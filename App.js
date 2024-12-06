@@ -50,7 +50,7 @@ export default function App() {
         <ActivityIndicator size={RFPercentage(6)} color={Colors.primary} />
       </View>
     );
-
+// test
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Onboarding">
