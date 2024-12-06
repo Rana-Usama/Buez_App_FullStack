@@ -12,8 +12,13 @@ import InputField from "../components/common/InputField";
 
 // config
 import Colors from "../config/Colors";
+import { validateConfirmPassword, validatePassword } from "../utils/helperFunctions";
+import { updatePassword } from "../services/auth";
 
 function ChangePassword({ navigation }) {
+  const [indicator, showIndicator] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Enter",
@@ -26,12 +31,16 @@ function ChangePassword({ navigation }) {
       title: "New Password",
       value: "",
       secure: true,
+      error: "",
+      validator: validatePassword,
     },
     {
       placeholder: "Enter",
       title: "Repeat New Password",
       value: "",
       secure: true,
+      error: "",
+      validator: validateConfirmPassword,
     },
   ]);
 
@@ -39,6 +48,44 @@ function ChangePassword({ navigation }) {
     let tempfeilds = [...inputField];
     tempfeilds[i].value = text;
     SetInputField(tempfeilds);
+  };
+
+  const handleValidation = () => {
+    let isValid = true;
+    const updatedFields = [...inputField];
+
+    // Validate Password
+    updatedFields[1].error = updatedFields[1].validator(updatedFields[1].value);
+    if (updatedFields[1].error) isValid = false;
+
+    // Validate Confirm Password
+    updatedFields[2].error = updatedFields[2].validator(updatedFields[1].value, updatedFields[2].value);
+
+    if (updatedFields[2].error) isValid = false;
+
+    SetInputField(updatedFields);
+    return isValid;
+  };
+
+  const handlePasswordChange = async () => {
+    try {
+      // Check field validation
+      if (!handleValidation()) {
+        return;
+      }
+
+      showIndicator(true); // Show loader
+      const currentPassword = inputField[0].value;
+      const newPassword = inputField[1].value;
+      await updatePassword(currentPassword, newPassword);
+      navigation.navigate("Settings")
+    } catch (error) {
+      // Error: Set the error message and show the modal
+      setErrorMessage(error.message);
+      setShowError(true);
+    }
+
+    showIndicator(false); // Hide loader
   };
 
   const handleLogin = () => {
@@ -107,7 +154,7 @@ function ChangePassword({ navigation }) {
 
       {/* Button */}
       <View style={{ justifyContent: "center", alignItems: "center", position: "absolute", bottom: RFPercentage(16) }}>
-        <MyAppButton title={"Change"} marginTop={RFPercentage(2)} onPress={() => navigation.navigate("Settings")} />
+        <MyAppButton title={"Change"} marginTop={RFPercentage(2)} onPress={() => handlePasswordChange()} />
       </View>
 
       {/* Bottom Tab */}

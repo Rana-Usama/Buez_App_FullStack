@@ -7,8 +7,15 @@ import Screen from "../components/Screen";
 import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
 
+// auth
+// eslint-disable-next-line import/no-unresolved
+import { createUserWithEmailAndPassword } from "firebase/auth";
+
 // config
 import Colors from "../config/Colors";
+import { validateConfirmPassword, validateEmail, validateName, validatePassword } from "../utils/helperFunctions";
+import { FIREBASE_AUTH } from "../../firebaseConfig";
+import { addUser } from "../services/user";
 
 function Signup(props) {
   const [indicator, showIndicator] = useState(false);
@@ -16,20 +23,28 @@ function Signup(props) {
     {
       placeholder: "Name",
       value: "",
+      error: "",
+      validator: validateName,
     },
     {
       placeholder: "Email",
       value: "",
+      error: "",
+      validator: validateEmail,
     },
     {
       placeholder: "Password",
       value: "",
+      error: "",
       secure: true,
+      validator: validatePassword,
     },
     {
       placeholder: "Confirm Password",
       value: "",
+      error: "",
       secure: true,
+      validator: validateConfirmPassword,
     },
   ]);
 
@@ -39,18 +54,66 @@ function Signup(props) {
     SetInputField(tempfeilds);
   };
 
-  const handleSignup = () => {
-    showIndicator(true);
-    let tempfeilds = [...inputField];
+  const handleValidation = () => {
+    let isValid = true;
+    const updatedFields = [...inputField];
 
-    if (tempfeilds[0].value === "" || tempfeilds[1].value === "") {
-      alert("Please fill all the fields to proceed");
-      showIndicator(false);
-      return true;
-    }
+    // Validate Name
+    updatedFields[0].error = updatedFields[0].validator(updatedFields[0].value);
+    if (updatedFields[0].error) isValid = false;
+
+    // Validate Email
+    updatedFields[1].error = updatedFields[1].validator(updatedFields[1].value);
+    if (updatedFields[1].error) isValid = false;
+
+    // Validate Password
+    updatedFields[2].error = updatedFields[2].validator(updatedFields[2].value);
+    if (updatedFields[2].error) isValid = false;
+
+    // Validate Confirm Password
+    updatedFields[3].error = updatedFields[3].validator(updatedFields[2].value, updatedFields[3].value);
+    if (updatedFields[3].error) isValid = false;
+
+    SetInputField(updatedFields);
+    return isValid;
+  };
+
+  const createAccountWithEmail = async (email, password) => {
     try {
+      const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      const user = userCredential.user;
+      return user;
     } catch (error) {
-      alert("Error");
+      throw error;
+    }
+  };
+
+  const handleSignup = async () => {
+    if (!handleValidation()) {
+      console.error('Please fill all the required fields');
+      return;
+    }
+
+    showIndicator(true);
+    try {
+      const userName = inputField[0].value;
+      const email = inputField[1].value;
+      const password = inputField[2].value;
+      const user = await createAccountWithEmail(email, password);
+      if (user) {
+        const userData = {
+          userName: userName,
+        };
+        await addUser(user?.uid, userData);
+      }
+    } catch (error) {
+      if (error.code === "auth/email-already-in-use") {
+        alert("Email already in use. Please choose a different email.");
+      } else if (error.code === "auth/weak-password") {
+        alert("Weak password. Please choose a stronger password.");
+      } else {
+        alert("Signup error: " + error.message);
+      }
     }
 
     showIndicator(false);
@@ -87,7 +150,7 @@ function Signup(props) {
         </View>
 
         {/* Signup Button */}
-        <MyAppButton title={"Signup"} marginTop={RFPercentage(4.5)} />
+        <MyAppButton disabled={indicator} title={"Signup"} onPress={handleSignup} marginTop={RFPercentage(4.5)} />
 
         {/* Social Media Login */}
         <View style={styles.socialMediaContainer}>

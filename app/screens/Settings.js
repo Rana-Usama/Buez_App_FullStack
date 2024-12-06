@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
+import { logout } from "../services/auth";
 
 // components
 import Nav from "../components/common/Nav";
@@ -36,7 +37,7 @@ function Settings({ navigation }) {
       iconSource: require("../../assets/Images/logout.png"),
       title: "Logout",
       redColor: true,
-      navigation: () => navigation.navigate("Login"),
+      navigation: () => logout(),
     },
   ];
 

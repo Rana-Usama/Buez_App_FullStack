@@ -10,8 +10,11 @@ import InputField from "../components/common/AuthInputField";
 
 // config
 import Colors from "../config/Colors";
+import { useUser } from "../contexts/user.context";
 
 function Home({ navigation }) {
+  const user = useUser();
+  const profileImgUrl = user?.profileImage || "";
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Search",
@@ -84,7 +87,7 @@ function Home({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav crown={true} marginTop={RFPercentage(7.5)} profileImage={true} leftLogo={true} navigation={navigation} title="Home" />
+        <Nav crown={true} marginTop={RFPercentage(7.5)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Home" />
 
         <View style={styles.inputFieldContainer}>
           {inputField.map((item, i) => (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -13,8 +13,14 @@ import InputField from "../components/common/InputField";
 
 // config
 import Colors from "../config/Colors";
+import { useUser } from "../contexts/user.context";
+import { useFocusEffect } from "@react-navigation/native";
+import { updateProfile } from "../services/user";
 
 function EditProfile({ navigation }) {
+  const user = useUser();
+  const [loading, setLoading] = useState(true);
+  const [imageUri, setImageUri] = useState(null);
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Emma Stone",
@@ -34,8 +40,6 @@ function EditProfile({ navigation }) {
     SetInputField(tempfeilds);
   };
 
-  const [imageUri, setImageUri] = useState(null);
-
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -50,6 +54,43 @@ function EditProfile({ navigation }) {
       setImageUri(result.assets[0].uri);
     }
   };
+
+  useFocusEffect(useCallback(() => {
+    console.log('getLoggedInUser');
+    fetchUserData();
+  }, []));
+
+  const fetchUserData = async () => {
+    try {
+      // const response = await getLoggedInUser();
+      if (user) {
+        const tempfeilds = [...inputField];
+        tempfeilds[0].value = user.userName || '';
+        tempfeilds[1].value = user.phoneNumber || '';
+        console.log(tempfeilds);
+        SetInputField(tempfeilds);
+        setImageUri(user.profileImage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const updateProfileData = async () => {
+    const userName = inputField[0].value.trim();
+    const phoneNumber = inputField[1].value.trim();
+    const userData = {
+      userName,
+      phoneNumber
+    };
+
+    try {
+      await updateProfile(userData, imageUri);
+      navigation.goBack();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <View style={styles.screen}>
@@ -106,7 +147,7 @@ function EditProfile({ navigation }) {
                 fontSize={RFPercentage(1.8)}
                 fontFamily={"Poppins-Regular"}
                 icon={item.icon}
-                handleFeild={(text) => handleChange(text, i)}
+                onChangeText={(text) => handleChange(text, i)}
                 value={item.value}
                 width={"97%"}
               />
@@ -117,7 +158,7 @@ function EditProfile({ navigation }) {
 
       {/* Button */}
       <View style={{ justifyContent: "center", alignItems: "center", position: "absolute", bottom: RFPercentage(16) }}>
-        <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={() => navigation.goBack()} />
+        <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={() => updateProfileData()} />
       </View>
 
       {/* Bottom Tab */}

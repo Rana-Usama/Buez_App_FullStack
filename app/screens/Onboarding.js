@@ -145,7 +145,7 @@ function Onboarding(props) {
 
       {/* Buttons */}
       <View style={{ position: "absolute", bottom: RFPercentage(8), width: "90%", justifyContent: "center", alignItems: "center", alignSelf: "center", flexDirection: "row" }}>
-        <TouchableOpacity activeOpacity={0.8} style={{ position: "absolute", left: RFPercentage(1) }} onPress={() => props.navigation.navigate("Home")}>
+        <TouchableOpacity activeOpacity={0.8} style={{ position: "absolute", left: RFPercentage(1) }} onPress={() => props.navigation.navigate("Login")}>
           <Text style={{ color: "#475569", fontSize: RFPercentage(2.1), fontFamily: "Poppins_500Medium" }}>Skip</Text>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} onPress={handleNext} style={styles.nextContainer}>

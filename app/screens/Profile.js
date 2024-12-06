@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -9,8 +9,14 @@ import CustomTabBar from "../components/common/CustomTabBar";
 
 // config
 import Colors from "../config/Colors";
+import { useUser } from "../contexts/user.context";
+import { useFocusEffect } from "@react-navigation/native";
 
 function Profile({ navigation }) {
+  const user = useUser();
+  const [loading, setLoading] = useState(true);
+  const profileImgUrl = user?.profileImage || "";
+  const userName = user?.userName || "";
   const navigationsList = [
     {
       iconSource: require("../../assets/Images/editP.png"),
@@ -28,13 +34,13 @@ function Profile({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(7.9)} leftLogo={true} navigation={navigation} title="Profile" />
+        <Nav marginTop={RFPercentage(7.9)} leftLogo={true} profileImage={profileImgUrl} navigation={navigation} title="Profile" />
 
         {/* Profile Image */}
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("EditProfile")} style={{ marginTop: RFPercentage(5.5) }}>
           <Image
             style={{ width: RFPercentage(20), height: RFPercentage(20), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) }}
-            source={require("../../assets/Images/dp.png")}
+            source={profileImgUrl ? { uri: profileImgUrl } : require("../../assets/Images/dp.png")}
           />
           <Image
             style={{ width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(20), position: "absolute", bottom: RFPercentage(-0.3), right: RFPercentage(3) }}
@@ -43,7 +49,7 @@ function Profile({ navigation }) {
         </TouchableOpacity>
 
         {/*User Name */}
-        <Text style={{ color: "#57534E", fontSize: RFPercentage(2.2), fontFamily: "Poppins-Medium", marginTop: RFPercentage(2) }}>Emma Stone</Text>
+        <Text style={{ color: "#57534E", fontSize: RFPercentage(2.2), fontFamily: "Poppins-Medium", marginTop: RFPercentage(2) }}>{userName}</Text>
 
         {/* Navigation List */}
         {navigationsList.map((item, i) => (

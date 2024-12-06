@@ -1,21 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
+
+// auth
+// eslint-disable-next-line import/no-unresolved
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { getCredentials, saveCredentials } from "../services/auth";
+import { FIREBASE_AUTH } from "../../firebaseConfig";
 
 // components
 import Screen from "../components/Screen";
 import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
 
+// utils
+import { validateEmail } from "../utils/helperFunctions";
+
 // config
 import Colors from "../config/Colors";
 
 function Login(props) {
   const [indicator, showIndicator] = useState(false);
+  const [remember, setRemember] = useState(false);
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Email",
       value: "",
+      validator: validateEmail,
     },
     {
       placeholder: "Password",
@@ -24,13 +35,53 @@ function Login(props) {
     },
   ]);
 
+  useEffect(() => {
+    const fetchCredentials = async () => {
+      const credentials = await getCredentials();
+      if (credentials.email && credentials.password) {
+        const tempfeilds = [...inputField];
+        tempfeilds[0].value = credentials.email;
+        tempfeilds[1].value = credentials.password;
+        SetInputField(tempfeilds);
+        setRemember(true);
+      }
+    };
+
+    fetchCredentials();
+  }, []);
+
   const handleChange = (text, i) => {
     let tempFields = [...inputField];
     tempFields[i].value = text;
     SetInputField(tempFields);
   };
 
-  const handleLogin = () => {
+  const handleValidation = () => {
+    let isValid = true;
+    const updatedFields = [...inputField];
+    // Validate Email
+    updatedFields[0].error = updatedFields[0].validator(updatedFields[0].value);
+    if (updatedFields[0].error) isValid = false;
+
+    SetInputField(updatedFields);
+    return isValid;
+  };
+
+  const signInWithEmail = async (email, password) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      const user = userCredential.user;
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!handleValidation()) {
+      return;
+    }
+
     showIndicator(true);
     let tempFields = [...inputField];
 
@@ -40,14 +91,26 @@ function Login(props) {
       return true;
     }
     try {
-      // Add login logic here
+      const email = tempFields[0].value;
+      const password = tempFields[1].value;
+      const user = await signInWithEmail(email, password);
+      if (remember) {
+        await saveCredentials(email, password);
+      }
+      console.log(user);
     } catch (error) {
-      alert("Error");
+      if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+        alert("Invalid email or password. Please try again.");
+      } else if (error.code === "auth/too-many-requests") {
+        alert("Too many unsuccessful login attempts. Please try again later.");
+      } else {
+        alert("Sign-in error: " + error.message + " code: " + error.code);
+      }
+      console.log(error.code);
     }
     showIndicator(false);
   };
 
-  const [remember, setRemember] = useState(false);
   const toggleRemember = () => {
     setRemember(!remember);
   };
@@ -73,7 +136,7 @@ function Login(props) {
               color={Colors.black}
               fontSize={RFPercentage(1.7)}
               fontFamily={"Poppins_400Regular"}
-              handleField={(text) => handleChange(text, i)}
+              onChangeText={(text) => handleChange(text, i)}
               value={item.value}
               width={"94%"}
             />
@@ -93,7 +156,7 @@ function Login(props) {
         </TouchableOpacity>
       </View>
 
-      <MyAppButton title={"Login"} marginTop={RFPercentage(7)} onPress={() => props.navigation.navigate("Subscription")} />
+      <MyAppButton title={"Login"} marginTop={RFPercentage(7)} onPress={() => handleLogin()} />
 
       <View style={styles.socialLoginContainer}>
         <View style={styles.divider} />

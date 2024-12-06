@@ -24,7 +24,7 @@ const Nav = ({ crown = false, marginTop = RFPercentage(6), title, navigation, le
               height: profileImage ? RFPercentage(6) : RFPercentage(5),
               borderRadius: profileImage ? RFPercentage(100) : undefined,
             }}
-            source={profileImage ? require("../../../assets/Images/dp.png") : require("../../../assets/Images/buez.png")}
+            source={profileImage ? { uri: profileImage } : require("../../../assets/Images/buez.png")}
           />
         </TouchableOpacity>
       ) : (
