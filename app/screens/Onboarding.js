@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, Animated, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
+import * as SecureStore from 'expo-secure-store';
 
 // components
 import Screen from "../components/Screen";
@@ -56,6 +57,7 @@ function Onboarding(props) {
     } else {
       props.navigation.navigate("Login");
     }
+    SecureStore.setItemAsync('onboard', '1');
   };
 
   const handleDotPress = (index) => {

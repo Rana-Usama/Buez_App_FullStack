@@ -61,7 +61,10 @@ function ChangePassword({ navigation }) {
     // Validate Confirm Password
     updatedFields[2].error = updatedFields[2].validator(updatedFields[1].value, updatedFields[2].value);
 
-    if (updatedFields[2].error) isValid = false;
+    if (updatedFields[2].error) {
+      isValid = false;
+      alert("Please enter a valid password");
+    };
 
     SetInputField(updatedFields);
     return isValid;

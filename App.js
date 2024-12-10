@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold, Poppins_900Black, useFonts } from "@expo-google-fonts/poppins";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import * as SecureStore from 'expo-secure-store';
 
 // Screens
 import Onboarding from "./app/screens/Onboarding";
@@ -95,7 +96,7 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  if (!fontsLoaded)
+  if (!fontsLoaded || initializing)
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size={RFPercentage(6)} color={Colors.primary} />
