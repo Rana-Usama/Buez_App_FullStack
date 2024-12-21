@@ -13,7 +13,7 @@ import InputField from "../components/common/InputField";
 // config
 import Colors from "../config/Colors";
 import { validateConfirmPassword, validatePassword } from "../utils/helperFunctions";
-import { updatePassword } from "../services/auth";
+import { updatePassword } from "../services/Auth.service";
 
 function ChangePassword({ navigation }) {
   const [indicator, showIndicator] = useState(false);

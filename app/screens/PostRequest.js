@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, TextInput, Image } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -12,6 +12,9 @@ import MyAppButton from "../components/common/MyAppButton";
 
 // config
 import Colors from "../config/Colors";
+import { validateRequired } from "../utils/helperFunctions";
+import { savePost, updatePost } from "../services/Post.service";
+import { useFocusEffect } from "@react-navigation/native";
 
 function PostRequest({ navigation, route }) {
   const [showTaskDropdown, setShowTaskDropdown] = useState(false);
@@ -19,19 +22,66 @@ function PostRequest({ navigation, route }) {
   const [showCompensationDropdown, setShowCompensationDropdown] = useState(false);
   const [selectedCompensation, setSelectedCompensation] = useState("");
   const [imageUris, setImageUris] = useState([null, null, null]);
+    // Input Fields
+  const [indicator, showIndicator] = useState(false);
+  const [description, setDescription] = useState('');
+  const [inputField, SetInputField] = useState([
+    {
+      placeholder: "Location Address",
+      value: "",
+      validator: validateRequired,
+      display: () => true,
+    },
+    {
+      placeholder: "Compensation Details e.g, Two Movie Tickets",
+      value: "",
+      validator: validateRequired,
+      display: (v) => v === 'Other',
+    },
+    {
+      placeholder: "e.g, 100$",
+      value: "",
+      validator: validateRequired,
+      display: (v) => v === 'Monitarely' || !v,
+    },
+  ]);
+
   const title = route.params?.title;
+  const isEditing = !!route.params?.postRequest
+  const currentPostRequest = route.params?.postRequest
+  console.log('Edit post',route.params?.postRequest);
 
   const taskOptions = [
     { id: 1, name: "Cleaning" },
     { id: 2, name: "Gardening" },
     { id: 3, name: "Gaming" },
     { id: 4, name: "Moving" },
+    { id: 5, name: "Other" },
   ];
 
   const compensationOptions = [
     { id: 1, type: "Monitarely" },
     { id: 2, type: "Other" },
   ];
+
+  useFocusEffect(useCallback(() => {
+    // set values
+    const currentPostRequest = route.params?.postRequest
+    if (currentPostRequest) {
+      console.log('set values');
+      setSelectedCompensation(currentPostRequest.compensationType);
+      setSelectedTask(currentPostRequest.taskType);
+      handleChange(currentPostRequest.address, 0);
+      handleChange(currentPostRequest.otherCompensation, 1);
+      handleChange(currentPostRequest.monitarily, 2);
+      const temp = [...imageUris];
+      currentPostRequest.imageUrls.forEach((imgUrl, i) => {
+        temp[i] = imgUrl;
+      });
+      setImageUris(temp);
+      setDescription(currentPostRequest.description);
+    }
+  }, [route.params?.postRequest]));
 
   const toggleDropdown = (dropdownType) => {
     if (dropdownType === "task") {
@@ -75,35 +125,69 @@ function PostRequest({ navigation, route }) {
     setImageUris(tempImageUris);
   };
 
-  // Input Fields
-  const [indicator, showIndicator] = useState(false);
-  const [inputField, SetInputField] = useState([
-    {
-      placeholder: "Location Address",
-      value: "",
-    },
-    {
-      placeholder: "Compensation Details e.g, Two Movie Tickets",
-      value: "",
-    },
-    {
-      placeholder: "e.g, 100$",
-      value: "",
-    },
-  ]);
-
   const handleChange = (text, i) => {
     let tempfeilds = [...inputField];
     tempfeilds[i].value = text;
     SetInputField(tempfeilds);
   };
 
-  const [remember, setRemember] = useState(false);
+  const handleValidation = () => {
+    let isValid = true;
+    if (!inputField[0].validator(inputField[0].value)) {
+      isValid = false;
+      return isValid;
+    } else if (selectedCompensation === 'Monitarely' && !inputField[2].validator(inputField[2].value)) {
+      isValid = false;
+      return isValid;
+    } else if (selectedCompensation === 'Other' && !inputField[1].validator(inputField[1].value)) {
+      isValid = false;
+      return isValid;
+    }
 
-  const toggleRemember = () => {
-    setRemember(!remember);
-    console.log(remember);
+    if (!selectedTask || !selectedCompensation || !description) {
+      isValid = false;
+    }
+
+    if (imageUris.every(img => !img)) {
+      isValid = false;
+    }
+
+    return isValid;
   };
+
+  const submitPostData = async () => {
+    if (!handleValidation()) {
+      alert('Please fill all the required fields');
+      return;
+    }
+    try {
+      showIndicator(true);
+      const keywords = description.toLowerCase().split(" ");
+      const data = {
+        taskType: selectedTask,
+        compensationType: selectedCompensation,
+        description: description,
+        descriptionKeywords: keywords,
+        address: inputField[0].value,
+        otherCompensation: inputField[1].value,
+        monitarily: inputField[2].value,
+      }
+      console.log(data);
+      if (isEditing) {
+        const imgs = imageUris.filter(img => Boolean(img));
+        await updatePost(currentPostRequest.id, data, imgs);
+      } else {
+        const imgs = imageUris.filter(img => Boolean(img));
+        await savePost(data, imgs);
+      }
+
+      navigation.navigate("SuccessScreen");
+    } catch (e) {
+      alert('There was an error while saving the request');
+    } finally {
+      showIndicator(false);
+    }
+  }
 
   return (
     <View style={styles.screen}>
@@ -190,6 +274,8 @@ function PostRequest({ navigation, route }) {
           <TextInput
             placeholder="Description"
             placeholderTextColor={Colors.heading}
+            value={description}
+            onChangeText={(e) => setDescription(e)}
             style={{ color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), top: RFPercentage(1.5), left: RFPercentage(1.5) }}
           />
         </View>
@@ -197,24 +283,25 @@ function PostRequest({ navigation, route }) {
         {/* Input field */}
         <View style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
           {inputField.map((item, i) => (
-            <View key={i} style={{ marginTop: i == 0 ? RFPercentage(1.7) : RFPercentage(1) }}>
-              <InputField
-                placeholder={item.placeholder}
-                placeholderColor={"#6B7280"}
-                height={RFPercentage(6.2)}
-                backgroundColor={Colors.white}
-                borderWidth={RFPercentage(0.1)}
-                borderColor={"#E5E7EB"}
-                secure={item.secure}
-                borderRadius={RFPercentage(1)}
-                color={Colors.black}
-                fontSize={RFPercentage(1.8)}
-                fontFamily={"Poppins_400Regular"}
-                handleFeild={(text) => handleChange(text, i)}
-                value={item.value}
-                width={"97.5%"}
-              />
-            </View>
+              item?.display(selectedCompensation) ? (
+                <View key={i} style={{ marginTop: i === 0 ? RFPercentage(1.7) : RFPercentage(1) }}>
+                  <InputField
+                    placeholder={item.placeholder}
+                    placeholderColor={"#6B7280"}
+                    height={RFPercentage(6.2)}
+                    backgroundColor={Colors.white}
+                    borderWidth={RFPercentage(0.1)}
+                    borderColor={"#E5E7EB"}
+                    secure={item.secure}
+                    borderRadius={RFPercentage(1)}
+                    color={Colors.black}
+                    fontSize={RFPercentage(1.8)}
+                    fontFamily={"Poppins_400Regular"}
+                    handleFeild={(text) => handleChange(text, i)}
+                    value={item.value}
+                    width={"97.5%"}
+                  />
+            </View>) : null
           ))}
         </View>
 
@@ -245,7 +332,7 @@ function PostRequest({ navigation, route }) {
         </View>
 
         {/*Login Button */}
-        <MyAppButton title={title === "Edit Profile" ? "Edit" : "Post"} marginTop={RFPercentage(6)} onPress={() => navigation.navigate("SuccessScreen")} />
+        <MyAppButton disabled={indicator} title={title === "Edit Profile" ? "Edit" : "Post"} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
 
         <View style={{ marginBottom: RFPercentage(8) }} />
       </ScrollView>

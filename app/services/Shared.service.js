@@ -18,6 +18,17 @@ export const getRelativePostTime = (createdAt) => {
   return formatDistanceToNow(postDate, { addSuffix: true });
 };
 
+export const getFormatedDate = (date) => {
+  if (!date) { return ''; }
+  const postDate = new Date(date.seconds * 1000);
+  try {
+    return format(new Date(postDate), 'MMM-d-yyyy');
+  } catch (e) {
+    console.log(e);
+    return '';
+  }
+}
+
 export const processHashtags = (hashtagsInput) => {
   let hashtagsArray = hashtagsInput
     .replace(/\s+/g, '')

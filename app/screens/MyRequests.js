@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, Dimensions, Modal, Pressable } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, Dimensions, Modal, Pressable, RefreshControl } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
@@ -9,6 +9,9 @@ import Colors from "../config/Colors";
 import Nav from "../components/common/Nav";
 import CustomTabBar from "../components/common/CustomTabBar";
 import MyAppButton from "../components/common/MyAppButton";
+import { getMyReuqests } from "../services/Post.service";
+import { useFocusEffect } from "@react-navigation/native";
+import { getRelativePostTime } from "../services/Shared.service";
 
 function MyRequests({ navigation }) {
   const [inputField, SetInputField] = useState([
@@ -19,9 +22,14 @@ function MyRequests({ navigation }) {
   ]);
 
   const [activeFilter, setActiveFilter] = useState("Active");
-  const [activeIndex, setActiveIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [taskRecords, setTaskRecords] = useState([]);
+  const [lastVisiblePost, setLastVisiblePost] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const carts = [
     {
@@ -45,6 +53,58 @@ function MyRequests({ navigation }) {
   ];
 
   const [activeIndices, setActiveIndices] = useState(carts.map(() => 0));
+
+  useFocusEffect(
+    useCallback(() => {
+      setTaskRecords([]);
+      fetchRequests();
+      
+      return () => {
+        console.log("unmounting: MyRequests");
+      };
+    }, [activeFilter]),
+  );
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    try {
+      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(activeFilter, lastVisiblePost);
+      setTaskRecords(newRecords);
+      setLastVisiblePost(lastVisible);
+      setHasMore(newRecords.length > 0);
+    } catch (error) {
+      console.error("Error loading posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMorePosts = async () => {
+    if (!hasMore || loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(activeFilter, lastVisiblePost);
+      setTaskRecords([...taskRecords, ...newRecords]);
+      setLastVisiblePost(lastVisible);
+      setHasMore(newRecords.length > 0);
+    } catch (error) {
+      console.error("Error loading more posts:", error);
+    }
+    setLoadingMore(false);
+  };
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchMorePosts();
+    }
+  };
+
+  const refreshRequests = async () => {
+    setRefreshing(true);
+    await fetchRequests();
+    setRefreshing(false);
+  };
 
   const handleChange = (text, i) => {
     let tempFields = [...inputField];
@@ -103,18 +163,19 @@ function MyRequests({ navigation }) {
         </View>
 
         {/* Carts */}
-        {filteredCarts.map((cart, index) => (
+        {taskRecords.map((cart, index) => (
           <View activeOpacity={0.8} key={index} style={[styles.cartContainer, { marginTop: index === 1 ? RFPercentage(3) : RFPercentage(3) }]}>
             <FlatList
-              data={cart.images}
+              data={cart.imageUrls}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
+              onEndReached={handleLoadMore}
               onMomentumScrollEnd={(event) => handleScrollEnd(event, index)}
               renderItem={({ item }) => (
-                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={item}>
+                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{uri: item}}>
                   <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryText}>{cart.category}</Text>
+                    <Text style={styles.categoryText}>{cart.taskType}</Text>
                   </View>
 
                   <View
@@ -127,7 +188,7 @@ function MyRequests({ navigation }) {
                       top: RFPercentage(2),
                     }}
                   >
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("PostRequest", { title: "Edit Profile" })}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("PostRequest", { title: "Edit Profile", postRequest: cart })}>
                       <Image
                         style={{
                           width: RFPercentage(3.7),
@@ -140,10 +201,11 @@ function MyRequests({ navigation }) {
                 </ImageBackground>
               )}
               keyExtractor={(item, index) => index.toString()}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
             />
 
             <View style={styles.dotsContainer}>
-              {cart.images.map((_, imageIndex) => (
+              {cart.imageUrls.map((_, imageIndex) => (
                 <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[index] ? styles.activeDot : styles.inactiveDot]} />
               ))}
             </View>
@@ -151,16 +213,16 @@ function MyRequests({ navigation }) {
             {/* Info */}
             <View style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.userImage} source={cart.dp} />
+                <Image style={styles.userImage} source={{uri: cart.user.profileImage}} />
               </TouchableOpacity>
 
-              <Text style={styles.userName}>{cart.user}</Text>
-              <Text style={styles.postDate}>{cart.date}</Text>
+              <Text style={styles.userName}>{cart.user.userName}</Text>
+              <Text style={styles.postDate}>Posted on: {getRelativePostTime(cart.createdAt)}</Text>
             </View>
             <View style={styles.taskInfoContainer}>
-              <Text style={styles.taskText}>{cart.task}</Text>
+              <Text style={styles.taskText}>{cart.description}</Text>
               <Text style={styles.compensationText}>
-                Compensation: <Text style={styles.compensationAmount}>{cart.compensation}</Text>
+                Compensation: <Text style={styles.compensationAmount}>{cart.compensationType === 'Other' ? cart.otherCompensation : cart.monitarily}</Text>
               </Text>
             </View>
             <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", top: RFPercentage(-2.5) }}>
@@ -190,11 +252,19 @@ function MyRequests({ navigation }) {
                   right: 0,
                 }}
               >
-                <Text style={{ color: Colors.red }}>Mark as Done</Text>
+                <Text style={{ color: Colors.red }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
         ))}
+
+        {loading && <View>
+          <Text>Loading...</Text>
+        </View>}
+
+        {!loading && taskRecords.length === 0 && <View>
+          <Text>No record found!</Text>
+        </View>}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>

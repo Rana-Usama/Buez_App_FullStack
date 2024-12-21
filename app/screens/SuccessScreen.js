@@ -18,7 +18,7 @@ function SuccessScreen({ navigation }) {
       {/* Gif */}
       <Text style={{ color: Colors.white, fontSize: RFPercentage(2.6), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(3) }}>Request Posted Successfully</Text>
 
-      <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={() => navigation.navigate("Profile")}>
+      <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={() => navigation.navigate("Home")}>
         <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>Home</Text>
       </TouchableOpacity>
     </LinearGradient>

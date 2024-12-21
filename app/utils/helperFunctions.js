@@ -38,3 +38,8 @@ export const validatePassword = (password, minLength = 6) => {
 export const validateConfirmPassword = (password, confirmPassword) => {
 	return password === confirmPassword ? '' : 'Passwords do not match';
 };
+
+
+export const validateRequired = (value) => {
+	return !!value;
+}

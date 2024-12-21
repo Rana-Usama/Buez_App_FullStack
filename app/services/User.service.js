@@ -3,7 +3,7 @@ import { doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 // FIREBASE config
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 // shared
-import { uploadImage } from './shared';
+import { uploadImage } from './Shared.service';
 
 const db = FIREBASE_DB;
 

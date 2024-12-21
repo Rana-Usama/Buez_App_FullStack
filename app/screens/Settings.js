@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
-import { logout } from "../services/auth";
+import { logout } from "../services/Auth.service";
 
 // components
 import Nav from "../components/common/Nav";

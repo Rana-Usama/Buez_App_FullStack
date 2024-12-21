@@ -15,7 +15,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import Colors from "../config/Colors";
 import { validateConfirmPassword, validateEmail, validateName, validatePassword } from "../utils/helperFunctions";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
-import { addUser } from "../services/user";
+import { addUser } from "../services/User.service";
 
 function Signup(props) {
   const [indicator, showIndicator] = useState(false);

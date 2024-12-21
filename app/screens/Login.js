@@ -5,7 +5,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 // auth
 // eslint-disable-next-line import/no-unresolved
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { getCredentials, saveCredentials } from "../services/auth";
+import { getCredentials, saveCredentials } from "../services/Auth.service";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 
 // components

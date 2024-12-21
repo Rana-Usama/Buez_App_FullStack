@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, Dimensions } from "react-native";
+import React, { useState, useCallback } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, Dimensions, RefreshControl } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -11,6 +11,9 @@ import InputField from "../components/common/AuthInputField";
 // config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
+import { getRequestList } from "../services/Post.service";
+import { useFocusEffect } from "@react-navigation/native";
+import { getFormatedDate } from "../services/Shared.service";
 
 function Home({ navigation }) {
   const user = useUser();
@@ -24,6 +27,12 @@ function Home({ navigation }) {
 
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [taskRecords, setTaskRecords] = useState([]);
+  const [lastVisiblePost, setLastVisiblePost] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const carts = [
     {
@@ -47,6 +56,58 @@ function Home({ navigation }) {
   ];
 
   const [activeIndices, setActiveIndices] = useState(carts.map(() => 0));
+
+  useFocusEffect(
+    useCallback(() => {
+      setTaskRecords([]);
+      fetchRequests();
+      
+      return () => {
+        console.log("unmounting: Home");
+      };
+    }, [activeFilter]),
+  );
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    try {
+      const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, searchQuery, lastVisiblePost);
+      setTaskRecords(newRecords);
+      setLastVisiblePost(lastVisible);
+      setHasMore(newRecords.length > 0);
+    } catch (error) {
+      console.error("Error loading posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMorePosts = async () => {
+    if (!hasMore || loadingMore) return;
+
+    setLoadingMore(true);
+    try {
+      const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, searchQuery, lastVisiblePost);
+      setTaskRecords([...taskRecords, ...newRecords]);
+      setLastVisiblePost(lastVisible);
+      setHasMore(newRecords.length > 0);
+    } catch (error) {
+      console.error("Error loading more posts:", error);
+    }
+    setLoadingMore(false);
+  };
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchMorePosts();
+    }
+  };
+
+  const refreshRequests = async () => {
+    setRefreshing(true);
+    await fetchRequests();
+    setRefreshing(false);
+  };
 
   const handleChange = (text, i) => {
     let tempFields = [...inputField];
@@ -128,26 +189,28 @@ function Home({ navigation }) {
         </View>
 
         {/* Carts */}
-        {filteredCarts.map((cart, cartIndex) => (
+        {taskRecords.map((cart, cartIndex) => (
           <View activeOpacity={0.8} key={cartIndex} style={[styles.cartContainer, { marginTop: cartIndex === 1 ? RFPercentage(3) : RFPercentage(2) }]}>
             <FlatList
-              data={cart.images}
+              data={cart.imageUrls}
               horizontal
               pagingEnabled
+              onEndReached={handleLoadMore}
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={(event) => handleScrollEnd(event, cartIndex)}
               renderItem={({ item }) => (
-                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={item}>
+                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{uri: item}}>
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{cart.category}</Text>
                   </View>
                 </ImageBackground>
               )}
               keyExtractor={(item, index) => index.toString()}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
             />
 
             <View style={styles.dotsContainer}>
-              {cart.images.map((_, imageIndex) => (
+              {cart.imageUrls.map((_, imageIndex) => (
                 <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[cartIndex] ? styles.activeDot : styles.inactiveDot]} />
               ))}
             </View>
@@ -155,21 +218,28 @@ function Home({ navigation }) {
             {/* Info */}
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("OfferDetail")} style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.userImage} source={cart.dp} />
+                <Image style={styles.userImage} source={{uri: cart.user.profileImage}} />
               </TouchableOpacity>
 
-              <Text style={styles.userName}>{cart.user}</Text>
-              <Text style={styles.postDate}>{cart.date}</Text>
+              <Text style={styles.userName}>{cart.user.userName}</Text>
+              <Text style={styles.postDate}>Posted on {getFormatedDate(cart.createdAt)}</Text>
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("OfferDetail")} style={styles.taskInfoContainer}>
-              <Text style={styles.taskText}>{cart.task}</Text>
+              <Text style={styles.taskText}>{cart.description}</Text>
               <Text style={styles.compensationText}>
-                Compensation: <Text style={styles.compensationAmount}>{cart.compensation}</Text>
+                Compensation: <Text style={styles.compensationAmount}>{cart.compensationType ? cart.monitarily : cart.otherCompensation}</Text>
               </Text>
             </TouchableOpacity>
           </View>
         ))}
 
+        {loading && <View>
+          <Text>Loading...</Text>
+        </View>}
+
+        {!loading && taskRecords.length === 0 && <View>
+          <Text>No record found!</Text>
+        </View>}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 

@@ -15,7 +15,7 @@ import InputField from "../components/common/InputField";
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { useFocusEffect } from "@react-navigation/native";
-import { updateProfile } from "../services/user";
+import { updateProfile } from "../services/User.service";
 
 function EditProfile({ navigation }) {
   const user = useUser();
