@@ -9,9 +9,10 @@ import Colors from "../config/Colors";
 import Nav from "../components/common/Nav";
 import CustomTabBar from "../components/common/CustomTabBar";
 import MyAppButton from "../components/common/MyAppButton";
-import { getMyReuqests } from "../services/Post.service";
+import { getMyReuqests, updateReqestStatus } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
 import { getRelativePostTime } from "../services/Shared.service";
+import { REQUEST_STATUS } from "../utils/gloabals";
 
 function MyRequests({ navigation }) {
   const [inputField, SetInputField] = useState([
@@ -57,18 +58,23 @@ function MyRequests({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       setTaskRecords([]);
-      fetchRequests();
-      
+      setLastVisiblePost(null);
+      fetchRequests(null);
+
       return () => {
         console.log("unmounting: MyRequests");
       };
     }, [activeFilter]),
   );
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
     try {
-      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(activeFilter, lastVisiblePost);
+      let isLastVisible = lastVisiblePost
+      if (typeof islastVisiblePost !== 'undefined') {
+        isLastVisible = islastVisiblePost
+      }
+      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(activeFilter, isLastVisible);
       setTaskRecords(newRecords);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
@@ -113,6 +119,21 @@ function MyRequests({ navigation }) {
     setSearchQuery(text);
   };
 
+  const changeReqestStatus = async (i, status, item) => {
+    try {
+      console.log('UPDATE STATUS 1');
+      await updateReqestStatus(item.id, status, item);
+      setTaskRecords(p => {
+        const newRecords = [...p];
+        newRecords.splice(i, 1)
+        return newRecords;
+      });
+      console.log('UPDATE STATUS');
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   const filteredCarts = carts.filter((cart) => {
     const lowercasedQuery = searchQuery.toLowerCase();
     return cart.category.toLowerCase().includes(lowercasedQuery) || cart.user.toLowerCase().includes(lowercasedQuery) || cart.task.toLowerCase().includes(lowercasedQuery);
@@ -140,6 +161,10 @@ function MyRequests({ navigation }) {
     newActiveIndices[cartIndex] = index;
     setActiveIndices(newActiveIndices);
   };
+
+  const postEditHandler = (cart) => {
+    navigation.navigate("PostRequest", { title: "Edit Profile", postRequest: cart })
+  }
 
   return (
     <View style={styles.screen}>
@@ -178,7 +203,7 @@ function MyRequests({ navigation }) {
                     <Text style={styles.categoryText}>{cart.taskType}</Text>
                   </View>
 
-                  <View
+                  {cart.status === REQUEST_STATUS.Active && <View
                     style={{
                       justifyContent: "center",
                       alignItems: "center",
@@ -188,7 +213,7 @@ function MyRequests({ navigation }) {
                       top: RFPercentage(2),
                     }}
                   >
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("PostRequest", { title: "Edit Profile", postRequest: cart })}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => postEditHandler(cart)}>
                       <Image
                         style={{
                           width: RFPercentage(3.7),
@@ -197,7 +222,7 @@ function MyRequests({ navigation }) {
                         source={require("../../assets/Images/editRequest.png")}
                       />
                     </TouchableOpacity>
-                  </View>
+                  </View>}
                 </ImageBackground>
               )}
               keyExtractor={(item, index) => index.toString()}
@@ -220,12 +245,12 @@ function MyRequests({ navigation }) {
               <Text style={styles.postDate}>Posted on: {getRelativePostTime(cart.createdAt)}</Text>
             </View>
             <View style={styles.taskInfoContainer}>
-              <Text style={styles.taskText}>{cart.description}</Text>
+              <Text style={styles.taskText}>{cart.description?.substr(0, 15) + (cart.description?.length > 15 ? '...' : '')}</Text>
               <Text style={styles.compensationText}>
-                Compensation: <Text style={styles.compensationAmount}>{cart.compensationType === 'Other' ? cart.otherCompensation : cart.monitarily}</Text>
+                Compensation: <Text style={styles.compensationAmount}>{cart.compensationType === 'Monitarely' ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? '...' : '')}</Text>
               </Text>
             </View>
-            <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", top: RFPercentage(-2.5) }}>
+            {cart.status === REQUEST_STATUS.Active && <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", top: RFPercentage(-2.5) }}>
               <TouchableOpacity
                 style={{
                   borderRadius: RFPercentage(1),
@@ -236,10 +261,12 @@ function MyRequests({ navigation }) {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
+                onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}
               >
                 <Text style={{ color: Colors.primary }}>Mark as Done</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => changeReqestStatus(index, REQUEST_STATUS.Cancelled, cart)}
                 style={{
                   borderRadius: RFPercentage(1),
                   width: RFPercentage(14),
@@ -254,11 +281,11 @@ function MyRequests({ navigation }) {
               >
                 <Text style={{ color: Colors.red }}>Cancel</Text>
               </TouchableOpacity>
-            </View>
+            </View>}
           </View>
         ))}
 
-        {loading && <View>
+        {(loading || loadingMore) && <View>
           <Text>Loading...</Text>
         </View>}
 

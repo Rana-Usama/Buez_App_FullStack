@@ -9,14 +9,16 @@ import CustomTabBar from "../components/common/CustomTabBar";
 // config
 import Colors from "../config/Colors";
 import MyAppButton from "../components/common/MyAppButton";
+import { getDateTime } from "../services/Shared.service";
 
 const screenWidth = Dimensions.get("window").width;
 
-function OfferDetail({ navigation }) {
+function OfferDetail({ navigation, route }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const images = [require("../../assets/Images/cover.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")];
-
+  const postRequest = route.params?.postRequest
+  console.log('POST DETAILS: ', postRequest);
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
@@ -26,46 +28,46 @@ function OfferDetail({ navigation }) {
         {/* Image Carousel */}
         <View style={{ width: "90%", justifyContent: "center", alignItems: "center" }}>
           <FlatList
-            data={images}
+            data={postRequest.imageUrls}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={(event) => {
               setActiveIndex(Math.floor(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width));
             }}
-            renderItem={({ item }) => <ImageBackground style={styles.imageBackground} imageStyle={styles.image} source={item} />}
+            renderItem={({ item }) => <ImageBackground style={styles.imageBackground} imageStyle={styles.image} source={{uri: item}} />}
             keyExtractor={(item, index) => index.toString()}
           />
         </View>
 
         {/* Three dots */}
         <View style={styles.dotsContainer}>
-          {images.map((_, index) => (
+          {postRequest.imageUrls.map((_, index) => (
             <View key={index} style={[styles.dot, index === activeIndex ? styles.activeDot : styles.inactiveDot]} />
           ))}
         </View>
 
         {/* Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>Need help in cleaning the house!</Text>
-          <Text style={styles.description}>Clean the house by decluttering, dusting surfaces, vacuuming floors, wiping down counters, and tidying up each room.</Text>
+          <Text style={styles.title}>{postRequest.taskType}</Text>
+          <Text style={styles.description}>{postRequest.description}</Text>
         </View>
 
         <View style={styles.infoContainer}>
           <Image style={styles.icon} source={require("../../assets/Images/location.png")} />
           <Text style={styles.infoText}>Location</Text>
-          <Text style={styles.infoDetail}>Blumenweg 5, 8008 Zürich, Switzerland</Text>
+          <Text style={styles.infoDetail}>{postRequest.address}</Text>
         </View>
 
         <View style={styles.infoContainer}>
           <Image style={styles.icon} source={require("../../assets/Images/cal.png")} />
           <Text style={styles.infoText}>Date/Time</Text>
-          <Text style={styles.infoDetail}>08 August 2024 / 5:00PM </Text>
+          <Text style={styles.infoDetail}>{getDateTime(postRequest.createdAt)}</Text>
         </View>
 
         <View style={styles.compensationContainer}>
           <Text style={styles.compensationTitle}>Compensation:</Text>
-          <Text style={styles.description}>I have Two Movie Tickets to offer if you help me with cleaning my house.</Text>
+          <Text style={styles.description}>{postRequest.compensationType === 'Monitarely' ? postRequest.monitarily : postRequest.otherCompensation}</Text>
         </View>
 
         {/* Buttons */}
@@ -86,7 +88,7 @@ function OfferDetail({ navigation }) {
             <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>Message Requester</Text>
           </TouchableOpacity>
 
-          <MyAppButton title={"View My Task"} marginTop={RFPercentage(0)} onPress={() => props.navigation.navigate("Home")} />
+          <MyAppButton title={"View My Task"} marginTop={RFPercentage(0)} onPress={() => navigation.navigate("Home")} />
         </View>
       </ScrollView>
 

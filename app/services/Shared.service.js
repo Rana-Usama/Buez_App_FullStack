@@ -29,6 +29,17 @@ export const getFormatedDate = (date) => {
   }
 }
 
+export const getDateTime = (date) => {
+  if (!date) { return ''; }
+  const postDate = new Date(date.seconds * 1000);
+  try {
+    return format(new Date(postDate), 'MMM-d-yyyy HH:mm aaa');
+  } catch (e) {
+    console.log(e);
+    return '';
+  }
+}
+
 export const processHashtags = (hashtagsInput) => {
   let hashtagsArray = hashtagsInput
     .replace(/\s+/g, '')

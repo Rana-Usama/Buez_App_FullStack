@@ -15,6 +15,7 @@ import Colors from "../config/Colors";
 import { validateRequired } from "../utils/helperFunctions";
 import { savePost, updatePost } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
+import { REQUEST_STATUS } from "../utils/gloabals";
 
 function PostRequest({ navigation, route }) {
   const [showTaskDropdown, setShowTaskDropdown] = useState(false);
@@ -171,6 +172,7 @@ function PostRequest({ navigation, route }) {
         address: inputField[0].value,
         otherCompensation: inputField[1].value,
         monitarily: inputField[2].value,
+        status: REQUEST_STATUS.Active,
       }
       console.log(data);
       if (isEditing) {
@@ -321,6 +323,9 @@ function PostRequest({ navigation, route }) {
                     <Image style={{ width: "100%", height: "100%", borderRadius: RFPercentage(1.4) }} source={{ uri: imageUris[index] }} />
                     <TouchableOpacity onPress={() => [deleteImage(index), pickImage(index)]} style={{ position: "absolute", top: 5, right: 5 }}>
                       <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/edit.png")} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => deleteImage(index)} style={{ position: "absolute", top: 5, left: 5 }}>
+                      <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/cross.png")} />
                     </TouchableOpacity>
                   </>
                 ) : (

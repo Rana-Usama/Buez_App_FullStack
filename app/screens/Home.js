@@ -59,8 +59,7 @@ function Home({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      setTaskRecords([]);
-      fetchRequests();
+      fetchRequests(null);
       
       return () => {
         console.log("unmounting: Home");
@@ -68,10 +67,16 @@ function Home({ navigation }) {
     }, [activeFilter]),
   );
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
+    // setTaskRecords([]);
+    // setLastVisiblePost(null);
     try {
-      const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, searchQuery, lastVisiblePost);
+      let isLastVisible = lastVisiblePost
+      if (typeof islastVisiblePost !== 'undefined') {
+        isLastVisible = islastVisiblePost
+      }
+      const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, searchQuery, isLastVisible);
       setTaskRecords(newRecords);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
@@ -105,7 +110,7 @@ function Home({ navigation }) {
 
   const refreshRequests = async () => {
     setRefreshing(true);
-    await fetchRequests();
+    await fetchRequests(null);
     setRefreshing(false);
   };
 
@@ -127,6 +132,13 @@ function Home({ navigation }) {
     newActiveIndices[cartIndex] = index;
     setActiveIndices(newActiveIndices);
   };
+
+  const handleCommonSearch = () => {
+    if (searchQuery === '') {
+      setHasMore(true);
+    }
+    fetchRequests(null);
+  }
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -168,6 +180,9 @@ function Home({ navigation }) {
                 handleFeild={(text) => handleChange(text, i)}
                 value={item.value}
                 width={"97%"}
+                onSubmitEditing={()=>{
+                  handleCommonSearch();
+                }}
               />
             </View>
           ))}
@@ -216,7 +231,7 @@ function Home({ navigation }) {
             </View>
 
             {/* Info */}
-            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("OfferDetail")} style={styles.cartInfoContainer}>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("OfferDetail", { postRequest: cart })} style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
                 <Image style={styles.userImage} source={{uri: cart.user.profileImage}} />
               </TouchableOpacity>
@@ -224,16 +239,16 @@ function Home({ navigation }) {
               <Text style={styles.userName}>{cart.user.userName}</Text>
               <Text style={styles.postDate}>Posted on {getFormatedDate(cart.createdAt)}</Text>
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("OfferDetail")} style={styles.taskInfoContainer}>
-              <Text style={styles.taskText}>{cart.description}</Text>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("OfferDetail", { postRequest: cart })} style={styles.taskInfoContainer}>
+              <Text style={styles.taskText}>{cart.description?.substr(0, 15) + (cart.description?.length > 15 ? '...' : '')}</Text>
               <Text style={styles.compensationText}>
-                Compensation: <Text style={styles.compensationAmount}>{cart.compensationType ? cart.monitarily : cart.otherCompensation}</Text>
+                Compensation: <Text style={styles.compensationAmount}>{cart.compensationType === 'Monitarely' ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? '...' : '')}</Text>
               </Text>
             </TouchableOpacity>
           </View>
         ))}
 
-        {loading && <View>
+        {(loading || loadingMore) && <View>
           <Text>Loading...</Text>
         </View>}
 

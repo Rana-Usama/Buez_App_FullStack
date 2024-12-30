@@ -14,6 +14,7 @@ export const savePost = async (data, imageUris) => {
     const imageUrls = await Promise.all(imageUris.map(uri => {
       if (uri && !uri?.startsWith('http')) {
         uploadImage(uri);
+        return;
       }
 
       return uri;
@@ -38,7 +39,7 @@ export const updatePost = async (id, data, imageUris) => {
   try {
     const imageUrls = await Promise.all(imageUris.map(uri => {
       if (uri && !uri?.startsWith('http')) {
-        uploadImage(uri);
+        return uploadImage(uri);
       }
 
       return uri;
@@ -47,7 +48,6 @@ export const updatePost = async (id, data, imageUris) => {
     const userRef = doc(db, "taskRequests", id);
     await updateDoc(userRef, {
       ...data,
-      status: 'Active',
       imageUrls,
       updatedAt: Timestamp.now(),
       userId: userId
@@ -66,7 +66,7 @@ export const getMyReuqests = async (postStatus, lastVisiblePost = null, pageSize
     if (!userId) {
       throw new Error("User is not logged in");
     }
-
+    console.log(postStatus);
     let q = query(
       collection(FIREBASE_DB, 'taskRequests'),
       where('status', '==', postStatus),
@@ -137,7 +137,7 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
     }
     console.table({ taskType, searchQuery });
     if (searchQuery) {
-      const keywords = searchQuery.split(' ');
+      const keywords = searchQuery.trim().split(' ').map(k => k.toLowerCase());
       q = query(q, where('descriptionKeywords', 'array-contains-any', keywords));
     }
 
@@ -156,10 +156,25 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
     }
 
     const lastVisible = snapshot.docs[snapshot.docs.length - 1];
-    console.log('HOME RECORDS:' ,tasksArray);
+    console.log('HOME RECORDS:' ,tasksArray.length, tasksArray);
     return {tasksArray, lastVisible};
   } catch (error) {
     console.log('GET_MY_POSTS: ', error);
     throw error;
+  }
+}
+
+export const updateReqestStatus = async (id, status, data) => {
+  try {
+    const userRef = doc(db, "taskRequests", id);
+    await updateDoc(userRef, {
+      ...data,
+      status: status
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error_saving_post: ", error);
+    throw error
   }
 }
