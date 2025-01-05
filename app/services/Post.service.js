@@ -13,8 +13,7 @@ export const savePost = async (data, imageUris) => {
   try {
     const imageUrls = await Promise.all(imageUris.map(uri => {
       if (uri && !uri?.startsWith('http')) {
-        uploadImage(uri);
-        return;
+        return uploadImage(uri);
       }
 
       return uri;
@@ -159,7 +158,7 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
     console.log('HOME RECORDS:' ,tasksArray.length, tasksArray);
     return {tasksArray, lastVisible};
   } catch (error) {
-    console.log('GET_MY_POSTS: ', error);
+    console.log('GET_POSTS_LIST: ', error);
     throw error;
   }
 }
