@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, FlatList } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
@@ -60,20 +60,49 @@ function Messages({ navigation }) {
   );
 
   return (
-    <View style={styles.screen}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        {/* Nav */}
-        <Nav marginTop={RFPercentage(7.5)} leftLogo={false} navigation={navigation} title="Messages" />
+		<View style={styles.screen}>
+			<ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+				{/* Nav */}
+				<Nav marginTop={RFPercentage(7.5)} leftLogo={false} navigation={navigation} title='Messages' />
 
-        {/* Filter Buttons */}
-        <View style={styles.filterContainer}>
-          {filters.map((title, index) => (
-            <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
-          ))}
-        </View>
+				{/* Filter Buttons */}
+				<View style={styles.filterContainer}>
+					{filters.map((title, index) => (
+						<FilterButton
+							key={title}
+							title={title}
+							isActive={activeFilter === title}
+							isFirst={index === 0}
+						/>
+					))}
+				</View>
 
-        {/* Messages List */}
-        {messages.map((message) => (
+				{/* Messages List */}
+				<FlatList
+					data={messages}
+					pagingEnabled
+					onEndReached={() => console.log('end reached')}
+					showsHorizontalScrollIndicator={false}
+					onMomentumScrollEnd={() => console.log('end')}
+					style={{ width: '100%' }}
+					renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Chat", {id: item.id})}
+							activeOpacity={0.8}
+							style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+							<View key={item.id} style={styles.messageContainer}>
+								<Image style={styles.messageImage} source={item.imageSource} />
+								<View style={styles.messageTextContainer}>
+									<Text style={styles.messageUserName}>{item.userName}</Text>
+									<Text style={styles.messageText}>{item.messageText}</Text>
+								</View>
+								<Text style={styles.messageTime}>{item.time}</Text>
+							</View>
+							<View style={styles.separator} />
+						</TouchableOpacity>
+					)}
+				/>
+				{/* {messages.map((message) => (
           <TouchableOpacity activeOpacity={0.8} style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
             <View key={message.id} style={styles.messageContainer}>
               <Image style={styles.messageImage} source={message.imageSource} />
@@ -85,14 +114,14 @@ function Messages({ navigation }) {
             </View>
             <View style={styles.separator} />
           </TouchableOpacity>
-        ))}
+        ))} */}
 
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+				<View style={styles.bottomSpacing} />
+			</ScrollView>
 
-      {/* Bottom Tab */}
-      <CustomTabBar messagesTab={true} navigation={navigation} />
-    </View>
+			{/* Bottom Tab */}
+			<CustomTabBar messagesTab={true} navigation={navigation} />
+		</View>
   );
 }
 
