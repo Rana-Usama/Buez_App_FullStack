@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList, Dimensions } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { getAuth } from "firebase/auth";
 
 // components
 import Nav from "../components/common/Nav";
@@ -10,15 +11,25 @@ import CustomTabBar from "../components/common/CustomTabBar";
 import Colors from "../config/Colors";
 import MyAppButton from "../components/common/MyAppButton";
 import { getDateTime } from "../services/Shared.service";
+import { createNewChat } from "../services/Chat.service";
+import { useUser } from "../contexts/user.context";
 
 const screenWidth = Dimensions.get("window").width;
 
 function OfferDetail({ navigation, route }) {
   const [activeIndex, setActiveIndex] = useState(0);
-
+  const currentUser = useUser();
+  const currentUserId = getAuth().currentUser?.uid;
   const images = [require("../../assets/Images/cover.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")];
   const postRequest = route.params?.postRequest
-  console.log('POST DETAILS: ', postRequest);
+  
+  console.log('user',currentUser)
+  const handleStartChat = async () => {
+    const chatId = await createNewChat(currentUserId, postRequest.userId);
+    navigation.navigate('Chat', { chatId: chatId, senderId: currentUserId, senderName: currentUser.userName, receiver: postRequest.user });
+  };
+  
+
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
@@ -84,6 +95,8 @@ function OfferDetail({ navigation, route }) {
               justifyContent: "center",
               alignItems: "center",
             }}
+            disabled={currentUserId === postRequest.userId}
+            onPress={handleStartChat}
           >
             <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>Message Requester</Text>
           </TouchableOpacity>

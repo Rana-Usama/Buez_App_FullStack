@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, FlatList, ActivityIndicator } from "react-native";
+import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDocs, getDoc, doc } from 'firebase/firestore';
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
@@ -8,8 +9,19 @@ import Colors from "../config/Colors";
 import Nav from "../components/common/Nav";
 import CustomTabBar from "../components/common/CustomTabBar";
 
+import { FIREBASE_DB } from "../../firebaseConfig";
+import { getAuth } from "firebase/auth";
+import { useUser } from "../contexts/user.context";
+
 function Messages({ navigation }) {
   const [activeFilter, setActiveFilter] = useState("All");
+  const [chats, setChats] = useState([]);
+  const [lastVisible, setLastVisible] = useState(null); // Tracks last document for pagination
+  const [loading, setLoading] = useState(false); // Loading state for fetching chats
+  const [isRefreshing, setIsRefreshing] = useState(false); // State for pull-to-refresh
+  const pageSize = 10; // Number of chats to fetch per batch
+  const userId = getAuth().currentUser?.uid;
+  const currentUser = useUser();
 
   const filters = ["All", "Unread"];
   const messages = [
@@ -43,6 +55,85 @@ function Messages({ navigation }) {
     },
   ];
 
+  useEffect(() => {
+    fetchInitialChats();
+  }, []);
+
+  const getChatData = async (d) => {
+    const chatData = d.data();
+    const otherUser = chatData.participants.find(u => u !== userId);
+    const userRef = doc(FIREBASE_DB, "users", otherUser);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.exists() ? userDoc.data() : null;
+    return { id: d.id, ...chatData, user: userData };
+  }
+
+  const fetchInitialChats = async () => {
+    setLoading(true);
+    let unsubscribe;
+		try {
+			const q = query(
+				collection(FIREBASE_DB, 'chats'),
+				where('participants', 'array-contains', userId),
+				orderBy('lastMessageTimestamp', 'desc'),
+				limit(pageSize)
+			);
+
+      unsubscribe = onSnapshot(q, async (snapshot) => {
+        const chatData = [];
+        for await (const doc of snapshot.docs) {
+          const data = await getChatData(doc);
+          chatData.push(data);
+        }
+				// const chatData = snapshot.docs.map(async (doc) => {
+        //   const data = await getChatData(doc);
+        //   return data
+				// });
+
+				console.log('CHATS', chatData);
+				setChats(chatData);
+				setLastVisible(snapshot.docs[snapshot.docs.length - 1]); // Set last visible document
+				setLoading(false);
+			});
+		} catch (e) {
+			console.log('Chat Error', e);
+		}
+
+    return () => { if (unsubscribe) unsubscribe() }; // Clean up listener
+  };
+
+  const fetchMoreChats = async () => {
+    if (!lastVisible || loading) return;
+
+    setLoading(true);
+
+    const q = query(
+      collection(FIREBASE_DB, 'chats'),
+      where('participants', 'array-contains', userId),
+      orderBy('lastMessageTimestamp', 'desc'),
+      startAfter(lastVisible),
+      limit(pageSize)
+    );
+
+    const snapshot = await getDocs(q);
+
+    const chatData = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    setChats((prevChats) => [...prevChats, ...chatData]);
+    setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+    setLoading(false);
+  };
+
+
+  const refreshChats = async () => {
+    setIsRefreshing(true);
+    await fetchInitialChats();
+    setIsRefreshing(false);
+  };
+
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -56,6 +147,23 @@ function Messages({ navigation }) {
       ) : (
         <Text style={styles.filterButtonTextInactive}>{title}</Text>
       )}
+    </TouchableOpacity>
+  );
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('Chat', {chatId: item.id, senderId: userId, senderName: currentUser.userName, receiver: item.user })}
+      activeOpacity={0.8}
+      style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+      <View key={item.id} style={styles.messageContainer}>
+        <Image style={styles.messageImage} source={{uri: item.user.profileImage}} />
+        <View style={styles.messageTextContainer}>
+          <Text style={styles.messageUserName}>{item.user.userName}</Text>
+          <Text style={styles.messageText}>{item.lastMessage.text}</Text>
+        </View>
+        <Text style={styles.messageTime}>{item.time}</Text>
+      </View>
+      <View style={styles.separator} />
     </TouchableOpacity>
   );
 
@@ -78,7 +186,18 @@ function Messages({ navigation }) {
 				</View>
 
 				{/* Messages List */}
-				<FlatList
+        <FlatList
+          style={{ width: '100%' }}
+					data={chats}
+					renderItem={renderItem}
+					keyExtractor={(item) => item.id}
+					onEndReached={fetchMoreChats}
+					onEndReachedThreshold={0.5}
+					refreshing={isRefreshing}
+					onRefresh={refreshChats}
+					ListFooterComponent={loading && <ActivityIndicator size='large' color='#0000ff' />}
+				/>
+				{/* <FlatList
 					data={messages}
 					pagingEnabled
 					onEndReached={() => console.log('end reached')}
@@ -86,8 +205,8 @@ function Messages({ navigation }) {
 					onMomentumScrollEnd={() => console.log('end')}
 					style={{ width: '100%' }}
 					renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Chat", {id: item.id})}
+						<TouchableOpacity
+							onPress={() => navigation.navigate('Chat', { id: item.id })}
 							activeOpacity={0.8}
 							style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
 							<View key={item.id} style={styles.messageContainer}>
@@ -101,7 +220,7 @@ function Messages({ navigation }) {
 							<View style={styles.separator} />
 						</TouchableOpacity>
 					)}
-				/>
+				/> */}
 				{/* {messages.map((message) => (
           <TouchableOpacity activeOpacity={0.8} style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
             <View key={message.id} style={styles.messageContainer}>
