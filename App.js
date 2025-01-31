@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Stack } from 'expo-router/stack';
 import { View, ActivityIndicator, LogBox } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -7,56 +8,54 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from 'expo-secure-store';
 
 // Screens
-import Onboarding from "./app/screens/Onboarding";
-import Login from "./app/screens/Login";
-import Signup from "./app/screens/Signup";
-import ForgotPassword from "./app/screens/ForgotPassword";
-import OTPInput from "./app/screens/OTPInput";
-import SetNewPassword from "./app/screens/SetNewPassword";
-import Home from "./app/screens/Home";
-import SuccessScreen from "./app/screens/SuccessScreen";
-import ChangePassword from "./app/screens/ChangePassword";
-import OfferDetail from "./app/screens/OfferDetail";
-import PostRequest from "./app/screens/PostRequest";
-import MyRequests from "./app/screens/MyRequests";
-import Settings from "./app/screens/Settings";
-import TermsAndConditions from "./app/screens/TermsAndConditions";
-import FAQ from "./app/screens/FAQ";
-import PrivacyPolicy from "./app/screens/PrivacyPolicy";
-import Profile from "./app/screens/Profile";
-import EditProfile from "./app/screens/EditProfile";
-import Reviews from "./app/screens/Reviews";
-import Messages from "./app/screens/Messages";
-import Subscription from "./app/screens/Subscription";
+import Onboarding from "./app/Onboarding";
+import Login from "./app/Login";
+import Signup from "./app/Signup";
+import ForgotPassword from "./app/ForgotPassword";
+import OTPInput from "./app/OTPInput";
+import SetNewPassword from "./app/SetNewPassword";
+import Home from "./app/(app)/Home";
+import SuccessScreen from "./app/(app)/SuccessScreen";
+import ChangePassword from "./app/(app)/ChangePassword";
+import OfferDetail from "./app/(app)/OfferDetail";
+import PostRequest from "./app/(app)/PostRequest";
+import MyRequests from "./app/(app)/MyRequests";
+import Settings from "./app/(app)/Settings";
+import TermsAndConditions from "./app/(app)/TermsAndConditions";
+import FAQ from "./app/(app)/FAQ";
+import PrivacyPolicy from "./app/(app)/PrivacyPolicy";
+import Profile from "./app/(app)/Profile";
+import EditProfile from "./app/(app)/EditProfile";
+import Reviews from "./app/(app)/Reviews";
+import Messages from "./app/(app)/Messages";
+import Chat from "./app/(app)/Chat";
+import Subscription from "./app/(app)/Subscription";
 
 // auth
 // eslint-disable-next-line import/no-unresolved
 import { onAuthStateChanged } from 'firebase/auth';
-import { UserProvider } from "./app/contexts/user.context";
+import { UserProvider } from "./contexts/user.context";
 import { FIREBASE_AUTH } from "./firebaseConfig";
 
 // config
-import Colors from "./app/config/Colors";
-import Chat from "./app/screens/Chat";
-
-const Stack = createStackNavigator();
+import Colors from "./config/Colors";
 
 LogBox.ignoreAllLogs();
 
 const AuthStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Onboarding">
+  <Stack screenOptions={{ headerShown: false }} initialRouteName="Onboarding">
     <Stack.Screen name="Onboarding" component={Onboarding} />
-    <Stack.Screen name="Login" component={Login} />
+    <Stack.Screen name="index" component={Login} />
     <Stack.Screen name="Signup" component={Signup} />
     <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
     <Stack.Screen name="OTPInput" component={OTPInput} />
     <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
-  </Stack.Navigator>
+  </Stack>
 );
 
 const AppStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Home">
-    <Stack.Screen name="Home" component={Home} />
+  <Stack screenOptions={{ headerShown: false }} initialRouteName="Home">
+    <Stack.Screen name="index" component={Home} />
     <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
     <Stack.Screen name="ChangePassword" component={ChangePassword} />
     <Stack.Screen name="OfferDetail" component={OfferDetail} />
@@ -72,7 +71,7 @@ const AppStack = () => (
     <Stack.Screen name="Messages" component={Messages} />
     <Stack.Screen name="Chat" component={Chat} />
     <Stack.Screen name="Subscription" component={Subscription} />
-  </Stack.Navigator>
+  </Stack>
 )
 export default function App() {
   // Font
@@ -107,9 +106,9 @@ export default function App() {
 
   return (
     <UserProvider>
-      <NavigationContainer>
           {user ? <AppStack /> : <AuthStack /> }
-      </NavigationContainer>
+      {/* <NavigationContainer>
+      </NavigationContainer> */}
     </UserProvider>
   );
 }

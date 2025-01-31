@@ -7,6 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "buez",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -19,13 +20,37 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.adamburg.Buez"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      [
+        "expo-router",
+        {
+          "origin": "https://buez.expo.app"
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.buez.stripe",
+          "publishableKey": "pk_test_51LtcrdFQprReXlK6tCsDooVIYLhyMgc0AkW6SUcBGshGUN0rfZCmfc7riWPJq8QtO2Xe6WzuPLBM4qKInsX6txGo00MzVdCD03",
+          "enableGooglePay": false,
+          "enableApplePay": false
+        }
+      ]
+    ],
+    "extra": {
+      "router": {
+        "origin": "https://buez.expo.app"
+      },
+      "eas": {
+        "projectId": "040c3caa-bcd9-4c99-9fb2-0deb0be5b597"
+      }
+    }
   }
 }
