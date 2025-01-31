@@ -37,6 +37,7 @@ import { FIREBASE_AUTH } from "./firebaseConfig";
 
 // config
 import Colors from "./app/config/Colors";
+import Chat from "./app/screens/Chat";
 
 const Stack = createStackNavigator();
 
@@ -69,6 +70,7 @@ const AppStack = () => (
     <Stack.Screen name="EditProfile" component={EditProfile} />
     <Stack.Screen name="Reviews" component={Reviews} />
     <Stack.Screen name="Messages" component={Messages} />
+    <Stack.Screen name="Chat" component={Chat} />
     <Stack.Screen name="Subscription" component={Subscription} />
   </Stack.Navigator>
 )
