@@ -21,7 +21,8 @@ const SubscriptionListener = ({navigation, userId }) => {
 			const subscriptionDate = new Date(subscription.subscriptionDate.seconds * 1000);
       const subscriptionAge = differenceInDays(new Date(), subscriptionDate);
       console.log('subscriptionAge',subscriptionAge);
-			if (subscriptionAge > 30) {
+      if (subscriptionAge > 30) {
+        if (currentRouteName && currentRouteName !== "Subscription" )
 				navigation.replace("Subscription"); // Force re-subscription
 			} else {
         navigation.replace('Home'); // Allow access
