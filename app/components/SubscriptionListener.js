@@ -13,9 +13,10 @@ const SubscriptionListener = ({navigation, userId }) => {
   });
   
   console.log("Current Screen:", currentRouteName);
-  console.log('SubscriptionListener', subscription);
+  console.log('SubscriptionListener', subscription, userData);
 	useEffect(() => {
-		if (!userId) return;
+    if (!userId) return;
+    if (!userData) return;
 		if (subscription) {
 			setSubscriptionStatus(subscription);
 			const subscriptionDate = new Date(subscription.subscriptionDate.seconds * 1000);
