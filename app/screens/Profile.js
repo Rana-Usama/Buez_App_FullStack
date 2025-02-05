@@ -13,7 +13,7 @@ import { useUser } from "../contexts/user.context";
 import { useFocusEffect } from "@react-navigation/native";
 
 function Profile({ navigation }) {
-  const user = useUser();
+  const { userData: user } = useUser();
   const [loading, setLoading] = useState(true);
   const profileImgUrl = user?.profileImage || "";
   const userName = user?.userName || "";

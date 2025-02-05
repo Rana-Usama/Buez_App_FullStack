@@ -3,14 +3,14 @@
 # dependencies
 node_modules/
 
-# Expo
+/ios
+/android
 .env
+# Expo
 .expo/
 dist/
 web-build/
 expo-env.d.ts
-/ios
-/android
 
 # Native
 *.orig.*

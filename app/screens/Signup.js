@@ -103,6 +103,7 @@ function Signup(props) {
       if (user) {
         const userData = {
           userName: userName,
+          email: email
         };
         await addUser(user?.uid, userData);
       }

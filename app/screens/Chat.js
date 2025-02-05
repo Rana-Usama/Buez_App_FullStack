@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { GiftedChat } from 'react-native-gifted-chat';
 import { Avatar } from 'react-native-elements';
 import Nav from '../components/common/Nav';
-import { collection, query, orderBy, limit, onSnapshot, addDoc, getDocs, Timestamp, startAfter, doc, updateDoc, where } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot, addDoc, getDocs, Timestamp, startAfter, doc, updateDoc, where, writeBatch, getDoc } from 'firebase/firestore';
 
 import { RFPercentage } from 'react-native-responsive-fontsize';
 
@@ -163,6 +163,7 @@ const Chat = ({ navigation, route }) => {
 			timestamp: Timestamp.now(),
 			senderId: senderId,
 			senderName: senderName,
+			unread: true,
 		};
 
 		// Save message to Firestore
@@ -170,6 +171,10 @@ const Chat = ({ navigation, route }) => {
 			await addDoc(collection(FIREBASE_DB, `chats/${chatId}/messages`), newMessage);
 			const chatRef = doc(FIREBASE_DB, 'chats', chatId);
 			await updateDoc(chatRef, {
+				...message,
+				unread: true,
+				senderId: senderId,
+				senderName: senderName,
 				lastMessage: message,
 				lastMessageTimestamp: Timestamp.now(),
 			});
@@ -177,6 +182,47 @@ const Chat = ({ navigation, route }) => {
 			console.log(e);
 		}
 	}, []);
+
+	// Add a new useEffect to mark messages as read when the chat is opened
+	useEffect(() => {
+		if (!chatId || !senderId) return;
+
+		const markMessagesAsRead = async () => {
+			try {
+				// Get unread messages sent by the other user
+				const q = query(
+					collection(FIREBASE_DB, `chats/${chatId}/messages`),
+					where('unread', '==', true),
+					where('senderId', '!=', senderId)
+				);
+
+				const snapshot = await getDocs(q);
+				
+				// Update each unread message
+				const batch = writeBatch(FIREBASE_DB);
+				snapshot.docs.forEach((doc) => {
+					batch.update(doc.ref, { unread: false });
+				});
+
+				// Update the last message unread status if it was from the other user
+				const chatRef = doc(FIREBASE_DB, 'chats', chatId);
+				const chatDoc = await getDoc(chatRef);
+				const chatData = chatDoc.data();
+				
+				if (chatData?.lastMessage?.senderId !== senderId && chatData?.lastMessage?.unread) {
+					batch.update(chatRef, {
+						'lastMessage.unread': false
+					});
+				}
+
+				await batch.commit();
+			} catch (error) {
+				console.error('Error marking messages as read:', error);
+			}
+		};
+
+		markMessagesAsRead();
+	}, [chatId, senderId]);
 
 	console.log(messages);
 	return (

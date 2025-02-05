@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, FlatList, ActivityIndicator } from "react-native";
 import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDocs, getDoc, doc } from 'firebase/firestore';
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -21,43 +21,63 @@ function Messages({ navigation }) {
   const [isRefreshing, setIsRefreshing] = useState(false); // State for pull-to-refresh
   const pageSize = 10; // Number of chats to fetch per batch
   const userId = getAuth().currentUser?.uid;
-  const currentUser = useUser();
+  const { userData, loading: userLoading, error: userError } = useUser();
+
+  console.log(userData);
 
   const filters = ["All", "Unread"];
-  const messages = [
-    {
-      id: 1,
-      userName: "Usama",
-      messageText: "Hey, will be available...",
-      time: "9:17 PM",
-      imageSource: require("../../assets/Images/message.png"),
-    },
-    {
-      id: 2,
-      userName: "Jhon Smith",
-      messageText: "Hey, will be available...",
-      time: "9:17 PM",
-      imageSource: require("../../assets/Images/dp.png"),
-    },
-    {
-      id: 3,
-      userName: "Emma Stone",
-      messageText: "Hey, will be available...",
-      time: "9:17 PM",
-      imageSource: require("../../assets/Images/profilePic.png"),
-    },
-    {
-      id: 4,
-      userName: "Alex Rock",
-      messageText: "Hey, will be available...",
-      time: "9:17 PM",
-      imageSource: require("../../assets/Images/profile2.png"),
-    },
-  ];
 
   useEffect(() => {
     fetchInitialChats();
+    listenForNewChats();
   }, []);
+
+  const listenForNewChats = () => {
+    const q = query(
+      collection(FIREBASE_DB, 'chats'),
+      where('participants', 'array-contains', userId),
+      orderBy('lastMessageTimestamp', 'desc'),
+      limit(10)
+    );
+
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      try {
+        const updates = snapshot.docChanges().map(async (change) => {
+          if (change.type === 'added' || change.type === 'modified') {
+            return await getChatData(change.doc);
+          }
+          if (change.type === 'removed') {
+            return { id: change.doc.id, removed: true };
+          }
+          return null;
+        });
+
+        const resolvedUpdates = (await Promise.all(updates)).filter(Boolean);
+
+        setChats(prevChats => {
+          const updatedChats = [...prevChats];
+          
+          resolvedUpdates.forEach(data => {
+            if (data.removed) {
+              return updatedChats.filter(chat => chat.id !== data.id);
+            }
+            
+            const chatIndex = updatedChats.findIndex(chat => chat.id === data.id);
+            if (chatIndex !== -1) {
+              updatedChats.splice(chatIndex, 1);
+            }
+            updatedChats.unshift(data);
+          });
+
+          return updatedChats;
+        });
+      } catch (error) {
+        console.error('Error processing chat updates:', error);
+      }
+    });
+
+    return unsubscribe;
+  };
 
   const getChatData = async (d) => {
     const chatData = d.data();
@@ -70,7 +90,6 @@ function Messages({ navigation }) {
 
   const fetchInitialChats = async () => {
     setLoading(true);
-    let unsubscribe;
 		try {
 			const q = query(
 				collection(FIREBASE_DB, 'chats'),
@@ -79,27 +98,19 @@ function Messages({ navigation }) {
 				limit(pageSize)
 			);
 
-      unsubscribe = onSnapshot(q, async (snapshot) => {
-        const chatData = [];
-        for await (const doc of snapshot.docs) {
-          const data = await getChatData(doc);
-          chatData.push(data);
-        }
-				// const chatData = snapshot.docs.map(async (doc) => {
-        //   const data = await getChatData(doc);
-        //   return data
-				// });
+      const snapshot = await getDocs(q);
+      const chatData = [];
+      for await (const doc of snapshot.docs) {
+        const data = await getChatData(doc);
+        chatData.push(data);
+      }
 
-				console.log('CHATS', chatData);
-				setChats(chatData);
-				setLastVisible(snapshot.docs[snapshot.docs.length - 1]); // Set last visible document
-				setLoading(false);
-			});
+      setChats(chatData);
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]); // Set last visible document
+      setLoading(false);
 		} catch (e) {
 			console.log('Chat Error', e);
 		}
-
-    return () => { if (unsubscribe) unsubscribe() }; // Clean up listener
   };
 
   const fetchMoreChats = async () => {
@@ -152,20 +163,48 @@ function Messages({ navigation }) {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate('Chat', {chatId: item.id, senderId: userId, senderName: currentUser.userName, receiver: item.user })}
+      onPress={() => navigation.navigate('Chat', {chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
       activeOpacity={0.8}
       style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-      <View key={item.id} style={styles.messageContainer}>
+      <View key={item.id} style={[
+        styles.messageContainer,
+        item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadMessage
+      ]}>
         <Image style={styles.messageImage} source={{uri: item.user.profileImage}} />
         <View style={styles.messageTextContainer}>
-          <Text style={styles.messageUserName}>{item.user.userName}</Text>
-          <Text style={styles.messageText}>{item.lastMessage.text}</Text>
+          <Text style={[
+            styles.messageUserName,
+            item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText
+          ]}>
+            {item.user.userName}
+          </Text>
+          <Text style={[
+            styles.messageText,
+            item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText
+          ]}>
+            {item.lastMessage.text}
+          </Text>
         </View>
         <Text style={styles.messageTime}>{item.time}</Text>
+        {item.lastMessage?.unread && item.lastMessage?.senderId !== userId && (
+          <View style={styles.unreadDot} />
+        )}
       </View>
       <View style={styles.separator} />
     </TouchableOpacity>
   );
+
+  // Add filtered chats computation
+  const filteredChats = useMemo(() => {
+    if (activeFilter === "Unread") {
+      return chats.filter(
+        chat => 
+          chat.lastMessage?.unread && 
+          chat.lastMessage?.senderId !== userId
+      );
+    }
+    return chats;
+  }, [chats, activeFilter, userId]);
 
   return (
 		<View style={styles.screen}>
@@ -188,13 +227,22 @@ function Messages({ navigation }) {
 				{/* Messages List */}
         <FlatList
           style={{ width: '100%' }}
-					data={chats}
+					data={filteredChats}
 					renderItem={renderItem}
 					keyExtractor={(item) => item.id}
 					onEndReached={fetchMoreChats}
 					onEndReachedThreshold={0.5}
 					refreshing={isRefreshing}
-					onRefresh={refreshChats}
+          onRefresh={refreshChats}
+          ListEmptyComponent={() => (
+						<View style={styles.emptyContainer}>
+							{!loading && <Text style={styles.emptyText}>
+								{activeFilter === "Unread" 
+									? "No unread messages" 
+									: "No messages yet"}
+							</Text>}
+						</View>
+					)}
 					ListFooterComponent={loading && <ActivityIndicator size='large' color='#0000ff' />}
 				/>
 				{/* <FlatList
@@ -341,6 +389,34 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     marginBottom: RFPercentage(6),
+  },
+  unreadMessage: {
+    backgroundColor: Colors.lightGrey,
+  },
+  unreadText: {
+    fontFamily: "Poppins_500Medium",
+    color: Colors.heading,
+  },
+  unreadDot: {
+    position: 'absolute',
+    right: RFPercentage(1),
+    top: RFPercentage(1),
+    width: RFPercentage(1),
+    height: RFPercentage(1),
+    borderRadius: RFPercentage(0.5),
+    backgroundColor: Colors.primary,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: RFPercentage(10),
+  },
+  emptyText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(2),
+    color: Colors.darkGrey,
+    textAlign: 'center',
   },
 });
 

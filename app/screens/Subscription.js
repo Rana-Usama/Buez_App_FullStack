@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-
+import * as Linking from "expo-linking";
+import { useStripe } from "@stripe/stripe-react-native";
+import { getAuth } from "firebase/auth";
+import { useUser } from "../contexts/user.context";
 // components
 import Screen from "../components/Screen";
 import InputField from "../components/common/AuthInputField";
@@ -9,9 +12,34 @@ import MyAppButton from "../components/common/MyAppButton";
 
 // config
 import Colors from "../config/Colors";
+import SubscriptionListener from "../components/SubscriptionListener";
+
+async function getPaymentSheet(amount, currency, userId) {
+  console.log('getPaymentSheet', amount);
+  try {
+    const response = await fetch('http://192.168.100.4:4242/payment-sheet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({amount: amount, currency, userId}),
+    });
+    console.log('response', response);
+    const data = await response.json();
+    console.log('getPaymentSheet', data);
+    return data;
+  } catch (error) {
+    console.log('getPaymentSheet', error);
+    throw error;
+  }
+}
 
 function Subscription(props) {
+  const { userData } = useUser();
+  const userId = getAuth()?.currentUser?.uid;
   const [indicator, showIndicator] = useState(false);
+  const { initPaymentSheet, presentPaymentSheet, confirmPayment } = useStripe();
+  const [loading, setLoading] = useState(false);
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Email",
@@ -23,6 +51,56 @@ function Subscription(props) {
       secure: true,
     },
   ]);
+  console.log('Subscription', userData);
+  const initializePaymentSheet = async () => {
+    try {
+      // PaymentConfiguration.init(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+      console.log('Payment init');
+      const { customer, ephemeralKey, paymentIntent } = await getPaymentSheet(12.99, 'USD', userId);
+      const {error} = await initPaymentSheet({
+        customerId: customer,
+        customerEphemeralKeySecret: ephemeralKey,
+        paymentIntentClientSecret: paymentIntent,
+        allowsDelayedPaymentMethods: true,
+        defaultBillingDetails: {
+          name: userData.userName, // logged in user name
+          email: userData.email, // logged in user email
+          phone: userData.phoneNumber, // logged in user phone
+          postalCode: '12345'
+        },
+        merchantDisplayName: "Buez",
+        returnURL: Linking.createURL("/stripe-redirect"),
+        // applePay: {
+        //   merchantCountryCode: "US",
+        //   merchantIdentifier: "merchant.com.example.test",
+        //   displayName: "Buez",
+        // }
+      });
+  
+      if (error) {
+        console.log(error.message);
+      } else {
+        setLoading(true);
+        onPaymentSheet();
+      }
+    } catch (e) {
+      console.log('Error initializing payment sheet', e);
+    }
+
+  }
+
+  const onPaymentSheet = async () => {
+    const {error} = await presentPaymentSheet();
+    if (error) {
+      // TODO: handle error
+      // show error message to user
+      console.log(error.message);
+    } else {
+      // save user subscription to firebase
+      
+      console.log("Payment successful");
+    }
+  }
 
   const handleChange = (text, i) => {
     let tempFields = [...inputField];
@@ -84,8 +162,8 @@ function Subscription(props) {
           <Image style={styles.starIconRight} source={require("../../assets/Images/stars.png")} />
         </View>
       </View>
-
-      <MyAppButton title={"Checkout"} marginTop={RFPercentage(7)} onPress={() => props.navigation.navigate("Home")} />
+      {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />}
+      <MyAppButton title={"Checkout"} marginTop={RFPercentage(7)} onPress={() => initializePaymentSheet()} />
     </Screen>
   );
 }

@@ -163,7 +163,7 @@ function MyRequests({ navigation }) {
   };
 
   const postEditHandler = (cart) => {
-    navigation.navigate("PostRequest", { title: "Edit Profile", postRequest: cart })
+    navigation.navigate("PostRequest", { title: "Edit Requestt", postRequest: cart })
   }
 
   return (

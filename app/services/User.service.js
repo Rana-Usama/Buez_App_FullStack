@@ -7,13 +7,14 @@ import { uploadImage } from './Shared.service';
 
 const db = FIREBASE_DB;
 
-export const addUser = async (id, { userName, phoneNumber = '', profileImage = ''}) => {
+export const addUser = async (id, { userName, email, phoneNumber = '', profileImage = ''}) => {
   try {
     console.log('ADD_USER');
     const user = {
       userName,
       phoneNumber,
-      profileImage
+      profileImage,
+      email
     };
 
     await setDoc(doc(db, "users", id), user);
@@ -30,7 +31,7 @@ export const subscribeToUserData = (userId, callback) => {
     const unsubscribe = onSnapshot(docRef, async (docSnap) => {
       if (docSnap.exists()) {
         console.log("User data updated:", docSnap.data());
-        callback(docSnap.data());
+        callback({...docSnap.data(), id: userId});
       } else {
         console.log("No such document, creating a new one...");
         const defaultUserData = {
@@ -103,6 +104,16 @@ export const updateProfile = async (updatedData, imageUri) => {
     }
   } catch (error) {
     console.log("Error updating profile:", error);
+    throw error;
+  }
+};
+
+export const saveSubscription = async (userId, subscriptionId) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, { subscriptionId });
+  } catch (error) {
+    console.log("Error saving subscription:", error);
     throw error;
   }
 };

@@ -16,7 +16,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getFormatedDate } from "../services/Shared.service";
 
 function Home({ navigation }) {
-  const user = useUser();
+  const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
   const [inputField, SetInputField] = useState([
     {

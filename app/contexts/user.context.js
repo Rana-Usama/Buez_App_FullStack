@@ -8,14 +8,22 @@ const UserContext = createContext(null);
 export const UserProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [authUser, setAuthUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(FIREBASE_AUTH, (user) => {
-      if (user) {
-        setAuthUser(user);
-      } else {
-        setAuthUser(null);
-        setUserData(null);
+      try {
+        if (user) {
+          setAuthUser(user);
+        } else {
+          setAuthUser(null);
+          setUserData(null);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     });
 
@@ -26,7 +34,11 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     let unsubscribeUserData;
     if (authUser) {
-      unsubscribeUserData = subscribeToUserData(authUser?.uid, setUserData);
+      try {
+        unsubscribeUserData = subscribeToUserData(authUser?.uid, setUserData);
+      } catch (err) {
+        setError(err.message);
+      }
     }
 
     return () => {
@@ -34,8 +46,15 @@ export const UserProvider = ({ children }) => {
     };
   }, [authUser]);
 
+  const isAuthenticated = !!authUser;
   return (
-    <UserContext.Provider value={userData}>
+    <UserContext.Provider value={{
+      userData,
+      authUser,
+      loading,
+      error, 
+      isAuthenticated
+    }}>
       {children}
     </UserContext.Provider>
   );

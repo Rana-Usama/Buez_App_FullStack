@@ -23,10 +23,10 @@ function OfferDetail({ navigation, route }) {
   const images = [require("../../assets/Images/cover.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")];
   const postRequest = route.params?.postRequest
   
-  console.log('user',currentUser)
+  console.log('current user',currentUser.userData)
   const handleStartChat = async () => {
     const chatId = await createNewChat(currentUserId, postRequest.userId);
-    navigation.navigate('Chat', { chatId: chatId, senderId: currentUserId, senderName: currentUser.userName, receiver: postRequest.user });
+    navigation.navigate('Chat', { chatId: chatId, senderId: currentUserId, senderName: currentUser.userData.userName, receiver: postRequest.user });
   };
   
 

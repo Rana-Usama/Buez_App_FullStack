@@ -195,7 +195,7 @@ function PostRequest({ navigation, route }) {
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(7.5)} leftLogo={false} navigation={navigation} title={title === "Edit Profile" ? "Edit Profile" : "Post Request"} />
+        <Nav marginTop={RFPercentage(7.5)} leftLogo={false} navigation={navigation} title={title === "Edit Request" ? "Edit Request" : "Post Request"} />
 
         {/* Task Type Dropdown */}
         <TouchableOpacity

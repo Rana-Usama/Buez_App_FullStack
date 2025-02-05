@@ -18,7 +18,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { updateProfile } from "../services/User.service";
 
 function EditProfile({ navigation }) {
-  const user = useUser();
+  const { userData: user } = useUser();
   const [loading, setLoading] = useState(true);
   const [imageUri, setImageUri] = useState(null);
   const [inputField, SetInputField] = useState([

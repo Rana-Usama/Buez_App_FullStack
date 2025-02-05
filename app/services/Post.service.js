@@ -34,6 +34,17 @@ export const savePost = async (data, imageUris) => {
   }
 };
 
+export const getPostById = async (id) => {
+  try {
+    const docRef = doc(db, "taskRequests", id);
+    const docSnap = await getDoc(docRef);
+    return docSnap.data();
+  } catch (error) {
+    console.error("Error_getting_post: ", error);
+    throw error
+  }
+}
+
 export const updatePost = async (id, data, imageUris) => {
   try {
     const imageUrls = await Promise.all(imageUris.map(uri => {
