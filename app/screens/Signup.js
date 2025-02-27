@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 // components
@@ -90,7 +90,8 @@ function Signup(props) {
 
   const handleSignup = async () => {
     if (!handleValidation()) {
-      console.error('Please fill all the required fields');
+      console.error("Please fill all the required fields");
+      alert("Please Fill all the fields to Proceed!");
       return;
     }
 
@@ -103,7 +104,7 @@ function Signup(props) {
       if (user) {
         const userData = {
           userName: userName,
-          email: email
+          email: email,
         };
         await addUser(user?.uid, userData);
       }
@@ -151,7 +152,11 @@ function Signup(props) {
         </View>
 
         {/* Signup Button */}
-        <MyAppButton disabled={indicator} title={"Signup"} onPress={handleSignup} marginTop={RFPercentage(4.5)} />
+        {indicator ? (
+          <ActivityIndicator style={{ marginTop: RFPercentage(4.5) }} size="medium" color={Colors.primary} />
+        ) : (
+          <MyAppButton title="Signup" onPress={handleSignup} marginTop={RFPercentage(4.5)} />
+        )}
 
         {/* Social Media Login */}
         <View style={styles.socialMediaContainer}>

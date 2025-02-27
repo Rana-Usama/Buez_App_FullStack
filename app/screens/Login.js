@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 // auth
@@ -156,8 +156,11 @@ function Login(props) {
         </TouchableOpacity>
       </View>
 
-      <MyAppButton title={"Login"} marginTop={RFPercentage(7)} onPress={() => handleLogin()} />
-
+      {indicator ? (
+        <ActivityIndicator style={{ marginTop: RFPercentage(7) }} size="medium" color={Colors.primary} />
+      ) : (
+        <MyAppButton title={"Login"} marginTop={RFPercentage(7)} onPress={() => handleLogin()} />
+      )}
       <View style={styles.socialLoginContainer}>
         <View style={styles.divider} />
         <Text style={styles.orText}>or login with</Text>

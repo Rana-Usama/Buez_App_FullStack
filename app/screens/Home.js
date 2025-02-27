@@ -60,7 +60,7 @@ function Home({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       fetchRequests(null);
-      
+
       return () => {
         console.log("unmounting: Home");
       };
@@ -72,9 +72,9 @@ function Home({ navigation }) {
     // setTaskRecords([]);
     // setLastVisiblePost(null);
     try {
-      let isLastVisible = lastVisiblePost
-      if (typeof islastVisiblePost !== 'undefined') {
-        isLastVisible = islastVisiblePost
+      let isLastVisible = lastVisiblePost;
+      if (typeof islastVisiblePost !== "undefined") {
+        isLastVisible = islastVisiblePost;
       }
       const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, searchQuery, isLastVisible);
       setTaskRecords(newRecords);
@@ -134,11 +134,11 @@ function Home({ navigation }) {
   };
 
   const handleCommonSearch = () => {
-    if (searchQuery === '') {
+    if (searchQuery === "") {
       setHasMore(true);
     }
     fetchRequests(null);
-  }
+  };
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -160,7 +160,7 @@ function Home({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav crown={true} marginTop={RFPercentage(7.5)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Home" />
+        <Nav crown={true} marginTop={RFPercentage(4)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Home" />
 
         <View style={styles.inputFieldContainer}>
           {inputField.map((item, i) => (
@@ -180,7 +180,7 @@ function Home({ navigation }) {
                 handleFeild={(text) => handleChange(text, i)}
                 value={item.value}
                 width={"97%"}
-                onSubmitEditing={()=>{
+                onSubmitEditing={() => {
                   handleCommonSearch();
                 }}
               />
@@ -214,7 +214,7 @@ function Home({ navigation }) {
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={(event) => handleScrollEnd(event, cartIndex)}
               renderItem={({ item }) => (
-                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{uri: item}}>
+                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }}>
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{cart.category}</Text>
                   </View>
@@ -233,28 +233,35 @@ function Home({ navigation }) {
             {/* Info */}
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("OfferDetail", { postRequest: cart })} style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.userImage} source={{uri: cart.user.profileImage}} />
+                <Image style={styles.userImage} source={{ uri: cart.user.profileImage }} />
               </TouchableOpacity>
 
               <Text style={styles.userName}>{cart.user.userName}</Text>
               <Text style={styles.postDate}>Posted on {getFormatedDate(cart.createdAt)}</Text>
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("OfferDetail", { postRequest: cart })} style={styles.taskInfoContainer}>
-              <Text style={styles.taskText}>{cart.description?.substr(0, 15) + (cart.description?.length > 15 ? '...' : '')}</Text>
+              <Text style={styles.taskText}>{cart.description?.substr(0, 15) + (cart.description?.length > 15 ? "..." : "")}</Text>
               <Text style={styles.compensationText}>
-                Compensation: <Text style={styles.compensationAmount}>{cart.compensationType === 'Monitarely' ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? '...' : '')}</Text>
+                Compensation:{" "}
+                <Text style={styles.compensationAmount}>
+                  {cart.compensationType === "Monitarely" ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                </Text>
               </Text>
             </TouchableOpacity>
           </View>
         ))}
 
-        {(loading || loadingMore) && <View>
-          <Text>Loading...</Text>
-        </View>}
+        {(loading || loadingMore) && (
+          <View>
+            <Text>Loading...</Text>
+          </View>
+        )}
 
-        {!loading && taskRecords.length === 0 && <View>
-          <Text>No record found!</Text>
-        </View>}
+        {!loading && taskRecords.length === 0 && (
+          <View>
+            <Text>No record found!</Text>
+          </View>
+        )}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 

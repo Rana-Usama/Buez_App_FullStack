@@ -15,21 +15,21 @@ import Colors from "../config/Colors";
 import SubscriptionListener from "../components/SubscriptionListener";
 
 async function getPaymentSheet(amount, currency, userId) {
-  console.log('getPaymentSheet', amount);
+  console.log("getPaymentSheet", amount);
   try {
-    const response = await fetch('http://192.168.100.4:4242/payment-sheet', {
-      method: 'POST',
+    const response = await fetch("http://192.168.100.5:4242/payment-sheet", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({amount: amount, currency, userId}),
+      body: JSON.stringify({ amount: amount, currency, userId }),
     });
-    console.log('response', response);
+    console.log("response", response);
     const data = await response.json();
-    console.log('getPaymentSheet', data);
+    console.log("getPaymentSheet", data);
     return data;
   } catch (error) {
-    console.log('getPaymentSheet', error);
+    console.log("getPaymentSheet", error);
     throw error;
   }
 }
@@ -51,13 +51,13 @@ function Subscription(props) {
       secure: true,
     },
   ]);
-  console.log('Subscription', userData);
+  console.log("Subscription", userData);
   const initializePaymentSheet = async () => {
     try {
       // PaymentConfiguration.init(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-      console.log('Payment init');
-      const { customer, ephemeralKey, paymentIntent } = await getPaymentSheet(12.99, 'USD', userId);
-      const {error} = await initPaymentSheet({
+      console.log("Payment init");
+      const { customer, ephemeralKey, paymentIntent } = await getPaymentSheet(12.99, "USD", userId);
+      const { error } = await initPaymentSheet({
         customerId: customer,
         customerEphemeralKeySecret: ephemeralKey,
         paymentIntentClientSecret: paymentIntent,
@@ -66,7 +66,7 @@ function Subscription(props) {
           name: userData.userName, // logged in user name
           email: userData.email, // logged in user email
           phone: userData.phoneNumber, // logged in user phone
-          postalCode: '12345'
+          postalCode: "12345",
         },
         merchantDisplayName: "Buez",
         returnURL: Linking.createURL("/stripe-redirect"),
@@ -76,7 +76,7 @@ function Subscription(props) {
         //   displayName: "Buez",
         // }
       });
-  
+
       if (error) {
         console.log(error.message);
       } else {
@@ -84,23 +84,22 @@ function Subscription(props) {
         onPaymentSheet();
       }
     } catch (e) {
-      console.log('Error initializing payment sheet', e);
+      console.log("Error initializing payment sheet", e);
     }
-
-  }
+  };
 
   const onPaymentSheet = async () => {
-    const {error} = await presentPaymentSheet();
+    const { error } = await presentPaymentSheet();
     if (error) {
       // TODO: handle error
       // show error message to user
       console.log(error.message);
     } else {
       // save user subscription to firebase
-      
+
       console.log("Payment successful");
     }
-  }
+  };
 
   const handleChange = (text, i) => {
     let tempFields = [...inputField];
