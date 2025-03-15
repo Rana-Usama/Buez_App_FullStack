@@ -221,6 +221,7 @@ function PostRequest({ navigation, route }) {
             <FlatList
               data={taskOptions}
               showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
               keyExtractor={(item) => item.id.toString()}
               style={[
                 styles.dropdown,
@@ -285,8 +286,9 @@ function PostRequest({ navigation, route }) {
               placeholder="Description"
               placeholderTextColor={Colors.heading}
               value={description}
+              multiline
               onChangeText={(e) => setDescription(e)}
-              style={{ color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), top: RFPercentage(1.5), left: RFPercentage(1.5) }}
+              style={{ width: "90%", color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), top: RFPercentage(1.5), left: RFPercentage(1.5) }}
             />
           </View>
 

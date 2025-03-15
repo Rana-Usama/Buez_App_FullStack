@@ -41,6 +41,7 @@ import Chat from "./app/screens/Chat";
 import ExpoStripeProvider from "./app/contexts/stripe-provider";
 import SubscriptionListener from "./app/components/SubscriptionListener";
 import InitialScreen from "./app/screens/InitialScreen";
+import DeciderScreen from "./app/screens/DeciderScreen";
 
 const Stack = createStackNavigator();
 
@@ -62,6 +63,7 @@ const AppStack = () => (
     <Stack.Screen name="InitialScreen" component={InitialScreen} />
     <Stack.Screen name="Home" component={Home} />
     <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
+    <Stack.Screen name="DeciderScreen" component={DeciderScreen} />
     <Stack.Screen name="ChangePassword" component={ChangePassword} />
     <Stack.Screen name="OfferDetail" component={OfferDetail} />
     <Stack.Screen name="PostRequest" component={PostRequest} />
