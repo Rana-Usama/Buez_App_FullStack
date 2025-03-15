@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -34,7 +34,7 @@ function Profile({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(7.9)} leftLogo={true} profileImage={profileImgUrl} navigation={navigation} title="Profile" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} profileImage={profileImgUrl} navigation={navigation} title="Profile" />
 
         {/* Profile Image */}
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("EditProfile")} style={{ marginTop: RFPercentage(5.5) }}>
@@ -49,7 +49,7 @@ function Profile({ navigation }) {
         </TouchableOpacity>
 
         {/*User Name */}
-        <Text style={{ color: "#57534E", fontSize: RFPercentage(2.2), fontFamily: "Poppins-Medium", marginTop: RFPercentage(2) }}>{userName}</Text>
+        <Text style={{ color: "#57534E", fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(2.2) }}>{userName}</Text>
 
         {/* Navigation List */}
         {navigationsList.map((item, i) => (

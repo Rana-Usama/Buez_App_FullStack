@@ -46,7 +46,7 @@ function FAQ({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(7.9)} navigation={navigation} title="FAQ's" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title="FAQ's" />
 
         <View style={{ marginTop: RFPercentage(3.2), width: "90%" }}>
           {faqs.map((item, index) => (

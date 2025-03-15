@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, ScrollView, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 // components
@@ -14,7 +14,7 @@ function Reviews({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Rating & Reviews" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Rating & Reviews" />
 
         {/* My Reviews */}
         <View style={styles.reviewsHeader}>
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3.5),
   },
   headerText: {
-    color: Colors.lightGrey,
+    color: Colors.grey,
     fontSize: RFPercentage(1.9),
     fontFamily: "Poppins-Regular",
   },

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import { logout } from "../services/Auth.service";
@@ -45,7 +45,7 @@ function Settings({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(7.9)} leftLogo={true} navigation={navigation} title="Settings" />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={true} navigation={navigation} title="Settings" />
 
         <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(3.5) }}>
           <Text style={{ color: Colors.lightGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" }}>Help & Security</Text>

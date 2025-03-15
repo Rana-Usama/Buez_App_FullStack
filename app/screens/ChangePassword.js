@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -64,7 +64,7 @@ function ChangePassword({ navigation }) {
     if (updatedFields[2].error) {
       isValid = false;
       alert("Please enter a valid password");
-    };
+    }
 
     SetInputField(updatedFields);
     return isValid;
@@ -81,7 +81,7 @@ function ChangePassword({ navigation }) {
       const currentPassword = inputField[0].value;
       const newPassword = inputField[1].value;
       await updatePassword(currentPassword, newPassword);
-      navigation.navigate("Settings")
+      navigation.navigate("Settings");
     } catch (error) {
       // Error: Set the error message and show the modal
       setErrorMessage(error.message);
@@ -111,7 +111,7 @@ function ChangePassword({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(8.6)} leftLogo={false} navigation={navigation} title="Change Password" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Change Password" />
 
         {/* Input field */}
         <View
@@ -153,15 +153,14 @@ function ChangePassword({ navigation }) {
             </View>
           ))}
         </View>
+        {/* Button */}
+        <View style={{ justifyContent: "center", alignItems: "center", marginTop: RFPercentage(8) }}>
+          <MyAppButton title={"Change"} marginTop={RFPercentage(2)} onPress={() => handlePasswordChange()} />
+        </View>
       </ScrollView>
 
-      {/* Button */}
-      <View style={{ justifyContent: "center", alignItems: "center", position: "absolute", bottom: RFPercentage(16) }}>
-        <MyAppButton title={"Change"} marginTop={RFPercentage(2)} onPress={() => handlePasswordChange()} />
-      </View>
-
       {/* Bottom Tab */}
-      <CustomTabBar profileTab={true} navigation={navigation} />
+      {/* <CustomTabBar profileTab={true} navigation={navigation} /> */}
     </View>
   );
 }

@@ -21,6 +21,9 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "android": {
+        "windowSoftInputMode": "adjustPan"
+      },
       "package": "com.adamburg.Buez"
     },
     "web": {
@@ -51,6 +54,7 @@
       "eas": {
         "projectId": "040c3caa-bcd9-4c99-9fb2-0deb0be5b597"
       }
-    }
+    },
+    "owner": "native-team"
   }
 }

@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, ActivityIndicator, Platform, Keyboard } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -14,13 +14,15 @@ import InputField from "../components/common/InputField";
 // config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { updateProfile } from "../services/User.service";
 
 function EditProfile({ navigation }) {
   const { userData: user } = useUser();
   const [loading, setLoading] = useState(true);
   const [imageUri, setImageUri] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Emma Stone",
@@ -55,18 +57,20 @@ function EditProfile({ navigation }) {
     }
   };
 
-  useFocusEffect(useCallback(() => {
-    console.log('getLoggedInUser');
-    fetchUserData();
-  }, []));
+  useFocusEffect(
+    useCallback(() => {
+      console.log("getLoggedInUser");
+      fetchUserData();
+    }, []),
+  );
 
   const fetchUserData = async () => {
     try {
       // const response = await getLoggedInUser();
       if (user) {
         const tempfeilds = [...inputField];
-        tempfeilds[0].value = user.userName || '';
-        tempfeilds[1].value = user.phoneNumber || '';
+        tempfeilds[0].value = user.userName || "";
+        tempfeilds[1].value = user.phoneNumber || "";
         console.log(tempfeilds);
         SetInputField(tempfeilds);
         setImageUri(user.profileImage);
@@ -74,92 +78,96 @@ function EditProfile({ navigation }) {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const updateProfileData = async () => {
     const userName = inputField[0].value.trim();
     const phoneNumber = inputField[1].value.trim();
     const userData = {
       userName,
-      phoneNumber
+      phoneNumber,
     };
+    setIsUpdating(true);
 
     try {
       await updateProfile(userData, imageUri);
       navigation.goBack();
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsUpdating(false);
     }
-  }
+  };
 
   return (
     <View style={styles.screen}>
-      <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
-        {/* Nav */}
-        <Nav marginTop={RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Edit Profile" />
+      {/* Nav */}
+      <Nav dpNull={true} marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Edit Profile" />
 
-        {/* Profile Image */}
-        <TouchableOpacity activeOpacity={0.8} onPress={pickImage} style={{ marginTop: RFPercentage(5.5), opacity: imageUri ? 1 : 0.8 }}>
-          <Image
-            style={{ width: RFPercentage(20), height: RFPercentage(20), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) }}
-            source={imageUri ? { uri: imageUri } : require("../../assets/Images/dp.png")}
-          />
-          <Image
-            style={{ width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(20), position: "absolute", bottom: RFPercentage(-0.3), right: RFPercentage(3) }}
-            source={require("../../assets/Images/gallery.png")}
-          />
-        </TouchableOpacity>
-        <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.5) }}>
-          <Text style={{ color: Colors.lightGrey, fontSize: RFPercentage(1.9), fontFamily: "Poppins-Regular" }}>Edit Info</Text>
-          <View style={{ width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) }} />
-        </View>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ScrollView style={{ width: "100%" }} showsVerticalScrollIndicator={false} contentContainerStyle={{ width: "100%", alignItems: "center" }} keyboardShouldPersistTaps="handled">
+          {/* Profile Image */}
+          <TouchableOpacity activeOpacity={0.8} onPress={pickImage} style={{ marginTop: RFPercentage(5.5), opacity: imageUri ? 1 : 0.8 }}>
+            <Image
+              style={{ width: RFPercentage(20), height: RFPercentage(20), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) }}
+              source={imageUri ? { uri: imageUri } : require("../../assets/Images/dp.png")}
+            />
+            <Image
+              style={{ width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(20), position: "absolute", bottom: RFPercentage(-0.3), right: RFPercentage(3) }}
+              source={require("../../assets/Images/gallery.png")}
+            />
+          </TouchableOpacity>
+          <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.5) }}>
+            <Text style={{ color: Colors.lightGrey, fontSize: RFPercentage(1.9), fontFamily: "Poppins-Regular" }}>Edit Info</Text>
+            <View style={{ width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) }} />
+          </View>
 
-        {/* Input field */}
-        <View
-          style={{
-            marginTop: RFPercentage(3),
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            alignSelf: "center",
-          }}
-        >
-          {inputField.map((item, i) => (
-            <View
-              key={i}
-              style={{
-                marginTop: i == 0 ? RFPercentage(-0.5) : RFPercentage(2.2),
-                alignSelf: "center",
-              }}
-            >
-              <Text style={{ left: RFPercentage(1.6), marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" }}>{item.title}</Text>
-              <InputField
-                placeholder={item.placeholder}
-                placeholderColor={Colors.inputFieldPlaceholder}
-                placeholderAtCenter={false}
-                height={RFPercentage(6)}
-                borderColor={Colors.border}
-                borderWidth={RFPercentage(0.1)}
-                backgroundColor={"white"}
-                secure={item.secure}
-                borderRadius={RFPercentage(1.4)}
-                color={Colors.black}
-                fontSize={RFPercentage(1.8)}
-                fontFamily={"Poppins-Regular"}
-                icon={item.icon}
-                onChangeText={(text) => handleChange(text, i)}
-                value={item.value}
-                width={"97%"}
-              />
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-
-      {/* Button */}
-      <View style={{ justifyContent: "center", alignItems: "center", position: "absolute", bottom: RFPercentage(16) }}>
-        <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={() => updateProfileData()} />
-      </View>
+          {/* Input field */}
+          <View
+            style={{
+              marginTop: RFPercentage(3),
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              alignSelf: "center",
+            }}
+          >
+            {inputField.map((item, i) => (
+              <View
+                key={i}
+                style={{
+                  marginTop: i == 0 ? RFPercentage(-0.5) : RFPercentage(2.2),
+                  alignSelf: "center",
+                }}
+              >
+                <Text style={{ left: RFPercentage(1.6), marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" }}>{item.title}</Text>
+                <InputField
+                  placeholder={item.placeholder}
+                  placeholderColor={Colors.inputFieldPlaceholder}
+                  placeholderAtCenter={false}
+                  height={RFPercentage(6)}
+                  borderColor={Colors.border}
+                  borderWidth={RFPercentage(0.1)}
+                  backgroundColor={"white"}
+                  secure={item.secure}
+                  borderRadius={RFPercentage(1.4)}
+                  color={Colors.black}
+                  fontSize={RFPercentage(1.8)}
+                  fontFamily={"Poppins-Regular"}
+                  icon={item.icon}
+                  onChangeText={(text) => handleChange(text, i)}
+                  value={item.value}
+                  width={"97%"}
+                />
+              </View>
+            ))}
+          </View>
+          {/* Button */}
+          <View style={{ justifyContent: "center", alignItems: "center", marginTop: RFPercentage(12) }}>
+            {isUpdating ? <ActivityIndicator size="large" color={Colors.primary} /> : <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={updateProfileData} />}{" "}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Bottom Tab */}
       <CustomTabBar profileTab={true} navigation={navigation} />

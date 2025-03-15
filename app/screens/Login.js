@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 // auth
@@ -144,23 +144,20 @@ function Login(props) {
         ))}
       </View>
 
-      <View style={styles.rememberContainer}>
-        <TouchableOpacity activeOpacity={0.8} onPress={toggleRemember} style={styles.rememberWrapper}>
-          <TouchableOpacity style={styles.rememberBox}>
-            <TouchableOpacity onPress={toggleRemember} style={[styles.rememberIndicator, { backgroundColor: remember ? Colors.primary : null }]} />
-          </TouchableOpacity>
+      <TouchableOpacity activeOpacity={0.8} onPress={toggleRemember} style={styles.rememberContainer}>
+        <View activeOpacity={0.8} style={styles.rememberWrapper}>
+          <View style={styles.rememberBox}>
+            <View style={[styles.rememberIndicator, { backgroundColor: remember ? Colors.primary : null }]} />
+          </View>
           <Text style={styles.rememberText}>Remember me?</Text>
-        </TouchableOpacity>
+        </View>
         <TouchableOpacity onPress={() => props.navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
           <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
 
-      {indicator ? (
-        <ActivityIndicator style={{ marginTop: RFPercentage(7) }} size="medium" color={Colors.primary} />
-      ) : (
-        <MyAppButton title={"Login"} marginTop={RFPercentage(7)} onPress={() => handleLogin()} />
-      )}
+      <MyAppButton title={"Login"} loading={indicator} marginTop={RFPercentage(7)} onPress={() => handleLogin()} />
+
       <View style={styles.socialLoginContainer}>
         <View style={styles.divider} />
         <Text style={styles.orText}>or login with</Text>
@@ -233,11 +230,12 @@ const styles = StyleSheet.create({
   rememberWrapper: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   rememberBox: {
-    width: RFPercentage(2),
-    height: RFPercentage(2),
-    borderColor: "#E5E7EB",
+    width: RFPercentage(2.2),
+    height: RFPercentage(2.2),
+    borderColor: Colors.lightGrey,
     borderRadius: RFPercentage(30),
     borderWidth: RFPercentage(0.1),
     justifyContent: "center",
@@ -252,7 +250,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(0.6),
     color: "#4B5563",
     fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_300Light",
+    fontFamily: "Poppins_400Medium",
   },
   forgotPassword: {
     position: "absolute",
@@ -261,7 +259,7 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: "#4B5563",
     fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_300Light",
+    fontFamily: "Poppins_400Medium",
   },
   socialLoginContainer: {
     marginTop: RFPercentage(4.5),

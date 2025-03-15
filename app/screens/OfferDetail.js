@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList, Dimensions, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 
@@ -21,23 +21,22 @@ function OfferDetail({ navigation, route }) {
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
   const images = [require("../../assets/Images/cover.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")];
-  const postRequest = route.params?.postRequest
-  
-  console.log('current user',currentUser.userData)
+  const postRequest = route.params?.postRequest;
+
+  console.log("current user", currentUser.userData);
   const handleStartChat = async () => {
     const chatId = await createNewChat(currentUserId, postRequest.userId);
-    navigation.navigate('Chat', { chatId: chatId, senderId: currentUserId, senderName: currentUser.userData.userName, receiver: postRequest.user });
+    navigation.navigate("Chat", { chatId: chatId, senderId: currentUserId, senderName: currentUser.userData.userName, receiver: postRequest.user });
   };
-  
 
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(7.5)} leftLogo={false} navigation={navigation} title="Details" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Details" />
 
         {/* Image Carousel */}
-        <View style={{ width: "90%", justifyContent: "center", alignItems: "center" }}>
+        <View style={{ width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(0.5) }}>
           <FlatList
             data={postRequest.imageUrls}
             horizontal
@@ -46,7 +45,7 @@ function OfferDetail({ navigation, route }) {
             onMomentumScrollEnd={(event) => {
               setActiveIndex(Math.floor(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width));
             }}
-            renderItem={({ item }) => <ImageBackground style={styles.imageBackground} imageStyle={styles.image} source={{uri: item}} />}
+            renderItem={({ item }) => <ImageBackground style={styles.imageBackground} imageStyle={styles.image} source={{ uri: item }} />}
             keyExtractor={(item, index) => index.toString()}
           />
         </View>
@@ -78,32 +77,32 @@ function OfferDetail({ navigation, route }) {
 
         <View style={styles.compensationContainer}>
           <Text style={styles.compensationTitle}>Compensation:</Text>
-          <Text style={styles.description}>{postRequest.compensationType === 'Monitarely' ? postRequest.monitarily : postRequest.otherCompensation}</Text>
-        </View>
-
-        {/* Buttons */}
-        <View style={{ marginTop: RFPercentage(14), width: "100%", justifyContent: "center", alignItems: "center", flexDirection: "row" }}>
-          <TouchableOpacity
-            style={{
-              marginRight: RFPercentage(2),
-              backgroundColor: "#F8FAFC",
-              width: RFPercentage(21),
-              height: RFPercentage(6.2),
-              borderRadius: RFPercentage(100),
-              borderColor: Colors.primary,
-              borderWidth: RFPercentage(0.1),
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            disabled={currentUserId === postRequest.userId}
-            onPress={handleStartChat}
-          >
-            <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>Message Requester</Text>
-          </TouchableOpacity>
-
-          <MyAppButton title={"View My Task"} marginTop={RFPercentage(0)} onPress={() => navigation.navigate("Home")} />
+          <Text style={styles.description}>{postRequest.compensationType === "Monitarely" ? postRequest.monitarily : postRequest.otherCompensation}</Text>
         </View>
       </ScrollView>
+
+      {/* Buttons */}
+      <View style={{ position: "absolute", bottom: RFPercentage(15), width: "100%", justifyContent: "center", alignItems: "center", flexDirection: "row" }}>
+        <TouchableOpacity
+          style={{
+            marginRight: RFPercentage(2),
+            backgroundColor: "#F8FAFC",
+            width: RFPercentage(21),
+            height: RFPercentage(6.2),
+            borderRadius: RFPercentage(100),
+            borderColor: Colors.primary,
+            borderWidth: RFPercentage(0.1),
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          disabled={currentUserId === postRequest.userId}
+          onPress={handleStartChat}
+        >
+          <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>Message Requester</Text>
+        </TouchableOpacity>
+
+        <MyAppButton title={"My Requests"} marginTop={RFPercentage(0)} onPress={() => navigation.navigate("MyRequests")} />
+      </View>
 
       {/* Bottom Tab */}
       <CustomTabBar homeTab={true} navigation={navigation} />

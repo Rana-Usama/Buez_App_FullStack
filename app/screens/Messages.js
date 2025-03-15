@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, FlatList, ActivityIndicator } from "react-native";
-import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDocs, getDoc, doc } from 'firebase/firestore';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, FlatList, ActivityIndicator, Platform } from "react-native";
+import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDocs, getDoc, doc } from "firebase/firestore";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
@@ -33,20 +33,15 @@ function Messages({ navigation }) {
   }, []);
 
   const listenForNewChats = () => {
-    const q = query(
-      collection(FIREBASE_DB, 'chats'),
-      where('participants', 'array-contains', userId),
-      orderBy('lastMessageTimestamp', 'desc'),
-      limit(10)
-    );
+    const q = query(collection(FIREBASE_DB, "chats"), where("participants", "array-contains", userId), orderBy("lastMessageTimestamp", "desc"), limit(10));
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       try {
         const updates = snapshot.docChanges().map(async (change) => {
-          if (change.type === 'added' || change.type === 'modified') {
+          if (change.type === "added" || change.type === "modified") {
             return await getChatData(change.doc);
           }
-          if (change.type === 'removed') {
+          if (change.type === "removed") {
             return { id: change.doc.id, removed: true };
           }
           return null;
@@ -54,15 +49,15 @@ function Messages({ navigation }) {
 
         const resolvedUpdates = (await Promise.all(updates)).filter(Boolean);
 
-        setChats(prevChats => {
+        setChats((prevChats) => {
           const updatedChats = [...prevChats];
-          
-          resolvedUpdates.forEach(data => {
+
+          resolvedUpdates.forEach((data) => {
             if (data.removed) {
-              return updatedChats.filter(chat => chat.id !== data.id);
+              return updatedChats.filter((chat) => chat.id !== data.id);
             }
-            
-            const chatIndex = updatedChats.findIndex(chat => chat.id === data.id);
+
+            const chatIndex = updatedChats.findIndex((chat) => chat.id === data.id);
             if (chatIndex !== -1) {
               updatedChats.splice(chatIndex, 1);
             }
@@ -72,7 +67,7 @@ function Messages({ navigation }) {
           return updatedChats;
         });
       } catch (error) {
-        console.error('Error processing chat updates:', error);
+        console.error("Error processing chat updates:", error);
       }
     });
 
@@ -81,22 +76,17 @@ function Messages({ navigation }) {
 
   const getChatData = async (d) => {
     const chatData = d.data();
-    const otherUser = chatData.participants.find(u => u !== userId);
+    const otherUser = chatData.participants.find((u) => u !== userId);
     const userRef = doc(FIREBASE_DB, "users", otherUser);
     const userDoc = await getDoc(userRef);
     const userData = userDoc.exists() ? userDoc.data() : null;
     return { id: d.id, ...chatData, user: userData };
-  }
+  };
 
   const fetchInitialChats = async () => {
     setLoading(true);
-		try {
-			const q = query(
-				collection(FIREBASE_DB, 'chats'),
-				where('participants', 'array-contains', userId),
-				orderBy('lastMessageTimestamp', 'desc'),
-				limit(pageSize)
-			);
+    try {
+      const q = query(collection(FIREBASE_DB, "chats"), where("participants", "array-contains", userId), orderBy("lastMessageTimestamp", "desc"), limit(pageSize));
 
       const snapshot = await getDocs(q);
       const chatData = [];
@@ -108,9 +98,9 @@ function Messages({ navigation }) {
       setChats(chatData);
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]); // Set last visible document
       setLoading(false);
-		} catch (e) {
-			console.log('Chat Error', e);
-		}
+    } catch (e) {
+      console.log("Chat Error", e);
+    }
   };
 
   const fetchMoreChats = async () => {
@@ -118,13 +108,7 @@ function Messages({ navigation }) {
 
     setLoading(true);
 
-    const q = query(
-      collection(FIREBASE_DB, 'chats'),
-      where('participants', 'array-contains', userId),
-      orderBy('lastMessageTimestamp', 'desc'),
-      startAfter(lastVisible),
-      limit(pageSize)
-    );
+    const q = query(collection(FIREBASE_DB, "chats"), where("participants", "array-contains", userId), orderBy("lastMessageTimestamp", "desc"), startAfter(lastVisible), limit(pageSize));
 
     const snapshot = await getDocs(q);
 
@@ -137,7 +121,6 @@ function Messages({ navigation }) {
     setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
     setLoading(false);
   };
-
 
   const refreshChats = async () => {
     setIsRefreshing(true);
@@ -163,32 +146,18 @@ function Messages({ navigation }) {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate('Chat', {chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
+      onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
       activeOpacity={0.8}
-      style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-      <View key={item.id} style={[
-        styles.messageContainer,
-        item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadMessage
-      ]}>
-        <Image style={styles.messageImage} source={{uri: item.user.profileImage}} />
+      style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
+    >
+      <View key={item.id} style={[styles.messageContainer, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadMessage]}>
+        <Image style={styles.messageImage} source={{ uri: item.user.profileImage }} />
         <View style={styles.messageTextContainer}>
-          <Text style={[
-            styles.messageUserName,
-            item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText
-          ]}>
-            {item.user.userName}
-          </Text>
-          <Text style={[
-            styles.messageText,
-            item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText
-          ]}>
-            {item.lastMessage.text}
-          </Text>
+          <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.user.userName}</Text>
+          <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.lastMessage.text}</Text>
         </View>
         <Text style={styles.messageTime}>{item.time}</Text>
-        {item.lastMessage?.unread && item.lastMessage?.senderId !== userId && (
-          <View style={styles.unreadDot} />
-        )}
+        {item.lastMessage?.unread && item.lastMessage?.senderId !== userId && <View style={styles.unreadDot} />}
       </View>
       <View style={styles.separator} />
     </TouchableOpacity>
@@ -197,55 +166,50 @@ function Messages({ navigation }) {
   // Add filtered chats computation
   const filteredChats = useMemo(() => {
     if (activeFilter === "Unread") {
-      return chats.filter(
-        chat => 
-          chat.lastMessage?.unread && 
-          chat.lastMessage?.senderId !== userId
-      );
+      return chats.filter((chat) => chat.lastMessage?.unread && chat.lastMessage?.senderId !== userId);
     }
     return chats;
   }, [chats, activeFilter, userId]);
 
   return (
-		<View style={styles.screen}>
-			<ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-				{/* Nav */}
-				<Nav marginTop={RFPercentage(7.5)} leftLogo={false} navigation={navigation} title='Messages' />
+    <View style={styles.screen}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+        {/* Nav */}
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Messages" />
 
-				{/* Filter Buttons */}
-				<View style={styles.filterContainer}>
-					{filters.map((title, index) => (
-						<FilterButton
-							key={title}
-							title={title}
-							isActive={activeFilter === title}
-							isFirst={index === 0}
-						/>
-					))}
-				</View>
+        {/* Filter Buttons */}
+        <View style={styles.filterContainer}>
+          {filters.map((title, index) => (
+            <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
+          ))}
+        </View>
 
-				{/* Messages List */}
+        {/* Messages List */}
         <FlatList
-          style={{ width: '100%' }}
-					data={filteredChats}
-					renderItem={renderItem}
-					keyExtractor={(item) => item.id}
-					onEndReached={fetchMoreChats}
-					onEndReachedThreshold={0.5}
-					refreshing={isRefreshing}
+          style={{ width: "100%" }}
+          data={filteredChats}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          onEndReached={fetchMoreChats}
+          onEndReachedThreshold={0.5}
+          refreshing={isRefreshing}
           onRefresh={refreshChats}
           ListEmptyComponent={() => (
-						<View style={styles.emptyContainer}>
-							{!loading && <Text style={styles.emptyText}>
-								{activeFilter === "Unread" 
-									? "No unread messages" 
-									: "No messages yet"}
-							</Text>}
-						</View>
-					)}
-					ListFooterComponent={loading && <ActivityIndicator size='large' color='#0000ff' />}
-				/>
-				{/* <FlatList
+            <View style={styles.emptyContainer}>
+              {!loading && (
+                <View style={{ justifyContent: "center", alignItems: "center" }}>
+                  <Image
+                    style={{ borderRadius: RFPercentage(1), width: RFPercentage(26), height: RFPercentage(18), marginBottom: RFPercentage(2) }}
+                    source={require("../../assets/Images/noMessage.png")}
+                  />
+                  <Text style={styles.emptyText}>{activeFilter === "Unread" ? "No Unread Messages" : "No Messages Yet"}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          ListFooterComponent={loading && <ActivityIndicator size="large" color={Colors.primary} />}
+        />
+        {/* <FlatList
 					data={messages}
 					pagingEnabled
 					onEndReached={() => console.log('end reached')}
@@ -269,7 +233,7 @@ function Messages({ navigation }) {
 						</TouchableOpacity>
 					)}
 				/> */}
-				{/* {messages.map((message) => (
+        {/* {messages.map((message) => (
           <TouchableOpacity activeOpacity={0.8} style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
             <View key={message.id} style={styles.messageContainer}>
               <Image style={styles.messageImage} source={message.imageSource} />
@@ -283,12 +247,12 @@ function Messages({ navigation }) {
           </TouchableOpacity>
         ))} */}
 
-				<View style={styles.bottomSpacing} />
-			</ScrollView>
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
 
-			{/* Bottom Tab */}
-			<CustomTabBar messagesTab={true} navigation={navigation} />
-		</View>
+      {/* Bottom Tab */}
+      <CustomTabBar messagesTab={true} navigation={navigation} />
+    </View>
   );
 }
 
@@ -306,9 +270,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   filterContainer: {
-    marginTop: RFPercentage(3.2),
+    marginTop: RFPercentage(3.6),
     flexDirection: "row",
     width: "90%",
+    marginBottom: RFPercentage(1),
   },
   filterButton: {
     width: RFPercentage(13),
@@ -353,8 +318,8 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
   },
   messageImage: {
-    width: RFPercentage(5.4),
-    height: RFPercentage(5.4),
+    width: RFPercentage(5.8),
+    height: RFPercentage(5.8),
     borderRadius: RFPercentage(100),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.1),
@@ -398,7 +363,7 @@ const styles = StyleSheet.create({
     color: Colors.heading,
   },
   unreadDot: {
-    position: 'absolute',
+    position: "absolute",
     right: RFPercentage(1),
     top: RFPercentage(1),
     width: RFPercentage(1),
@@ -408,15 +373,15 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: RFPercentage(10),
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: RFPercentage(25),
   },
   emptyText: {
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(2),
     color: Colors.darkGrey,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
 

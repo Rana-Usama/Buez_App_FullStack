@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, Dimensions, Modal, Pressable, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, Platform, FlatList, Dimensions, Modal, Pressable, RefreshControl, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
@@ -70,9 +70,9 @@ function MyRequests({ navigation }) {
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
     try {
-      let isLastVisible = lastVisiblePost
-      if (typeof islastVisiblePost !== 'undefined') {
-        isLastVisible = islastVisiblePost
+      let isLastVisible = lastVisiblePost;
+      if (typeof islastVisiblePost !== "undefined") {
+        isLastVisible = islastVisiblePost;
       }
       const { tasksArray: newRecords, lastVisible } = await getMyReuqests(activeFilter, isLastVisible);
       setTaskRecords(newRecords);
@@ -121,18 +121,18 @@ function MyRequests({ navigation }) {
 
   const changeReqestStatus = async (i, status, item) => {
     try {
-      console.log('UPDATE STATUS 1');
+      console.log("UPDATE STATUS 1");
       await updateReqestStatus(item.id, status, item);
-      setTaskRecords(p => {
+      setTaskRecords((p) => {
         const newRecords = [...p];
-        newRecords.splice(i, 1)
+        newRecords.splice(i, 1);
         return newRecords;
       });
-      console.log('UPDATE STATUS');
+      console.log("UPDATE STATUS");
     } catch (e) {
       console.log(e);
     }
-  }
+  };
 
   const filteredCarts = carts.filter((cart) => {
     const lowercasedQuery = searchQuery.toLowerCase();
@@ -163,14 +163,14 @@ function MyRequests({ navigation }) {
   };
 
   const postEditHandler = (cart) => {
-    navigation.navigate("PostRequest", { title: "Edit Requestt", postRequest: cart })
-  }
+    navigation.navigate("PostRequest", { title: "Edit Requestt", postRequest: cart });
+  };
 
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav marginTop={RFPercentage(7.5)} leftLogo={false} navigation={navigation} title="My Requests" />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="My Requests" />
 
         {/* Filter Buttons */}
         <View
@@ -198,100 +198,118 @@ function MyRequests({ navigation }) {
               onEndReached={handleLoadMore}
               onMomentumScrollEnd={(event) => handleScrollEnd(event, index)}
               renderItem={({ item }) => (
-                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{uri: item}}>
+                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }}>
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{cart.taskType}</Text>
                   </View>
 
-                  {cart.status === REQUEST_STATUS.Active && <View
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      flexDirection: "row",
-                      position: "absolute",
-                      left: RFPercentage(2),
-                      top: RFPercentage(2),
-                    }}
-                  >
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => postEditHandler(cart)}>
-                      <Image
-                        style={{
-                          width: RFPercentage(3.7),
-                          height: RFPercentage(3.7),
-                        }}
-                        source={require("../../assets/Images/editRequest.png")}
-                      />
-                    </TouchableOpacity>
-                  </View>}
+                  {cart.status === REQUEST_STATUS.Active && (
+                    <View
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexDirection: "row",
+                        position: "absolute",
+                        left: RFPercentage(2),
+                        top: RFPercentage(2),
+                      }}
+                    >
+                      <TouchableOpacity activeOpacity={0.8} onPress={() => postEditHandler(cart)}>
+                        <Image
+                          style={{
+                            width: RFPercentage(3.7),
+                            height: RFPercentage(3.7),
+                          }}
+                          source={require("../../assets/Images/editRequest.png")}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </ImageBackground>
               )}
               keyExtractor={(item, index) => index.toString()}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
             />
 
-            <View style={styles.dotsContainer}>
+            {/* <View style={styles.dotsContainer}>
               {cart.imageUrls.map((_, imageIndex) => (
                 <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[index] ? styles.activeDot : styles.inactiveDot]} />
               ))}
-            </View>
+            </View> */}
 
             {/* Info */}
             <View style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.userImage} source={{uri: cart.user.profileImage}} />
+                <Image style={styles.userImage} source={{ uri: cart.user.profileImage }} />
               </TouchableOpacity>
 
               <Text style={styles.userName}>{cart.user.userName}</Text>
               <Text style={styles.postDate}>Posted on: {getRelativePostTime(cart.createdAt)}</Text>
             </View>
+
             <View style={styles.taskInfoContainer}>
-              <Text style={styles.taskText}>{cart.description?.substr(0, 15) + (cart.description?.length > 15 ? '...' : '')}</Text>
-              <Text style={styles.compensationText}>
-                Compensation: <Text style={styles.compensationAmount}>{cart.compensationType === 'Monitarely' ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? '...' : '')}</Text>
+              <Text style={styles.taskText}>{cart.description?.substr(0, 15) + (cart.description?.length > 15 ? "..." : "")}</Text>
+            </View>
+
+            <View style={styles.taskInfoContainer}>
+              <Text style={{ fontSize: RFPercentage(2), top: RFPercentage(1), fontFamily: "Poppins_500Medium" }}>
+                Compensation:{" "}
+                <Text style={styles.compensationAmount}>
+                  {cart.compensationType === "Monitarely" ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                </Text>
               </Text>
             </View>
-            {cart.status === REQUEST_STATUS.Active && <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", top: RFPercentage(-2.5) }}>
-              <TouchableOpacity
-                style={{
-                  borderRadius: RFPercentage(1),
-                  width: RFPercentage(14),
-                  height: RFPercentage(5.5),
-                  borderColor: Colors.primary,
-                  borderWidth: RFPercentage(0.2),
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}
-              >
-                <Text style={{ color: Colors.primary }}>Mark as Done</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => changeReqestStatus(index, REQUEST_STATUS.Cancelled, cart)}
-                style={{
-                  borderRadius: RFPercentage(1),
-                  width: RFPercentage(14),
-                  height: RFPercentage(5.5),
-                  borderColor: Colors.red,
-                  borderWidth: RFPercentage(0.2),
-                  justifyContent: "center",
-                  alignItems: "center",
-                  position: "absolute",
-                  right: 0,
-                }}
-              >
-                <Text style={{ color: Colors.red }}>Cancel</Text>
-              </TouchableOpacity>
-            </View>}
+
+            {cart.status === REQUEST_STATUS.Active && (
+              <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", top: RFPercentage(-2.5) }}>
+                <TouchableOpacity
+                  style={{
+                    borderRadius: RFPercentage(1),
+                    width: RFPercentage(14),
+                    height: RFPercentage(5.2),
+                    borderColor: Colors.primary,
+                    borderWidth: RFPercentage(0.2),
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}
+                >
+                  <Text style={{ color: Colors.primary }}>Mark as Done</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => changeReqestStatus(index, REQUEST_STATUS.Cancelled, cart)}
+                  style={{
+                    borderRadius: RFPercentage(1),
+                    width: RFPercentage(14),
+                    height: RFPercentage(5.2),
+                    borderColor: Colors.red,
+                    borderWidth: RFPercentage(0.2),
+                    justifyContent: "center",
+                    alignItems: "center",
+                    position: "absolute",
+                    right: 0,
+                  }}
+                >
+                  <Text style={{ color: Colors.red }}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         ))}
 
-        {(loading || loadingMore) && <View>
-          <Text>Loading...</Text>
-        </View>}
+        {(loading || loadingMore) && (
+          <View style={{ marginTop: RFPercentage(34) }}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            {/* <Text>Loading....</Text> */}
+          </View>
+        )}
 
-        {!loading && taskRecords.length === 0 && <View>
-          <Text>No record found!</Text>
-        </View>}
+        {!loading && taskRecords.length === 0 && (
+          <View style={{ marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" }}>
+            <Image style={{ borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) }} source={require("../../assets/Images/empty.png")} />
+            <Text style={{ color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" }}>No Record Found!</Text>
+          </View>
+        )}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>

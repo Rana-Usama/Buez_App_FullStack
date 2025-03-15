@@ -1,12 +1,12 @@
 import React from "react";
-import { TouchableOpacity, Text } from "react-native";
+import { TouchableOpacity, Text, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 
 // Config
 import Colors from "../../config/Colors";
 
-function MyAppButton({ disabled = false, height = RFPercentage(6.2), onPress, width = RFPercentage(21), marginTop = RFPercentage(5), title = "Login", navigation }) {
+function MyAppButton({ loading, disabled = false, height = RFPercentage(6.2), onPress, width = RFPercentage(21), marginTop = RFPercentage(5), title = "Login", navigation }) {
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -31,7 +31,7 @@ function MyAppButton({ disabled = false, height = RFPercentage(6.2), onPress, wi
           opacity: disabled ? 0.5 : 1,
         }}
       >
-        <Text style={{ color: Colors.white, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>{title}</Text>
+        {loading ? <ActivityIndicator size="small" color={Colors.white} /> : <Text style={{ color: Colors.white, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>{title}</Text>}
       </LinearGradient>
     </TouchableOpacity>
   );

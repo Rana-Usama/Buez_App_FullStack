@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, TextInput, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, TextInput, Image, Platform, KeyboardAvoidingView } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -23,9 +23,9 @@ function PostRequest({ navigation, route }) {
   const [showCompensationDropdown, setShowCompensationDropdown] = useState(false);
   const [selectedCompensation, setSelectedCompensation] = useState("");
   const [imageUris, setImageUris] = useState([null, null, null]);
-    // Input Fields
+  // Input Fields
   const [indicator, showIndicator] = useState(false);
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState("");
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Location Address",
@@ -37,20 +37,20 @@ function PostRequest({ navigation, route }) {
       placeholder: "Compensation Details e.g, Two Movie Tickets",
       value: "",
       validator: validateRequired,
-      display: (v) => v === 'Other',
+      display: (v) => v === "Other",
     },
     {
       placeholder: "e.g, 100$",
       value: "",
       validator: validateRequired,
-      display: (v) => v === 'Monitarely' || !v,
+      display: (v) => v === "Monitarely" || !v,
     },
   ]);
 
   const title = route.params?.title;
-  const isEditing = !!route.params?.postRequest
-  const currentPostRequest = route.params?.postRequest
-  console.log('Edit post',route.params?.postRequest);
+  const isEditing = !!route.params?.postRequest;
+  const currentPostRequest = route.params?.postRequest;
+  console.log("Edit post", route.params?.postRequest);
 
   const taskOptions = [
     { id: 1, name: "Cleaning" },
@@ -65,24 +65,26 @@ function PostRequest({ navigation, route }) {
     { id: 2, type: "Other" },
   ];
 
-  useFocusEffect(useCallback(() => {
-    // set values
-    const currentPostRequest = route.params?.postRequest
-    if (currentPostRequest) {
-      console.log('set values');
-      setSelectedCompensation(currentPostRequest.compensationType);
-      setSelectedTask(currentPostRequest.taskType);
-      handleChange(currentPostRequest.address, 0);
-      handleChange(currentPostRequest.otherCompensation, 1);
-      handleChange(currentPostRequest.monitarily, 2);
-      const temp = [...imageUris];
-      currentPostRequest.imageUrls.forEach((imgUrl, i) => {
-        temp[i] = imgUrl;
-      });
-      setImageUris(temp);
-      setDescription(currentPostRequest.description);
-    }
-  }, [route.params?.postRequest]));
+  useFocusEffect(
+    useCallback(() => {
+      // set values
+      const currentPostRequest = route.params?.postRequest;
+      if (currentPostRequest) {
+        console.log("set values");
+        setSelectedCompensation(currentPostRequest.compensationType);
+        setSelectedTask(currentPostRequest.taskType);
+        handleChange(currentPostRequest.address, 0);
+        handleChange(currentPostRequest.otherCompensation, 1);
+        handleChange(currentPostRequest.monitarily, 2);
+        const temp = [...imageUris];
+        currentPostRequest.imageUrls.forEach((imgUrl, i) => {
+          temp[i] = imgUrl;
+        });
+        setImageUris(temp);
+        setDescription(currentPostRequest.description);
+      }
+    }, [route.params?.postRequest]),
+  );
 
   const toggleDropdown = (dropdownType) => {
     if (dropdownType === "task") {
@@ -137,10 +139,10 @@ function PostRequest({ navigation, route }) {
     if (!inputField[0].validator(inputField[0].value)) {
       isValid = false;
       return isValid;
-    } else if (selectedCompensation === 'Monitarely' && !inputField[2].validator(inputField[2].value)) {
+    } else if (selectedCompensation === "Monitarely" && !inputField[2].validator(inputField[2].value)) {
       isValid = false;
       return isValid;
-    } else if (selectedCompensation === 'Other' && !inputField[1].validator(inputField[1].value)) {
+    } else if (selectedCompensation === "Other" && !inputField[1].validator(inputField[1].value)) {
       isValid = false;
       return isValid;
     }
@@ -149,7 +151,7 @@ function PostRequest({ navigation, route }) {
       isValid = false;
     }
 
-    if (imageUris.every(img => !img)) {
+    if (imageUris.every((img) => !img)) {
       isValid = false;
     }
 
@@ -158,7 +160,7 @@ function PostRequest({ navigation, route }) {
 
   const submitPostData = async () => {
     if (!handleValidation()) {
-      alert('Please fill all the required fields');
+      alert("Please fill all the required fields");
       return;
     }
     try {
@@ -173,118 +175,124 @@ function PostRequest({ navigation, route }) {
         otherCompensation: inputField[1].value,
         monitarily: inputField[2].value,
         status: REQUEST_STATUS.Active,
-      }
+      };
       console.log(data);
       if (isEditing) {
-        const imgs = imageUris.filter(img => Boolean(img));
+        const imgs = imageUris.filter((img) => Boolean(img));
         await updatePost(currentPostRequest.id, data, imgs);
       } else {
-        const imgs = imageUris.filter(img => Boolean(img));
+        const imgs = imageUris.filter((img) => Boolean(img));
         await savePost(data, imgs);
       }
 
       navigation.navigate("SuccessScreen");
     } catch (e) {
-      alert('There was an error while saving the request');
+      alert("There was an error while saving the request");
     } finally {
       showIndicator(false);
     }
-  }
+  };
 
   return (
     <View style={styles.screen}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        {/* Nav */}
-        <Nav marginTop={RFPercentage(7.5)} leftLogo={false} navigation={navigation} title={title === "Edit Request" ? "Edit Request" : "Post Request"} />
-
-        {/* Task Type Dropdown */}
-        <TouchableOpacity
-          style={[
-            styles.dropdownHeader,
-            { marginTop: RFPercentage(3), borderBottomLeftRadius: showTaskDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showTaskDropdown ? 0 : RFPercentage(1) },
-          ]}
-          onPress={() => toggleDropdown("task")}
-        >
-          <Text style={styles.dropdownHeaderText}>{selectedTask || "Task Type"}</Text>
-          <MaterialIcons name={showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
-        </TouchableOpacity>
-
-        {showTaskDropdown && (
-          <FlatList
-            data={taskOptions}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item.id.toString()}
-            style={[
-              styles.dropdown,
-              {
-                maxHeight: RFPercentage(20),
-                borderTopLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
-                borderTopRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
-              },
-            ]}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => selectTask(item)} style={styles.dropdownItem}>
-                <Text style={styles.dropdownItemText}>{item.name}</Text>
-              </TouchableOpacity>
-            )}
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+          {/* Nav */}
+          <Nav
+            marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)}
+            leftLogo={false}
+            navigation={navigation}
+            title={title === "Edit Request" ? "Edit Request" : "Post Request"}
           />
-        )}
 
-        <View style={{ width: "100%", justifyContent: "center", alignItems: "center" }}>
+          {/* Task Type Dropdown */}
           <TouchableOpacity
             style={[
               styles.dropdownHeader,
-              { marginTop: RFPercentage(2.2), borderBottomLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) },
+              { marginTop: RFPercentage(4), borderBottomLeftRadius: showTaskDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showTaskDropdown ? 0 : RFPercentage(1) },
             ]}
-            onPress={() => toggleDropdown("compensation")}
+            onPress={() => toggleDropdown("task")}
           >
-            <Text style={styles.dropdownHeaderText}>{selectedCompensation || "Compensation Type"}</Text>
-            <MaterialIcons name={showCompensationDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
+            <Text style={styles.dropdownHeaderText}>{selectedTask || "Task Type"}</Text>
+            <MaterialIcons name={showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
           </TouchableOpacity>
 
-          {showCompensationDropdown && (
+          {showTaskDropdown && (
             <FlatList
-              data={compensationOptions}
+              data={taskOptions}
               showsVerticalScrollIndicator={false}
               keyExtractor={(item) => item.id.toString()}
               style={[
                 styles.dropdown,
-                { maxHeight: RFPercentage(20), borderTopLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderTopRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) },
+                {
+                  maxHeight: RFPercentage(20),
+                  borderTopLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                  borderTopRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                },
               ]}
               renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => selectCompensation(item)} style={styles.dropdownItem}>
-                  <Text style={styles.dropdownItemText}>{item.type}</Text>
+                <TouchableOpacity onPress={() => selectTask(item)} style={styles.dropdownItem}>
+                  <Text style={styles.dropdownItemText}>{item.name}</Text>
                 </TouchableOpacity>
               )}
             />
           )}
-        </View>
 
-        {/* decsription */}
-        <View
-          style={{
-            width: "90%",
-            height: RFPercentage(20),
-            borderRadius: RFPercentage(1.2),
-            borderColor: Colors.border,
-            borderWidth: RFPercentage(0.1),
-            justifyContent: "flex-start",
-            alignItems: "flex-start",
-            marginTop: RFPercentage(2.5),
-          }}
-        >
-          <TextInput
-            placeholder="Description"
-            placeholderTextColor={Colors.heading}
-            value={description}
-            onChangeText={(e) => setDescription(e)}
-            style={{ color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), top: RFPercentage(1.5), left: RFPercentage(1.5) }}
-          />
-        </View>
+          <View style={{ width: "100%", justifyContent: "center", alignItems: "center" }}>
+            <TouchableOpacity
+              style={[
+                styles.dropdownHeader,
+                { marginTop: RFPercentage(2.2), borderBottomLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) },
+              ]}
+              onPress={() => toggleDropdown("compensation")}
+            >
+              <Text style={styles.dropdownHeaderText}>{selectedCompensation || "Compensation Type"}</Text>
+              <MaterialIcons name={showCompensationDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
+            </TouchableOpacity>
 
-        {/* Input field */}
-        <View style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
-          {inputField.map((item, i) => (
+            {showCompensationDropdown && (
+              <FlatList
+                data={compensationOptions}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={(item) => item.id.toString()}
+                style={[
+                  styles.dropdown,
+                  { maxHeight: RFPercentage(20), borderTopLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderTopRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) },
+                ]}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => selectCompensation(item)} style={styles.dropdownItem}>
+                    <Text style={styles.dropdownItemText}>{item.type}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+          </View>
+
+          {/* decsription */}
+          <View
+            style={{
+              width: "90%",
+              height: RFPercentage(20),
+              borderRadius: RFPercentage(1.2),
+              borderColor: Colors.border,
+              borderWidth: RFPercentage(0.1),
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+              marginTop: RFPercentage(2.5),
+            }}
+          >
+            <TextInput
+              placeholder="Description"
+              placeholderTextColor={Colors.heading}
+              value={description}
+              onChangeText={(e) => setDescription(e)}
+              style={{ color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), top: RFPercentage(1.5), left: RFPercentage(1.5) }}
+            />
+          </View>
+
+          {/* Input field */}
+          <View style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
+            {inputField.map((item, i) =>
               item?.display(selectedCompensation) ? (
                 <View key={i} style={{ marginTop: i === 0 ? RFPercentage(1.7) : RFPercentage(1) }}>
                   <InputField
@@ -303,44 +311,46 @@ function PostRequest({ navigation, route }) {
                     value={item.value}
                     width={"97.5%"}
                   />
-            </View>) : null
-          ))}
-        </View>
-
-        {/* Image Picker */}
-        <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.3) }}>
-          <Text style={{ marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" }}>Upload Photos From Gallery</Text>
-          <View style={{ width: "100%", justifyContent: "space-between", alignItems: "center", marginTop: RFPercentage(0.8), flexDirection: "row" }}>
-            {[0, 1, 2].map((index) => (
-              <TouchableOpacity
-                key={index}
-                activeOpacity={0.8}
-                onPress={() => pickImage(index)}
-                style={{ width: "32%", height: RFPercentage(14), borderRadius: RFPercentage(1.4), justifyContent: "center", alignItems: "center", backgroundColor: "#F3F4F6", position: "relative" }}
-              >
-                {imageUris[index] ? (
-                  <>
-                    <Image style={{ width: "100%", height: "100%", borderRadius: RFPercentage(1.4) }} source={{ uri: imageUris[index] }} />
-                    <TouchableOpacity onPress={() => [deleteImage(index), pickImage(index)]} style={{ position: "absolute", top: 5, right: 5 }}>
-                      <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/edit.png")} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => deleteImage(index)} style={{ position: "absolute", top: 5, left: 5 }}>
-                      <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/cross.png")} />
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/gal.png")} />
-                )}
-              </TouchableOpacity>
-            ))}
+                </View>
+              ) : null,
+            )}
           </View>
-        </View>
 
-        {/*Login Button */}
-        <MyAppButton disabled={indicator} title={title === "Edit Profile" ? "Edit" : "Post"} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
+          {/* Image Picker */}
+          <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.3) }}>
+            <Text style={{ marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" }}>Upload Photos From Gallery</Text>
+            <View style={{ width: "100%", justifyContent: "space-between", alignItems: "center", marginTop: RFPercentage(0.8), flexDirection: "row" }}>
+              {[0, 1, 2].map((index) => (
+                <TouchableOpacity
+                  key={index}
+                  activeOpacity={0.8}
+                  onPress={() => pickImage(index)}
+                  style={{ width: "32%", height: RFPercentage(14), borderRadius: RFPercentage(1.4), justifyContent: "center", alignItems: "center", backgroundColor: "#F3F4F6", position: "relative" }}
+                >
+                  {imageUris[index] ? (
+                    <>
+                      <Image style={{ width: "100%", height: "100%", borderRadius: RFPercentage(1.4) }} source={{ uri: imageUris[index] }} />
+                      <TouchableOpacity onPress={() => [deleteImage(index), pickImage(index)]} style={{ position: "absolute", top: 5, right: 5 }}>
+                        <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/edit.png")} />
+                      </TouchableOpacity>
+                      {/* <TouchableOpacity onPress={() => deleteImage(index)} style={{ position: "absolute", top: 5, left: 5 }}>
+                      <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/cross.png")} />
+                    </TouchableOpacity> */}
+                    </>
+                  ) : (
+                    <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/gal.png")} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
-        <View style={{ marginBottom: RFPercentage(8) }} />
-      </ScrollView>
+          {/*Login Button */}
+          <MyAppButton disabled={indicator} loading={indicator} title={title === "Edit Profile" ? "Edit" : "Post"} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
+
+          <View style={{ marginBottom: RFPercentage(8) }} />
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Bottom Tab */}
       <CustomTabBar postRequest={true} navigation={navigation} />

@@ -151,12 +151,7 @@ function Signup(props) {
           ))}
         </View>
 
-        {/* Signup Button */}
-        {indicator ? (
-          <ActivityIndicator style={{ marginTop: RFPercentage(4.5) }} size="medium" color={Colors.primary} />
-        ) : (
-          <MyAppButton title="Signup" onPress={handleSignup} marginTop={RFPercentage(4.5)} />
-        )}
+        <MyAppButton title="Signup" loading={indicator} onPress={handleSignup} marginTop={RFPercentage(4.5)} />
 
         {/* Social Media Login */}
         <View style={styles.socialMediaContainer}>
