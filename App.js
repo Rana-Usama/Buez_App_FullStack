@@ -42,6 +42,7 @@ import ExpoStripeProvider from "./app/contexts/stripe-provider";
 import SubscriptionListener from "./app/components/SubscriptionListener";
 import InitialScreen from "./app/screens/InitialScreen";
 import DeciderScreen from "./app/screens/DeciderScreen";
+import { PostProvider } from "./app/contexts/PostContext";
 
 const Stack = createStackNavigator();
 
@@ -59,7 +60,7 @@ const AuthStack = () => (
 );
 
 const AppStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="InitialScreen">
+  <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="DeciderScreen">
     <Stack.Screen name="InitialScreen" component={InitialScreen} />
     <Stack.Screen name="Home" component={Home} />
     <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
@@ -113,15 +114,17 @@ export default function App() {
 
   return (
     <UserProvider>
-      <NavigationContainer>
-        {user ? (
-          <ExpoStripeProvider>
-            <AppStack />
-          </ExpoStripeProvider>
-        ) : (
-          <AuthStack />
-        )}
-      </NavigationContainer>
+      <PostProvider>
+        <NavigationContainer>
+          {user ? (
+            <ExpoStripeProvider>
+              <AppStack />
+            </ExpoStripeProvider>
+          ) : (
+            <AuthStack />
+          )}
+        </NavigationContainer>
+      </PostProvider>
     </UserProvider>
   );
 }

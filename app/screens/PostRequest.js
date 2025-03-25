@@ -16,8 +16,11 @@ import { validateRequired } from "../utils/helperFunctions";
 import { savePost, updatePost } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
 import { REQUEST_STATUS } from "../utils/gloabals";
+import { useUser } from "../contexts/user.context";
 
 function PostRequest({ navigation, route }) {
+  const { userData: user } = useUser();
+  const profileImgUrl = user?.profileImage || "";
   const [showTaskDropdown, setShowTaskDropdown] = useState(false);
   const [selectedTask, setSelectedTask] = useState("");
   const [showCompensationDropdown, setShowCompensationDropdown] = useState(false);
@@ -151,9 +154,9 @@ function PostRequest({ navigation, route }) {
       isValid = false;
     }
 
-    if (imageUris.every((img) => !img)) {
-      isValid = false;
-    }
+    // if (imageUris.every((img) => !img)) {
+    //   isValid = false;
+    // }
 
     return isValid;
   };
@@ -179,9 +182,15 @@ function PostRequest({ navigation, route }) {
       console.log(data);
       if (isEditing) {
         const imgs = imageUris.filter((img) => Boolean(img));
+        if (imgs.length === 0) {
+          imgs.push('https://firebasestorage.googleapis.com/v0/b/socially-1720865151833.appspot.com/o/images%2Ffe116284-58be-41c1-b538-53eb4816ee23.png?alt=media&token=9e6ed2f0-d729-4b1f-a210-24adb1d1b5eb');
+        }
         await updatePost(currentPostRequest.id, data, imgs);
       } else {
         const imgs = imageUris.filter((img) => Boolean(img));
+        if (imgs.length === 0) {
+          imgs.push('https://firebasestorage.googleapis.com/v0/b/socially-1720865151833.appspot.com/o/images%2Ffe116284-58be-41c1-b538-53eb4816ee23.png?alt=media&token=9e6ed2f0-d729-4b1f-a210-24adb1d1b5eb');
+        }
         await savePost(data, imgs);
       }
 
@@ -201,6 +210,7 @@ function PostRequest({ navigation, route }) {
           <Nav
             marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)}
             leftLogo={false}
+            profileImage={profileImgUrl}
             navigation={navigation}
             title={title === "Edit Request" ? "Edit Request" : "Post Request"}
           />

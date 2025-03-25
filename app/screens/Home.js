@@ -14,6 +14,7 @@ import { useUser } from "../contexts/user.context";
 import { getRequestList } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
 import { getFormatedDate } from "../services/Shared.service";
+import { usePostContext } from "../contexts/PostContext";
 
 function Home({ navigation }) {
   const { userData: user } = useUser();
@@ -27,12 +28,23 @@ function Home({ navigation }) {
 
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [taskRecords, setTaskRecords] = useState([]);
-  const [lastVisiblePost, setLastVisiblePost] = useState(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
+
+  const {
+    taskRecords,
+    setTaskRecords,
+    lastVisiblePost,
+    setLastVisiblePost,
+    hasMore,
+    setHasMore,
+    loading,
+    setLoading,
+    refreshing,
+    setRefreshing,
+    loadingMore,
+    setLoadingMore,
+    scrollPosition,
+    unsubscribeRef,
+  } = usePostContext();
 
   const carts = [
     {
@@ -161,7 +173,7 @@ function Home({ navigation }) {
   return (
     <View style={styles.screen}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+        <ScrollView onScroll={(e) => (scrollPosition.current = e.nativeEvent.contentOffset.y)} style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
           {/* Nav */}
           <Nav crown={true} marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Home" />
 
@@ -240,7 +252,7 @@ function Home({ navigation }) {
               <View style={{ top: RFPercentage(0.2), width: "100%", justifyContent: "center", alignItems: "center" }}>
                 <View style={styles.cartInfoContainer}>
                   <TouchableOpacity activeOpacity={0.8}>
-                    <Image style={styles.userImage} source={{ uri: cart.user.profileImage }} />
+                    <Image style={styles.userImage} source={cart.user.profileImage ? { uri: cart.user.profileImage } : require("../../assets/Images/dp.png") } />
                   </TouchableOpacity>
 
                   <Text style={styles.userName}>{cart.user.userName}</Text>

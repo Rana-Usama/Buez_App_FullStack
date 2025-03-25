@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, FlatList, ActivityIndicator, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, FlatList, ActivityIndicator, Platform } from "react-native";
 import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDocs, getDoc, doc } from "firebase/firestore";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -12,16 +12,18 @@ import CustomTabBar from "../components/common/CustomTabBar";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
+import { getFormatedDate } from "../services/Shared.service";
 
 function Messages({ navigation }) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [chats, setChats] = useState([]);
-  const [lastVisible, setLastVisible] = useState(null); // Tracks last document for pagination
-  const [loading, setLoading] = useState(false); // Loading state for fetching chats
-  const [isRefreshing, setIsRefreshing] = useState(false); // State for pull-to-refresh
-  const pageSize = 10; // Number of chats to fetch per batch
+  const [lastVisible, setLastVisible] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const pageSize = 10;
   const userId = getAuth().currentUser?.uid;
-  const { userData, loading: userLoading, error: userError } = useUser();
+  const { userData } = useUser();
+  const profileImgUrl = userData?.profileImage || "";
 
   console.log(userData);
 
@@ -96,9 +98,10 @@ function Messages({ navigation }) {
       }
 
       setChats(chatData);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]); // Set last visible document
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setLoading(false);
     } catch (e) {
+      setLoading(false);
       console.log("Chat Error", e);
     }
   };
@@ -107,19 +110,23 @@ function Messages({ navigation }) {
     if (!lastVisible || loading) return;
 
     setLoading(true);
-
-    const q = query(collection(FIREBASE_DB, "chats"), where("participants", "array-contains", userId), orderBy("lastMessageTimestamp", "desc"), startAfter(lastVisible), limit(pageSize));
-
-    const snapshot = await getDocs(q);
-
-    const chatData = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    setChats((prevChats) => [...prevChats, ...chatData]);
-    setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-    setLoading(false);
+    try {
+      const q = query(collection(FIREBASE_DB, "chats"), where("participants", "array-contains", userId), orderBy("lastMessageTimestamp", "desc"), startAfter(lastVisible), limit(pageSize));
+  
+      const snapshot = await getDocs(q);
+  
+      const chatData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      setChats((prevChats) => [...prevChats, ...chatData]);
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+      setLoading(false);
+    } catch (e) {
+      setLoading(false);
+      console.log("Chat Error", e);
+    }
   };
 
   const refreshChats = async () => {
@@ -144,38 +151,39 @@ function Messages({ navigation }) {
     </TouchableOpacity>
   );
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
+  const renderItem = ({ item }) => {
+    // console.log("MSG INFO:: ", item.lastMessage, item.lastMessage?.senderId !== userId)
+    return (<TouchableOpacity
       onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
       activeOpacity={0.8}
       style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
     >
       <View key={item.id} style={[styles.messageContainer, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadMessage]}>
-        <Image style={styles.messageImage} source={{ uri: item.user.profileImage }} />
+        <Image style={styles.messageImage} source={item.user.profileImage ? { uri: item.user.profileImage } : require("../../assets/Images/dp.png")} />
         <View style={styles.messageTextContainer}>
           <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.user.userName}</Text>
           <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.lastMessage.text}</Text>
         </View>
-        <Text style={styles.messageTime}>{item.time}</Text>
-        {item.lastMessage?.unread && item.lastMessage?.senderId !== userId && <View style={styles.unreadDot} />}
+        <Text style={styles.messageTime}>{getFormatedDate(item.lastMessage.createdAt)}</Text>
+        {item.unread && item.senderId !== userId && <View style={styles.unreadDot} />}
       </View>
       <View style={styles.separator} />
-    </TouchableOpacity>
-  );
+    </TouchableOpacity>)
+  };
 
   // Add filtered chats computation
   const filteredChats = useMemo(() => {
     if (activeFilter === "Unread") {
-      return chats.filter((chat) => chat.lastMessage?.unread && chat.lastMessage?.senderId !== userId);
+      return chats.filter((chat) => chat?.unread && chat.senderId !== userId);
     }
     return chats;
   }, [chats, activeFilter, userId]);
-
+  
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Messages" />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title="Messages" />
 
         {/* Filter Buttons */}
         <View style={styles.filterContainer}>
@@ -196,7 +204,7 @@ function Messages({ navigation }) {
           onRefresh={refreshChats}
           ListEmptyComponent={() => (
             <View style={styles.emptyContainer}>
-              {!loading && (
+              {!loading && filteredChats.length === 0 && (
                 <View style={{ justifyContent: "center", alignItems: "center" }}>
                   <Image
                     style={{ borderRadius: RFPercentage(1), width: RFPercentage(26), height: RFPercentage(18), marginBottom: RFPercentage(2) }}

@@ -13,8 +13,11 @@ import { getMyReuqests, updateReqestStatus } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
 import { getRelativePostTime } from "../services/Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
+import { useUser } from "../contexts/user.context";
 
 function MyRequests({ navigation }) {
+  const { userData: user } = useUser();
+    const profileImgUrl = user?.profileImage || "";
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Search",
@@ -170,7 +173,7 @@ function MyRequests({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="My Requests" />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title="My Requests" />
 
         {/* Filter Buttons */}
         <View

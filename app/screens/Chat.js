@@ -12,8 +12,8 @@ import { FIREBASE_DB } from "../../firebaseConfig";
 const Chat = ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
-  const { chatId, senderId, senderName, receiver } = route.params;
-  console.log({ chatId, senderId, senderName, receiver });
+  const { chatId, senderId: currentUserId, senderName, receiver } = route.params;
+  console.log({ chatId, senderId: currentUserId, senderName, receiver });
 
   useEffect(() => {
     const listenForNewMessages = () => {
@@ -86,6 +86,7 @@ const Chat = ({ navigation, route }) => {
         console.log(Array.from(messagesMap.values()).sort((a, b) => b.createdAt - a.createdAt));
         return GiftedChat.append(Array.from(messagesMap.values()).sort((a, b) => b.createdAt - a.createdAt)).filter(Boolean);
       });
+      markMessagesAsRead();
     };
 
     fetchInitialMessages();
@@ -148,6 +149,7 @@ const Chat = ({ navigation, route }) => {
       newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
       return GiftedChat.append(Array.from(messagesMap.values()).sort((a, b) => b.createdAt - a.createdAt)).filter(Boolean);
     });
+    markMessagesAsRead();
     setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
   };
 
@@ -156,7 +158,7 @@ const Chat = ({ navigation, route }) => {
     const newMessage = {
       text: message.text,
       timestamp: Timestamp.now(),
-      senderId: senderId,
+      senderId: currentUserId,
       senderName: senderName,
       unread: true,
     };
@@ -168,7 +170,7 @@ const Chat = ({ navigation, route }) => {
       await updateDoc(chatRef, {
         ...message,
         unread: true,
-        senderId: senderId,
+        senderId: currentUserId,
         senderName: senderName,
         lastMessage: message,
         lastMessageTimestamp: Timestamp.now(),
@@ -179,41 +181,31 @@ const Chat = ({ navigation, route }) => {
   }, []);
 
   // Add a new useEffect to mark messages as read when the chat is opened
-  useEffect(() => {
-    if (!chatId || !senderId) return;
+      
+  const markMessagesAsRead = async () => {
+    if (!chatId || !currentUserId) return;
+    try {
+      // Get unread messages sent by the other user
+      const docRef = doc(FIREBASE_DB, 'chats', chatId)
+      // const q = query(
+      //   collection(FIREBASE_DB, 'chats', chatId),
+      //   where("unread", "==", true),
+      //   where("senderId", "!=", currentUserId)
+      // );
 
-    const markMessagesAsRead = async () => {
-      try {
-        // Get unread messages sent by the other user
-        const q = query(collection(FIREBASE_DB, `chats/${chatId}/messages`), where("unread", "==", true), where("senderId", "!=", senderId));
+      // const docSnap = await getDoc(docRef);
 
-        const snapshot = await getDocs(q);
-
-        // Update each unread message
-        const batch = writeBatch(FIREBASE_DB);
-        snapshot.docs.forEach((doc) => {
-          batch.update(doc.ref, { unread: false });
-        });
-
-        // Update the last message unread status if it was from the other user
-        const chatRef = doc(FIREBASE_DB, "chats", chatId);
-        const chatDoc = await getDoc(chatRef);
-        const chatData = chatDoc.data();
-
-        if (chatData?.lastMessage?.senderId !== senderId && chatData?.lastMessage?.unread) {
-          batch.update(chatRef, {
-            "lastMessage.unread": false,
-          });
-        }
-
-        await batch.commit();
-      } catch (error) {
-        console.error("Error marking messages as read:", error);
-      }
-    };
-
-    markMessagesAsRead();
-  }, [chatId, senderId]);
+      // if (docSnap.exists()) {
+      //   console.log("Document data:", docSnap.data());
+      //   return docSnap.data();
+      // } else {
+      //   console.log("No such document!");
+      // }
+      await updateDoc(docRef, { unread: false });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
+  };
 
   console.log(messages);
   return (
@@ -229,7 +221,7 @@ const Chat = ({ navigation, route }) => {
             messages={messages}
             onSend={(messages) => onSend(messages)}
             user={{
-              _id: senderId,
+              _id: currentUserId,
               name: senderName,
             }}
             loadEarlier={!!lastVisible}

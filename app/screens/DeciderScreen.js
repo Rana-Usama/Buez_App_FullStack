@@ -5,12 +5,21 @@ import { LinearGradient } from "expo-linear-gradient";
 
 // config
 import Colors from "../config/Colors";
+import { useUser } from "../contexts/user.context";
+import { getAuth } from "firebase/auth";
+import SubscriptionListener from "../components/SubscriptionListener";
 
 function DeciderScreen({ navigation }) {
+  const userId = getAuth()?.currentUser?.uid;
+  const { userData, loading } = useUser();
+  console.log("DECIDER: user", userData, loading, userId);
   return (
-    <LinearGradient colors={[Colors.white, Colors.white]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
+    <>
+    {(!userId || loading || !userData) ? (<LinearGradient colors={[Colors.white, Colors.white]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
       <Image style={{ width: RFPercentage(10), height: RFPercentage(10) }} source={require("../../assets/Images/buez.png")} />
-    </LinearGradient>
+      </LinearGradient >)
+     : <SubscriptionListener navigation={navigation} userId={userId} />}
+     </>
   );
 }
 

@@ -76,7 +76,7 @@ export const getMyReuqests = async (postStatus, lastVisiblePost = null, pageSize
     if (!userId) {
       throw new Error("User is not logged in");
     }
-    console.log(postStatus);
+    // console.log(postStatus);
     let q = query(
       collection(FIREBASE_DB, 'taskRequests'),
       where('status', '==', postStatus),
@@ -109,7 +109,7 @@ export const getMyReuqests = async (postStatus, lastVisiblePost = null, pageSize
     }
 
     const lastVisible = snapshot.docs[snapshot.docs.length - 1];
-    console.log('RECORDS:' ,tasksArray);
+    // console.log('RECORDS:' ,tasksArray);
     return {tasksArray, lastVisible};
   } catch (error) {
     console.log('GET_MY_POSTS: ', error);
@@ -128,6 +128,7 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
     let q = query(
       collection(FIREBASE_DB, 'taskRequests'),
       where("status", "==", 'Active'),
+      where("userId", "!=", userId),
       orderBy('createdAt', 'desc'),
       // where('taskType', '==', 'Gardening'),
       // where('descriptionKeywords', 'array-contains-any', keywords),
@@ -137,6 +138,7 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
       q = query(
         collection(FIREBASE_DB, 'taskRequests'),
         where("status", "==", 'Active'),
+        where("userId", "!=", userId),
         orderBy('createdAt', 'desc'),
         startAfter(lastVisiblePost),
         limit(pageSize));
@@ -145,7 +147,7 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
     if (taskType && taskType !== 'All') {
       q = query(q, where('taskType', '==', taskType));
     }
-    console.table({ taskType, searchQuery });
+    // console.table({ taskType, searchQuery });
     if (searchQuery) {
       const keywords = searchQuery.trim().split(' ').map(k => k.toLowerCase());
       q = query(q, where('descriptionKeywords', 'array-contains-any', keywords));
@@ -166,7 +168,7 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
     }
 
     const lastVisible = snapshot.docs[snapshot.docs.length - 1];
-    console.log('HOME RECORDS:' ,tasksArray.length, tasksArray);
+    // console.log('HOME RECORDS:' ,tasksArray.length, tasksArray);
     return {tasksArray, lastVisible};
   } catch (error) {
     console.log('GET_POSTS_LIST: ', error);

@@ -10,8 +10,13 @@ import CustomTabBar from "../components/common/CustomTabBar";
 
 // config
 import Colors from "../config/Colors";
+import { useUser } from "../contexts/user.context";
+import { usePostContext } from "../contexts/PostContext";
 
 function Settings({ navigation }) {
+  const { userData: user } = useUser();
+  const { resetPostsData } = usePostContext();
+  const profileImgUrl = user?.profileImage || "";
   const navigationsList = [
     {
       iconSource: require("../../assets/Images/privacy.png"),
@@ -37,7 +42,10 @@ function Settings({ navigation }) {
       iconSource: require("../../assets/Images/logout.png"),
       title: "Logout",
       redColor: true,
-      navigation: () => logout(),
+      navigation: () => {
+        resetPostsData();
+        logout();
+      },
     },
   ];
 
@@ -45,7 +53,7 @@ function Settings({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={true} navigation={navigation} title="Settings" />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Settings" />
 
         <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(3.5) }}>
           <Text style={{ color: Colors.lightGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" }}>Help & Security</Text>
