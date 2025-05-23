@@ -112,14 +112,14 @@ function Messages({ navigation }) {
     setLoading(true);
     try {
       const q = query(collection(FIREBASE_DB, "chats"), where("participants", "array-contains", userId), orderBy("lastMessageTimestamp", "desc"), startAfter(lastVisible), limit(pageSize));
-  
+
       const snapshot = await getDocs(q);
-  
+
       const chatData = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-  
+
       setChats((prevChats) => [...prevChats, ...chatData]);
       setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       setLoading(false);
@@ -153,22 +153,29 @@ function Messages({ navigation }) {
 
   const renderItem = ({ item }) => {
     // console.log("MSG INFO:: ", item.lastMessage, item.lastMessage?.senderId !== userId)
-    return (<TouchableOpacity
-      onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
-      activeOpacity={0.8}
-      style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
-    >
-      <View key={item.id} style={[styles.messageContainer, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadMessage]}>
-        <Image style={styles.messageImage} source={item.user.profileImage ? { uri: item.user.profileImage } : require("../../assets/Images/dp.png")} />
-        <View style={styles.messageTextContainer}>
-          <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.user.userName}</Text>
-          <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.lastMessage.text}</Text>
+    return (
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
+        activeOpacity={0.8}
+        style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
+      >
+        <View key={item.id} style={[styles.messageContainer, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadMessage]}>
+          <Image style={styles.messageImage} source={item.user.profileImage ? { uri: item.user.profileImage } : require("../../assets/Images/dp.png")} />
+          <View style={styles.messageTextContainer}>
+            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+              <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.user.userName}</Text>
+              {item.unread && item.senderId !== userId && <View style={styles.unreadDot} />}
+            </View>
+
+            <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>
+              {item.lastMessage.text.length > 50 ? `${item.lastMessage.text.substring(0, 30)}...` : item.lastMessage.text}
+            </Text>
+          </View>
+          <Text style={styles.messageTime}>{getFormatedDate(item.lastMessage.createdAt)}</Text>
         </View>
-        <Text style={styles.messageTime}>{getFormatedDate(item.lastMessage.createdAt)}</Text>
-        {item.unread && item.senderId !== userId && <View style={styles.unreadDot} />}
-      </View>
-      <View style={styles.separator} />
-    </TouchableOpacity>)
+        <View style={styles.separator} />
+      </TouchableOpacity>
+    );
   };
 
   // Add filtered chats computation
@@ -178,7 +185,7 @@ function Messages({ navigation }) {
     }
     return chats;
   }, [chats, activeFilter, userId]);
-  
+
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
@@ -371,13 +378,12 @@ const styles = StyleSheet.create({
     color: Colors.heading,
   },
   unreadDot: {
-    position: "absolute",
-    right: RFPercentage(1),
-    top: RFPercentage(1),
     width: RFPercentage(1),
     height: RFPercentage(1),
     borderRadius: RFPercentage(0.5),
     backgroundColor: Colors.primary,
+    marginLeft: RFPercentage(1),
+    top: RFPercentage(-0.1),
   },
   emptyContainer: {
     flex: 1,
