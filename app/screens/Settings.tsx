@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Pl
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import { logout } from "../services/Auth.service";
+import { deleteAccount } from "../services/Auth.service";
 
 // components
 import Nav from "../components/common/Nav";
@@ -46,6 +47,15 @@ function Settings({ navigation }) {
       navigation: () => {
         resetPostsData();
         logout();
+      },
+    },
+    {
+      iconSource: Icons.logout,
+      title: "Delete Account",
+      redColor: true,
+      navigation: () => {
+        resetPostsData();
+        deleteAccount();
       },
     },
   ];

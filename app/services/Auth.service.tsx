@@ -1,6 +1,7 @@
 /* eslint-disable import/no-unresolved */
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { sendEmailVerification, signOut, updatePassword as firebaseUpdatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "firebase/auth";
+import { deleteUser } from "firebase/auth";
 
 import * as SecureStore from "expo-secure-store";
 
@@ -85,3 +86,24 @@ export async function getCredentials() {
   const password = await SecureStore.getItemAsync("password");
   return { email, password };
 }
+
+
+export const deleteAccount = async () => {
+  try {
+    const user = FIREBASE_AUTH.currentUser;
+    if (user) {
+      await deleteUser(user);
+      console.log("Account deleted successfully.");
+      return true;
+    } else {
+      console.log("No user is logged in to delete account.");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error deleting account:", error.message);
+    if (error.code === "auth/requires-recent-login") {
+      throw new Error("Please re-authenticate and try again.");
+    }
+    throw error;
+  }
+};

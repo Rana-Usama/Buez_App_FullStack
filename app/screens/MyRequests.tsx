@@ -17,6 +17,8 @@ import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 
+const { width: screenWidth } = Dimensions.get('window');
+
 function MyRequests({ navigation }) {
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
@@ -195,7 +197,7 @@ function MyRequests({ navigation }) {
               onEndReached={handleLoadMore}
               onMomentumScrollEnd={(event) => handleScrollEnd(event, index)}
               renderItem={({ item }) => (
-                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }}>
+                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }} resizeMode="cover" >
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{cart.taskType}</Text>
                   </View>
@@ -228,28 +230,28 @@ function MyRequests({ navigation }) {
             {/* Info */}
             <View style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.userImage} source={{ uri: cart.user.profileImage }} />
+                <Image style={styles.userImage} source={{ uri: cart?.user?.profileImage }} />
               </TouchableOpacity>
 
               <Text style={styles.userName}>{cart.user.userName}</Text>
-              <Text style={styles.postDate}>Posted on: {getRelativePostTime(cart.createdAt)}</Text>
+              <Text style={styles.postDate}>Posted on: {getRelativePostTime(cart?.createdAt)}</Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={styles.taskText}>{cart.description?.substr(0, 15) + (cart.description?.length > 15 ? "..." : "")}</Text>
+              <Text style={styles.taskText}>{cart?.description?.substr(0, 30) + (cart?.description?.length > 15 ? "..." : "")}</Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={{ fontSize: RFPercentage(2), top: RFPercentage(1), fontFamily: "Poppins_500Medium" }}>
+              <Text style={{ fontSize: RFPercentage(2),  fontFamily: "Poppins_500Medium", marginTop:RFPercentage(1) }}>
                 Compensation:{" "}
                 <Text style={styles.compensationAmount}>
-                  {cart.compensationType === "Monitarely" ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                  {cart.compensationType === "Monitarely" ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
               </Text>
             </View>
 
-            {cart.status === REQUEST_STATUS.Active && (
-              <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", top: RFPercentage(-2.5) }}>
+            {cart?.status === REQUEST_STATUS.Active && (
+              <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center",marginTop : RFPercentage(1.5) }}>
                 <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
                   <Text style={{ color: Colors.primary }}>Mark as Done</Text>
                 </TouchableOpacity>
@@ -347,16 +349,17 @@ const styles = StyleSheet.create({
   },
   cartContainer: {
     width: "90%",
-    height: RFPercentage(50),
+    // height: RFPercentage(50),
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(2),
     justifyContent: "flex-start",
     alignItems: "center",
     overflow: "hidden",
+    paddingBottom:RFPercentage(1.6)
   },
   cartImageBackground: {
-    width: RFPercentage(45.3),
+     width: screenWidth * 0.9,
     height: RFPercentage(24.5),
   },
   cartImage: {
@@ -401,7 +404,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     flexDirection: "row",
-    top: RFPercentage(-7),
+    marginVertical : RFPercentage(2)
+    // top: RFPercentage(-7),
   },
   userImage: {
     width: RFPercentage(4.9),
@@ -426,7 +430,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     flexDirection: "row",
-    top: RFPercentage(-5),
+    // top: RFPercentage(-5),
   },
   taskText: {
     fontSize: RFPercentage(1.8),
@@ -517,7 +521,7 @@ const styles = StyleSheet.create({
   },
   markButton: {
     borderRadius: RFPercentage(1),
-    width: RFPercentage(14),
+    width: RFPercentage(16),
     height: RFPercentage(5.2),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.2),
@@ -526,7 +530,7 @@ const styles = StyleSheet.create({
   },
   cancel: {
     borderRadius: RFPercentage(1),
-    width: RFPercentage(14),
+    width: RFPercentage(16),
     height: RFPercentage(5.2),
     borderColor: Colors.red,
     borderWidth: RFPercentage(0.2),

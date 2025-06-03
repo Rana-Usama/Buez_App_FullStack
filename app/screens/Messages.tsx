@@ -90,7 +90,6 @@ function Messages({ navigation }) {
     setLoading(true);
     try {
       const q = query(collection(FIREBASE_DB, "chats"), where("participants", "array-contains", userId), orderBy("lastMessageTimestamp", "desc"), limit(pageSize));
-
       const snapshot = await getDocs(q);
       const chatData = [];
       for await (const doc of snapshot.docs) {
@@ -99,7 +98,7 @@ function Messages({ navigation }) {
       }
 
       setChats(chatData);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+      setLastVisible(snapshot.docs[snapshot?.docs?.length - 1]);
       setLoading(false);
     } catch (e) {
       setLoading(false);
@@ -113,16 +112,14 @@ function Messages({ navigation }) {
     setLoading(true);
     try {
       const q = query(collection(FIREBASE_DB, "chats"), where("participants", "array-contains", userId), orderBy("lastMessageTimestamp", "desc"), startAfter(lastVisible), limit(pageSize));
-
       const snapshot = await getDocs(q);
-
       const chatData = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
       setChats((prevChats) => [...prevChats, ...chatData]);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+      setLastVisible(snapshot.docs[snapshot?.docs?.length - 1]);
       setLoading(false);
     } catch (e) {
       setLoading(false);
@@ -169,7 +166,7 @@ function Messages({ navigation }) {
             </View>
 
             <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>
-              {item.lastMessage.text.length > 50 ? `${item.lastMessage.text.substring(0, 30)}...` : item.lastMessage.text}
+              {item?.lastMessage?.text?.length > 50 ? `${item.lastMessage.text.substring(0, 30)}...` : item.lastMessage.text}
             </Text>
           </View>
           <Text style={styles.messageTime}>{getFormatedDate(item.lastMessage.createdAt)}</Text>

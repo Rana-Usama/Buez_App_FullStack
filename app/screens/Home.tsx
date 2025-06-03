@@ -21,7 +21,7 @@ import NotFound from "../components/common/NotFound";
 type InputFieldType = {
   placeholder: string;
   value: string;
-  secure?: boolean; // optional
+  secure?: boolean; 
 };
 
 function Home({ navigation }) {
@@ -99,7 +99,7 @@ function Home({ navigation }) {
       const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, searchQuery, isLastVisible);
       setTaskRecords(newRecords);
       setLastVisiblePost(lastVisible);
-      setHasMore(newRecords.length > 0);
+      setHasMore(newRecords?.length > 0);
     } catch (error) {
       console.error("Error loading posts:", error);
     } finally {
@@ -186,7 +186,7 @@ function Home({ navigation }) {
           <Nav crown={true} marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Home" />
 
           <View style={styles.inputFieldContainer}>
-            {inputField.map((item, i) => (
+            {inputField?.map((item, i) => (
               <View key={i} style={styles.inputFieldWrapper}>
                 <InputField
                   placeholder={item.placeholder}
@@ -227,7 +227,7 @@ function Home({ navigation }) {
           </View>
 
           {/* Carts */}
-          {taskRecords.map((cart, cartIndex) => (
+          {taskRecords?.map((cart, cartIndex) => (
             <TouchableOpacity
               onPress={() => navigation.navigate("OfferDetail", { postRequest: cart })}
               activeOpacity={0.8}
@@ -268,7 +268,7 @@ function Home({ navigation }) {
                 </View>
 
                 <View style={styles.taskInfoContainer}>
-                  <Text style={styles.taskText}>{cart.description?.substr(0, 40) + (cart.description?.length > 15 ? "..." : "")}</Text>
+                  <Text style={styles.taskText}>{cart.description?.substr(0, 35) + (cart.description?.length > 8 ? "..." : "")}</Text>
                   <View style={styles.compensationWrapper}>
                     <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
                     <Text style={styles.compensationText}>
@@ -377,17 +377,19 @@ const styles = StyleSheet.create({
   },
   cartContainer: {
     width: "90%",
-    height: RFPercentage(44),
+    height: RFPercentage(40),
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(2),
     justifyContent: "flex-start",
     alignItems: "center",
     overflow: "hidden",
+    paddingBottom : RFPercentage(1)
   },
   cartImageBackground: {
     width: RFPercentage(45.3),
     height: RFPercentage(24.5),
+    // backgroundColor:'yellow'
   },
   cartImage: {
     borderTopLeftRadius: RFPercentage(2),
@@ -431,7 +433,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     flexDirection: "row",
-    top: RFPercentage(-6),
+    // top: RFPercentage(-6),
+    // backgroundColor:'red',
+    marginVertical : RFPercentage(1)
   },
   userImage: {
     width: RFPercentage(4.9),
@@ -455,12 +459,13 @@ const styles = StyleSheet.create({
     width: "92%",
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    bottom: RFPercentage(3),
+
+    // bottom: RFPercentage(3),
   },
   taskText: {
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_400Regular",
-    marginTop: RFPercentage(-1),
+    // marginTop: RFPercentage(-1),
     color: Colors.darkGrey2,
   },
   compensationText: {
@@ -477,7 +482,7 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     marginBottom: RFPercentage(6),
   },
-  infoWrapper: { top: RFPercentage(0.2), width: "100%", justifyContent: "center", alignItems: "center" },
+  infoWrapper: { width: "100%", justifyContent: "center", alignItems: "center",},
   compensationWrapper: {
     marginTop: RFPercentage(1),
     justifyContent: "center",

@@ -165,7 +165,7 @@ function Login(props: any) {
         </TouchableOpacity>
       </TouchableOpacity>
 
-      <MyAppButton title={"Login"} loading={indicator} marginTop={RFPercentage(7)} onPress={() => handleLogin()} />
+      <MyAppButton title={"Login"} loading={indicator} marginTop={RFPercentage(7)} onPress={() => handleLogin()} disabled={indicator} />
 
       <View style={styles.socialLoginContainer}>
         <View style={styles.divider} />

@@ -13,14 +13,20 @@ interface Timestamp {
 export const getRelativePostTime = (createdAt: Timestamp): string => {
   const postDate = new Date(createdAt.seconds * 1000);
   const now = new Date();
-  const differenceInDays = (now.getTime() - postDate.getTime()) / (1000 * 60 * 60 * 24);
+  const diffInSeconds = (now.getTime() - postDate.getTime()) / 1000;
+  const differenceInDays = diffInSeconds / (60 * 60 * 24);
+
+  if (diffInSeconds < 10) {
+    return "Just now";
+  }
 
   if (differenceInDays > 30) {
     return format(postDate, 'MMM d, yyyy');
   }
-
   return formatDistanceToNow(postDate, { addSuffix: true });
 };
+
+
 
 export const getFormatedDate = (date: Timestamp | null | undefined): string => {
   if (!date) {

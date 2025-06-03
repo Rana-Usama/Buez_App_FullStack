@@ -239,7 +239,7 @@ function PostRequest({ navigation, route }) {
             ]}
             onPress={() => toggleDropdown("task")}
           >
-            <Text style={styles.dropdownHeaderText}>{selectedTask || "Task Type"}</Text>
+            <Text style={[styles.dropdownHeaderText, {color : selectedTask ?  Colors.black : Colors.heading}]}>{selectedTask || "Task Type"}</Text>
             <MaterialIcons name={showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
           </TouchableOpacity>
 
@@ -252,9 +252,10 @@ function PostRequest({ navigation, route }) {
               style={[
                 styles.dropdown,
                 {
-                  maxHeight: RFPercentage(20),
+                  maxHeight: RFPercentage(21),
                   borderTopLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
                   borderTopRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                  paddingVertical:RFPercentage(1)
                 },
               ]}
               renderItem={({ item }) => (
@@ -269,11 +270,11 @@ function PostRequest({ navigation, route }) {
             <TouchableOpacity
               style={[
                 styles.dropdownHeader,
-                { marginTop: RFPercentage(2.2), borderBottomLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) },
+                { marginTop: RFPercentage(2.2), borderBottomLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) , },
               ]}
               onPress={() => toggleDropdown("compensation")}
             >
-              <Text style={styles.dropdownHeaderText}>{selectedCompensation || "Compensation Type"}</Text>
+              <Text style={[styles.dropdownHeaderText,  {color : selectedCompensation ?  Colors.black : Colors.heading}]}>{selectedCompensation || "Compensation Type"}</Text>
               <MaterialIcons name={showCompensationDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
             </TouchableOpacity>
 
@@ -284,7 +285,7 @@ function PostRequest({ navigation, route }) {
                 keyExtractor={(item) => item.id.toString()}
                 style={[
                   styles.dropdown,
-                  { maxHeight: RFPercentage(20), borderTopLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderTopRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) },
+                  { maxHeight: RFPercentage(20), borderTopLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderTopRightRadius: showCompensationDropdown ? 0 : RFPercentage(1), paddingVertical:RFPercentage(1) },
                 ]}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => selectCompensation(item)} style={styles.dropdownItem}>
@@ -389,7 +390,7 @@ const styles = StyleSheet.create({
   },
   dropdownHeaderText: {
     color: Colors.heading,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_400Regular",
     left: RFPercentage(-0.5),
   },
@@ -405,7 +406,9 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1),
   },
   dropdownItem: {
-    padding: RFPercentage(2),
+    padding: RFPercentage(0.8),
+    paddingHorizontal:RFPercentage(1.5)
+    // backgroundColor:'red'
   },
   dropdownItemText: {
     fontSize: RFPercentage(2),
