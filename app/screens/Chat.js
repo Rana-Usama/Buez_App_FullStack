@@ -1,7 +1,6 @@
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { GiftedChat } from "react-native-gifted-chat";
-import { Avatar } from "react-native-elements";
 import Nav from "../components/common/Nav";
 import { collection, query, orderBy, limit, onSnapshot, addDoc, getDocs, Timestamp, startAfter, doc, updateDoc, where, writeBatch, getDoc } from "firebase/firestore";
 

@@ -32,6 +32,7 @@ function FAQ({ navigation }) {
 
   const [expandedIndex, setExpandedIndex] = useState(null);
 
+
   const toggleFAQ = (index) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
@@ -42,6 +43,8 @@ function FAQ({ navigation }) {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
   }, []);
+
+  
   return (
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>

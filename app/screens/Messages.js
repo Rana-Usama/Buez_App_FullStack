@@ -212,7 +212,7 @@ function Messages({ navigation }) {
           onRefresh={refreshChats}
           ListEmptyComponent={() => (
             <View style={styles.emptyContainer}>
-              {!loading && filteredChats.length === 0 && (
+              {!loading && filteredChats?.length === 0 && (
                 <View style={{ justifyContent: "center", alignItems: "center" }}>
                   <Image
                     style={styles.noMessageIcon}

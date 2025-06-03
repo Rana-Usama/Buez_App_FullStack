@@ -16,6 +16,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getFormatedDate } from "../services/Shared.service";
 import { usePostContext } from "../contexts/PostContext";
 import { Icons } from "../config/theme";
+import NotFound from "../components/common/NotFound";
 
 function Home({ navigation }) {
   const { userData: user } = useUser();
@@ -279,16 +280,10 @@ function Home({ navigation }) {
           {(loading || loadingMore) && (
             <View style={{ marginTop: RFPercentage(20) }}>
               <ActivityIndicator size="large" color={Colors.primary} />
-              {/* <Text>Loading....</Text> */}
             </View>
           )}
 
-          {!loading && taskRecords.length === 0 && (
-            <View style={styles.notFoundWrapper}>
-              <Image style={styles.notFoundImg} source={Icons.empty} />
-              <Text style={styles.notFoundText}>No Record Found!</Text>
-            </View>
-          )}
+          {!loading && taskRecords?.length === 0 && <NotFound title="No Record Found!" />}
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </KeyboardAvoidingView>

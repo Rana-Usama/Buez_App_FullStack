@@ -14,6 +14,8 @@ function DeciderScreen({ navigation }) {
   const userId = getAuth()?.currentUser?.uid;
   const { userData, loading } = useUser();
   console.log("DECIDER: user", userData, loading, userId);
+
+  
   return (
     <>
       {!userId || loading || !userData ? (

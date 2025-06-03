@@ -15,6 +15,7 @@ import { getRelativePostTime } from "../services/Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
+import NotFound from "../components/common/NotFound";
 
 function MyRequests({ navigation }) {
   const { userData: user } = useUser();
@@ -267,11 +268,8 @@ function MyRequests({ navigation }) {
           </View>
         )}
 
-        {!loading && taskRecords.length === 0 && (
-          <View style={styles.notFoundWrapper}>
-            <Image style={styles.notFoundIcon} source={Icons.empty} />
-            <Text style={styles.notFoundText}>No Record Found!</Text>
-          </View>
+        {!loading && taskRecords?.length === 0 && (
+          <NotFound title='No Record Found!' />
         )}
 
         <View style={styles.bottomSpacing} />

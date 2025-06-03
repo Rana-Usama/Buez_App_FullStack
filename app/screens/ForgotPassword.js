@@ -12,8 +12,6 @@ import MyAppButton from "../components/common/MyAppButton";
 import Colors from "../config/Colors";
 
 function ForgotPassword(props) {
-  const [indicator, showIndicator] = useState(false);
-
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Enter Email",
@@ -27,27 +25,7 @@ function ForgotPassword(props) {
     SetInputField(tempfeilds);
   };
 
-  const handleLogin = () => {
-    showIndicator(true);
-    let tempfeilds = [...inputField];
 
-    if (tempfeilds[0].value === "" || tempfeilds[1].value === "") {
-      alert("Please fill all the feilds to proceed");
-      showIndicator(false);
-      return true;
-    }
-    try {
-    } catch (error) {
-      alert("Error");
-    }
-
-    showIndicator(false);
-  };
-
-  const [remember, setRemember] = useState(false);
-  const toggleRemember = () => {
-    setRemember(!remember);
-  };
 
   return (
     <Screen style={styles.screen}>

@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { MaterialIcons } from "@expo/vector-icons";
 
 // components
-import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
 import InputField from "../components/common/InputField";
 
 // config
@@ -76,7 +73,6 @@ function ChangePassword({ navigation }) {
       if (!handleValidation()) {
         return;
       }
-
       showIndicator(true); // Show loader
       const currentPassword = inputField[0].value;
       const newPassword = inputField[1].value;
@@ -87,26 +83,10 @@ function ChangePassword({ navigation }) {
       setErrorMessage(error.message);
       setShowError(true);
     }
-
     showIndicator(false); // Hide loader
   };
 
-  const handleLogin = () => {
-    // showIndicator(true);
-    let tempfeilds = [...inputField];
 
-    if (tempfeilds[0].value === "" || tempfeilds[1].value === "") {
-      // showIndicator(false);
-      return true;
-    }
-    // navigation.navigate("HomeTab");
-    try {
-    } catch (error) {
-      alert("Error");
-    }
-
-    // showIndicator(false);
-  };
   return (
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
