@@ -13,13 +13,13 @@ import Colors from "../config/Colors";
 function SuccessScreen({ navigation }) {
   return (
     <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
-      <Octicons name={"check-circle"} style={{ fontSize: RFPercentage(14) }} color={Colors.white} />
+      <Octicons name={"check-circle"} style={styles.icon} color={Colors.white} />
 
       {/* Gif */}
-      <Text style={{ color: Colors.white, fontSize: RFPercentage(2.6), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(3) }}>Request Posted Successfully</Text>
+      <Text style={styles.txt}>Request Posted Successfully</Text>
 
       <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={() => navigation.navigate("Home")}>
-        <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>Home</Text>
+        <Text style={styles.home}>Home</Text>
       </TouchableOpacity>
     </LinearGradient>
   );
@@ -41,6 +41,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: RFPercentage(20),
   },
+  icon: { fontSize: RFPercentage(14) },
+  txt: { color: Colors.white, fontSize: RFPercentage(2.6), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(3) },
+  home: { color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" },
 });
 
 export default SuccessScreen;

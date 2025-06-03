@@ -51,13 +51,13 @@ function Settings({ navigation }) {
 
   return (
     <View style={styles.screen}>
-      <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
         <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Settings" />
 
-        <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(3.5) }}>
-          <Text style={{ color: Colors.lightGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" }}>Help & Security</Text>
-          <View style={{ width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) }} />
+        <View style={styles.content}>
+          <Text style={styles.txt}>Help & Security</Text>
+          <View style={styles.wrap} />
         </View>
 
         {/* Navigation List */}
@@ -66,21 +66,17 @@ function Settings({ navigation }) {
             key={i}
             onPress={item.navigation}
             activeOpacity={0.8}
-            style={{
-              width: "90%",
-              marginTop: i == 0 ? RFPercentage(3) : RFPercentage(2.5),
-              height: RFPercentage(6.5),
-              borderRadius: RFPercentage(1),
-              borderColor: Colors.detailsBorder,
-              borderWidth: RFPercentage(0.1),
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            style={[
+              styles.navigationWrap,
+              {
+                marginTop: i == 0 ? RFPercentage(3) : RFPercentage(2.5),
+              },
+            ]}
           >
-            <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "center", flexDirection: "row" }}>
-              <Image style={{ width: RFPercentage(2.8), height: RFPercentage(2.8) }} source={item.iconSource} />
-              <Text style={{ marginLeft: RFPercentage(1.6), color: item.redColor ? Colors.red : "#44403C", fontSize: RFPercentage(1.7), fontFamily: "Poppins-Regular" }}>{item.title}</Text>
-              <MaterialIcons name="arrow-forward-ios" style={{ fontSize: RFPercentage(1.7), color: item.redColor ? Colors.red : "#44403C", position: "absolute", right: 0 }} color={Colors.heading} />
+            <View style={styles.content2}>
+              <Image style={styles.img} source={item.iconSource} />
+              <Text style={[styles.title, { color: item.redColor ? Colors.red : "#44403C" }]}>{item.title}</Text>
+              <MaterialIcons name="arrow-forward-ios" style={[styles.icon, { color: item.redColor ? Colors.red : "#44403C" }]} color={Colors.heading} />
             </View>
           </TouchableOpacity>
         ))}
@@ -99,6 +95,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
   },
+  scroll: { width: "100%" },
+  scrollContent: { width: "100%", alignItems: "center" },
+  content: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(3.5) },
+  txt: { color: Colors.lightGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" },
+  wrap: { width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) },
+  navigationWrap: {
+    height: RFPercentage(6.5),
+    borderRadius: RFPercentage(1),
+    borderColor: Colors.detailsBorder,
+    borderWidth: RFPercentage(0.1),
+    justifyContent: "center",
+    alignItems: "center",
+    width: "90%",
+  },
+  content2: { width: "90%", justifyContent: "flex-start", alignItems: "center", flexDirection: "row" },
+  img: { width: RFPercentage(2.8), height: RFPercentage(2.8) },
+  title: { fontSize: RFPercentage(1.7), fontFamily: "Poppins-Regular", marginLeft: RFPercentage(1.6) },
+  icon: { position: "absolute", right: 0, fontSize: RFPercentage(1.7) },
 });
 
 export default Settings;

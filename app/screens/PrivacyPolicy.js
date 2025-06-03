@@ -12,7 +12,7 @@ import Colors from "../config/Colors";
 function PrivacyPolicy({ navigation }) {
   return (
     <View style={styles.screen}>
-      <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title="Privacy Policy" />
 
@@ -73,7 +73,7 @@ function PrivacyPolicy({ navigation }) {
           <Text style={styles.text}>If you have any questions about this Privacy Policy, please contact us at support@example.com.</Text>
         </View>
 
-        <View style={{ marginBottom: RFPercentage(6) }} />
+        <View style={styles.space} />
       </ScrollView>
 
       {/* Bottom Tab */}
@@ -108,6 +108,10 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins-Regular",
   },
+  scroll : { width: "100%" },
+  scrollContent : { width: "100%", alignItems: "center" },
+  space : { marginBottom: RFPercentage(6) }
+
 });
 
 export default PrivacyPolicy;

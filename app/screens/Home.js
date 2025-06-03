@@ -76,7 +76,7 @@ function Home({ navigation }) {
       return () => {
         console.log("unmounting: Home");
       };
-    }, [activeFilter]),
+    }, [activeFilter])
   );
 
   const fetchRequests = async (islastVisiblePost = undefined) => {
@@ -249,10 +249,10 @@ function Home({ navigation }) {
               />
 
               {/* Info */}
-              <View style={{ top: RFPercentage(0.2), width: "100%", justifyContent: "center", alignItems: "center" }}>
+              <View style={styles.infoWrapper}>
                 <View style={styles.cartInfoContainer}>
                   <TouchableOpacity activeOpacity={0.8}>
-                    <Image style={styles.userImage} source={cart.user.profileImage ? { uri: cart.user.profileImage } : require("../../assets/Images/dp.png") } />
+                    <Image style={styles.userImage} source={cart.user.profileImage ? { uri: cart.user.profileImage } : require("../../assets/Images/dp.png")} />
                   </TouchableOpacity>
 
                   <Text style={styles.userName}>{cart.user.userName}</Text>
@@ -261,16 +261,8 @@ function Home({ navigation }) {
 
                 <View style={styles.taskInfoContainer}>
                   <Text style={styles.taskText}>{cart.description?.substr(0, 40) + (cart.description?.length > 15 ? "..." : "")}</Text>
-                  <View
-                    style={{
-                      marginTop: RFPercentage(1),
-
-                      justifyContent: "center",
-                      alignItems: "center",
-                      flexDirection: "row",
-                    }}
-                  >
-                    <Image tintColor={Colors.darkGrey} style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/compensation.png")} />
+                  <View style={styles.compensationWrapper}>
+                    <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
                     <Text style={styles.compensationText}>
                       Compensation:{" "}
                       <Text style={styles.compensationAmount}>
@@ -291,9 +283,9 @@ function Home({ navigation }) {
           )}
 
           {!loading && taskRecords.length === 0 && (
-            <View style={{ marginTop: RFPercentage(16), justifyContent: "center", alignItems: "center" }}>
-              <Image style={{ borderRadius: RFPercentage(1), width: RFPercentage(16), height: RFPercentage(16), marginBottom: RFPercentage(2) }} source={require("../../assets/Images/empty.png")} />
-              <Text style={{ color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" }}>No Record Found!</Text>
+            <View style={styles.notFoundWrapper}>
+              <Image style={styles.notFoundImg} source={require("../../assets/Images/empty.png")} />
+              <Text style={styles.notFoundText}>No Record Found!</Text>
             </View>
           )}
           <View style={styles.bottomSpacing} />
@@ -483,6 +475,17 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     marginBottom: RFPercentage(6),
   },
+  infoWrapper: { top: RFPercentage(0.2), width: "100%", justifyContent: "center", alignItems: "center" },
+  compensationWrapper: {
+    marginTop: RFPercentage(1),
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  compansationIcon: { width: RFPercentage(3), height: RFPercentage(3) },
+  notFoundWrapper: { marginTop: RFPercentage(16), justifyContent: "center", alignItems: "center" },
+  notFoundImg: { borderRadius: RFPercentage(1), width: RFPercentage(16), height: RFPercentage(16), marginBottom: RFPercentage(2) },
+  notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
 });
 
 export default Home;

@@ -12,11 +12,11 @@ import Colors from "../config/Colors";
 function TermsAndConditions({ navigation }) {
   return (
     <View style={styles.screen}>
-      <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title="Terms & Conditions" />
 
-        <View style={{ width: "90%", marginTop: RFPercentage(3), justifyContent: "center", alignItems: "center" }}>
+        <View style={styles.content}>
           <Text style={styles.text}>
             Welcome to BUEZ, a platform operated by Devappics that connects users who need help with daily tasks to individuals willing to provide assistance in exchange for compensation. By accessing
             or using the BUEZ mobile application (the "App") or any related services (collectively, the "Service"), you agree to be bound by these Terms and Conditions ("Terms"). If you do not agree,
@@ -102,6 +102,9 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins-Regular",
   },
+  content: { width: "90%", marginTop: RFPercentage(3), justifyContent: "center", alignItems: "center" },
+  scroll: { width: "100%" },
+  scrollContent: { width: "100%", alignItems: "center" },
 });
 
 export default TermsAndConditions;

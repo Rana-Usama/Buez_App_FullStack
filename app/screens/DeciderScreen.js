@@ -15,11 +15,14 @@ function DeciderScreen({ navigation }) {
   console.log("DECIDER: user", userData, loading, userId);
   return (
     <>
-    {(!userId || loading || !userData) ? (<LinearGradient colors={[Colors.white, Colors.white]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
-      <Image style={{ width: RFPercentage(10), height: RFPercentage(10) }} source={require("../../assets/Images/buez.png")} />
-      </LinearGradient >)
-     : <SubscriptionListener navigation={navigation} userId={userId} />}
-     </>
+      {!userId || loading || !userData ? (
+        <LinearGradient colors={[Colors.white, Colors.white]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
+          <Image style={styles.img} source={require("../../assets/Images/buez.png")} />
+        </LinearGradient>
+      ) : (
+        <SubscriptionListener navigation={navigation} userId={userId} />
+      )}
+    </>
   );
 }
 
@@ -29,6 +32,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  img: { width: RFPercentage(10), height: RFPercentage(10) },
 });
 
 export default DeciderScreen;

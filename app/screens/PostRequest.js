@@ -86,7 +86,7 @@ function PostRequest({ navigation, route }) {
         setImageUris(temp);
         setDescription(currentPostRequest.description);
       }
-    }, [route.params?.postRequest]),
+    }, [route.params?.postRequest])
   );
 
   const toggleDropdown = (dropdownType) => {
@@ -183,13 +183,17 @@ function PostRequest({ navigation, route }) {
       if (isEditing) {
         const imgs = imageUris.filter((img) => Boolean(img));
         if (imgs.length === 0) {
-          imgs.push('https://firebasestorage.googleapis.com/v0/b/socially-1720865151833.appspot.com/o/images%2Ffe116284-58be-41c1-b538-53eb4816ee23.png?alt=media&token=9e6ed2f0-d729-4b1f-a210-24adb1d1b5eb');
+          imgs.push(
+            "https://firebasestorage.googleapis.com/v0/b/socially-1720865151833.appspot.com/o/images%2Ffe116284-58be-41c1-b538-53eb4816ee23.png?alt=media&token=9e6ed2f0-d729-4b1f-a210-24adb1d1b5eb"
+          );
         }
         await updatePost(currentPostRequest.id, data, imgs);
       } else {
         const imgs = imageUris.filter((img) => Boolean(img));
         if (imgs.length === 0) {
-          imgs.push('https://firebasestorage.googleapis.com/v0/b/socially-1720865151833.appspot.com/o/images%2Ffe116284-58be-41c1-b538-53eb4816ee23.png?alt=media&token=9e6ed2f0-d729-4b1f-a210-24adb1d1b5eb');
+          imgs.push(
+            "https://firebasestorage.googleapis.com/v0/b/socially-1720865151833.appspot.com/o/images%2Ffe116284-58be-41c1-b538-53eb4816ee23.png?alt=media&token=9e6ed2f0-d729-4b1f-a210-24adb1d1b5eb"
+          );
         }
         await savePost(data, imgs);
       }
@@ -249,7 +253,7 @@ function PostRequest({ navigation, route }) {
             />
           )}
 
-          <View style={{ width: "100%", justifyContent: "center", alignItems: "center" }}>
+          <View style={styles.typeWrapper}>
             <TouchableOpacity
               style={[
                 styles.dropdownHeader,
@@ -280,30 +284,12 @@ function PostRequest({ navigation, route }) {
           </View>
 
           {/* decsription */}
-          <View
-            style={{
-              width: "90%",
-              height: RFPercentage(20),
-              borderRadius: RFPercentage(1.2),
-              borderColor: Colors.border,
-              borderWidth: RFPercentage(0.1),
-              justifyContent: "flex-start",
-              alignItems: "flex-start",
-              marginTop: RFPercentage(2.5),
-            }}
-          >
-            <TextInput
-              placeholder="Description"
-              placeholderTextColor={Colors.heading}
-              value={description}
-              multiline
-              onChangeText={(e) => setDescription(e)}
-              style={{ width: "90%", color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), top: RFPercentage(1.5), left: RFPercentage(1.5) }}
-            />
+          <View style={styles.descriptionContainer}>
+            <TextInput placeholder="Description" placeholderTextColor={Colors.heading} value={description} multiline onChangeText={(e) => setDescription(e)} style={styles.desc} />
           </View>
 
           {/* Input field */}
-          <View style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
+          <View style={styles.typeWrapper}>
             {inputField.map((item, i) =>
               item?.display(selectedCompensation) ? (
                 <View key={i} style={{ marginTop: i === 0 ? RFPercentage(1.7) : RFPercentage(1) }}>
@@ -324,33 +310,28 @@ function PostRequest({ navigation, route }) {
                     width={"97.5%"}
                   />
                 </View>
-              ) : null,
+              ) : null
             )}
           </View>
 
           {/* Image Picker */}
-          <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.3) }}>
-            <Text style={{ marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" }}>Upload Photos From Gallery</Text>
-            <View style={{ width: "100%", justifyContent: "space-between", alignItems: "center", marginTop: RFPercentage(0.8), flexDirection: "row" }}>
+          <View style={styles.imageWrapper}>
+            <Text style={styles.imgText}>Upload Photos From Gallery</Text>
+            <View style={styles.imgContainer}>
               {[0, 1, 2].map((index) => (
-                <TouchableOpacity
-                  key={index}
-                  activeOpacity={0.8}
-                  onPress={() => pickImage(index)}
-                  style={{ width: "32%", height: RFPercentage(14), borderRadius: RFPercentage(1.4), justifyContent: "center", alignItems: "center", backgroundColor: "#F3F4F6", position: "relative" }}
-                >
+                <TouchableOpacity key={index} activeOpacity={0.8} onPress={() => pickImage(index)} style={styles.imgPick}>
                   {imageUris[index] ? (
                     <>
-                      <Image style={{ width: "100%", height: "100%", borderRadius: RFPercentage(1.4) }} source={{ uri: imageUris[index] }} />
+                      <Image style={styles.img2} source={{ uri: imageUris[index] }} />
                       <TouchableOpacity onPress={() => [deleteImage(index), pickImage(index)]} style={{ position: "absolute", top: 5, right: 5 }}>
-                        <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/edit.png")} />
+                        <Image style={styles.img3} source={require("../../assets/Images/edit.png")} />
                       </TouchableOpacity>
                       {/* <TouchableOpacity onPress={() => deleteImage(index)} style={{ position: "absolute", top: 5, left: 5 }}>
                       <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/cross.png")} />
                     </TouchableOpacity> */}
                     </>
                   ) : (
-                    <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/gal.png")} />
+                    <Image style={styles.img3} source={require("../../assets/Images/gal.png")} />
                   )}
                 </TouchableOpacity>
               ))}
@@ -360,7 +341,7 @@ function PostRequest({ navigation, route }) {
           {/*Login Button */}
           <MyAppButton disabled={indicator} loading={indicator} title={title === "Edit Profile" ? "Edit" : "Post"} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
 
-          <View style={{ marginBottom: RFPercentage(8) }} />
+          <View style={styles.space} />
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -419,6 +400,25 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     color: Colors.heading,
   },
+  typeWrapper: { width: "100%", justifyContent: "center", alignItems: "center" },
+  descriptionContainer: {
+    width: "90%",
+    height: RFPercentage(20),
+    borderRadius: RFPercentage(1.2),
+    borderColor: Colors.border,
+    borderWidth: RFPercentage(0.1),
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    marginTop: RFPercentage(2.5),
+  },
+  desc: { width: "90%", color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), top: RFPercentage(1.5), left: RFPercentage(1.5) },
+  imageWrapper: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.3) },
+  imgText: { marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
+  imgContainer: { width: "100%", justifyContent: "space-between", alignItems: "center", marginTop: RFPercentage(0.8), flexDirection: "row" },
+  imgPick: { width: "32%", height: RFPercentage(14), borderRadius: RFPercentage(1.4), justifyContent: "center", alignItems: "center", backgroundColor: "#F3F4F6", position: "relative" },
+  img2: { width: "100%", height: "100%", borderRadius: RFPercentage(1.4) },
+  img3: { width: RFPercentage(3), height: RFPercentage(3) },
+  space: { marginBottom: RFPercentage(8) },
 });
 
 export default PostRequest;

@@ -114,15 +114,7 @@ function ChangePassword({ navigation }) {
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Change Password" />
 
         {/* Input field */}
-        <View
-          style={{
-            marginTop: RFPercentage(6),
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            alignSelf: "center",
-          }}
-        >
+        <View style={styles.fieldContainer}>
           {inputField.map((item, i) => (
             <View
               key={i}
@@ -131,7 +123,7 @@ function ChangePassword({ navigation }) {
                 alignSelf: "center",
               }}
             >
-              <Text style={{ left: RFPercentage(1.6), marginBottom: RFPercentage(1.2), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" }}>{item.title}</Text>
+              <Text style={styles.title}>{item.title}</Text>
               <InputField
                 placeholder={item.placeholder}
                 placeholderColor={Colors.inputFieldPlaceholder}
@@ -153,8 +145,9 @@ function ChangePassword({ navigation }) {
             </View>
           ))}
         </View>
+
         {/* Button */}
-        <View style={{ justifyContent: "center", alignItems: "center", marginTop: RFPercentage(8) }}>
+        <View style={styles.buttonWrapper}>
           <MyAppButton title={"Change"} marginTop={RFPercentage(2)} onPress={() => handlePasswordChange()} />
         </View>
       </ScrollView>
@@ -172,6 +165,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
   },
+  fieldContainer: {
+    marginTop: RFPercentage(6),
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    alignSelf: "center",
+  },
+  title: { left: RFPercentage(1.6), marginBottom: RFPercentage(1.2), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" },
+  buttonWrapper: { justifyContent: "center", alignItems: "center", marginTop: RFPercentage(8) },
 });
 
 export default ChangePassword;

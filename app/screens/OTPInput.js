@@ -51,15 +51,15 @@ function OTPInput(props) {
 
   return (
     <Screen style={styles.screen}>
-      <View style={{ width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(3) }}>
+      <View style={styles.container}>
         <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={{ position: "absolute", left: 0 }}>
           <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.5) }} color={Colors.heading} />
         </TouchableOpacity>
-        <Text style={{ color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium" }}>Reset Password?</Text>
+        <Text style={styles.heading}>Reset Password?</Text>
       </View>
 
       {/* Input field */}
-      <View style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
+      <View style={styles.wrap}>
         {inputField.map((item, i) => (
           <View key={i} style={{ marginTop: i == 0 ? RFPercentage(5) : RFPercentage(3) }}>
             <InputField
@@ -94,6 +94,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
   },
+  container: { width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(3) },
+  heading: { color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium" },
+  wrap: { justifyContent: "center", alignItems: "center", width: "100%" },
 });
 
 export default OTPInput;

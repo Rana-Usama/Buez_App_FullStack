@@ -53,53 +53,20 @@ function FAQ({ navigation }) {
             <View key={index}>
               <TouchableOpacity
                 onPress={() => toggleFAQ(index)}
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottomWidth: 1,
-                  borderBottomColor: "#F3F4F6",
-                  width: "100%",
-                  marginTop: !index == 0 ? RFPercentage(2.5) : 0,
-                  paddingVertical: RFPercentage(1.2),
-                }}
+                style={[
+                  styles.toggleFAQ,
+                  {
+                    marginTop: !index == 0 ? RFPercentage(2.5) : 0,
+                  },
+                ]}
               >
                 <View style={{ width: "95%" }}>
-                  <Text
-                    style={{
-                      fontSize: RFPercentage(1.8),
-                      color: "#334155",
-                      fontFamily: "Poppins-Regular",
-                      textAlign: "left",
-                    }}
-                  >
-                    {item.question}
-                  </Text>
+                  <Text style={styles.q}>{item.question}</Text>
                 </View>
 
-                <MaterialIcons
-                  name={expandedIndex === index ? "keyboard-arrow-up" : "keyboard-arrow-down"}
-                  style={{
-                    fontSize: RFPercentage(3),
-                    color: "#57534E",
-                    position: "absolute",
-                    right: 0,
-                  }}
-                />
+                <MaterialIcons name={expandedIndex === index ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.icon} />
               </TouchableOpacity>
-              {expandedIndex === index && (
-                <Text
-                  style={{
-                    marginTop: RFPercentage(1),
-                    fontSize: RFPercentage(1.7),
-                    color: "#64748B",
-                    textAlign: "justify",
-                    fontFamily: "Poppins-Regular",
-                  }}
-                >
-                  {item.answer}
-                </Text>
-              )}
+              {expandedIndex === index && <Text style={styles.ans}>{item.answer}</Text>}
             </View>
           ))}
         </View>
@@ -117,6 +84,34 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: Colors.white,
+  },
+  toggleFAQ: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    width: "100%",
+    paddingVertical: RFPercentage(1.2),
+  },
+  q: {
+    fontSize: RFPercentage(1.8),
+    color: "#334155",
+    fontFamily: "Poppins-Regular",
+    textAlign: "left",
+  },
+  icon: {
+    fontSize: RFPercentage(3),
+    color: "#57534E",
+    position: "absolute",
+    right: 0,
+  },
+  ans: {
+    marginTop: RFPercentage(1),
+    fontSize: RFPercentage(1.7),
+    color: "#64748B",
+    textAlign: "justify",
+    fontFamily: "Poppins-Regular",
   },
 });
 

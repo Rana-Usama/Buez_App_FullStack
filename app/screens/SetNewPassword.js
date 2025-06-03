@@ -55,15 +55,15 @@ function SetNewPassword(props) {
 
   return (
     <Screen style={styles.screen}>
-      <View style={{ width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(3) }}>
+      <View style={styles.content}>
         <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={{ position: "absolute", left: 0 }}>
-          <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.5) }} color={Colors.heading} />
+          <Ionicons name="chevron-back" style={styles.arrow} color={Colors.heading} />
         </TouchableOpacity>
-        <Text style={{ color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium" }}>Reset Password?</Text>
+        <Text style={styles.title}>Reset Password?</Text>
       </View>
 
       {/* Input field */}
-      <View style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
+      <View style={styles.fieldContent}>
         {inputField.map((item, i) => (
           <View key={i} style={{ marginTop: i == 0 ? RFPercentage(5) : RFPercentage(3) }}>
             <InputField
@@ -98,6 +98,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
   },
+  content : { width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(3) },
+arrow : { fontSize: RFPercentage(2.5) },
+title : { color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium" },
+fieldContent : { justifyContent: "center", alignItems: "center", width: "100%" },
+
 });
 
 export default SetNewPassword;

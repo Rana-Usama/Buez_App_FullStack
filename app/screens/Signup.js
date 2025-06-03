@@ -16,6 +16,8 @@ import Colors from "../config/Colors";
 import { validateConfirmPassword, validateEmail, validateName, validatePassword } from "../utils/helperFunctions";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { addUser } from "../services/User.service";
+import { FIREBASE_DB } from "../../firebaseConfig";
+import { setDoc, doc } from "firebase/firestore";
 
 function Signup(props) {
   const [indicator, showIndicator] = useState(false);
@@ -105,6 +107,8 @@ function Signup(props) {
         const userData = {
           userName: userName,
           email: email,
+          trialStartDate: new Date(),
+          isSubscribed: false,
         };
         await addUser(user?.uid, userData);
       }

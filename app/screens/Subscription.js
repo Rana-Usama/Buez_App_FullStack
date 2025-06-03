@@ -9,6 +9,7 @@ import { useUser } from "../contexts/user.context";
 import Screen from "../components/Screen";
 import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
+import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 // config
 import Colors from "../config/Colors";
@@ -17,7 +18,7 @@ import SubscriptionListener from "../components/SubscriptionListener";
 async function getPaymentSheet(amount, currency, userId) {
   console.log("getPaymentSheet", amount);
   try {
-    const response = await fetch("http://192.168.100.5:4242/payment-sheet", {
+    const response = await fetch("http://192.168.100.30:4242/payment-sheet", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,6 +38,7 @@ async function getPaymentSheet(amount, currency, userId) {
 function Subscription(props) {
   const { userData } = useUser();
   const userId = getAuth()?.currentUser?.uid;
+  const firestore = getFirestore();
   const [indicator, showIndicator] = useState(false);
   const { initPaymentSheet, presentPaymentSheet, confirmPayment } = useStripe();
   const [loading, setLoading] = useState(false);
@@ -88,6 +90,20 @@ function Subscription(props) {
     }
   };
 
+  const updateSubscriptionStatus = async () => {
+    if (!userId) return;
+    const userRef = doc(firestore, "users", userId);
+    try {
+      await updateDoc(userRef, {
+        isSubscribed: true,
+        subscriptionDate: serverTimestamp(),
+      });
+      console.log("User subscription status updated in Firestore");
+    } catch (error) {
+      console.error("Failed to update subscription status:", error);
+    }
+  };
+
   const onPaymentSheet = async () => {
     const { error } = await presentPaymentSheet();
     if (error) {
@@ -96,7 +112,7 @@ function Subscription(props) {
       console.log(error.message);
     } else {
       // save user subscription to firebase
-
+      await updateSubscriptionStatus();
       console.log("Payment successful");
     }
   };

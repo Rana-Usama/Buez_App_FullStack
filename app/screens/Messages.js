@@ -214,7 +214,7 @@ function Messages({ navigation }) {
               {!loading && filteredChats.length === 0 && (
                 <View style={{ justifyContent: "center", alignItems: "center" }}>
                   <Image
-                    style={{ borderRadius: RFPercentage(1), width: RFPercentage(26), height: RFPercentage(18), marginBottom: RFPercentage(2) }}
+                    style={styles.noMessageIcon}
                     source={require("../../assets/Images/noMessage.png")}
                   />
                   <Text style={styles.emptyText}>{activeFilter === "Unread" ? "No Unread Messages" : "No Messages Yet"}</Text>
@@ -397,6 +397,7 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     textAlign: "center",
   },
+  noMessageIcon : { borderRadius: RFPercentage(1), width: RFPercentage(26), height: RFPercentage(18), marginBottom: RFPercentage(2) }
 });
 
 export default Messages;

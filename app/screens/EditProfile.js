@@ -61,7 +61,7 @@ function EditProfile({ navigation }) {
     useCallback(() => {
       console.log("getLoggedInUser");
       fetchUserData();
-    }, []),
+    }, [])
   );
 
   const fetchUserData = async () => {
@@ -104,34 +104,20 @@ function EditProfile({ navigation }) {
       {/* Nav */}
       <Nav dpNull={true} marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Edit Profile" />
 
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboard}>
         <ScrollView style={{ width: "100%" }} showsVerticalScrollIndicator={false} contentContainerStyle={{ width: "100%", alignItems: "center" }} keyboardShouldPersistTaps="handled">
           {/* Profile Image */}
           <TouchableOpacity activeOpacity={0.8} onPress={pickImage} style={{ marginTop: RFPercentage(5.5), opacity: imageUri ? 1 : 0.8 }}>
-            <Image
-              style={{ width: RFPercentage(20), height: RFPercentage(20), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) }}
-              source={imageUri ? { uri: imageUri } : require("../../assets/Images/dp.png")}
-            />
-            <Image
-              style={{ width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(20), position: "absolute", bottom: RFPercentage(-0.3), right: RFPercentage(3) }}
-              source={require("../../assets/Images/gallery.png")}
-            />
+            <Image style={styles.image} source={imageUri ? { uri: imageUri } : require("../../assets/Images/dp.png")} />
+            <Image style={styles.edit} source={require("../../assets/Images/gallery.png")} />
           </TouchableOpacity>
-          <View style={{ width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.5) }}>
-            <Text style={{ color: Colors.lightGrey, fontSize: RFPercentage(1.9), fontFamily: "Poppins-Regular" }}>Edit Info</Text>
-            <View style={{ width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) }} />
+          <View style={styles.editInfo}>
+            <Text style={styles.infoText}>Edit Info</Text>
+            <View style={styles.infoBottom} />
           </View>
 
           {/* Input field */}
-          <View
-            style={{
-              marginTop: RFPercentage(3),
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              alignSelf: "center",
-            }}
-          >
+          <View style={styles.fieldWrapper}>
             {inputField.map((item, i) => (
               <View
                 key={i}
@@ -140,7 +126,7 @@ function EditProfile({ navigation }) {
                   alignSelf: "center",
                 }}
               >
-                <Text style={{ left: RFPercentage(1.6), marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" }}>{item.title}</Text>
+                <Text style={styles.titleText}>{item.title}</Text>
                 <InputField
                   placeholder={item.placeholder}
                   placeholderColor={Colors.inputFieldPlaceholder}
@@ -163,7 +149,7 @@ function EditProfile({ navigation }) {
             ))}
           </View>
           {/* Button */}
-          <View style={{ justifyContent: "center", alignItems: "center", marginTop: RFPercentage(12) }}>
+          <View style={styles.buttonWrapper}>
             {isUpdating ? <ActivityIndicator size="large" color={Colors.primary} /> : <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={updateProfileData} />}{" "}
           </View>
         </ScrollView>
@@ -182,6 +168,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
   },
+  keyboard: { flex: 1, justifyContent: "center", alignItems: "center" },
+  image: { width: RFPercentage(20), height: RFPercentage(20), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) },
+  edit: { width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(20), position: "absolute", bottom: RFPercentage(-0.3), right: RFPercentage(3) },
+  editInfo: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.5) },
+  infoText: { color: Colors.lightGrey, fontSize: RFPercentage(1.9), fontFamily: "Poppins-Regular" },
+  infoBottom: { width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) },
+  fieldWrapper: {
+    marginTop: RFPercentage(3),
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    alignSelf: "center",
+  },
+  titleText: { left: RFPercentage(1.6), marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" },
+  buttonWrapper: { justifyContent: "center", alignItems: "center", marginTop: RFPercentage(12) },
 });
 
 export default EditProfile;

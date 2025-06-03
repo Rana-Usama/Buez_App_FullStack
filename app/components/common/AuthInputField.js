@@ -117,13 +117,6 @@ function InputField({
           </TouchableOpacity>
         ) : null}
       </View>
-
-      {/* <View
-        style={{
-          width: '90%',
-          height: RFPercentage(0.1),
-          backgroundColor: Colors.darkGrey,
-        }}></View> */}
     </View>
   );
 }

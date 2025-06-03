@@ -7,14 +7,16 @@ import { uploadImage } from './Shared.service';
 
 const db = FIREBASE_DB;
 
-export const addUser = async (id, { userName, email, phoneNumber = '', profileImage = ''}) => {
+export const addUser = async (id, { userName, email, phoneNumber = '', profileImage = '', trialStartDate, isSubscribed}) => {
   try {
     console.log('ADD_USER');
     const user = {
       userName,
       phoneNumber,
       profileImage,
-      email
+      email,
+      trialStartDate, 
+      isSubscribed
     };
 
     await setDoc(doc(db, "users", id), user);

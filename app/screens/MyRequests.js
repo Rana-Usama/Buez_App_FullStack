@@ -17,7 +17,7 @@ import { useUser } from "../contexts/user.context";
 
 function MyRequests({ navigation }) {
   const { userData: user } = useUser();
-    const profileImgUrl = user?.profileImage || "";
+  const profileImgUrl = user?.profileImage || "";
   const [inputField, SetInputField] = useState([
     {
       placeholder: "Search",
@@ -67,7 +67,7 @@ function MyRequests({ navigation }) {
       return () => {
         console.log("unmounting: MyRequests");
       };
-    }, [activeFilter]),
+    }, [activeFilter])
   );
 
   const fetchRequests = async (islastVisiblePost = undefined) => {
@@ -176,15 +176,7 @@ function MyRequests({ navigation }) {
         <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title="My Requests" />
 
         {/* Filter Buttons */}
-        <View
-          style={{
-            marginTop: RFPercentage(3.2),
-            justifyContent: "flex-start",
-            alignItems: "flex-start",
-            flexDirection: "row",
-            width: "90%",
-          }}
-        >
+        <View style={styles.filterContainer}>
           {["Active", "Completed"].map((title, index) => (
             <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
           ))}
@@ -207,16 +199,7 @@ function MyRequests({ navigation }) {
                   </View>
 
                   {cart.status === REQUEST_STATUS.Active && (
-                    <View
-                      style={{
-                        justifyContent: "center",
-                        alignItems: "center",
-                        flexDirection: "row",
-                        position: "absolute",
-                        left: RFPercentage(2),
-                        top: RFPercentage(2),
-                      }}
-                    >
+                    <View style={styles.cartWrapper}>
                       <TouchableOpacity activeOpacity={0.8} onPress={() => postEditHandler(cart)}>
                         <Image
                           style={{
@@ -265,34 +248,10 @@ function MyRequests({ navigation }) {
 
             {cart.status === REQUEST_STATUS.Active && (
               <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", top: RFPercentage(-2.5) }}>
-                <TouchableOpacity
-                  style={{
-                    borderRadius: RFPercentage(1),
-                    width: RFPercentage(14),
-                    height: RFPercentage(5.2),
-                    borderColor: Colors.primary,
-                    borderWidth: RFPercentage(0.2),
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}
-                >
+                <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
                   <Text style={{ color: Colors.primary }}>Mark as Done</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => changeReqestStatus(index, REQUEST_STATUS.Cancelled, cart)}
-                  style={{
-                    borderRadius: RFPercentage(1),
-                    width: RFPercentage(14),
-                    height: RFPercentage(5.2),
-                    borderColor: Colors.red,
-                    borderWidth: RFPercentage(0.2),
-                    justifyContent: "center",
-                    alignItems: "center",
-                    position: "absolute",
-                    right: 0,
-                  }}
-                >
+                <TouchableOpacity onPress={() => changeReqestStatus(index, REQUEST_STATUS.Cancelled, cart)} style={styles.cancel}>
                   <Text style={{ color: Colors.red }}>Cancel</Text>
                 </TouchableOpacity>
               </View>
@@ -308,9 +267,9 @@ function MyRequests({ navigation }) {
         )}
 
         {!loading && taskRecords.length === 0 && (
-          <View style={{ marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" }}>
-            <Image style={{ borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) }} source={require("../../assets/Images/empty.png")} />
-            <Text style={{ color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" }}>No Record Found!</Text>
+          <View style={styles.notFoundWrapper}>
+            <Image style={styles.notFoundIcon} source={require("../../assets/Images/empty.png")} />
+            <Text style={styles.notFoundText}>No Record Found!</Text>
           </View>
         )}
 
@@ -542,6 +501,44 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontFamily: "Poppins_500Medium",
   },
+  filterContainer: {
+    marginTop: RFPercentage(3.2),
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    flexDirection: "row",
+    width: "90%",
+  },
+  cartWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    position: "absolute",
+    left: RFPercentage(2),
+    top: RFPercentage(2),
+  },
+  markButton: {
+    borderRadius: RFPercentage(1),
+    width: RFPercentage(14),
+    height: RFPercentage(5.2),
+    borderColor: Colors.primary,
+    borderWidth: RFPercentage(0.2),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cancel: {
+    borderRadius: RFPercentage(1),
+    width: RFPercentage(14),
+    height: RFPercentage(5.2),
+    borderColor: Colors.red,
+    borderWidth: RFPercentage(0.2),
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    right: 0,
+  },
+  notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
+  notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },
+  notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
 });
 
 export default MyRequests;

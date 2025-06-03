@@ -36,7 +36,7 @@ function OfferDetail({ navigation, route }) {
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Details" />
 
         {/* Image Carousel */}
-        <View style={{ width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(0.5) }}>
+        <View style={styles.carousal}>
           <FlatList
             data={postRequest.imageUrls}
             horizontal
@@ -82,23 +82,9 @@ function OfferDetail({ navigation, route }) {
       </ScrollView>
 
       {/* Buttons */}
-      <View style={{ position: "absolute", bottom: RFPercentage(15), width: "100%", justifyContent: "center", alignItems: "center", flexDirection: "row" }}>
-        <TouchableOpacity
-          style={{
-            marginRight: RFPercentage(2),
-            backgroundColor: "#F8FAFC",
-            width: RFPercentage(21),
-            height: RFPercentage(6.2),
-            borderRadius: RFPercentage(100),
-            borderColor: Colors.primary,
-            borderWidth: RFPercentage(0.1),
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          disabled={currentUserId === postRequest.userId}
-          onPress={handleStartChat}
-        >
-          <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" }}>Message Requester</Text>
+      <View style={styles.buttonWrapper}>
+        <TouchableOpacity style={styles.chatButton} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
+          <Text style={styles.text}>Message Requester</Text>
         </TouchableOpacity>
 
         <MyAppButton title={"My Requests"} marginTop={RFPercentage(0)} onPress={() => navigation.navigate("MyRequests")} />
@@ -206,6 +192,20 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
   },
+  carousal: { width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(0.5) },
+  chatButton: {
+    marginRight: RFPercentage(2),
+    backgroundColor: "#F8FAFC",
+    width: RFPercentage(21),
+    height: RFPercentage(6.2),
+    borderRadius: RFPercentage(100),
+    borderColor: Colors.primary,
+    borderWidth: RFPercentage(0.1),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: { color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" },
+  buttonWrapper: { position: "absolute", bottom: RFPercentage(15), width: "100%", justifyContent: "center", alignItems: "center", flexDirection: "row" },
 });
 
 export default OfferDetail;
