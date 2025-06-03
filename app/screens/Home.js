@@ -15,6 +15,7 @@ import { getRequestList } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
 import { getFormatedDate } from "../services/Shared.service";
 import { usePostContext } from "../contexts/PostContext";
+import { Icons } from "../config/theme";
 
 function Home({ navigation }) {
   const { userData: user } = useUser();
@@ -284,7 +285,7 @@ function Home({ navigation }) {
 
           {!loading && taskRecords.length === 0 && (
             <View style={styles.notFoundWrapper}>
-              <Image style={styles.notFoundImg} source={require("../../assets/Images/empty.png")} />
+              <Image style={styles.notFoundImg} source={Icons.empty} />
               <Text style={styles.notFoundText}>No Record Found!</Text>
             </View>
           )}

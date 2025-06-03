@@ -4,6 +4,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 
 //config
 import Colors from "../../config/Colors";
+import { Icons } from "../../config/theme";
 
 const CustomTabBar = ({
   navigation,
@@ -31,31 +32,31 @@ const CustomTabBar = ({
           },
         ]}
       >
-        <Image style={styles.home} source={require("../../../assets/Images/homeTab.png")} />
+        <Image style={styles.home} source={Icons.homeTab} />
       </TouchableOpacity>
       <View style={styles.wrapper}>
         <View style={styles.inner}>
           {/* Orders */}
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("MyRequests")} style={styles.touchable}>
-            <Image style={styles.icon} source={myRequests ? require("../../../assets/Images/myRequestsActive.png") : require("../../../assets/Images/order.png")} />
+            <Image style={styles.icon} source={myRequests ? Icons.myRequestsActive : Icons.order} />
             <Text style={[styles.req, { color: myRequests ? Colors.primary : Colors.detailsText }]}>My Req</Text>
           </TouchableOpacity>
           {/* Settings */}
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("PostRequest")} style={styles.touchable2}>
-            <Image style={styles.icon} source={postRequest ? require("../../../assets/Images/activePostRequest.png") : require("../../../assets/Images/setting.png")} />
+            <Image style={styles.icon} source={postRequest ? Icons.activePostRequest : Icons.setting} />
             <Text style={[styles.req, { color: postRequest ? Colors.primary : Colors.detailsText }]}>Post Req</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.inner2}>
-          {/* Vehicle */}
+          {/* Messages */}
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Messages")} style={styles.touchable2}>
-            <Image style={styles.icon} source={messagesTab ? require("../../../assets/Images/activeMessages.png") : require("../../../assets/Images/vehicle.png")} />
+            <Image style={styles.icon} source={messagesTab ? Icons.activeMessages : Icons.vehicle} />
             <Text style={[styles.req, { color: messagesTab ? Colors.primary : Colors.detailsText }]}>Messages</Text>
           </TouchableOpacity>
           {/* Profile */}
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Settings")} style={styles.touchable2}>
-            <Image style={styles.icon} source={settingTab ? require("../../../assets/Images/settingsActive.png") : require("../../../assets/Images/profile.png")} />
+            <Image style={styles.icon} source={settingTab ? Icons.settingsActive : Icons.profile} />
             <Text style={[styles.req, { color: settingTab ? Colors.primary : Colors.detailsText }]}>Settings</Text>
           </TouchableOpacity>
         </View>

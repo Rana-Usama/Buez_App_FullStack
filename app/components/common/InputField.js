@@ -7,6 +7,7 @@ import Feather from "react-native-vector-icons/Feather";
 
 //config
 import Colors from "../../config/Colors";
+import { Icons } from "../../config/theme";
 
 function InputField({
   onTouchStart = () => {},
@@ -103,7 +104,7 @@ function InputField({
 
         {cardIcon ? (
           <TouchableOpacity style={{ position: "absolute", right: RFPercentage(1) }}>
-            <Image style={{ width: RFPercentage(3.5), height: RFPercentage(3) }} source={require("../../../assets/Images/visa.png")} />
+            <Image style={{ width: RFPercentage(3.5), height: RFPercentage(3) }} source={Icons.visa} />
           </TouchableOpacity>
         ) : null}
 
@@ -118,13 +119,6 @@ function InputField({
           </TouchableOpacity>
         ) : null}
       </View>
-
-      {/* <View
-        style={{
-          width: '90%',
-          height: RFPercentage(0.1),
-          backgroundColor: Colors.darkGrey,
-        }}></View> */}
     </View>
   );
 }

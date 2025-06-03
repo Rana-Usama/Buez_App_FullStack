@@ -18,6 +18,7 @@ import { validateEmail } from "../utils/helperFunctions";
 
 // config
 import Colors from "../config/Colors";
+import { Icons } from "../config/theme";
 
 function Login(props) {
   const [indicator, showIndicator] = useState(false);
@@ -117,8 +118,8 @@ function Login(props) {
 
   return (
     <Screen style={styles.screen}>
-      <Image style={styles.logo} source={require("../../assets/Images/logo.png")} />
-      <Image style={styles.crown} source={require("../../assets/Images/crown.png")} />
+      <Image style={styles.logo} source={Icons.logo} />
+      <Image style={styles.crown} source={Icons.crown} />
       <Text style={styles.welcomeText}>Welcome Back</Text>
 
       <View style={styles.inputContainer}>
@@ -166,13 +167,13 @@ function Login(props) {
 
       <View style={styles.socialIconsContainer}>
         <TouchableOpacity activeOpacity={0.8}>
-          <Image style={styles.socialIcon} source={require("../../assets/Images/fbicon.png")} />
+          <Image style={styles.socialIcon} source={Icons.fb} />
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8}>
-          <Image style={[styles.socialIcon, styles.socialIconMargin]} source={require("../../assets/Images/apple.png")} />
+          <Image style={[styles.socialIcon, styles.socialIconMargin]} source={Icons.apple} />
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8}>
-          <Image style={styles.socialIcon} source={require("../../assets/Images/goicon.png")} />
+          <Image style={styles.socialIcon} source={Icons.google} />
         </TouchableOpacity>
       </View>
 

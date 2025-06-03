@@ -17,6 +17,7 @@ import { savePost, updatePost } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
+import { Icons } from "../config/theme";
 
 function PostRequest({ navigation, route }) {
   const { userData: user } = useUser();
@@ -324,14 +325,14 @@ function PostRequest({ navigation, route }) {
                     <>
                       <Image style={styles.img2} source={{ uri: imageUris[index] }} />
                       <TouchableOpacity onPress={() => [deleteImage(index), pickImage(index)]} style={{ position: "absolute", top: 5, right: 5 }}>
-                        <Image style={styles.img3} source={require("../../assets/Images/edit.png")} />
+                        <Image style={styles.img3} source={Icons.edit} />
                       </TouchableOpacity>
                       {/* <TouchableOpacity onPress={() => deleteImage(index)} style={{ position: "absolute", top: 5, left: 5 }}>
                       <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/cross.png")} />
                     </TouchableOpacity> */}
                     </>
                   ) : (
-                    <Image style={styles.img3} source={require("../../assets/Images/gal.png")} />
+                    <Image style={styles.img3} source={Icons.gal} />
                   )}
                 </TouchableOpacity>
               ))}

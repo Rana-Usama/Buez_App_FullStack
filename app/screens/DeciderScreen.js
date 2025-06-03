@@ -8,6 +8,7 @@ import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { getAuth } from "firebase/auth";
 import SubscriptionListener from "../components/SubscriptionListener";
+import { Icons } from "../config/theme";
 
 function DeciderScreen({ navigation }) {
   const userId = getAuth()?.currentUser?.uid;
@@ -17,7 +18,7 @@ function DeciderScreen({ navigation }) {
     <>
       {!userId || loading || !userData ? (
         <LinearGradient colors={[Colors.white, Colors.white]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
-          <Image style={styles.img} source={require("../../assets/Images/buez.png")} />
+          <Image style={styles.img} source={Icons.buez} />
         </LinearGradient>
       ) : (
         <SubscriptionListener navigation={navigation} userId={userId} />

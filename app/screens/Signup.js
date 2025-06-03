@@ -18,6 +18,7 @@ import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { addUser } from "../services/User.service";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { setDoc, doc } from "firebase/firestore";
+import { Icons } from "../config/theme";
 
 function Signup(props) {
   const [indicator, showIndicator] = useState(false);
@@ -128,7 +129,7 @@ function Signup(props) {
   return (
     <Screen style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        <Image style={styles.logo} source={require("../../assets/Images/logo.png")} />
+        <Image style={styles.logo} source={Icons.logo} />
         <Text style={styles.welcomeText}>Welcome!</Text>
 
         {/* Input field */}
@@ -167,13 +168,13 @@ function Signup(props) {
         {/* Social Media Icons */}
         <View style={styles.socialIconsContainer}>
           <TouchableOpacity activeOpacity={0.8}>
-            <Image style={styles.socialIcon} source={require("../../assets/Images/fbicon.png")} />
+            <Image style={styles.socialIcon} source={Icons.fb} />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8}>
-            <Image style={[styles.socialIcon, styles.socialIconSpacing]} source={require("../../assets/Images/apple.png")} />
+            <Image style={[styles.socialIcon, styles.socialIconSpacing]} source={Icons.apple} />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8}>
-            <Image style={styles.socialIcon} source={require("../../assets/Images/goicon.png")} />
+            <Image style={styles.socialIcon} source={Icons.google} />
           </TouchableOpacity>
         </View>
 

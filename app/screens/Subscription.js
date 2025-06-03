@@ -14,6 +14,7 @@ import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestor
 // config
 import Colors from "../config/Colors";
 import SubscriptionListener from "../components/SubscriptionListener";
+import { Icons } from "../config/theme";
 
 async function getPaymentSheet(amount, currency, userId) {
   console.log("getPaymentSheet", amount);
@@ -147,17 +148,17 @@ function Subscription(props) {
 
   return (
     <Screen style={styles.screen}>
-      <Image style={styles.logo} source={require("../../assets/Images/logo.png")} />
-      <Image style={styles.vector} source={require("../../assets/Images/vec.png")} />
+      <Image style={styles.logo} source={Icons.logo} />
+      <Image style={styles.vector} source={Icons.vec} />
 
       <View style={styles.premiumInfo}>
-        <Image style={styles.crownIcon} source={require("../../assets/Images/crown.png")} />
+        <Image style={styles.crownIcon} source={Icons.crown} />
         <Text style={styles.premiumText}>Buy our premium to access full services</Text>
       </View>
 
       <View style={styles.subscriptionContainer}>
         <View style={styles.priceContainer}>
-          <Image style={styles.starIconLeft} source={require("../../assets/Images/stars.png")} />
+          <Image style={styles.starIconLeft} source={Icons.stars} />
           <Text style={styles.priceText}>
             $12<Text style={styles.priceSubText}>.99/month</Text>
           </Text>
@@ -174,7 +175,7 @@ function Subscription(props) {
         </View>
 
         <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
-          <Image style={styles.starIconRight} source={require("../../assets/Images/stars.png")} />
+          <Image style={styles.starIconRight} source={Icons.stars} />
         </View>
       </View>
       {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />}

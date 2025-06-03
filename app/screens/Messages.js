@@ -13,6 +13,7 @@ import { FIREBASE_DB } from "../../firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
 import { getFormatedDate } from "../services/Shared.service";
+import { Icons } from "../config/theme";
 
 function Messages({ navigation }) {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -160,7 +161,7 @@ function Messages({ navigation }) {
         style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
       >
         <View key={item.id} style={[styles.messageContainer, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadMessage]}>
-          <Image style={styles.messageImage} source={item.user.profileImage ? { uri: item.user.profileImage } : require("../../assets/Images/dp.png")} />
+          <Image style={styles.messageImage} source={item.user.profileImage ? { uri: item.user.profileImage } : Icons.dp} />
           <View style={styles.messageTextContainer}>
             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
               <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.user.userName}</Text>
@@ -215,7 +216,7 @@ function Messages({ navigation }) {
                 <View style={{ justifyContent: "center", alignItems: "center" }}>
                   <Image
                     style={styles.noMessageIcon}
-                    source={require("../../assets/Images/noMessage.png")}
+                    source={Icons.noMessage}
                   />
                   <Text style={styles.emptyText}>{activeFilter === "Unread" ? "No Unread Messages" : "No Messages Yet"}</Text>
                 </View>

@@ -12,6 +12,7 @@ import CustomTabBar from "../components/common/CustomTabBar";
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { usePostContext } from "../contexts/PostContext";
+import { Icons } from "../config/theme";
 
 function Settings({ navigation }) {
   const { userData: user } = useUser();
@@ -19,27 +20,27 @@ function Settings({ navigation }) {
   const profileImgUrl = user?.profileImage || "";
   const navigationsList = [
     {
-      iconSource: require("../../assets/Images/privacy.png"),
+      iconSource: Icons.privacy,
       title: "Change Password",
       navigation: () => navigation.navigate("ChangePassword"),
     },
     {
-      iconSource: require("../../assets/Images/tc.png"),
+      iconSource: Icons.tc,
       title: "Terms & Conditions",
       navigation: () => navigation.navigate("TermsAndConditions"),
     },
     {
-      iconSource: require("../../assets/Images/privacy.png"),
+      iconSource: Icons.privacy,
       title: "Privacy Policy",
       navigation: () => navigation.navigate("PrivacyPolicy"),
     },
     {
-      iconSource: require("../../assets/Images/faq.png"),
+      iconSource: Icons.faq,
       title: "FAQ's",
       navigation: () => navigation.navigate("FAQ"),
     },
     {
-      iconSource: require("../../assets/Images/logout.png"),
+      iconSource: Icons.logout,
       title: "Logout",
       redColor: true,
       navigation: () => {

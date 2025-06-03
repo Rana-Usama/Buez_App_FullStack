@@ -13,6 +13,7 @@ import MyAppButton from "../components/common/MyAppButton";
 import { getDateTime } from "../services/Shared.service";
 import { createNewChat } from "../services/Chat.service";
 import { useUser } from "../contexts/user.context";
+import { Icons } from "../config/theme";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -20,7 +21,6 @@ function OfferDetail({ navigation, route }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
-  const images = [require("../../assets/Images/cover.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")];
   const postRequest = route.params?.postRequest;
 
   console.log("current user", currentUser.userData);
@@ -64,13 +64,13 @@ function OfferDetail({ navigation, route }) {
         </View>
 
         <View style={styles.infoContainer}>
-          <Image style={styles.icon} source={require("../../assets/Images/location.png")} />
+          <Image style={styles.icon} source={Icons.location} />
           <Text style={styles.infoText}>Location</Text>
           <Text style={styles.infoDetail}>{postRequest.address}</Text>
         </View>
 
         <View style={styles.infoContainer}>
-          <Image style={styles.icon} source={require("../../assets/Images/cal.png")} />
+          <Image style={styles.icon} source={Icons.cal} />
           <Text style={styles.infoText}>Date/Time</Text>
           <Text style={styles.infoDetail}>{getDateTime(postRequest.createdAt)}</Text>
         </View>

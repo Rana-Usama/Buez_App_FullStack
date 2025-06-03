@@ -14,6 +14,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getRelativePostTime } from "../services/Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
+import { Icons } from "../config/theme";
 
 function MyRequests({ navigation }) {
   const { userData: user } = useUser();
@@ -206,7 +207,7 @@ function MyRequests({ navigation }) {
                             width: RFPercentage(3.7),
                             height: RFPercentage(3.7),
                           }}
-                          source={require("../../assets/Images/editRequest.png")}
+                          source={Icons.editRequest}
                         />
                       </TouchableOpacity>
                     </View>
@@ -268,7 +269,7 @@ function MyRequests({ navigation }) {
 
         {!loading && taskRecords.length === 0 && (
           <View style={styles.notFoundWrapper}>
-            <Image style={styles.notFoundIcon} source={require("../../assets/Images/empty.png")} />
+            <Image style={styles.notFoundIcon} source={Icons.empty} />
             <Text style={styles.notFoundText}>No Record Found!</Text>
           </View>
         )}

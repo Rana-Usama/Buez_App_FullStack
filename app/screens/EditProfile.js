@@ -16,10 +16,10 @@ import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { updateProfile } from "../services/User.service";
+import { Icons } from "../config/theme";
 
 function EditProfile({ navigation }) {
   const { userData: user } = useUser();
-  const [loading, setLoading] = useState(true);
   const [imageUri, setImageUri] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -108,8 +108,8 @@ function EditProfile({ navigation }) {
         <ScrollView style={{ width: "100%" }} showsVerticalScrollIndicator={false} contentContainerStyle={{ width: "100%", alignItems: "center" }} keyboardShouldPersistTaps="handled">
           {/* Profile Image */}
           <TouchableOpacity activeOpacity={0.8} onPress={pickImage} style={{ marginTop: RFPercentage(5.5), opacity: imageUri ? 1 : 0.8 }}>
-            <Image style={styles.image} source={imageUri ? { uri: imageUri } : require("../../assets/Images/dp.png")} />
-            <Image style={styles.edit} source={require("../../assets/Images/gallery.png")} />
+            <Image style={styles.image} source={imageUri ? { uri: imageUri } : Icons.dp} />
+            <Image style={styles.edit} source={Icons.gallery} />
           </TouchableOpacity>
           <View style={styles.editInfo}>
             <Text style={styles.infoText}>Edit Info</Text>

@@ -8,6 +8,7 @@ import CustomTabBar from "../components/common/CustomTabBar";
 
 // config
 import Colors from "../config/Colors";
+import { Icons } from "../config/theme";
 
 function Reviews({ navigation }) {
   return (
@@ -31,7 +32,7 @@ function Reviews({ navigation }) {
             <Text style={styles.reviewDate}>Dated: 25 Jul 2024</Text>
             <View style={styles.authorContainer}>
               <Text style={styles.authorText}>By: Jhon Brown</Text>
-              <Image style={styles.authorAvatar} source={require("../../assets/Images/profile2.png")} />
+              <Image style={styles.authorAvatar} source={Icons.profile2} />
             </View>
           </View>
         </View>

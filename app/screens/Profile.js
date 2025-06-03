@@ -10,6 +10,7 @@ import CustomTabBar from "../components/common/CustomTabBar";
 // config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
+import { Icons } from "../config/theme";
 
 function Profile({ navigation }) {
   const { userData: user } = useUser();
@@ -17,12 +18,12 @@ function Profile({ navigation }) {
   const userName = user?.userName || "";
   const navigationsList = [
     {
-      iconSource: require("../../assets/Images/editP.png"),
+      iconSource: Icons.editP,
       title: "Edit Profile",
       navigation: () => navigation.navigate("EditProfile"),
     },
     {
-      iconSource: require("../../assets/Images/receipt.png"),
+      iconSource: Icons.receipt,
       title: "Rating & Reviews",
       navigation: () => navigation.navigate("Reviews"),
     },
@@ -36,8 +37,8 @@ function Profile({ navigation }) {
 
         {/* Profile Image */}
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("EditProfile")} style={{ marginTop: RFPercentage(5.5) }}>
-          <Image style={styles.img} source={profileImgUrl ? { uri: profileImgUrl } : require("../../assets/Images/dp.png")} />
-          <Image style={styles.edit} source={require("../../assets/Images/edit.png")} />
+          <Image style={styles.img} source={profileImgUrl ? { uri: profileImgUrl } : Icons.dp} />
+          <Image style={styles.edit} source={Icons.edit} />
         </TouchableOpacity>
 
         {/*User Name */}
