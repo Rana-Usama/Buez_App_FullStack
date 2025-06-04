@@ -4,8 +4,8 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 
 // components
 import Screen from "../components/Screen";
-import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
+import InputFieldNew from "../components/common/NewField";
 
 // auth
 // eslint-disable-next-line import/no-unresolved
@@ -13,73 +13,25 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 
 // config
 import Colors from "../config/Colors";
-import { validateConfirmPassword, validateEmail, validateName, validatePassword } from "../utils/helperFunctions";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { addUser } from "../services/User.service";
-import { FIREBASE_DB } from "../../firebaseConfig";
-import { setDoc, doc } from "firebase/firestore";
 import { Icons } from "../config/theme";
+import * as yup from "yup";
+import { Formik } from "formik";
+import Toast from "react-native-toast-message";
 
-function Signup(props : any) {
+function Signup(props: any) {
+  let validationSchema = yup.object({
+    name: yup.string().required("Username is required"),
+    email: yup.string().email("Invalid email").required("Email is required"),
+    password: yup.string().min(6, "Password must be at least 6 characters long").required("Password is required"),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref("password")], "Passwords must match")
+      .required("Passwords must match"),
+  });
+
   const [indicator, showIndicator] = useState(false);
-  const [inputField, SetInputField] = useState([
-    {
-      placeholder: "Name",
-      value: "",
-      error: "",
-      validator: validateName,
-    },
-    {
-      placeholder: "Email",
-      value: "",
-      error: "",
-      validator: validateEmail,
-    },
-    {
-      placeholder: "Password",
-      value: "",
-      error: "",
-      secure: true,
-      validator: validatePassword,
-    },
-    {
-      placeholder: "Confirm Password",
-      value: "",
-      error: "",
-      secure: true,
-      validator: validateConfirmPassword,
-    },
-  ]);
-
-  const handleChange = (text, i) => {
-    let tempfeilds = [...inputField];
-    tempfeilds[i].value = text;
-    SetInputField(tempfeilds);
-  };
-
-  const handleValidation = () => {
-    let isValid = true;
-    const updatedFields = [...inputField];
-
-    // Validate Name
-    updatedFields[0].error = updatedFields[0].validator(updatedFields[0].value);
-    if (updatedFields[0].error) isValid = false;
-
-    // Validate Email
-    updatedFields[1].error = updatedFields[1].validator(updatedFields[1].value);
-    if (updatedFields[1].error) isValid = false;
-
-    // Validate Password
-    updatedFields[2].error = updatedFields[2].validator(updatedFields[2].value);
-    if (updatedFields[2].error) isValid = false;
-
-    // Validate Confirm Password
-    updatedFields[3].validator(updatedFields[2].value, Number(updatedFields[3].value));
-    if (updatedFields[3].error) isValid = false;
-
-    SetInputField(updatedFields);
-    return isValid;
-  };
 
   const createAccountWithEmail = async (email, password) => {
     try {
@@ -91,18 +43,12 @@ function Signup(props : any) {
     }
   };
 
-  const handleSignup = async () => {
-    if (!handleValidation()) {
-      console.error("Please fill all the required fields");
-      alert("Please Fill all the fields to Proceed!");
-      return;
-    }
-
+  const handleSignup = async (values: any) => {
     showIndicator(true);
     try {
-      const userName = inputField[0].value;
-      const email = inputField[1].value;
-      const password = inputField[2].value;
+      const userName = values.name;
+      const email = values.email;
+      const password = values.password;
       const user = await createAccountWithEmail(email, password);
       if (user) {
         const userData = {
@@ -113,16 +59,18 @@ function Signup(props : any) {
         };
         await addUser(user?.uid, userData);
       }
+      Toast.show({
+        type: "success",
+        text1: "Sign Up",
+        text2: "User registered Successfully!",
+      });
     } catch (error) {
-      if (error.code === "auth/email-already-in-use") {
-        alert("Email already in use. Please choose a different email.");
-      } else if (error.code === "auth/weak-password") {
-        alert("Weak password. Please choose a stronger password.");
-      } else {
-        alert("Signup error: " + error.message);
-      }
+      Toast.show({
+        type: "error",
+        text1: "Sign Up Error",
+        text2: "User not registered!",
+      });
     }
-
     showIndicator(false);
   };
 
@@ -132,31 +80,98 @@ function Signup(props : any) {
         <Image style={styles.logo} source={Icons.logo} />
         <Text style={styles.welcomeText}>Welcome!</Text>
 
-        {/* Input field */}
-        <View style={styles.inputContainer}>
-          {inputField.map((item, i) => (
-            <View key={i} style={[styles.inputFieldContainer, { marginTop: i === 0 ? RFPercentage(4.5) : RFPercentage(1.2) }]}>
-              <InputField
-                placeholder={item.placeholder}
-                placeholderColor={"#6B7280"}
-                height={RFPercentage(6.4)}
-                backgroundColor={Colors.white}
-                borderWidth={RFPercentage(0.1)}
-                borderColor={"#E5E7EB"}
-                secure={item.secure}
-                borderRadius={RFPercentage(1.6)}
-                color={Colors.black}
-                fontSize={RFPercentage(1.7)}
-                fontFamily={"Poppins_400Regular"}
-                handleFeild={(text) => handleChange(text, i)}
-                value={item.value}
-                width={"94%"}
-              />
-            </View>
-          ))}
-        </View>
+        <Formik
+          initialValues={{
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+          }}
+          validationSchema={validationSchema}
+          onSubmit={(values) => handleSignup(values)}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <>
+              <View style={styles.inputContainer}>
+                {/* Name */}
+                <InputFieldNew
+                  placeholder="Name"
+                  onChangeText={handleChange("name")}
+                  handleBlur={handleBlur("name")}
+                  value={values.name}
+                  customStyle={{
+                    borderColor: touched.name && errors.name ? Colors.red : "#E5E7EB",
+                  }}
+                />
+                {touched.name && errors.name && (
+                  <>
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>{errors.name}</Text>
+                    </View>
+                  </>
+                )}
 
-        <MyAppButton title="Signup" loading={indicator} onPress={handleSignup} marginTop={RFPercentage(4.5)} disabled={indicator} />
+                {/* Email */}
+                <InputFieldNew
+                  placeholder="Email"
+                  onChangeText={handleChange("email")}
+                  handleBlur={handleBlur("email")}
+                  value={values.email}
+                  customStyle={{
+                    borderColor: touched.email && errors.email ? Colors.red : "#E5E7EB",
+                  }}
+                />
+                {touched.email && errors.email && (
+                  <>
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>{errors.email}</Text>
+                    </View>
+                  </>
+                )}
+
+                {/* Password */}
+                <InputFieldNew
+                  placeholder="Password"
+                  password={true}
+                  onChangeText={handleChange("password")}
+                  handleBlur={handleBlur("password")}
+                  value={values.password}
+                  customStyle={{
+                    borderColor: touched.password && errors.password ? Colors.red : "#E5E7EB",
+                  }}
+                />
+                {touched.password && errors.password && (
+                  <>
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>{errors.password}</Text>
+                    </View>
+                  </>
+                )}
+
+                {/* Confirm Password */}
+                <InputFieldNew
+                  placeholder="Confirm Password"
+                  password={true}
+                  onChangeText={handleChange("confirmPassword")}
+                  handleBlur={handleBlur("confirmPassword")}
+                  value={values.confirmPassword}
+                  customStyle={{
+                    borderColor: touched.confirmPassword && errors.confirmPassword ? Colors.red : "#E5E7EB",
+                  }}
+                />
+                {touched.confirmPassword && errors.confirmPassword && (
+                  <>
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                    </View>
+                  </>
+                )}
+              </View>
+
+              <MyAppButton title="Signup" loading={indicator} onPress={() => handleSubmit()} marginTop={RFPercentage(4.5)} disabled={indicator} />
+            </>
+          )}
+        </Formik>
 
         {/* Social Media Login */}
         <View style={styles.socialMediaContainer}>
@@ -202,6 +217,7 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     width: "100%",
     alignItems: "center",
+    paddingBottom: RFPercentage(5),
   },
   logo: {
     width: RFPercentage(6.5),
@@ -217,7 +233,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
+    width: "88%",
+    alignSelf: "center",
+    marginVertical: RFPercentage(1.5),
+    // backgroundColor:'red'
   },
   inputFieldContainer: {
     justifyContent: "center",
@@ -268,6 +287,19 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     marginLeft: RFPercentage(0.5),
     fontFamily: "Poppins_500Medium",
+  },
+
+  errorContainer: {
+    width: "100%",
+    height: RFPercentage(2),
+    top: RFPercentage(0.2),
+  },
+
+  errorText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    color: Colors.red,
+    left: RFPercentage(0.2),
   },
 });
 

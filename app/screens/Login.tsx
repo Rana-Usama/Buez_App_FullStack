@@ -12,6 +12,8 @@ import { FIREBASE_AUTH } from "../../firebaseConfig";
 import Screen from "../components/Screen";
 import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
+import InputFieldNew from "../components/common/NewField";
+import Toast from "react-native-toast-message";
 
 // utils
 import { validateEmail } from "../utils/helperFunctions";
@@ -19,6 +21,9 @@ import { validateEmail } from "../utils/helperFunctions";
 // config
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
+
+import * as yup from "yup";
+import { Formik } from "formik";
 
 type InputField = {
   placeholder: string;
@@ -31,51 +36,12 @@ type InputField = {
 function Login(props: any) {
   const [indicator, showIndicator] = useState(false);
   const [remember, setRemember] = useState(false);
-  const [inputField, SetInputField] = useState<InputField[]>([
-    {
-      placeholder: "Email",
-      value: "",
-      validator: validateEmail,
-    },
-    {
-      placeholder: "Password",
-      value: "",
-      secure: true,
-    },
-  ]);
 
-  useEffect(() => {
-    const fetchCredentials = async () => {
-      const credentials = await getCredentials();
-      if (credentials.email && credentials.password) {
-        const tempfeilds = [...inputField];
-        tempfeilds[0].value = credentials.email;
-        tempfeilds[1].value = credentials.password;
-        SetInputField(tempfeilds);
-        setRemember(true);
-      }
-    };
-
-    fetchCredentials();
-  }, []);
-
-  const handleChange = (text, i) => {
-    let tempFields = [...inputField];
-    tempFields[i].value = text;
-    SetInputField(tempFields);
-  };
-
-  const handleValidation = () => {
-    let isValid = true;
-    const updatedFields = [...inputField];
-    // Validate Email
-    updatedFields[0].error = updatedFields[0].validator(updatedFields[0].value);
-    if (updatedFields[0].error) isValid = false;
-
-    SetInputField(updatedFields);
-    return isValid;
-  };
-
+  let validationSchema = yup.object({
+    email: yup.string().email("Invalid email").required("Email is required"),
+    password: yup.string().required("Password is required"),
+  });
+ 
   const signInWithEmail = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
@@ -86,36 +52,27 @@ function Login(props: any) {
     }
   };
 
-  const handleLogin = async () => {
-    if (!handleValidation()) {
-      return;
-    }
-
+  const handleLogin = async (values: any) => {
     showIndicator(true);
-    let tempFields = [...inputField];
-
-    if (tempFields[0].value === "" || tempFields[1].value === "") {
-      alert("Please fill all the fields to proceed");
-      showIndicator(false);
-      return true;
-    }
     try {
-      const email = tempFields[0].value;
-      const password = tempFields[1].value;
+      const email = values.email;
+      const password = values.password;
       const user = await signInWithEmail(email, password);
       if (remember) {
         await saveCredentials(email, password);
       }
+      Toast.show({
+        type: "success",
+        text1: "Sign In",
+        text2: "Signed In Successfully!",
+      });
       console.log(user);
     } catch (error) {
-      if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
-        alert("Invalid email or password. Please try again.");
-      } else if (error.code === "auth/too-many-requests") {
-        alert("Too many unsuccessful login attempts. Please try again later.");
-      } else {
-        alert("Sign-in error: " + error.message + " code: " + error.code);
-      }
-      console.log(error.code);
+      Toast.show({
+        type: "error",
+        text1: "Sign In Error",
+        text2: 'Invalid Credentials',
+      });
     }
     showIndicator(false);
   };
@@ -130,43 +87,71 @@ function Login(props: any) {
       <Image style={styles.crown} source={Icons.crown} />
       <Text style={styles.welcomeText}>Welcome Back</Text>
 
-      <View style={styles.inputContainer}>
-        {inputField.map((item, i) => (
-          <View key={i} style={[styles.inputFieldWrapper, i === 0 && styles.firstInput]}>
-            <InputField
-              placeholder={item.placeholder}
-              placeholderColor={"#6B7280"}
-              height={RFPercentage(6.4)}
-              backgroundColor={Colors.white}
-              borderWidth={RFPercentage(0.1)}
-              borderColor={"#E5E7EB"}
-              secure={item.secure}
-              borderRadius={RFPercentage(1.6)}
-              color={Colors.black}
-              fontSize={RFPercentage(1.7)}
-              fontFamily={"Poppins_400Regular"}
-              onChangeText={(text) => handleChange(text, i)}
-              value={item.value}
-              width={"94%"}
-            />
-          </View>
-        ))}
-      </View>
+      <Formik
+        initialValues={{
+          email: "",
+          password: "",
+        }}
+        validationSchema={validationSchema}
+        onSubmit={(values) => handleLogin(values)}
+      >
+        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          <>
+            <View style={styles.inputContainer}>
+              {/* Email */}
+              <InputFieldNew
+                placeholder="Email"
+                onChangeText={handleChange("email")}
+                handleBlur={handleBlur("email")}
+                value={values.email}
+                customStyle={{
+                  borderColor: touched.email && errors.email ? Colors.red : "#E5E7EB",
+                }}
+              />
+              {touched.email && errors.email && (
+                <>
+                  <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{errors.email}</Text>
+                  </View>
+                </>
+              )}
 
-      <TouchableOpacity activeOpacity={0.8} onPress={toggleRemember} style={styles.rememberContainer}>
-        <View style={styles.rememberWrapper}>
-          <View style={styles.rememberBox}>
-            <View style={[styles.rememberIndicator, { backgroundColor: remember ? Colors.primary : null }]} />
-          </View>
-          <Text style={styles.rememberText}>Remember me?</Text>
-        </View>
-        <TouchableOpacity onPress={() => props.navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
-      </TouchableOpacity>
+              {/* Password */}
+              <InputFieldNew
+                placeholder="Password"
+                password={true}
+                onChangeText={handleChange("password")}
+                handleBlur={handleBlur("password")}
+                value={values.password}
+                customStyle={{
+                  borderColor: touched.password && errors.password ? Colors.red : "#E5E7EB",
+                }}
+              />
+              {touched.password && errors.password && (
+                <>
+                  <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{errors.password}</Text>
+                  </View>
+                </>
+              )}
+            </View>
 
-      <MyAppButton title={"Login"} loading={indicator} marginTop={RFPercentage(7)} onPress={() => handleLogin()} disabled={indicator} />
+            <TouchableOpacity activeOpacity={0.8} onPress={toggleRemember} style={styles.rememberContainer}>
+              <View style={styles.rememberWrapper}>
+                <View style={styles.rememberBox}>
+                  <View style={[styles.rememberIndicator, { backgroundColor: remember ? Colors.primary : null }]} />
+                </View>
+                <Text style={styles.rememberText}>Remember me?</Text>
+              </View>
+              <TouchableOpacity onPress={() => props.navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
 
+            <MyAppButton title={"Login"} loading={indicator} marginTop={RFPercentage(7)} onPress={() => handleSubmit()} disabled={indicator} />
+          </>
+        )}
+      </Formik>
       <View style={styles.socialLoginContainer}>
         <View style={styles.divider} />
         <Text style={styles.orText}>or login with</Text>
@@ -221,7 +206,8 @@ const styles = StyleSheet.create({
   inputContainer: {
     justifyContent: "center",
     alignItems: "center",
-    width: "100%",
+    width: "88%",
+    alignSelf: "center",
   },
   inputFieldWrapper: {
     marginTop: RFPercentage(1.5),
@@ -230,11 +216,12 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(7),
   },
   rememberContainer: {
-    width: "83.6%",
+    width: "87%",
     flexDirection: "row",
     marginTop: RFPercentage(1),
     justifyContent: "flex-start",
     alignItems: "center",
+    alignSelf: "center",
   },
   rememberWrapper: {
     flexDirection: "row",
@@ -259,7 +246,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(0.6),
     color: "#4B5563",
     fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Medium",
+    fontFamily: "Poppins_400Regular",
   },
   forgotPassword: {
     position: "absolute",
@@ -268,7 +255,7 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: "#4B5563",
     fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Medium",
+    fontFamily: "Poppins_500Medium",
   },
   socialLoginContainer: {
     marginTop: RFPercentage(4.5),
@@ -312,6 +299,18 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     marginLeft: RFPercentage(0.5),
     fontFamily: "Poppins_500Medium",
+  },
+  errorContainer: {
+    width: "100%",
+    height: RFPercentage(2),
+    top: RFPercentage(0.2),
+  },
+
+  errorText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    color: Colors.red,
+    left: RFPercentage(0.3),
   },
 });
 

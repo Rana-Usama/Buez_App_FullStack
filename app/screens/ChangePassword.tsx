@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Platform,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, Platform, ScrollView } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 // components
@@ -18,16 +12,10 @@ import Colors from "../config/Colors";
 import { validateConfirmPassword, validatePassword } from "../utils/helperFunctions";
 import { updatePassword } from "../services/Auth.service";
 
-// types
-interface InputFieldType {
-  placeholder: string;
-  title: string;
-  value: string;
-  secure: boolean;
-  icon?: any;
-  error?: string;
-  validator?: (value: string, secondValue?: string) => string;
-}
+import Toast from "react-native-toast-message";
+import * as yup from "yup";
+import { Formik } from "formik";
+import InputFieldNew from "../components/common/NewField";
 
 interface ChangePasswordProps {
   navigation: any;
@@ -35,79 +23,34 @@ interface ChangePasswordProps {
 
 function ChangePassword({ navigation }: ChangePasswordProps) {
   const [indicator, showIndicator] = useState<boolean>(false);
-  const [showError, setShowError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const [inputField, SetInputField] = useState<InputFieldType[]>([
-    {
-      placeholder: "Enter",
-      title: "Old Password",
-      value: "",
-      secure: true,
-    },
-    {
-      placeholder: "Enter",
-      title: "New Password",
-      value: "",
-      secure: true,
-      error: "",
-      validator: validatePassword,
-    },
-    {
-      placeholder: "Enter",
-      title: "Repeat New Password",
-      value: "",
-      secure: true,
-      error: "",
-      validator: validateConfirmPassword,
-    },
-  ]);
+  let validationSchema = yup.object({
+    oldPassword: yup.string().required("Password is required"),
+    password: yup.string().min(6, "Password must be at least 6 characters long").required("Password is required"),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref("password")], "Passwords must match")
+      .required("Passwords must match"),
+  }); 
 
-  const handleChange = (text: string, i: number) => {
-    const tempFields = [...inputField];
-    tempFields[i].value = text;
-    SetInputField(tempFields);
-  };
-
-  const handleValidation = (): boolean => {
-    let isValid = true;
-    const updatedFields = [...inputField];
-
-    // Validate Password
-    if (updatedFields[1].validator) {
-      updatedFields[1].error = updatedFields[1].validator(updatedFields[1].value);
-      if (updatedFields[1].error) isValid = false;
-    }
-
-    // Validate Confirm Password
-    if (updatedFields[2].validator) {
-      updatedFields[2].error = updatedFields[2].validator(
-        updatedFields[1].value,
-        updatedFields[2].value
-      );
-
-      if (updatedFields[2].error) {
-        isValid = false;
-        alert("Please enter a valid password");
-      }
-    }
-
-    SetInputField(updatedFields);
-    return isValid;
-  };
-
-  const handlePasswordChange = async () => {
+  const handlePasswordChange = async (values: any) => {
     try {
-      if (!handleValidation()) return;
       showIndicator(true);
-
-      const currentPassword = inputField[0].value;
-      const newPassword = inputField[1].value;
+      const currentPassword = values.oldPassword;
+      const newPassword = values.password;
       await updatePassword(currentPassword, newPassword);
-      navigation.navigate("Settings");
+      Toast.show({
+        type : 'success',
+        text1 : 'Password Change',
+        text2 : 'Password has been changed successfully!'
+      })
+      navigation.navigate("Login");
     } catch (error: any) {
-      setErrorMessage(error.message);
-      setShowError(true);
+       Toast.show({
+        type : 'error',
+        text1 : 'Password Change',
+        text2 : 'Some thing went wrong!'
+      });
     }
     showIndicator(false);
   };
@@ -116,51 +59,93 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav
-          dpNull
-          marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)}
-          leftLogo={false}
-          navigation={navigation}
-          title="Change Password"
-        />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Change Password" />
 
-        {/* Input Fields */}
-        <View style={styles.fieldContainer}>
-          {inputField.map((item, i) => (
-            <View
-              key={i}
-              style={{
-                marginTop: i === 0 ? RFPercentage(-0.5) : RFPercentage(2.2),
-                alignSelf: "center",
-              }}
-            >
-              <Text style={styles.title}>{item.title}</Text>
-              <InputField
-                placeholder={item.placeholder}
-                placeholderColor={Colors.inputFieldPlaceholder}
-                placeholderAtCenter={false}
-                height={RFPercentage(6)}
-                borderColor={Colors.border}
-                borderWidth={RFPercentage(0.1)}
-                backgroundColor={"white"}
-                secure={item.secure}
-                borderRadius={RFPercentage(1.4)}
-                color={Colors.black}
-                fontSize={RFPercentage(1.8)}
-                fontFamily={"Poppins_400Regular"}
-                icon={item.icon}
-                handleFeild={(text: string) => handleChange(text, i)}
-                value={item.value}
-                width={"97%"}
-              />
-            </View>
-          ))}
-        </View>
+        <Formik
+          initialValues={{
+            oldPassword: "",
+            password: "",
+            confirmPassword: "",
+          }}
+          validationSchema={validationSchema}
+          onSubmit={(values) => handlePasswordChange(values)}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+            <>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.title}>Old Password</Text>
+                <InputFieldNew
+                  placeholder="Enter Old Password"
+                  password={true}
+                  onChangeText={handleChange("oldPassword")}
+                  handleBlur={handleBlur("oldPassword")}
+                  value={values.oldPassword}
+                  customStyle={{
+                    width: "100%",
+                    marginTop: RFPercentage(1.3),
+                    borderColor: touched.oldPassword && errors.oldPassword ? Colors.red : "#E5E7EB",
+                  }}
+                />
+                {touched.oldPassword && errors.oldPassword && (
+                  <>
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>{errors.oldPassword}</Text>
+                    </View>
+                  </>
+                )}
+              </View>
 
-        {/* Button */}
-        <View style={styles.buttonWrapper}>
-          <MyAppButton title="Change" marginTop={RFPercentage(2)} onPress={handlePasswordChange} loading={indicator} disabled={indicator} />
-        </View>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.title}>New Password</Text>
+                <InputFieldNew
+                  placeholder="Enter New Password"
+                  password={true}
+                  onChangeText={handleChange("password")}
+                  handleBlur={handleBlur("password")}
+                  value={values.password}
+                  customStyle={{
+                    width: "100%",
+                    marginTop: RFPercentage(1.3),
+                    borderColor: touched.password && errors.password ? Colors.red : "#E5E7EB",
+                  }}
+                />
+                {touched.password && errors.password && (
+                  <>
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>{errors.password}</Text>
+                    </View>
+                  </>
+                )}
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.title}>Repeat New Password</Text>
+                <InputFieldNew
+                  placeholder="Repeat New Password"
+                  password={true}
+                  onChangeText={handleChange("confirmPassword")}
+                  handleBlur={handleBlur("confirmPassword")}
+                  value={values.confirmPassword}
+                  customStyle={{
+                    width: "100%",
+                    marginTop: RFPercentage(1.3),
+                    borderColor: touched.confirmPassword && errors.confirmPassword ? Colors.red : "#E5E7EB",
+                  }}
+                />
+                {touched.confirmPassword && errors.confirmPassword && (
+                  <>
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                    </View>
+                  </>
+                )}
+              </View>
+              <View style={styles.buttonWrapper}>
+                <MyAppButton title="Change" marginTop={RFPercentage(2)} onPress={() => handleSubmit()} loading={indicator} disabled={indicator} />
+              </View>
+            </>
+          )}
+        </Formik>
       </ScrollView>
     </View>
   );
@@ -174,14 +159,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   fieldContainer: {
-    marginTop: RFPercentage(6),
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
+    marginTop: RFPercentage(3),
+    // justifyContent: "center",
+    // alignItems: "center",
+    width: "88%",
     alignSelf: "center",
   },
   title: {
-    left: RFPercentage(1.6),
+    // left: RFPercentage(1.6),
     // marginBottom: RFPercentage(1.2),
     color: "#57534E",
     fontSize: RFPercentage(1.8),
@@ -191,6 +176,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: RFPercentage(8),
+  },
+  errorContainer: {
+    width: "100%",
+    height: RFPercentage(2),
+    top: RFPercentage(0.2),
+  },
+
+  errorText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    color: Colors.red,
+    left: RFPercentage(0.2),
   },
 });
 

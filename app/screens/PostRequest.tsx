@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, TextInp
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+// import { Image as CompressorImage } from "react-native-compressor";
 
 // components
 import Nav from "../components/common/Nav";
@@ -18,17 +19,15 @@ import { useFocusEffect } from "@react-navigation/native";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
-
+import Toast from "react-native-toast-message";
 
 type InputField = {
   placeholder: string;
   value: string;
-  validator: (value: any) => boolean;   
+  validator: (value: any) => boolean;
   display: (v: any) => boolean;
-  secure?: boolean; 
+  secure?: boolean;
 };
-
-
 
 function PostRequest({ navigation, route }) {
   const { userData: user } = useUser();
@@ -127,12 +126,18 @@ function PostRequest({ navigation, route }) {
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 1, // Still full quality, will compress below
     });
-
     if (!result.canceled && result.assets) {
+      const selectedImage = result.assets[0];
+      // const compressedImage = await CompressorImage.compress(selectedImage?.uri, {
+      //   compressionMethod: "manual",
+      //   maxWidth: 1000,
+      //   quality: 0.8,
+      // });
+      
       let tempImageUris = [...imageUris];
-      tempImageUris[index] = result.assets[0].uri;
+      tempImageUris[index] = selectedImage?.uri;
       setImageUris(tempImageUris);
     }
   };
@@ -161,21 +166,24 @@ function PostRequest({ navigation, route }) {
       isValid = false;
       return isValid;
     }
-
     if (!selectedTask || !selectedCompensation || !description) {
       isValid = false;
     }
 
-    // if (imageUris.every((img) => !img)) {
-    //   isValid = false;
-    // }
+    if (imageUris.every((img) => !img)) {
+      isValid = false;
+    }
 
     return isValid;
   };
 
   const submitPostData = async () => {
     if (!handleValidation()) {
-      alert("Please fill all the required fields");
+      Toast.show({
+        type: "info",
+        text1: "Post Request",
+        text2: "Please add the required details!",
+      });
       return;
     }
     try {
@@ -212,7 +220,11 @@ function PostRequest({ navigation, route }) {
 
       navigation.navigate("SuccessScreen");
     } catch (e) {
-      alert("There was an error while saving the request");
+      Toast.show({
+        type: "error",
+        text1: "Post Request",
+        text2: "There was an error while saving the request!",
+      });
     } finally {
       showIndicator(false);
     }
@@ -239,7 +251,7 @@ function PostRequest({ navigation, route }) {
             ]}
             onPress={() => toggleDropdown("task")}
           >
-            <Text style={[styles.dropdownHeaderText, {color : selectedTask ?  Colors.black : Colors.heading}]}>{selectedTask || "Task Type"}</Text>
+            <Text style={[styles.dropdownHeaderText, { color: selectedTask ? Colors.black : Colors.heading }]}>{selectedTask || "Task Type"}</Text>
             <MaterialIcons name={showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
           </TouchableOpacity>
 
@@ -255,7 +267,7 @@ function PostRequest({ navigation, route }) {
                   maxHeight: RFPercentage(21),
                   borderTopLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
                   borderTopRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
-                  paddingVertical:RFPercentage(1)
+                  paddingVertical: RFPercentage(1),
                 },
               ]}
               renderItem={({ item }) => (
@@ -270,11 +282,11 @@ function PostRequest({ navigation, route }) {
             <TouchableOpacity
               style={[
                 styles.dropdownHeader,
-                { marginTop: RFPercentage(2.2), borderBottomLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) , },
+                { marginTop: RFPercentage(2.2), borderBottomLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) },
               ]}
               onPress={() => toggleDropdown("compensation")}
             >
-              <Text style={[styles.dropdownHeaderText,  {color : selectedCompensation ?  Colors.black : Colors.heading}]}>{selectedCompensation || "Compensation Type"}</Text>
+              <Text style={[styles.dropdownHeaderText, { color: selectedCompensation ? Colors.black : Colors.heading }]}>{selectedCompensation || "Compensation Type"}</Text>
               <MaterialIcons name={showCompensationDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
             </TouchableOpacity>
 
@@ -285,7 +297,12 @@ function PostRequest({ navigation, route }) {
                 keyExtractor={(item) => item.id.toString()}
                 style={[
                   styles.dropdown,
-                  { maxHeight: RFPercentage(20), borderTopLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderTopRightRadius: showCompensationDropdown ? 0 : RFPercentage(1), paddingVertical:RFPercentage(1) },
+                  {
+                    maxHeight: RFPercentage(20),
+                    borderTopLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1),
+                    borderTopRightRadius: showCompensationDropdown ? 0 : RFPercentage(1),
+                    paddingVertical: RFPercentage(1),
+                  },
                 ]}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => selectCompensation(item)} style={styles.dropdownItem}>
@@ -390,7 +407,7 @@ const styles = StyleSheet.create({
   },
   dropdownHeaderText: {
     color: Colors.heading,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     left: RFPercentage(-0.5),
   },
@@ -407,11 +424,11 @@ const styles = StyleSheet.create({
   },
   dropdownItem: {
     padding: RFPercentage(0.8),
-    paddingHorizontal:RFPercentage(1.5)
+    paddingHorizontal: RFPercentage(1.5),
     // backgroundColor:'red'
   },
   dropdownItemText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     color: Colors.heading,
   },
@@ -426,7 +443,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     marginTop: RFPercentage(2.5),
   },
-  desc: { width: "90%", color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), top: RFPercentage(1.5), left: RFPercentage(1.5) },
+  desc: { width: "90%", color: Colors.black, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.8), top: RFPercentage(1.5), left: RFPercentage(1.5) },
   imageWrapper: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.3) },
   imgText: { marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   imgContainer: { width: "100%", justifyContent: "space-between", alignItems: "center", marginTop: RFPercentage(0.8), flexDirection: "row" },

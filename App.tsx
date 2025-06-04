@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, ActivityIndicator, LogBox } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import {
-  createStackNavigator,
-  StackNavigationProp,
-} from "@react-navigation/stack";
-import {
-  Poppins_300Light,
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-  Poppins_800ExtraBold,
-  Poppins_900Black,
-  useFonts,
-} from "@expo-google-fonts/poppins";
+import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack";
+import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold, Poppins_900Black, useFonts } from "@expo-google-fonts/poppins";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
 
@@ -53,6 +41,8 @@ import ExpoStripeProvider from "./app/contexts/stripe-provider";
 
 // Config
 import Colors from "./app/config/Colors";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "./app/utils/ToastConfig";
 
 LogBox.ignoreAllLogs();
 
@@ -170,6 +160,7 @@ export default function App() {
             <AuthStack />
           )}
         </NavigationContainer>
+        <Toast config={toastConfig} />
       </PostProvider>
     </UserProvider>
   );

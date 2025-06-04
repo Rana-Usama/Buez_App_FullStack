@@ -4,6 +4,7 @@ import { sendEmailVerification, signOut, updatePassword as firebaseUpdatePasswor
 import { deleteUser } from "firebase/auth";
 
 import * as SecureStore from "expo-secure-store";
+import Toast from "react-native-toast-message";
 
 export const resetPassword = async (email: any) => {
   try {
@@ -71,6 +72,12 @@ export const updatePassword = async (currentPassword: any, newPassword: any) => 
 
 export const logout = async () => {
   await signOut(FIREBASE_AUTH);
+  await SecureStore.setItemAsync("loggedOut", 'true');
+  Toast.show({
+    type: "success",
+    text1: "Logout",
+    text2: "You have been successfully logged out from your account!",
+  });
 };
 
 // Remember me
@@ -87,23 +94,26 @@ export async function getCredentials() {
   return { email, password };
 }
 
-
 export const deleteAccount = async () => {
   try {
     const user = FIREBASE_AUTH.currentUser;
     if (user) {
       await deleteUser(user);
-      console.log("Account deleted successfully.");
+      Toast.show({
+        type: "success",
+        text1: "Account Deactivation",
+        text2: "Your account has been deleted successfully!",
+      });
       return true;
     } else {
       console.log("No user is logged in to delete account.");
       return false;
     }
   } catch (error) {
-    console.error("Error deleting account:", error.message);
-    if (error.code === "auth/requires-recent-login") {
-      throw new Error("Please re-authenticate and try again.");
-    }
-    throw error;
+    Toast.show({
+      type: "error",
+      text1: "Account Deactivation",
+      text2: "Account is not deleted due to some reason!",
+    });
   }
 };

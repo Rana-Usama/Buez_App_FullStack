@@ -32,19 +32,13 @@ import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
+import Toast from "react-native-toast-message";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 function MyRequests({ navigation }) {
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
-  const [inputField, SetInputField] = useState([
-    {
-      placeholder: "Search",
-      value: "",
-    },
-  ]);
-
   const [activeFilter, setActiveFilter] = useState("Active");
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -56,29 +50,6 @@ function MyRequests({ navigation }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedRequestIndex, setSelectedRequestIndex] = useState(null);
   const [selectedRequestItem, setSelectedRequestItem] = useState(null);
-
-  const carts = [
-    {
-      images: [require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")],
-      category: "Gardening",
-      user: "Emma Stone",
-      date: "Posted on: 07-08-2024",
-      task: "Help in Gardening...",
-      compensation: "25$",
-      dp: require("../../assets/Images/dp.png"),
-    },
-    {
-      images: [require("../../assets/Images/cover.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")],
-      category: "Cleaning",
-      user: "John Doe",
-      date: "Posted on: 08-08-2024",
-      task: "Help with Lawn...",
-      compensation: "30$",
-      dp: require("../../assets/Images/jhon.png"),
-    },
-  ];
-
-  const [activeIndices, setActiveIndices] = useState(carts.map(() => 0));
 
   useFocusEffect(
     useCallback(() => {
@@ -112,7 +83,6 @@ function MyRequests({ navigation }) {
 
   const fetchMorePosts = async () => {
     if (!hasMore || loadingMore) return;
-
     setLoadingMore(true);
     try {
       const { tasksArray: newRecords, lastVisible } = await getMyReuqests(activeFilter, lastVisiblePost);
@@ -137,32 +107,30 @@ function MyRequests({ navigation }) {
     setRefreshing(false);
   };
 
-  const handleChange = (text, i) => {
-    let tempFields = [...inputField];
-    tempFields[i].value = text;
-    SetInputField(tempFields);
-    setSearchQuery(text);
-  };
-
   const changeReqestStatus = async (i, status, item) => {
     try {
-      console.log("UPDATE STATUS 1");
       await updateReqestStatus(item.id, status, item);
       setTaskRecords((p) => {
         const newRecords = [...p];
         newRecords.splice(i, 1);
         return newRecords;
       });
-      console.log("UPDATE STATUS");
+
+      const action = status === REQUEST_STATUS.Completed ? "marked as complete" : "cancelled";
+      Toast.show({
+        type: "success",
+        text1: `Request Status`,
+        text2: `Request ${action}`,
+      });
     } catch (e) {
       console.log(e);
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong!",
+        text2: "Unable to update request status.",
+      });
     }
   };
-
-  const filteredCarts = carts.filter((cart) => {
-    const lowercasedQuery = searchQuery.toLowerCase();
-    return cart.category.toLowerCase().includes(lowercasedQuery) || cart.user.toLowerCase().includes(lowercasedQuery) || cart.task.toLowerCase().includes(lowercasedQuery);
-  });
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -179,13 +147,6 @@ function MyRequests({ navigation }) {
       )}
     </TouchableOpacity>
   );
-
-  const handleScrollEnd = (event, cartIndex) => {
-    const index = Math.floor(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width);
-    const newActiveIndices = [...activeIndices];
-    newActiveIndices[cartIndex] = index;
-    setActiveIndices(newActiveIndices);
-  };
 
   const postEditHandler = (cart) => {
     navigation.navigate("PostRequest", { title: "Edit Requestt", postRequest: cart });
@@ -218,7 +179,6 @@ function MyRequests({ navigation }) {
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               onEndReached={handleLoadMore}
-              onMomentumScrollEnd={(event) => handleScrollEnd(event, index)}
               renderItem={({ item }) => (
                 <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }} resizeMode="cover">
                   <View style={styles.categoryBadge}>

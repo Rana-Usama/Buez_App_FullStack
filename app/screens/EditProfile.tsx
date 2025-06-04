@@ -17,6 +17,7 @@ import { useUser } from "../contexts/user.context";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { updateProfile } from "../services/User.service";
 import { Icons } from "../config/theme";
+import Toast from "react-native-toast-message";
 
 type InputFieldType = {
   placeholder: string;
@@ -84,7 +85,6 @@ function EditProfile({ navigation }) {
       const name = user.userName || "";
       const phone = user.phoneNumber || "";
       const image = user.profileImage || null;
-
       const tempFields = [...inputField];
       tempFields[0].value = name;
       tempFields[1].value = phone;
@@ -111,8 +111,17 @@ function EditProfile({ navigation }) {
     try {
       await updateProfile(userData, imageUri);
       navigation.goBack();
+      Toast.show({
+        type : 'success',
+        text1 : 'Profile Update',
+        text2 : 'Profile has been updated successfully!'
+      })
     } catch (error) {
-      console.log(error);
+      Toast.show({
+        type : 'error',
+        text1 : 'Profile Update',
+        text2 : 'Error in updating Profile!'
+      })
     } finally {
       setIsUpdating(false);
     }
