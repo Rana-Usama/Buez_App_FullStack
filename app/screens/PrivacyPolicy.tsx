@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   heading: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_500Medium",
     color: "#000",
     marginBottom: RFPercentage(0.4),
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(3.2),
     color: "#44403C",
     fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins_400Regular",
   },
   scroll : { width: "100%" },
   scrollContent : { width: "100%", alignItems: "center" },

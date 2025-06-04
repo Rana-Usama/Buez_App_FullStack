@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   },
   section: {
     width: "90%",
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(2.5),
     justifyContent: "center",
     alignItems: "flex-start",
   },
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(3.2),
     color: "#44403C",
     fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins_400Regular",
   },
   content: { width: "90%", marginTop: RFPercentage(3), justifyContent: "center", alignItems: "center" },
   scroll: { width: "100%" },

@@ -30,6 +30,12 @@ function EditProfile({ navigation }) {
   const { userData: user } = useUser();
   const [imageUri, setImageUri] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [originalData, setOriginalData] = useState({
+  name: "",
+  phone: "",
+  imageUri: null,
+});
+
 
   const [inputField, SetInputField] = useState<InputFieldType[]>([
     {
@@ -72,21 +78,26 @@ function EditProfile({ navigation }) {
     }, [])
   );
 
-  const fetchUserData = async () => {
-    try {
-      // const response = await getLoggedInUser();
-      if (user) {
-        const tempfeilds = [...inputField];
-        tempfeilds[0].value = user.userName || "";
-        tempfeilds[1].value = user.phoneNumber || "";
-        console.log(tempfeilds);
-        SetInputField(tempfeilds);
-        setImageUri(user.profileImage);
-      }
-    } catch (error) {
-      console.log(error);
+ const fetchUserData = async () => {
+  try {
+    if (user) {
+      const name = user.userName || "";
+      const phone = user.phoneNumber || "";
+      const image = user.profileImage || null;
+
+      const tempFields = [...inputField];
+      tempFields[0].value = name;
+      tempFields[1].value = phone;
+      SetInputField(tempFields);
+
+      setOriginalData({ name, phone, imageUri: image });
+      setImageUri(image);
     }
-  };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
   const updateProfileData = async () => {
     const userName = inputField[0].value.trim();
@@ -106,6 +117,13 @@ function EditProfile({ navigation }) {
       setIsUpdating(false);
     }
   };
+
+
+  const isChanged =
+  inputField[0].value.trim() !== originalData.name.trim() ||
+  inputField[1].value.trim() !== originalData.phone.trim() ||
+  imageUri !== originalData.imageUri;
+
 
   return (
     <View style={styles.screen}>
@@ -147,7 +165,7 @@ function EditProfile({ navigation }) {
                   borderRadius={RFPercentage(1.4)}
                   color={Colors.black}
                   fontSize={RFPercentage(1.8)}
-                  fontFamily={"Poppins-Regular"}
+                  fontFamily={"Poppins_400Regular"}
                   icon={item.icon}
                   onChangeText={(text) => handleChange(text, i)}
                   value={item.value}
@@ -158,7 +176,7 @@ function EditProfile({ navigation }) {
           </View>
           {/* Button */}
           <View style={styles.buttonWrapper}>
-            {isUpdating ? <ActivityIndicator size="large" color={Colors.primary} /> : <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={updateProfileData} />}{" "}
+            <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={updateProfileData} loading={isUpdating}  disabled={!isChanged || isUpdating} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -180,7 +198,7 @@ const styles = StyleSheet.create({
   image: { width: RFPercentage(20), height: RFPercentage(20), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) },
   edit: { width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(20), position: "absolute", bottom: RFPercentage(-0.3), right: RFPercentage(3) },
   editInfo: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.5) },
-  infoText: { color: Colors.lightGrey, fontSize: RFPercentage(1.9), fontFamily: "Poppins-Regular" },
+  infoText: { color: Colors.lightGrey, fontSize: RFPercentage(1.9), fontFamily: "Poppins_400Regular" },
   infoBottom: { width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) },
   fieldWrapper: {
     marginTop: RFPercentage(3),
@@ -189,7 +207,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
-  titleText: { left: RFPercentage(1.6), marginBottom: RFPercentage(1), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins-Regular" },
+  titleText: { left: RFPercentage(1.6), color: "#57534E", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   buttonWrapper: { justifyContent: "center", alignItems: "center", marginTop: RFPercentage(12) },
 });
 

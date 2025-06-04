@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, FlatList, ActivityIndicator, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, FlatList, ActivityIndicator, Platform, RefreshControl } from "react-native";
 import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDocs, getDoc, doc } from "firebase/firestore";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -151,6 +151,7 @@ function Messages({ navigation }) {
 
   const renderItem = ({ item }) => {
     // console.log("MSG INFO:: ", item.lastMessage, item.lastMessage?.senderId !== userId)
+    console.log(item.user);
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
@@ -184,9 +185,15 @@ function Messages({ navigation }) {
     return chats;
   }, [chats, activeFilter, userId]);
 
+  console.log("filteredChats..........", filteredChats);
+
   return (
     <View style={styles.screen}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refreshChats} colors={[Colors.primary]} tintColor={Colors.primary} />}
+      >
         {/* Nav */}
         <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title="Messages" />
 
@@ -198,30 +205,36 @@ function Messages({ navigation }) {
         </View>
 
         {/* Messages List */}
-        <FlatList
-          style={{ width: "100%" }}
-          data={filteredChats}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          onEndReached={fetchMoreChats}
-          onEndReachedThreshold={0.5}
-          refreshing={isRefreshing}
-          onRefresh={refreshChats}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              {!loading && filteredChats?.length === 0 && (
-                <View style={{ justifyContent: "center", alignItems: "center" }}>
-                  <Image
-                    style={styles.noMessageIcon}
-                    source={Icons.noMessage}
-                  />
-                  <Text style={styles.emptyText}>{activeFilter === "Unread" ? "No Unread Messages" : "No Messages Yet"}</Text>
+        {loading ? (
+          <>
+            <ActivityIndicator size="large" color={Colors.primary} style={{marginTop:RFPercentage(10)}} />
+          </>
+        ) : (
+          <>
+            <FlatList
+              style={{ width: "100%" }}
+              data={filteredChats}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+              onEndReached={fetchMoreChats}
+              onEndReachedThreshold={0.5}
+              refreshing={isRefreshing}
+              // onRefresh={refreshChats}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyContainer}>
+                  {!loading && filteredChats?.length === 0 && (
+                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+                      <Image style={styles.noMessageIcon} source={Icons.noMessage} />
+                      <Text style={styles.emptyText}>{activeFilter === "Unread" ? "No Unread Messages" : "No Messages Yet"}</Text>
+                    </View>
+                  )}
                 </View>
               )}
-            </View>
-          )}
-          ListFooterComponent={loading && <ActivityIndicator size="large" color={Colors.primary} />}
-        />
+              // ListFooterComponent={loading && <ActivityIndicator size="large" color={Colors.primary} />}
+            />
+          </>
+        )}
+
         {/* <FlatList
 					data={messages}
 					pagingEnabled
@@ -395,7 +408,7 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     textAlign: "center",
   },
-  noMessageIcon : { borderRadius: RFPercentage(1), width: RFPercentage(26), height: RFPercentage(18), marginBottom: RFPercentage(2) }
+  noMessageIcon: { borderRadius: RFPercentage(1), width: RFPercentage(26), height: RFPercentage(18), marginBottom: RFPercentage(2) },
 });
 
 export default Messages;

@@ -1,5 +1,21 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, Platform, FlatList, Dimensions, Modal, Pressable, RefreshControl, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ImageBackground,
+  Image,
+  Platform,
+  FlatList,
+  Dimensions,
+  Modal,
+  Pressable,
+  RefreshControl,
+  ActivityIndicator,
+  StatusBar,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
@@ -17,7 +33,7 @@ import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 
 function MyRequests({ navigation }) {
   const { userData: user } = useUser();
@@ -38,6 +54,8 @@ function MyRequests({ navigation }) {
   const [hasMore, setHasMore] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedRequestIndex, setSelectedRequestIndex] = useState(null);
+  const [selectedRequestItem, setSelectedRequestItem] = useState(null);
 
   const carts = [
     {
@@ -175,7 +193,12 @@ function MyRequests({ navigation }) {
 
   return (
     <View style={styles.screen}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+      <StatusBar barStyle="dark-content" />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
+      >
         {/* Nav */}
         <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title="My Requests" />
 
@@ -197,7 +220,7 @@ function MyRequests({ navigation }) {
               onEndReached={handleLoadMore}
               onMomentumScrollEnd={(event) => handleScrollEnd(event, index)}
               renderItem={({ item }) => (
-                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }} resizeMode="cover" >
+                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }} resizeMode="cover">
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{cart.taskType}</Text>
                   </View>
@@ -218,7 +241,6 @@ function MyRequests({ navigation }) {
                 </ImageBackground>
               )}
               keyExtractor={(item, index) => index.toString()}
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
             />
 
             {/* <View style={styles.dotsContainer}>
@@ -242,7 +264,7 @@ function MyRequests({ navigation }) {
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={{ fontSize: RFPercentage(2),  fontFamily: "Poppins_500Medium", marginTop:RFPercentage(1) }}>
+              <Text style={{ fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(1) }}>
                 Compensation:{" "}
                 <Text style={styles.compensationAmount}>
                   {cart.compensationType === "Monitarely" ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
@@ -251,12 +273,19 @@ function MyRequests({ navigation }) {
             </View>
 
             {cart?.status === REQUEST_STATUS.Active && (
-              <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center",marginTop : RFPercentage(1.5) }}>
+              <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) }}>
                 <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
-                  <Text style={{ color: Colors.primary }}>Mark as Done</Text>
+                  <Text style={{ color: Colors.primary, fontFamily: "Poppins_400Regular" }}>Mark as Done</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => changeReqestStatus(index, REQUEST_STATUS.Cancelled, cart)} style={styles.cancel}>
-                  <Text style={{ color: Colors.red }}>Cancel</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedRequestIndex(index);
+                    setSelectedRequestItem(cart);
+                    setIsModalVisible(true);
+                  }}
+                  style={styles.cancel}
+                >
+                  <Text style={{ color: Colors.red, fontFamily: "Poppins_400Regular" }}>Cancel</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -270,9 +299,7 @@ function MyRequests({ navigation }) {
           </View>
         )}
 
-        {!loading && taskRecords?.length === 0 && (
-          <NotFound title='No Record Found!' />
-        )}
+        {!loading && taskRecords?.length === 0 && <NotFound title="No Record Found!" />}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -282,14 +309,25 @@ function MyRequests({ navigation }) {
 
       {/* Modal */}
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
-        <BlurView intensity={40} style={styles.modalBackground}>
+        <BlurView intensity={100} style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalText}>Are you sure you want to delete{"\n"}this request?</Text>
             <View style={styles.modalButtons}>
               <Pressable style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </Pressable>
-              <MyAppButton title={"Yes"} marginTop={RFPercentage(0)} height={RFPercentage(5.8)} width={RFPercentage(17)} />
+              <MyAppButton
+                title={"Yes"}
+                marginTop={RFPercentage(0)}
+                height={RFPercentage(5.8)}
+                width={RFPercentage(17)}
+                onPress={() => {
+                  if (selectedRequestIndex !== null && selectedRequestItem) {
+                    changeReqestStatus(selectedRequestIndex, REQUEST_STATUS.Cancelled, selectedRequestItem);
+                    setIsModalVisible(false);
+                  }
+                }}
+              />
             </View>
           </View>
         </BlurView>
@@ -356,10 +394,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     overflow: "hidden",
-    paddingBottom:RFPercentage(1.6)
+    paddingBottom: RFPercentage(1.6),
   },
   cartImageBackground: {
-     width: screenWidth * 0.9,
+    width: screenWidth * 0.9,
     height: RFPercentage(24.5),
   },
   cartImage: {
@@ -404,7 +442,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     flexDirection: "row",
-    marginVertical : RFPercentage(2)
+    marginVertical: RFPercentage(2),
     // top: RFPercentage(-7),
   },
   userImage: {
@@ -453,6 +491,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(218, 218, 218, 0.5)",
   },
   modalContainer: {
     width: "80%",

@@ -1,9 +1,10 @@
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View, Image, TextInput, StatusBar } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { GiftedChat } from "react-native-gifted-chat";
+import { GiftedChat, InputToolbar, Bubble } from "react-native-gifted-chat";
 import Nav from "../components/common/Nav";
 import { collection, query, orderBy, limit, onSnapshot, addDoc, getDocs, Timestamp, startAfter, doc, updateDoc, where, writeBatch, getDoc } from "firebase/firestore";
-
+import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 import Colors from "../config/Colors";
@@ -13,6 +14,7 @@ const Chat = ({ navigation, route }) => {
   const [lastVisible, setLastVisible] = useState(null);
   const { chatId, senderId: currentUserId, senderName, receiver } = route.params;
   console.log({ chatId, senderId: currentUserId, senderName, receiver });
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const listenForNewMessages = () => {
@@ -172,6 +174,7 @@ const Chat = ({ navigation, route }) => {
     };
 
     // Save message to Firestore
+    setMessage("");
     try {
       await addDoc(collection(FIREBASE_DB, `chats/${chatId}/messages`), newMessage);
       const chatRef = doc(FIREBASE_DB, "chats", chatId);
@@ -216,12 +219,46 @@ const Chat = ({ navigation, route }) => {
   };
 
   console.log(messages);
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? RFPercentage(7.9) : RFPercentage(-25)}>
+      <StatusBar backgroundColor={Colors.lightWhite} translucent barStyle="dark-content"/>
       <View style={styles.screen}>
         {/* Nav */}
-        <View style={{ width: "100%", justifyContent: "center", alignItems: "center" }}>
-          <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={receiver?.userName} />
+        <View style={{ width: "100%", alignItems: "center", flexDirection: "row", height: RFPercentage(10), borderBottomWidth: 1, borderBottomColor: Colors.lightGrey }}>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={Colors.primary} />
+          </TouchableOpacity>
+          <View style={{ marginLeft: RFPercentage(2.5) }}>
+            {receiver?.profileImage ? (
+              <>
+                <Image
+                  source={{ uri: receiver?.profileImage }}
+                  resizeMode="contain"
+                  style={{ width: RFPercentage(7), height: RFPercentage(7), borderRadius: RFPercentage(100), borderWidth: 2, borderColor: Colors.primary }}
+                />
+              </>
+            ) : (
+              <>
+                <View
+                  style={{
+                    width: RFPercentage(7),
+                    height: RFPercentage(7),
+                    borderRadius: RFPercentage(100),
+                    borderWidth: 2,
+                    borderColor: Colors.primary,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" }}>{receiver?.userName[0]}</Text>
+                </View>
+              </>
+            )}
+          </View>
+          <View style={{ marginLeft: RFPercentage(1.5) }}>
+            <Text style={{ color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" }}>{receiver?.userName}</Text>
+          </View>
         </View>
 
         <View style={styles.messageContainer}>
@@ -237,8 +274,59 @@ const Chat = ({ navigation, route }) => {
             bottomOffset={RFPercentage(2)} // Adjusted bottomOffset
             renderLoadEarlier={(props) => (
               <TouchableOpacity style={styles.loadMessages} onPress={props.onLoadEarlier}>
-                <Text style={{ color: Colors.white, fontWeight: "bold" }}>Load earlier messages</Text>
+                <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular"  }}>Load earlier messages</Text>
               </TouchableOpacity>
+            )}
+            renderInputToolbar={(props) => (
+              <InputToolbar
+                {...props}
+                containerStyle={styles.toolbar}
+                renderComposer={() => <TextInput style={styles.customTextInput} placeholder="Type a message" placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
+                renderSend={() => (
+                  <TouchableOpacity
+                    style={styles.sendButton}
+                    onPress={() => {
+                      onSend([
+                        {
+                          text: message,
+                          user: {
+                            _id: currentUserId,
+                            name: senderName,
+                          },
+                          createdAt: new Date(),
+                        },
+                      ]);
+                    }}
+                  >
+                    <Feather name="send" size={RFPercentage(2.3)} color={Colors.white} />
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+            renderBubble={(props) => (
+              <Bubble
+                {...props}
+                wrapperStyle={{
+                  left: {
+                    backgroundColor: Colors.lightGrey,
+                    padding: RFPercentage(0.6),
+                  },
+                  right: {
+                    backgroundColor: Colors.primary,
+                    padding: RFPercentage(0.6),
+                  },
+                }}
+                textStyle={{
+                  left: {
+                    color: Colors.primary,
+                     fontFamily: "Poppins_400Regular",
+                  },
+                  right: {
+                    color: Colors.white,
+                     fontFamily: "Poppins_400Regular",
+                  },
+                }}
+              />
             )}
           />
         </View>
@@ -254,14 +342,14 @@ const styles = StyleSheet.create({
     paddingRight: RFPercentage(1),
     // justifyContent: 'flex-start',
     // alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.lightWhite,
   },
   messageContainer: {
     flex: 1,
     width: "100%",
     // justifyContent: 'center',
     // alignItems: 'center',
-    backgroundColor: "white",
+    backgroundColor: Colors.lightWhite,
     marginBottom: RFPercentage(1),
     borderRadius: RFPercentage(1),
   },
@@ -272,6 +360,34 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 10,
     paddingHorizontal: RFPercentage(2.6),
+  },
+  toolbar: {
+    backgroundColor: Colors.primary,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    borderRadius: RFPercentage(6),
+    height: RFPercentage(6),
+    justifyContent: "center",
+    paddingHorizontal: RFPercentage(1.5),
+    // bottom: keyboardVisible ? RFPercentage(25) : 0,
+  },
+  customTextInput: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.8),
+    borderRadius: RFPercentage(10),
+    width: RFPercentage(36),
+    fontFamily: "Poppins_400Regular",
+  },
+  sendButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(100),
+    position: "absolute",
+    right: 0,
+    // backgroundColor:'red',
+    top: RFPercentage(-0.8),
   },
 });
 

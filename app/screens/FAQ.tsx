@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   q: {
     fontSize: RFPercentage(1.8),
     color: "#334155",
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins_400Regular",
     textAlign: "left",
   },
   icon: {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     color: "#64748B",
     textAlign: "justify",
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins_400Regular",
   },
 });
 

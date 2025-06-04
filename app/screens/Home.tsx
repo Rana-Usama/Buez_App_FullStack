@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, KeyboardAvoidingView, RefreshControl, ActivityIndicator, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,7 +21,7 @@ import NotFound from "../components/common/NotFound";
 type InputFieldType = {
   placeholder: string;
   value: string;
-  secure?: boolean; 
+  secure?: boolean;
 };
 
 function Home({ navigation }) {
@@ -36,6 +36,8 @@ function Home({ navigation }) {
 
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [allTasks, setAllTasks] = useState([]);
 
   const {
     taskRecords,
@@ -54,49 +56,22 @@ function Home({ navigation }) {
     unsubscribeRef,
   } = usePostContext();
 
-  const carts = [
-    {
-      images: [require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")],
-      category: "Gardening",
-      user: "Emma Stone",
-      date: "Posted on: 07-08-2024",
-      task: "Help in Gardening...",
-      compensation: "25$",
-      dp: require("../../assets/Images/dp.png"),
-    },
-    {
-      images: [require("../../assets/Images/cover.png"), require("../../assets/Images/c1.png"), require("../../assets/Images/c1.png")],
-      category: "Cleaning",
-      user: "John Doe",
-      date: "Posted on: 08-08-2024",
-      task: "Help with Lawn...",
-      compensation: "30$",
-      dp: require("../../assets/Images/jhon.png"),
-    },
-  ];
-
-  const [activeIndices, setActiveIndices] = useState(carts.map((cart) => (cart.images.length > 1 ? 0 : 0)));
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchRequests(null);
-
-      return () => {
-        console.log("unmounting: Home");
-      };
-    }, [activeFilter])
-  );
+  useEffect(() => {
+    fetchRequests(null);
+    return () => {
+      console.log("unmounting: Home");
+    };
+  }, [activeFilter]);
 
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
-    // setTaskRecords([]);
-    // setLastVisiblePost(null);
     try {
       let isLastVisible = lastVisiblePost;
       if (typeof islastVisiblePost !== "undefined") {
         isLastVisible = islastVisiblePost;
       }
-      const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, searchQuery, isLastVisible);
+      const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, "", isLastVisible); // fetch everything
+      setAllTasks(newRecords);
       setTaskRecords(newRecords);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords?.length > 0);
@@ -141,26 +116,28 @@ function Home({ navigation }) {
     setSearchQuery(text);
   };
 
-  const filteredCarts = carts.filter((cart) => {
-    const lowercasedQuery = searchQuery.toLowerCase();
-    return cart.category.toLowerCase().includes(lowercasedQuery) || cart.user.toLowerCase().includes(lowercasedQuery) || cart.task.toLowerCase().includes(lowercasedQuery);
-  });
+const getDisplayTasks = () => {
+  let list = allTasks;
 
-  const handleScrollEnd = (event, cartIndex) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width);
-    setActiveIndices((prev) => {
-      const updatedIndices = [...prev];
-      updatedIndices[cartIndex] = index;
-      return updatedIndices;
-    });
-  };
+  if (activeFilter !== "All") {
+    list = list.filter(
+      (task) => task.taskType?.toLowerCase() === activeFilter.toLowerCase()
+    );
+  }
 
-  const handleCommonSearch = () => {
-    if (searchQuery === "") {
-      setHasMore(true);
-    }
-    fetchRequests(null);
-  };
+  if (searchQuery.trim() !== "") {
+    list = list.filter(
+      (task) =>
+        task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.user?.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.taskType?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  return list;
+};
+const displayTasks = getDisplayTasks();
+
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -181,7 +158,12 @@ function Home({ navigation }) {
   return (
     <View style={styles.screen}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ScrollView onScroll={(e) => (scrollPosition.current = e.nativeEvent.contentOffset.y)} style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+        <ScrollView
+          onScroll={(e) => (scrollPosition.current = e.nativeEvent.contentOffset.y)}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollViewContent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
+        >
           {/* Nav */}
           <Nav crown={true} marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Home" />
 
@@ -203,9 +185,6 @@ function Home({ navigation }) {
                   handleFeild={(text) => handleChange(text, i)}
                   value={item.value}
                   width={"97%"}
-                  onSubmitEditing={() => {
-                    handleCommonSearch();
-                  }}
                 />
               </View>
             ))}
@@ -227,69 +206,69 @@ function Home({ navigation }) {
           </View>
 
           {/* Carts */}
-          {taskRecords?.map((cart, cartIndex) => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("OfferDetail", { postRequest: cart })}
-              activeOpacity={0.8}
-              key={cartIndex}
-              style={[styles.cartContainer, { marginTop: cartIndex === 1 ? RFPercentage(3) : RFPercentage(2) }]}
-            >
-              <FlatList
-                data={cart.imageUrls}
-                horizontal
-                pagingEnabled
-                onEndReached={handleLoadMore}
-                showsHorizontalScrollIndicator={false}
-                onMomentumScrollEnd={(event) => handleScrollEnd(event, cartIndex)}
-                renderItem={({ item }) => (
-                  <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }}>
-                    {/* <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryText}>{cart.category}</Text>
-                  </View> */}
-                    {/* <View style={styles.dotsContainer}>
-                    {cart.imageUrls.length > 1 &&
-                      cart.imageUrls.map((_, imageIndex) => <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[cartIndex] ? styles.activeDot : styles.inactiveDot]} />)}
-                  </View> */}
-                  </ImageBackground>
-                )}
-                keyExtractor={(item, index) => index.toString()}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
-              />
-
-              {/* Info */}
-              <View style={styles.infoWrapper}>
-                <View style={styles.cartInfoContainer}>
-                  <TouchableOpacity activeOpacity={0.8}>
-                    <Image style={styles.userImage} source={cart.user.profileImage ? { uri: cart.user.profileImage } : require("../../assets/Images/dp.png")} />
-                  </TouchableOpacity>
-
-                  <Text style={styles.userName}>{cart.user.userName}</Text>
-                  <Text style={styles.postDate}>Posted on {getFormatedDate(cart.createdAt)}</Text>
-                </View>
-
-                <View style={styles.taskInfoContainer}>
-                  <Text style={styles.taskText}>{cart.description?.substr(0, 35) + (cart.description?.length > 8 ? "..." : "")}</Text>
-                  <View style={styles.compensationWrapper}>
-                    <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
-                    <Text style={styles.compensationText}>
-                      Compensation:{" "}
-                      <Text style={styles.compensationAmount}>
-                        {cart.compensationType === "Monitarely" ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
-                      </Text>
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-
-          {(loading || loadingMore) && (
+          {loading ? (
             <View style={{ marginTop: RFPercentage(20) }}>
               <ActivityIndicator size="large" color={Colors.primary} />
             </View>
+          ) : (
+            <>
+              {displayTasks.map((cart, cartIndex) => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("OfferDetail", { postRequest: cart })}
+                  activeOpacity={0.8}
+                  key={cartIndex}
+                  style={[styles.cartContainer, { marginTop: cartIndex === 1 ? RFPercentage(3) : RFPercentage(2) }]}
+                >
+                  <FlatList
+                    data={cart.imageUrls}
+                    horizontal
+                    pagingEnabled
+                    onEndReached={handleLoadMore}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({ item }) => (
+                      <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }}>
+                        {/* <View style={styles.categoryBadge}>
+                    <Text style={styles.categoryText}>{cart.category}</Text>
+                  </View> */}
+                        {/* <View style={styles.dotsContainer}>
+                    {cart.imageUrls.length > 1 &&
+                      cart.imageUrls.map((_, imageIndex) => <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[cartIndex] ? styles.activeDot : styles.inactiveDot]} />)}
+                  </View> */}
+                      </ImageBackground>
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
+                  />
+
+                  {/* Info */}
+                  <View style={styles.infoWrapper}>
+                    <View style={styles.cartInfoContainer}>
+                      <TouchableOpacity activeOpacity={0.8}>
+                        <Image style={styles.userImage} source={cart.user.profileImage ? { uri: cart.user.profileImage } : require("../../assets/Images/dp.png")} />
+                      </TouchableOpacity>
+
+                      <Text style={styles.userName}>{cart.user.userName}</Text>
+                      <Text style={styles.postDate}>Posted on {getFormatedDate(cart.createdAt)}</Text>
+                    </View>
+
+                    <View style={styles.taskInfoContainer}>
+                      <Text style={styles.taskText}>{cart.description?.substr(0, 35) + (cart.description?.length > 8 ? "..." : "")}</Text>
+                      <View style={styles.compensationWrapper}>
+                        <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
+                        <Text style={styles.compensationText}>
+                          Compensation:{" "}
+                          <Text style={styles.compensationAmount}>
+                            {cart.compensationType === "Monitarely" ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                          </Text>
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
           )}
 
-          {!loading && taskRecords?.length === 0 && <NotFound title="No Record Found!" />}
+          {!loading && displayTasks?.length === 0 && <NotFound title="No Record Found!" />}
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -384,7 +363,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     overflow: "hidden",
-    paddingBottom : RFPercentage(1)
+    paddingBottom: RFPercentage(1),
   },
   cartImageBackground: {
     width: RFPercentage(45.3),
@@ -435,7 +414,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     // top: RFPercentage(-6),
     // backgroundColor:'red',
-    marginVertical : RFPercentage(1)
+    marginVertical: RFPercentage(1),
   },
   userImage: {
     width: RFPercentage(4.9),
@@ -482,7 +461,7 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     marginBottom: RFPercentage(6),
   },
-  infoWrapper: { width: "100%", justifyContent: "center", alignItems: "center",},
+  infoWrapper: { width: "100%", justifyContent: "center", alignItems: "center" },
   compensationWrapper: {
     marginTop: RFPercentage(1),
     justifyContent: "center",

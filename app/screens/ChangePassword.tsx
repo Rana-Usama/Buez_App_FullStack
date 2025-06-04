@@ -147,7 +147,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                 borderRadius={RFPercentage(1.4)}
                 color={Colors.black}
                 fontSize={RFPercentage(1.8)}
-                fontFamily={"Poppins-Regular"}
+                fontFamily={"Poppins_400Regular"}
                 icon={item.icon}
                 handleFeild={(text: string) => handleChange(text, i)}
                 value={item.value}
@@ -159,7 +159,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
 
         {/* Button */}
         <View style={styles.buttonWrapper}>
-          <MyAppButton title="Change" marginTop={RFPercentage(2)} onPress={handlePasswordChange} />
+          <MyAppButton title="Change" marginTop={RFPercentage(2)} onPress={handlePasswordChange} loading={indicator} disabled={indicator} />
         </View>
       </ScrollView>
     </View>
@@ -182,10 +182,10 @@ const styles = StyleSheet.create({
   },
   title: {
     left: RFPercentage(1.6),
-    marginBottom: RFPercentage(1.2),
+    // marginBottom: RFPercentage(1.2),
     color: "#57534E",
     fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins-Regular",
+    fontFamily: "Poppins_400Regular",
   },
   buttonWrapper: {
     justifyContent: "center",

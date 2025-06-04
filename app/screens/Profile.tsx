@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
   content: { width: "90%", justifyContent: "flex-start", alignItems: "center", flexDirection: "row" },
   icon: { width: RFPercentage(2.2), height: RFPercentage(2.2) },
-  title: { marginLeft: RFPercentage(1.7), color: "#44403C", fontSize: RFPercentage(1.7), fontFamily: "Poppins-Regular" },
+  title: { marginLeft: RFPercentage(1.7), color: "#44403C", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   arrow: { fontSize: RFPercentage(1.7), color: "#44403C", position: "absolute", right: 0 },
 });
 
