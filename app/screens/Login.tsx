@@ -17,6 +17,8 @@ import Toast from "react-native-toast-message";
 
 // utils
 import { validateEmail } from "../utils/helperFunctions";
+import { updateUserToken } from "../services/User.service";
+import { registerForPushNotificationsAsync } from "../utils/notificationService";
 
 // config
 import Colors from "../config/Colors";
@@ -41,7 +43,7 @@ function Login(props: any) {
     email: yup.string().email("Invalid email").required("Email is required"),
     password: yup.string().required("Password is required"),
   });
- 
+
   const signInWithEmail = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
@@ -58,20 +60,26 @@ function Login(props: any) {
       const email = values.email;
       const password = values.password;
       const user = await signInWithEmail(email, password);
+
       if (remember) {
         await saveCredentials(email, password);
       }
+
+      const pushToken = await registerForPushNotificationsAsync();
+      if (user && pushToken) {
+        await updateUserToken(user.uid, pushToken);
+      }
       Toast.show({
         type: "success",
-        text1: "Sign In",
-        text2: "Signed In Successfully!",
+        text1: "Login Successful",
+        text2: "Welcome back!",
       });
       console.log(user);
     } catch (error) {
       Toast.show({
         type: "error",
         text1: "Sign In Error",
-        text2: 'Invalid Credentials',
+        text2: "Invalid Credentials",
       });
     }
     showIndicator(false);

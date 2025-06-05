@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "291364316025",
+    "project_id": "socially-1720865151833",
+    "storage_bucket": "socially-1720865151833.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291364316025:android:c64083404511ef294285a8",
+        "android_client_info": {
+          "package_name": "com.adamburg.Buez"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "291364316025-baf68r6qls0q419j58jtbn8liin8r6si.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adamburg.Buez",
+            "certificate_hash": "4359795a947e16f6c2277d599e9acdf128d41abe"
+          }
+        },
+        {
+          "client_id": "291364316025-e6865419mldibgleh55n6jo68mt3u1kn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adamburg.Buez",
+            "certificate_hash": "69cfe342186c471c2ef0e2dba50b3fb70b1ae837"
+          }
+        },
+        {
+          "client_id": "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMSZToKjYzVkyVUGTdmcw5ivtpQUTKKmc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "291364316025-73q230c3tjj0qh6k3m5148kk2mh2qjft.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "291364316025-ei4kkql4mobs21k17gop81os2lcttjgp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sahil.wildlife"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -187,6 +187,7 @@ const Chat = ({ navigation, route }) => {
         lastMessage: message,
         lastMessageTimestamp: Timestamp.now(),
       });
+      sendPushNotification(message?.text)
     } catch (e) {
       console.log(e);
     }
@@ -219,7 +220,32 @@ const Chat = ({ navigation, route }) => {
     }
   };
 
-  console.log(messages);
+  // console.log(messages);
+
+
+
+  async function sendPushNotification(message) {
+  try {
+    const response = await fetch("http://192.168.100.30:4242/send-notification", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        expoPushToken : receiver.token,
+        title :senderName,
+        message : message,
+      }),
+    });
+    const data = await response.text();
+    console.log("sendPushNotification:", data);
+    return data;
+  } catch (error) {
+    console.error("sendPushNotification error:", error);
+    throw error;
+  }
+}
+
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? RFPercentage(7.9) : RFPercentage(-25)}>

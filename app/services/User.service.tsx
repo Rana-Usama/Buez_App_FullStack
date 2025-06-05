@@ -7,7 +7,7 @@ import { uploadImage } from "./Shared.service";
 
 const db = FIREBASE_DB;
 
-export const addUser = async (id: any, { userName, email, phoneNumber = "", profileImage = "", trialStartDate, isSubscribed }) => {
+export const addUser = async (id: any, { userName, email, phoneNumber = "", profileImage = "", trialStartDate, isSubscribed, token }) => {
   try {
     console.log("ADD_USER");
     const user = {
@@ -17,6 +17,7 @@ export const addUser = async (id: any, { userName, email, phoneNumber = "", prof
       email,
       trialStartDate,
       isSubscribed,
+      token
     };
 
     await setDoc(doc(db, "users", id), user);
@@ -119,3 +120,16 @@ export const saveSubscription = async (userId : any, subscriptionId : any) => {
     throw error;
   }
 };
+
+
+export const updateUserToken = async (userId: string, token: string) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, { token });
+    console.log("Push token updated for user:", userId);
+  } catch (error) {
+    console.error("Error updating push token:", error);
+    throw error;
+  }
+};
+

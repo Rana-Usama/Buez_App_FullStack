@@ -154,7 +154,7 @@ function Messages({ navigation }) {
     console.log(item.user);
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
+        onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user, })}
         activeOpacity={0.8}
         style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
       >

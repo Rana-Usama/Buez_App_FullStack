@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
@@ -19,8 +19,10 @@ import { Icons } from "../config/theme";
 import * as yup from "yup";
 import { Formik } from "formik";
 import Toast from "react-native-toast-message";
+import { registerForPushNotificationsAsync } from "../utils/notificationService";
 
 function Signup(props: any) {
+
   let validationSchema = yup.object({
     name: yup.string().required("Username is required"),
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -32,6 +34,19 @@ function Signup(props: any) {
   });
 
   const [indicator, showIndicator] = useState(false);
+  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+
+
+   useEffect(() => {
+    async function getToken() {
+      const token = await registerForPushNotificationsAsync();
+      setExpoPushToken(token);
+    }
+    getToken();
+  }, []);
+
+
+  console.log('expoPushToken...................', expoPushToken)
 
   const createAccountWithEmail = async (email, password) => {
     try {
@@ -56,6 +71,7 @@ function Signup(props: any) {
           email: email,
           trialStartDate: new Date(),
           isSubscribed: false,
+          token : expoPushToken
         };
         await addUser(user?.uid, userData);
       }
