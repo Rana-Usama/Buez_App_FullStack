@@ -27,7 +27,7 @@ import CustomTabBar from "../components/common/CustomTabBar";
 import MyAppButton from "../components/common/MyAppButton";
 import { getMyReuqests, updateReqestStatus } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
-import { getRelativePostTime } from "../services/Shared.service";
+import { getFormatedDate, getRelativePostTime } from "../services/Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
@@ -40,7 +40,6 @@ function MyRequests({ navigation }) {
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
   const [activeFilter, setActiveFilter] = useState("Active");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [taskRecords, setTaskRecords] = useState([]);
@@ -50,6 +49,7 @@ function MyRequests({ navigation }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedRequestIndex, setSelectedRequestIndex] = useState(null);
   const [selectedRequestItem, setSelectedRequestItem] = useState(null);
+  const [activeIndices, setActiveIndices] = useState({});
 
   useFocusEffect(
     useCallback(() => {
@@ -152,6 +152,17 @@ function MyRequests({ navigation }) {
     navigation.navigate("PostRequest", { title: "Edit Requestt", postRequest: cart });
   };
 
+  const handleImageScroll = (event, cardIndex) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const viewSize = event.nativeEvent.layoutMeasurement.width;
+    const currentIndex = Math.floor(contentOffsetX / viewSize);
+
+    setActiveIndices((prev) => ({
+      ...prev,
+      [cardIndex]: currentIndex,
+    }));
+  };
+
   return (
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content" />
@@ -178,6 +189,8 @@ function MyRequests({ navigation }) {
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
+              onScroll={(event) => handleImageScroll(event, index)}
+              scrollEventThrottle={16}
               onEndReached={handleLoadMore}
               renderItem={({ item }) => (
                 <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }} resizeMode="cover">
@@ -202,21 +215,22 @@ function MyRequests({ navigation }) {
               )}
               keyExtractor={(item, index) => index.toString()}
             />
-
-            {/* <View style={styles.dotsContainer}>
-              {cart.imageUrls.map((_, imageIndex) => (
-                <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[index] ? styles.activeDot : styles.inactiveDot]} />
-              ))}
-            </View> */}
+            {cart?.imageUrls?.length > 1 && (
+              <View style={styles.dotsContainer}>
+                {cart.imageUrls.map((_, imageIndex) => (
+                  <View key={imageIndex} style={[styles.dot, (activeIndices[index] ?? 0) === imageIndex ? styles.activeDot : styles.inactiveDot]} />
+                ))}
+              </View>
+            )}
 
             {/* Info */}
             <View style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.userImage} source={{ uri: cart?.user?.profileImage }} />
+                <Image style={styles.userImage} source={cart?.user?.profileImage ?  { uri: cart?.user?.profileImage } : Icons.dp} />
               </TouchableOpacity>
 
               <Text style={styles.userName}>{cart.user.userName}</Text>
-              <Text style={styles.postDate}>Posted on: {getRelativePostTime(cart?.createdAt)}</Text>
+              <Text style={styles.postDate}>Posted on: {getFormatedDate(cart?.createdAt)}</Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
@@ -224,7 +238,7 @@ function MyRequests({ navigation }) {
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={{ fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(1) }}>
+              <Text style={{ fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(1) }}>
                 Compensation:{" "}
                 <Text style={styles.compensationAmount}>
                   {cart.compensationType === "Monitarely" ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
@@ -233,9 +247,9 @@ function MyRequests({ navigation }) {
             </View>
 
             {cart?.status === REQUEST_STATUS.Active && (
-              <View style={{ width: "90%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) }}>
+              <View style={{ width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) }}>
                 <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
-                  <Text style={{ color: Colors.primary, fontFamily: "Poppins_400Regular" }}>Mark as Done</Text>
+                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>Mark as Done</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -245,7 +259,7 @@ function MyRequests({ navigation }) {
                   }}
                   style={styles.cancel}
                 >
-                  <Text style={{ color: Colors.red, fontFamily: "Poppins_400Regular" }}>Cancel</Text>
+                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>Cancel</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -382,7 +396,7 @@ const styles = StyleSheet.create({
   dotsContainer: {
     flexDirection: "row",
     alignSelf: "center",
-    top: RFPercentage(-9),
+    // top: RFPercentage(-9),
   },
   dot: {
     height: RFPercentage(0.9),
@@ -443,6 +457,7 @@ const styles = StyleSheet.create({
   compensationAmount: {
     color: Colors.primary,
     fontFamily: "Poppins_600SemiBold",
+    fontSize:RFPercentage(1.8)
   },
   bottomSpacing: {
     marginBottom: RFPercentage(6),
@@ -519,16 +534,17 @@ const styles = StyleSheet.create({
     top: RFPercentage(2),
   },
   markButton: {
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(100),
     width: RFPercentage(16),
     height: RFPercentage(5.2),
-    borderColor: Colors.primary,
+    borderColor: "rgb(116, 209, 158)",
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgb(116, 209, 158)",
   },
   cancel: {
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(100),
     width: RFPercentage(16),
     height: RFPercentage(5.2),
     borderColor: Colors.red,
@@ -537,6 +553,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "absolute",
     right: 0,
+    backgroundColor: Colors.red,
   },
   notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },

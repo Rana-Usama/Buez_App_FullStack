@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, KeyboardAvoidingView, RefreshControl, ActivityIndicator, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, KeyboardAvoidingView, RefreshControl, ActivityIndicator, Platform, Dimensions } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -23,6 +23,8 @@ type InputFieldType = {
   value: string;
   secure?: boolean;
 };
+
+const { width } = Dimensions.get("window");
 
 function Home({ navigation }) {
   const { userData: user } = useUser();
@@ -62,6 +64,8 @@ function Home({ navigation }) {
       console.log("unmounting: Home");
     };
   }, [activeFilter]);
+
+  const [activeIndices, setActiveIndices] = useState({});
 
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
@@ -116,28 +120,25 @@ function Home({ navigation }) {
     setSearchQuery(text);
   };
 
-const getDisplayTasks = () => {
-  let list = allTasks;
+  const getDisplayTasks = () => {
+    let list = allTasks;
 
-  if (activeFilter !== "All") {
-    list = list.filter(
-      (task) => task.taskType?.toLowerCase() === activeFilter.toLowerCase()
-    );
-  }
+    if (activeFilter !== "All") {
+      list = list.filter((task) => task.taskType?.toLowerCase() === activeFilter.toLowerCase());
+    }
 
-  if (searchQuery.trim() !== "") {
-    list = list.filter(
-      (task) =>
-        task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.user?.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.taskType?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
+    if (searchQuery.trim() !== "") {
+      list = list.filter(
+        (task) =>
+          task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          task.user?.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          task.taskType?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-  return list;
-};
-const displayTasks = getDisplayTasks();
-
+    return list;
+  };
+  const displayTasks = getDisplayTasks();
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -161,6 +162,7 @@ const displayTasks = getDisplayTasks();
         <ScrollView
           onScroll={(e) => (scrollPosition.current = e.nativeEvent.contentOffset.y)}
           style={styles.scrollView}
+          nestedScrollEnabled={true}
           contentContainerStyle={styles.scrollViewContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
         >
@@ -212,59 +214,72 @@ const displayTasks = getDisplayTasks();
             </View>
           ) : (
             <>
-              {displayTasks.map((cart, cartIndex) => (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("OfferDetail", { postRequest: cart })}
-                  activeOpacity={0.8}
-                  key={cartIndex}
-                  style={[styles.cartContainer, { marginTop: cartIndex === 1 ? RFPercentage(3) : RFPercentage(2) }]}
-                >
-                  <FlatList
-                    data={cart.imageUrls}
-                    horizontal
-                    pagingEnabled
-                    onEndReached={handleLoadMore}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                      <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }}>
-                        {/* <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryText}>{cart.category}</Text>
-                  </View> */}
-                        {/* <View style={styles.dotsContainer}>
-                    {cart.imageUrls.length > 1 &&
-                      cart.imageUrls.map((_, imageIndex) => <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[cartIndex] ? styles.activeDot : styles.inactiveDot]} />)}
-                  </View> */}
-                      </ImageBackground>
+              <FlatList
+                data={displayTasks}
+                keyExtractor={(item, index) => index.toString()}
+                scrollEventThrottle={16}
+                renderItem={({ item, index }) => (
+                  <TouchableOpacity onPress={() => navigation.navigate("OfferDetail", { postRequest: item })} activeOpacity={0.8} style={[styles.cartContainer]}>
+                    <FlatList
+                      data={item.imageUrls}
+                      keyExtractor={(_, imgIndex) => imgIndex.toString()}
+                      horizontal
+                      pagingEnabled
+                      showsHorizontalScrollIndicator={false}
+                      scrollEnabled={true} // ensure it's scrollable
+                      nestedScrollEnabled={true} // allow nested scrolling
+                      onScroll={(e) => {
+                        const slideIndex = Math.round(e.nativeEvent.contentOffset.x / (width * 0.9));
+                        setActiveIndices((prev) => ({ ...prev, [index]: slideIndex }));
+                      }}
+                      renderItem={({ item: imageUrl }) => (
+                        <Image
+                          resizeMode="cover"
+                          source={{ uri: imageUrl }}
+                          style={{
+                            width: width * 0.9,
+                            height: RFPercentage(30),
+                            borderTopLeftRadius: RFPercentage(1),
+                            borderTopRightRadius: RFPercentage(1),
+                          }}
+                        />
+                      )}
+                    />
+
+                    {item?.imageUrls?.length > 1 && (
+                      <View style={styles.dotsContainer}>
+                        {item.imageUrls.map((_, imageIndex) => (
+                          <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[index] ? styles.activeDot : styles.inactiveDot]} />
+                        ))}
+                      </View>
                     )}
-                    keyExtractor={(item, index) => index.toString()}
-                  />
 
-                  {/* Info */}
-                  <View style={styles.infoWrapper}>
-                    <View style={styles.cartInfoContainer}>
-                      <TouchableOpacity activeOpacity={0.8}>
-                        <Image style={styles.userImage} source={cart.user.profileImage ? { uri: cart.user.profileImage } : require("../../assets/Images/dp.png")} />
-                      </TouchableOpacity>
+                    <View style={styles.infoWrapper}>
+                      <View style={styles.cartInfoContainer}>
+                        <TouchableOpacity activeOpacity={0.8}>
+                          <Image style={styles.userImage} source={item.user.profileImage ? { uri: item.user.profileImage } : require("../../assets/Images/dp.png")} />
+                        </TouchableOpacity>
 
-                      <Text style={styles.userName}>{cart.user.userName}</Text>
-                      <Text style={styles.postDate}>Posted on {getFormatedDate(cart.createdAt)}</Text>
-                    </View>
+                        <Text style={styles.userName}>{item.user.userName}</Text>
+                        <Text style={styles.postDate}>Posted on {getFormatedDate(item.createdAt)}</Text>
+                      </View>
 
-                    <View style={styles.taskInfoContainer}>
-                      <Text style={styles.taskText}>{cart.description?.substr(0, 35) + (cart.description?.length > 8 ? "..." : "")}</Text>
-                      <View style={styles.compensationWrapper}>
-                        <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
-                        <Text style={styles.compensationText}>
-                          Compensation:{" "}
-                          <Text style={styles.compensationAmount}>
-                            {cart.compensationType === "Monitarely" ? cart.monitarily : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                      <View style={styles.taskInfoContainer}>
+                        <Text style={styles.taskText}>{item.description?.substr(0, 35) + (item.description?.length > 8 ? "..." : "")}</Text>
+                        <View style={styles.compensationWrapper}>
+                          <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
+                          <Text style={styles.compensationText}>
+                            Compensation:{" "}
+                            <Text style={styles.compensationAmount}>
+                              {item.compensationType === "Monitarely" ? `$${item.monitarily}` : item.otherCompensation?.substr(0, 20) + (item.otherCompensation?.length > 20 ? "..." : "")}
+                            </Text>
                           </Text>
-                        </Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
+                  </TouchableOpacity>
+                )}
+              />
             </>
           )}
 
@@ -355,19 +370,17 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2.5),
   },
   cartContainer: {
-    width: "90%",
-    height: RFPercentage(40),
+    width: width * 0.9,
+    height: RFPercentage(42),
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
-    borderRadius: RFPercentage(2),
-    justifyContent: "flex-start",
-    alignItems: "center",
-    overflow: "hidden",
+    borderRadius: RFPercentage(1),
     paddingBottom: RFPercentage(2),
+    marginTop: 20,
   },
   cartImageBackground: {
-    width: RFPercentage(45.3),
-    height: RFPercentage(24.5),
+    width: "100%",
+    height: RFPercentage(26.5),
     // backgroundColor:'yellow'
   },
   cartImage: {
@@ -390,23 +403,30 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
   },
   dotsContainer: {
+    width: "100%",
     flexDirection: "row",
-    alignSelf: "center",
-    position: "absolute",
-    bottom: RFPercentage(-3),
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "red",
+    height: 20,
+    top: 10,
   },
+
   dot: {
-    height: RFPercentage(0.9),
-    width: RFPercentage(0.9),
+    width: RFPercentage(1),
+    height: RFPercentage(1),
     borderRadius: RFPercentage(0.5),
-    margin: RFPercentage(0.5),
+    marginHorizontal: RFPercentage(0.3),
   },
+
   activeDot: {
     backgroundColor: Colors.primary,
   },
+
   inactiveDot: {
-    backgroundColor: "#D3D3D3",
+    backgroundColor: "#D1D5DB",
   },
+
   cartInfoContainer: {
     width: "92%",
     justifyContent: "flex-start",
@@ -456,7 +476,7 @@ const styles = StyleSheet.create({
   compensationAmount: {
     color: Colors.primary,
     fontFamily: "Poppins_700Bold",
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
   },
   bottomSpacing: {
     marginBottom: RFPercentage(6),
@@ -468,7 +488,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
   },
-  compansationIcon: { width: RFPercentage(3), height: RFPercentage(3) },
+  compansationIcon: { width: RFPercentage(2.3), height: RFPercentage(2.3) },
   notFoundWrapper: { marginTop: RFPercentage(16), justifyContent: "center", alignItems: "center" },
   notFoundImg: { borderRadius: RFPercentage(1), width: RFPercentage(16), height: RFPercentage(16), marginBottom: RFPercentage(2) },
   notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },

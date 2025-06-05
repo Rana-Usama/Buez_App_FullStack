@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, TextInp
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-// import { Image as CompressorImage } from "react-native-compressor";
+// import * as ImageManipulator from 'expo-image-manipulator';
 
 // components
 import Nav from "../components/common/Nav";
@@ -20,6 +20,7 @@ import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
+import InputFieldNew from "../components/common/NewField";
 
 type InputField = {
   placeholder: string;
@@ -40,26 +41,9 @@ function PostRequest({ navigation, route }) {
   // Input Fields
   const [indicator, showIndicator] = useState(false);
   const [description, setDescription] = useState("");
-  const [inputField, SetInputField] = useState<InputField[]>([
-    {
-      placeholder: "Location Address",
-      value: "",
-      validator: validateRequired,
-      display: () => true,
-    },
-    {
-      placeholder: "Compensation Details e.g, Two Movie Tickets",
-      value: "",
-      validator: validateRequired,
-      display: (v) => v === "Other",
-    },
-    {
-      placeholder: "e.g, 100$",
-      value: "",
-      validator: validateRequired,
-      display: (v) => v === "Monitarely" || !v,
-    },
-  ]);
+  const [location, setLocation] = useState("");
+  const [budget, setBudget] = useState("");
+  const [compensation, setCompensation] = useState("");
 
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
@@ -87,9 +71,10 @@ function PostRequest({ navigation, route }) {
         console.log("set values");
         setSelectedCompensation(currentPostRequest.compensationType);
         setSelectedTask(currentPostRequest.taskType);
-        handleChange(currentPostRequest.address, 0);
-        handleChange(currentPostRequest.otherCompensation, 1);
-        handleChange(currentPostRequest.monitarily, 2);
+        setLocation(currentPostRequest.address);
+        setCompensation(currentPostRequest.otherCompensation);
+        setBudget(`$${currentPostRequest.monitarily}`);
+
         const temp = [...imageUris];
         currentPostRequest.imageUrls.forEach((imgUrl, i) => {
           temp[i] = imgUrl;
@@ -126,18 +111,27 @@ function PostRequest({ navigation, route }) {
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1, // Still full quality, will compress below
+      quality: 1, // get original quality for picking
     });
+
     if (!result.canceled && result.assets) {
       const selectedImage = result.assets[0];
-      // const compressedImage = await CompressorImage.compress(selectedImage?.uri, {
-      //   compressionMethod: "manual",
-      //   maxWidth: 1000,
-      //   quality: 0.8,
-      // });
-      
+
+      // Compress the image
+      // const compressedImage = await ImageManipulator.manipulateAsync(
+      //   selectedImage.uri,
+      //   [],
+      //   {
+      //     compress: 0.5, // change compression level (0 to 1)
+      //     format: ImageManipulator.SaveFormat.JPEG,
+      //   }
+      // );
+
+      // console.log('compressedImage............', compressedImage)
+
+      // Update your imageUris state with compressed image URI
       let tempImageUris = [...imageUris];
-      tempImageUris[index] = selectedImage?.uri;
+      tempImageUris[index] = selectedImage.uri;
       setImageUris(tempImageUris);
     }
   };
@@ -148,37 +142,16 @@ function PostRequest({ navigation, route }) {
     setImageUris(tempImageUris);
   };
 
-  const handleChange = (text, i) => {
-    let tempfeilds = [...inputField];
-    tempfeilds[i].value = text;
-    SetInputField(tempfeilds);
-  };
-
-  const handleValidation = () => {
-    let isValid = true;
-    if (!inputField[0].validator(inputField[0].value)) {
-      isValid = false;
-      return isValid;
-    } else if (selectedCompensation === "Monitarely" && !inputField[2].validator(inputField[2].value)) {
-      isValid = false;
-      return isValid;
-    } else if (selectedCompensation === "Other" && !inputField[1].validator(inputField[1].value)) {
-      isValid = false;
-      return isValid;
-    }
-    if (!selectedTask || !selectedCompensation || !description) {
-      isValid = false;
-    }
-
-    if (imageUris.every((img) => !img)) {
-      isValid = false;
-    }
-
-    return isValid;
+  const DEFAUKT_IMAGES = {
+    Gardening: "https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    Cleaning: "https://plus.unsplash.com/premium_photo-1663011218145-c1d0c3ba3542?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    Gaming: "https://images.unsplash.com/photo-1486572788966-cfd3df1f5b42?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    Moving: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    Other: "https://images.unsplash.com/photo-1461595520627-42e3c83019bc?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   };
 
   const submitPostData = async () => {
-    if (!handleValidation()) {
+    if (!selectedTask || !selectedCompensation || !description || !location || (!compensation && !budget)) {
       Toast.show({
         type: "info",
         text1: "Post Request",
@@ -194,27 +167,27 @@ function PostRequest({ navigation, route }) {
         compensationType: selectedCompensation,
         description: description,
         descriptionKeywords: keywords,
-        address: inputField[0].value,
-        otherCompensation: inputField[1].value,
-        monitarily: inputField[2].value,
+        address: location,
+        otherCompensation: compensation,
+        monitarily: budget.replace(/^\$/, ""),
         status: REQUEST_STATUS.Active,
       };
       console.log(data);
       if (isEditing) {
         const imgs = imageUris.filter((img) => Boolean(img));
         if (imgs.length === 0) {
-          imgs.push(
-            "https://firebasestorage.googleapis.com/v0/b/socially-1720865151833.appspot.com/o/images%2Ffe116284-58be-41c1-b538-53eb4816ee23.png?alt=media&token=9e6ed2f0-d729-4b1f-a210-24adb1d1b5eb"
-          );
+          const defaultImageForTask = DEFAUKT_IMAGES[selectedTask] || DEFAUKT_IMAGES["Other"];
+          imgs.push(defaultImageForTask);
         }
+
         await updatePost(currentPostRequest.id, data, imgs);
       } else {
         const imgs = imageUris.filter((img) => Boolean(img));
         if (imgs.length === 0) {
-          imgs.push(
-            "https://firebasestorage.googleapis.com/v0/b/socially-1720865151833.appspot.com/o/images%2Ffe116284-58be-41c1-b538-53eb4816ee23.png?alt=media&token=9e6ed2f0-d729-4b1f-a210-24adb1d1b5eb"
-          );
+          const defaultImageForTask = DEFAUKT_IMAGES[selectedTask] || DEFAUKT_IMAGES["Other"];
+          imgs.push(defaultImageForTask);
         }
+
         await savePost(data, imgs);
       }
 
@@ -320,27 +293,29 @@ function PostRequest({ navigation, route }) {
 
           {/* Input field */}
           <View style={styles.typeWrapper}>
-            {inputField.map((item, i) =>
-              item?.display(selectedCompensation) ? (
-                <View key={i} style={{ marginTop: i === 0 ? RFPercentage(1.7) : RFPercentage(1) }}>
-                  <InputField
-                    placeholder={item.placeholder}
-                    placeholderColor={"#6B7280"}
-                    height={RFPercentage(6.2)}
-                    backgroundColor={Colors.white}
-                    borderWidth={RFPercentage(0.1)}
-                    borderColor={"#E5E7EB"}
-                    secure={item.secure}
-                    borderRadius={RFPercentage(1)}
-                    color={Colors.black}
-                    fontSize={RFPercentage(1.8)}
-                    fontFamily={"Poppins_400Regular"}
-                    handleFeild={(text) => handleChange(text, i)}
-                    value={item.value}
-                    width={"97.5%"}
-                  />
-                </View>
-              ) : null
+            <InputFieldNew placeholder="Location Adress" value={location} onChangeText={setLocation} customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }} />
+            {selectedCompensation === "Other" ? (
+              <>
+                <InputFieldNew
+                  placeholder="Compensation Details e.g, Two Movie Tickets"
+                  value={compensation}
+                  onChangeText={setCompensation}
+                  customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }}
+                />
+              </>
+            ) : (
+              <>
+                <InputFieldNew
+                  placeholder="e.g, 100$"
+                  value={budget}
+                  onChangeText={(text) => {
+                    const numeric = text.replace(/[^0-9]/g, "");
+                    setBudget(numeric ? `$${numeric}` : "");
+                  }}
+                  customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }}
+                  keyboardType="numeric"
+                />
+              </>
             )}
           </View>
 
