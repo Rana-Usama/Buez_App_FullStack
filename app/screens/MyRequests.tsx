@@ -249,7 +249,7 @@ function MyRequests({ navigation }) {
             {cart?.status === REQUEST_STATUS.Active && (
               <View style={{ width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) }}>
                 <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
-                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>Mark as Done</Text>
+                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.7)}}>Mark as Done</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -259,7 +259,7 @@ function MyRequests({ navigation }) {
                   }}
                   style={styles.cancel}
                 >
-                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>Cancel</Text>
+                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.8)}}>Cancel</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -537,23 +537,23 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     width: RFPercentage(16),
     height: RFPercentage(5.2),
-    borderColor: "rgb(116, 209, 158)",
+    borderColor: Colors.primary,
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgb(116, 209, 158)",
+    backgroundColor: Colors.primary,
   },
   cancel: {
     borderRadius: RFPercentage(100),
     width: RFPercentage(16),
     height: RFPercentage(5.2),
-    borderColor: Colors.red,
+    borderColor: 'rgb(215, 215, 215)',
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
     right: 0,
-    backgroundColor: Colors.red,
+    backgroundColor: 'rgb(215, 215, 215)',
   },
   notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },

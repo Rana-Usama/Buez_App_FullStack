@@ -1,12 +1,5 @@
-import React from "react";
-import {
-  Image,
-  View,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ImageSourcePropType,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { Image, View, TouchableOpacity, Text, StyleSheet, ImageSourcePropType, Keyboard } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 // config
@@ -44,6 +37,28 @@ const CustomTabBar: React.FC<Props> = ({
   myRequests = false,
   messagesTab = false,
 }) => {
+
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  if (keyboardVisible) {
+    return null;
+  }
+
+  
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -62,101 +77,29 @@ const CustomTabBar: React.FC<Props> = ({
       <View style={styles.wrapper}>
         <View style={styles.inner}>
           {/* My Requests */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate("MyRequests")}
-            style={styles.touchable}
-          >
-            <Image
-              style={styles.icon}
-              source={
-                (myRequests
-                  ? Icons.myRequestsActive
-                  : Icons.order) as ImageSourcePropType
-              }
-            />
-            <Text
-              style={[
-                styles.req,
-                { color: myRequests ? Colors.primary : Colors.detailsText },
-              ]}
-            >
-              My Req
-            </Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("MyRequests")} style={styles.touchable}>
+            <Image style={styles.icon} source={(myRequests ? Icons.myRequestsActive : Icons.order) as ImageSourcePropType} />
+            <Text style={[styles.req, { color: myRequests ? Colors.primary : Colors.detailsText }]}>My Req</Text>
           </TouchableOpacity>
 
           {/* Post Request */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate("PostRequest")}
-            style={styles.touchable2}
-          >
-            <Image
-              style={styles.icon}
-              source={
-                (postRequest
-                  ? Icons.activePostRequest
-                  : Icons.setting) as ImageSourcePropType
-              }
-            />
-            <Text
-              style={[
-                styles.req,
-                { color: postRequest ? Colors.primary : Colors.detailsText },
-              ]}
-            >
-              Post Req
-            </Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("PostRequest")} style={styles.touchable2}>
+            <Image style={styles.icon} source={(postRequest ? Icons.activePostRequest : Icons.setting) as ImageSourcePropType} />
+            <Text style={[styles.req, { color: postRequest ? Colors.primary : Colors.detailsText }]}>Post Req</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.inner2}>
           {/* Messages */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate("Messages")}
-            style={styles.touchable2}
-          >
-            <Image
-              style={styles.icon}
-              source={
-                (messagesTab
-                  ? Icons.activeMessages
-                  : Icons.vehicle) as ImageSourcePropType
-              }
-            />
-            <Text
-              style={[
-                styles.req,
-                { color: messagesTab ? Colors.primary : Colors.detailsText },
-              ]}
-            >
-              Messages
-            </Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Messages")} style={styles.touchable2}>
+            <Image style={styles.icon} source={(messagesTab ? Icons.activeMessages : Icons.vehicle) as ImageSourcePropType} />
+            <Text style={[styles.req, { color: messagesTab ? Colors.primary : Colors.detailsText }]}>Messages</Text>
           </TouchableOpacity>
 
           {/* Settings */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate("Settings")}
-            style={styles.touchable2}
-          >
-            <Image
-              style={styles.icon}
-              source={
-                (settingTab
-                  ? Icons.settingsActive
-                  : Icons.profile) as ImageSourcePropType
-              }
-            />
-            <Text
-              style={[
-                styles.req,
-                { color: settingTab ? Colors.primary : Colors.detailsText },
-              ]}
-            >
-              Settings
-            </Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Settings")} style={styles.touchable2}>
+            <Image style={styles.icon} source={(settingTab ? Icons.settingsActive : Icons.profile) as ImageSourcePropType} />
+            <Text style={[styles.req, { color: settingTab ? Colors.primary : Colors.detailsText }]}>Settings</Text>
           </TouchableOpacity>
         </View>
       </View>

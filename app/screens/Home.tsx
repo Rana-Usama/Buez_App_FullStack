@@ -110,6 +110,7 @@ function Home({ navigation }) {
   const refreshRequests = async () => {
     setRefreshing(true);
     await fetchRequests(null);
+    handleLoadMore();
     setRefreshing(false);
   };
 

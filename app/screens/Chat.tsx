@@ -9,6 +9,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 
 import Colors from "../config/Colors";
 import { FIREBASE_DB } from "../../firebaseConfig";
+import { LinearGradient } from "expo-linear-gradient";
 const Chat = ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
@@ -222,8 +223,8 @@ const Chat = ({ navigation, route }) => {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? RFPercentage(7.9) : RFPercentage(-25)}>
-      <StatusBar backgroundColor={Colors.lightWhite} translucent barStyle="dark-content"/>
-      <View style={styles.screen}>
+      <StatusBar backgroundColor={Colors.lightWhite} translucent barStyle="dark-content" />
+      <LinearGradient colors={["rgba(161, 172, 235, 0)", "rgba(95, 96, 142, 0.53)"]}  start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.screen}>
         {/* Nav */}
         <View style={{ width: "100%", alignItems: "center", flexDirection: "row", height: RFPercentage(10), borderBottomWidth: 1, borderBottomColor: Colors.lightGrey }}>
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
@@ -274,7 +275,7 @@ const Chat = ({ navigation, route }) => {
             bottomOffset={RFPercentage(2)} // Adjusted bottomOffset
             renderLoadEarlier={(props) => (
               <TouchableOpacity style={styles.loadMessages} onPress={props.onLoadEarlier}>
-                <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular"  }}>Load earlier messages</Text>
+                <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>Load earlier messages</Text>
               </TouchableOpacity>
             )}
             renderInputToolbar={(props) => (
@@ -308,7 +309,7 @@ const Chat = ({ navigation, route }) => {
                 {...props}
                 wrapperStyle={{
                   left: {
-                    backgroundColor: Colors.lightGrey,
+                    backgroundColor: Colors.lightWhite,
                     padding: RFPercentage(0.6),
                   },
                   right: {
@@ -318,19 +319,19 @@ const Chat = ({ navigation, route }) => {
                 }}
                 textStyle={{
                   left: {
-                    color: Colors.primary,
-                     fontFamily: "Poppins_400Regular",
+                    color: Colors.black,
+                    fontFamily: "Poppins_400Regular",
                   },
                   right: {
                     color: Colors.white,
-                     fontFamily: "Poppins_400Regular",
+                    fontFamily: "Poppins_400Regular",
                   },
                 }}
               />
             )}
           />
         </View>
-      </View>
+      </LinearGradient>
     </KeyboardAvoidingView>
   );
 };
@@ -349,9 +350,10 @@ const styles = StyleSheet.create({
     width: "100%",
     // justifyContent: 'center',
     // alignItems: 'center',
-    backgroundColor: Colors.lightWhite,
-    marginBottom: RFPercentage(1),
-    borderRadius: RFPercentage(1),
+    // backgroundColor: Colors.lightWhite,
+    // marginBottom: RFPercentage(1),
+    // borderRadius: RFPercentage(1),
+    paddingBottom:RFPercentage(2)
   },
   loadMessages: {
     backgroundColor: Colors.chat,
@@ -362,21 +364,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2.6),
   },
   toolbar: {
-    backgroundColor: Colors.primary,
-    borderWidth: 1,
+    backgroundColor: 'rgb(124, 130, 164)',
+    borderWidth: 1.5,
     borderColor: Colors.primary,
     borderRadius: RFPercentage(6),
     height: RFPercentage(6),
     justifyContent: "center",
-    paddingHorizontal: RFPercentage(1.5),
+    padding: RFPercentage(1.5),
+    borderTopWidth: 1,
     // bottom: keyboardVisible ? RFPercentage(25) : 0,
   },
   customTextInput: {
     color: Colors.white,
     fontSize: RFPercentage(1.8),
     borderRadius: RFPercentage(10),
-    width: RFPercentage(36),
+    width: RFPercentage(38),
     fontFamily: "Poppins_400Regular",
+    // backgroundColor:'red'
   },
   sendButton: {
     justifyContent: "center",
