@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, TextInp
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-// import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 // components
 import Nav from "../components/common/Nav";
@@ -118,20 +118,20 @@ function PostRequest({ navigation, route }) {
       const selectedImage = result.assets[0];
 
       // Compress the image
-      // const compressedImage = await ImageManipulator.manipulateAsync(
-      //   selectedImage.uri,
-      //   [],
-      //   {
-      //     compress: 0.5, // change compression level (0 to 1)
-      //     format: ImageManipulator.SaveFormat.JPEG,
-      //   }
-      // );
+      const compressedImage = await ImageManipulator.manipulateAsync(
+        selectedImage.uri,
+        [],
+        {
+          compress: 0.5, // change compression level (0 to 1)
+          format: ImageManipulator.SaveFormat.JPEG,
+        }
+      );
 
-      // console.log('compressedImage............', compressedImage)
+      console.log('compressedImage............', compressedImage)
 
       // Update your imageUris state with compressed image URI
       let tempImageUris = [...imageUris];
-      tempImageUris[index] = selectedImage.uri;
+      tempImageUris[index] = compressedImage.uri;
       setImageUris(tempImageUris);
     }
   };
@@ -238,6 +238,8 @@ function PostRequest({ navigation, route }) {
         const defaultImageForTask = getRandomImage(selectedTask);
         imgs.push(defaultImageForTask);
       }
+
+      
 
       if (isEditing) {
         await updatePost(currentPostRequest.id, data, imgs);

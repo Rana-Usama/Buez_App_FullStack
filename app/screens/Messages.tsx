@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   },
   messageUserName: {
     color: Colors.darkGrey2,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
   },
   messageText: {

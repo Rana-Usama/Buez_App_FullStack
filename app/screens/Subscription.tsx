@@ -19,7 +19,7 @@ import { Icons } from "../config/theme";
 async function getPaymentSheet(amount, currency, userId) {
   console.log("getPaymentSheet", amount);
   try {
-    const response = await fetch("http://192.168.100.30:4242/payment-sheet", {
+    const response = await fetch("https://buez-server-khaki.vercel.app/api/payment-sheet", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

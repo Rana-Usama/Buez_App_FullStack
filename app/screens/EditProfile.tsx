@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, KeyboardAv
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 
 // components
 import Screen from "../components/Screen";
@@ -23,8 +24,8 @@ type InputFieldType = {
   placeholder: string;
   value: string;
   secure?: boolean; // optional;
-  icon? : any;
-  title? : string
+  icon?: any;
+  title?: string;
 };
 
 function EditProfile({ navigation }) {
@@ -32,11 +33,10 @@ function EditProfile({ navigation }) {
   const [imageUri, setImageUri] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [originalData, setOriginalData] = useState({
-  name: "",
-  phone: "",
-  imageUri: null,
-});
-
+    name: "",
+    phone: "",
+    imageUri: null,
+  });
 
   const [inputField, SetInputField] = useState<InputFieldType[]>([
     {
@@ -68,7 +68,12 @@ function EditProfile({ navigation }) {
     console.log(result);
 
     if (!result.canceled && result.assets) {
-      setImageUri(result.assets[0].uri);
+      const compressedImage = await ImageManipulator.manipulateAsync(result.assets[0].uri, [], {
+        compress: 0.5, // change compression level (0 to 1)
+        format: ImageManipulator.SaveFormat.JPEG,
+      });
+      console.log(compressedImage)
+      setImageUri(compressedImage.uri);
     }
   };
 
@@ -79,25 +84,24 @@ function EditProfile({ navigation }) {
     }, [])
   );
 
- const fetchUserData = async () => {
-  try {
-    if (user) {
-      const name = user.userName || "";
-      const phone = user.phoneNumber || "";
-      const image = user.profileImage || null;
-      const tempFields = [...inputField];
-      tempFields[0].value = name;
-      tempFields[1].value = phone;
-      SetInputField(tempFields);
+  const fetchUserData = async () => {
+    try {
+      if (user) {
+        const name = user.userName || "";
+        const phone = user.phoneNumber || "";
+        const image = user.profileImage || null;
+        const tempFields = [...inputField];
+        tempFields[0].value = name;
+        tempFields[1].value = phone;
+        SetInputField(tempFields);
 
-      setOriginalData({ name, phone, imageUri: image });
-      setImageUri(image);
+        setOriginalData({ name, phone, imageUri: image });
+        setImageUri(image);
+      }
+    } catch (error) {
+      console.log(error);
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
+  };
 
   const updateProfileData = async () => {
     const userName = inputField[0].value.trim();
@@ -112,27 +116,22 @@ function EditProfile({ navigation }) {
       await updateProfile(userData, imageUri);
       navigation.goBack();
       Toast.show({
-        type : 'success',
-        text1 : 'Profile Update',
-        text2 : 'Profile has been updated successfully!'
-      })
+        type: "success",
+        text1: "Profile Update",
+        text2: "Profile has been updated successfully!",
+      });
     } catch (error) {
       Toast.show({
-        type : 'error',
-        text1 : 'Profile Update',
-        text2 : 'Error in updating Profile!'
-      })
+        type: "error",
+        text1: "Profile Update",
+        text2: "Error in updating Profile!",
+      });
     } finally {
       setIsUpdating(false);
     }
   };
 
-
-  const isChanged =
-  inputField[0].value.trim() !== originalData.name.trim() ||
-  inputField[1].value.trim() !== originalData.phone.trim() ||
-  imageUri !== originalData.imageUri;
-
+  const isChanged = inputField[0].value.trim() !== originalData.name.trim() || inputField[1].value.trim() !== originalData.phone.trim() || imageUri !== originalData.imageUri;
 
   return (
     <View style={styles.screen}>
@@ -185,7 +184,7 @@ function EditProfile({ navigation }) {
           </View>
           {/* Button */}
           <View style={styles.buttonWrapper}>
-            <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={updateProfileData} loading={isUpdating}  disabled={!isChanged || isUpdating} />
+            <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={updateProfileData} loading={isUpdating} disabled={!isChanged || isUpdating} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

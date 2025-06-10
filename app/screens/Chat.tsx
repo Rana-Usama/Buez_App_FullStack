@@ -226,7 +226,7 @@ const Chat = ({ navigation, route }) => {
 
   async function sendPushNotification(message) {
   try {
-    const response = await fetch("http://192.168.100.30:4242/send-notification", {
+    const response = await fetch("https://buez-server-khaki.vercel.app/api/send-notification", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
