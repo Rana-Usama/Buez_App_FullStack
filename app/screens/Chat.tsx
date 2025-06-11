@@ -1,6 +1,6 @@
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View, Image, TextInput, StatusBar } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { GiftedChat, InputToolbar, Bubble } from "react-native-gifted-chat";
+import { GiftedChat, InputToolbar, Bubble, Day } from "react-native-gifted-chat";
 import Nav from "../components/common/Nav";
 import { collection, query, orderBy, limit, onSnapshot, addDoc, getDocs, Timestamp, startAfter, doc, updateDoc, where, writeBatch, getDoc } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
@@ -187,7 +187,7 @@ const Chat = ({ navigation, route }) => {
         lastMessage: message,
         lastMessageTimestamp: Timestamp.now(),
       });
-      sendPushNotification(message?.text)
+      sendPushNotification(message?.text);
     } catch (e) {
       console.log(e);
     }
@@ -222,164 +222,136 @@ const Chat = ({ navigation, route }) => {
 
   // console.log(messages);
 
-
-
   async function sendPushNotification(message) {
-  try {
-    const response = await fetch("https://buez-server-khaki.vercel.app/api/send-notification", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        expoPushToken : receiver.token,
-        title :senderName,
-        message : message,
-      }),
-    });
-    const data = await response.text();
-    console.log("sendPushNotification:", data);
-    return data;
-  } catch (error) {
-    console.error("sendPushNotification error:", error);
-    throw error;
+    try {
+      const response = await fetch("https://buez-server-khaki.vercel.app/api/send-notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          expoPushToken: receiver.token,
+          title: senderName,
+          message: message,
+        }),
+      });
+      const data = await response.text();
+      console.log("sendPushNotification:", data);
+      return data;
+    } catch (error) {
+      console.error("sendPushNotification error:", error);
+      throw error;
+    }
   }
-}
-
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? RFPercentage(7.9) : RFPercentage(-25)}>
-      <StatusBar backgroundColor={Colors.lightWhite} translucent barStyle="dark-content" />
-      <LinearGradient colors={["rgba(161, 172, 235, 0)", "rgba(95, 96, 142, 0.53)"]}  start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.screen}>
-        {/* Nav */}
-        <View style={{ width: "100%", alignItems: "center", flexDirection: "row", height: RFPercentage(10), borderBottomWidth: 1, borderBottomColor: Colors.lightGrey }}>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={Colors.primary} />
-          </TouchableOpacity>
-          <View style={{ marginLeft: RFPercentage(2.5) }}>
-            {receiver?.profileImage ? (
-              <>
-                <Image
-                  source={{ uri: receiver?.profileImage }}
-                  resizeMode="contain"
-                  style={{ width: RFPercentage(7), height: RFPercentage(7), borderRadius: RFPercentage(100), borderWidth: 2, borderColor: Colors.primary }}
-                />
-              </>
-            ) : (
-              <>
-                <View
-                  style={{
-                    width: RFPercentage(7),
-                    height: RFPercentage(7),
-                    borderRadius: RFPercentage(100),
-                    borderWidth: 2,
-                    borderColor: Colors.primary,
-                    alignItems: "center",
-                    justifyContent: "center",
+    <LinearGradient colors={["rgba(161, 172, 235, 0)", "rgba(95, 96, 142, 0.53)"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.screen}>
+      {/* Nav */}
+      <View style={styles.profileContainer}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={20} color={Colors.primary} />
+        </TouchableOpacity>
+        <View style={{ marginLeft: RFPercentage(2.5) }}>
+          {receiver?.profileImage ? (
+            <>
+              <Image source={{ uri: receiver?.profileImage }} resizeMode="contain" style={styles.profile} />
+            </>
+          ) : (
+            <>
+              <View style={styles.noProfile}>
+                <Text style={styles.noProfileInner}>{receiver?.userName[0]}</Text>
+              </View>
+            </>
+          )}
+        </View>
+        <View style={{ marginLeft: RFPercentage(1.5) }}>
+          <Text style={{ color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" }}>{receiver?.userName}</Text>
+        </View>
+      </View>
+
+      <View style={styles.messageContainer}>
+        <GiftedChat
+          messages={messages}
+          onSend={(messages) => onSend(messages)}
+          user={{
+            _id: currentUserId,
+            name: senderName,
+          }}
+          loadEarlier={!!lastVisible}
+          onLoadEarlier={fetchMoreMessages}
+          // bottomOffset={RFPercentage(2)} // Adjusted bottomOffset
+          renderLoadEarlier={(props) => (
+            <TouchableOpacity style={styles.loadMessages} onPress={props.onLoadEarlier}>
+              <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>Load earlier messages</Text>
+            </TouchableOpacity>
+          )}
+          renderInputToolbar={(props) => (
+            <InputToolbar
+              {...props}
+              containerStyle={styles.toolbar}
+              renderComposer={() => <TextInput style={styles.customTextInput} placeholder="Type a message" placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
+              renderSend={() => (
+                <TouchableOpacity
+                  style={styles.sendButton}
+                  onPress={() => {
+                    onSend([
+                      {
+                        text: message,
+                        user: {
+                          _id: currentUserId,
+                          name: senderName,
+                        },
+                        createdAt: new Date(),
+                      },
+                    ]);
                   }}
                 >
-                  <Text style={{ color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" }}>{receiver?.userName[0]}</Text>
-                </View>
-              </>
-            )}
-          </View>
-          <View style={{ marginLeft: RFPercentage(1.5) }}>
-            <Text style={{ color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" }}>{receiver?.userName}</Text>
-          </View>
-        </View>
-
-        <View style={styles.messageContainer}>
-          <GiftedChat
-            messages={messages}
-            onSend={(messages) => onSend(messages)}
-            user={{
-              _id: currentUserId,
-              name: senderName,
-            }}
-            loadEarlier={!!lastVisible}
-            onLoadEarlier={fetchMoreMessages}
-            bottomOffset={RFPercentage(2)} // Adjusted bottomOffset
-            renderLoadEarlier={(props) => (
-              <TouchableOpacity style={styles.loadMessages} onPress={props.onLoadEarlier}>
-                <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>Load earlier messages</Text>
-              </TouchableOpacity>
-            )}
-            renderInputToolbar={(props) => (
-              <InputToolbar
-                {...props}
-                containerStyle={styles.toolbar}
-                renderComposer={() => <TextInput style={styles.customTextInput} placeholder="Type a message" placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
-                renderSend={() => (
-                  <TouchableOpacity
-                    style={styles.sendButton}
-                    onPress={() => {
-                      onSend([
-                        {
-                          text: message,
-                          user: {
-                            _id: currentUserId,
-                            name: senderName,
-                          },
-                          createdAt: new Date(),
-                        },
-                      ]);
-                    }}
-                  >
-                    <Feather name="send" size={RFPercentage(2.3)} color={Colors.white} />
-                  </TouchableOpacity>
-                )}
-              />
-            )}
-            renderBubble={(props) => (
-              <Bubble
-                {...props}
-                wrapperStyle={{
-                  left: {
-                    backgroundColor: Colors.lightWhite,
-                    padding: RFPercentage(0.6),
-                  },
-                  right: {
-                    backgroundColor: Colors.primary,
-                    padding: RFPercentage(0.6),
-                  },
-                }}
-                textStyle={{
-                  left: {
-                    color: Colors.black,
-                    fontFamily: "Poppins_400Regular",
-                  },
-                  right: {
-                    color: Colors.white,
-                    fontFamily: "Poppins_400Regular",
-                  },
-                }}
-              />
-            )}
-          />
-        </View>
-      </LinearGradient>
-    </KeyboardAvoidingView>
+                  <Feather name="send" size={RFPercentage(2.3)} color={Colors.white} />
+                </TouchableOpacity>
+              )}
+            />
+          )}
+          renderDay={(props) => <Day {...props} textStyle={styles.dateText} />}
+          renderBubble={(props) => (
+            <Bubble
+              {...props}
+              wrapperStyle={{
+                left: {
+                  backgroundColor: Colors.lightWhite,
+                  padding: RFPercentage(0.6),
+                },
+                right: {
+                  backgroundColor: Colors.primary,
+                  padding: RFPercentage(0.6),
+                },
+              }}
+              textStyle={{
+                left: {
+                  color: Colors.black,
+                  fontFamily: "Poppins_400Regular",
+                },
+                right: {
+                  color: Colors.white,
+                  fontFamily: "Poppins_400Regular",
+                },
+              }}
+            />
+          )}
+        />
+      </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    paddingLeft: RFPercentage(1),
-    paddingRight: RFPercentage(1),
-    // justifyContent: 'flex-start',
-    // alignItems: 'center',
-    backgroundColor: Colors.lightWhite,
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(1),
   },
   messageContainer: {
     flex: 1,
     width: "100%",
-    // justifyContent: 'center',
-    // alignItems: 'center',
-    // backgroundColor: Colors.lightWhite,
-    // marginBottom: RFPercentage(1),
-    // borderRadius: RFPercentage(1),
-    paddingBottom:RFPercentage(2)
   },
   loadMessages: {
     backgroundColor: Colors.chat,
@@ -390,7 +362,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2.6),
   },
   toolbar: {
-    backgroundColor: 'rgb(124, 130, 164)',
+    backgroundColor: "rgb(124, 130, 164)",
     borderWidth: 1.5,
     borderColor: Colors.primary,
     borderRadius: RFPercentage(6),
@@ -398,6 +370,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: RFPercentage(1.5),
     borderTopWidth: 1,
+    alignSelf: "center",
+    width: "100%",
+    marginBottom: RFPercentage(2.5),
     // bottom: keyboardVisible ? RFPercentage(25) : 0,
   },
   customTextInput: {
@@ -419,6 +394,27 @@ const styles = StyleSheet.create({
     // backgroundColor:'red',
     top: RFPercentage(-0.8),
   },
+  dateText: {
+    color: Colors.primary,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.6),
+    backgroundColor: Colors.chat,
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: RFPercentage(20),
+    paddingHorizontal: RFPercentage(1.2),
+  },
+  noProfile: {
+    width: RFPercentage(7),
+    height: RFPercentage(7),
+    borderRadius: RFPercentage(100),
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noProfileInner: { color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" },
+  profile: { width: RFPercentage(7), height: RFPercentage(7), borderRadius: RFPercentage(100), borderWidth: 2, borderColor: Colors.primary },
+  profileContainer: { width: "100%", alignItems: "center", flexDirection: "row", height: RFPercentage(10), borderBottomWidth: 1, borderBottomColor: Colors.lightGrey },
 });
 
 export default Chat;

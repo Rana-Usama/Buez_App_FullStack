@@ -46,7 +46,7 @@ function Signup(props: any) {
   }, []);
 
 
-  console.log('expoPushToken...................', expoPushToken)
+  // console.log('expoPushToken...................', expoPushToken)
 
   const createAccountWithEmail = async (email, password) => {
     try {
@@ -71,7 +71,8 @@ function Signup(props: any) {
           email: email,
           trialStartDate: new Date(),
           isSubscribed: false,
-          token : expoPushToken
+          token : expoPushToken,
+          isFreeTrial : false
         };
         await addUser(user?.uid, userData);
       }

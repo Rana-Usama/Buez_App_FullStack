@@ -42,4 +42,7 @@ export const Icons: { [key: string]: ImageRequireSource } = {
   clean: require("../../assets/Images/clean.jpg"),
   garden: require("../../assets/Images/garden.jpg"),
   game: require("../../assets/Images/game.jpg"),
+  key: require("../../assets/Images/key.png"),
+  star: require("../../assets/Images/star.png"),
+  notify: require("../../assets/Images/notification-bing.png"),
 };

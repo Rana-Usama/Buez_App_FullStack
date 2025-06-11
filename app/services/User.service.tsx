@@ -7,7 +7,7 @@ import { uploadImage } from "./Shared.service";
 
 const db = FIREBASE_DB;
 
-export const addUser = async (id: any, { userName, email, phoneNumber = "", profileImage = "", trialStartDate, isSubscribed, token }) => {
+export const addUser = async (id: any, { userName, email, phoneNumber = "", profileImage = "", trialStartDate, isSubscribed, token, isFreeTrial }) => {
   try {
     console.log("ADD_USER");
     const user = {
@@ -17,7 +17,8 @@ export const addUser = async (id: any, { userName, email, phoneNumber = "", prof
       email,
       trialStartDate,
       isSubscribed,
-      token
+      token,
+      isFreeTrial,
     };
 
     await setDoc(doc(db, "users", id), user);
@@ -111,7 +112,7 @@ export const updateProfile = async (updatedData: any, imageUri: any) => {
   }
 };
 
-export const saveSubscription = async (userId : any, subscriptionId : any) => {
+export const saveSubscription = async (userId: any, subscriptionId: any) => {
   try {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, { subscriptionId });
@@ -120,7 +121,6 @@ export const saveSubscription = async (userId : any, subscriptionId : any) => {
     throw error;
   }
 };
-
 
 export const updateUserToken = async (userId: string, token: string) => {
   try {
@@ -132,4 +132,3 @@ export const updateUserToken = async (userId: string, token: string) => {
     throw error;
   }
 };
-

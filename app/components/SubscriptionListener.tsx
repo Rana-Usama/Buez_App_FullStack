@@ -18,37 +18,41 @@ interface SubscriptionListenerProps {
 const SubscriptionListener: React.FC<SubscriptionListenerProps> = ({ navigation, userId }) => {
   const { userData, loading } = useUser();
 
-  const currentRouteName = useNavigationState(
-    (state) => state?.routes[state.index]?.name
-  );
+  const currentRouteName = useNavigationState((state) => state?.routes[state.index]?.name);
 
   useEffect(() => {
     if (!userId || loading || !userData) return;
 
     const isSubscribed = userData?.isSubscribed ?? false;
     const trialStartTimestamp = userData?.trialStartDate?.seconds;
-    const trialStartDate = trialStartTimestamp
-      ? new Date(trialStartTimestamp * 1000)
-      : null;
-
-    if (isSubscribed) {
-      if (currentRouteName !== "Home") {
-        navigation.replace("Home");
-      }
-      return;
-    }
+    const trialStartDate = trialStartTimestamp ? new Date(trialStartTimestamp * 1000) : null;
+    const isFreeTrial = userData?.isFreeTrial ?? false;
 
     if (trialStartDate) {
       const trialAge = differenceInDays(new Date(), trialStartDate);
       console.log("Trial Age:", trialAge);
 
-      if (trialAge <= 15) {
+      if (isSubscribed && trialAge > 14) {
         if (currentRouteName !== "Home") {
           navigation.replace("Home");
         }
+        return;
+      }
+
+      if (isFreeTrial && trialAge <= 14) {
+        if (currentRouteName !== "Home") {
+          navigation.replace("Home");
+        }
+        return;
+      }
+
+      if (!isFreeTrial && trialAge <= 14) {
+        if (currentRouteName !== "FreeTrial" && currentRouteName !== "SubscriptionV2") {
+          navigation.replace("FreeTrial");
+        }
       } else {
-        if (currentRouteName !== "Subscription") {
-          navigation.replace("Subscription");
+        if (currentRouteName !== "Home") {
+          navigation.replace("Home");
         }
       }
     } else {

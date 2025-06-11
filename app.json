@@ -13,12 +13,15 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "notification": {
+      "icon": "./assets/notification-icon.png"
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
@@ -46,6 +49,12 @@
           "enableGooglePay": false,
           "enableApplePay": false
         }
+      ],
+      [
+         "expo-notifications",
+         {
+          "icon": "./assets/notification-icon.png"
+         }
       ]
     ],
     "extra": {

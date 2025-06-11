@@ -46,6 +46,8 @@ import ExpoStripeProvider from "./app/contexts/stripe-provider";
 import Colors from "./app/config/Colors";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./app/utils/ToastConfig";
+import FreeTrial from "./app/screens/FreeTrial";
+import SubscriptionV2 from "./app/screens/SubscriptionV2";
 
 LogBox.ignoreAllLogs();
 
@@ -57,6 +59,8 @@ export type AuthStackParamList = {
   ForgotPassword: undefined;
   OTPInput: undefined;
   SetNewPassword: undefined;
+  FreeTrial: undefined;
+  SubscriptionV2: undefined;
 };
 
 export type AppStackParamList = {
@@ -78,6 +82,8 @@ export type AppStackParamList = {
   Messages: undefined;
   Chat: undefined;
   Subscription: undefined;
+  FreeTrial: undefined;
+  SubscriptionV2: undefined;
 };
 
 // Create Typed Navigators
@@ -93,6 +99,8 @@ const AuthStack = () => (
     <AuthStackNavigator.Screen name="ForgotPassword" component={ForgotPassword} />
     <AuthStackNavigator.Screen name="OTPInput" component={OTPInput} />
     <AuthStackNavigator.Screen name="SetNewPassword" component={SetNewPassword} />
+    <AuthStackNavigator.Screen name="FreeTrial" component={FreeTrial} />
+    <AuthStackNavigator.Screen name="SubscriptionV2" component={SubscriptionV2} />
   </AuthStackNavigator.Navigator>
 );
 
@@ -117,6 +125,8 @@ const AppStack = () => (
     <AppStackNavigator.Screen name="Messages" component={Messages} />
     <AppStackNavigator.Screen name="Chat" component={Chat} />
     <AppStackNavigator.Screen name="Subscription" component={Subscription} />
+    <AppStackNavigator.Screen name="SubscriptionV2" component={SubscriptionV2} />
+    <AppStackNavigator.Screen name="FreeTrial" component={FreeTrial} />
   </AppStackNavigator.Navigator>
 );
 
@@ -149,28 +159,26 @@ export default function App() {
   const responseListener = useRef();
 
   // console.log('notification...............', notification)
- useEffect(() => {
-  // Register for push notifications and get token
-  registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+  useEffect(() => {
+    // Register for push notifications and get token
+    registerForPushNotificationsAsync().then((token) => setExpoPushToken(token));
 
-  // Store the listener references
-  notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-    console.log('Notification received:', notification);
-    setNotification(notification); // if you want to update state
-  });
+    // Store the listener references
+    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
+      console.log("Notification received:", notification);
+      setNotification(notification); // if you want to update state
+    });
 
-  responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-    console.log('User interacted with notification:', response);
-    // You can navigate or do something on notification tap
-  });
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      console.log("User interacted with notification:", response);
+      // You can navigate or do something on notification tap
+    });
 
-
-  return () => {
-    Notifications.removeNotificationSubscription(notificationListener.current);
-    Notifications.removeNotificationSubscription(responseListener.current);
-  };
-}, []);
-
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
