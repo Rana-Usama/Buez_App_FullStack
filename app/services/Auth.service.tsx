@@ -72,7 +72,7 @@ export const updatePassword = async (currentPassword: any, newPassword: any) => 
 
 export const logout = async () => {
   await signOut(FIREBASE_AUTH);
-  await SecureStore.setItemAsync("loggedOut", 'true');
+  await SecureStore.setItemAsync("loggedOut", "true");
   Toast.show({
     type: "success",
     text1: "Logout",
@@ -94,26 +94,30 @@ export async function getCredentials() {
   return { email, password };
 }
 
-export const deleteAccount = async () => {
+export const deleteAccount = async (email, password) => {
   try {
     const user = FIREBASE_AUTH.currentUser;
-    if (user) {
-      await deleteUser(user);
-      Toast.show({
-        type: "success",
-        text1: "Account Deactivation",
-        text2: "Your account has been deleted successfully!",
-      });
-      return true;
-    } else {
+    if (!user) {
       console.log("No user is logged in to delete account.");
       return false;
     }
+    const credential = EmailAuthProvider.credential(email, password);
+
+    await reauthenticateWithCredential(user, credential);
+    await deleteUser(user);
+
+    Toast.show({
+      type: "success",
+      text1: "Account Deactivation",
+      text2: "Your account has been deleted successfully!",
+    });
+    return true;
   } catch (error) {
+    console.log(error);
     Toast.show({
       type: "error",
       text1: "Account Deactivation",
-      text2: "Account is not deleted due to some reason!",
+      text2: error.message || "An error occurred while deleting the account.",
     });
   }
 };

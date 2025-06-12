@@ -1,66 +1,37 @@
 import { useEffect } from "react";
-import { useNavigationState } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
 import { differenceInDays } from "date-fns";
 import { useUser } from "../contexts/user.context";
 
-type RootStackParamList = {
-  Home: undefined;
-  Subscription: undefined;
-  // add other routes here if needed
-};
-
-interface SubscriptionListenerProps {
-  navigation: StackNavigationProp<RootStackParamList>;
-  userId: string | null | undefined;
-}
-
-const SubscriptionListener: React.FC<SubscriptionListenerProps> = ({ navigation, userId }) => {
+const SubscriptionListener = ({ userId }) => {
   const { userData, loading } = useUser();
-
-  const currentRouteName = useNavigationState((state) => state?.routes[state.index]?.name);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    if (!userId || loading || !userData) return;
+    if (loading || !userData) return;
 
     const isSubscribed = userData?.isSubscribed ?? false;
-    const trialStartTimestamp = userData?.trialStartDate?.seconds;
-    const trialStartDate = trialStartTimestamp ? new Date(trialStartTimestamp * 1000) : null;
+    const trialStartTimestamp = userData?.freeTrialStartedAt?.seconds;
     const isFreeTrial = userData?.isFreeTrial ?? false;
+
+    const trialStartDate = trialStartTimestamp ? new Date(trialStartTimestamp * 1000) : null;
 
     if (trialStartDate) {
       const trialAge = differenceInDays(new Date(), trialStartDate);
       console.log("Trial Age:", trialAge);
-
-      if (isSubscribed && trialAge > 14) {
-        if (currentRouteName !== "Home") {
-          navigation.replace("Home");
-        }
-        return;
-      }
-
-      if (isFreeTrial && trialAge <= 14) {
-        if (currentRouteName !== "Home") {
-          navigation.replace("Home");
-        }
-        return;
-      }
-
-      if (!isFreeTrial && trialAge <= 14) {
-        if (currentRouteName !== "FreeTrial" && currentRouteName !== "SubscriptionV2") {
-          navigation.replace("FreeTrial");
-        }
+      if (isFreeTrial && trialAge >= 0 && trialAge <= 14) {
+        navigation.navigate("Home");
+      } else if (isFreeTrial && trialAge < 0 || trialAge > 14 && !isSubscribed) {
+        navigation.navigate("Subscription");
       } else {
-        if (currentRouteName !== "Home") {
-          navigation.replace("Home");
-        }
+        navigation.navigate("FreeTrial");
       }
+    } else if (isSubscribed) {
+      navigation.navigate("Home");
     } else {
-      if (currentRouteName !== "Subscription") {
-        navigation.replace("Subscription");
-      }
+      navigation.navigate("FreeTrial");
     }
-  }, [userId, navigation, userData, loading, currentRouteName]);
+  }, [userData, loading, navigation]);
 
   return null;
 };

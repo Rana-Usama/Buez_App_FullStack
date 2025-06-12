@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as Linking from "expo-linking";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -15,26 +15,8 @@ import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestor
 import Colors from "../config/Colors";
 import SubscriptionListener from "../components/SubscriptionListener";
 import { Icons } from "../config/theme";
-
-async function getPaymentSheet(amount, currency, userId) {
-  console.log("getPaymentSheet", amount);
-  try {
-    const response = await fetch("https://buez-server-khaki.vercel.app/api/payment-sheet", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ amount: amount, currency, userId }),
-    });
-    console.log("response", response);
-    const data = await response.json();
-    console.log("getPaymentSheet", data);
-    return data;
-  } catch (error) {
-    console.log("getPaymentSheet", error);
-    throw error;
-  }
-}
+import Toast from "react-native-toast-message";
+import { saveSubscription } from "../services/User.service";
 
 function Subscription(props) {
   const { userData } = useUser();
@@ -43,53 +25,17 @@ function Subscription(props) {
   const [indicator, showIndicator] = useState(false);
   const { initPaymentSheet, presentPaymentSheet, confirmPayment } = useStripe();
   const [loading, setLoading] = useState(false);
-  
-  console.log("Subscription", userData);
-  const initializePaymentSheet = async () => {
-    try {
-      // PaymentConfiguration.init(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-      console.log("Payment init");
-      const { customer, ephemeralKey, paymentIntent } = await getPaymentSheet(12.99, "USD", userId);
-      const { error } = await initPaymentSheet({
-        customerId: customer,
-        customerEphemeralKeySecret: ephemeralKey,
-        paymentIntentClientSecret: paymentIntent,
-        allowsDelayedPaymentMethods: true,
-        defaultBillingDetails: {
-          name: userData.userName, // logged in user name
-          email: userData.email, // logged in user email
-          phone: userData.phoneNumber, // logged in user phone
-          address: {
-            postalCode: "12345",
-          },
-        },
-        merchantDisplayName: "Buez",
-        returnURL: Linking.createURL("/stripe-redirect"),
-        // applePay: {
-        //   merchantCountryCode: "US",
-        //   merchantIdentifier: "merchant.com.example.test",
-        //   displayName: "Buez",
-        // }
-      });
+  const [modalVisible2, setModalVisible2] = useState(false);
 
-      if (error) {
-        console.log(error.message);
-      } else {
-        setLoading(true);
-        onPaymentSheet();
-      }
-    } catch (e) {
-      console.log("Error initializing payment sheet", e);
-    }
-  };
-
-  const updateSubscriptionStatus = async () => {
+  const updateSubscriptionStatus = async (start, end) => {
     if (!userId) return;
     const userRef = doc(firestore, "users", userId);
     try {
       await updateDoc(userRef, {
         isSubscribed: true,
-        subscriptionDate: serverTimestamp(),
+        isFreeTrial: true,
+        freeTrialStartedAt: start,
+        freeTrialEndAt: end,
       });
       console.log("User subscription status updated in Firestore");
     } catch (error) {
@@ -97,28 +43,88 @@ function Subscription(props) {
     }
   };
 
-  const onPaymentSheet = async () => {
-    const { error } = await presentPaymentSheet();
-    if (error) {
-      // TODO: handle error
-      // show error message to user
-      console.log(error.message);
-    } else {
-      // save user subscription to firebase
-      await updateSubscriptionStatus();
-      console.log("Payment successful");
+  // Fetching payment intent
+  const fetchSetupIntent = async () => {
+    try {
+      const response = await fetch("https://buez-server-khaki.vercel.app/api/payment-sheet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userData?.email }),
+      });
+      const { setupIntentClientSecret, customerId } = await response.json();
+
+      if (!setupIntentClientSecret || !customerId) {
+        throw new Error("Missing client secret or customer ID");
+      }
+      return { setupIntentClientSecret, customerId };
+    } catch (error) {
+      Alert.alert("Error", "Could not create customer. Please try again.");
+      return null;
     }
   };
 
+  // Open payment sheet
+  const openPaymentSheet = async () => {
+    setLoading(true);
+    const setupData = await fetchSetupIntent();
+    if (!setupData) return;
+    const { setupIntentClientSecret, customerId } = setupData;
+    const { error: initError } = await initPaymentSheet({
+      setupIntentClientSecret,
+      merchantDisplayName: "BUEZ",
+    });
+
+    if (initError) {
+      setLoading(false);
+      return;
+    }
+    const { error: paymentError } = await presentPaymentSheet();
+    console.log("paymentError............", paymentError);
+    if (paymentError) {
+      Toast.show({
+        type: "info",
+        text1: "Subscription Incomplete",
+        text2: "Your subscription could not be completed. Please try again.",
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Payment
+    const setupIntentId = setupIntentClientSecret.split("_secret")[0];
+
+    const res = await fetch("https://buez-server-khaki.vercel.app/api/create-subscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ customerId, setupIntentId }),
+    });
+    console.log("res......", res);
+    const result = await res.json();
+    console.log("result...........", result);
+
+    if (result.success) {
+      await updateSubscriptionStatus(result?.trialStartDate, result?.trialEndDate);
+      await saveSubscription(userId, result?.subscriptionId);
+      Toast.show({
+        type: "success",
+        text1: "Subscription Confirmed",
+        text2: "Monthly plan activated successfully.",
+      });
+      props.navigation.navigate("Home");
+    } else {
+      setModalVisible2(true);
+    }
+  };
 
   return (
     <Screen style={styles.screen}>
       <Image style={styles.logo} source={Icons.logo} />
       <Image style={styles.vector} source={Icons.vec} />
 
+      <Text style={{ top: RFPercentage(4), color: Colors.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(2) }}>Your 14-day free trial has ended.</Text>
       <View style={styles.premiumInfo}>
         <Image style={styles.crownIcon} source={Icons.crown} />
-        <Text style={styles.premiumText}>Buy our premium to access full services</Text>
+        <Text style={styles.premiumText}>Upgrade to Premium to unlock full access.</Text>
       </View>
 
       <View style={styles.subscriptionContainer}>
@@ -143,8 +149,10 @@ function Subscription(props) {
           <Image style={styles.starIconRight} source={Icons.stars} />
         </View>
       </View>
-      {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />}
-      <MyAppButton title={"Checkout"} marginTop={RFPercentage(7)} onPress={() => initializePaymentSheet()} />
+      {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
+      <View style={{ alignItems: "center", justifyContent: "center", width: "80%" }}>
+        <MyAppButton title={"Checkout"} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(20)} loading={loading} />
+      </View>
     </Screen>
   );
 }
@@ -186,7 +194,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     width: "90%",
-    height: RFPercentage(30),
+    height: RFPercentage(32),
     borderColor: Colors.stroke,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(2),
@@ -220,10 +228,11 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1.5),
   },
   detailsContainer: {
-    marginTop: RFPercentage(2),
+    paddingVertical: RFPercentage(2),
     width: "90%",
     justifyContent: "flex-start",
     alignItems: "flex-start",
+    // backgroundColor:'red'
   },
   detailText: {
     color: Colors.darkGrey,
@@ -241,6 +250,7 @@ const styles = StyleSheet.create({
     right: RFPercentage(-1.5),
     width: RFPercentage(6),
     height: RFPercentage(6),
+    bottom: RFPercentage(0.1),
   },
 });
 

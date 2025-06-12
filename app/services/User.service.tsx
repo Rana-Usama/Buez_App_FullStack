@@ -7,7 +7,7 @@ import { uploadImage } from "./Shared.service";
 
 const db = FIREBASE_DB;
 
-export const addUser = async (id: any, { userName, email, phoneNumber = "", profileImage = "", trialStartDate, isSubscribed, token, isFreeTrial }) => {
+export const addUser = async (id: any, { userName, email, phoneNumber = "", profileImage = "", isSubscribed, token, isFreeTrial }) => {
   try {
     console.log("ADD_USER");
     const user = {
@@ -15,7 +15,6 @@ export const addUser = async (id: any, { userName, email, phoneNumber = "", prof
       phoneNumber,
       profileImage,
       email,
-      trialStartDate,
       isSubscribed,
       token,
       isFreeTrial,

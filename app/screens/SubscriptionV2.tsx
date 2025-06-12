@@ -16,26 +16,7 @@ import Colors from "../config/Colors";
 import SubscriptionListener from "../components/SubscriptionListener";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
-
-// async function getPaymentSheet(amount, currency, userId) {
-//   console.log("getPaymentSheet", amount);
-//   try {
-//     const response = await fetch("https://buez-server-khaki.vercel.app/api/payment-sheet", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ amount: amount, currency, userId }),
-//     });
-//     console.log("response", response);
-//     const data = await response.json();
-//     console.log("getPaymentSheet", data);
-//     return data;
-//   } catch (error) {
-//     console.log("getPaymentSheet", error);
-//     throw error;
-//   }
-// }
+import { saveSubscription } from "../services/User.service";
 
 function SubscriptionV2(props) {
   const { userData } = useUser();
@@ -46,73 +27,21 @@ function SubscriptionV2(props) {
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
 
-  //   console.log("Subscription", userData);
-  //   const initializePaymentSheet = async () => {
-  //     try {
-  //       // PaymentConfiguration.init(process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-  //       console.log("Payment init");
-  //       const { customer, ephemeralKey, paymentIntent } = await getPaymentSheet(12.99, "USD", userId);
-  //       const { error } = await initPaymentSheet({
-  //         customerId: customer,
-  //         customerEphemeralKeySecret: ephemeralKey,
-  //         paymentIntentClientSecret: paymentIntent,
-  //         allowsDelayedPaymentMethods: true,
-  //         defaultBillingDetails: {
-  //           name: userData.userName, // logged in user name
-  //           email: userData.email, // logged in user email
-  //           phone: userData.phoneNumber, // logged in user phone
-  //           address: {
-  //             postalCode: "12345",
-  //           },
-  //         },
-  //         merchantDisplayName: "Buez",
-  //         returnURL: Linking.createURL("/stripe-redirect"),
-  //         // applePay: {
-  //         //   merchantCountryCode: "US",
-  //         //   merchantIdentifier: "merchant.com.example.test",
-  //         //   displayName: "Buez",
-  //         // }
-  //       });
-
-  //       if (error) {
-  //         console.log(error.message);
-  //       } else {
-  //         setLoading(true);
-  //         onPaymentSheet();
-  //       }
-  //     } catch (e) {
-  //       console.log("Error initializing payment sheet", e);
-  //     }
-  //   };
-
-  const updateSubscriptionStatus = async () => {
+  const updateSubscriptionStatus = async (start, end) => {
     if (!userId) return;
     const userRef = doc(firestore, "users", userId);
     try {
       await updateDoc(userRef, {
         isSubscribed: true,
-        // subscriptionDate: serverTimestamp(),
         isFreeTrial: true,
-        freeTrialStartedAt: serverTimestamp(),
+        freeTrialStartedAt: start,
+        freeTrialEndAt: end,
       });
       console.log("User subscription status updated in Firestore");
     } catch (error) {
       console.error("Failed to update subscription status:", error);
     }
   };
-
-  //   const onPaymentSheet = async () => {
-  //     const { error } = await presentPaymentSheet();
-  //     if (error) {
-  //       // TODO: handle error
-  //       // show error message to user
-  //       console.log(error.message);
-  //     } else {
-  //       // save user subscription to firebase
-  //       await updateSubscriptionStatus();
-  //       console.log("Payment successful");
-  //     }
-  //   };
 
   // Fetching payment intent
   const fetchSetupIntent = async () => {
@@ -142,7 +71,7 @@ function SubscriptionV2(props) {
     const { setupIntentClientSecret, customerId } = setupData;
     const { error: initError } = await initPaymentSheet({
       setupIntentClientSecret,
-      merchantDisplayName: "Cleaner Choice",
+      merchantDisplayName: "BUEZ",
     });
 
     if (initError) {
@@ -155,7 +84,7 @@ function SubscriptionV2(props) {
       Toast.show({
         type: "info",
         text1: "Subscription",
-        text2: "Subscription has not been fullfiled!",
+        text2: "Card not added for subscription!",
       });
       setLoading(false);
       return;
@@ -174,14 +103,14 @@ function SubscriptionV2(props) {
     console.log("result...........", result);
 
     if (result.success) {
-      const { periodEndTimestamp } = result;
-      await updateSubscriptionStatus();
+      await updateSubscriptionStatus(result?.trialStartDate, result?.trialEndDate);
+      await saveSubscription(userId, result?.subscriptionId);
       Toast.show({
         type: "success",
-        text1: "Subscription",
-        text2: "Subscription has been purchased successfully!",
+        text1: "14 Day Free Trial!",
+        text2: "Your 14 day free trial has been started!",
       });
-        props.navigation.navigate('Home');
+      props.navigation.navigate("Home");
     } else {
       setModalVisible2(true);
     }
@@ -219,9 +148,9 @@ function SubscriptionV2(props) {
           <Image style={styles.starIconRight} source={Icons.stars} />
         </View>
       </View>
-      {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />}
+      {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "80%" }}>
-        <MyAppButton title={"Add Card"} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(18)} />
+        <MyAppButton title={"Add Card"} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(18)} loading={loading} />
         <TouchableOpacity
           onPress={async () => {
             if (!userId) return;
@@ -237,16 +166,7 @@ function SubscriptionV2(props) {
               console.error("Failed to start free trial:", error);
             }
           }}
-          style={{
-            height: RFPercentage(6.2),
-            width: RFPercentage(18),
-            marginTop: RFPercentage(7),
-            borderWidth: 1,
-            borderColor: Colors.primary,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: RFPercentage(100),
-          }}
+          style={styles.skip}
         >
           <Text style={{ color: Colors.primary, fontFamily: "Poppins_500Medium" }}>Skip</Text>
         </TouchableOpacity>
@@ -292,7 +212,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     width: "90%",
-    height: RFPercentage(30),
+    height: RFPercentage(32),
     borderColor: Colors.stroke,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(2),
@@ -326,10 +246,11 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1.5),
   },
   detailsContainer: {
-    marginTop: RFPercentage(2),
+    paddingVertical: RFPercentage(2),
     width: "90%",
     justifyContent: "flex-start",
     alignItems: "flex-start",
+    // backgroundColor:'red'
   },
   detailText: {
     color: Colors.darkGrey,
@@ -347,6 +268,17 @@ const styles = StyleSheet.create({
     right: RFPercentage(-1.5),
     width: RFPercentage(6),
     height: RFPercentage(6),
+    bottom: RFPercentage(0.1),
+  },
+  skip: {
+    height: RFPercentage(6.2),
+    width: RFPercentage(18),
+    marginTop: RFPercentage(7),
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: RFPercentage(100),
   },
 });
 

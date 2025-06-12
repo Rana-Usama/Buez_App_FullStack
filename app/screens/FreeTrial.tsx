@@ -7,7 +7,8 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "../components/common/MyAppButton";
 import { useNavigation } from "@react-navigation/native";
 
-const FreeTrial = ({ navigation }: any) => {
+const FreeTrial = () => {
+  const navigation = useNavigation()
   return (
     <Screen style={styles.screen}>
       <Image style={styles.logo} source={Icons.logo} />

@@ -52,7 +52,7 @@ function Settings({ navigation }) {
       navigation: () => {
         // resetPostsData();
         // logout();
-        setIsModalVisible2(true)
+        setIsModalVisible2(true);
       },
     },
     {
@@ -60,7 +60,7 @@ function Settings({ navigation }) {
       title: "Delete Account",
       redColor: true,
       navigation: () => {
-        setIsModalVisible(true)
+        setIsModalVisible(true);
         // resetPostsData();
         // deleteAccount();
       },
@@ -117,7 +117,7 @@ function Settings({ navigation }) {
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
                 onPress={() => {
-                  deleteAccount()
+                  deleteAccount(user?.email, user?.password);
                   setIsModalVisible(false);
                 }}
               />
@@ -126,9 +126,7 @@ function Settings({ navigation }) {
         </BlurView>
       </Modal>
 
-
-
-       <Modal animationType="fade" transparent={true} visible={isModalVisible2} onRequestClose={() => setIsModalVisible2(false)}>
+      <Modal animationType="fade" transparent={true} visible={isModalVisible2} onRequestClose={() => setIsModalVisible2(false)}>
         <BlurView intensity={100} style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalText}>Are you sure you want to logout{"\n"} from this account?</Text>
@@ -142,7 +140,7 @@ function Settings({ navigation }) {
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
                 onPress={() => {
-                  logout()
+                  logout();
                   setIsModalVisible2(false);
                 }}
               />

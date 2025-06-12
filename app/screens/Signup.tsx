@@ -69,10 +69,9 @@ function Signup(props: any) {
         const userData = {
           userName: userName,
           email: email,
-          trialStartDate: new Date(),
           isSubscribed: false,
           token : expoPushToken,
-          isFreeTrial : false
+          isFreeTrial : false,
         };
         await addUser(user?.uid, userData);
       }

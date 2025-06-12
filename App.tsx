@@ -59,8 +59,6 @@ export type AuthStackParamList = {
   ForgotPassword: undefined;
   OTPInput: undefined;
   SetNewPassword: undefined;
-  FreeTrial: undefined;
-  SubscriptionV2: undefined;
 };
 
 export type AppStackParamList = {
@@ -99,8 +97,8 @@ const AuthStack = () => (
     <AuthStackNavigator.Screen name="ForgotPassword" component={ForgotPassword} />
     <AuthStackNavigator.Screen name="OTPInput" component={OTPInput} />
     <AuthStackNavigator.Screen name="SetNewPassword" component={SetNewPassword} />
-    <AuthStackNavigator.Screen name="FreeTrial" component={FreeTrial} />
-    <AuthStackNavigator.Screen name="SubscriptionV2" component={SubscriptionV2} />
+    {/* <AuthStackNavigator.Screen name="FreeTrial" component={FreeTrial} /> */}
+    {/* <AuthStackNavigator.Screen name="SubscriptionV2" component={SubscriptionV2} /> */}
   </AuthStackNavigator.Navigator>
 );
 
@@ -108,9 +106,12 @@ const AuthStack = () => (
 const AppStack = () => (
   <AppStackNavigator.Navigator screenOptions={{ headerShown: false }} initialRouteName="DeciderScreen">
     <AppStackNavigator.Screen name="InitialScreen" component={InitialScreen} />
+    <AppStackNavigator.Screen name="DeciderScreen" component={DeciderScreen} />
+    <AppStackNavigator.Screen name="FreeTrial" component={FreeTrial} />
+    <AppStackNavigator.Screen name="Subscription" component={Subscription} />
+    <AppStackNavigator.Screen name="SubscriptionV2" component={SubscriptionV2} />
     <AppStackNavigator.Screen name="Home" component={Home} />
     <AppStackNavigator.Screen name="SuccessScreen" component={SuccessScreen} />
-    <AppStackNavigator.Screen name="DeciderScreen" component={DeciderScreen} />
     <AppStackNavigator.Screen name="ChangePassword" component={ChangePassword} />
     <AppStackNavigator.Screen name="OfferDetail" component={OfferDetail} />
     <AppStackNavigator.Screen name="PostRequest" component={PostRequest} />
@@ -124,9 +125,6 @@ const AppStack = () => (
     <AppStackNavigator.Screen name="Reviews" component={Reviews} />
     <AppStackNavigator.Screen name="Messages" component={Messages} />
     <AppStackNavigator.Screen name="Chat" component={Chat} />
-    <AppStackNavigator.Screen name="Subscription" component={Subscription} />
-    <AppStackNavigator.Screen name="SubscriptionV2" component={SubscriptionV2} />
-    <AppStackNavigator.Screen name="FreeTrial" component={FreeTrial} />
   </AppStackNavigator.Navigator>
 );
 
@@ -152,7 +150,6 @@ export default function App() {
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [initializing, setInitializing] = useState<boolean>(true);
-
   const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
