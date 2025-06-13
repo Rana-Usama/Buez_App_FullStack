@@ -48,6 +48,7 @@ import Toast from "react-native-toast-message";
 import { toastConfig } from "./app/utils/ToastConfig";
 import FreeTrial from "./app/screens/FreeTrial";
 import SubscriptionV2 from "./app/screens/SubscriptionV2";
+import CancelSubscription from "./app/screens/CancelSubscription";
 
 LogBox.ignoreAllLogs();
 
@@ -82,6 +83,7 @@ export type AppStackParamList = {
   Subscription: undefined;
   FreeTrial: undefined;
   SubscriptionV2: undefined;
+  CancelSubscription:undefined;
 };
 
 // Create Typed Navigators
@@ -117,6 +119,7 @@ const AppStack = () => (
     <AppStackNavigator.Screen name="PostRequest" component={PostRequest} />
     <AppStackNavigator.Screen name="MyRequests" component={MyRequests} />
     <AppStackNavigator.Screen name="Settings" component={Settings} />
+    <AppStackNavigator.Screen name="CancelSubscription" component={CancelSubscription} />
     <AppStackNavigator.Screen name="TermsAndConditions" component={TermsAndConditions} />
     <AppStackNavigator.Screen name="FAQ" component={FAQ} />
     <AppStackNavigator.Screen name="PrivacyPolicy" component={PrivacyPolicy} />

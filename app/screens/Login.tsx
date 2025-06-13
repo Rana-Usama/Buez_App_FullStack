@@ -170,9 +170,10 @@ function Login(props: any) {
         <TouchableOpacity activeOpacity={0.8}>
           <Image style={styles.socialIcon} source={Icons.fb} />
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8}>
+        <View style={styles.socialIconMargin}></View>
+        {/* <TouchableOpacity activeOpacity={0.8}>
           <Image style={[styles.socialIcon, styles.socialIconMargin]} source={Icons.apple} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity activeOpacity={0.8}>
           <Image style={styles.socialIcon} source={Icons.google} />
         </TouchableOpacity>
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(4.4),
   },
   socialIconMargin: {
-    marginHorizontal: RFPercentage(1.6),
+    marginHorizontal: RFPercentage(0.7),
   },
   signupContainer: {
     flexDirection: "row",

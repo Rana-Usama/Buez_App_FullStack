@@ -21,12 +21,14 @@ const SubscriptionListener = ({ userId }) => {
       console.log("Trial Age:", trialAge);
       if (isFreeTrial && trialAge >= 0 && trialAge <= 14) {
         navigation.navigate("Home");
-      } else if (isFreeTrial && trialAge < 0 || trialAge > 14 && !isSubscribed) {
+      } else if ((isFreeTrial && trialAge < 0) || (trialAge > 14 && !isSubscribed)) {
         navigation.navigate("Subscription");
       } else {
         navigation.navigate("FreeTrial");
       }
     } else if (isSubscribed) {
+      navigation.navigate("Home");
+    } else if (!isSubscribed && userData?.freeTrialStartedAt <= userData?.freeTrialEndAt) {
       navigation.navigate("Home");
     } else {
       navigation.navigate("FreeTrial");

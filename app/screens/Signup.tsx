@@ -1,4 +1,4 @@
-import React, { useState , useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
@@ -20,9 +20,9 @@ import * as yup from "yup";
 import { Formik } from "formik";
 import Toast from "react-native-toast-message";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
+import { saveCredentials } from "../services/Auth.service";
 
 function Signup(props: any) {
-
   let validationSchema = yup.object({
     name: yup.string().required("Username is required"),
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -36,15 +36,13 @@ function Signup(props: any) {
   const [indicator, showIndicator] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
 
-
-   useEffect(() => {
+  useEffect(() => {
     async function getToken() {
       const token = await registerForPushNotificationsAsync();
       setExpoPushToken(token);
     }
     getToken();
   }, []);
-
 
   // console.log('expoPushToken...................', expoPushToken)
 
@@ -70,10 +68,11 @@ function Signup(props: any) {
           userName: userName,
           email: email,
           isSubscribed: false,
-          token : expoPushToken,
-          isFreeTrial : false,
+          token: expoPushToken,
+          isFreeTrial: false,
         };
         await addUser(user?.uid, userData);
+        await saveCredentials(email, password);
       }
       Toast.show({
         type: "success",
@@ -201,9 +200,10 @@ function Signup(props: any) {
           <TouchableOpacity activeOpacity={0.8}>
             <Image style={styles.socialIcon} source={Icons.fb} />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8}>
+          <View style={styles.socialIconSpacing}></View>
+          {/* <TouchableOpacity activeOpacity={0.8}>
             <Image style={[styles.socialIcon, styles.socialIconSpacing]} source={Icons.apple} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity activeOpacity={0.8}>
             <Image style={styles.socialIcon} source={Icons.google} />
           </TouchableOpacity>
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(4.4),
   },
   socialIconSpacing: {
-    marginHorizontal: RFPercentage(1.6),
+    marginHorizontal: RFPercentage(0.7),
   },
   footer: {
     flexDirection: "row",

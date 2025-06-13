@@ -5,6 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { logout } from "../services/Auth.service";
 import { deleteAccount } from "../services/Auth.service";
 import { BlurView } from "expo-blur";
+import { getCredentials } from "../services/Auth.service";
 
 // components
 import Nav from "../components/common/Nav";
@@ -23,8 +24,22 @@ function Settings({ navigation }) {
   const profileImgUrl = user?.profileImage || "";
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
+  const [password, setPassword] = useState('')
+
+  const fetchCredentials = async () => {
+    const { email, password } = await getCredentials();
+    console.log(email, password);
+    setPassword(password)
+  };
+
+  fetchCredentials();
 
   const navigationsList = [
+    {
+      iconSource: Icons.privacy,
+      title: "Cancel Subscription",
+      navigation: () => navigation.navigate("CancelSubscription"),
+    },
     {
       iconSource: Icons.privacy,
       title: "Change Password",
@@ -117,7 +132,7 @@ function Settings({ navigation }) {
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
                 onPress={() => {
-                  deleteAccount(user?.email, user?.password);
+                  deleteAccount(user?.email, password);
                   setIsModalVisible(false);
                 }}
               />
