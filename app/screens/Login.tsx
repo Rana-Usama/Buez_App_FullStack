@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 // import auth from "@react-native-firebase/auth";
@@ -24,6 +24,8 @@ import Toast from "react-native-toast-message";
 import { validateEmail } from "../utils/helperFunctions";
 import { addUser, updateUserToken } from "../services/User.service";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
+// import { LoginManager, AccessToken } from "react-native-fbsdk-next";
+import { FacebookAuthProvider } from "firebase/auth";
 
 // config
 import Colors from "../config/Colors";
@@ -41,6 +43,7 @@ type InputField = {
   validator?: (value: any, compareValue?: any) => string;
 };
 
+// WebBrowser.maybeCompleteAuthSession();
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
 function Login(props: any) {
@@ -51,7 +54,6 @@ function Login(props: any) {
     password: yup.string().required("Password is required"),
   });
   const [loading, setLoading] = useState(false);
-
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -161,6 +163,22 @@ function Login(props: any) {
     setRemember(!remember);
   };
 
+  // const signInWithFB = async () => {
+  //   try {
+  //     await LoginManager.logInWithPermissions(["public_profile", "email"]);
+  //     const data = await AccessToken.getCurrentAccessToken();
+  //     console.log("data.........", data);
+  //     if (!data) {
+  //       return;
+  //     }
+  //     const facebookCredential = FacebookAuthProvider.credential(data.accessToken);
+  //     const response = await signInWithCredential(FIREBASE_AUTH, facebookCredential);
+  //     console.log(response);
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
+
   return (
     <Screen style={styles.screen}>
       <Image style={styles.logo} source={Icons.logo} />
@@ -241,7 +259,7 @@ function Login(props: any) {
       <View style={styles.socialIconsContainer}>
         {loading ? (
           <>
-          <ActivityIndicator size={'small'} color={Colors.primary}   />
+            <ActivityIndicator size={"small"} color={Colors.primary} />
           </>
         ) : (
           <>

@@ -56,9 +56,25 @@
           "icon": "./assets/notification-icon.png"
         }
       ],
+      [
+        "expo-facebook",
+        {
+          "appId": "3491611774307995"
+        }
+      ],
+
+      [
+        "react-native-fbsdk-next",
+        {
+          "appID": "3491611774307995",
+          "clientToken": "94e46dc37491e6f748381809c6b3ee4f",
+          "displayName": "BUEZ"
+        }
+      ],
       "@react-native-google-signin/google-signin",
       "@react-native-firebase/app",
-      "@react-native-firebase/auth"
+      "@react-native-firebase/auth",
+      "expo-facebook"
     ],
     "extra": {
       "router": {
