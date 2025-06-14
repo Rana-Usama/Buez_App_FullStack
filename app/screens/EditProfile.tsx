@@ -40,12 +40,12 @@ function EditProfile({ navigation }) {
 
   const [inputField, SetInputField] = useState<InputFieldType[]>([
     {
-      placeholder: "Emma Stone",
+      placeholder: "Add your Name",
       title: "Name",
       value: "",
     },
     {
-      placeholder: "+1 (502) 363-6754",
+      placeholder: "Add your Phone Number",
       title: "Phone Number",
       value: "",
     },

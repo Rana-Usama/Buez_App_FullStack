@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Animated, Platform } f
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from "expo-secure-store";
+import LottieView from "lottie-react-native";
 
 // components
 import Screen from "../components/Screen";
@@ -14,18 +15,34 @@ import { Icons } from "../config/theme";
 const onboardingData = [
   {
     image: Icons.onBoarding1,
-    title: "Connecting Communities",
-    description: "Find help for your everyday tasks from people around you.",
+    title: "Welcome to BUEZ",
+    description: "Connect, collaborate, and grow — your network for professional support starts here.",
+    lottie: require("../../assets/lottie/firstv2.json"),
+  },
+
+  {
+    image: Icons.onBoarding1,
+    title: "Post What You Need Help With",
+    description: "Share your work or challenges. Get responses from real people ready to assist.",
+    lottie: require("../../assets/lottie/OnBoarding1.json"),
+  },
+  {
+    image: Icons.onBoarding1,
+    title: "Manage Posts & Message Freely",
+    description: "Track your requests, update your posts, and message with supporters — all in one place",
+    lottie: require("../../assets/lottie/chatMob.json"),
   },
   {
     image: Icons.onBoarding2,
-    title: "Simplifying Assistance",
-    description: "Post requests for help with chores and get responses quickly.",
+    title: "Enjoy 14 Days of Full Access",
+    description: "Try every feature of BUEZ absolutely free. No limits, no commitments.",
+    lottie: require("../../assets/lottie/gift.json"),
   },
   {
     image: Icons.onBoarding3,
-    title: "Seamless Communication",
-    description: "Chat within the app to ensure smooth coordination.",
+    title: "Continue with a Simple Subscription",
+    description: "After your 14-day free trial, keep enjoying BUEZ with 12.99$ monthly plan. Cancel anytime.",
+    lottie: require("../../assets/lottie/pay2.json"),
   },
 ];
 
@@ -109,40 +126,39 @@ function Onboarding(props) {
     }
   };
 
-  const { image, title, description } = onboardingData[activeIndex];
+  const { lottie, title, description } = onboardingData[activeIndex];
+
+
+  const buttonScale = useRef(new Animated.Value(1)).current;
+
+useEffect(() => {
+  Animated.timing(buttonScale, {
+    toValue: 1 + activeIndex * 0.1, // increase size with index
+    duration: 300,
+    useNativeDriver: true,
+  }).start();
+}, [activeIndex]);
+
 
   return (
     <Screen style={styles.screen}>
       <Image style={styles.img} source={Icons.logo} />
 
       {/* Body */}
-      <Animated.View
-        style={[
-          styles.body,
-          {
-            opacity: fadeAnim,
-            transform: [
-              {
-                translateY: fadeAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [50, 0],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        <Image style={{ borderRadius: RFPercentage(1), width: calculateImageWidth(), height: calculateImageHeight(), marginTop: RFPercentage(18) }} source={image} />
 
-        <View style={styles.wrapper}>
-          <Text style={styles.title}>{title}</Text>
-        </View>
+      <View style={{ width: "90%", alignItems: "center", justifyContent: "center" }}>
+        <LottieView source={lottie} autoPlay loop style={{ width: RFPercentage(40), height: RFPercentage(40) }} />
+      </View>
 
-        <View style={styles.wrapper2}>
-          <Text style={styles.desc}>{description}</Text>
-        </View>
-      </Animated.View>
+      <View style={styles.wrapper}>
+        <Text style={styles.title}>{title}</Text>
+      </View>
 
+      <View style={styles.wrapper2}>
+        <Text style={styles.desc}>{description}</Text>
+      </View>
+
+     
       <View style={styles.dot}>{renderDots()}</View>
 
       {/* Buttons */}
@@ -181,9 +197,9 @@ const styles = StyleSheet.create({
   wrapper: { width: "90%", justifyContent: "center", alignItems: "center" },
   title: { textAlign: "center", marginTop: RFPercentage(2), color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_600SemiBold" },
   wrapper2: { width: "75%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(0.5) },
-  desc: { lineHeight: RFPercentage(2.7), textAlign: "center", color: "#64748B", fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular" },
+  desc: { lineHeight: RFPercentage(2.7), textAlign: "center", color: "#64748B", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   dot: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(2) },
-  buttonWrapper: { position: "absolute", bottom: RFPercentage(8), width: "90%", justifyContent: "center", alignItems: "center", alignSelf: "center", flexDirection: "row" },
+  buttonWrapper: { position: "absolute", bottom: RFPercentage(10), width: "90%", justifyContent: "center", alignItems: "center", alignSelf: "center", flexDirection: "row" },
   skip: { position: "absolute", left: RFPercentage(1) },
   skipText: { color: "#475569", fontSize: RFPercentage(2.1), fontFamily: "Poppins_500Medium" },
   gradient: {

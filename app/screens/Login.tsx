@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+// import auth from "@react-native-firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
+import { FIREBASE_DB } from "../../firebaseConfig";
+import { getDoc, doc } from "firebase/firestore";
 
 // auth
 // eslint-disable-next-line import/no-unresolved
@@ -17,7 +22,7 @@ import Toast from "react-native-toast-message";
 
 // utils
 import { validateEmail } from "../utils/helperFunctions";
-import { updateUserToken } from "../services/User.service";
+import { addUser, updateUserToken } from "../services/User.service";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
 
 // config
@@ -26,6 +31,7 @@ import { Icons } from "../config/theme";
 
 import * as yup from "yup";
 import { Formik } from "formik";
+import { useNavigation } from "@react-navigation/native";
 
 type InputField = {
   placeholder: string;
@@ -35,14 +41,76 @@ type InputField = {
   validator?: (value: any, compareValue?: any) => string;
 };
 
+const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
+
 function Login(props: any) {
   const [indicator, showIndicator] = useState(false);
   const [remember, setRemember] = useState(false);
-
   let validationSchema = yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
     password: yup.string().required("Password is required"),
   });
+  const [loading, setLoading] = useState(false);
+
+  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function getToken() {
+      const token = await registerForPushNotificationsAsync();
+      setExpoPushToken(token);
+    }
+    getToken();
+  }, []);
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: webClientId,
+    });
+  }, []);
+
+  const onGoogleButtonPress = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+      const userInfo = await GoogleSignin.signIn();
+      console.log(userInfo);
+      const { idToken } = userInfo?.data;
+
+      const googleCredential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(FIREBASE_AUTH, googleCredential);
+
+      const user = userCredential.user;
+      console.log("Firebase User:", user);
+
+      const userRef = doc(FIREBASE_DB, "users", user.uid);
+      const userSnapshot = await getDoc(userRef);
+      if (!userSnapshot.exists()) {
+        const userData = {
+          userName: user?.displayName,
+          email: user?.email,
+          isSubscribed: false,
+          profileImage: user?.photoURL,
+          phoneNumber: user?.phoneNumber,
+          token: expoPushToken,
+          isFreeTrial: false,
+        };
+        await addUser(user?.uid, userData);
+        Toast.show({
+          type: "success",
+          text1: "Sign Up",
+          text2: "User registered Successfully!",
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Sign Up",
+          text2: "You have already signed up with this account!",
+        });
+      }
+    } catch (error) {
+      console.log("Google Sign-In Error:", error?.code ?? "Unknown Code", error?.message ?? error);
+    }
+  };
 
   const signInWithEmail = async (email, password) => {
     try {
@@ -74,7 +142,7 @@ function Login(props: any) {
         text1: "Login Successful",
         text2: "Welcome back!",
       });
-      console.log(user);
+      // console.log(user);
     } catch (error) {
       Toast.show({
         type: "error",
@@ -174,7 +242,7 @@ function Login(props: any) {
         {/* <TouchableOpacity activeOpacity={0.8}>
           <Image style={[styles.socialIcon, styles.socialIconMargin]} source={Icons.apple} />
         </TouchableOpacity> */}
-        <TouchableOpacity activeOpacity={0.8}>
+        <TouchableOpacity activeOpacity={0.8} onPress={onGoogleButtonPress}>
           <Image style={styles.socialIcon} source={Icons.google} />
         </TouchableOpacity>
       </View>

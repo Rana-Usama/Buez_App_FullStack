@@ -60,6 +60,7 @@ export type AuthStackParamList = {
   ForgotPassword: undefined;
   OTPInput: undefined;
   SetNewPassword: undefined;
+  Home : undefined;
 };
 
 export type AppStackParamList = {
@@ -83,7 +84,7 @@ export type AppStackParamList = {
   Subscription: undefined;
   FreeTrial: undefined;
   SubscriptionV2: undefined;
-  CancelSubscription:undefined;
+  CancelSubscription: undefined;
 };
 
 // Create Typed Navigators
@@ -99,6 +100,8 @@ const AuthStack = () => (
     <AuthStackNavigator.Screen name="ForgotPassword" component={ForgotPassword} />
     <AuthStackNavigator.Screen name="OTPInput" component={OTPInput} />
     <AuthStackNavigator.Screen name="SetNewPassword" component={SetNewPassword} />
+    <AuthStackNavigator.Screen name="Home" component={Home} />
+
     {/* <AuthStackNavigator.Screen name="FreeTrial" component={FreeTrial} /> */}
     {/* <AuthStackNavigator.Screen name="SubscriptionV2" component={SubscriptionV2} /> */}
   </AuthStackNavigator.Navigator>
@@ -158,7 +161,9 @@ export default function App() {
   const notificationListener = useRef();
   const responseListener = useRef();
 
-  // console.log('notification...............', notification)
+  console.log('user...............', user)
+
+
   useEffect(() => {
     // Register for push notifications and get token
     registerForPushNotificationsAsync().then((token) => setExpoPushToken(token));
@@ -188,7 +193,7 @@ export default function App() {
     return unsubscribe;
   }, [initializing]);
 
-  if (!fontsLoaded || initializing) {
+  if (initializing) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size={RFPercentage(6)} color={Colors.primary} />

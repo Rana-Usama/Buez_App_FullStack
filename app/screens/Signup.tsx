@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { getAuth, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { FIREBASE_DB } from "../../firebaseConfig";
+import { getDoc, doc } from "firebase/firestore";
 
 // components
 import Screen from "../components/Screen";
@@ -21,6 +25,8 @@ import { Formik } from "formik";
 import Toast from "react-native-toast-message";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
 import { saveCredentials } from "../services/Auth.service";
+
+const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
 function Signup(props: any) {
   let validationSchema = yup.object({
@@ -45,6 +51,56 @@ function Signup(props: any) {
   }, []);
 
   // console.log('expoPushToken...................', expoPushToken)
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: webClientId,
+    });
+  }, []);
+
+  const onGoogleButtonPress = async () => {
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+      const userInfo = await GoogleSignin.signIn();
+      console.log(userInfo);
+      const { idToken } = userInfo?.data;
+
+      const googleCredential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(FIREBASE_AUTH, googleCredential);
+
+      const user = userCredential.user;
+      console.log("Firebase User:", user);
+
+      const userRef = doc(FIREBASE_DB, "users", user.uid);
+      const userSnapshot = await getDoc(userRef);
+      if (!userSnapshot.exists()) {
+        const userData = {
+          userName: user?.displayName,
+          email: user?.email,
+          isSubscribed: false,
+          profileImage: user?.photoURL,
+          phoneNumber: user?.phoneNumber,
+          token: expoPushToken,
+          isFreeTrial: false,
+        };
+        await addUser(user?.uid, userData);
+        Toast.show({
+          type: "success",
+          text1: "Sign Up",
+          text2: "User registered Successfully!",
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Sign Up",
+          text2: "You have already signed up with this account!",
+        });
+      }
+    } catch (error) {
+      console.log("Google Sign-In Error:", error?.code ?? "Unknown Code", error?.message ?? error);
+    }
+  };
 
   const createAccountWithEmail = async (email, password) => {
     try {
@@ -204,7 +260,7 @@ function Signup(props: any) {
           {/* <TouchableOpacity activeOpacity={0.8}>
             <Image style={[styles.socialIcon, styles.socialIconSpacing]} source={Icons.apple} />
           </TouchableOpacity> */}
-          <TouchableOpacity activeOpacity={0.8}>
+          <TouchableOpacity activeOpacity={0.8} onPress={onGoogleButtonPress}>
             <Image style={styles.socialIcon} source={Icons.google} />
           </TouchableOpacity>
         </View>
