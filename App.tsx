@@ -60,7 +60,6 @@ export type AuthStackParamList = {
   ForgotPassword: undefined;
   OTPInput: undefined;
   SetNewPassword: undefined;
-  Home : undefined;
 };
 
 export type AppStackParamList = {
@@ -100,8 +99,6 @@ const AuthStack = () => (
     <AuthStackNavigator.Screen name="ForgotPassword" component={ForgotPassword} />
     <AuthStackNavigator.Screen name="OTPInput" component={OTPInput} />
     <AuthStackNavigator.Screen name="SetNewPassword" component={SetNewPassword} />
-    <AuthStackNavigator.Screen name="Home" component={Home} />
-
     {/* <AuthStackNavigator.Screen name="FreeTrial" component={FreeTrial} /> */}
     {/* <AuthStackNavigator.Screen name="SubscriptionV2" component={SubscriptionV2} /> */}
   </AuthStackNavigator.Navigator>

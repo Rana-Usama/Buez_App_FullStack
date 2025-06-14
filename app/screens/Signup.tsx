@@ -92,9 +92,9 @@ function Signup(props: any) {
         });
       } else {
         Toast.show({
-          type: "error",
+          type: "success",
           text1: "Sign Up",
-          text2: "You have already signed up with this account!",
+          text2: "Signed In Successfully!",
         });
       }
     } catch (error) {

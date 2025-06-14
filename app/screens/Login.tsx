@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 // import auth from "@react-native-firebase/auth";
@@ -69,19 +69,16 @@ function Login(props: any) {
   }, []);
 
   const onGoogleButtonPress = async () => {
+    setLoading(true);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-
       const userInfo = await GoogleSignin.signIn();
       console.log(userInfo);
       const { idToken } = userInfo?.data;
-
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(FIREBASE_AUTH, googleCredential);
-
       const user = userCredential.user;
       console.log("Firebase User:", user);
-
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
       if (!userSnapshot.exists()) {
@@ -97,18 +94,25 @@ function Login(props: any) {
         await addUser(user?.uid, userData);
         Toast.show({
           type: "success",
-          text1: "Sign Up",
-          text2: "User registered Successfully!",
+          text1: "Welcome to Buez!",
+          text2: "Your account has been created successfully.",
         });
       } else {
         Toast.show({
-          type: "error",
-          text1: "Sign Up",
-          text2: "You have already signed up with this account!",
+          type: "success",
+          text1: "Welcome to Buez!",
+          text2: "Signed In successfully!",
         });
       }
     } catch (error) {
       console.log("Google Sign-In Error:", error?.code ?? "Unknown Code", error?.message ?? error);
+      Toast.show({
+        type: "error",
+        text1: "Sign-In Failed",
+        text2: "Something went wrong. Please try again.",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -235,16 +239,24 @@ function Login(props: any) {
       </View>
 
       <View style={styles.socialIconsContainer}>
-        <TouchableOpacity activeOpacity={0.8}>
-          <Image style={styles.socialIcon} source={Icons.fb} />
-        </TouchableOpacity>
-        <View style={styles.socialIconMargin}></View>
-        {/* <TouchableOpacity activeOpacity={0.8}>
+        {loading ? (
+          <>
+          <ActivityIndicator size={'small'} color={Colors.primary}   />
+          </>
+        ) : (
+          <>
+            <TouchableOpacity activeOpacity={0.8}>
+              <Image style={styles.socialIcon} source={Icons.fb} />
+            </TouchableOpacity>
+            <View style={styles.socialIconMargin}></View>
+            {/* <TouchableOpacity activeOpacity={0.8}>
           <Image style={[styles.socialIcon, styles.socialIconMargin]} source={Icons.apple} />
         </TouchableOpacity> */}
-        <TouchableOpacity activeOpacity={0.8} onPress={onGoogleButtonPress}>
-          <Image style={styles.socialIcon} source={Icons.google} />
-        </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.8} onPress={onGoogleButtonPress}>
+              <Image style={styles.socialIcon} source={Icons.google} />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       <View style={styles.signupContainer}>

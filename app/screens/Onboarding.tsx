@@ -15,7 +15,7 @@ import { Icons } from "../config/theme";
 const onboardingData = [
   {
     image: Icons.onBoarding1,
-    title: "Welcome to BUEZ",
+    title: "Welcome to Büez",
     description: "Connect, collaborate, and grow — your network for professional support starts here.",
     lottie: require("../../assets/lottie/firstv2.json"),
   },
@@ -30,18 +30,18 @@ const onboardingData = [
     image: Icons.onBoarding1,
     title: "Manage Posts & Message Freely",
     description: "Track your requests, update your posts, and message with supporters — all in one place",
-    lottie: require("../../assets/lottie/chatMob.json"),
+    lottie: require("../../assets/lottie/chatBoth.json"),
   },
   {
     image: Icons.onBoarding2,
     title: "Enjoy 14 Days of Full Access",
-    description: "Try every feature of BUEZ absolutely free. No limits, no commitments.",
-    lottie: require("../../assets/lottie/gift.json"),
+    description: "Try every feature of Büez absolutely free. No limits, no commitments.",
+    lottie: require("../../assets/lottie/gift2.json"),
   },
   {
     image: Icons.onBoarding3,
-    title: "Continue with a Simple Subscription",
-    description: "After your 14-day free trial, keep enjoying BUEZ with 12.99$ monthly plan. Cancel anytime.",
+    title: "Continue with Subscription",
+    description: "After your 14-day free trial, keep enjoying Büez with 12.99$ monthly plan. Cancel anytime.",
     lottie: require("../../assets/lottie/pay2.json"),
   },
 ];
@@ -108,7 +108,7 @@ function Onboarding(props) {
         key={index}
         activeOpacity={0.8}
         style={{
-          marginHorizontal: RFPercentage(0.2),
+          marginHorizontal: RFPercentage(0.3),
           width: index === activeIndex ? RFPercentage(3) : RFPercentage(0.9),
           height: RFPercentage(0.9),
           backgroundColor: index === activeIndex ? Colors.primary : "#D1D5DB",
@@ -128,17 +128,15 @@ function Onboarding(props) {
 
   const { lottie, title, description } = onboardingData[activeIndex];
 
-
   const buttonScale = useRef(new Animated.Value(1)).current;
 
-useEffect(() => {
-  Animated.timing(buttonScale, {
-    toValue: 1 + activeIndex * 0.1, // increase size with index
-    duration: 300,
-    useNativeDriver: true,
-  }).start();
-}, [activeIndex]);
-
+  useEffect(() => {
+    Animated.timing(buttonScale, {
+      toValue: 1 + activeIndex * 0.1, // increase size with index
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [activeIndex]);
 
   return (
     <Screen style={styles.screen}>
@@ -146,20 +144,19 @@ useEffect(() => {
 
       {/* Body */}
 
-      <View style={{ width: "90%", alignItems: "center", justifyContent: "center" }}>
-        <LottieView source={lottie} autoPlay loop style={{ width: RFPercentage(40), height: RFPercentage(40) }} />
+      <View style={{ width: "90%", alignItems: "center", justifyContent: "center", marginTop: RFPercentage(8),position: "absolute", top: RFPercentage(10) }}>
+        <LottieView source={lottie} autoPlay loop style={{ width: RFPercentage(40), height: activeIndex === 2 ? RFPercentage(34) : RFPercentage(40) }} />
       </View>
+      <View style={{ top: RFPercentage(45), alignItems:'center', justifyContent:'center' }}>
+        <View style={styles.wrapper}>
+          <Text style={styles.title}>{title}</Text>
+        </View>
 
-      <View style={styles.wrapper}>
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.wrapper2}>
+          <Text style={styles.desc}>{description}</Text>
+        </View>
+        <View style={styles.dot}>{renderDots()}</View>
       </View>
-
-      <View style={styles.wrapper2}>
-        <Text style={styles.desc}>{description}</Text>
-      </View>
-
-     
-      <View style={styles.dot}>{renderDots()}</View>
 
       {/* Buttons */}
       <View style={styles.buttonWrapper}>
@@ -197,7 +194,7 @@ const styles = StyleSheet.create({
   wrapper: { width: "90%", justifyContent: "center", alignItems: "center" },
   title: { textAlign: "center", marginTop: RFPercentage(2), color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_600SemiBold" },
   wrapper2: { width: "75%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(0.5) },
-  desc: { lineHeight: RFPercentage(2.7), textAlign: "center", color: "#64748B", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
+  desc: { lineHeight: RFPercentage(2.7), textAlign: "center", color: "#64748B", fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular" },
   dot: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(2) },
   buttonWrapper: { position: "absolute", bottom: RFPercentage(10), width: "90%", justifyContent: "center", alignItems: "center", alignSelf: "center", flexDirection: "row" },
   skip: { position: "absolute", left: RFPercentage(1) },
