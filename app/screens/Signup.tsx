@@ -139,7 +139,7 @@ function Signup(props: any) {
       Toast.show({
         type: "error",
         text1: "Sign Up Error",
-        text2: "User not registered!",
+        text2: "Credentials already in use",
       });
     }
     showIndicator(false);

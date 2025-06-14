@@ -72,7 +72,7 @@ function EditProfile({ navigation }) {
         compress: 0.5, // change compression level (0 to 1)
         format: ImageManipulator.SaveFormat.JPEG,
       });
-      console.log(compressedImage)
+      console.log(compressedImage);
       setImageUri(compressedImage.uri);
     }
   };
@@ -114,7 +114,7 @@ function EditProfile({ navigation }) {
 
     try {
       await updateProfile(userData, imageUri);
-      navigation.goBack();
+      navigation.navigate("Profile");
       Toast.show({
         type: "success",
         text1: "Profile Update",

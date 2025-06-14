@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Pl
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import { logout } from "../services/Auth.service";
-import { deleteAccount } from "../services/Auth.service";
+import { deleteCurrentUser } from "../services/Auth.service";
 import { BlurView } from "expo-blur";
 import { getCredentials } from "../services/Auth.service";
 
@@ -132,7 +132,7 @@ function Settings({ navigation }) {
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
                 onPress={() => {
-                  deleteAccount(user?.email, password);
+                  deleteCurrentUser();
                   setIsModalVisible(false);
                 }}
               />

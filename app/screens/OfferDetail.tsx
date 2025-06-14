@@ -29,6 +29,8 @@ function OfferDetail({ navigation, route }) {
     navigation.navigate("Chat", { chatId: chatId, senderId: currentUserId, senderName: currentUser.userData.userName, receiver: postRequest.user });
   };
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
@@ -52,15 +54,20 @@ function OfferDetail({ navigation, route }) {
 
         {/* Three dots */}
         <View style={styles.dotsContainer}>
-          {postRequest.imageUrls.map((_, index) => (
-            <View key={index} style={[styles.dot, index === activeIndex ? styles.activeDot : styles.inactiveDot]} />
-          ))}
+          {postRequest?.imageUrls?.length > 1 && postRequest.imageUrls.map((_, index) => <View key={index} style={[styles.dot, index === activeIndex ? styles.activeDot : styles.inactiveDot]} />)}
         </View>
 
         {/* Details */}
         <View style={styles.detailsContainer}>
           <Text style={styles.title}>{postRequest.taskType}</Text>
-          <Text style={styles.description}>{postRequest.description}</Text>
+          <Text style={styles.description}>
+            {isExpanded || postRequest.description.length <= 120 ? postRequest.description : postRequest.description.slice(0, 120) + "... "}
+            {postRequest.description.length > 120 && (
+              <Text onPress={() => setIsExpanded(!isExpanded)} style={styles.readMoreText}>
+                {isExpanded ? "Read Less" : "Read More"}
+              </Text>
+            )}
+          </Text>
         </View>
 
         <View style={styles.infoContainer}>
@@ -77,7 +84,7 @@ function OfferDetail({ navigation, route }) {
 
         <View style={styles.compensationContainer}>
           <Text style={styles.compensationTitle}>Compensation:</Text>
-          <Text style={styles.description}>{postRequest.compensationType === "Monitarely" ? postRequest.monitarily : postRequest.otherCompensation}</Text>
+          <Text style={styles.description}>{postRequest.compensationType === "Monitarely" ? `${postRequest.monitarily}$` : postRequest.otherCompensation}</Text>
         </View>
       </ScrollView>
 
@@ -103,6 +110,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
   },
+  readMoreText: {
+    color: Colors.primary,
+    fontSize: RFPercentage(1.7),
+    fontFamily:'Poppins_500Medium'
+  },
+
   scrollView: {
     width: "100%",
   },

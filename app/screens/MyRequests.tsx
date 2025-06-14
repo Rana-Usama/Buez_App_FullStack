@@ -116,7 +116,7 @@ function MyRequests({ navigation }) {
         return newRecords;
       });
 
-      const action = status === REQUEST_STATUS.Completed ? "marked as complete" : "cancelled";
+      const action = status === REQUEST_STATUS.Completed ? "mark as completed" : "cancelled";
       Toast.show({
         type: "success",
         text1: `Request Status`,
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     overflow: "hidden",
-    paddingBottom: RFPercentage(1.6),
+    paddingBottom: RFPercentage(2),
   },
   cartImageBackground: {
     width: screenWidth * 0.9,
@@ -547,13 +547,13 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     width: RFPercentage(16),
     height: RFPercentage(5.2),
-    borderColor: 'rgb(215, 215, 215)',
+    borderColor: 'rgb(204, 204, 216)',
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
     right: 0,
-    backgroundColor: 'rgb(215, 215, 215)',
+    backgroundColor: 'rgb(204, 204, 216)',
   },
   notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },

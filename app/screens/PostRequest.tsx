@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, TextInp
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImageManipulator from "expo-image-manipulator";
 
 // components
 import Nav from "../components/common/Nav";
@@ -118,16 +118,12 @@ function PostRequest({ navigation, route }) {
       const selectedImage = result.assets[0];
 
       // Compress the image
-      const compressedImage = await ImageManipulator.manipulateAsync(
-        selectedImage.uri,
-        [],
-        {
-          compress: 0.5, // change compression level (0 to 1)
-          format: ImageManipulator.SaveFormat.JPEG,
-        }
-      );
+      const compressedImage = await ImageManipulator.manipulateAsync(selectedImage.uri, [], {
+        compress: 0.5, // change compression level (0 to 1)
+        format: ImageManipulator.SaveFormat.JPEG,
+      });
 
-      console.log('compressedImage............', compressedImage)
+      console.log("compressedImage............", compressedImage);
 
       // Update your imageUris state with compressed image URI
       let tempImageUris = [...imageUris];
@@ -211,8 +207,8 @@ function PostRequest({ navigation, route }) {
     if (!selectedTask || !selectedCompensation || !description || !location || (!compensation && !budget)) {
       Toast.show({
         type: "info",
-        text1: "Post Request",
-        text2: "Please add the required details!",
+        text1: "Incomplete Details",
+        text2: "Please fill in all required fields before posting.",
       });
       return;
     }
@@ -239,8 +235,6 @@ function PostRequest({ navigation, route }) {
         imgs.push(defaultImageForTask);
       }
 
-      
-
       if (isEditing) {
         await updatePost(currentPostRequest.id, data, imgs);
       } else {
@@ -251,15 +245,14 @@ function PostRequest({ navigation, route }) {
     } catch (e) {
       Toast.show({
         type: "error",
-        text1: "Post Request",
-        text2: "There was an error while saving the request!",
+        text1: "Failed to Post",
+        text2: "Something went wrong. Please try again shortly.",
       });
     } finally {
       showIndicator(false);
     }
   };
 
-  
   return (
     <View style={styles.screen}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -345,7 +338,8 @@ function PostRequest({ navigation, route }) {
 
           {/* decsription */}
           <View style={styles.descriptionContainer}>
-            <TextInput placeholder="Description" placeholderTextColor={Colors.heading} value={description} multiline onChangeText={(e) => setDescription(e)} style={styles.desc} />
+            <TextInput placeholder="Description" placeholderTextColor={Colors.heading} value={description} multiline onChangeText={(e) => setDescription(e)} maxLength={250} style={styles.desc} />
+            <Text style={styles.charCount}>{description.length}/250</Text>
           </View>
 
           {/* Input field */}
@@ -401,7 +395,7 @@ function PostRequest({ navigation, route }) {
           </View>
 
           {/*Login Button */}
-          <MyAppButton disabled={indicator} loading={indicator} title={title === "Edit Profile" ? "Edit" : "Post"} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
+          <MyAppButton disabled={indicator} loading={indicator} title={isEditing ? "Edit" : "Post"} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
 
           <View style={styles.space} />
         </ScrollView>
@@ -424,6 +418,14 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     alignItems: "center",
   },
+  charCount: {
+  alignSelf: "flex-end",
+  right: 10,
+  color: Colors.grey,
+  fontSize: RFPercentage(1.6),
+  bottom:10,
+  position: 'absolute',
+},
   dropdownHeader: {
     marginTop: RFPercentage(3),
     width: "90%",

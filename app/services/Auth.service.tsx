@@ -1,7 +1,8 @@
 /* eslint-disable import/no-unresolved */
-import { FIREBASE_AUTH } from "../../firebaseConfig";
+import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { sendEmailVerification, signOut, updatePassword as firebaseUpdatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "firebase/auth";
 import { deleteUser } from "firebase/auth";
+import { doc, deleteDoc } from "firebase/firestore";
 
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
@@ -94,30 +95,21 @@ export async function getCredentials() {
   return { email, password };
 }
 
-export const deleteAccount = async (email, password) => {
-  try {
-    const user = FIREBASE_AUTH.currentUser;
-    if (!user) {
-      console.log("No user is logged in to delete account.");
-      return false;
-    }
-    const credential = EmailAuthProvider.credential(email, password);
+export const deleteCurrentUser = async () => {
+  const user = FIREBASE_AUTH.currentUser;
+  
 
-    await reauthenticateWithCredential(user, credential);
+  if (!user) return;
+
+  try {
+    // Delete user Firestore data first
+    await deleteDoc(doc(FIREBASE_DB, "users", user.uid));
+
+    // Then delete user auth account
     await deleteUser(user);
 
-    Toast.show({
-      type: "success",
-      text1: "Account Deactivation",
-      text2: "Your account has been deleted successfully!",
-    });
-    return true;
+    console.log("User completely deleted.");
   } catch (error) {
-    console.log(error);
-    Toast.show({
-      type: "error",
-      text1: "Account Deactivation",
-      text2: error.message || "An error occurred while deleting the account.",
-    });
+    console.error("Error deleting user:", error);
   }
 };

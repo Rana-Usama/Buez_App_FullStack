@@ -86,6 +86,8 @@ export type AppStackParamList = {
   CancelSubscription: undefined;
 };
 
+
+
 // Create Typed Navigators
 const AuthStackNavigator = createStackNavigator<AuthStackParamList>();
 const AppStackNavigator = createStackNavigator<AppStackParamList>();

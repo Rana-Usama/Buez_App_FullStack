@@ -141,6 +141,15 @@ function Home({ navigation }) {
   };
   const displayTasks = getDisplayTasks();
 
+  useEffect(() => {
+    // Ensure first image is active for every item
+    const initialIndices = {};
+    displayTasks.forEach((_, index) => {
+      initialIndices[index] = 0;
+    });
+    setActiveIndices(initialIndices);
+  }, [displayTasks]);
+
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -219,6 +228,7 @@ function Home({ navigation }) {
                 data={displayTasks}
                 keyExtractor={(item, index) => index.toString()}
                 scrollEventThrottle={16}
+                nestedScrollEnabled={true}
                 renderItem={({ item, index }) => (
                   <TouchableOpacity onPress={() => navigation.navigate("OfferDetail", { postRequest: item })} activeOpacity={0.8} style={[styles.cartContainer]}>
                     <FlatList
@@ -227,8 +237,8 @@ function Home({ navigation }) {
                       horizontal
                       pagingEnabled
                       showsHorizontalScrollIndicator={false}
-                      scrollEnabled={true} // ensure it's scrollable
-                      nestedScrollEnabled={true} // allow nested scrolling
+                      scrollEnabled={true}
+                      nestedScrollEnabled={true}
                       onScroll={(e) => {
                         const slideIndex = Math.round(e.nativeEvent.contentOffset.x / (width * 0.9));
                         setActiveIndices((prev) => ({ ...prev, [index]: slideIndex }));
@@ -239,7 +249,7 @@ function Home({ navigation }) {
                           source={{ uri: imageUrl }}
                           style={{
                             width: width * 0.9,
-                            height: RFPercentage(30),
+                            height: RFPercentage(35),
                             borderTopLeftRadius: RFPercentage(1),
                             borderTopRightRadius: RFPercentage(1),
                           }}

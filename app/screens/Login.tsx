@@ -145,7 +145,7 @@ function Login(props: any) {
       }
       Toast.show({
         type: "success",
-        text1: "Login Successful",
+        text1: "Sign in Successfully!",
         text2: "Welcome back!",
       });
       // console.log(user);

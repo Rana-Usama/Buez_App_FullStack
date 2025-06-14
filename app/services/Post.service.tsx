@@ -81,8 +81,8 @@ export const getMyReuqests = async (postStatus : any, lastVisiblePost = null, pa
       collection(FIREBASE_DB, 'taskRequests'),
       where('status', '==', postStatus),
       where("userId", "==", userId),
-      orderBy('createdAt', 'desc'),
-      limit(pageSize));
+      orderBy('createdAt', 'desc'))
+      // limit(pageSize));
 
     if (lastVisiblePost) {
       q = query(
@@ -90,8 +90,8 @@ export const getMyReuqests = async (postStatus : any, lastVisiblePost = null, pa
         where('status', '==', postStatus),
         where("userId", "==", userId),
         orderBy('createdAt', 'desc'),
-        startAfter(lastVisiblePost),
-        limit(pageSize));
+        startAfter(lastVisiblePost))
+        // limit(pageSize));
     }
 
     const snapshot = await getDocs(q);
@@ -129,10 +129,10 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
       collection(FIREBASE_DB, 'taskRequests'),
       where("status", "==", 'Active'),
       where("userId", "!=", userId),
-      orderBy('createdAt', 'desc'),
+      orderBy('createdAt', 'desc'))
       // where('taskType', '==', 'Gardening'),
       // where('descriptionKeywords', 'array-contains-any', keywords),
-      limit(pageSize));
+      // limit(pageSize));
 
     if (lastVisiblePost) {
       q = query(
@@ -140,8 +140,8 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
         where("status", "==", 'Active'),
         where("userId", "!=", userId),
         orderBy('createdAt', 'desc'),
-        startAfter(lastVisiblePost),
-        limit(pageSize));
+        startAfter(lastVisiblePost))
+        // limit(pageSize));
     }
 
     if (taskType && taskType !== 'All') {
