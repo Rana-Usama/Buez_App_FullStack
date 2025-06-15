@@ -95,19 +95,21 @@ export async function getCredentials() {
   return { email, password };
 }
 
+export async function removeCredentials() {
+  await SecureStore.deleteItemAsync("email");
+  await SecureStore.deleteItemAsync("password");
+}
+
 export const deleteCurrentUser = async () => {
   const user = FIREBASE_AUTH.currentUser;
-  
-
   if (!user) return;
-
   try {
     // Delete user Firestore data first
-    await deleteDoc(doc(FIREBASE_DB, "users", user.uid));
 
+    // await deleteDoc(doc(FIREBASE_DB, "users", user.uid));
+    
     // Then delete user auth account
     await deleteUser(user);
-
     console.log("User completely deleted.");
   } catch (error) {
     console.error("Error deleting user:", error);

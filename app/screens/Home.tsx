@@ -300,7 +300,7 @@ function Home({ navigation }) {
       </KeyboardAvoidingView>
 
       {/* Bottom Tab */}
-      <CustomTabBar homeTab={true} navigation={navigation} />
+      {/* <CustomTabBar homeTab={true} navigation={navigation} /> */}
     </View>
   );
 }

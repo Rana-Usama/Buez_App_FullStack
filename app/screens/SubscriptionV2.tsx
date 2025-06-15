@@ -34,8 +34,9 @@ function SubscriptionV2(props) {
       await updateDoc(userRef, {
         isSubscribed: true,
         isFreeTrial: true,
-        freeTrialStartedAt: start,
+        freeTrialStartedAt: serverTimestamp(),
         freeTrialEndAt: end,
+        freeTrialStart : start
       });
       console.log("User subscription status updated in Firestore");
     } catch (error) {
@@ -110,7 +111,7 @@ function SubscriptionV2(props) {
         text1: "14 Day Free Trial!",
         text2: "Your 14 day free trial has been started!",
       });
-      props.navigation.navigate("Home");
+      props.navigation.navigate("TabNavigator");
     } else {
       setModalVisible2(true);
     }
@@ -161,7 +162,7 @@ function SubscriptionV2(props) {
                 freeTrialStartedAt: serverTimestamp(),
               });
               console.log("Free trial started");
-              props.navigation.navigate("Home");
+              props.navigation.navigate("TabNavigator");
             } catch (error) {
               console.error("Failed to start free trial:", error);
             }

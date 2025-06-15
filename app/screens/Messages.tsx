@@ -277,7 +277,7 @@ function Messages({ navigation }) {
       </ScrollView>
 
       {/* Bottom Tab */}
-      <CustomTabBar messagesTab={true} navigation={navigation} />
+      {/* <CustomTabBar messagesTab={true} navigation={navigation} /> */}
     </View>
   );
 }

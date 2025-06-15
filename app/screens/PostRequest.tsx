@@ -402,7 +402,7 @@ function PostRequest({ navigation, route }) {
       </KeyboardAvoidingView>
 
       {/* Bottom Tab */}
-      <CustomTabBar postRequest={true} navigation={navigation} />
+      {/* <CustomTabBar postRequest={true} navigation={navigation} /> */}
     </View>
   );
 }

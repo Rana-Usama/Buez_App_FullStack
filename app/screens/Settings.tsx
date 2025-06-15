@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Platform, Modal, Pressable } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
-import { logout } from "../services/Auth.service";
+import { logout, removeCredentials } from "../services/Auth.service";
 import { deleteCurrentUser } from "../services/Auth.service";
 import { BlurView } from "expo-blur";
 import { getCredentials } from "../services/Auth.service";
-
+import * as SecureStore from "expo-secure-store";
 // components
 import Nav from "../components/common/Nav";
 import CustomTabBar from "../components/common/CustomTabBar";
@@ -24,12 +24,12 @@ function Settings({ navigation }) {
   const profileImgUrl = user?.profileImage || "";
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
-  const [password, setPassword] = useState('')
+  const [password, setPassword] = useState("");
 
   const fetchCredentials = async () => {
     const { email, password } = await getCredentials();
     console.log(email, password);
-    setPassword(password)
+    setPassword(password);
   };
 
   fetchCredentials();
@@ -116,7 +116,7 @@ function Settings({ navigation }) {
       </ScrollView>
 
       {/* Bottom Tab */}
-      <CustomTabBar settingTab={true} navigation={navigation} />
+      {/* <CustomTabBar settingTab={true} navigation={navigation} /> */}
 
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
         <BlurView intensity={100} style={styles.modalBackground}>
@@ -134,6 +134,8 @@ function Settings({ navigation }) {
                 onPress={() => {
                   deleteCurrentUser();
                   setIsModalVisible(false);
+                  removeCredentials();
+                  navigation.navigate("OnBoarding");
                 }}
               />
             </View>
@@ -154,9 +156,11 @@ function Settings({ navigation }) {
                 marginTop={RFPercentage(0)}
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
-                onPress={() => {
-                  logout();
+                onPress={async () => {
+                  removeCredentials();
                   setIsModalVisible2(false);
+                  await SecureStore.setItemAsync("loggedOut", "true");
+                  navigation.navigate("Login");
                 }}
               />
             </View>

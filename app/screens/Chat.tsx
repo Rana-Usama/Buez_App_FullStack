@@ -254,7 +254,7 @@ const Chat = ({ navigation, route }) => {
         <View style={{ marginLeft: RFPercentage(2.5) }}>
           {receiver?.profileImage ? (
             <>
-              <Image source={{ uri: receiver?.profileImage }} resizeMode="contain" style={styles.profile} />
+              <Image source={{ uri: receiver?.profileImage }} resizeMode="cover" style={styles.profile} />
             </>
           ) : (
             <>

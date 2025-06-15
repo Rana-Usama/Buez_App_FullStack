@@ -5,6 +5,7 @@ import { getAuth, GoogleAuthProvider, signInWithCredential } from "firebase/auth
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { getDoc, doc } from "firebase/firestore";
+import * as SecureStore from "expo-secure-store";
 
 // components
 import Screen from "../components/Screen";
@@ -25,6 +26,7 @@ import { Formik } from "formik";
 import Toast from "react-native-toast-message";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
 import { saveCredentials } from "../services/Auth.service";
+import { useNavigation } from "@react-navigation/native";
 
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
@@ -38,7 +40,7 @@ function Signup(props: any) {
       .oneOf([yup.ref("password")], "Passwords must match")
       .required("Passwords must match"),
   });
-
+  const navigation = useNavigation();
   const [indicator, showIndicator] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
 
@@ -119,6 +121,7 @@ function Signup(props: any) {
       const email = values.email;
       const password = values.password;
       const user = await createAccountWithEmail(email, password);
+       await SecureStore.setItemAsync("loggedOut", "false");
       if (user) {
         const userData = {
           userName: userName,
@@ -135,6 +138,7 @@ function Signup(props: any) {
         text1: "Sign Up",
         text2: "User registered Successfully!",
       });
+      navigation.navigate("FreeTrial");
     } catch (error) {
       Toast.show({
         type: "error",

@@ -279,7 +279,7 @@ function MyRequests({ navigation }) {
       </ScrollView>
 
       {/* Bottom Tab */}
-      <CustomTabBar myRequests={true} navigation={navigation} />
+      {/* <CustomTabBar myRequests={true} navigation={navigation} /> */}
 
       {/* Modal */}
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>

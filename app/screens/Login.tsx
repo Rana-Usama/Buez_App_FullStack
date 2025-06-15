@@ -6,6 +6,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { getAuth, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { getDoc, doc } from "firebase/firestore";
+import * as SecureStore from "expo-secure-store";
 
 // auth
 // eslint-disable-next-line import/no-unresolved
@@ -55,7 +56,7 @@ function Login(props: any) {
   });
   const [loading, setLoading] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
-
+  const navigation = useNavigation();
   useEffect(() => {
     async function getToken() {
       const token = await registerForPushNotificationsAsync();
@@ -134,7 +135,7 @@ function Login(props: any) {
       const email = values.email;
       const password = values.password;
       const user = await signInWithEmail(email, password);
-
+      await SecureStore.setItemAsync("loggedOut", "false");
       if (remember) {
         await saveCredentials(email, password);
       }
@@ -148,7 +149,7 @@ function Login(props: any) {
         text1: "Sign in Successfully!",
         text2: "Welcome back!",
       });
-      // console.log(user);
+      navigation.navigate("TabNavigator");
     } catch (error) {
       Toast.show({
         type: "error",
