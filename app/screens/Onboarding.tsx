@@ -25,33 +25,33 @@ function Onboarding(props) {
   const onboardingData = [
     {
       image: Icons.onBoarding1,
-      title: `${t("onBoarding1Title")}`,
-      description: `${t("onBoarding1Desc")}`,
+      title: `${t("onBoarding.onBoarding1.Title")}`,
+      description: `${t("onBoarding.onBoarding1.Desc")}`,
       lottie: require("../../assets/lottie/firstv2.json"),
     },
 
     {
       image: Icons.onBoarding1,
-      title: `${t("onBoarding2Title")}`,
-      description: `${t("onBoarding2Desc")}`,
+      title: `${t("onBoarding.onBoarding2.Title")}`,
+      description: `${t("onBoarding.onBoarding2.Desc")}`,
       lottie: require("../../assets/lottie/OnBoarding1.json"),
     },
     {
       image: Icons.onBoarding1,
-      title: `${t("onBoarding3Title")}`,
-      description: `${t("onBoarding3Desc")}`,
+      title: `${t("onBoarding.onBoarding3.Title")}`,
+      description: `${t("onBoarding.onBoarding3.Desc")}`,
       lottie: require("../../assets/lottie/chatBoth.json"),
     },
     {
       image: Icons.onBoarding2,
-      title: `${t("onBoarding4Title")}`,
-      description: `${t("onBoarding4Desc")}`,
+      title: `${t("onBoarding.onBoarding4.Title")}`,
+      description: `${t("onBoarding.onBoarding4.Desc")}`,
       lottie: require("../../assets/lottie/gift2.json"),
     },
     {
       image: Icons.onBoarding3,
-      title: `${t("onBoarding5Title")}`,
-      description: `${t("onBoarding5Desc")}`,
+      title: `${t("onBoarding.onBoarding5.Title")}`,
+      description: `${t("onBoarding.onBoarding5.Desc")}`,
       lottie: require("../../assets/lottie/pay2.json"),
     },
   ];
@@ -126,9 +126,9 @@ function Onboarding(props) {
 
   const renderNextButtonText = () => {
     if (activeIndex === onboardingData.length - 1) {
-      return "Start";
+      return `${t("buttons.start")}`;
     } else {
-      return "Next";
+      return `${t("buttons.next")}`;
     }
   };
 
@@ -167,7 +167,7 @@ function Onboarding(props) {
       {/* Buttons */}
       <View style={styles.buttonWrapper}>
         <TouchableOpacity activeOpacity={0.8} style={styles.skip} onPress={() => props.navigation.navigate("Login")}>
-          <Text style={styles.skipText}>Skip</Text>
+          <Text style={styles.skipText}>{`${t("buttons.skip")}`}</Text>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} onPress={handleNext} style={styles.nextContainer}>
           <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={styles.gradient}>

@@ -14,8 +14,10 @@ import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
 import { getFormatedDate } from "../services/Shared.service";
 import { Icons } from "../config/theme";
+import { useTranslation } from "react-i18next";
 
 function Messages({ navigation }) {
+  const { t } = useTranslation();
   const [activeFilter, setActiveFilter] = useState("All");
   const [chats, setChats] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
@@ -28,7 +30,7 @@ function Messages({ navigation }) {
 
   console.log(userData);
 
-  const filters = ["All", "Unread"];
+  const filters = [`${t("messages.txt2")}`, `${t("messages.txt3")}`];
 
   useEffect(() => {
     fetchInitialChats();
@@ -154,7 +156,7 @@ function Messages({ navigation }) {
     console.log(item.user);
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user, })}
+        onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
         activeOpacity={0.8}
         style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
       >
@@ -179,13 +181,11 @@ function Messages({ navigation }) {
 
   // Add filtered chats computation
   const filteredChats = useMemo(() => {
-    if (activeFilter === "Unread") {
+    if (activeFilter === `${t("messages.txt3")}`) {
       return chats.filter((chat) => chat?.unread && chat.senderId !== userId);
     }
     return chats;
   }, [chats, activeFilter, userId]);
-
-  console.log("filteredChats..........", filteredChats);
 
   return (
     <View style={styles.screen}>
@@ -195,7 +195,7 @@ function Messages({ navigation }) {
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refreshChats} colors={[Colors.primary]} tintColor={Colors.primary} />}
       >
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title="Messages" />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title={`${t("messages.txt1")}`} />
 
         {/* Filter Buttons */}
         <View style={styles.filterContainer}>
@@ -207,7 +207,7 @@ function Messages({ navigation }) {
         {/* Messages List */}
         {loading ? (
           <>
-            <ActivityIndicator size="large" color={Colors.primary} style={{marginTop:RFPercentage(10)}} />
+            <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: RFPercentage(10) }} />
           </>
         ) : (
           <>
@@ -225,7 +225,7 @@ function Messages({ navigation }) {
                   {!loading && filteredChats?.length === 0 && (
                     <View style={{ justifyContent: "center", alignItems: "center" }}>
                       <Image style={styles.noMessageIcon} source={Icons.noMessage} />
-                      <Text style={styles.emptyText}>{activeFilter === "Unread" ? "No Unread Messages" : "No Messages Yet"}</Text>
+                      <Text style={styles.emptyText}>{activeFilter === `${t("messages.txt3")}` ? `${t("messages.txt4")}` : `${t("messages.txt5")}`}</Text>
                     </View>
                   )}
                 </View>

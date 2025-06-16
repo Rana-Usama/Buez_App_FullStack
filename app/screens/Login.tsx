@@ -34,6 +34,7 @@ import { Icons } from "../config/theme";
 import * as yup from "yup";
 import { Formik } from "formik";
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 // WebBrowser.maybeCompleteAuthSession();
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
@@ -41,9 +42,13 @@ const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleus
 function Login({ navigation }: any) {
   const [indicator, showIndicator] = useState(false);
   const [remember, setRemember] = useState(false);
+  const { t } = useTranslation();
   let validationSchema = yup.object({
-    email: yup.string().email("Invalid email").required("Email is required"),
-    password: yup.string().required("Password is required"),
+    email: yup
+      .string()
+      .email(`${t("validations.inValid")}`)
+      .required(`${t("validations.emailReq")}`),
+    password: yup.string().required(`${t("validations.passwordReq")}`),
   });
   const [loading, setLoading] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
@@ -88,16 +93,15 @@ function Login({ navigation }: any) {
         await addUser(user?.uid, userData);
         Toast.show({
           type: "success",
-          text1: "Welcome back!",
-          text2: "Signed In successfully!",
+          text1: `${t("toast.login.one")}`,
+          text2: `${t("toast.login.two")}`,
         });
       }
     } catch (error) {
-      console.log("Google Sign-In Error:", error?.code ?? "Unknown Code", error?.message ?? error);
       Toast.show({
         type: "error",
-        text1: "Sign-In Failed",
-        text2: "Something went wrong. Please try again.",
+        text1: `${t("toast.login.three")}`,
+        text2: `${t("toast.login.four")}`,
       });
     } finally {
       setLoading(false);
@@ -131,15 +135,15 @@ function Login({ navigation }: any) {
       }
       Toast.show({
         type: "success",
-        text1: "Welcome back!",
-        text2: "Signed In successfully!",
+        text1: `${t("toast.login.one")}`,
+        text2: `${t("toast.login.two")}`,
       });
       navigation.navigate("TabNavigator");
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Sign-In Failed",
-        text2: "Invalid Credentials",
+        text1: `${t("toast.login.three")}`,
+        text2: `${t("toast.login.five")}`,
       });
     }
     showIndicator(false);
@@ -153,7 +157,7 @@ function Login({ navigation }: any) {
     <Screen style={styles.screen}>
       <Image style={styles.logo} source={Icons.logo} />
       <Image style={styles.crown} source={Icons.crown} />
-      <Text style={styles.welcomeText}>Welcome Back</Text>
+      <Text style={styles.welcomeText}>{`${t("login.txt1")}`}</Text>
 
       <Formik
         initialValues={{
@@ -168,7 +172,7 @@ function Login({ navigation }: any) {
             <View style={styles.inputContainer}>
               {/* Email */}
               <InputFieldNew
-                placeholder="Email"
+                placeholder={`${t("common.email")}`}
                 onChangeText={handleChange("email")}
                 handleBlur={handleBlur("email")}
                 value={values.email}
@@ -186,7 +190,7 @@ function Login({ navigation }: any) {
 
               {/* Password */}
               <InputFieldNew
-                placeholder="Password"
+                placeholder={`${t("common.password")}`}
                 password={true}
                 onChangeText={handleChange("password")}
                 handleBlur={handleBlur("password")}
@@ -209,20 +213,20 @@ function Login({ navigation }: any) {
                 <View style={styles.rememberBox}>
                   <View style={[styles.rememberIndicator, { backgroundColor: remember ? Colors.primary : null }]} />
                 </View>
-                <Text style={styles.rememberText}>Remember me?</Text>
+                <Text style={styles.rememberText}>{`${t("login.txt2")}`}</Text>
               </View>
               <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
-                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                <Text style={styles.forgotPasswordText}>{`${t("login.txt3")}`}</Text>
               </TouchableOpacity>
             </TouchableOpacity>
 
-            <MyAppButton title={"Login"} loading={indicator} marginTop={RFPercentage(7)} onPress={() => handleSubmit()} disabled={indicator} />
+            <MyAppButton title={`${t("buttons.login")}`} loading={indicator} marginTop={RFPercentage(7)} onPress={() => handleSubmit()} disabled={indicator} />
           </>
         )}
       </Formik>
       <View style={styles.socialLoginContainer}>
         <View style={styles.divider} />
-        <Text style={styles.orText}>or login with</Text>
+        <Text style={styles.orText}>{`${t("login.txt4")}`}</Text>
         <View style={styles.divider} />
       </View>
 
@@ -248,9 +252,9 @@ function Login({ navigation }: any) {
       </View>
 
       <View style={styles.signupContainer}>
-        <Text style={styles.signupText}>Don't have an account?</Text>
+        <Text style={styles.signupText}>{`${t("login.txt5")}`}</Text>
         <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={styles.signupLink}>Signup</Text>
+          <Text style={styles.signupLink}>{`${t("buttons.signup")}`}</Text>
         </TouchableOpacity>
       </View>
     </Screen>

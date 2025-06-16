@@ -16,10 +16,16 @@ import Colors from "../config/Colors";
 import * as yup from "yup";
 import { Formik } from "formik";
 import Toast from "react-native-toast-message";
+import { useTranslation } from "react-i18next";
 
 function ForgotPassword(props: any) {
+  const { t } = useTranslation();
+
   let validationSchema = yup.object({
-    email: yup.string().email("Invalid email").required("Email is required"),
+    email: yup
+      .string()
+      .email(`${t("validations.inValid")}`)
+      .required(`${t("validations.emailReq")}`),
   });
 
   const [loader, setLoader] = useState(false);
@@ -28,18 +34,18 @@ function ForgotPassword(props: any) {
     setLoader(true);
     try {
       await sendPasswordResetEmail(FIREBASE_AUTH, values.email);
-      props.navigation.navigate('Login')
+      props.navigation.navigate("Login");
       Toast.show({
         type: "success",
-        text1: "Reset Link Sent",
-        text2: "Check your email to reset your password.",
+        text1: `${t("toast.forgetPassword.one")}`,
+        text2: `${t("toast.forgetPassword.two")}`,
       });
     } catch (error) {
       console.log("Error sending reset link:", error.message);
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: "Failed to send reset link.",
+        text1: `${t("toast.forgetPassword.three")}`,
+        text2: `${t("toast.forgetPassword.four")}`,
       });
     } finally {
       setLoader(false);
@@ -52,7 +58,7 @@ function ForgotPassword(props: any) {
         <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={{ position: "absolute", left: 0 }}>
           <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.5) }} color={Colors.heading} />
         </TouchableOpacity>
-        <Text style={styles.heading}>Reset Password?</Text>
+        <Text style={styles.heading}>{`${t("forgetPassword.txt1")}`}</Text>
       </View>
 
       {/* Input field */}
@@ -67,7 +73,7 @@ function ForgotPassword(props: any) {
           <>
             <View style={styles.fieldWrapper}>
               <InputFieldNew
-                placeholder="Enter Email"
+                placeholder={`${t("validations.email")}`}
                 onChangeText={handleChange("email")}
                 handleBlur={handleBlur("email")}
                 value={values.email}
@@ -85,7 +91,7 @@ function ForgotPassword(props: any) {
             </View>
 
             {/*Login Button */}
-            <MyAppButton title={"Send OTP"} marginTop={RFPercentage(5.2)} onPress={() => handleSubmit()} loading={loader} disabled={loader} />
+            <MyAppButton title={`${t("forgetPassword.txt2")}`} marginTop={RFPercentage(5.2)} onPress={() => handleSubmit()} loading={loader} disabled={loader} />
           </>
         )}
       </Formik>

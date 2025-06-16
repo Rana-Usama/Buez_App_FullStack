@@ -17,12 +17,13 @@ import SubscriptionListener from "../components/SubscriptionListener";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import { saveSubscription } from "../services/User.service";
+import { useTranslation } from "react-i18next";
 
 function SubscriptionV2(props) {
+  const { t } = useTranslation();
   const { userData } = useUser();
   const userId = getAuth()?.currentUser?.uid;
   const firestore = getFirestore();
-  const [indicator, showIndicator] = useState(false);
   const { initPaymentSheet, presentPaymentSheet, confirmPayment } = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -84,8 +85,8 @@ function SubscriptionV2(props) {
     if (paymentError) {
       Toast.show({
         type: "info",
-        text1: "Subscription Incomplete",
-        text2: "Your card could not be added. Please try again.",
+        text1: `${t("toast.subscriptionV2.one")}`,
+        text2: `${t("toast.subscriptionV2.two")}`,
       });
       setLoading(false);
       return;
@@ -109,8 +110,8 @@ function SubscriptionV2(props) {
       await saveSubscription(userId, result?.subscriptionId);
       Toast.show({
         type: "success",
-        text1: "Free Trial Activated",
-        text2: "Your 14-day free trial has started successfully.",
+        text1: `${t("toast.subscriptionV2.three")}`,
+        text2: `${t("toast.subscriptionV2.four")}`,
       });
       props.navigation.navigate("TabNavigator");
     } else {
@@ -125,14 +126,14 @@ function SubscriptionV2(props) {
 
       <View style={styles.premiumInfo}>
         <Image style={styles.crownIcon} source={Icons.crown} />
-        <Text style={styles.premiumText}>Buy our premium to access full services</Text>
+        <Text style={styles.premiumText}>{`${t("subscriptionV2.txt1")}`}</Text>
       </View>
 
       <View style={styles.subscriptionContainer}>
         <View style={styles.priceContainer}>
           <Image style={styles.starIconLeft} source={Icons.stars} />
           <Text style={styles.priceText}>
-            $12<Text style={styles.priceSubText}>.99/month</Text>
+            $12<Text style={styles.priceSubText}>{`${t("subscriptionV2.txt2")}`}</Text>
           </Text>
         </View>
 
@@ -140,10 +141,10 @@ function SubscriptionV2(props) {
 
         {/* Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.detailText}>⊙ Post daily chore requests</Text>
-          <Text style={styles.detailText}>⊙ See requests daily</Text>
-          <Text style={styles.detailText}>⊙ Earn money by doing daily chores</Text>
-          <Text style={styles.detailText}>⊙ Cancel anytime</Text>
+          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt3")}`}</Text>
+          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt4")}`}</Text>
+          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt5")}`}</Text>
+          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt6")}`}</Text>
         </View>
 
         <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
@@ -152,7 +153,7 @@ function SubscriptionV2(props) {
       </View>
       {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "80%" }}>
-        <MyAppButton title={"Add Card"} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(18)} loading={loading} />
+        <MyAppButton title={`${t("subscriptionV2.txt7")}`} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(18)} loading={loading} />
         <TouchableOpacity
           onPress={async () => {
             if (!userId) return;
@@ -167,7 +168,7 @@ function SubscriptionV2(props) {
           }}
           style={styles.skip}
         >
-          <Text style={{ color: Colors.primary, fontFamily: "Poppins_500Medium" }}>Skip</Text>
+          <Text style={{ color: Colors.primary, fontFamily: "Poppins_500Medium" }}>{`${t("buttons.skip")}`}</Text>
         </TouchableOpacity>
       </View>
     </Screen>

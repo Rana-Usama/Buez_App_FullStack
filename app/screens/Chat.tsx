@@ -10,7 +10,9 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import Colors from "../config/Colors";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 const Chat = ({ navigation, route }) => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
   const { chatId, senderId: currentUserId, senderName, receiver } = route.params;
@@ -282,14 +284,14 @@ const Chat = ({ navigation, route }) => {
           // bottomOffset={RFPercentage(2)} // Adjusted bottomOffset
           renderLoadEarlier={(props) => (
             <TouchableOpacity style={styles.loadMessages} onPress={props.onLoadEarlier}>
-              <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>Load earlier messages</Text>
+              <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>{`${t("chat.txt1")}`}</Text>
             </TouchableOpacity>
           )}
           renderInputToolbar={(props) => (
             <InputToolbar
               {...props}
               containerStyle={styles.toolbar}
-              renderComposer={() => <TextInput style={styles.customTextInput} placeholder="Type a message" placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
+              renderComposer={() => <TextInput style={styles.customTextInput} placeholder={`${t("chat.txt2")}`} placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
               renderSend={() => (
                 <TouchableOpacity
                   style={styles.sendButton}

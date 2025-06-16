@@ -17,6 +17,7 @@ import { getFormatedDate } from "../services/Shared.service";
 import { usePostContext } from "../contexts/PostContext";
 import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
+import { useTranslation } from "react-i18next";
 
 type InputFieldType = {
   placeholder: string;
@@ -27,16 +28,18 @@ type InputFieldType = {
 const { width } = Dimensions.get("window");
 
 function Home({ navigation }) {
+  const {t} = useTranslation()
+
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
   const [inputField, SetInputField] = useState<InputFieldType[]>([
     {
-      placeholder: "Search",
+      placeholder: `${t("home.txt2")}`,
       value: "",
     },
   ]);
 
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState(`${t("home.txt4")}`);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [allTasks, setAllTasks] = useState([]);
@@ -124,7 +127,7 @@ function Home({ navigation }) {
   const getDisplayTasks = () => {
     let list = allTasks;
 
-    if (activeFilter !== "All") {
+    if (activeFilter !== `${t("home.txt4")}`) {
       list = list.filter((task) => task.taskType?.toLowerCase() === activeFilter.toLowerCase());
     }
 
@@ -177,7 +180,7 @@ function Home({ navigation }) {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
         >
           {/* Nav */}
-          <Nav crown={true} marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Home" />
+          <Nav crown={true} marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("home.txt1")}`} />
 
           <View style={styles.inputFieldContainer}>
             {inputField?.map((item, i) => (
@@ -203,18 +206,18 @@ function Home({ navigation }) {
           </View>
 
           <View style={styles.categoriesContainer}>
-            <Text style={styles.categoriesText}>Categories</Text>
+            <Text style={styles.categoriesText}>{`${t("home.txt3")}`}</Text>
           </View>
 
           {/* Filter Buttons */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterButtonsContainer}>
-            {["All", "Cleaning", "Moving", "Gardening", "Others"].map((title, index) => (
+            {[`${t("home.txt4")}`, `${t("home.txt5")}`, `${t("home.txt6")}`, `${t("home.txt7")}`, `${t("home.txt8")}`].map((title, index) => (
               <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
             ))}
           </ScrollView>
 
           <View style={[styles.categoriesContainer, styles.recentRequestsContainer]}>
-            <Text style={styles.categoriesText}>Recent Requests</Text>
+            <Text style={styles.categoriesText}>{`${t("home.txt9")}`}</Text>
           </View>
 
           {/* Carts */}
@@ -280,7 +283,7 @@ function Home({ navigation }) {
                         <View style={styles.compensationWrapper}>
                           <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
                           <Text style={styles.compensationText}>
-                            Compensation:{" "}
+                            {`${t("home.txt10")}`}:{" "}
                             <Text style={styles.compensationAmount}>
                               {item.compensationType === "Monitarely" ? `$${item.monitarily}` : item.otherCompensation?.substr(0, 20) + (item.otherCompensation?.length > 20 ? "..." : "")}
                             </Text>
@@ -294,7 +297,7 @@ function Home({ navigation }) {
             </>
           )}
 
-          {!loading && displayTasks?.length === 0 && <NotFound title="No Record Found!" />}
+          {!loading && displayTasks?.length === 0 && <NotFound title={`${t("home.txt11")}`} />}
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </KeyboardAvoidingView>

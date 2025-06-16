@@ -14,10 +14,12 @@ import { getDateTime } from "../services/Shared.service";
 import { createNewChat } from "../services/Chat.service";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
+import { useTranslation } from "react-i18next";
 
 const screenWidth = Dimensions.get("window").width;
 
 function OfferDetail({ navigation, route }) {
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
@@ -35,7 +37,7 @@ function OfferDetail({ navigation, route }) {
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Details" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("details.txt1")}`} />
 
         {/* Image Carousel */}
         <View style={styles.carousal}>
@@ -64,7 +66,7 @@ function OfferDetail({ navigation, route }) {
             {isExpanded || postRequest.description.length <= 120 ? postRequest.description : postRequest.description.slice(0, 120) + "... "}
             {postRequest.description.length > 120 && (
               <Text onPress={() => setIsExpanded(!isExpanded)} style={styles.readMoreText}>
-                {isExpanded ? "Read Less" : "Read More"}
+                {isExpanded ? `${t("details.txt2")}` : `${t("details.txt3")}`}
               </Text>
             )}
           </Text>
@@ -72,18 +74,18 @@ function OfferDetail({ navigation, route }) {
 
         <View style={styles.infoContainer}>
           <Image style={styles.icon} source={Icons.location} />
-          <Text style={styles.infoText}>Location</Text>
+          <Text style={styles.infoText}>{`${t("details.txt4")}`}</Text>
           <Text style={styles.infoDetail}>{postRequest.address}</Text>
         </View>
 
         <View style={styles.infoContainer}>
           <Image style={styles.icon} source={Icons.cal} />
-          <Text style={styles.infoText}>Date/Time</Text>
+          <Text style={styles.infoText}>{`${t("details.txt5")}`}</Text>
           <Text style={styles.infoDetail}>{getDateTime(postRequest.createdAt)}</Text>
         </View>
 
         <View style={styles.compensationContainer}>
-          <Text style={styles.compensationTitle}>Compensation:</Text>
+          <Text style={styles.compensationTitle}>{`${t("details.txt6")}`}:</Text>
           <Text style={styles.description}>{postRequest.compensationType === "Monitarely" ? `${postRequest.monitarily}$` : postRequest.otherCompensation}</Text>
         </View>
       </ScrollView>
@@ -91,10 +93,10 @@ function OfferDetail({ navigation, route }) {
       {/* Buttons */}
       <View style={styles.buttonWrapper}>
         <TouchableOpacity style={styles.chatButton} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
-          <Text style={styles.text}>Message Requester</Text>
+          <Text style={styles.text}>{`${t("details.txt7")}`}</Text>
         </TouchableOpacity>
 
-        <MyAppButton title={"My Requests"} marginTop={RFPercentage(0)} onPress={() => navigation.navigate("MyRequests")} />
+        <MyAppButton title={`${t("details.txt8")}`} marginTop={RFPercentage(0)} onPress={() => navigation.navigate("MyRequests")} />
       </View>
 
       {/* Bottom Tab */}
@@ -113,7 +115,7 @@ const styles = StyleSheet.create({
   readMoreText: {
     color: Colors.primary,
     fontSize: RFPercentage(1.7),
-    fontFamily:'Poppins_500Medium'
+    fontFamily: "Poppins_500Medium",
   },
 
   scrollView: {

@@ -17,8 +17,10 @@ import SubscriptionListener from "../components/SubscriptionListener";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import { saveSubscription } from "../services/User.service";
+import { useTranslation } from "react-i18next";
 
 function Subscription(props) {
+  const { t } = useTranslation();
   const { userData } = useUser();
   const userId = getAuth()?.currentUser?.uid;
   const firestore = getFirestore();
@@ -83,8 +85,8 @@ function Subscription(props) {
     if (paymentError) {
       Toast.show({
         type: "info",
-        text1: "Subscription Incomplete",
-        text2: "Your subscription could not be completed. Please try again.",
+        text1: `${t("toast.subscriptionV2.one")}`,
+        text2: `${t("toast.subscriptionV2.two")}`,
       });
       setLoading(false);
       return;
@@ -107,8 +109,8 @@ function Subscription(props) {
       await saveSubscription(userId, result?.subscriptionId);
       Toast.show({
         type: "success",
-        text1: "Subscription Successful!",
-        text2: "Monthly plan activated successfully.",
+        text1: `${t("toast.subscription.one")}`,
+        text2: `${t("toast.subscription.two")}`,
       });
       props.navigation.navigate("TabNavigator");
     } else {
@@ -121,17 +123,17 @@ function Subscription(props) {
       <Image style={styles.logo} source={Icons.logo} />
       <Image style={styles.vector} source={Icons.vec} />
 
-      <Text style={{ top: RFPercentage(4), color: Colors.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(2) }}>Your 14-day free trial has ended.</Text>
+      <Text style={{ top: RFPercentage(4), color: Colors.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(2) }}>{`${t("subscription.txt1")}`}</Text>
       <View style={styles.premiumInfo}>
         <Image style={styles.crownIcon} source={Icons.crown} />
-        <Text style={styles.premiumText}>Upgrade to Premium to unlock full access.</Text>
+        <Text style={styles.premiumText}>{`${t("subscription.txt2")}`}</Text>
       </View>
 
       <View style={styles.subscriptionContainer}>
         <View style={styles.priceContainer}>
           <Image style={styles.starIconLeft} source={Icons.stars} />
           <Text style={styles.priceText}>
-            $12<Text style={styles.priceSubText}>.99/month</Text>
+            $12<Text style={styles.priceSubText}>{`${t("subscriptionV2.txt2")}`}</Text>
           </Text>
         </View>
 
@@ -139,10 +141,10 @@ function Subscription(props) {
 
         {/* Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.detailText}>⊙ Post daily chore requests</Text>
-          <Text style={styles.detailText}>⊙ See requests daily</Text>
-          <Text style={styles.detailText}>⊙ Earn money by doing daily chores</Text>
-          <Text style={styles.detailText}>⊙ Cancel anytime</Text>
+          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt3")}`}</Text>
+          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt4")}`}</Text>
+          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt5")}`}</Text>
+          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt6")}`}</Text>
         </View>
 
         <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
@@ -151,7 +153,7 @@ function Subscription(props) {
       </View>
       {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
       <View style={{ alignItems: "center", justifyContent: "center", width: "80%" }}>
-        <MyAppButton title={"Checkout"} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(20)} loading={loading} />
+        <MyAppButton title={`${t("subscription.txt3")}`} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(20)} loading={loading} />
       </View>
     </Screen>
   );

@@ -27,18 +27,27 @@ import Toast from "react-native-toast-message";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
 import { saveCredentials } from "../services/Auth.service";
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
 function Signup({ navigation }: any) {
+  const { t } = useTranslation();
+
   let validationSchema = yup.object({
-    name: yup.string().required("Username is required"),
-    email: yup.string().email("Invalid email").required("Email is required"),
-    password: yup.string().min(6, "Password must be at least 6 characters long").required("Password is required"),
+    name: yup.string().required(`${t("validations.userReq")}`),
+    email: yup
+      .string()
+      .email(`${t("validations.inValid")}`)
+      .required(`${t("validations.emailReq")}`),
+    password: yup
+      .string()
+      .min(6, `${t("validations.passwordLen")}`)
+      .required(`${t("validations.passwordReq")}`),
     confirmPassword: yup
       .string()
-      .oneOf([yup.ref("password")], "Passwords must match")
-      .required("Passwords must match"),
+      .oneOf([yup.ref("password")], `${t("validations.passwordMatch")}`)
+      .required(`${t("validations.passwordMatch")}`),
   });
   const [indicator, showIndicator] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
@@ -58,8 +67,6 @@ function Signup({ navigation }: any) {
       webClientId: webClientId,
     });
   }, []);
-
-
 
   const onGoogleButtonPress = async () => {
     try {
@@ -90,14 +97,14 @@ function Signup({ navigation }: any) {
         await addUser(user?.uid, userData);
         Toast.show({
           type: "success",
-          text1: "Sign Up",
-          text2: "User registered Successfully!",
+          text1: `${t("toast.signup.one")}`,
+          text2: `${t("toast.signup.two")}`,
         });
       } else {
         Toast.show({
           type: "success",
-          text1: "Sign Up",
-          text2: "Signed In Successfully!",
+          text1: `${t("toast.signup.one")}`,
+          text2: `${t("toast.login.two")}`,
         });
       }
     } catch (error) {
@@ -136,27 +143,25 @@ function Signup({ navigation }: any) {
       }
       Toast.show({
         type: "success",
-        text1: "Sign Up",
-        text2: "User registered Successfully!",
+        text1: `${t("toast.signup.one")}`,
+        text2: `${t("toast.signup.two")}`,
       });
       navigation.navigate("FreeTrial");
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Sign Up Error",
-        text2: "Credentials already in use",
+        text1: `${t("toast.signup.three")}`,
+        text2: `${t("toast.signup.four")}`,
       });
     }
     showIndicator(false);
   };
 
-
-
   return (
     <Screen style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <Image style={styles.logo} source={Icons.logo} />
-        <Text style={styles.welcomeText}>Welcome!</Text>
+        <Text style={styles.welcomeText}>{`${t("signup.txt1")}`}</Text>
 
         <Formik
           initialValues={{
@@ -173,7 +178,7 @@ function Signup({ navigation }: any) {
               <View style={styles.inputContainer}>
                 {/* Name */}
                 <InputFieldNew
-                  placeholder="Name"
+                  placeholder={`${t("validations.name")}`}
                   onChangeText={handleChange("name")}
                   handleBlur={handleBlur("name")}
                   value={values.name}
@@ -191,7 +196,7 @@ function Signup({ navigation }: any) {
 
                 {/* Email */}
                 <InputFieldNew
-                  placeholder="Email"
+                  placeholder={`${t("validations.email")}`}
                   onChangeText={handleChange("email")}
                   handleBlur={handleBlur("email")}
                   value={values.email}
@@ -209,7 +214,7 @@ function Signup({ navigation }: any) {
 
                 {/* Password */}
                 <InputFieldNew
-                  placeholder="Password"
+                  placeholder={`${t("validations.password")}`}
                   password={true}
                   onChangeText={handleChange("password")}
                   handleBlur={handleBlur("password")}
@@ -228,7 +233,7 @@ function Signup({ navigation }: any) {
 
                 {/* Confirm Password */}
                 <InputFieldNew
-                  placeholder="Confirm Password"
+                  placeholder={`${t("validations.confirm")}`}
                   password={true}
                   onChangeText={handleChange("confirmPassword")}
                   handleBlur={handleBlur("confirmPassword")}
@@ -246,7 +251,7 @@ function Signup({ navigation }: any) {
                 )}
               </View>
 
-              <MyAppButton title="Signup" loading={indicator} onPress={() => handleSubmit()} marginTop={RFPercentage(4.5)} disabled={indicator} />
+              <MyAppButton title={`${t("buttons.signup")}`} loading={indicator} onPress={() => handleSubmit()} marginTop={RFPercentage(4.5)} disabled={indicator} />
             </>
           )}
         </Formik>
@@ -254,7 +259,7 @@ function Signup({ navigation }: any) {
         {/* Social Media Login */}
         <View style={styles.socialMediaContainer}>
           <View style={styles.divider} />
-          <Text style={styles.socialMediaText}>or signup with</Text>
+          <Text style={styles.socialMediaText}>{`${t("signup.txt2")}`}</Text>
           <View style={styles.divider} />
         </View>
 
@@ -273,16 +278,15 @@ function Signup({ navigation }: any) {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account?</Text>
+          <Text style={styles.footerText}>{`${t("signup.txt3")}`}</Text>
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.loginText}>Login</Text>
+            <Text style={styles.loginText}>{`${t("buttons.login")}`}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </Screen>
   );
 }
-
 
 const styles = StyleSheet.create({
   screen: {

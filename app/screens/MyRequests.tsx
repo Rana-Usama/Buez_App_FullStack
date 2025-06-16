@@ -33,10 +33,12 @@ import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 import Toast from "react-native-toast-message";
+import { useTranslation } from "react-i18next";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 function MyRequests({ navigation }) {
+  const {t} = useTranslation()
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
   const [activeFilter, setActiveFilter] = useState("Active");
@@ -115,18 +117,18 @@ function MyRequests({ navigation }) {
         newRecords.splice(i, 1);
         return newRecords;
       });
-      const action = status === REQUEST_STATUS.Completed ? "mark as completed" : "cancelled";
+      const action = status === REQUEST_STATUS.Completed ? `${t("toast.myRequests.three")}` : `${t("toast.myRequests.four")}`;
       Toast.show({
         type: "success",
-        text1: `Request Status`,
-        text2: `Request ${action}`,
+        text1: `${t("toast.myRequests.one")}`,
+        text2: `${t("toast.myRequests.two")} ${action}`,
       });
     } catch (e) {
       console.log(e);
       Toast.show({
         type: "error",
-        text1: "Something went wrong!",
-        text2: "Unable to update request status.",
+        text1: `${t("toast.myRequests.five")}`,
+        text2: `${t("toast.myRequests.six")}`,
       });
     }
   };
@@ -173,11 +175,11 @@ function MyRequests({ navigation }) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
       >
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title="My Requests" />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title={`${t("myRequests.txt1")}`} />
 
         {/* Filter Buttons */}
         <View style={styles.filterContainer}>
-          {["Active", "Completed"].map((title, index) => (
+          {[`${t("myRequests.txt2")}`, `${t("myRequests.txt3")}`].map((title, index) => (
             <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
           ))}
         </View>
@@ -231,7 +233,7 @@ function MyRequests({ navigation }) {
               </TouchableOpacity>
 
               <Text style={styles.userName}>{cart.user.userName}</Text>
-              <Text style={styles.postDate}>Posted on: {getFormatedDate(cart?.createdAt)}</Text>
+              <Text style={styles.postDate}>{`${t("myRequests.txt4")}`} {getFormatedDate(cart?.createdAt)}</Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
@@ -240,7 +242,7 @@ function MyRequests({ navigation }) {
 
             <View style={styles.taskInfoContainer}>
               <Text style={{ fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(1) }}>
-                Compensation:{" "}
+                {`${t("home.txt10")}`}:{" "}
                 <Text style={styles.compensationAmount}>
                   {cart.compensationType === "Monitarely" ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
@@ -250,7 +252,7 @@ function MyRequests({ navigation }) {
             {cart?.status === REQUEST_STATUS.Active && (
               <View style={{ width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) }}>
                 <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
-                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.7)}}>Mark as Done</Text>
+                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.7)}}>{`${t("myRequests.txt5")}`}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -260,7 +262,7 @@ function MyRequests({ navigation }) {
                   }}
                   style={styles.cancel}
                 >
-                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.8)}}>Cancel</Text>
+                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.8)}}>{`${t("myRequests.txt6")}`}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -274,7 +276,7 @@ function MyRequests({ navigation }) {
           </View>
         )}
 
-        {!loading && taskRecords?.length === 0 && <NotFound title="No Record Found!" />}
+        {!loading && taskRecords?.length === 0 && <NotFound title={`${t("home.txt11")}`} />}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -286,13 +288,13 @@ function MyRequests({ navigation }) {
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
         <BlurView intensity={100} style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>Are you sure you want to delete{"\n"}this request?</Text>
+            <Text style={styles.modalText}>{`${t("myRequests.txt7")}`}</Text>
             <View style={styles.modalButtons}>
               <Pressable style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{`${t("buttons.cancel")}`}</Text>
               </Pressable>
               <MyAppButton
-                title={"Yes"}
+                title={`${t("buttons.yes")}`}
                 marginTop={RFPercentage(0)}
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}

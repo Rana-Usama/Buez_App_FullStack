@@ -21,6 +21,7 @@ import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import InputFieldNew from "../components/common/NewField";
+import { useTranslation } from "react-i18next";
 
 type InputField = {
   placeholder: string;
@@ -31,6 +32,7 @@ type InputField = {
 };
 
 function PostRequest({ navigation, route }) {
+  const { t } = useTranslation();
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
   const [showTaskDropdown, setShowTaskDropdown] = useState(false);
@@ -51,16 +53,16 @@ function PostRequest({ navigation, route }) {
   console.log("Edit post", route.params?.postRequest);
 
   const taskOptions = [
-    { id: 1, name: "Cleaning" },
-    { id: 2, name: "Gardening" },
-    { id: 3, name: "Gaming" },
-    { id: 4, name: "Moving" },
-    { id: 5, name: "Other" },
+    { id: 1, name: `${t("home.txt5")}` },
+    { id: 2, name: `${t("home.txt6")}` },
+    { id: 3, name: `${t("home.txt7")}` },
+    { id: 4, name: `${t("postRequest.txt4")}` },
+    { id: 5, name: `${t("postRequest.txt6")}` },
   ];
 
   const compensationOptions = [
-    { id: 1, type: "Monitarely" },
-    { id: 2, type: "Other" },
+    { id: 1, type: `${t("postRequest.txt5")}` },
+    { id: 2, type: `${t("postRequest.txt6")}` },
   ];
 
   useFocusEffect(
@@ -198,7 +200,7 @@ function PostRequest({ navigation, route }) {
   };
 
   function getRandomImage(taskType) {
-    const images = DEFAULT_IMAGES[taskType] || DEFAULT_IMAGES["Other"];
+    const images = DEFAULT_IMAGES[taskType] || DEFAULT_IMAGES[`${t("postRequest.txt6")}`];
     const randomIndex = Math.floor(Math.random() * images.length);
     return images[randomIndex];
   }
@@ -207,8 +209,8 @@ function PostRequest({ navigation, route }) {
     if (!selectedTask || !selectedCompensation || !description || !location || (!compensation && !budget)) {
       Toast.show({
         type: "info",
-        text1: "Incomplete Details",
-        text2: "Please fill in all required fields before posting.",
+        text1: `${t("toast.postRequest.one")}`,
+        text2: `${t("toast.postRequest.two")}`,
       });
       return;
     }
@@ -245,8 +247,8 @@ function PostRequest({ navigation, route }) {
     } catch (e) {
       Toast.show({
         type: "error",
-        text1: "Failed to Post",
-        text2: "Something went wrong. Please try again shortly.",
+        text1: `${t("toast.postRequest.three")}`,
+        text2: `${t("toast.postRequest.four")}`,
       });
     } finally {
       showIndicator(false);
@@ -263,7 +265,7 @@ function PostRequest({ navigation, route }) {
             leftLogo={false}
             profileImage={profileImgUrl}
             navigation={navigation}
-            title={title === "Edit Request" ? "Edit Request" : "Post Request"}
+            title={title === `${t("postRequest.txt2")}` ? `${t("postRequest.txt2")}` : `${t("postRequest.txt1")}`}
           />
 
           {/* Task Type Dropdown */}
@@ -274,7 +276,7 @@ function PostRequest({ navigation, route }) {
             ]}
             onPress={() => toggleDropdown("task")}
           >
-            <Text style={[styles.dropdownHeaderText, { color: selectedTask ? Colors.black : Colors.heading }]}>{selectedTask || "Task Type"}</Text>
+            <Text style={[styles.dropdownHeaderText, { color: selectedTask ? Colors.black : Colors.heading }]}>{selectedTask || `${t("postRequest.txt3")}`}</Text>
             <MaterialIcons name={showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
           </TouchableOpacity>
 
@@ -309,7 +311,7 @@ function PostRequest({ navigation, route }) {
               ]}
               onPress={() => toggleDropdown("compensation")}
             >
-              <Text style={[styles.dropdownHeaderText, { color: selectedCompensation ? Colors.black : Colors.heading }]}>{selectedCompensation || "Compensation Type"}</Text>
+              <Text style={[styles.dropdownHeaderText, { color: selectedCompensation ? Colors.black : Colors.heading }]}>{selectedCompensation || `${t("postRequest.txt7")}`}</Text>
               <MaterialIcons name={showCompensationDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
             </TouchableOpacity>
 
@@ -338,17 +340,17 @@ function PostRequest({ navigation, route }) {
 
           {/* decsription */}
           <View style={styles.descriptionContainer}>
-            <TextInput placeholder="Description" placeholderTextColor={Colors.heading} value={description} multiline onChangeText={(e) => setDescription(e)} maxLength={250} style={styles.desc} />
+            <TextInput placeholder={`${t("postRequest.txt8")}`} placeholderTextColor={Colors.heading} value={description} multiline onChangeText={(e) => setDescription(e)} maxLength={250} style={styles.desc} />
             <Text style={styles.charCount}>{description.length}/250</Text>
           </View>
 
           {/* Input field */}
           <View style={styles.typeWrapper}>
-            <InputFieldNew placeholder="Location Adress" value={location} onChangeText={setLocation} customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }} />
-            {selectedCompensation === "Other" ? (
+            <InputFieldNew placeholder={`${t("postRequest.txt9")}`} value={location} onChangeText={setLocation} customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }} />
+            {selectedCompensation === `${t("postRequest.txt6")}` ? (
               <>
                 <InputFieldNew
-                  placeholder="Compensation Details e.g, Two Movie Tickets"
+                  placeholder={`${t("postRequest.txt10")}`}
                   value={compensation}
                   onChangeText={setCompensation}
                   customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }}
@@ -357,7 +359,7 @@ function PostRequest({ navigation, route }) {
             ) : (
               <>
                 <InputFieldNew
-                  placeholder="e.g, 100$"
+                  placeholder={`${t("postRequest.txt11")}`}
                   value={budget}
                   onChangeText={(text) => {
                     const numeric = text.replace(/[^0-9]/g, "");
@@ -372,7 +374,7 @@ function PostRequest({ navigation, route }) {
 
           {/* Image Picker */}
           <View style={styles.imageWrapper}>
-            <Text style={styles.imgText}>Upload Photos From Gallery</Text>
+            <Text style={styles.imgText}>{`${t("postRequest.txt12")}`}</Text>
             <View style={styles.imgContainer}>
               {[0, 1, 2].map((index) => (
                 <TouchableOpacity key={index} activeOpacity={0.8} onPress={() => pickImage(index)} style={styles.imgPick}>
@@ -395,7 +397,7 @@ function PostRequest({ navigation, route }) {
           </View>
 
           {/*Login Button */}
-          <MyAppButton disabled={indicator} loading={indicator} title={isEditing ? "Edit" : "Post"} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
+          <MyAppButton disabled={indicator} loading={indicator} title={isEditing ? `${t("postRequest.txt13")}` : `${t("postRequest.txt14")}`} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
 
           <View style={styles.space} />
         </ScrollView>
@@ -419,13 +421,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   charCount: {
-  alignSelf: "flex-end",
-  right: 10,
-  color: Colors.grey,
-  fontSize: RFPercentage(1.6),
-  bottom:10,
-  position: 'absolute',
-},
+    alignSelf: "flex-end",
+    right: 10,
+    color: Colors.grey,
+    fontSize: RFPercentage(1.6),
+    bottom: 10,
+    position: "absolute",
+  },
   dropdownHeader: {
     marginTop: RFPercentage(3),
     width: "90%",
