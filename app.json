@@ -56,16 +56,9 @@
           "icon": "./assets/notification-icon.png"
         }
       ],
-      [
-        "expo-facebook",
-        {
-          "appId": "3491611774307995"
-        }
-      ],
       "@react-native-google-signin/google-signin",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
-      "expo-facebook",
       "expo-localization"
     ],
     "extra": {
