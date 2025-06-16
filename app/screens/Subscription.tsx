@@ -34,8 +34,8 @@ function Subscription(props) {
       await updateDoc(userRef, {
         isSubscribed: true,
         isFreeTrial: true,
-        freeTrialStartedAt: start,
-        freeTrialEndAt: end,
+        subscriptionStart: start,
+        subscriptionEnd: end,
       });
       console.log("User subscription status updated in Firestore");
     } catch (error) {
@@ -79,7 +79,7 @@ function Subscription(props) {
       return;
     }
     const { error: paymentError } = await presentPaymentSheet();
-    console.log("paymentError............", paymentError);
+    // console.log("paymentError............", paymentError);
     if (paymentError) {
       Toast.show({
         type: "info",
@@ -93,24 +93,24 @@ function Subscription(props) {
     // Payment
     const setupIntentId = setupIntentClientSecret.split("_secret")[0];
 
-    const res = await fetch("https://buez-server-khaki.vercel.app/api/create-subscription", {
+    const res = await fetch("https://buez-server-khaki.vercel.app/api/withoutTrial-subscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ customerId, setupIntentId }),
     });
-    console.log("res......", res);
+    // console.log("res......", res);
     const result = await res.json();
-    console.log("result...........", result);
+    // console.log("result...........", result);
 
     if (result.success) {
-      await updateSubscriptionStatus(result?.trialStartDate, result?.trialEndDate);
+      await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);
       await saveSubscription(userId, result?.subscriptionId);
       Toast.show({
         type: "success",
         text1: "Subscription Confirmed",
         text2: "Monthly plan activated successfully.",
       });
-      props.navigation.navigate("Home");
+      props.navigation.navigate("TabNavigator");
     } else {
       setModalVisible2(true);
     }

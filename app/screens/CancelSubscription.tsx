@@ -19,6 +19,8 @@ import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import { saveSubscription } from "../services/User.service";
 import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+
 import { useNavigation } from "@react-navigation/native";
 
 function CancelSubscription(props) {
@@ -87,11 +89,14 @@ function CancelSubscription(props) {
       setIsLoading(false);
     }
   };
-const navigation = useNavigation()
+  const navigation = useNavigation();
 
   return (
     <Screen style={styles.screen}>
       <Image style={styles.logo} source={Icons.logo} />
+      <TouchableOpacity style={{ position: "absolute", left:RFPercentage(2), top:RFPercentage(5) }} onPress={()=> navigation.goBack()}>
+         <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={Colors.primary} />
+      </TouchableOpacity>
       {userData?.subscriptionId ? (
         <>
           <View style={styles.premiumInfo}>
@@ -132,7 +137,10 @@ const navigation = useNavigation()
           <Text style={{ color: Colors.darkGrey, fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(2), paddingHorizontal: RFPercentage(5), textAlign: "center" }}>
             You do not have an active subscription.
           </Text>
-          <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: RFPercentage(2), marginTop: RFPercentage(4) }} onPress={()=> navigation.navigate('Subscription')}>
+          <TouchableOpacity
+            style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: RFPercentage(2), marginTop: RFPercentage(4) }}
+            onPress={() => navigation.navigate("Subscription")}
+          >
             <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.9), fontFamily: "Poppins_500Medium" }}>Activate Subscription</Text>
             <AntDesign name="arrowright" color={Colors.primary} size={RFPercentage(3)} style={{ left: RFPercentage(1) }} />
           </TouchableOpacity>

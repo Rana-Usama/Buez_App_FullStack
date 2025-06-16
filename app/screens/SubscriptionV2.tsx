@@ -35,8 +35,8 @@ function SubscriptionV2(props) {
         isSubscribed: true,
         isFreeTrial: true,
         freeTrialStartedAt: serverTimestamp(),
-        freeTrialEndAt: end,
-        freeTrialStart : start
+        subscriptionStart: start,
+        subscriptionEnd: end,
       });
       console.log("User subscription status updated in Firestore");
     } catch (error) {
@@ -99,12 +99,13 @@ function SubscriptionV2(props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ customerId, setupIntentId }),
     });
+
     console.log("res......", res);
     const result = await res.json();
     console.log("result...........", result);
 
     if (result.success) {
-      await updateSubscriptionStatus(result?.trialStartDate, result?.trialEndDate);
+      await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);
       await saveSubscription(userId, result?.subscriptionId);
       Toast.show({
         type: "success",

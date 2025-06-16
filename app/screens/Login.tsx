@@ -25,8 +25,7 @@ import Toast from "react-native-toast-message";
 import { validateEmail } from "../utils/helperFunctions";
 import { addUser, updateUserToken } from "../services/User.service";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
-// import { LoginManager, AccessToken } from "react-native-fbsdk-next";
-import { FacebookAuthProvider } from "firebase/auth";
+// import { FacebookAuthProvider } from "firebase/auth";
 
 // config
 import Colors from "../config/Colors";
@@ -164,21 +163,7 @@ function Login(props: any) {
     setRemember(!remember);
   };
 
-  // const signInWithFB = async () => {
-  //   try {
-  //     await LoginManager.logInWithPermissions(["public_profile", "email"]);
-  //     const data = await AccessToken.getCurrentAccessToken();
-  //     console.log("data.........", data);
-  //     if (!data) {
-  //       return;
-  //     }
-  //     const facebookCredential = FacebookAuthProvider.credential(data.accessToken);
-  //     const response = await signInWithCredential(FIREBASE_AUTH, facebookCredential);
-  //     console.log(response);
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
+  
 
   return (
     <Screen style={styles.screen}>

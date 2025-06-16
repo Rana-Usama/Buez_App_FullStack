@@ -30,13 +30,13 @@ import DeciderScreen from "../screens/DeciderScreen";
 import TabNavigator from "./BottomNavigator";
 import FreeTrial from "../screens/FreeTrial";
 import SubscriptionV2 from "../screens/SubscriptionV2";
+import CancelSubscription from "../screens/CancelSubscription";
 
 // Utils
 import { getCredentials } from "../services/Auth.service";
 import * as SecureStore from "expo-secure-store";
 import { useUser } from "../contexts/user.context";
 import { differenceInDays } from "date-fns";
-import CancelSubscription from "../screens/CancelSubscription";
 
 export type RootStackParamList = {
   OnBoarding: undefined;
@@ -75,7 +75,7 @@ export type RootStackParamList = {
   };
   Messages: undefined;
   Profile: undefined;
-  CancelSubscription : undefined
+  CancelSubscription: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -96,87 +96,96 @@ const StackNavigator: React.FC = () => {
       setLoggedOut(status);
       setIsLoading(false);
     };
-
     fetchData();
   }, []);
 
   useEffect(() => {
     const { email, password } = credentials;
-
     const isUserDataReady = userData && typeof userData?.isSubscribed === "boolean" && typeof userData?.isFreeTrial === "boolean";
 
-    if (!isLoading && !userLoading && email && password && isUserDataReady) {
-      const isFreeTrial = userData.isFreeTrial;
-      const isSubscribed = userData.isSubscribed;
-
-      // ✅ Only read trial date if user is on free trial
-      let trialDays = null;
-      if (isFreeTrial && userData?.freeTrialStartedAt?.seconds) {
-        const trialStart = userData.freeTrialStartedAt.seconds;
-        const trialStartDate = new Date(trialStart * 1000);
-        trialDays = differenceInDays(new Date(), trialStartDate);
-      }
-
-      console.log("== ROUTING LOGIC ==");
-      console.log("email:", email);
-      console.log("password:", password);
-      console.log("isSubscribed:", isSubscribed);
-      console.log("isFreeTrial:", isFreeTrial);
-      console.log("trialDays:", trialDays);
-
+    if (!isLoading && !userLoading) {
       if (loggedOut === "true") {
         setInitialRoute("Login");
-      } else if (isSubscribed) {
-        setInitialRoute("TabNavigator");
-      } else if (isFreeTrial && trialDays !== null && trialDays >= 0 && trialDays <= 14) {
-        setInitialRoute("TabNavigator");
-      } else if (!isSubscribed && trialDays !== null && trialDays > 14) {
-        setInitialRoute("Subscription");
-      } else {
-        setInitialRoute("FreeTrial");
+      } else if (email && password && isUserDataReady) {
+        const isFreeTrial = userData.isFreeTrial;
+        const isSubscribed = userData.isSubscribed;
+        const subscriptionStart = userData?.subscriptionStart;
+        const subscriptionEnd = userData?.subscriptionEnd;
+        const now = new Date();
+
+        let trialDays = null;
+        let isTrialValid = false;
+
+        if (isFreeTrial && userData?.freeTrialStartedAt?.seconds) {
+          const trialStartDate = new Date(userData.freeTrialStartedAt.seconds * 1000);
+          trialDays = differenceInDays(now, trialStartDate);
+          isTrialValid = trialDays >= 0 && trialDays <= 14;
+        }
+
+        const subStartDate = subscriptionStart ? new Date(subscriptionStart) : null;
+        const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
+
+        const isWithinPaidPeriod = subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
+
+        console.log("== ROUTING LOGIC ==");
+        console.log("email:", email);
+        console.log("password:", password);
+        console.log("isSubscribed:", isSubscribed);
+        console.log("isFreeTrial:", isFreeTrial);
+        console.log("trialDays:", trialDays);
+        console.log("isTrialValid:", isTrialValid);
+        console.log("subStartDate:", subStartDate);
+        console.log("subEndDate:", subEndDate);
+        console.log("isWithinPaidPeriod:", isWithinPaidPeriod);
+
+        if (isSubscribed || isWithinPaidPeriod) {
+          setInitialRoute("TabNavigator");
+        } else if (isTrialValid) {
+          setInitialRoute("FreeTrial");
+        } else if (isFreeTrial && trialDays !== null && trialDays > 14) {
+          setInitialRoute("Subscription");
+        } else {
+          setInitialRoute("FreeTrial");
+        }
+      } else if (!email && !password) {
+        setInitialRoute("OnBoarding");
       }
-    } else if (!isLoading && !userLoading && !email && !password) {
-      setInitialRoute("OnBoarding");
     }
   }, [isLoading, userLoading, userData, credentials, loggedOut]);
-
-  console.log(isLoading, userLoading, initialRoute);
 
   return (
     <NavigationContainer>
       {isLoading || userLoading || !initialRoute ? (
         <DeciderScreen />
       ) : (
-        <>
-          <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-            {/* Auth Screens */}
-            <Stack.Screen name="OnBoarding" component={Onboarding} />
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="Signup" component={Signup} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-            <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
-            <Stack.Screen name="OTPInput" component={OTPInput} />
-            <Stack.Screen name="FreeTrial" component={FreeTrial} />
-            <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
+        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
+          {/* Auth Screens */}
+          <Stack.Screen name="OnBoarding" component={Onboarding} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Signup" component={Signup} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+          <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
+          <Stack.Screen name="OTPInput" component={OTPInput} />
+          <Stack.Screen name="FreeTrial" component={FreeTrial} />
+          <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
 
-            {/* Main App Screens */}
-            <Stack.Screen name="TabNavigator" component={TabNavigator} />
-            <Stack.Screen name="InitialScreen" component={InitialScreen} />
-            <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
-            <Stack.Screen name="OfferDetail" component={OfferDetail} />
-            <Stack.Screen name="ChangePassword" component={ChangePassword} />
-            <Stack.Screen name="EditProfile" component={EditProfile} />
-            <Stack.Screen name="FAQ" component={FAQ} />
-            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-            <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
-            <Stack.Screen name="Reviews" component={Reviews} />
-            <Stack.Screen name="Subscription" component={Subscription} />
-            <Stack.Screen name="Chat" component={Chat} />
-            <Stack.Screen name="Messages" component={Messages} />
-            <Stack.Screen name="Profile" component={Profile} />
-            <Stack.Screen name="CancelSubscription" component={CancelSubscription} />
-          </Stack.Navigator>
-        </>
+          {/* Main App Screens */}
+          <Stack.Screen name="TabNavigator" component={TabNavigator} />
+          <Stack.Screen name="InitialScreen" component={InitialScreen} />
+          <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
+          <Stack.Screen name="OfferDetail" component={OfferDetail} />
+          <Stack.Screen name="ChangePassword" component={ChangePassword} />
+          <Stack.Screen name="EditProfile" component={EditProfile} />
+          <Stack.Screen name="FAQ" component={FAQ} />
+          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+          <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
+          <Stack.Screen name="Reviews" component={Reviews} />
+          <Stack.Screen name="Subscription" component={Subscription} />
+          <Stack.Screen name="Chat" component={Chat} />
+          <Stack.Screen name="Messages" component={Messages} />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="CancelSubscription" component={CancelSubscription} />
+        </Stack.Navigator>
       )}
     </NavigationContainer>
   );
