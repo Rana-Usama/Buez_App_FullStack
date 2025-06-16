@@ -38,7 +38,7 @@ function Reviews({ navigation }) {
         </View>
       </ScrollView>
       {/* Bottom Tab */}
-      <CustomTabBar settingTab={true} navigation={navigation} />
+      {/* <CustomTabBar settingTab={true} navigation={navigation} /> */}
     </View>
   );
 }

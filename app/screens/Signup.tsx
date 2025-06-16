@@ -30,7 +30,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
-function Signup(props: any) {
+function Signup({ navigation }: any) {
   let validationSchema = yup.object({
     name: yup.string().required("Username is required"),
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -40,7 +40,6 @@ function Signup(props: any) {
       .oneOf([yup.ref("password")], "Passwords must match")
       .required("Passwords must match"),
   });
-  const navigation = useNavigation();
   const [indicator, showIndicator] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
 
@@ -59,6 +58,8 @@ function Signup(props: any) {
       webClientId: webClientId,
     });
   }, []);
+
+
 
   const onGoogleButtonPress = async () => {
     try {
@@ -121,7 +122,7 @@ function Signup(props: any) {
       const email = values.email;
       const password = values.password;
       const user = await createAccountWithEmail(email, password);
-       await SecureStore.setItemAsync("loggedOut", "false");
+      await SecureStore.setItemAsync("loggedOut", "false");
       if (user) {
         const userData = {
           userName: userName,
@@ -148,6 +149,8 @@ function Signup(props: any) {
     }
     showIndicator(false);
   };
+
+
 
   return (
     <Screen style={styles.screen}>
@@ -270,8 +273,8 @@ function Signup(props: any) {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("Login")}>
+          <Text style={styles.footerText}>Already have an account?</Text>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Login")}>
             <Text style={styles.loginText}>Login</Text>
           </TouchableOpacity>
         </View>
@@ -279,6 +282,7 @@ function Signup(props: any) {
     </Screen>
   );
 }
+
 
 const styles = StyleSheet.create({
   screen: {

@@ -115,7 +115,6 @@ function MyRequests({ navigation }) {
         newRecords.splice(i, 1);
         return newRecords;
       });
-
       const action = status === REQUEST_STATUS.Completed ? "mark as completed" : "cancelled";
       Toast.show({
         type: "success",
@@ -131,6 +130,8 @@ function MyRequests({ navigation }) {
       });
     }
   };
+
+  
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity

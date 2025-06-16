@@ -18,7 +18,7 @@ function SuccessScreen({ navigation }) {
       {/* Gif */}
       <Text style={styles.txt}>Request Posted Successfully</Text>
 
-      <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={() => navigation.navigate("Home")}>
+      <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={() => navigation.navigate("TabNavigator")}>
         <Text style={styles.home}>Home</Text>
       </TouchableOpacity>
     </LinearGradient>

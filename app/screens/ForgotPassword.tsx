@@ -39,7 +39,7 @@ function ForgotPassword(props: any) {
       Toast.show({
         type: "error",
         text1: "Error",
-        text2: error.message || "Failed to send reset link.",
+        text2: "Failed to send reset link.",
       });
     } finally {
       setLoader(false);

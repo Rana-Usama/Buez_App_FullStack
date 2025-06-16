@@ -40,7 +40,7 @@ function SubscriptionV2(props) {
       });
       console.log("User subscription status updated in Firestore");
     } catch (error) {
-      console.error("Failed to update subscription status:", error);
+      console.log("Failed to update subscription status:", error);
     }
   };
 
@@ -80,12 +80,12 @@ function SubscriptionV2(props) {
       return;
     }
     const { error: paymentError } = await presentPaymentSheet();
-    console.log("paymentError............", paymentError);
+    // console.log("paymentError............", paymentError);
     if (paymentError) {
       Toast.show({
         type: "info",
-        text1: "Subscription",
-        text2: "Card not added for subscription!",
+        text1: "Subscription Incomplete",
+        text2: "Your card could not be added. Please try again.",
       });
       setLoading(false);
       return;
@@ -100,17 +100,17 @@ function SubscriptionV2(props) {
       body: JSON.stringify({ customerId, setupIntentId }),
     });
 
-    console.log("res......", res);
+    // console.log("res......", res);
     const result = await res.json();
-    console.log("result...........", result);
+    // console.log("result...........", result);
 
     if (result.success) {
       await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);
       await saveSubscription(userId, result?.subscriptionId);
       Toast.show({
         type: "success",
-        text1: "14 Day Free Trial!",
-        text2: "Your 14 day free trial has been started!",
+        text1: "Free Trial Activated",
+        text2: "Your 14-day free trial has started successfully.",
       });
       props.navigation.navigate("TabNavigator");
     } else {
@@ -162,11 +162,8 @@ function SubscriptionV2(props) {
                 isFreeTrial: true,
                 freeTrialStartedAt: serverTimestamp(),
               });
-              console.log("Free trial started");
               props.navigation.navigate("TabNavigator");
-            } catch (error) {
-              console.error("Failed to start free trial:", error);
-            }
+            } catch (error) {}
           }}
           style={styles.skip}
         >

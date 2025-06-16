@@ -1,0 +1,293 @@
+{
+  "buttons": {
+    "next": "Wiiter",
+    "start": "Startä",
+    "skip": "Überspringä",
+    "login": "Iilogge",
+    "signup": "Registriere",
+    "yes": "Ja",
+    "cancel": "Abbräche"
+  },
+  "common": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "name": "Name",
+    "confirm": "Passwort bestätige"
+  },
+  "validations": {
+    "inValid": "Ungültigi E-Mail",
+    "emailReq": "E-Mail wird bruucht",
+    "passwordReq": "Passwort wird bruucht",
+    "userReq": "Benutzername wird bruucht",
+    "passwordLen": "Passwort mues mindestens 6 Zeiche lang sii",
+    "passwordMatch": "Passwörter müend übereinstimme"
+  },
+  "toast": {
+    "login": {
+      "one": "Willkomme zrugg!",
+      "two": "Erfolgrich igloggt!",
+      "three": "Iilogge isch gscheitert",
+      "four": "Öppis isch schief gange. Bitte nomol versueche.",
+      "five": "Falschi Zuegangsdäte"
+    },
+    "signup": {
+      "one": "Registrierig",
+      "two": "Benutzer erfolgrich registriert!",
+      "three": "Fehler bi de Registrierig",
+      "four": "Zuegangsdäte werded scho bruucht"
+    },
+    "forgetPassword": {
+      "one": "Reset-Link versendet",
+      "two": "Lueg in dinere E-Mail, zum s'Passwort zruggzsetze.",
+      "three": "Fehler",
+      "four": "Reset-Link konnt nöd versendet werde."
+    },
+    "subscriptionV2": {
+      "one": "Abo nöd vollständet",
+      "two": "Dini Chärtli hät nöd chönne hinzugefügt werde. Bitte versuech’s nomol.",
+      "three": "Gratis-Testzit aktiviert",
+      "four": "Dini 14-tägigi Gratis-Testzit het erfolgrich agfange."
+    },
+    "subscription": {
+      "one": "Abo erfolgrich!",
+      "two": "Monatlichs Abo isch erfolgrich aktiviert worde."
+    },
+    "myRequests": {
+      "one": "Status vom Uftrag",
+      "two": "Uftrag",
+      "three": "Als abgschlosse markiere",
+      "four": "Abbroche",
+      "five": "Öppis isch schief gloffe!",
+      "six": "Status vom Uftrag cha nöd aktualisiert wärde."
+    },
+    "cancelSubscription": {
+      "one": "Kei aktivs Abo",
+      "two": "Mir hend kei aktivs Abo gfundä, wo mit dim Konto verknüpft isch.",
+      "three": "Abo isch kündet worde",
+      "four": "Dini Abonemänt isch erfolgrich kündet worde. Du hesch no Zuegriff bis zum Änd vom Abrechnigsziitraum."
+    },
+    "changePassword": {
+      "one": "Passwort gändere",
+      "two": "S Passwort isch erfolgrich gänderet worde!",
+      "three": "Fehler",
+      "four": "Öppis isch schief gange!"
+    },
+    "editProfile": {
+      "one": "Profil aktualisiert",
+      "two": "Ding Profil isch erfolgrich aktualisiert worde!",
+      "three": "Aktualisiere fehlgschlage",
+      "four": "Es isch e Fähler passiert bi de Aktualisierung. Bitte versuech's nomol."
+    }
+  },
+  "onBoarding": {
+    "onBoarding1": {
+      "Title": "Willkomme bi Büez",
+      "Desc": "Verbind di, schaff zäme und wach – din Ort für professionelli Unterstützig fangt da a."
+    },
+    "onBoarding2": {
+      "Title": "Poste, wobei du Hülfe bruchsch",
+      "Desc": "Teil dini Arbeit oder diini Challängs. Bkomm Antworte vo Lüüt, wo wüklich hälfe wend."
+    },
+    "onBoarding3": {
+      "Title": "Verwalte Dini Posts & Schreib frei",
+      "Desc": "Behalte diini Aafrogä im Griff, update diini Posts und schreib mit Unterstützer – alles am gliiche Ort."
+    },
+    "onBoarding4": {
+      "Title": "Gnüss 14 Täg volle Zuegriff",
+      "Desc": "Probiär all Büez-Funktione gratis us. Kei Limit, kei Verbindlichkeitä."
+    },
+    "onBoarding5": {
+      "Title": "Mach wiiter mit Abo",
+      "Desc": "Nach de 14-tägige Gratis-Testzit, gnüss Büez mit em $12.99-Abo pro Monet. Chasch jederzeit kündä."
+    }
+  },
+  "login": {
+    "txt1": "Willkomme zrugg",
+    "txt2": "Weisch no wer ich bi?",
+    "txt3": "Passwort vergässe?",
+    "txt4": "oder iilogge mit",
+    "txt5": "Hesch no kei Konto?"
+  },
+  "signup": {
+    "txt1": "Willkomme!",
+    "txt2": "oder registriere mit",
+    "txt3": "Hesch scho es Konto?"
+  },
+  "forgetPassword": {
+    "txt1": "Passwort zruggsetze?",
+    "txt2": "OTP schickä"
+  },
+  "freeTrial": {
+    "txt1": "Aktivier dini 14-tägigi gratis Testzit!",
+    "txt2": "So funktioniert d’Gratis-Testzit",
+    "txt3": "Hüt",
+    "txt4": "Schalt völle Zuegriff frei – gnüss alli Funktione vo dr App, komplett gratis.",
+    "txt5": "In 10 Täg",
+    "txt6": "Mir gibed dir Bescheid, wenn d'Testzit langsam ändet – blib informiert.",
+    "txt7": "In 14 Täg",
+    "txt8": "Dini Abonnemänt startet automatisch. Chasch vorher jederzyt kündä, zum Kostä z'vermide.",
+    "txt9": "Gratis-Testzit starte"
+  },
+  "subscriptionV2": {
+    "txt1": "Kauf üses Premium, zum völle Service z'nutze",
+    "txt2": ".99 pro Monet",
+    "txt3": "Täglich Uftrag-Postings mache",
+    "txt4": "Täglich Ufträge aaluege",
+    "txt5": "Verdien Gäld mit tägliche Büez",
+    "txt6": "Jederzyt kündbar",
+    "txt7": "Chärtli hinzfüege"
+  },
+  "subscription": {
+    "txt1": "Dini 14-tägigi Gratis-Testzit isch abeglaufe.",
+    "txt2": "Upgrade uf Premium, zum völle Zuegriff z'ha.",
+    "txt3": "Zahlä"
+  },
+  "home": {
+    "txt1": "Start",
+    "txt2": "Sueche",
+    "txt3": "Kategorie",
+    "txt4": "Alli",
+    "txt5": "Putzä",
+    "txt6": "Zügle",
+    "txt7": "Gartearbeit",
+    "txt8": "Anderi",
+    "txt9": "Neui Ufträgi",
+    "txt10": "Entlöhnig",
+    "txt11": "Kei Eintrag gfunde!"
+  },
+  "details": {
+    "txt1": "Detail",
+    "txt2": "Weniger aazeige",
+    "txt3": "Meh aazeige",
+    "txt4": "Ort",
+    "txt5": "Datum/Zyt",
+    "txt6": "Entlöhnig",
+    "txt7": "Nachricht a d’Persoon schicke",
+    "txt8": "Mini Ufträgi"
+  },
+  "myRequests": {
+    "txt1": "Mini Ufträgi",
+    "txt2": "Aktiv",
+    "txt3": "Abgschlosse",
+    "txt4": "Gpostet am:",
+    "txt5": "Als erledigt markiere",
+    "txt6": "Abbräche",
+    "txt7": "Bisch sicher, dass du dä Uftrag wotsch lösche{`\n`}?"
+  },
+  "postRequest": {
+    "txt1": "Uftrag poste",
+    "txt2": "Uftrag bearbeite",
+    "txt3": "Arbetsart",
+    "txt4": "Gamen",
+    "txt5": "Geldlich",
+    "txt6": "Anderi",
+    "txt7": "Zahligsart",
+    "txt8": "Beschrieb",
+    "txt9": "Standort-Adräss",
+    "txt10": "Zahligs-Detail z. B. zwei Kinobillet",
+    "txt11": "z. B. 100 Fr.",
+    "txt12": "Fotos us Galerie ufelade",
+    "txt13": "Bearbeite",
+    "txt14": "Poste"
+  },
+  "messages": {
+    "txt1": "Nachrichte",
+    "txt2": "Alli",
+    "txt3": "Ungelesen",
+    "txt4": "Kei ungleseni Nachrichte",
+    "txt5": "No kei Nachrichte"
+  },
+  "chat": {
+    "txt1": "Früehere Nachrichte lade",
+    "txt2": "Nachricht schriebe"
+  },
+  "settings": {
+    "txt1": "Abo abstelle",
+    "txt2": "Passwort ändere",
+    "txt3": "Allgemeini Bedingige",
+    "txt4": "Datenschutz",
+    "txt5": "FAQ's",
+    "txt6": "Uslogge",
+    "txt7": "Konto lösche",
+    "txt8": "Hilf & Sicherheit",
+    "txt9": "Einstellige",
+    "txt10": "Bisch sicher, dass du die Konto wotsch lösche{`\n`}?",
+    "txt11": "Bisch sicher, dass du dich uslogge wotsch{`\n`} us däm Konto?"
+  },
+  "cancelSubscription": {
+    "txt1": "Premium-Abo kündige",
+    "txt2": "Aktuälle Plan",
+    "txt3": ".99 pro Monet",
+    "txt4": "Dini Dienst wird nümme für anderi sichtbar si",
+    "txt5": "Du bechunsch kei tägliche Ufträge meh",
+    "txt6": "Du chasch nümme mit tägliche Ufträge verdiene",
+    "txt7": "Du verlüsch dä flexible Kündigungs-Zugang",
+    "txt8": "Du hesch ke aktivs Abo.",
+    "txt9": "Abo aktiviere",
+    "txt10": "Bisch sicher, dass du dini monatlichi Abo kündige wotsch?{`\n`}"
+  },
+  "chnagePassword": {
+    "txt1": "Alts Passwort iigäh",
+    "txt2": "Neus Passwort iigäh",
+    "txt3": "Neus Passwort wiederhole",
+    "txt4": "Ändere"
+  },
+  "faqs": {
+    "txt1": "Welche Gebiet bediänet dir?",
+    "txt2": "Cha ich mini eigene Aafrog poste?",
+    "txt3": "Cha ich e Aafrog abmelde, wenn ich sie scho akzeptiert han?",
+    "txt4": "Cha ich eme Aafroger e Bewertig hinterlah?"
+  },
+  "privacyPolicy": {
+    "txt1": "Willkomme zu üüsere Datenschutz-Richtlinie. Dini Privatsphär isch üs mega wichtig. Die Richtlinie erklärt, wie mir Dini persönliche Date sammle, bruuche und schütze, wenn du üsi App nutzt.",
+    "txt2": "Was für Informatione mir sammle",
+    "txt3": "Mir sammle d'Informatione, wo du direkt gisch – zum Bispil, wenn du e Konto eröffnet, e Aafrog abschicksch oder mit em Support schriebsch. Das cha Dini Name, E-Mail, Telefonnummer und anderi Detail enthalte.",
+    "txt4": "Wie mir Dini Informatione verwände",
+    "txt5": "Mir verwände d'Informatione, zum üsi Dienscht verbessere, personalisiere und zur Verfüegig stelle. Das beinhaltet z.B. d'Verarbeitig vo Transaktione, Benachrichtigung verschicke, Sicheheit gewährleischte und Nutzig analysiere.",
+    "txt6": "Datewitergab und Sicheheit",
+    "txt7": "Mir verkaufe Dini Date nöd a Dritti. Es isch möglich, dass mir mit zuverlässige Dienschtleister Date teile, zum Betriib sicherstelle, Gsetz erfülle oder d'Sicheheit vo Nutzer gewährleischte. Mir setze Massnahme um, zum Dini Date schütze.",
+    "txt8": "Dini Rächti",
+    "txt9": "Du hesch s'Recht, Dini persönliche Date aaluege, aktualisiere oder lösche. Du chasch au gewisse Dateerfassige ablehne. Meld di bi üs, wenn du Froge zur Privatsphär hesch.",
+    "txt10": "Änderige a dere Richtlinie",
+    "txt11": "Mir chönd die Datenschutz-Richtlinie ab und zue aktualisiere. Mir empfehle dir, sie regelmässig aaluege. Wenn du nach ere Änderig wiiterhersch Nutzig machsch, gilt das als akzeptiert.",
+    "txt12": "Kontakt",
+    "txt13": "Wenn du Froge zur Datenschutz-Richtlinie hesch, meld di bitte bi üs unter support@example.com."
+  },
+  "terms": {
+    "txt1": "Willkomme bi BUEZ, e Plattform vo Devappics, wo Lüüt verbindet, wo Hülfe bi Alltagsufgabe brauche mit de, wo gärn hälfe möchted gegen e Entschädigung. Wenn du d'BUEZ App (d’App) oder verwandti Dienscht (zäme „Dienscht“) bruuchsch, stimmsch du däne AGB (Allgemeini Geschäftsbedingige) zue. Wenn nöd, denn derfsch du d'Dienscht nöd nutze.",
+    "txt2": "1. Nutzigsberechtigung",
+    "txt3": "Du muesch mindestens 18 Jahr alt sii, zum BUEZ nutze. Mit dr Registrierig bestätigsch du, dass du d'rechtlichi Fähigkeit hesch, dem Vertrag zzustimme. BUEZ behält sich s’Recht vor, Kontos z’sperre oder lösche, wo d’Bedingige verletze.",
+    "txt4": "2. Nutzerkonto",
+    "txt5": "Du muesch es Konto erstelle, zum dr Dienscht nutze. Du bisch selber verantwortlech für d’Sicherheit vo dine Zuegangsdaten. BUEZ haftet nöd für unberechtigti Zuegriffig uf dis Konto.",
+    "txt6": "3. Abo und Zahlig",
+    "txt7": "BUEZ funktionier mit eme Abomodell. Nutzer müend es Abo abonniere, zum Aafroge erstelle und dr Dienscht voll nutze. D’Abo-Gebühre wärde monatlich verrechnet und laufe wiiter, bis sie vo dir selber kündet wärde. D’Zahlig erfolge über Drittanbieter.",
+    "txt8": "4. Nutzig vom Dienscht",
+    "txt9": "Nutzer chönd Aafroge für Hülfe poste mit Angabe vo Entschädigung und Aufgabedetail. D'Entschädigung wird direkt zwüsche Hilfesuecher und Helfer abgmacht. BUEZ garantiert kei Zahlig und isch nöd drzwüsche.",
+    "txt10": "5. Verboteni Aktivitäte",
+    "txt11": "Nutzer derfed kei irreführendi, schädlichi oder beleidigendi Inhalte poste, kei illegali Aktivitäte drüber abwickle oder versueche, d’Plattform z’hacke oder z’störe.",
+    "txt12": "6. Haftigsbeschränkig",
+    "txt13": "BUEZ isch e Vermittler und haftet nöd für direkti, indirekti oder folgendi Schädä, wo dur d'Nutzig vom Dienscht entstöh. BUEZ garantiert weder d’Qualität, Zuverlässigkeit no d'Sicherhei vo de Dienscht, wo vo Nutzer aebote wärde.",
+    "txt14": "7. Kontaktinformatione",
+    "txt15": "Für Froge oder Support: Bitte kontaktier üs unter info@buez.com"
+  },
+  "successScreen": {
+    "txt1": "Aafrog erfolgrich gpostet",
+    "txt2": "Start"
+  },
+  "profile": {
+    "txt1": "Profil",
+    "txt2": "Profil bearbeite",
+    "txt3": "Bewärtige & Rückmäldige"
+  },
+  "editProfile": {
+    "txt1": "Gib dis Name a",
+    "txt2": "Gib dis Telefonnumere a",
+    "txt3": "Info bearbeite",
+    "txt4": "Bearbeite"
+  },
+  "reviews": {
+    "txt1": "Mini Bewertige",
+    "txt2": "Datum:",
+    "txt3": "Vo:"
+  }
+}

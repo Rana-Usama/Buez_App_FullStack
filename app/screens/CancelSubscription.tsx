@@ -23,13 +23,10 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { useNavigation } from "@react-navigation/native";
 
-function CancelSubscription(props) {
+function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
   const userId = getAuth()?.currentUser?.uid;
   const firestore = getFirestore();
-  const [indicator, showIndicator] = useState(false);
-  const { initPaymentSheet, presentPaymentSheet, confirmPayment } = useStripe();
-  const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [isloading, setIsLoading] = useState(false);
 
@@ -39,8 +36,8 @@ function CancelSubscription(props) {
     if (!userData?.subscriptionId) {
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: "No active subscription found.",
+        text1: "No Active Subscription",
+        text2: "We couldn't find an active subscription linked to your account.",
       });
       return;
     }
@@ -54,7 +51,7 @@ function CancelSubscription(props) {
       const text = await res.text(); // Read as text first
       try {
         const result = JSON.parse(text); // Try parsing manually
-        console.log("result...........", result);
+        // console.log("result...........", result);
         if (result.success) {
           const { currentPeriodEnd } = result;
           if (userId) {
@@ -69,13 +66,13 @@ function CancelSubscription(props) {
               });
               console.log("User subscription status updated in Firestore");
             } catch (error) {
-              console.error("Failed to update subscription status:", error);
+              console.log("Failed to update subscription status:", error);
             }
           }
           Toast.show({
             type: "success",
-            text1: "Cancel Subscription",
-            text2: "Subscription has been canceled successfully!",
+            text1: "Subscription Cancelled",
+            text2: "Your subscription has been successfully cancelled. You will retain access until the end of your billing period.",
           });
           //   navigation.goBack();
         } else {
@@ -89,13 +86,12 @@ function CancelSubscription(props) {
       setIsLoading(false);
     }
   };
-  const navigation = useNavigation();
 
   return (
     <Screen style={styles.screen}>
       <Image style={styles.logo} source={Icons.logo} />
-      <TouchableOpacity style={{ position: "absolute", left:RFPercentage(2), top:RFPercentage(5) }} onPress={()=> navigation.goBack()}>
-         <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={Colors.primary} />
+      <TouchableOpacity style={{ position: "absolute", left: RFPercentage(2), top: RFPercentage(5) }} onPress={() => navigation.goBack()}>
+        <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={Colors.primary} />
       </TouchableOpacity>
       {userData?.subscriptionId ? (
         <>
@@ -128,7 +124,7 @@ function CancelSubscription(props) {
           </View>
           {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
           <View style={{ alignItems: "center", justifyContent: "center", width: "80%" }}>
-            <MyAppButton title={"Cancel"} marginTop={RFPercentage(7)} onPress={() => setModalVisible2(true)} width={RFPercentage(20)} loading={loading} />
+            <MyAppButton title={"Cancel"} marginTop={RFPercentage(7)} onPress={() => setModalVisible2(true)} width={RFPercentage(20)} loading={isloading} />
           </View>
         </>
       ) : (

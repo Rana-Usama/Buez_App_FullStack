@@ -35,18 +35,10 @@ import * as yup from "yup";
 import { Formik } from "formik";
 import { useNavigation } from "@react-navigation/native";
 
-type InputField = {
-  placeholder: string;
-  value: string;
-  secure?: boolean;
-  error?: string;
-  validator?: (value: any, compareValue?: any) => string;
-};
-
 // WebBrowser.maybeCompleteAuthSession();
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
-function Login(props: any) {
+function Login({ navigation }: any) {
   const [indicator, showIndicator] = useState(false);
   const [remember, setRemember] = useState(false);
   let validationSchema = yup.object({
@@ -55,7 +47,7 @@ function Login(props: any) {
   });
   const [loading, setLoading] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
-  const navigation = useNavigation();
+
   useEffect(() => {
     async function getToken() {
       const token = await registerForPushNotificationsAsync();
@@ -96,13 +88,7 @@ function Login(props: any) {
         await addUser(user?.uid, userData);
         Toast.show({
           type: "success",
-          text1: "Welcome to Buez!",
-          text2: "Your account has been created successfully.",
-        });
-      } else {
-        Toast.show({
-          type: "success",
-          text1: "Welcome to Buez!",
+          text1: "Welcome back!",
           text2: "Signed In successfully!",
         });
       }
@@ -145,14 +131,14 @@ function Login(props: any) {
       }
       Toast.show({
         type: "success",
-        text1: "Sign in Successfully!",
-        text2: "Welcome back!",
+        text1: "Welcome back!",
+        text2: "Signed In successfully!",
       });
       navigation.navigate("TabNavigator");
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Sign In Error",
+        text1: "Sign-In Failed",
         text2: "Invalid Credentials",
       });
     }
@@ -162,8 +148,6 @@ function Login(props: any) {
   const toggleRemember = () => {
     setRemember(!remember);
   };
-
-  
 
   return (
     <Screen style={styles.screen}>
@@ -227,7 +211,7 @@ function Login(props: any) {
                 </View>
                 <Text style={styles.rememberText}>Remember me?</Text>
               </View>
-              <TouchableOpacity onPress={() => props.navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
+              <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableOpacity>
             </TouchableOpacity>
@@ -265,7 +249,7 @@ function Login(props: any) {
 
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don't have an account?</Text>
-        <TouchableOpacity onPress={() => props.navigation.navigate("Signup")}>
+        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
           <Text style={styles.signupLink}>Signup</Text>
         </TouchableOpacity>
       </View>

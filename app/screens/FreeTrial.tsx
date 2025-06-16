@@ -5,10 +5,8 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "../components/common/MyAppButton";
-import { useNavigation } from "@react-navigation/native";
 
-const FreeTrial = () => {
-  const navigation = useNavigation()
+const FreeTrial = ({ navigation }: any) => {
   return (
     <Screen style={styles.screen}>
       <Image style={styles.logo} source={Icons.logo} />

@@ -74,7 +74,7 @@ function FAQ({ navigation }) {
       </ScrollView>
 
       {/* Bottom Tab */}
-      <CustomTabBar settingTab={true} navigation={navigation} />
+      {/* <CustomTabBar settingTab={true} navigation={navigation} /> */}
     </View>
   );
 }

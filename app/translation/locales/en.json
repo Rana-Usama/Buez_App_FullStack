@@ -1,0 +1,293 @@
+{
+  "buttons": {
+    "next": "Next",
+    "start": "Start",
+    "skip": "Skip",
+    "login": "Login",
+    "signup": "Signup",
+    "yes": "Yes",
+    "cancel": "Cancel"
+  },
+  "common": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "confirm": "Confirm Password"
+  },
+  "validations": {
+    "inValid": "Invalid email",
+    "emailReq": "Email is required",
+    "passwordReq": "Password is required",
+    "userReq": "Username is required",
+    "passwordLen": "Password must be at least 6 characters long",
+    "passwordMatch": "Passwords must match"
+  },
+  "toast": {
+    "login": {
+      "one": "Welcome back!",
+      "two": "Signed In successfully!",
+      "three": "Sign-In Failed",
+      "four": "Something went wrong. Please try again.",
+      "five": "Invalid Credentials"
+    },
+    "signup": {
+      "one": "Sign Up",
+      "two": "User registered Successfully!",
+      "three": "Sign Up Error",
+      "four": "Credentials already in use"
+    },
+    "forgetPassword": {
+      "one": "Reset Link Sent",
+      "two": "Check your email to reset your password.",
+      "three": "Error",
+      "four": "Failed to send reset link."
+    },
+    "subscriptionV2": {
+      "one": "Subscription Incomplete",
+      "two": "Your subscription could not be completed. Please try again.",
+      "three": "Free Trial Activated",
+      "four": "Your 14-day free trial has started successfully."
+    },
+    "subscription": {
+      "one": "Subscription Successful!",
+      "two": "Monthly plan activated successfully."
+    },
+    "myRequests": {
+      "one": "Request Status",
+      "two": "Request",
+      "three": "mark as completed",
+      "four": "cancelled",
+      "five": "Something went wrong!",
+      "six": "Unable to update request status."
+    },
+    "cancelSubscription": {
+      "one": "No Active Subscription",
+      "two": "We couldn't find an active subscription linked to your account.",
+      "three": "Subscription Cancelled",
+      "four": "Your subscription has been successfully cancelled. You will retain access until the end of your billing period."
+    },
+    "changePassword": {
+      "one": "Password Changed",
+      "two": "Password has been changed successfully!",
+      "three": "Error",
+      "four": "Some thing went wrong!"
+    },
+    "editProfile": {
+      "one": "Profile Updated",
+      "two": "Your profile has been updated successfully!.",
+      "three": "Update Failed",
+      "four": "An error occurred while updating your profile. Please try again."
+    }
+  },
+  "onBoarding": {
+    "onBoarding1": {
+      "Title": "Welcome to Büez",
+      "Desc": "Connect, collaborate, and grow – your network for professional support starts here."
+    },
+    "onBoarding2": {
+      "Title": "Post what you need help with",
+      "Desc": "Share your work or challenges. Get responses from real people ready to help."
+    },
+    "onBoarding3": {
+      "Title": "Manage posts & chat freely",
+      "Desc": "Keep track of your requests, update your posts, and chat with supporters – all in one place."
+    },
+    "onBoarding4": {
+      "Title": "Enjoy 14 days of full access",
+      "Desc": "Try all features of Büez completely free. No restrictions, no commitments."
+    },
+    "onBoarding5": {
+      "Title": "Continue with subscription",
+      "Desc": "After your 14-day free trial, continue enjoying Büez with the $12.99 monthly plan. Cancel anytime."
+    }
+  },
+  "login": {
+    "txt1": "Welcome Back",
+    "txt2": "Remember me?",
+    "txt3": "Forgot Password?",
+    "txt4": "or login with",
+    "txt5": "Don't have an account?"
+  },
+  "signup": {
+    "txt1": "Welcome!",
+    "txt2": "or signup with",
+    "txt3": "Already have an account?"
+  },
+  "forgetPassword": {
+    "txt1": "Reset Password?",
+    "txt2": "Send OTP"
+  },
+  "freeTrial": {
+    "txt1": "Activate Your 14-day free trial!",
+    "txt2": "How the Free Trial Works",
+    "txt3": "Today",
+    "txt4": "Unlock full access — enjoy all features of the app, completely free.",
+    "txt5": "In 10 days",
+    "txt6": "We’ll let you know as your trial nears its end — stay informed.",
+    "txt7": "In 14 days",
+    "txt8": "Your subscription begins automatically. Cancel anytime before then to avoid charges.",
+    "txt9": "Start Free Trial"
+  },
+  "subscriptionV2": {
+    "txt1": "Buy our premium to access full services",
+    "txt2": ".99/month",
+    "txt3": "Post daily chore requests",
+    "txt4": "See requests daily",
+    "txt5": "Earn money by doing daily chores",
+    "txt6": "Cancel anytime",
+    "txt7": "Add Card"
+  },
+  "subscription": {
+    "txt1": "Your 14-day free trial has ended.",
+    "txt2": "Upgrade to Premium to unlock full access.",
+    "txt3": "Checkout"
+  },
+  "home": {
+    "txt1": "Home",
+    "txt2": "Search",
+    "txt3": "Categories",
+    "txt4": "All",
+    "txt5": "Cleaning",
+    "txt6": "Moving",
+    "txt7": "Gardening",
+    "txt8": "Others",
+    "txt9": "Recent Requests",
+    "txt10": "Compensation",
+    "txt11": "No Record Found!"
+  },
+  "details": {
+    "txt1": "Details",
+    "txt2": "Read less",
+    "txt3": "Read more",
+    "txt4": "Location",
+    "txt5": "Date/Time",
+    "txt6": "Compensation",
+    "txt7": "Message Requester",
+    "txt8": "My Requests"
+  },
+  "myRequests": {
+    "txt1": "My Requests",
+    "txt2": "Active",
+    "txt3": "Completed",
+    "txt4": "Posted on:",
+    "txt5": "Mark as Done",
+    "txt6": "Cancel",
+    "txt7": "Are you sure you want to delete{`\n`}this request?"
+  },
+  "postRequest": {
+    "txt1": "Post Request",
+    "txt2": "Edit Request",
+    "txt3": "Task Type",
+    "txt4": "Gaming",
+    "txt5": "Monitarely",
+    "txt6": "Other",
+    "txt7": "Compensation Type",
+    "txt8": "Description",
+    "txt9": "Location Adress",
+    "txt10": "Compensation Details e.g, Two Movie Tickets",
+    "txt11": "e.g, 100$",
+    "txt12": "Upload Photos From Gallery",
+    "txt13": "Edit",
+    "txt14": "Post"
+  },
+  "messages": {
+    "txt1": "Messages",
+    "txt2": "All",
+    "txt3": "Unread",
+    "txt4": "No Unread Messages",
+    "txt5": "No Messages Yet"
+  },
+  "chat": {
+    "txt1": "Load earlier messages",
+    "txt2": "Type a message"
+  },
+  "settings": {
+    "txt1": "Cancel Subscription",
+    "txt2": "Change Password",
+    "txt3": "Terms & Conditions",
+    "txt4": "Privacy Policy",
+    "txt5": "FAQ's",
+    "txt6": "Logout",
+    "txt7": "Delete Account",
+    "txt8": "Help & Security",
+    "txt9": "Settings",
+    "txt10": "Are you sure you want to delete{`\n`}this account?",
+    "txt11": "Are you sure you want to logout{`\n`} from this account?"
+  },
+  "cancelSubscription": {
+    "txt1": "Cancel Premium Subscription",
+    "txt2": "Current Plan",
+    "txt3": ".99/month",
+    "txt4": "Your services will no longer be visible to others",
+    "txt5": "You won't receive daily requests anymore",
+    "txt6": "You won’t be able to earn from daily chores",
+    "txt7": "You will lose access to flexible cancellations",
+    "txt8": "You do not have an active subscription.",
+    "txt9": "Activate Subscription",
+    "txt10": "Are you sure you want to cancel{`\n}your monthly subscription?"
+  },
+  "chnagePassword": {
+    "txt1": "Enter Old Password",
+    "txt2": "Enter New Password",
+    "txt3": "Repeat New Password",
+    "txt4": "Change"
+  },
+  "faqs": {
+    "txt1": "What areas do you serve?",
+    "txt2": "Can I post my own requests?",
+    "txt3": "Can I cancel a request after I accept it?",
+    "txt4": "Can I leave a review to requester?"
+  },
+  "privacyPolicy": {
+    "txt1": " Welcome to our Privacy Policy. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal data when you use our application.",
+    "txt2": "Information We Collect",
+    "txt3": " We collect information that you provide directly to us, such as when you create an account, submit a request, or communicate with customer support. This may include your name, email, phone number, and other relevant details.",
+    "txt4": "How We Use Your Information",
+    "txt5": "We use the collected information to provide, improve, and personalize our services. This includes processing transactions, sending notifications, ensuring security, and analyzing usage trends.",
+    "txt6": "Data Sharing and Security",
+    "txt7": "We do not sell your personal data to third parties. We may share data with trusted service providers for necessary operations, complying with legal obligations, or ensuring user safety. We implement security measures to protect your data.",
+    "txt8": "Your Rights",
+    "txt9": "You have the right to access, update, or delete your personal information. You may also opt-out of certain data collection practices. Contact us if you have any privacy concerns.",
+    "txt10": "Changes to This Policy",
+    "txt11": "We may update this Privacy Policy from time to time. We encourage you to review it periodically for any changes. Continued use of our services after updates constitutes your acceptance of the revised policy.",
+    "txt12": "Contact Us",
+    "txt13": "If you have any questions about this Privacy Policy, please contact us at support@example.com."
+  },
+  "terms": {
+    "txt1": " Welcome to BUEZ, a platform operated by Devappics that connects users who need help with daily tasks to individuals willing to provide assistance in exchange for compensation. By accessing or using the BUEZ mobile application (the 'App') or any related services (collectively, the 'Service'), you agree to be bound by these Terms and Conditions ('Terms'). If you do not agree, you must not use the Service.",
+    "txt2": "1. Eligibility",
+    "txt3": "You must be at least 18 years old to use BUEZ. By registering, you confirm that you have the legal capacity to enter into this agreement. BUEZ reserves the right to suspend or terminate accounts that violate these Terms.",
+    "txt4": "2. User Accounts",
+    "txt5": "You must create an account to access and use the Service. You are responsible for maintaining the confidentiality of your account credentials. BUEZ is not liable for any unauthorized access to your account.",
+    "txt6": "3. Subscription and Payments",
+    "txt7": "BUEZ operates on a subscription-based model. Users must subscribe to access and post requests. Subscription fees are charged monthly and will continue until canceled by the user. Payments are processed through third-party payment providers.",
+    "txt8": "4. Use of the Service",
+    "txt9": "Users may post requests for assistance, specifying compensation and task details. Compensation is handled directly between the requestor and the helper, and BUEZ does not guarantee or process payments between users.",
+    "txt10": "5. Prohibited Activities",
+    "txt11": "Users must not post misleading, harmful, or offensive content, use the platform for illegal activities, or attempt to hack or disrupt the platform’s functionality.",
+    "txt12": "6. Limitation of Liability",
+    "txt13": "BUEZ is a facilitator and is not liable for any direct, indirect, incidental, or consequential damages arising from the use of the Service. BUEZ does not guarantee the quality, reliability, or safety of services provided by users.",
+    "txt14": "7. Contact Information",
+    "txt15": "For questions or support, please contact us at info@buez.com"
+  },
+  "successScreen": {
+    "txt1": "Request Posted Successfully",
+    "txt2": "Home"
+  },
+  "profile": {
+    "txt1": "Profile",
+    "txt2": "Edit Profile",
+    "txt3": "Rating & Reviews"
+  },
+  "editProfile": {
+    "txt1": "Add your Name",
+    "txt2": "Add your Phone Number",
+    "txt3": "Edit Info",
+    "txt4": "Edit"
+  },
+  "reviews" : {
+    "txt1" : "My Reviews",
+    "txt2" : "Dated:",
+    "txt3" : "By:"
+  }
+}

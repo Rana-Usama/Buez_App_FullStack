@@ -107,7 +107,7 @@ function Subscription(props) {
       await saveSubscription(userId, result?.subscriptionId);
       Toast.show({
         type: "success",
-        text1: "Subscription Confirmed",
+        text1: "Subscription Successful!",
         text2: "Monthly plan activated successfully.",
       });
       props.navigation.navigate("TabNavigator");

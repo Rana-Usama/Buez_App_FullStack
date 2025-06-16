@@ -15,6 +15,7 @@ import ExpoStripeProvider from "./app/contexts/stripe-provider";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./app/utils/ToastConfig";
 import StackNavigator from "./app/router/StackNavigator";
+import i18n from "./app/translation/i18n";
 
 LogBox.ignoreAllLogs();
 

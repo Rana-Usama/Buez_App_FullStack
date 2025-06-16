@@ -41,14 +41,14 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
       await updatePassword(currentPassword, newPassword);
       Toast.show({
         type : 'success',
-        text1 : 'Password Change',
+        text1 : 'Password Changed',
         text2 : 'Password has been changed successfully!'
       })
       navigation.navigate("Login");
     } catch (error: any) {
        Toast.show({
         type : 'error',
-        text1 : 'Password Change',
+        text1 : 'Error',
         text2 : 'Some thing went wrong!'
       });
     }

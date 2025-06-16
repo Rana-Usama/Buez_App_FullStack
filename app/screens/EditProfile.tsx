@@ -117,14 +117,14 @@ function EditProfile({ navigation }) {
       navigation.navigate("Profile");
       Toast.show({
         type: "success",
-        text1: "Profile Update",
-        text2: "Profile has been updated successfully!",
+        text1: "Profile Updated",
+        text2: "Your profile has been updated successfully!.",
       });
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Profile Update",
-        text2: "Error in updating Profile!",
+        text1: "Update Failed",
+        text2: "An error occurred while updating your profile. Please try again.",
       });
     } finally {
       setIsUpdating(false);
@@ -190,7 +190,7 @@ function EditProfile({ navigation }) {
       </KeyboardAvoidingView>
 
       {/* Bottom Tab */}
-      <CustomTabBar profileTab={true} navigation={navigation} />
+      {/* <CustomTabBar profileTab={true} navigation={navigation} /> */}
     </View>
   );
 }

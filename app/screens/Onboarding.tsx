@@ -4,51 +4,57 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from "expo-secure-store";
 import LottieView from "lottie-react-native";
-
+import i18n from "../translation/i18n";
 // components
 import Screen from "../components/Screen";
 
 // config
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
-
-const onboardingData = [
-  {
-    image: Icons.onBoarding1,
-    title: "Welcome to Büez",
-    description: "Connect, collaborate, and grow — your network for professional support starts here.",
-    lottie: require("../../assets/lottie/firstv2.json"),
-  },
-
-  {
-    image: Icons.onBoarding1,
-    title: "Post What You Need Help With",
-    description: "Share your work or challenges. Get responses from real people ready to assist.",
-    lottie: require("../../assets/lottie/OnBoarding1.json"),
-  },
-  {
-    image: Icons.onBoarding1,
-    title: "Manage Posts & Message Freely",
-    description: "Track your requests, update your posts, and message with supporters — all in one place",
-    lottie: require("../../assets/lottie/chatBoth.json"),
-  },
-  {
-    image: Icons.onBoarding2,
-    title: "Enjoy 14 Days of Full Access",
-    description: "Try every feature of Büez absolutely free. No limits, no commitments.",
-    lottie: require("../../assets/lottie/gift2.json"),
-  },
-  {
-    image: Icons.onBoarding3,
-    title: "Continue with Subscription",
-    description: "After your 14-day free trial, keep enjoying Büez with 12.99$ monthly plan. Cancel anytime.",
-    lottie: require("../../assets/lottie/pay2.json"),
-  },
-];
+import { useTranslation } from "react-i18next";
 
 function Onboarding(props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const { t } = useTranslation();
+
+  // useEffect(() => {
+  //   console.log("✅ i18n is initialized:", i18n.isInitialized);
+  // }, []);
+
+  const onboardingData = [
+    {
+      image: Icons.onBoarding1,
+      title: `${t("onBoarding1Title")}`,
+      description: `${t("onBoarding1Desc")}`,
+      lottie: require("../../assets/lottie/firstv2.json"),
+    },
+
+    {
+      image: Icons.onBoarding1,
+      title: `${t("onBoarding2Title")}`,
+      description: `${t("onBoarding2Desc")}`,
+      lottie: require("../../assets/lottie/OnBoarding1.json"),
+    },
+    {
+      image: Icons.onBoarding1,
+      title: `${t("onBoarding3Title")}`,
+      description: `${t("onBoarding3Desc")}`,
+      lottie: require("../../assets/lottie/chatBoth.json"),
+    },
+    {
+      image: Icons.onBoarding2,
+      title: `${t("onBoarding4Title")}`,
+      description: `${t("onBoarding4Desc")}`,
+      lottie: require("../../assets/lottie/gift2.json"),
+    },
+    {
+      image: Icons.onBoarding3,
+      title: `${t("onBoarding5Title")}`,
+      description: `${t("onBoarding5Desc")}`,
+      lottie: require("../../assets/lottie/pay2.json"),
+    },
+  ];
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -144,10 +150,10 @@ function Onboarding(props) {
 
       {/* Body */}
 
-      <View style={{ width: "90%", alignItems: "center", justifyContent: "center", marginTop: RFPercentage(8),position: "absolute", top: RFPercentage(10) }}>
+      <View style={{ width: "90%", alignItems: "center", justifyContent: "center", marginTop: RFPercentage(8), position: "absolute", top: RFPercentage(10) }}>
         <LottieView source={lottie} autoPlay loop style={{ width: RFPercentage(40), height: activeIndex === 2 ? RFPercentage(34) : RFPercentage(40) }} />
       </View>
-      <View style={{ top: RFPercentage(45), alignItems:'center', justifyContent:'center' }}>
+      <View style={{ top: RFPercentage(45), alignItems: "center", justifyContent: "center" }}>
         <View style={styles.wrapper}>
           <Text style={styles.title}>{title}</Text>
         </View>

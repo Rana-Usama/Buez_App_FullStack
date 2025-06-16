@@ -98,7 +98,7 @@ function OfferDetail({ navigation, route }) {
       </View>
 
       {/* Bottom Tab */}
-      <CustomTabBar homeTab={true} navigation={navigation} />
+      {/* <CustomTabBar homeTab={true} navigation={navigation} /> */}
     </View>
   );
 }
