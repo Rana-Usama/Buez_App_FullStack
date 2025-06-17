@@ -22,9 +22,11 @@ import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
+  const { t } = useTranslation();
   const userId = getAuth()?.currentUser?.uid;
   const firestore = getFirestore();
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -36,8 +38,8 @@ function CancelSubscription({ navigation }: any) {
     if (!userData?.subscriptionId) {
       Toast.show({
         type: "error",
-        text1: "No Active Subscription",
-        text2: "We couldn't find an active subscription linked to your account.",
+        text1: `${t("toast.cancelSubscription.one")}`,
+        text2: `${t("toast.cancelSubscription.two")}`,
       });
       return;
     }
@@ -71,8 +73,8 @@ function CancelSubscription({ navigation }: any) {
           }
           Toast.show({
             type: "success",
-            text1: "Subscription Cancelled",
-            text2: "Your subscription has been successfully cancelled. You will retain access until the end of your billing period.",
+            text1: `${t("toast.cancelSubscription.three")}`,
+            text2: `${t("toast.cancelSubscription.four")}`,
           });
           //   navigation.goBack();
         } else {
@@ -96,15 +98,15 @@ function CancelSubscription({ navigation }: any) {
       {userData?.subscriptionId ? (
         <>
           <View style={styles.premiumInfo}>
-            <Text style={styles.premiumText}>Cancel Premium Subscription</Text>
+            <Text style={styles.premiumText}>{`${t("cancelSubscription.txt1")}`}</Text>
           </View>
 
           <View style={styles.subscriptionContainer}>
             <View style={styles.priceContainer}>
               <Image style={styles.starIconLeft} source={Icons.stars} />
-              <Text style={{ fontFamily: "Poppins_600SemiBold", color: Colors.darkGrey }}>Current Plan</Text>
+              <Text style={{ fontFamily: "Poppins_600SemiBold", color: Colors.darkGrey }}>{`${t("cancelSubscription.txt2")}`}</Text>
               <Text style={styles.priceText}>
-                $12<Text style={styles.priceSubText}>.99/month</Text>
+                $12<Text style={styles.priceSubText}>{`${t("cancelSubscription.txt3")}`}</Text>
               </Text>
             </View>
 
@@ -112,10 +114,10 @@ function CancelSubscription({ navigation }: any) {
 
             {/* Details */}
             <View style={styles.detailsContainer}>
-              <Text style={styles.detailText}>⊙ Your services will no longer be visible to others</Text>
-              <Text style={styles.detailText}>⊙ You won't receive daily requests anymore</Text>
-              <Text style={styles.detailText}>⊙ You won’t be able to earn from daily chores</Text>
-              <Text style={styles.detailText}>⊙ You will lose access to flexible cancellations</Text>
+              <Text style={styles.detailText}>⊙ {`${t("cancelSubscription.txt4")}`}</Text>
+              <Text style={styles.detailText}>⊙ {`${t("cancelSubscription.txt5")}`}</Text>
+              <Text style={styles.detailText}>⊙ {`${t("cancelSubscription.txt6")}`}</Text>
+              <Text style={styles.detailText}>⊙ {`${t("cancelSubscription.txt7")}`}</Text>
             </View>
 
             <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
@@ -124,20 +126,20 @@ function CancelSubscription({ navigation }: any) {
           </View>
           {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
           <View style={{ alignItems: "center", justifyContent: "center", width: "80%" }}>
-            <MyAppButton title={"Cancel"} marginTop={RFPercentage(7)} onPress={() => setModalVisible2(true)} width={RFPercentage(20)} loading={isloading} />
+            <MyAppButton title={`${t("buttons.cancel")}`} marginTop={RFPercentage(7)} onPress={() => setModalVisible2(true)} width={RFPercentage(20)} loading={isloading} />
           </View>
         </>
       ) : (
         <>
           <Image style={styles.vector} source={Icons.notActive} resizeMode="contain" />
           <Text style={{ color: Colors.darkGrey, fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(2), paddingHorizontal: RFPercentage(5), textAlign: "center" }}>
-            You do not have an active subscription.
+            {`${t("cancelSubscription.txt8")}`}
           </Text>
           <TouchableOpacity
             style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: RFPercentage(2), marginTop: RFPercentage(4) }}
             onPress={() => navigation.navigate("Subscription")}
           >
-            <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.9), fontFamily: "Poppins_500Medium" }}>Activate Subscription</Text>
+            <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.9), fontFamily: "Poppins_500Medium" }}>{`${t("cancelSubscription.txt9")}`}</Text>
             <AntDesign name="arrowright" color={Colors.primary} size={RFPercentage(3)} style={{ left: RFPercentage(1) }} />
           </TouchableOpacity>
         </>
@@ -146,13 +148,13 @@ function CancelSubscription({ navigation }: any) {
       <Modal animationType="fade" transparent={true} visible={modalVisible2} onRequestClose={() => setModalVisible2(false)}>
         <BlurView intensity={100} style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>Are you sure you want to cancel{"\n"}your monthly subscription?</Text>
+            <Text style={styles.modalText}>{`${t("cancelSubscription.txt10")}`}</Text>
             <View style={styles.modalButtons}>
               <Pressable style={styles.cancelButton} onPress={() => setModalVisible2(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{`${t("buttons.cancel")}`}</Text>
               </Pressable>
               <MyAppButton
-                title={"Yes"}
+                title={`${t("buttons.yes")}`}
                 marginTop={RFPercentage(0)}
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}

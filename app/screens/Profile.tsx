@@ -11,20 +11,22 @@ import CustomTabBar from "../components/common/CustomTabBar";
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
+import { useTranslation } from "react-i18next";
 
 function Profile({ navigation }) {
   const { userData: user } = useUser();
+  const { t } = useTranslation();
   const profileImgUrl = user?.profileImage || "";
   const userName = user?.userName || "";
   const navigationsList = [
     {
       iconSource: Icons.editP,
-      title: "Edit Profile",
+      title: `${t("profile.txt2")}`,
       navigation: () => navigation.navigate("EditProfile"),
     },
     {
       iconSource: Icons.receipt,
-      title: "Rating & Reviews",
+      title: `${t("profile.txt3")}`,
       navigation: () => navigation.navigate("Reviews"),
     },
   ];
@@ -33,7 +35,14 @@ function Profile({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} profileImage={profileImgUrl} navigation={navigation} title="Profile" />
+        <Nav
+          dpNull
+          marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)}
+          leftLogo={false}
+          profileImage={profileImgUrl}
+          navigation={navigation}
+          title={`${t("profile.txt1")}`}
+        />
 
         {/* Profile Image */}
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("EditProfile")} style={{ marginTop: RFPercentage(5.5) }}>

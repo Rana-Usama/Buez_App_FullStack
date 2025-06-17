@@ -8,20 +8,46 @@ import CustomTabBar from "../components/common/CustomTabBar";
 
 // config
 import Colors from "../config/Colors";
+import { useTranslation } from "react-i18next";
 
 function TermsAndConditions({ navigation }) {
+  const { t } = useTranslation();
+  const sections = [
+    {
+      title: `${t("terms.txt2")}`,
+      content: `${t("terms.txt3")}`,
+    },
+    {
+      title: `${t("terms.txt4")}`,
+      content: `${t("terms.txt5")}`,
+    },
+    {
+      title: `${t("terms.txt6")}`,
+      content: `${t("terms.txt7")}`,
+    },
+    {
+      title: `${t("terms.txt8")}`,
+      content: `${t("terms.txt9")}`,
+    },
+    {
+      title: `${t("terms.txt10")}`,
+      content: `${t("terms.txt11")}`,
+    },
+    {
+      title: `${t("terms.txt12")}`,
+      content: `${t("terms.txt13")}`,
+    },
+    { title: `${t("terms.txt14")}`, content: `${t("terms.txt15")}` },
+  ];
+
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title="Terms & Conditions" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title={`${t("settings.txt3")}`} />
 
         <View style={styles.content}>
-          <Text style={styles.text}>
-            Welcome to BUEZ, a platform operated by Devappics that connects users who need help with daily tasks to individuals willing to provide assistance in exchange for compensation. By accessing
-            or using the BUEZ mobile application (the "App") or any related services (collectively, the "Service"), you agree to be bound by these Terms and Conditions ("Terms"). If you do not agree,
-            you must not use the Service.
-          </Text>
+          <Text style={styles.text}>{`${t("terms.txt1")}`}</Text>
         </View>
 
         {/* Sections */}
@@ -40,39 +66,6 @@ function TermsAndConditions({ navigation }) {
     </View>
   );
 }
-
-const sections = [
-  {
-    title: "1. Eligibility",
-    content:
-      "You must be at least 18 years old to use BUEZ. By registering, you confirm that you have the legal capacity to enter into this agreement. BUEZ reserves the right to suspend or terminate accounts that violate these Terms.",
-  },
-  {
-    title: "2. User Accounts",
-    content:
-      "You must create an account to access and use the Service. You are responsible for maintaining the confidentiality of your account credentials. BUEZ is not liable for any unauthorized access to your account.",
-  },
-  {
-    title: "3. Subscription and Payments",
-    content:
-      "BUEZ operates on a subscription-based model. Users must subscribe to access and post requests. Subscription fees are charged monthly and will continue until canceled by the user. Payments are processed through third-party payment providers.",
-  },
-  {
-    title: "4. Use of the Service",
-    content:
-      "Users may post requests for assistance, specifying compensation and task details. Compensation is handled directly between the requestor and the helper, and BUEZ does not guarantee or process payments between users.",
-  },
-  {
-    title: "5. Prohibited Activities",
-    content: "Users must not post misleading, harmful, or offensive content, use the platform for illegal activities, or attempt to hack or disrupt the platform’s functionality.",
-  },
-  {
-    title: "6. Limitation of Liability",
-    content:
-      "BUEZ is a facilitator and is not liable for any direct, indirect, incidental, or consequential damages arising from the use of the Service. BUEZ does not guarantee the quality, reliability, or safety of services provided by users.",
-  },
-  { title: "7. Contact Information", content: "For questions or support, please contact us at info@buez.com" },
-];
 
 const styles = StyleSheet.create({
   screen: {

@@ -14,8 +14,8 @@ const FreeTrial = ({ navigation }: any) => {
     <Screen style={styles.screen}>
       <Image style={styles.logo} source={Icons.logo} />
       <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>{`${t("freeTial.txt1")}`}</Text>
-        <Text style={styles.subHeaderText}>🎁 {`${t("freeTial.txt2")}`}</Text>
+        <Text style={styles.headerText}>{`${t("freeTrial.txt1")}`}</Text>
+        <Text style={styles.subHeaderText}>🎁 {`${t("freeTrial.txt2")}`}</Text>
         <View style={styles.stepsWrapper}>
           {/* Step 1 */}
           <View style={styles.stepRow}>
@@ -23,8 +23,8 @@ const FreeTrial = ({ navigation }: any) => {
               <Image source={Icons.key} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainer}>
-              <Text style={styles.stepTitle}>{`${t("freeTial.txt3")}`}</Text>
-              <Text style={styles.stepDescription}>{`${t("freeTial.txt4")}`}</Text>
+              <Text style={styles.stepTitle}>{`${t("freeTrial.txt3")}`}</Text>
+              <Text style={styles.stepDescription}>{`${t("freeTrial.txt4")}`}</Text>
             </View>
           </View>
           <View style={styles.connectorLine1} />
@@ -35,8 +35,8 @@ const FreeTrial = ({ navigation }: any) => {
               <Image source={Icons.notify} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainerSecond}>
-              <Text style={styles.stepTitle}>{`${t("freeTial.txt5")}`}</Text>
-              <Text style={styles.stepDescription}>{`${t("freeTial.txt6")}`}</Text>
+              <Text style={styles.stepTitle}>{`${t("freeTrial.txt5")}`}</Text>
+              <Text style={styles.stepDescription}>{`${t("freeTrial.txt6")}`}</Text>
             </View>
           </View>
           <View style={styles.connectorLine2} />
@@ -47,14 +47,14 @@ const FreeTrial = ({ navigation }: any) => {
               <Image source={Icons.star} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainer}>
-              <Text style={styles.stepTitle}>{`${t("freeTial.txt7")}`}</Text>
-              <Text style={styles.stepDescription}>{`${t("freeTial.txt8")}`}</Text>
+              <Text style={styles.stepTitle}>{`${t("freeTrial.txt7")}`}</Text>
+              <Text style={styles.stepDescription}>{`${t("freeTrial.txt8")}`}</Text>
             </View>
           </View>
           <View style={styles.connectorLine3} />
         </View>
       </View>
-      <MyAppButton title={`${t("freeTial.txt9")}`} marginTop={RFPercentage(-10)} onPress={() => navigation.navigate("SubscriptionV2")} />
+      <MyAppButton title={`${t("freeTrial.txt9")}`} marginTop={RFPercentage(-10)} onPress={() => navigation.navigate("SubscriptionV2")} />
     </Screen>
   );
 };

@@ -19,6 +19,7 @@ import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { updateProfile } from "../services/User.service";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
+import { useTranslation } from "react-i18next";
 
 type InputFieldType = {
   placeholder: string;
@@ -29,6 +30,7 @@ type InputFieldType = {
 };
 
 function EditProfile({ navigation }) {
+  const { t } = useTranslation();
   const { userData: user } = useUser();
   const [imageUri, setImageUri] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -40,13 +42,13 @@ function EditProfile({ navigation }) {
 
   const [inputField, SetInputField] = useState<InputFieldType[]>([
     {
-      placeholder: "Add your Name",
-      title: "Name",
+      placeholder: `${t("editProfile.txt1")}`,
+      title: `${t("common.name")}`,
       value: "",
     },
     {
-      placeholder: "Add your Phone Number",
-      title: "Phone Number",
+      placeholder: `${t("editProfile.txt2")}`,
+      title: `${t("editProfile.txt5")}`,
       value: "",
     },
   ]);
@@ -117,14 +119,14 @@ function EditProfile({ navigation }) {
       navigation.navigate("Profile");
       Toast.show({
         type: "success",
-        text1: "Profile Updated",
-        text2: "Your profile has been updated successfully!.",
+        text1: `${t("toast.editProfile.one")}`,
+        text2: `${t("toast.editProfile.two")}`,
       });
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Update Failed",
-        text2: "An error occurred while updating your profile. Please try again.",
+        text1: `${t("toast.editProfile.three")}`,
+        text2: `${t("toast.editProfile.four")}`,
       });
     } finally {
       setIsUpdating(false);
@@ -136,7 +138,7 @@ function EditProfile({ navigation }) {
   return (
     <View style={styles.screen}>
       {/* Nav */}
-      <Nav dpNull={true} marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Edit Profile" />
+      <Nav dpNull={true} marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("profile.txt2")}`} />
 
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboard}>
         <ScrollView style={{ width: "100%" }} showsVerticalScrollIndicator={false} contentContainerStyle={{ width: "100%", alignItems: "center" }} keyboardShouldPersistTaps="handled">
@@ -146,7 +148,7 @@ function EditProfile({ navigation }) {
             <Image style={styles.edit} source={Icons.gallery} />
           </TouchableOpacity>
           <View style={styles.editInfo}>
-            <Text style={styles.infoText}>Edit Info</Text>
+            <Text style={styles.infoText}>{`${t("editProfile.txt3")}`}</Text>
             <View style={styles.infoBottom} />
           </View>
 
@@ -184,7 +186,7 @@ function EditProfile({ navigation }) {
           </View>
           {/* Button */}
           <View style={styles.buttonWrapper}>
-            <MyAppButton title={"Edit"} marginTop={RFPercentage(2)} onPress={updateProfileData} loading={isUpdating} disabled={!isChanged || isUpdating} />
+            <MyAppButton title={`${t("editProfile.txt4")}`} marginTop={RFPercentage(2)} onPress={updateProfileData} loading={isUpdating} disabled={!isChanged || isUpdating} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -9,23 +9,26 @@ import CustomTabBar from "../components/common/CustomTabBar";
 
 // config
 import Colors from "../config/Colors";
+import { useTranslation } from "react-i18next";
 
 function FAQ({ navigation }) {
+  const { t } = useTranslation();
+
   const [faqs, setFaqs] = useState([
     {
-      question: "What areas do you serve?",
+      question: `${t("faqs.txt1")}`,
       answer: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.`,
     },
     {
-      question: "Can I post my own requests?",
+      question:  `${t("faqs.txt2")}`,
       answer: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.`,
     },
     {
-      question: "Can I cancel a request after I accept it?",
+      question:  `${t("faqs.txt3")}`,
       answer: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.`,
     },
     {
-      question: "Can I leave a review to requester?",
+      question:  `${t("faqs.txt4")}`,
       answer: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.`,
     },
   ]);
@@ -47,7 +50,7 @@ function FAQ({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title="FAQ's" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title={ `${t("settings.txt5")}`} />
 
         <View style={{ marginTop: RFPercentage(3.2), width: "90%" }}>
           {faqs.map((item, index) => (

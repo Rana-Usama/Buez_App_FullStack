@@ -212,7 +212,8 @@
     "txt8": "Hilf & Sicherheit",
     "txt9": "Einstellige",
     "txt10": "Bisch sicher, dass du die Konto wotsch lösche{`\n`}?",
-    "txt11": "Bisch sicher, dass du dich uslogge wotsch{`\n`} us däm Konto?"
+    "txt11": "Bisch sicher, dass du dich uslogge wotsch{`\n`} us däm Konto?",
+    "txt12": "Sprache ändern"
   },
   "cancelSubscription": {
     "txt1": "Premium-Abo kündige",
@@ -230,7 +231,10 @@
     "txt1": "Alts Passwort iigäh",
     "txt2": "Neus Passwort iigäh",
     "txt3": "Neus Passwort wiederhole",
-    "txt4": "Ändere"
+    "txt4": "Ändere",
+    "txt5": "Alts Passwort",
+    "txt6": "Neus Passwort",
+    "txt7": "Passwort wiederhole"
   },
   "faqs": {
     "txt1": "Welche Gebiet bediänet dir?",
@@ -283,7 +287,8 @@
     "txt1": "Gib dis Name a",
     "txt2": "Gib dis Telefonnumere a",
     "txt3": "Info bearbeite",
-    "txt4": "Bearbeite"
+    "txt4": "Bearbeite",
+    "txt5": "Telefonnummer"
   },
   "reviews": {
     "txt1": "Mini Bewertige",

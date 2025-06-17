@@ -28,7 +28,7 @@ type InputFieldType = {
 const { width } = Dimensions.get("window");
 
 function Home({ navigation }) {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
 
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
@@ -41,8 +41,9 @@ function Home({ navigation }) {
 
   const [activeFilter, setActiveFilter] = useState(`${t("home.txt4")}`);
   const [searchQuery, setSearchQuery] = useState("");
-
+  console.log(activeFilter);
   const [allTasks, setAllTasks] = useState([]);
+  // console.log(allTasks);
 
   const {
     taskRecords,
@@ -180,7 +181,14 @@ function Home({ navigation }) {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
         >
           {/* Nav */}
-          <Nav crown={true} marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("home.txt1")}`} />
+          <Nav
+            crown={true}
+            marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)}
+            profileImage={profileImgUrl}
+            leftLogo={true}
+            navigation={navigation}
+            title={`${t("home.txt1")}`}
+          />
 
           <View style={styles.inputFieldContainer}>
             {inputField?.map((item, i) => (

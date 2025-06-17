@@ -16,6 +16,7 @@ import Toast from "react-native-toast-message";
 import * as yup from "yup";
 import { Formik } from "formik";
 import InputFieldNew from "../components/common/NewField";
+import { useTranslation } from "react-i18next";
 
 interface ChangePasswordProps {
   navigation: any;
@@ -23,15 +24,18 @@ interface ChangePasswordProps {
 
 function ChangePassword({ navigation }: ChangePasswordProps) {
   const [indicator, showIndicator] = useState<boolean>(false);
-
+  const { t } = useTranslation();
   let validationSchema = yup.object({
-    oldPassword: yup.string().required("Password is required"),
-    password: yup.string().min(6, "Password must be at least 6 characters long").required("Password is required"),
+    oldPassword: yup.string().required(`${t("validations.passwordReq")}`),
+    password: yup
+      .string()
+      .min(6, `${t("validations.passwordLen")}`)
+      .required(`${t("validations.passwordReq")}`),
     confirmPassword: yup
       .string()
-      .oneOf([yup.ref("password")], "Passwords must match")
-      .required("Passwords must match"),
-  }); 
+      .oneOf([yup.ref("password")], `${t("validations.passwordMatch")}`)
+      .required(`${t("validations.passwordMatch")}`),
+  });
 
   const handlePasswordChange = async (values: any) => {
     try {
@@ -40,16 +44,16 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
       const newPassword = values.password;
       await updatePassword(currentPassword, newPassword);
       Toast.show({
-        type : 'success',
-        text1 : 'Password Changed',
-        text2 : 'Password has been changed successfully!'
-      })
+        type: "success",
+        text1: `${t("toast.changePassword.one")}`,
+        text2: `${t("toast.changePassword.two")}`,
+      });
       navigation.navigate("Login");
     } catch (error: any) {
-       Toast.show({
-        type : 'error',
-        text1 : 'Error',
-        text2 : 'Some thing went wrong!'
+      Toast.show({
+        type: "error",
+        text1: `${t("toast.changePassword.three")}`,
+        text2: `${t("toast.changePassword.four")}`,
       });
     }
     showIndicator(false);
@@ -59,7 +63,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
     <View style={styles.screen}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Change Password" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("settings.txt2")}`} />
 
         <Formik
           initialValues={{
@@ -73,9 +77,9 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
             <>
               <View style={styles.fieldContainer}>
-                <Text style={styles.title}>Old Password</Text>
+                <Text style={styles.title}>{`${t("chnagePassword.txt5")}`}</Text>
                 <InputFieldNew
-                  placeholder="Enter Old Password"
+                  placeholder={`${t("chnagePassword.txt1")}`}
                   password={true}
                   onChangeText={handleChange("oldPassword")}
                   handleBlur={handleBlur("oldPassword")}
@@ -96,9 +100,9 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
               </View>
 
               <View style={styles.fieldContainer}>
-                <Text style={styles.title}>New Password</Text>
+                <Text style={styles.title}>{`${t("chnagePassword.txt6")}`}</Text>
                 <InputFieldNew
-                  placeholder="Enter New Password"
+                  placeholder={`${t("chnagePassword.txt2")}`}
                   password={true}
                   onChangeText={handleChange("password")}
                   handleBlur={handleBlur("password")}
@@ -119,9 +123,9 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
               </View>
 
               <View style={styles.fieldContainer}>
-                <Text style={styles.title}>Repeat New Password</Text>
+                <Text style={styles.title}>{`${t("chnagePassword.txt7")}`}</Text>
                 <InputFieldNew
-                  placeholder="Repeat New Password"
+                  placeholder={`${t("chnagePassword.txt3")}`}
                   password={true}
                   onChangeText={handleChange("confirmPassword")}
                   handleBlur={handleBlur("confirmPassword")}
@@ -141,7 +145,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                 )}
               </View>
               <View style={styles.buttonWrapper}>
-                <MyAppButton title="Change" marginTop={RFPercentage(2)} onPress={() => handleSubmit()} loading={indicator} disabled={indicator} />
+                <MyAppButton title={`${t("chnagePassword.txt4")}`} marginTop={RFPercentage(2)} onPress={() => handleSubmit()} loading={indicator} disabled={indicator} />
               </View>
             </>
           )}

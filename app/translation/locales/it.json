@@ -1,0 +1,298 @@
+{
+  "buttons": {
+    "next": "Avanti",
+    "start": "Inizia",
+    "skip": "Salta",
+    "login": "Accedi",
+    "signup": "Registrati",
+    "yes": "Sì",
+    "cancel": "Annulla"
+  },
+  "common": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Nome",
+    "confirm": "Conferma password"
+  },
+  "validations": {
+    "inValid": "Email non valida",
+    "emailReq": "L'email è obbligatoria",
+    "passwordReq": "La password è obbligatoria",
+    "userReq": "Il nome utente è obbligatorio",
+    "passwordLen": "La password deve contenere almeno 6 caratteri",
+    "passwordMatch": "Le password devono corrispondere"
+  },
+  "toast": {
+    "login": {
+      "one": "Bentornato!",
+      "two": "Accesso effettuato con successo!",
+      "three": "Accesso non riuscito",
+      "four": "Qualcosa è andato storto. Riprova.",
+      "five": "Credenziali non valide"
+    },
+    "signup": {
+      "one": "Registrazione",
+      "two": "Utente registrato con successo!",
+      "three": "Errore di registrazione",
+      "four": "Credenziali già in uso"
+    },
+    "forgetPassword": {
+      "one": "Link di reimpostazione inviato",
+      "two": "Controlla la tua email per reimpostare la password.",
+      "three": "Errore",
+      "four": "Invio del link di reimpostazione fallito."
+    },
+    "subscriptionV2": {
+      "one": "Abbonamento incompleto",
+      "two": "Impossibile completare l'abbonamento. Riprova.",
+      "three": "Prova gratuita attivata",
+      "four": "La tua prova gratuita di 14 giorni è stata attivata con successo."
+    },
+    "subscription": {
+      "one": "Abbonamento riuscito!",
+      "two": "Piano mensile attivato con successo."
+    },
+    "myRequests": {
+      "one": "Stato della richiesta",
+      "two": "Richiesta",
+      "three": "segna come completata",
+      "four": "annullata",
+      "five": "Qualcosa è andato storto!",
+      "six": "Impossibile aggiornare lo stato della richiesta."
+    },
+    "cancelSubscription": {
+      "one": "Nessun abbonamento attivo",
+      "two": "Non abbiamo trovato un abbonamento attivo associato al tuo account.",
+      "three": "Abbonamento annullato",
+      "four": "Il tuo abbonamento è stato annullato con successo. Rimarrai attivo fino alla fine del periodo di fatturazione."
+    },
+    "changePassword": {
+      "one": "Password cambiata",
+      "two": "La password è stata cambiata con successo!",
+      "three": "Errore",
+      "four": "Qualcosa è andato storto!"
+    },
+    "editProfile": {
+      "one": "Profilo aggiornato",
+      "two": "Il tuo profilo è stato aggiornato con successo!",
+      "three": "Aggiornamento fallito",
+      "four": "Si è verificato un errore durante l’aggiornamento del profilo. Riprova."
+    }
+  },
+  "onBoarding": {
+    "onBoarding1": {
+      "Title": "Benvenuto su Büez",
+      "Desc": "Connettiti, collabora e cresci – la tua rete per il supporto professionale inizia qui."
+    },
+    "onBoarding2": {
+      "Title": "Pubblica ciò con cui hai bisogno di aiuto",
+      "Desc": "Condividi il tuo lavoro o le tue sfide. Ricevi risposte da persone reali pronte ad aiutarti."
+    },
+    "onBoarding3": {
+      "Title": "Gestisci post e chat liberamente",
+      "Desc": "Tieni traccia delle tue richieste, aggiorna i tuoi post e chatta con chi ti supporta – tutto in un unico posto."
+    },
+    "onBoarding4": {
+      "Title": "Goditi 14 giorni di accesso completo",
+      "Desc": "Prova tutte le funzionalità di Büez gratuitamente. Nessuna restrizione, nessun impegno."
+    },
+    "onBoarding5": {
+      "Title": "Continua con l’abbonamento",
+      "Desc": "Dopo i 14 giorni di prova gratuita, continua a usare Büez con il piano mensile da $12.99. Disdici in qualsiasi momento."
+    }
+  },
+  "login": {
+    "txt1": "Bentornato",
+    "txt2": "Mi riconosci?",
+    "txt3": "Password dimenticata?",
+    "txt4": "oppure accedi con",
+    "txt5": "Non hai un account?"
+  },
+  "signup": {
+    "txt1": "Benvenuto!",
+    "txt2": "oppure registrati con",
+    "txt3": "Hai già un account?"
+  },
+  "forgetPassword": {
+    "txt1": "Reimposta password?",
+    "txt2": "Invia codice OTP"
+  },
+  "freeTrial": {
+    "txt1": "Attiva la tua prova gratuita di 14 giorni!",
+    "txt2": "Come funziona la prova gratuita",
+    "txt3": "Oggi",
+    "txt4": "Sblocca l’accesso completo — usa tutte le funzionalità dell’app, gratuitamente.",
+    "txt5": "Tra 10 giorni",
+    "txt6": "Ti avviseremo quando la prova si avvicina alla fine — resta aggiornato.",
+    "txt7": "Tra 14 giorni",
+    "txt8": "L’abbonamento partirà automaticamente. Disdici prima per evitare addebiti.",
+    "txt9": "Inizia prova gratuita"
+  },
+  "subscriptionV2": {
+    "txt1": "Acquista il nostro premium per l’accesso completo ai servizi",
+    "txt2": "0,99 CHF/mese",
+    "txt3": "Pubblica richieste quotidiane di faccende",
+    "txt4": "Vedi le richieste quotidianamente",
+    "txt5": "Guadagna facendo faccende giornaliere",
+    "txt6": "Disdici quando vuoi",
+    "txt7": "Aggiungi Carta"
+  },
+  "subscription": {
+    "txt1": "La tua prova gratuita di 14 giorni è terminata.",
+    "txt2": "Passa a Premium per sbloccare l’accesso completo.",
+    "txt3": "Procedi al pagamento"
+  },
+  "home": {
+    "txt1": "Home",
+    "txt2": "Cerca",
+    "txt3": "Categorie",
+    "txt4": "Tutto",
+    "txt5": "Pulizie",
+    "txt6": "Traslochi",
+    "txt7": "Giardinaggio",
+    "txt8": "Altro",
+    "txt9": "Richieste recenti",
+    "txt10": "Compenso",
+    "txt11": "Nessun record trovato!"
+  },
+  "details": {
+    "txt1": "Dettagli",
+    "txt2": "Leggi meno",
+    "txt3": "Leggi di più",
+    "txt4": "Posizione",
+    "txt5": "Data/Ora",
+    "txt6": "Compenso",
+    "txt7": "Contatta il richiedente",
+    "txt8": "Le mie richieste"
+  },
+  "myRequests": {
+    "txt1": "Le mie richieste",
+    "txt2": "Attive",
+    "txt3": "Completate",
+    "txt4": "Pubblicato il:",
+    "txt5": "Segna come svolta",
+    "txt6": "Annulla",
+    "txt7": "Sei sicuro di voler eliminare\nquesta richiesta?"
+  },
+  "postRequest": {
+    "txt1": "Pubblica richiesta",
+    "txt2": "Modifica richiesta",
+    "txt3": "Tipo di attività",
+    "txt4": "Gaming",
+    "txt5": "Compenso",
+    "txt6": "Altro",
+    "txt7": "Tipo di compenso",
+    "txt8": "Descrizione",
+    "txt9": "Indirizzo",
+    "txt10": "Dettagli del compenso, es. due biglietti per il cinema",
+    "txt11": "es. 100 CHF",
+    "txt12": "Carica foto dalla galleria",
+    "txt13": "Modifica",
+    "txt14": "Pubblica"
+  },
+  "messages": {
+    "txt1": "Messaggi",
+    "txt2": "Tutti",
+    "txt3": "Non letti",
+    "txt4": "Nessun messaggio non letto",
+    "txt5": "Ancora nessun messaggio"
+  },
+  "chat": {
+    "txt1": "Carica messaggi precedenti",
+    "txt2": "Scrivi un messaggio"
+  },
+  "settings": {
+    "txt1": "Annulla abbonamento",
+    "txt2": "Cambia password",
+    "txt3": "Termini & Condizioni",
+    "txt4": "Politica sulla privacy",
+    "txt5": "FAQ",
+    "txt6": "Disconnettiti",
+    "txt7": "Elimina account",
+    "txt8": "Aiuto & Sicurezza",
+    "txt9": "Impostazioni",
+    "txt10": "Sei sicuro di voler eliminare\nquesto account?",
+    "txt11": "Sei sicuro di voler uscire\nda questo account?",
+    "txt12": "Cambia lingua"
+  },
+  "cancelSubscription": {
+    "txt1": "Annulla abbonamento Premium",
+    "txt2": "Piano attuale",
+    "txt3": "0,99 CHF/mese",
+    "txt4": "I tuoi servizi non saranno più visibili agli altri",
+    "txt5": "Non riceverai più richieste giornaliere",
+    "txt6": "Non potrai più guadagnare con le faccende quotidiane",
+    "txt7": "Perderai l’accesso alle cancellazioni flessibili",
+    "txt8": "Non hai un abbonamento attivo.",
+    "txt9": "Attiva abbonamento",
+    "txt10": "Sei sicuro di voler annullare\nil tuo abbonamento mensile?"
+  },
+  "chnagePassword": {
+    "txt1": "Inserisci la vecchia password",
+    "txt2": "Inserisci la nuova password",
+    "txt3": "Ripeti la nuova password",
+    "txt4": "Cambia",
+    "txt5": "Vecchia password",
+    "txt6": "Nuova password",
+    "txt7": "Ripeti la password"
+  },
+  "faqs": {
+    "txt1": "In quali zone operate?",
+    "txt2": "Posso pubblicare le mie richieste?",
+    "txt3": "Posso annullare una richiesta dopo averla accettata?",
+    "txt4": "Posso lasciare una recensione al richiedente?"
+  },
+  "privacyPolicy": {
+    "txt1": "Benvenuto nella nostra Informativa sulla privacy. La tua privacy è estremamente importante per noi. Questa informativa spiega come raccogliamo, usiamo e proteggiamo i tuoi dati personali quando utilizzi la nostra app.",
+    "txt2": "Informazioni che raccogliamo",
+    "txt3": "Raccogliamo le informazioni che fornisci direttamente, ad esempio quando crei un account, invii una richiesta o contatti il supporto. Queste possono includere nome, email, numero di telefono e altri dati pertinenti.",
+    "txt4": "Come usiamo le tue informazioni",
+    "txt5": "Utilizziamo le informazioni raccolte per fornire, migliorare e personalizzare i nostri servizi. Ciò include elaborare transazioni, inviare notifiche, garantire la sicurezza e analizzare le tendenze di utilizzo.",
+    "txt6": "Condivisione dati e sicurezza",
+    "txt7": "Non vendiamo i tuoi dati personali a terzi. Possiamo condividerli con fornitori di servizi fidati per necessità operative, obblighi legali o sicurezza degli utenti. Implementiamo misure per proteggerli.",
+    "txt8": "I tuoi diritti",
+    "txt9": "Hai il diritto di accedere, aggiornare o cancellare i tuoi dati personali. Puoi anche rinunciare ad alcune pratiche di raccolta. Contattaci per qualsiasi dubbio sulla privacy.",
+    "txt10": "Modifiche a questa informativa",
+    "txt11": "Potremmo aggiornare questa informativa periodicamente. Ti consigliamo di consultarla regolarmente. L’uso continuato dei nostri servizi dopo le modifiche implica accettazione.",
+    "txt12": "Contattaci",
+    "txt13": "Se hai domande su questa informativa, contattaci a support@example.com."
+  },
+  "terms": {
+    "txt1": "Benvenuto su BUEZ, una piattaforma gestita da Devappics che mette in contatto chi ha bisogno di aiuto per faccende quotidiane con persone disponibili a fornire assistenza in cambio di una ricompensa. Accedendo o utilizzando l’app BUEZ (“App”) o i servizi correlati (“Servizio”), accetti i presenti Termini e Condizioni (“Termini”). Se non sei d’accordo, non utilizzare il Servizio.",
+    "txt2": "1. Requisiti",
+    "txt3": "Devi avere almeno 18 anni per usare BUEZ. Registrandoti confermi di avere la capacità legale di stipulare questo accordo. BUEZ può sospendere o chiudere account che violano i Termini.",
+    "txt4": "2. Account utente",
+    "txt5": "Devi creare un account per usare il Servizio. Sei responsabile di mantenere riservati i tuoi dati di accesso. BUEZ non è responsabile per accessi non autorizzati.",
+    "txt6": "3. Abbonamenti e pagamenti",
+    "txt7": "BUEZ funziona con un modello in abbonamento. Gli utenti devono abbonarsi per usare e pubblicare richieste. I pagamenti sono mensili e continuano finché non disdetti. Sono gestiti da provider esterni.",
+    "txt8": "4. Uso del Servizio",
+    "txt9": "Gli utenti possono pubblicare richieste di aiuto indicando compenso e dettagli. Il compenso è gestito direttamente tra chi chiede e chi aiuta; BUEZ non garantisce né elabora i pagamenti.",
+    "txt10": "5. Attività vietate",
+    "txt11": "Non devi pubblicare contenuti ingannevoli, dannosi o offensivi, usare la piattaforma per scopi illegali o tentare di compromettere la piattaforma.",
+    "txt12": "6. Limitazione di responsabilità",
+    "txt13": "BUEZ è un facilitatore e non è responsabile per danni diretti, indiretti o causati dall’uso del Servizio. Non garantisce qualità, affidabilità o sicurezza dei servizi forniti dagli utenti.",
+    "txt14": "7. Contatti",
+    "txt15": "Per domande o assistenza, contattaci su info@buez.com"
+  },
+  "successScreen": {
+    "txt1": "Richiesta pubblicata con successo",
+    "txt2": "Home"
+  },
+  "profile": {
+    "txt1": "Profilo",
+    "txt2": "Modifica profilo",
+    "txt3": "Valutazioni & Recensioni"
+  },
+  "editProfile": {
+    "txt1": "Aggiungi il tuo nome",
+    "txt2": "Aggiungi il tuo numero di telefono",
+    "txt3": "Modifica informazioni",
+    "txt4": "Modifica",
+    "txt5": "Numero di telefono"
+  },
+  "reviews": {
+    "txt1": "Le mie recensioni",
+    "txt2": "Data:",
+    "txt3": "Di:"
+  }
+}

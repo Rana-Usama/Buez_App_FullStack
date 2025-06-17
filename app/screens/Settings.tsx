@@ -17,10 +17,11 @@ import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { usePostContext } from "../contexts/PostContext";
 import { Icons } from "../config/theme";
+import { useTranslation } from "react-i18next";
 
 function Settings({ navigation }) {
   const { userData: user } = useUser();
-  const { resetPostsData } = usePostContext();
+  const { t } = useTranslation();
   const profileImgUrl = user?.profileImage || "";
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
@@ -37,32 +38,37 @@ function Settings({ navigation }) {
   const navigationsList = [
     {
       iconSource: Icons.privacy,
-      title: "Cancel Subscription",
+      title: `${t("settings.txt1")}`,
       navigation: () => navigation.navigate("CancelSubscription"),
     },
     {
       iconSource: Icons.privacy,
-      title: "Change Password",
+      title: `${t("settings.txt2")}`,
       navigation: () => navigation.navigate("ChangePassword"),
     },
     {
+      iconSource: Icons.privacy,
+      title:`${t("settings.txt12")}`,
+      navigation: () => navigation.navigate("Language"),
+    },
+    {
       iconSource: Icons.tc,
-      title: "Terms & Conditions",
+      title: `${t("settings.txt3")}`,
       navigation: () => navigation.navigate("TermsAndConditions"),
     },
     {
       iconSource: Icons.privacy,
-      title: "Privacy Policy",
+      title: `${t("settings.txt4")}`,
       navigation: () => navigation.navigate("PrivacyPolicy"),
     },
     {
       iconSource: Icons.faq,
-      title: "FAQ's",
+      title: `${t("settings.txt5")}`,
       navigation: () => navigation.navigate("FAQ"),
     },
     {
       iconSource: Icons.logout,
-      title: "Logout",
+      title: `${t("settings.txt6")}`,
       redColor: true,
       navigation: () => {
         // resetPostsData();
@@ -72,7 +78,7 @@ function Settings({ navigation }) {
     },
     {
       iconSource: Icons.logout,
-      title: "Delete Account",
+      title: `${t("settings.txt7")}`,
       redColor: true,
       navigation: () => {
         setIsModalVisible(true);
@@ -86,10 +92,10 @@ function Settings({ navigation }) {
     <View style={styles.screen}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title="Settings" />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("settings.txt9")}`} />
 
         <View style={styles.content}>
-          <Text style={styles.txt}>Help & Security</Text>
+          <Text style={styles.txt}>{`${t("settings.txt8")}`}</Text>
           <View style={styles.wrap} />
         </View>
 
@@ -121,13 +127,13 @@ function Settings({ navigation }) {
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
         <BlurView intensity={100} style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>Are you sure you want to delete{"\n"}this account?</Text>
+            <Text style={styles.modalText}>{`${t("settings.txt10")}`}</Text>
             <View style={styles.modalButtons}>
               <Pressable style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{`${t("buttons.cancel")}`}</Text>
               </Pressable>
               <MyAppButton
-                title={"Yes"}
+                title={`${t("buttons.yes")}`}
                 marginTop={RFPercentage(0)}
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
@@ -146,13 +152,13 @@ function Settings({ navigation }) {
       <Modal animationType="fade" transparent={true} visible={isModalVisible2} onRequestClose={() => setIsModalVisible2(false)}>
         <BlurView intensity={100} style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>Are you sure you want to logout{"\n"} from this account?</Text>
+            <Text style={styles.modalText}>{`${t("settings.txt11")}`}</Text>
             <View style={styles.modalButtons}>
               <Pressable style={styles.cancelButton} onPress={() => setIsModalVisible2(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>{`${t("buttons.cancel")}`}</Text>
               </Pressable>
               <MyAppButton
-                title={"Yes"}
+                title={`${t("buttons.yes")}`}
                 marginTop={RFPercentage(0)}
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
@@ -179,7 +185,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   scroll: { width: "100%" },
-  scrollContent: { width: "100%", alignItems: "center" },
+  scrollContent: { width: "100%", alignItems: "center", paddingBottom: RFPercentage(5) },
   content: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(3.5) },
   txt: { color: Colors.lightGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   wrap: { width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) },

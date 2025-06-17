@@ -5,6 +5,7 @@ import { doc, setDoc, getDoc, updateDoc, onSnapshot, addDoc, collection, Timesta
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 // shared
 import { uploadImage } from './Shared.service';
+import i18n from '../translation/i18n';
 
 const db = FIREBASE_DB;
 const PAGE_SIZE = 10;
@@ -144,7 +145,7 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
         // limit(pageSize));
     }
 
-    if (taskType && taskType !== 'All') {
+    if (taskType && taskType !== `${i18n.t('home.txt4')}`) {
       q = query(q, where('taskType', '==', taskType));
     }
     // console.table({ taskType, searchQuery });

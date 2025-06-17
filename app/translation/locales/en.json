@@ -172,7 +172,7 @@
     "txt4": "Posted on:",
     "txt5": "Mark as Done",
     "txt6": "Cancel",
-    "txt7": "Are you sure you want to delete{`\n`}this request?"
+    "txt7": "Are you sure you want to delete\nthis request?"
   },
   "postRequest": {
     "txt1": "Post Request",
@@ -211,8 +211,9 @@
     "txt7": "Delete Account",
     "txt8": "Help & Security",
     "txt9": "Settings",
-    "txt10": "Are you sure you want to delete{`\n`}this account?",
-    "txt11": "Are you sure you want to logout{`\n`} from this account?"
+    "txt10": "Are you sure you want to delete\nthis account?",
+    "txt11": "Are you sure you want to logout\nfrom this account?",
+    "txt12" : "Change Language"
   },
   "cancelSubscription": {
     "txt1": "Cancel Premium Subscription",
@@ -224,13 +225,16 @@
     "txt7": "You will lose access to flexible cancellations",
     "txt8": "You do not have an active subscription.",
     "txt9": "Activate Subscription",
-    "txt10": "Are you sure you want to cancel{`\n}your monthly subscription?"
+    "txt10": "Are you sure you want to cancel\nyour monthly subscription?"
   },
   "chnagePassword": {
     "txt1": "Enter Old Password",
     "txt2": "Enter New Password",
     "txt3": "Repeat New Password",
-    "txt4": "Change"
+    "txt4": "Change",
+    "txt5": "Old Password",
+    "txt6": "New Password",
+    "txt7": "Repeat Password"
   },
   "faqs": {
     "txt1": "What areas do you serve?",
@@ -239,9 +243,9 @@
     "txt4": "Can I leave a review to requester?"
   },
   "privacyPolicy": {
-    "txt1": " Welcome to our Privacy Policy. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal data when you use our application.",
+    "txt1": "Welcome to our Privacy Policy. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal data when you use our application.",
     "txt2": "Information We Collect",
-    "txt3": " We collect information that you provide directly to us, such as when you create an account, submit a request, or communicate with customer support. This may include your name, email, phone number, and other relevant details.",
+    "txt3": "We collect information that you provide directly to us, such as when you create an account, submit a request, or communicate with customer support. This may include your name, email, phone number, and other relevant details.",
     "txt4": "How We Use Your Information",
     "txt5": "We use the collected information to provide, improve, and personalize our services. This includes processing transactions, sending notifications, ensuring security, and analyzing usage trends.",
     "txt6": "Data Sharing and Security",
@@ -283,13 +287,12 @@
     "txt1": "Add your Name",
     "txt2": "Add your Phone Number",
     "txt3": "Edit Info",
-    "txt4": "Edit"
+    "txt4": "Edit",
+    "txt5": "Phone Number"
   },
-  "reviews" : {
-    "txt1" : "My Reviews",
-    "txt2" : "Dated:",
-    "txt3" : "By:"
+  "reviews": {
+    "txt1": "My Reviews",
+    "txt2": "Dated:",
+    "txt3": "By:"
   }
-
-  
 }

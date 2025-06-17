@@ -9,17 +9,20 @@ import CustomTabBar from "../components/common/CustomTabBar";
 // config
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
+import { useTranslation } from "react-i18next";
 
 function Reviews({ navigation }) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title="Rating & Reviews" />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("profile.txt3")}`} />
 
         {/* My Reviews */}
         <View style={styles.reviewsHeader}>
-          <Text style={styles.headerText}>My Reviews</Text>
+          <Text style={styles.headerText}>{`${t("reviews.txt1")}`}</Text>
           <View style={styles.separator} />
         </View>
 
@@ -29,9 +32,9 @@ function Reviews({ navigation }) {
             <Text style={styles.reviewText}>It was fun to do gardening with Jake.</Text>
           </View>
           <View style={styles.reviewFooter}>
-            <Text style={styles.reviewDate}>Dated: 25 Jul 2024</Text>
+            <Text style={styles.reviewDate}>{`${t("reviews.txt2")}`} 25 Jul 2024</Text>
             <View style={styles.authorContainer}>
-              <Text style={styles.authorText}>By: Jhon Brown</Text>
+              <Text style={styles.authorText}>{`${t("reviews.txt3")}`} Jhon Brown</Text>
               <Image style={styles.authorAvatar} source={Icons.profile2} />
             </View>
           </View>

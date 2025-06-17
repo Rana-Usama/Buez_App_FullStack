@@ -37,6 +37,7 @@ import { getCredentials } from "../services/Auth.service";
 import * as SecureStore from "expo-secure-store";
 import { useUser } from "../contexts/user.context";
 import { differenceInDays } from "date-fns";
+import Language from "../screens/Language";
 
 export type RootStackParamList = {
   OnBoarding: undefined;
@@ -76,6 +77,7 @@ export type RootStackParamList = {
   Messages: undefined;
   Profile: undefined;
   CancelSubscription: undefined;
+  Language:undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -87,6 +89,7 @@ const StackNavigator: React.FC = () => {
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
 
   const { userData, loading: userLoading } = useUser();
+  console.log(credentials);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,6 +101,8 @@ const StackNavigator: React.FC = () => {
     };
     fetchData();
   }, []);
+
+  console.log(isLoading, userData, loggedOut, userLoading);
 
   useEffect(() => {
     const { email, password } = credentials;
@@ -141,7 +146,7 @@ const StackNavigator: React.FC = () => {
         if (isSubscribed || isWithinPaidPeriod) {
           setInitialRoute("TabNavigator");
         } else if (isTrialValid) {
-          setInitialRoute("FreeTrial");
+          setInitialRoute("TabNavigator");
         } else if (isFreeTrial && trialDays !== null && trialDays > 14) {
           setInitialRoute("Subscription");
         } else {
@@ -173,6 +178,8 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="TabNavigator" component={TabNavigator} />
           <Stack.Screen name="InitialScreen" component={InitialScreen} />
           <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
+          <Stack.Screen name="Language" component={Language} />
+
           <Stack.Screen name="OfferDetail" component={OfferDetail} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
           <Stack.Screen name="EditProfile" component={EditProfile} />
