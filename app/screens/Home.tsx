@@ -41,7 +41,7 @@ function Home({ navigation }) {
 
   const [activeFilter, setActiveFilter] = useState(`${t("home.txt4")}`);
   const [searchQuery, setSearchQuery] = useState("");
-  console.log(activeFilter);
+  // console.log(activeFilter);
   const [allTasks, setAllTasks] = useState([]);
   // console.log(allTasks);
 
@@ -65,7 +65,7 @@ function Home({ navigation }) {
   useEffect(() => {
     fetchRequests(null);
     return () => {
-      console.log("unmounting: Home");
+      // console.log("unmounting: Home");
     };
   }, [activeFilter]);
 
@@ -84,7 +84,7 @@ function Home({ navigation }) {
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords?.length > 0);
     } catch (error) {
-      console.error("Error loading posts:", error);
+      console.log("Error loading posts:", error);
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ function Home({ navigation }) {
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
     } catch (error) {
-      console.error("Error loading more posts:", error);
+      console.log("Error loading more posts:", error);
     }
     setLoadingMore(false);
   };
@@ -218,11 +218,34 @@ function Home({ navigation }) {
           </View>
 
           {/* Filter Buttons */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterButtonsContainer}>
-            {[`${t("home.txt4")}`, `${t("home.txt5")}`, `${t("home.txt6")}`, `${t("home.txt7")}`, `${t("home.txt8")}`].map((title, index) => (
-              <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
-            ))}
-          </ScrollView>
+          <FlatList
+            horizontal
+            data={[t("home.txt4"), t("home.txt5"), t("home.txt6"), t("home.txt7"), t("home.txt8")]}
+            keyExtractor={(item) => item}
+            contentContainerStyle={styles.filterButtonsContainer}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => {
+              // console.log(item, index);
+              // return <FilterButton title={item} isActive={activeFilter === item} isFirst={index === 0} />;
+              return (
+                <TouchableOpacity onPress={() => setActiveFilter(item)}>
+                  {activeFilter === item ? (
+                    <>
+                      <LinearGradient colors={[Colors.primary, "#4557B0"]} style={styles.gradient}>
+                        <Text style={{ fontFamily: "Poppins_400Regular", color: "white" }}>{item}</Text>
+                      </LinearGradient>
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.nonGradient}>
+                        <Text style={{ fontFamily: "Poppins_400Regular", color: Colors.heading }}>{item}</Text>
+                      </View>
+                    </>
+                  )}
+                </TouchableOpacity>
+              );
+            }}
+          />
 
           <View style={[styles.categoriesContainer, styles.recentRequestsContainer]}>
             <Text style={styles.categoriesText}>{`${t("home.txt9")}`}</Text>
@@ -343,6 +366,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     marginTop: RFPercentage(2),
+    // backgroundColor:'red'
   },
   categoriesText: {
     color: Colors.heading,
@@ -352,14 +376,16 @@ const styles = StyleSheet.create({
   filterButtonsContainer: {
     paddingHorizontal: RFPercentage(2.2),
     marginTop: RFPercentage(1.4),
+    // backgroundColor: "red",
   },
   filterButton: {
-    width: RFPercentage(11.5),
+    // width: RFPercentage(11.5),
     height: RFPercentage(4.8),
     borderRadius: RFPercentage(1),
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: RFPercentage(2),
+    // marginLeft: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
   },
   activeFilterButton: {
     borderColor: "transparent",
@@ -372,11 +398,22 @@ const styles = StyleSheet.create({
     marginLeft: 0,
   },
   gradient: {
-    justifyContent: "center",
+    paddingHorizontal: RFPercentage(2),
     alignItems: "center",
-    width: "100%",
-    height: "100%",
+    justifyContent: "center",
     borderRadius: RFPercentage(1),
+    height: RFPercentage(5.4),
+    marginHorizontal: RFPercentage(1),
+  },
+  nonGradient: {
+    height: RFPercentage(5.4),
+    paddingHorizontal: RFPercentage(2),
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "lightgrey",
+    borderRadius: RFPercentage(1),
+    marginHorizontal: RFPercentage(1),
   },
   filterButtonTextActive: {
     color: Colors.white,

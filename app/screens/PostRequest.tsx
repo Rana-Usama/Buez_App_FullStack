@@ -200,7 +200,13 @@ function PostRequest({ navigation, route }) {
   };
 
   function getRandomImage(taskType) {
-    const images = DEFAULT_IMAGES[taskType] || DEFAULT_IMAGES[`${t("postRequest.txt6")}`];
+    const defaultType = t("postRequest.txt6");
+    const images = DEFAULT_IMAGES?.[taskType] || DEFAULT_IMAGES?.[defaultType];
+
+    if (!Array.isArray(images) || images.length === 0) {
+      console.log("No images found for taskType:", taskType);
+      return null;
+    }
     const randomIndex = Math.floor(Math.random() * images.length);
     return images[randomIndex];
   }
@@ -209,8 +215,8 @@ function PostRequest({ navigation, route }) {
     if (!selectedTask || !selectedCompensation || !description || !location || (!compensation && !budget)) {
       Toast.show({
         type: "info",
-        text1: `${t("toast.postRequest.one")}`,
-        text2: `${t("toast.postRequest.two")}`,
+        text1: `Error`,
+        text2: `Fill all fields`,
       });
       return;
     }
@@ -229,14 +235,15 @@ function PostRequest({ navigation, route }) {
         status: REQUEST_STATUS.Active,
       };
 
-      const imgs = imageUris.filter((img) => Boolean(img));
+      const imgs = imageUris?.filter((img) => Boolean(img));
 
-      if (imgs.length === 0) {
+      if (imgs?.length === 0) {
         // Pick a random image from the selected task type
         const defaultImageForTask = getRandomImage(selectedTask);
         imgs.push(defaultImageForTask);
       }
-
+      console.log("data................", data);
+      console.log("imgs................", imgs);
       if (isEditing) {
         await updatePost(currentPostRequest.id, data, imgs);
       } else {
@@ -244,11 +251,12 @@ function PostRequest({ navigation, route }) {
       }
 
       navigation.navigate("SuccessScreen");
-    } catch (e) {
+    } catch (error) {
+      console.log("Error stack:", error?.stack);
       Toast.show({
         type: "error",
-        text1: `${t("toast.postRequest.three")}`,
-        text2: `${t("toast.postRequest.four")}`,
+        text1: `Error`,
+        text2: `${error}`,
       });
     } finally {
       showIndicator(false);
@@ -340,13 +348,26 @@ function PostRequest({ navigation, route }) {
 
           {/* decsription */}
           <View style={styles.descriptionContainer}>
-            <TextInput placeholder={`${t("postRequest.txt8")}`} placeholderTextColor={Colors.heading} value={description} multiline onChangeText={(e) => setDescription(e)} maxLength={250} style={styles.desc} />
+            <TextInput
+              placeholder={`${t("postRequest.txt8")}`}
+              placeholderTextColor={Colors.heading}
+              value={description}
+              multiline
+              onChangeText={(e) => setDescription(e)}
+              maxLength={250}
+              style={styles.desc}
+            />
             <Text style={styles.charCount}>{description.length}/250</Text>
           </View>
 
           {/* Input field */}
           <View style={styles.typeWrapper}>
-            <InputFieldNew placeholder={`${t("postRequest.txt9")}`} value={location} onChangeText={setLocation} customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }} />
+            <InputFieldNew
+              placeholder={`${t("postRequest.txt9")}`}
+              value={location}
+              onChangeText={setLocation}
+              customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }}
+            />
             {selectedCompensation === `${t("postRequest.txt6")}` ? (
               <>
                 <InputFieldNew
@@ -397,7 +418,13 @@ function PostRequest({ navigation, route }) {
           </View>
 
           {/*Login Button */}
-          <MyAppButton disabled={indicator} loading={indicator} title={isEditing ? `${t("postRequest.txt13")}` : `${t("postRequest.txt14")}`} marginTop={RFPercentage(6)} onPress={() => submitPostData()} />
+          <MyAppButton
+            disabled={indicator}
+            loading={indicator}
+            title={isEditing ? `${t("postRequest.txt13")}` : `${t("postRequest.txt14")}`}
+            marginTop={RFPercentage(6)}
+            onPress={() => submitPostData()}
+          />
 
           <View style={styles.space} />
         </ScrollView>

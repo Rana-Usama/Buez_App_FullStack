@@ -154,7 +154,8 @@
     "txt4": "Publitgà ils:",
     "txt5": "Marcar sco fatg",
     "txt6": "Annullar",
-    "txt7": "Essas ti segirt da vulair sbassar\nquesta dumonda?"
+    "txt7": "Essas ti segirt da vulair sbassar\nquesta dumonda?",
+    "txt8": "Annulà"
   },
   "postRequest": {
     "txt1": "Publitgar dumonda",
@@ -276,5 +277,12 @@
     "txt1": "Mes recensiuns",
     "txt2": "Data:",
     "txt3": "Da:"
+  },
+  "bottomTab": {
+    "txt1": "Mia dum.",
+    "txt2": "Publitgar",
+    "txt3": "Pagina",
+    "txt4": "Messadis",
+    "txt5": "Impostaziuns"
   }
 }

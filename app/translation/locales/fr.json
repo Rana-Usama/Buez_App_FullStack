@@ -172,7 +172,8 @@
     "txt4": "Publié le :",
     "txt5": "Marquer comme terminée",
     "txt6": "Annuler",
-    "txt7": "Êtes‑vous sûr de vouloir supprimer\ncette demande ?"
+    "txt7": "Êtes‑vous sûr de vouloir supprimer\ncette demande ?",
+    "txt8": "Annulé"
   },
   "postRequest": {
     "txt1": "Publier une demande",
@@ -294,5 +295,12 @@
     "txt1": "Mes avis",
     "txt2": "Daté :",
     "txt3": "Par :"
+  },
+  "bottomTab": {
+    "txt1": "Mes Dem.",
+    "txt2": "Publier",
+    "txt3": "Accueil",
+    "txt4": "Messages",
+    "txt5": "Paramètres"
   }
 }

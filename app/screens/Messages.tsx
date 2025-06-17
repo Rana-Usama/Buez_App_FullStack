@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 
 function Messages({ navigation }) {
   const { t } = useTranslation();
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState(`${t("messages.txt2")}`);
   const [chats, setChats] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -186,6 +186,8 @@ function Messages({ navigation }) {
     }
     return chats;
   }, [chats, activeFilter, userId]);
+
+  console.log("activeFilter........", activeFilter);
 
   return (
     <View style={styles.screen}>

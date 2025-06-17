@@ -172,7 +172,8 @@
     "txt4": "Posted on:",
     "txt5": "Mark as Done",
     "txt6": "Cancel",
-    "txt7": "Are you sure you want to delete\nthis request?"
+    "txt7": "Are you sure you want to delete\nthis request?",
+    "txt8": "Cancelled"
   },
   "postRequest": {
     "txt1": "Post Request",
@@ -213,7 +214,7 @@
     "txt9": "Settings",
     "txt10": "Are you sure you want to delete\nthis account?",
     "txt11": "Are you sure you want to logout\nfrom this account?",
-    "txt12" : "Change Language"
+    "txt12": "Change Language"
   },
   "cancelSubscription": {
     "txt1": "Cancel Premium Subscription",
@@ -294,5 +295,12 @@
     "txt1": "My Reviews",
     "txt2": "Dated:",
     "txt3": "By:"
+  },
+  "bottomTab": {
+    "txt1": "My Req",
+    "txt2": "Post Req",
+    "txt3": "Home",
+    "txt4": "Messages",
+    "txt5": "Settings"
   }
 }

@@ -38,10 +38,10 @@ import { useTranslation } from "react-i18next";
 const { width: screenWidth } = Dimensions.get("window");
 
 function MyRequests({ navigation }) {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
-  const [activeFilter, setActiveFilter] = useState("Active");
+  const [activeFilter, setActiveFilter] = useState(`${t("myRequests.txt2")}`);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [taskRecords, setTaskRecords] = useState([]);
@@ -132,8 +132,6 @@ function MyRequests({ navigation }) {
       });
     }
   };
-
-  
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -229,11 +227,13 @@ function MyRequests({ navigation }) {
             {/* Info */}
             <View style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.userImage} source={cart?.user?.profileImage ?  { uri: cart?.user?.profileImage } : Icons.dp} />
+                <Image style={styles.userImage} source={cart?.user?.profileImage ? { uri: cart?.user?.profileImage } : Icons.dp} />
               </TouchableOpacity>
 
               <Text style={styles.userName}>{cart.user.userName}</Text>
-              <Text style={styles.postDate}>{`${t("myRequests.txt4")}`} {getFormatedDate(cart?.createdAt)}</Text>
+              <Text style={styles.postDate}>
+                {`${t("myRequests.txt4")}`} {getFormatedDate(cart?.createdAt)}
+              </Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
@@ -252,7 +252,7 @@ function MyRequests({ navigation }) {
             {cart?.status === REQUEST_STATUS.Active && (
               <View style={{ width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) }}>
                 <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
-                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.7)}}>{`${t("myRequests.txt5")}`}</Text>
+                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.7) }}>{`${t("myRequests.txt5")}`}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -262,7 +262,7 @@ function MyRequests({ navigation }) {
                   }}
                   style={styles.cancel}
                 >
-                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.8)}}>{`${t("myRequests.txt6")}`}</Text>
+                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.8) }}>{`${t("myRequests.txt6")}`}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   compensationAmount: {
     color: Colors.primary,
     fontFamily: "Poppins_600SemiBold",
-    fontSize:RFPercentage(1.8)
+    fontSize: RFPercentage(1.8),
   },
   bottomSpacing: {
     marginBottom: RFPercentage(6),
@@ -550,13 +550,13 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     width: RFPercentage(16),
     height: RFPercentage(5.2),
-    borderColor: 'rgb(204, 204, 216)',
+    borderColor: "rgb(204, 204, 216)",
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
     right: 0,
-    backgroundColor: 'rgb(204, 204, 216)',
+    backgroundColor: "rgb(204, 204, 216)",
   },
   notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },

@@ -1,98 +1,93 @@
 // eslint-disable-next-line import/no-unresolved
-import { getAuth } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, onSnapshot, addDoc, collection, Timestamp, query, getDocs, where, orderBy, limit, startAfter } from 'firebase/firestore';
+import { getAuth } from "firebase/auth";
+import { doc, setDoc, getDoc, updateDoc, onSnapshot, addDoc, collection, Timestamp, query, getDocs, where, orderBy, limit, startAfter } from "firebase/firestore";
 // FIREBASE config
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 // shared
-import { uploadImage } from './Shared.service';
-import i18n from '../translation/i18n';
+import { uploadImage } from "./Shared.service";
+import i18n from "../translation/i18n";
 
 const db = FIREBASE_DB;
 const PAGE_SIZE = 10;
 
-export const savePost = async (data : any, imageUris : any) => {
+export const savePost = async (data: any, imageUris: any) => {
   try {
-    const imageUrls = await Promise.all(imageUris.map((uri : any) => {
-      if (uri && !uri?.startsWith('http')) {
-        return uploadImage(uri);
-      }
+    const imageUrls = await Promise.all(
+      imageUris.map((uri: any) => {
+        if (uri && !uri?.startsWith("http")) {
+          return uploadImage(uri);
+        }
 
-      return uri;
-    }));
+        return uri;
+      })
+    );
     const userId = getAuth().currentUser?.uid;
-    await addDoc(collection(db, 'taskRequests'), {
+    await addDoc(collection(db, "taskRequests"), {
       ...data,
-      status: 'Active',
+      status: "Active",
       imageUrls,
       createdAt: Timestamp.now(),
-      userId: userId
+      userId: userId,
     });
 
     return true;
   } catch (error) {
     console.error("Error_saving_post: ", error);
-    throw error
+    throw error;
   }
 };
 
-export const getPostById = async (id : any) => {
+export const getPostById = async (id: any) => {
   try {
     const docRef = doc(db, "taskRequests", id);
     const docSnap = await getDoc(docRef);
     return docSnap.data();
   } catch (error) {
     console.error("Error_getting_post: ", error);
-    throw error
+    throw error;
   }
-}
+};
 
-export const updatePost = async (id : any, data : any, imageUris:any) => {
+export const updatePost = async (id: any, data: any, imageUris: any) => {
   try {
-    const imageUrls = await Promise.all(imageUris.map((uri: any) => {
-      if (uri && !uri?.startsWith('http')) {
-        return uploadImage(uri);
-      }
+    const imageUrls = await Promise.all(
+      imageUris.map((uri: any) => {
+        if (uri && !uri?.startsWith("http")) {
+          return uploadImage(uri);
+        }
 
-      return uri;
-    }));
+        return uri;
+      })
+    );
     const userId = getAuth().currentUser?.uid;
     const userRef = doc(db, "taskRequests", id);
     await updateDoc(userRef, {
       ...data,
       imageUrls,
       updatedAt: Timestamp.now(),
-      userId: userId
+      userId: userId,
     });
 
     return true;
   } catch (error) {
     console.error("Error_saving_post: ", error);
-    throw error
+    throw error;
   }
 };
 
-export const getMyReuqests = async (postStatus : any, lastVisiblePost = null, pageSize = PAGE_SIZE) => {
+export const getMyReuqests = async (postStatus: any, lastVisiblePost = null, pageSize = PAGE_SIZE) => {
   try {
     const userId = getAuth().currentUser?.uid;
     if (!userId) {
       throw new Error("User is not logged in");
     }
     // console.log(postStatus);
-    let q = query(
-      collection(FIREBASE_DB, 'taskRequests'),
-      where('status', '==', postStatus),
-      where("userId", "==", userId),
-      orderBy('createdAt', 'desc'))
-      // limit(pageSize));
+    let q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", postStatus), where("userId", "==", userId), orderBy("createdAt", "desc"));
+    // limit(pageSize));
 
     if (lastVisiblePost) {
-      q = query(
-        collection(FIREBASE_DB, 'taskRequests'),
-        where('status', '==', postStatus),
-        where("userId", "==", userId),
-        orderBy('createdAt', 'desc'),
-        startAfter(lastVisiblePost))
-        // limit(pageSize));
+      q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", postStatus), where("userId", "==", userId), orderBy("createdAt", "desc"), startAfter(lastVisiblePost));
+      // limit(pageSize));
     }
 
     const snapshot = await getDocs(q);
@@ -111,14 +106,14 @@ export const getMyReuqests = async (postStatus : any, lastVisiblePost = null, pa
 
     const lastVisible = snapshot.docs[snapshot.docs.length - 1];
     // console.log('RECORDS:' ,tasksArray);
-    return {tasksArray, lastVisible};
+    return { tasksArray, lastVisible };
   } catch (error) {
-    console.log('GET_MY_POSTS: ', error);
+    console.log("GET_MY_POSTS: ", error);
     throw error;
   }
-}
+};
 
-export const getRequestList = async (taskType = '', searchQuery = '', lastVisiblePost = null, pageSize = PAGE_SIZE) => {
+export const getRequestList = async (taskType = "", searchQuery = "", lastVisiblePost = null, pageSize = PAGE_SIZE) => {
   try {
     const userId = getAuth().currentUser?.uid;
     if (!userId) {
@@ -126,32 +121,26 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
     }
 
     // const keywords = 'want help'.split(' ');
-    let q = query(
-      collection(FIREBASE_DB, 'taskRequests'),
-      where("status", "==", 'Active'),
-      where("userId", "!=", userId),
-      orderBy('createdAt', 'desc'))
-      // where('taskType', '==', 'Gardening'),
-      // where('descriptionKeywords', 'array-contains-any', keywords),
-      // limit(pageSize));
+    let q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", i18n.t("myRequests.txt2")), where("userId", "!=", userId), orderBy("createdAt", "desc"));
+    // where('taskType', '==', 'Gardening'),
+    // where('descriptionKeywords', 'array-contains-any', keywords),
+    // limit(pageSize));
 
     if (lastVisiblePost) {
-      q = query(
-        collection(FIREBASE_DB, 'taskRequests'),
-        where("status", "==", 'Active'),
-        where("userId", "!=", userId),
-        orderBy('createdAt', 'desc'),
-        startAfter(lastVisiblePost))
-        // limit(pageSize));
+      q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", i18n.t("myRequests.txt2")), where("userId", "!=", userId), orderBy("createdAt", "desc"), startAfter(lastVisiblePost));
+      // limit(pageSize));
     }
 
-    if (taskType && taskType !== `${i18n.t('home.txt4')}`) {
-      q = query(q, where('taskType', '==', taskType));
+    if (taskType && taskType !== `${i18n.t("home.txt4")}`) {
+      q = query(q, where("taskType", "==", taskType));
     }
     // console.table({ taskType, searchQuery });
     if (searchQuery) {
-      const keywords = searchQuery.trim().split(' ').map(k => k.toLowerCase());
-      q = query(q, where('descriptionKeywords', 'array-contains-any', keywords));
+      const keywords = searchQuery
+        .trim()
+        .split(" ")
+        .map((k) => k.toLowerCase());
+      q = query(q, where("descriptionKeywords", "array-contains-any", keywords));
     }
 
     const snapshot = await getDocs(q);
@@ -170,24 +159,24 @@ export const getRequestList = async (taskType = '', searchQuery = '', lastVisibl
 
     const lastVisible = snapshot.docs[snapshot.docs.length - 1];
     // console.log('HOME RECORDS:' ,tasksArray.length, tasksArray);
-    return {tasksArray, lastVisible};
+    return { tasksArray, lastVisible };
   } catch (error) {
-    console.log('GET_POSTS_LIST: ', error);
+    console.log("GET_POSTS_LIST: ", error);
     throw error;
   }
-}
+};
 
-export const updateReqestStatus = async (id : any, status:any, data:any) => {
+export const updateReqestStatus = async (id: any, status: any, data: any) => {
   try {
     const userRef = doc(db, "taskRequests", id);
     await updateDoc(userRef, {
       ...data,
-      status: status
+      status: status,
     });
 
     return true;
   } catch (error) {
     console.error("Error_saving_post: ", error);
-    throw error
+    throw error;
   }
-}
+};

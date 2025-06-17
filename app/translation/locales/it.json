@@ -172,7 +172,8 @@
     "txt4": "Pubblicato il:",
     "txt5": "Segna come svolta",
     "txt6": "Annulla",
-    "txt7": "Sei sicuro di voler eliminare\nquesta richiesta?"
+    "txt7": "Sei sicuro di voler eliminare\nquesta richiesta?",
+    "txt8": "Annullato"
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",
@@ -294,5 +295,13 @@
     "txt1": "Le mie recensioni",
     "txt2": "Data:",
     "txt3": "Di:"
-  }
+  },
+  "bottomTab": {
+  "txt1": "Mie Rich.",
+  "txt2": "Pubblica",
+  "txt3": "Home",
+  "txt4": "Messaggi",
+  "txt5": "Impostazioni"
+}
+
 }

@@ -172,7 +172,7 @@
     "txt4": "Gpostet am:",
     "txt5": "Als erledigt markiere",
     "txt6": "Abbräche",
-    "txt7": "Bisch sicher, dass du dä Uftrag wotsch lösche{`\n`}?"
+    "txt7": "Bisch sicher, dass du dä Uftrag wotsch lösche?"
   },
   "postRequest": {
     "txt1": "Uftrag poste",
@@ -211,8 +211,8 @@
     "txt7": "Konto lösche",
     "txt8": "Hilf & Sicherheit",
     "txt9": "Einstellige",
-    "txt10": "Bisch sicher, dass du die Konto wotsch lösche{`\n`}?",
-    "txt11": "Bisch sicher, dass du dich uslogge wotsch{`\n`} us däm Konto?",
+    "txt10": "Bisch sicher, dass du die Konto wotsch lösche?",
+    "txt11": "Bisch sicher, dass du dich uslogge wotsch\nus däm Konto?",
     "txt12": "Sprache ändern"
   },
   "cancelSubscription": {
@@ -225,7 +225,7 @@
     "txt7": "Du verlüsch dä flexible Kündigungs-Zugang",
     "txt8": "Du hesch ke aktivs Abo.",
     "txt9": "Abo aktiviere",
-    "txt10": "Bisch sicher, dass du dini monatlichi Abo kündige wotsch?{`\n`}"
+    "txt10": "Bisch sicher, dass du dini monatlichi Abo kündige wotsch?\n"
   },
   "chnagePassword": {
     "txt1": "Alts Passwort iigäh",
@@ -294,5 +294,13 @@
     "txt1": "Mini Bewertige",
     "txt2": "Datum:",
     "txt3": "Vo:"
-  }
+  },
+  "bottomTab": {
+  "txt1": "Meine Anf.",
+  "txt2": "Anfrage",
+  "txt3": "Start",
+  "txt4": "Nachrichten",
+  "txt5": "Einstellungen"
+}
+
 }

@@ -48,7 +48,7 @@ function Settings({ navigation }) {
     },
     {
       iconSource: Icons.privacy,
-      title:`${t("settings.txt12")}`,
+      title: `${t("settings.txt12")}`,
       navigation: () => navigation.navigate("Language"),
     },
     {
@@ -137,10 +137,11 @@ function Settings({ navigation }) {
                 marginTop={RFPercentage(0)}
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
-                onPress={() => {
+                onPress={async () => {
                   deleteCurrentUser();
                   setIsModalVisible(false);
                   removeCredentials();
+                  await SecureStore.deleteItemAsync("appLanguage");
                   navigation.navigate("OnBoarding");
                 }}
               />
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: RFPercentage(2),
     alignItems: "center",
-    height: RFPercentage(25),
+    height: RFPercentage(28),
     justifyContent: "center",
   },
   modalText: {
@@ -222,6 +223,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: RFPercentage(4),
     lineHeight: RFPercentage(3.2),
+    paddingHorizontal: RFPercentage(2),
   },
   modalButtons: {
     flexDirection: "row",
