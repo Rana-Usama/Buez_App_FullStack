@@ -21,6 +21,10 @@ LogBox.ignoreAllLogs();
 
 // Root App
 export default function App() {
+  useEffect(() => {
+    console.log("i18n is initialized:", i18n.isInitialized);
+  }, []);
+
   const [fontsLoaded] = useFonts({
     Poppins_300Light,
     Poppins_400Regular,

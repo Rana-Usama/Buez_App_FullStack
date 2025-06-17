@@ -178,7 +178,7 @@ function Signup({ navigation }: any) {
               <View style={styles.inputContainer}>
                 {/* Name */}
                 <InputFieldNew
-                  placeholder={`${t("validations.name")}`}
+                  placeholder={`${t("common.name")}`}
                   onChangeText={handleChange("name")}
                   handleBlur={handleBlur("name")}
                   value={values.name}
@@ -196,7 +196,7 @@ function Signup({ navigation }: any) {
 
                 {/* Email */}
                 <InputFieldNew
-                  placeholder={`${t("validations.email")}`}
+                  placeholder={`${t("common.email")}`}
                   onChangeText={handleChange("email")}
                   handleBlur={handleBlur("email")}
                   value={values.email}
@@ -214,7 +214,7 @@ function Signup({ navigation }: any) {
 
                 {/* Password */}
                 <InputFieldNew
-                  placeholder={`${t("validations.password")}`}
+                  placeholder={`${t("common.password")}`}
                   password={true}
                   onChangeText={handleChange("password")}
                   handleBlur={handleBlur("password")}
@@ -233,7 +233,7 @@ function Signup({ navigation }: any) {
 
                 {/* Confirm Password */}
                 <InputFieldNew
-                  placeholder={`${t("validations.confirm")}`}
+                  placeholder={`${t("common.confirm")}`}
                   password={true}
                   onChangeText={handleChange("confirmPassword")}
                   handleBlur={handleBlur("confirmPassword")}

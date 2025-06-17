@@ -18,9 +18,9 @@ function Onboarding(props) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const { t } = useTranslation();
 
-  // useEffect(() => {
-  //   console.log("✅ i18n is initialized:", i18n.isInitialized);
-  // }, []);
+  useEffect(() => {
+    console.log("✅ i18n is initialized:", i18n.isInitialized);
+  }, []);
 
   const onboardingData = [
     {

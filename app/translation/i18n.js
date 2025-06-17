@@ -11,7 +11,8 @@ i18n.use(initReactI18next).init({
     en: { translation: en },
     de: { translation: de },
   },
-  lng: Localization.locale.split("-")[0], // e.g. 'en-US' => 'en'
+  // lng: Localization.locale.split("-")[0], // e.g. 'en-US' => 'en'
+  lng : 'de',
   fallbackLng: "en",
   interpolation: {
     escapeValue: false,
