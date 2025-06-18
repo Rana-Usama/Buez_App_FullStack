@@ -6,6 +6,7 @@ import { collection, query, orderBy, limit, onSnapshot, addDoc, getDocs, Timesta
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { translateText } from "../translation/googleTranslation";
 
 import Colors from "../config/Colors";
 import { FIREBASE_DB } from "../../firebaseConfig";
@@ -22,33 +23,29 @@ const Chat = ({ navigation, route }) => {
   useEffect(() => {
     const listenForNewMessages = () => {
       const lastLoadedTimestamp = messages.length > 0 ? Timestamp.fromDate(messages[messages.length - 1].createdAt) : Timestamp.now();
-      console.log("WHERE", messages, lastLoadedTimestamp, Timestamp.now());
-      const q = query(
-        collection(FIREBASE_DB, `chats/${chatId}/messages`),
-        where("timestamp", ">", lastLoadedTimestamp), // Listen only for new messages
-        orderBy("timestamp", "asc")
-      );
+      const q = query(collection(FIREBASE_DB, `chats/${chatId}/messages`), where("timestamp", ">", lastLoadedTimestamp), orderBy("timestamp", "asc"));
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const newMessages = await Promise.all(
+          snapshot.docs.map(async (doc) => {
+            const firebaseMessage = doc.data();
+            const translatedText = await translateText(firebaseMessage?.text);
+            return {
+              _id: doc.id,
+              text: translatedText,
+              createdAt: firebaseMessage.timestamp.toDate(),
+              user: {
+                _id: firebaseMessage.senderId,
+                name: firebaseMessage.senderName,
+              },
+            };
+          })
+        );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const newMessages = snapshot.docs.map((doc) => {
-          const firebaseMessage = doc.data();
-          return {
-            _id: doc.id,
-            text: firebaseMessage.text,
-            createdAt: firebaseMessage.timestamp.toDate(),
-            user: {
-              _id: firebaseMessage.senderId,
-              name: firebaseMessage.senderName,
-            },
-          };
-        });
-        console.log(newMessages);
         setMessages((prevMessages) => {
           const messagesMap = new Map();
           prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
           newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
           const sortedMessages = Array.from(messagesMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          console.log(sortedMessages);
           return GiftedChat.append([], sortedMessages).filter(Boolean);
         });
       });
@@ -62,34 +59,31 @@ const Chat = ({ navigation, route }) => {
 
   useEffect(() => {
     const fetchInitialMessages = async () => {
-      const q = query(
-        collection(FIREBASE_DB, `chats/${chatId}/messages`),
-        /// where('text', '!=', ''), // Dummy where clause to make the query work
-        orderBy("timestamp", "desc"),
-        limit(100)
+      const q = query(collection(FIREBASE_DB, `chats/${chatId}/messages`), orderBy("timestamp", "desc"), limit(100));
+      const snapshot = await getDocs(q);
+      const initialMessages = await Promise.all(
+        snapshot.docs.map(async (doc) => {
+          const firebaseMessage = doc.data();
+          const translatedText = await translateText(firebaseMessage?.text);
+          return {
+            _id: doc.id,
+            text: translatedText,
+            createdAt: firebaseMessage.timestamp.toDate(),
+            user: {
+              _id: firebaseMessage.senderId,
+              name: firebaseMessage.senderName,
+            },
+          };
+        })
       );
 
-      const snapshot = await getDocs(q);
-      const initialMessages = snapshot.docs.map((doc) => {
-        const firebaseMessage = doc.data();
-        return {
-          _id: doc.id,
-          text: firebaseMessage.text,
-          createdAt: firebaseMessage.timestamp.toDate(),
-          user: {
-            _id: firebaseMessage.senderId,
-            name: firebaseMessage.senderName,
-          },
-        };
-      });
-      console.log("INITIAL CHAT", initialMessages);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]); // Update last visible
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+
       setMessages((prevMessages) => {
         const messagesMap = new Map();
         prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
         initialMessages.forEach((msg) => messagesMap.set(msg._id, msg));
         const mergedMessages = Array.from(messagesMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        console.log(mergedMessages);
         return GiftedChat.append([], mergedMessages).filter(Boolean);
       });
 
@@ -99,66 +93,31 @@ const Chat = ({ navigation, route }) => {
     fetchInitialMessages();
   }, [chatId]);
 
-  // useEffect(() => {
-  // 	const fetchInitialMessages = () => {
-  // 		const q = query(
-  // 			collection(FIREBASE_DB, `chats/${chatId}/messages`),
-  // 			orderBy('timestamp', 'desc'),
-  // 			limit(100)
-  // 		);
-
-  // 		const unsubscribe = onSnapshot(q, (snapshot) => {
-  // 			const newMessages = snapshot.docs.map((doc) => {
-  // 				const firebaseMessage = doc.data();
-  // 				return {
-  // 					_id: doc.id,
-  // 					text: firebaseMessage.text,
-  // 					createdAt: firebaseMessage.timestamp.toDate(),
-  // 					user: {
-  // 						_id: firebaseMessage.senderId,
-  // 						name: firebaseMessage.senderName,
-  // 					},
-  // 				};
-  // 			});
-
-  // 			setMessages((prevMessages) => GiftedChat.append(prevMessages, newMessages));
-  // 			setLastVisible(snapshot.docs[snapshot.docs.length - 1]); // Track last visible message
-  // 		});
-
-  // 		return unsubscribe;
-  // 	};
-
-  // 	return fetchInitialMessages();
-  // }, [chatId]);
-
   const fetchMoreMessages = async () => {
     if (!lastVisible) return;
-
     const q = query(collection(FIREBASE_DB, `chats/${chatId}/messages`), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(100));
-
     const snapshot = await getDocs(q);
-    const newMessages = snapshot.docs.map((doc) => {
-      const firebaseMessage = doc.data();
-      return {
-        _id: doc.id,
-        text: firebaseMessage.text,
-        createdAt: firebaseMessage.timestamp.toDate(),
-        user: {
-          _id: firebaseMessage.senderId,
-          name: firebaseMessage.senderName,
-        },
-      };
-    });
+    const newMessages = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const firebaseMessage = doc.data();
+        const translatedText = await translateText(firebaseMessage?.text);
+        return {
+          _id: doc.id,
+          text: translatedText,
+          createdAt: firebaseMessage.timestamp.toDate(),
+          user: {
+            _id: firebaseMessage.senderId,
+            name: firebaseMessage.senderName,
+          },
+        };
+      })
+    );
 
     setMessages((prevMessages) => {
       const messagesMap = new Map();
-
       prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
       newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-
-      const combinedMessages = Array.from(messagesMap.values()).sort(
-        (a, b) => (b.createdAt as any) - (a.createdAt as any) // Ensure createdAt is a number or Date
-      );
+      const combinedMessages = Array.from(messagesMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       return GiftedChat.append([], combinedMessages).filter(Boolean);
     });
 
@@ -202,20 +161,6 @@ const Chat = ({ navigation, route }) => {
     try {
       // Get unread messages sent by the other user
       const docRef = doc(FIREBASE_DB, "chats", chatId);
-      // const q = query(
-      //   collection(FIREBASE_DB, 'chats', chatId),
-      //   where("unread", "==", true),
-      //   where("senderId", "!=", currentUserId)
-      // );
-
-      // const docSnap = await getDoc(docRef);
-
-      // if (docSnap.exists()) {
-      //   console.log("Document data:", docSnap.data());
-      //   return docSnap.data();
-      // } else {
-      //   console.log("No such document!");
-      // }
       await updateDoc(docRef, { unread: false });
     } catch (error) {
       console.error("Error marking messages as read:", error);

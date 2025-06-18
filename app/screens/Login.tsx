@@ -80,7 +80,9 @@ function Login({ navigation }: any) {
       console.log("Firebase User:", user);
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
-      if (!userSnapshot.exists()) {
+      console.log(userSnapshot.exists())
+      // if (!userSnapshot.exists()) {
+
         const userData = {
           userName: user?.displayName,
           email: user?.email,
@@ -96,7 +98,8 @@ function Login({ navigation }: any) {
           text1: `${t("toast.login.one")}`,
           text2: `${t("toast.login.two")}`,
         });
-      }
+      // }
+      navigation.navigate("TabNavigator");
     } catch (error) {
       Toast.show({
         type: "error",

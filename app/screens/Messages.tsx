@@ -4,6 +4,7 @@ import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDo
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
+import { translateText } from "../translation/googleTranslation"; // make sure this import is correct
 
 // components
 import Nav from "../components/common/Nav";
@@ -18,7 +19,6 @@ import { useTranslation } from "react-i18next";
 
 function Messages({ navigation }) {
   const { t } = useTranslation();
-  const [activeFilter, setActiveFilter] = useState(`${t("messages.txt2")}`);
   const [chats, setChats] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -28,9 +28,8 @@ function Messages({ navigation }) {
   const { userData } = useUser();
   const profileImgUrl = userData?.profileImage || "";
 
-  console.log(userData);
-
   const filters = [`${t("messages.txt2")}`, `${t("messages.txt3")}`];
+  const [activeFilter, setActiveFilter] = useState(`${t("messages.txt2")}`);
 
   useEffect(() => {
     fetchInitialChats();
@@ -85,7 +84,25 @@ function Messages({ navigation }) {
     const userRef = doc(FIREBASE_DB, "users", otherUser);
     const userDoc = await getDoc(userRef);
     const userData = userDoc.exists() ? userDoc.data() : null;
-    return { id: d.id, ...chatData, user: userData };
+    let translatedText = chatData.lastMessage?.text || "";
+
+    if (translatedText) {
+      try {
+        translatedText = await translateText(translatedText);
+      } catch (e) {
+        console.log("Translation error:", e);
+      }
+    }
+
+    return {
+      id: d.id,
+      ...chatData,
+      lastMessage: {
+        ...chatData.lastMessage,
+        text: translatedText, // replaced with translated version
+      },
+      user: userData,
+    };
   };
 
   const fetchInitialChats = async () => {
@@ -153,7 +170,6 @@ function Messages({ navigation }) {
 
   const renderItem = ({ item }) => {
     // console.log("MSG INFO:: ", item.lastMessage, item.lastMessage?.senderId !== userId)
-    console.log(item.user);
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
@@ -186,8 +202,6 @@ function Messages({ navigation }) {
     }
     return chats;
   }, [chats, activeFilter, userId]);
-
-  console.log("activeFilter........", activeFilter);
 
   return (
     <View style={styles.screen}>
@@ -236,44 +250,6 @@ function Messages({ navigation }) {
             />
           </>
         )}
-
-        {/* <FlatList
-					data={messages}
-					pagingEnabled
-					onEndReached={() => console.log('end reached')}
-					showsHorizontalScrollIndicator={false}
-					onMomentumScrollEnd={() => console.log('end')}
-					style={{ width: '100%' }}
-					renderItem={({ item }) => (
-						<TouchableOpacity
-							onPress={() => navigation.navigate('Chat', { id: item.id })}
-							activeOpacity={0.8}
-							style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-							<View key={item.id} style={styles.messageContainer}>
-								<Image style={styles.messageImage} source={item.imageSource} />
-								<View style={styles.messageTextContainer}>
-									<Text style={styles.messageUserName}>{item.userName}</Text>
-									<Text style={styles.messageText}>{item.messageText}</Text>
-								</View>
-								<Text style={styles.messageTime}>{item.time}</Text>
-							</View>
-							<View style={styles.separator} />
-						</TouchableOpacity>
-					)}
-				/> */}
-        {/* {messages.map((message) => (
-          <TouchableOpacity activeOpacity={0.8} style={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
-            <View key={message.id} style={styles.messageContainer}>
-              <Image style={styles.messageImage} source={message.imageSource} />
-              <View style={styles.messageTextContainer}>
-                <Text style={styles.messageUserName}>{message.userName}</Text>
-                <Text style={styles.messageText}>{message.messageText}</Text>
-              </View>
-              <Text style={styles.messageTime}>{message.time}</Text>
-            </View>
-            <View style={styles.separator} />
-          </TouchableOpacity>
-        ))} */}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>

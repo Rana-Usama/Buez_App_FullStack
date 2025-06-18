@@ -18,6 +18,7 @@ function Profile({ navigation }) {
   const { t } = useTranslation();
   const profileImgUrl = user?.profileImage || "";
   const userName = user?.userName || "";
+  console.log(user)
   const navigationsList = [
     {
       iconSource: Icons.editP,

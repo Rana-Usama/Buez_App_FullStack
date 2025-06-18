@@ -18,6 +18,7 @@ import { usePostContext } from "../contexts/PostContext";
 import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 import { useTranslation } from "react-i18next";
+import { translateText } from "../translation/googleTranslation";
 
 type InputFieldType = {
   placeholder: string;
@@ -29,6 +30,13 @@ const { width } = Dimensions.get("window");
 
 function Home({ navigation }) {
   const { t } = useTranslation();
+
+  const handleTranslate = async () => {
+    const result = await translateText("Hello, how are you?");
+    // console.log("Translated:", result);
+  };
+
+  handleTranslate();
 
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";

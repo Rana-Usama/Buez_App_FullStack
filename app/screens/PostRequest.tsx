@@ -22,14 +22,7 @@ import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import InputFieldNew from "../components/common/NewField";
 import { useTranslation } from "react-i18next";
-
-type InputField = {
-  placeholder: string;
-  value: string;
-  validator: (value: any) => boolean;
-  display: (v: any) => boolean;
-  secure?: boolean;
-};
+import { translateText } from "../translation/googleTranslation";
 
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
@@ -50,7 +43,7 @@ function PostRequest({ navigation, route }) {
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
   const currentPostRequest = route.params?.postRequest;
-  console.log("Edit post", route.params?.postRequest);
+  // console.log("Edit post", route.params?.postRequest);
 
   const taskOptions = [
     { id: 1, name: `${t("home.txt5")}` },
@@ -67,23 +60,25 @@ function PostRequest({ navigation, route }) {
 
   useFocusEffect(
     useCallback(() => {
-      // set values
       const currentPostRequest = route.params?.postRequest;
-      if (currentPostRequest) {
-        console.log("set values");
-        setSelectedCompensation(currentPostRequest.compensationType);
-        setSelectedTask(currentPostRequest.taskType);
-        setLocation(currentPostRequest.address);
-        setCompensation(currentPostRequest.otherCompensation);
-        setBudget(`$${currentPostRequest.monitarily}`);
+      const translateAndSet = async () => {
+        if (currentPostRequest) {
+          setSelectedTask(await translateText(currentPostRequest.taskType));
+          setSelectedCompensation(await translateText(currentPostRequest.compensationType));
+          setLocation(currentPostRequest.address);
+          setCompensation(await translateText(currentPostRequest.otherCompensation));
+          setBudget(`$${currentPostRequest.monitarily}`);
 
-        const temp = [...imageUris];
-        currentPostRequest.imageUrls.forEach((imgUrl, i) => {
-          temp[i] = imgUrl;
-        });
-        setImageUris(temp);
-        setDescription(currentPostRequest.description);
-      }
+          const temp = [...imageUris];
+          currentPostRequest.imageUrls.forEach((imgUrl, i) => {
+            temp[i] = imgUrl;
+          });
+          setImageUris(temp);
+          setDescription(await translateText(currentPostRequest.description));
+        }
+      };
+
+      translateAndSet();
     }, [route.params?.postRequest])
   );
 

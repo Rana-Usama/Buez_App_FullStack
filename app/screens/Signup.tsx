@@ -107,6 +107,7 @@ function Signup({ navigation }: any) {
           text2: `${t("toast.login.two")}`,
         });
       }
+      navigation.navigate("TabNavigator");
     } catch (error) {
       console.log("Google Sign-In Error:", error?.code ?? "Unknown Code", error?.message ?? error);
     }

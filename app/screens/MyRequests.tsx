@@ -34,6 +34,7 @@ import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
+import { translateText } from "../translation/googleTranslation";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -53,6 +54,8 @@ function MyRequests({ navigation }) {
   const [selectedRequestItem, setSelectedRequestItem] = useState(null);
   const [activeIndices, setActiveIndices] = useState({});
 
+  const param = activeFilter === `${t("myRequests.txt2")}` ? REQUEST_STATUS.Active : REQUEST_STATUS.Completed;
+
   useFocusEffect(
     useCallback(() => {
       setTaskRecords([]);
@@ -62,9 +65,11 @@ function MyRequests({ navigation }) {
       return () => {
         console.log("unmounting: MyRequests");
       };
-    }, [activeFilter])
+    }, [param])
   );
 
+  const [compensationType, setComponsationType] = useState('')
+  console.log('compensationType........', compensationType)
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
     try {
@@ -72,8 +77,30 @@ function MyRequests({ navigation }) {
       if (typeof islastVisiblePost !== "undefined") {
         isLastVisible = islastVisiblePost;
       }
-      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(activeFilter, isLastVisible);
-      setTaskRecords(newRecords);
+      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(param, isLastVisible);
+
+      const type = await translateText('Monitarely')
+      setComponsationType(type)
+
+      const translatedRecords = await Promise.all(
+        newRecords.map(async (item) => {
+          console.log('item.........', item)
+          const translatedTitle = await translateText(item.title || "");
+          const translatedDescription = await translateText(item.description || "");
+          const translatedTaskType = await translateText(item.taskType || "");
+          const translatedCompensationType = await translateText(item.compensationType || "")
+          return {
+            ...item,
+            title: translatedTitle,
+            description: translatedDescription,
+            taskType: translatedTaskType,
+            compensationType : translatedCompensationType
+          };
+        })
+      );
+
+      console.log('translated............', translatedRecords)
+      setTaskRecords(translatedRecords);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
     } catch (error) {
@@ -87,7 +114,7 @@ function MyRequests({ navigation }) {
     if (!hasMore || loadingMore) return;
     setLoadingMore(true);
     try {
-      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(activeFilter, lastVisiblePost);
+      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(param, lastVisiblePost);
       setTaskRecords([...taskRecords, ...newRecords]);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
@@ -244,7 +271,7 @@ function MyRequests({ navigation }) {
               <Text style={{ fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(1) }}>
                 {`${t("home.txt10")}`}:{" "}
                 <Text style={styles.compensationAmount}>
-                  {cart.compensationType === "Monitarely" ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                  {cart.compensationType === `${compensationType}` ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
               </Text>
             </View>

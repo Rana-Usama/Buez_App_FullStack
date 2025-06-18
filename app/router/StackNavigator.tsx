@@ -132,16 +132,16 @@ const StackNavigator: React.FC = () => {
 
         const isWithinPaidPeriod = subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
-        console.log("== ROUTING LOGIC ==");
-        console.log("email:", email);
-        console.log("password:", password);
-        console.log("isSubscribed:", isSubscribed);
-        console.log("isFreeTrial:", isFreeTrial);
-        console.log("trialDays:", trialDays);
-        console.log("isTrialValid:", isTrialValid);
-        console.log("subStartDate:", subStartDate);
-        console.log("subEndDate:", subEndDate);
-        console.log("isWithinPaidPeriod:", isWithinPaidPeriod);
+        // console.log("== ROUTING LOGIC ==");
+        // console.log("email:", email);
+        // console.log("password:", password);
+        // console.log("isSubscribed:", isSubscribed);
+        // console.log("isFreeTrial:", isFreeTrial);
+        // console.log("trialDays:", trialDays);
+        // console.log("isTrialValid:", isTrialValid);
+        // console.log("subStartDate:", subStartDate);
+        // console.log("subEndDate:", subEndDate);
+        // console.log("isWithinPaidPeriod:", isWithinPaidPeriod);
 
         if (isSubscribed || isWithinPaidPeriod) {
           setInitialRoute("TabNavigator");
