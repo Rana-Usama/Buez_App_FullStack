@@ -12,12 +12,11 @@ import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 
-const languages = ["German", "French", "Italian", "Romansh", "English"];
+const languages = ["German", "French", "Italian", "English"];
 const languageMap = {
   German: "de",
   French: "fr",
   Italian: "it",
-  Romansh: "rm",
   English: "en",
 };
 

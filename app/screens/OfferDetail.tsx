@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList, Dimensions, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
@@ -15,6 +15,7 @@ import { createNewChat } from "../services/Chat.service";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
+import { translateText } from "../translation/googleTranslation";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -25,18 +26,47 @@ function OfferDetail({ navigation, route }) {
   const currentUserId = getAuth().currentUser?.uid;
   const postRequest = route.params?.postRequest;
 
-  console.log("current user", currentUser.userData);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const [translatedOffer, setTranslatedOffer] = useState({
+    taskType: "",
+    description: "",
+    otherCompensation: "",
+  });
+
+  useEffect(() => {
+    const translateOfferData = async () => {
+      const [translatedTaskType, translatedDescription, translatedCompensation] = await Promise.all([
+        translateText(postRequest.taskType || ""),
+        translateText(postRequest.description || ""),
+        translateText(postRequest.otherCompensation || ""),
+      ]);
+
+      setTranslatedOffer({
+        taskType: translatedTaskType,
+        description: translatedDescription,
+        otherCompensation: translatedCompensation,
+      });
+    };
+
+    if (postRequest) {
+      translateOfferData();
+    }
+  }, [postRequest]);
+
   const handleStartChat = async () => {
     const chatId = await createNewChat(currentUserId, postRequest.userId);
-    navigation.navigate("Chat", { chatId: chatId, senderId: currentUserId, senderName: currentUser.userData.userName, receiver: postRequest.user });
+    navigation.navigate("Chat", {
+      chatId: chatId,
+      senderId: currentUserId,
+      senderName: currentUser.userData.userName,
+      receiver: postRequest.user,
+    });
   };
-
-  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        {/* Nav */}
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("details.txt1")}`} />
 
         {/* Image Carousel */}
@@ -54,17 +84,17 @@ function OfferDetail({ navigation, route }) {
           />
         </View>
 
-        {/* Three dots */}
+        {/* Dots */}
         <View style={styles.dotsContainer}>
           {postRequest?.imageUrls?.length > 1 && postRequest.imageUrls.map((_, index) => <View key={index} style={[styles.dot, index === activeIndex ? styles.activeDot : styles.inactiveDot]} />)}
         </View>
 
-        {/* Details */}
+        {/* Translated Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>{postRequest.taskType}</Text>
+          <Text style={styles.title}>{translatedOffer.taskType}</Text>
           <Text style={styles.description}>
-            {isExpanded || postRequest.description.length <= 120 ? postRequest.description : postRequest.description.slice(0, 120) + "... "}
-            {postRequest.description.length > 120 && (
+            {isExpanded || translatedOffer.description.length <= 120 ? translatedOffer.description : translatedOffer.description.slice(0, 120) + "... "}
+            {translatedOffer.description.length > 120 && (
               <Text onPress={() => setIsExpanded(!isExpanded)} style={styles.readMoreText}>
                 {isExpanded ? `${t("details.txt2")}` : `${t("details.txt3")}`}
               </Text>
@@ -86,7 +116,7 @@ function OfferDetail({ navigation, route }) {
 
         <View style={styles.compensationContainer}>
           <Text style={styles.compensationTitle}>{`${t("details.txt6")}`}:</Text>
-          <Text style={styles.description}>{postRequest.compensationType === "Monitarely" ? `${postRequest.monitarily}$` : postRequest.otherCompensation}</Text>
+          <Text style={styles.description}>{postRequest.compensationType === "Monitarely" ? `${postRequest.monitarily}$` : translatedOffer.otherCompensation}</Text>
         </View>
       </ScrollView>
 
@@ -98,9 +128,6 @@ function OfferDetail({ navigation, route }) {
 
         <MyAppButton title={`${t("details.txt8")}`} marginTop={RFPercentage(0)} onPress={() => navigation.navigate("MyRequests")} />
       </View>
-
-      {/* Bottom Tab */}
-      {/* <CustomTabBar homeTab={true} navigation={navigation} /> */}
     </View>
   );
 }
@@ -112,17 +139,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
   },
-  readMoreText: {
-    color: Colors.primary,
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_500Medium",
-  },
-
   scrollView: {
     width: "100%",
   },
   scrollViewContent: {
     alignItems: "center",
+  },
+  carousal: {
+    width: "90%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: RFPercentage(0.5),
   },
   imageBackground: {
     width: screenWidth * 0.9,
@@ -170,6 +197,11 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
   },
+  readMoreText: {
+    color: Colors.primary,
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_500Medium",
+  },
   infoContainer: {
     width: "90%",
     justifyContent: "flex-start",
@@ -207,7 +239,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
   },
-  carousal: { width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(0.5) },
   chatButton: {
     marginRight: RFPercentage(2),
     backgroundColor: "#F8FAFC",
@@ -219,8 +250,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  text: { color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" },
-  buttonWrapper: { position: "absolute", bottom: RFPercentage(15), width: "100%", justifyContent: "center", alignItems: "center", flexDirection: "row" },
+  text: {
+    color: Colors.primary,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_500Medium",
+  },
+  buttonWrapper: {
+    position: "absolute",
+    bottom: RFPercentage(15),
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
 });
 
 export default OfferDetail;

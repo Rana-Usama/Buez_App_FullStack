@@ -53,7 +53,6 @@ function CancelSubscription({ navigation }: any) {
       const text = await res.text(); // Read as text first
       try {
         const result = JSON.parse(text); // Try parsing manually
-        // console.log("result...........", result);
         if (result.success) {
           const { currentPeriodEnd } = result;
           if (userId) {
@@ -62,9 +61,6 @@ function CancelSubscription({ navigation }: any) {
               await updateDoc(userRef, {
                 isSubscribed: false,
                 subscriptionId: null,
-                // isFreeTrial: true,
-                // freeTrialStartedAt: start,
-                // freeTrialEndAt: end,
               });
               console.log("User subscription status updated in Firestore");
             } catch (error) {
@@ -76,13 +72,10 @@ function CancelSubscription({ navigation }: any) {
             text1: `${t("toast.cancelSubscription.three")}`,
             text2: `${t("toast.cancelSubscription.four")}`,
           });
-          //   navigation.goBack();
         } else {
-          //   setModalVisible2(true);
         }
       } catch (err) {
         console.log(err);
-        // setModalVisible2(true);
       }
     } finally {
       setIsLoading(false);
@@ -124,7 +117,6 @@ function CancelSubscription({ navigation }: any) {
               <Image style={styles.starIconRight} source={Icons.stars} />
             </View>
           </View>
-          {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
           <View style={{ alignItems: "center", justifyContent: "center", width: "80%" }}>
             <MyAppButton title={`${t("buttons.cancel")}`} marginTop={RFPercentage(7)} onPress={() => setModalVisible2(true)} width={RFPercentage(20)} loading={isloading} />
           </View>
@@ -132,14 +124,9 @@ function CancelSubscription({ navigation }: any) {
       ) : (
         <>
           <Image style={styles.vector} source={Icons.notActive} resizeMode="contain" />
-          <Text style={{ color: Colors.darkGrey, fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(2), paddingHorizontal: RFPercentage(5), textAlign: "center" }}>
-            {`${t("cancelSubscription.txt8")}`}
-          </Text>
-          <TouchableOpacity
-            style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: RFPercentage(2), marginTop: RFPercentage(4) }}
-            onPress={() => navigation.navigate("Subscription")}
-          >
-            <Text style={{ color: Colors.primary, fontSize: RFPercentage(1.9), fontFamily: "Poppins_500Medium" }}>{`${t("cancelSubscription.txt9")}`}</Text>
+          <Text style={styles.notActive}>{`${t("cancelSubscription.txt8")}`}</Text>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Subscription")}>
+            <Text style={styles.buttonText}>{`${t("cancelSubscription.txt9")}`}</Text>
             <AntDesign name="arrowright" color={Colors.primary} size={RFPercentage(3)} style={{ left: RFPercentage(1) }} />
           </TouchableOpacity>
         </>
@@ -220,12 +207,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: RFPercentage(2),
   },
+  notActive: { color: Colors.darkGrey, fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(2), paddingHorizontal: RFPercentage(5), textAlign: "center" },
+  button: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: RFPercentage(2), marginTop: RFPercentage(4) },
+
   starIconLeft: {
     position: "absolute",
     left: RFPercentage(-1.5),
     width: RFPercentage(6),
     height: RFPercentage(6),
   },
+  buttonText: { color: Colors.primary, fontSize: RFPercentage(1.9), fontFamily: "Poppins_500Medium" },
   priceText: {
     color: Colors.darkGrey,
     fontSize: RFPercentage(4.2),

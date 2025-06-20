@@ -1,6 +1,5 @@
-// TabNavigator.tsx
-import React from "react";
-import { Image, Text, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Image, Text, TouchableOpacity, Keyboard } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
@@ -20,6 +19,22 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   const { t } = useTranslation();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   return (
     <Tab.Navigator
       id={undefined}
@@ -31,8 +46,6 @@ const TabNavigator = () => {
         tabBarShowLabel: true,
         tabBarStyle: {
           height: RFPercentage(10.5),
-          // borderTopRightRadius: RFPercentage(3),
-          // borderTopLeftRadius: RFPercentage(3),
           borderTopColor: Colors.detailsBorder,
           backgroundColor: Colors.detailsBorder,
           borderTopWidth: 0,
@@ -57,14 +70,15 @@ const TabNavigator = () => {
               break;
           }
 
+          const isMiddle = route.name === `${t("bottomTab.txt3")}`;
+
           return (
             <Image
               source={icon}
               style={{
-                width: route.name === `${t("bottomTab.txt3")}` ? RFPercentage(8) : RFPercentage(3),
-                height: route.name === `${t("bottomTab.txt3")}` ? RFPercentage(8) : RFPercentage(3),
-                bottom: route.name === `${t("bottomTab.txt3")}` ? RFPercentage(2) : RFPercentage(-0.6),
-                // top: route.name === "Home" ? 0 : RFPercentage(1),
+                width: isMiddle ? RFPercentage(8) : RFPercentage(3),
+                height: isMiddle ? RFPercentage(8) : RFPercentage(3),
+                bottom: isMiddle ? (isKeyboardVisible ? RFPercentage(-1) : RFPercentage(2)) : RFPercentage(-0.6),
               }}
               resizeMode="contain"
             />
@@ -72,9 +86,6 @@ const TabNavigator = () => {
         },
         tabBarLabel: ({ focused }) => {
           let label = route.name;
-          // if (label === "MyRequests") label = "My Req";
-          // if (label === "PostRequest") label = "Post Req";
-
           return (
             <Text
               style={{
@@ -82,9 +93,8 @@ const TabNavigator = () => {
                 fontSize: RFPercentage(1.5),
                 color: focused ? Colors.primary : Colors.detailsText,
                 top: RFPercentage(1),
-                // backgroundColor:'red',
-                width:RFPercentage(9),
-                textAlign:'center'
+                width: RFPercentage(9),
+                textAlign: "center",
               }}
             >
               {label}

@@ -37,7 +37,7 @@ function Settings({ navigation }) {
 
   const navigationsList = [
     {
-      iconSource: Icons.privacy,
+      iconSource: Icons.cancel,
       title: `${t("settings.txt1")}`,
       navigation: () => navigation.navigate("CancelSubscription"),
     },
@@ -47,7 +47,7 @@ function Settings({ navigation }) {
       navigation: () => navigation.navigate("ChangePassword"),
     },
     {
-      iconSource: Icons.privacy,
+      iconSource: Icons.language,
       title: `${t("settings.txt12")}`,
       navigation: () => navigation.navigate("Language"),
     },
@@ -77,7 +77,7 @@ function Settings({ navigation }) {
       },
     },
     {
-      iconSource: Icons.logout,
+      iconSource: Icons.delete,
       title: `${t("settings.txt7")}`,
       redColor: true,
       navigation: () => {

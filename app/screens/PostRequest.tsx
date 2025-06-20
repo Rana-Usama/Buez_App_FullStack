@@ -43,28 +43,53 @@ function PostRequest({ navigation, route }) {
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
   const currentPostRequest = route.params?.postRequest;
-  // console.log("Edit post", route.params?.postRequest);
 
   const taskOptions = [
-    { id: 1, name: `${t("home.txt5")}` },
-    { id: 2, name: `${t("home.txt6")}` },
-    { id: 3, name: `${t("home.txt7")}` },
-    { id: 4, name: `${t("postRequest.txt4")}` },
-    { id: 5, name: `${t("postRequest.txt6")}` },
+    { id: 1, name: "Cleaning" },
+    { id: 2, name: "Moving" },
+    { id: 3, name: "Gardening" },
+    { id: 4, name: "Gaming" },
+    { id: 5, name: "Other" },
   ];
 
   const compensationOptions = [
-    { id: 1, type: `${t("postRequest.txt5")}` },
-    { id: 2, type: `${t("postRequest.txt6")}` },
+    { id: 1, type: "Monitarely" },
+    { id: 2, type: "Other" },
   ];
+
+  const [translatedTaskOptions, setTranslatedTaskOptions] = useState([]);
+  const [translatedCompensationOptions, setTranslatedCompensationOptions] = useState([]);
+  const [originalTaskType, setOriginalTaskType] = useState("");
+  const [originalCompensationType, setOriginalCompensationType] = useState("");
 
   useFocusEffect(
     useCallback(() => {
       const currentPostRequest = route.params?.postRequest;
       const translateAndSet = async () => {
+        const translatedTasks = await Promise.all(
+          taskOptions.map(async (option) => ({
+            ...option,
+            name: await translateText(option.name),
+          }))
+        );
+        setTranslatedTaskOptions(translatedTasks);
+
+        // Translate compensation options
+        const translatedCompensations = await Promise.all(
+          compensationOptions.map(async (option) => ({
+            ...option,
+            type: await translateText(option.type),
+          }))
+        );
+        setTranslatedCompensationOptions(translatedCompensations);
+
         if (currentPostRequest) {
+          setOriginalTaskType(currentPostRequest.taskType);
           setSelectedTask(await translateText(currentPostRequest.taskType));
+
+          setOriginalCompensationType(currentPostRequest.compensationType);
           setSelectedCompensation(await translateText(currentPostRequest.compensationType));
+
           setLocation(currentPostRequest.address);
           setCompensation(await translateText(currentPostRequest.otherCompensation));
           setBudget(`$${currentPostRequest.monitarily}`);
@@ -93,12 +118,16 @@ function PostRequest({ navigation, route }) {
   };
 
   const selectTask = (task) => {
-    setSelectedTask(task.name);
+    setSelectedTask(task.name); // Translated
+    const original = taskOptions.find((t) => t.id === task.id)?.name;
+    setOriginalTaskType(original); // Store original
     setShowTaskDropdown(false);
   };
 
   const selectCompensation = (type) => {
-    setSelectedCompensation(type.type);
+    setSelectedCompensation(type.type); // Translated
+    const original = compensationOptions.find((c) => c.id === type.id)?.type;
+    setOriginalCompensationType(original); // Store original
     setShowCompensationDropdown(false);
   };
 
@@ -119,8 +148,6 @@ function PostRequest({ navigation, route }) {
         compress: 0.5, // change compression level (0 to 1)
         format: ImageManipulator.SaveFormat.JPEG,
       });
-
-      console.log("compressedImage............", compressedImage);
 
       // Update your imageUris state with compressed image URI
       let tempImageUris = [...imageUris];
@@ -220,8 +247,8 @@ function PostRequest({ navigation, route }) {
       showIndicator(true);
       const keywords = description.toLowerCase().split(" ");
       const data = {
-        taskType: selectedTask,
-        compensationType: selectedCompensation,
+        taskType: originalTaskType,
+        compensationType: originalCompensationType,
         description: description,
         descriptionKeywords: keywords,
         address: location,
@@ -234,11 +261,10 @@ function PostRequest({ navigation, route }) {
 
       if (imgs?.length === 0) {
         // Pick a random image from the selected task type
-        const defaultImageForTask = getRandomImage(selectedTask);
+        const defaultImageForTask = getRandomImage(originalTaskType);
         imgs.push(defaultImageForTask);
       }
-      console.log("data................", data);
-      console.log("imgs................", imgs);
+
       if (isEditing) {
         await updatePost(currentPostRequest.id, data, imgs);
       } else {
@@ -285,7 +311,7 @@ function PostRequest({ navigation, route }) {
 
           {showTaskDropdown && (
             <FlatList
-              data={taskOptions}
+              data={translatedTaskOptions}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled={true}
               keyExtractor={(item) => item.id.toString()}
@@ -320,7 +346,7 @@ function PostRequest({ navigation, route }) {
 
             {showCompensationDropdown && (
               <FlatList
-                data={compensationOptions}
+                data={translatedCompensationOptions}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={(item) => item.id.toString()}
                 style={[
@@ -363,7 +389,7 @@ function PostRequest({ navigation, route }) {
               onChangeText={setLocation}
               customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }}
             />
-            {selectedCompensation === `${t("postRequest.txt6")}` ? (
+            {originalCompensationType === `Other` ? (
               <>
                 <InputFieldNew
                   placeholder={`${t("postRequest.txt10")}`}
@@ -375,7 +401,7 @@ function PostRequest({ navigation, route }) {
             ) : (
               <>
                 <InputFieldNew
-                  placeholder={`${t("postRequest.txt11")}`}
+                  placeholder={`e.g; 90$2`}
                   value={budget}
                   onChangeText={(text) => {
                     const numeric = text.replace(/[^0-9]/g, "");
@@ -400,9 +426,6 @@ function PostRequest({ navigation, route }) {
                       <TouchableOpacity onPress={() => [deleteImage(index), pickImage(index)]} style={{ position: "absolute", top: 5, right: 5 }}>
                         <Image style={styles.img3} source={Icons.edit} />
                       </TouchableOpacity>
-                      {/* <TouchableOpacity onPress={() => deleteImage(index)} style={{ position: "absolute", top: 5, left: 5 }}>
-                      <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={require("../../assets/Images/cross.png")} />
-                    </TouchableOpacity> */}
                     </>
                   ) : (
                     <Image style={styles.img3} source={Icons.gal} />

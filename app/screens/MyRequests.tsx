@@ -61,15 +61,12 @@ function MyRequests({ navigation }) {
       setTaskRecords([]);
       setLastVisiblePost(null);
       fetchRequests(null);
-
       return () => {
-        console.log("unmounting: MyRequests");
+        // console.log("unmounting: MyRequests");
       };
     }, [param])
   );
 
-  const [compensationType, setComponsationType] = useState('')
-  console.log('compensationType........', compensationType)
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
     try {
@@ -78,33 +75,27 @@ function MyRequests({ navigation }) {
         isLastVisible = islastVisiblePost;
       }
       const { tasksArray: newRecords, lastVisible } = await getMyReuqests(param, isLastVisible);
-
-      const type = await translateText('Monitarely')
-      setComponsationType(type)
-
       const translatedRecords = await Promise.all(
         newRecords.map(async (item) => {
-          console.log('item.........', item)
           const translatedTitle = await translateText(item.title || "");
           const translatedDescription = await translateText(item.description || "");
           const translatedTaskType = await translateText(item.taskType || "");
-          const translatedCompensationType = await translateText(item.compensationType || "")
+          const otherCompensation = await translateText(item.otherCompensation || "");
           return {
             ...item,
             title: translatedTitle,
             description: translatedDescription,
             taskType: translatedTaskType,
-            compensationType : translatedCompensationType
+            otherCompensation: otherCompensation,
           };
         })
       );
 
-      console.log('translated............', translatedRecords)
       setTaskRecords(translatedRecords);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
     } catch (error) {
-      console.error("Error loading posts:", error);
+      console.log("Error loading posts:", error);
     } finally {
       setLoading(false);
     }
@@ -119,7 +110,7 @@ function MyRequests({ navigation }) {
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
     } catch (error) {
-      console.error("Error loading more posts:", error);
+      console.log("Error loading more posts:", error);
     }
     setLoadingMore(false);
   };
@@ -151,7 +142,6 @@ function MyRequests({ navigation }) {
         text2: `${t("toast.myRequests.two")} ${action}`,
       });
     } catch (e) {
-      console.log(e);
       Toast.show({
         type: "error",
         text1: `${t("toast.myRequests.five")}`,
@@ -229,13 +219,7 @@ function MyRequests({ navigation }) {
                   {cart.status === REQUEST_STATUS.Active && (
                     <View style={styles.cartWrapper}>
                       <TouchableOpacity activeOpacity={0.8} onPress={() => postEditHandler(cart)}>
-                        <Image
-                          style={{
-                            width: RFPercentage(3.7),
-                            height: RFPercentage(3.7),
-                          }}
-                          source={Icons.editRequest}
-                        />
+                        <Image style={styles.edit} source={Icons.editRequest} />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -268,18 +252,18 @@ function MyRequests({ navigation }) {
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={{ fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(1) }}>
+              <Text style={styles.compensation}>
                 {`${t("home.txt10")}`}:{" "}
                 <Text style={styles.compensationAmount}>
-                  {cart.compensationType === `${compensationType}` ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                  {cart.compensationType === `Monitarely` ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
               </Text>
             </View>
 
             {cart?.status === REQUEST_STATUS.Active && (
-              <View style={{ width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) }}>
+              <View style={styles.cartContainer2}>
                 <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
-                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.7) }}>{`${t("myRequests.txt5")}`}</Text>
+                  <Text style={styles.text2}>{`${t("myRequests.txt5")}`}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -289,7 +273,7 @@ function MyRequests({ navigation }) {
                   }}
                   style={styles.cancel}
                 >
-                  <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.8) }}>{`${t("myRequests.txt6")}`}</Text>
+                  <Text style={styles.text3}>{`${t("myRequests.txt6")}`}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -299,7 +283,6 @@ function MyRequests({ navigation }) {
         {(loading || loadingMore) && (
           <View style={{ marginTop: RFPercentage(34) }}>
             <ActivityIndicator size="large" color={Colors.primary} />
-            {/* <Text>Loading....</Text> */}
           </View>
         )}
 
@@ -308,8 +291,6 @@ function MyRequests({ navigation }) {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Bottom Tab */}
-      {/* <CustomTabBar myRequests={true} navigation={navigation} /> */}
 
       {/* Modal */}
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
@@ -428,6 +409,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     // top: RFPercentage(-9),
   },
+  edit: {
+    width: RFPercentage(3.7),
+    height: RFPercentage(3.7),
+  },
+  compensation: { fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(1) },
   dot: {
     height: RFPercentage(0.9),
     width: RFPercentage(0.9),
@@ -461,6 +447,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
   },
+  text2: { color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.7) },
   postDate: {
     fontSize: RFPercentage(1.6),
     position: "absolute",
@@ -588,6 +575,8 @@ const styles = StyleSheet.create({
   notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },
   notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
+  cartContainer2: { width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) },
+  text3: { color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.8) },
 });
 
 export default MyRequests;

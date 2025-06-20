@@ -5,7 +5,7 @@ import { doc, setDoc, getDoc, updateDoc, onSnapshot, addDoc, collection, Timesta
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 // shared
 import { uploadImage } from "./Shared.service";
-import i18n from "../translation/i18n";
+import { translateText } from "../translation/googleTranslation";
 
 const db = FIREBASE_DB;
 const PAGE_SIZE = 10;
@@ -115,23 +115,23 @@ export const getMyReuqests = async (postStatus: any, lastVisiblePost = null, pag
 
 export const getRequestList = async (taskType = "", searchQuery = "", lastVisiblePost = null, pageSize = PAGE_SIZE) => {
   try {
+    console.log(taskType)
     const userId = getAuth().currentUser?.uid;
     if (!userId) {
       throw new Error("User is not logged in");
     }
-
     // const keywords = 'want help'.split(' ');
-    let q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", i18n.t("myRequests.txt2")), where("userId", "!=", userId), orderBy("createdAt", "desc"));
+    let q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", "Active"), where("userId", "!=", userId), orderBy("createdAt", "desc"));
     // where('taskType', '==', 'Gardening'),
     // where('descriptionKeywords', 'array-contains-any', keywords),
     // limit(pageSize));
 
     if (lastVisiblePost) {
-      q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", i18n.t("myRequests.txt2")), where("userId", "!=", userId), orderBy("createdAt", "desc"), startAfter(lastVisiblePost));
+      q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", 'Active'), where("userId", "!=", userId), orderBy("createdAt", "desc"), startAfter(lastVisiblePost));
       // limit(pageSize));
     }
 
-    if (taskType && taskType !== `${i18n.t("home.txt4")}`) {
+    if (taskType && taskType !== `All`) {
       q = query(q, where("taskType", "==", taskType));
     }
     // console.table({ taskType, searchQuery });

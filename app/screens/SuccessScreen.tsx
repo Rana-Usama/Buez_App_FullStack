@@ -9,17 +9,20 @@ import MyAppButton from "../components/common/MyAppButton";
 
 // config
 import Colors from "../config/Colors";
+import { useTranslation } from "react-i18next";
 
 function SuccessScreen({ navigation }) {
+  const { t } = useTranslation();
+
   return (
     <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
       <Octicons name={"check-circle"} style={styles.icon} color={Colors.white} />
 
       {/* Gif */}
-      <Text style={styles.txt}>Request Posted Successfully</Text>
+      <Text style={styles.txt}>{t("successScreen.txt1")}</Text>
 
       <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={() => navigation.navigate("TabNavigator")}>
-        <Text style={styles.home}>Home</Text>
+        <Text style={styles.home}>{t("successScreen.txt2")}</Text>
       </TouchableOpacity>
     </LinearGradient>
   );

@@ -48,4 +48,7 @@ export const Icons: { [key: string]: ImageRequireSource } = {
   notActive: require("../../assets/Images/not-active.png"),
   homeActive: require("../../assets/Images/homeAct.png"),
   homeInActive: require("../../assets/Images/homeInActive.png"),
+  cancel: require("../../assets/Images/cancel.png"),
+  delete: require("../../assets/Images/deActivation.png"),
+  language: require("../../assets/Images/language.png"),
 };

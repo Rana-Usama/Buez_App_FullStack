@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, KeyboardAvoidingView, RefreshControl, ActivityIndicator, Platform, Dimensions } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -30,16 +30,10 @@ const { width } = Dimensions.get("window");
 
 function Home({ navigation }) {
   const { t } = useTranslation();
-
-  const handleTranslate = async () => {
-    const result = await translateText("Hello, how are you?");
-    // console.log("Translated:", result);
-  };
-
-  handleTranslate();
-
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
+  const [filterMap, setFilterMap] = useState({});
+
   const [inputField, SetInputField] = useState<InputFieldType[]>([
     {
       placeholder: `${t("home.txt2")}`,
@@ -47,11 +41,31 @@ function Home({ navigation }) {
     },
   ]);
 
-  const [activeFilter, setActiveFilter] = useState(`${t("home.txt4")}`);
+  const [activeFilter, setActiveFilter] = useState("");
+  const [filterOptions, setFilterOptions] = useState([]);
+  const originalFilters = ["All", "Cleaning", "Moving", "Gardening", "Gaming", "Other"];
+
+  useFocusEffect(
+    useCallback(() => {
+      const translateFilters = async () => {
+        const translations = await Promise.all(originalFilters.map((item) => translateText(item)));
+        const map = {};
+        originalFilters.forEach((original, i) => {
+          map[translations[i]] = original; // { "Nettoyage": "Cleaning", ... }
+        });
+        setFilterOptions(translations);
+        setFilterMap(map);
+
+        const translatedAll = translations[0]; // "All"
+        setActiveFilter(translatedAll);
+      };
+
+      translateFilters();
+    }, [])
+  );
+
   const [searchQuery, setSearchQuery] = useState("");
-  // console.log(activeFilter);
   const [allTasks, setAllTasks] = useState([]);
-  // console.log(allTasks);
 
   const {
     taskRecords,
@@ -82,15 +96,37 @@ function Home({ navigation }) {
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
     try {
+      const filterToUse = filterMap[activeFilter] || "";
+
       let isLastVisible = lastVisiblePost;
       if (typeof islastVisiblePost !== "undefined") {
         isLastVisible = islastVisiblePost;
       }
-      const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, "", isLastVisible); // fetch everything
-      setAllTasks(newRecords);
-      setTaskRecords(newRecords);
+
+      const { tasksArray: newRecords, lastVisible } = await getRequestList(filterToUse, "", isLastVisible);
+
+      // Translate each task before setting
+      const translatedTasks = await Promise.all(
+        newRecords.map(async (task) => {
+          const [translatedDescription, translatedCompensation, translatedTaskType] = await Promise.all([
+            translateText(task.description || ""),
+            translateText(task.otherCompensation || ""),
+            translateText(task.taskType || ""),
+          ]);
+
+          return {
+            ...task,
+            description: translatedDescription,
+            otherCompensation: translatedCompensation,
+            taskType: translatedTaskType,
+          };
+        })
+      );
+
+      setAllTasks(translatedTasks);
+      setTaskRecords(translatedTasks);
       setLastVisiblePost(lastVisible);
-      setHasMore(newRecords?.length > 0);
+      setHasMore(translatedTasks.length > 0);
     } catch (error) {
       console.log("Error loading posts:", error);
     } finally {
@@ -103,10 +139,29 @@ function Home({ navigation }) {
 
     setLoadingMore(true);
     try {
-      const { tasksArray: newRecords, lastVisible } = await getRequestList(activeFilter, searchQuery, lastVisiblePost);
-      setTaskRecords([...taskRecords, ...newRecords]);
+      const filterToUse = filterMap[activeFilter] || "";
+      const { tasksArray: newRecords, lastVisible } = await getRequestList(filterToUse, searchQuery, lastVisiblePost);
+
+      const translatedNew = await Promise.all(
+        newRecords.map(async (task) => {
+          const [translatedDescription, translatedCompensation, translatedTaskType] = await Promise.all([
+            translateText(task.description || ""),
+            translateText(task.otherCompensation || ""),
+            translateText(task.taskType || ""),
+          ]);
+
+          return {
+            ...task,
+            description: translatedDescription,
+            otherCompensation: translatedCompensation,
+            taskType: translatedTaskType,
+          };
+        })
+      );
+
+      setTaskRecords([...taskRecords, ...translatedNew]);
       setLastVisiblePost(lastVisible);
-      setHasMore(newRecords.length > 0);
+      setHasMore(translatedNew.length > 0);
     } catch (error) {
       console.log("Error loading more posts:", error);
     }
@@ -136,47 +191,31 @@ function Home({ navigation }) {
   const getDisplayTasks = () => {
     let list = allTasks;
 
-    if (activeFilter !== `${t("home.txt4")}`) {
-      list = list.filter((task) => task.taskType?.toLowerCase() === activeFilter.toLowerCase());
+    if (filterMap[activeFilter] !== "All") {
+      list = list.filter((task) => task.taskType?.toLowerCase() === filterMap[activeFilter]?.toLowerCase());
     }
 
     if (searchQuery.trim() !== "") {
       list = list.filter(
         (task) =>
-          task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.user?.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.taskType?.toLowerCase().includes(searchQuery.toLowerCase())
+          (task.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (task.user?.userName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (task.taskType || "").toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     return list;
   };
+
   const displayTasks = getDisplayTasks();
 
   useEffect(() => {
-    // Ensure first image is active for every item
     const initialIndices = {};
     displayTasks.forEach((_, index) => {
       initialIndices[index] = 0;
     });
     setActiveIndices(initialIndices);
   }, [displayTasks]);
-
-  const FilterButton = ({ title, isActive, isFirst }) => (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      style={[styles.filterButton, isActive ? styles.activeFilterButton : styles.inactiveFilterButton, isFirst && styles.firstFilterButton]}
-      onPress={() => setActiveFilter(title)}
-    >
-      {isActive ? (
-        <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={styles.gradient}>
-          <Text style={styles.filterButtonTextActive}>{title}</Text>
-        </LinearGradient>
-      ) : (
-        <Text style={styles.filterButtonTextInactive}>{title}</Text>
-      )}
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.screen}>
@@ -228,31 +267,23 @@ function Home({ navigation }) {
           {/* Filter Buttons */}
           <FlatList
             horizontal
-            data={[t("home.txt4"), t("home.txt5"), t("home.txt6"), t("home.txt7"), t("home.txt8")]}
+            data={filterOptions}
             keyExtractor={(item) => item}
             contentContainerStyle={styles.filterButtonsContainer}
             showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              // console.log(item, index);
-              // return <FilterButton title={item} isActive={activeFilter === item} isFirst={index === 0} />;
-              return (
-                <TouchableOpacity onPress={() => setActiveFilter(item)}>
-                  {activeFilter === item ? (
-                    <>
-                      <LinearGradient colors={[Colors.primary, "#4557B0"]} style={styles.gradient}>
-                        <Text style={{ fontFamily: "Poppins_400Regular", color: "white" }}>{item}</Text>
-                      </LinearGradient>
-                    </>
-                  ) : (
-                    <>
-                      <View style={styles.nonGradient}>
-                        <Text style={{ fontFamily: "Poppins_400Regular", color: Colors.heading }}>{item}</Text>
-                      </View>
-                    </>
-                  )}
-                </TouchableOpacity>
-              );
-            }}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => setActiveFilter(item)}>
+                {activeFilter === item ? (
+                  <LinearGradient colors={[Colors.primary, "#4557B0"]} style={styles.gradient}>
+                    <Text style={{ fontFamily: "Poppins_400Regular", color: "white" }}>{item}</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.nonGradient}>
+                    <Text style={{ fontFamily: "Poppins_400Regular", color: Colors.heading }}>{item}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            )}
           />
 
           <View style={[styles.categoriesContainer, styles.recentRequestsContainer]}>
@@ -314,11 +345,12 @@ function Home({ navigation }) {
                         </TouchableOpacity>
 
                         <Text style={styles.userName}>{item.user.userName}</Text>
-                        <Text style={styles.postDate}>Posted on {getFormatedDate(item.createdAt)}</Text>
+                        <Text style={styles.postDate}>{t("myRequests.txt4")} {getFormatedDate(item.createdAt)}</Text>
                       </View>
 
                       <View style={styles.taskInfoContainer}>
-                        <Text style={styles.taskText}>{item.description?.substr(0, 35) + (item.description?.length > 8 ? "..." : "")}</Text>
+                        <Text style={styles.taskText}>{item.description?.substr(0, 35) + (item.description?.length > 35 ? "..." : "")}</Text>
+
                         <View style={styles.compensationWrapper}>
                           <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
                           <Text style={styles.compensationText}>

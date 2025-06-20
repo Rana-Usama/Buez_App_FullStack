@@ -40,6 +40,7 @@ import { useTranslation } from "react-i18next";
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
 function Login({ navigation }: any) {
+  
   const [indicator, showIndicator] = useState(false);
   const [remember, setRemember] = useState(false);
   const { t } = useTranslation();
@@ -67,22 +68,18 @@ function Login({ navigation }: any) {
     });
   }, []);
 
+
   const onGoogleButtonPress = async () => {
     setLoading(true);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const userInfo = await GoogleSignin.signIn();
-      console.log(userInfo);
       const { idToken } = userInfo?.data;
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(FIREBASE_AUTH, googleCredential);
       const user = userCredential.user;
-      console.log("Firebase User:", user);
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnapshot = await getDoc(userRef);
-      console.log(userSnapshot.exists())
-      // if (!userSnapshot.exists()) {
-
         const userData = {
           userName: user?.displayName,
           email: user?.email,

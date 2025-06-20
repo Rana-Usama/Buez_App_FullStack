@@ -13,7 +13,6 @@ const getTargetLanguage = async () => {
 
 export const translateText = async (text) => {
   const targetLang = await getTargetLanguage();
-// console.log('targetLang..........', targetLang)
   try {
     const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=AIzaSyBkUKZUKnnMUm4jHEfp4itrNlxrkQfNuHw`, {
       method: "POST",
@@ -28,10 +27,9 @@ export const translateText = async (text) => {
     });
 
     const data = await response.json();
-    // console.log("translate...........", data);
     return data?.data?.translations[0]?.translatedText || text;
   } catch (error) {
-    console.error("Translation error:", error);
+    console.log("Translation error:", error);
     return null;
   }
 };

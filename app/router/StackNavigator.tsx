@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -77,7 +77,8 @@ export type RootStackParamList = {
   Messages: undefined;
   Profile: undefined;
   CancelSubscription: undefined;
-  Language:undefined;
+  Language: undefined;
+  PostRequest: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -175,7 +176,15 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
 
           {/* Main App Screens */}
-          <Stack.Screen name="TabNavigator" component={TabNavigator} />
+          <Stack.Screen
+            name="TabNavigator"
+            children={() => (
+              <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+                <TabNavigator />
+              </KeyboardAvoidingView>
+            )}
+          />
+
           <Stack.Screen name="InitialScreen" component={InitialScreen} />
           <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
           <Stack.Screen name="Language" component={Language} />
@@ -192,6 +201,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="Messages" component={Messages} />
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="CancelSubscription" component={CancelSubscription} />
+          <Stack.Screen name="PostRequest" component={PostRequest} />
         </Stack.Navigator>
       )}
     </NavigationContainer>
