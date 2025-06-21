@@ -30,6 +30,11 @@ function Profile({ navigation }) {
       title: `${t("profile.txt3")}`,
       navigation: () => navigation.navigate("Reviews"),
     },
+     {
+      iconSource: Icons.map2,
+      title: `Completed Tasks`,
+      navigation: () => navigation.navigate("CompletedTasks"),
+    },
   ];
 
   return (

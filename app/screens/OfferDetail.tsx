@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList, Dimensions, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
+import { getFirestore, collection, addDoc, updateDoc, doc } from "firebase/firestore";
 
 // components
 import Nav from "../components/common/Nav";
@@ -16,6 +17,7 @@ import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
+import { FIREBASE_DB } from "../../firebaseConfig";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -25,7 +27,7 @@ function OfferDetail({ navigation, route }) {
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
   const postRequest = route.params?.postRequest;
-
+  const db = FIREBASE_DB;
   const [isExpanded, setIsExpanded] = useState(false);
 
   const [translatedOffer, setTranslatedOffer] = useState({
@@ -62,6 +64,96 @@ function OfferDetail({ navigation, route }) {
       senderName: currentUser.userData.userName,
       receiver: postRequest.user,
     });
+  };
+
+  const storeAcceptedTask = async () => {
+    try {
+      await addDoc(collection(db, "completedTask"), {
+        taskId: postRequest.id,
+        taskOwnerId: postRequest.userId,
+        acceptedBy: {
+          userId: currentUserId,
+          name: currentUser?.userData?.userName,
+          email: currentUser?.userData?.email,
+          image: currentUser?.userData?.image || null,
+          phone: currentUser?.userData?.phone || null,
+        },
+        taskDetails: postRequest,
+        status: "pending",
+        acceptedAt: new Date().toISOString(),
+      });
+      console.log("Task successfully stored in completedTask collection.");
+    } catch (error) {
+      console.log("Error storing accepted task:", error);
+    }
+  };
+
+  const updateRequestAcceptedBy = async () => {
+    try {
+      const taskDocRef = doc(db, "taskRequests", postRequest.id); // replace with your actual collection name
+      await updateDoc(taskDocRef, {
+        acceptedBy: {
+          userId: currentUserId,
+          name: currentUser?.userData?.userName,
+          email: currentUser?.userData?.email,
+          image: currentUser?.userData?.image || null,
+          phone: currentUser?.userData?.phone || null,
+        },
+      });
+      console.log("Request updated with acceptedBy field.");
+    } catch (error) {
+      console.log("Error updating acceptedBy field:", error);
+    }
+  };
+
+  async function sendPushNotification() {
+    try {
+      const response = await fetch("https://buez-server-khaki.vercel.app/api/send-notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          expoPushToken: postRequest?.user?.token,
+          title: currentUser?.userData?.userName,
+          message: "Accepted your task request.",
+        }),
+      });
+      const data = await response.text();
+      console.log("sendPushNotification:", data);
+      return data;
+    } catch (error) {
+      console.log("sendPushNotification error:", error);
+      throw error;
+    }
+  }
+
+  const saveNotification = async () => {
+    try {
+      await addDoc(collection(db, "notifications"), {
+        sender: {
+          userId: currentUserId,
+          name: currentUser?.userData?.userName,
+          email: currentUser?.userData?.email,
+          image: currentUser?.userData?.image || null,
+          token: currentUser?.userData?.token,
+        },
+        receiver: {
+          userId: postRequest?.user?.id || postRequest?.userId,
+          name: postRequest?.user?.userName,
+          email: postRequest?.user?.email,
+        },
+        task: {
+          postRequest,
+        },
+        type: "task_acceptance",
+        timestamp: new Date().toISOString(),
+        isRead: false,
+      });
+      console.log("Notification saved in notifications collection.");
+    } catch (error) {
+      console.log("Error saving notification:", error);
+    }
   };
 
   return (
@@ -122,11 +214,32 @@ function OfferDetail({ navigation, route }) {
 
       {/* Buttons */}
       <View style={styles.buttonWrapper}>
-        <TouchableOpacity style={styles.chatButton} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
-          <Text style={styles.text}>{`${t("details.txt7")}`}</Text>
-        </TouchableOpacity>
-
-        <MyAppButton title={`${t("details.txt8")}`} marginTop={RFPercentage(0)} onPress={() => navigation.navigate("MyRequests")} />
+        {postRequest?.acceptedBy ? (
+          <>
+            <MyAppButton title="Messsage" disabled={currentUserId === postRequest.userId} onPress={handleStartChat} />
+          </>
+        ) : (
+          <>
+            <TouchableOpacity style={styles.chatButton} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
+              <Text style={styles.text}>{`Message`}</Text>
+            </TouchableOpacity>
+            <MyAppButton
+              title={`Accept Task`}
+              marginTop={RFPercentage(0)}
+              onPress={async () => {
+                try {
+                  await sendPushNotification();
+                  await storeAcceptedTask();
+                  await updateRequestAcceptedBy();
+                  await saveNotification();
+                  navigation.goBack();
+                } catch (error) {
+                  console.log("Error accepting task:", error);
+                }
+              }}
+            />
+          </>
+        )}
       </View>
     </View>
   );

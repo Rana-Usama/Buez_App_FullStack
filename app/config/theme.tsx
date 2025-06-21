@@ -51,4 +51,8 @@ export const Icons: { [key: string]: ImageRequireSource } = {
   cancel: require("../../assets/Images/cancel.png"),
   delete: require("../../assets/Images/deActivation.png"),
   language: require("../../assets/Images/language.png"),
+  notify2: require("../../assets/Images/notify2.png"),
+  messages: require("../../assets/Images/messages.png"),
+  rate: require("../../assets/Images/rate.png"),
+  map2: require("../../assets/Images/map2.png"),
 };

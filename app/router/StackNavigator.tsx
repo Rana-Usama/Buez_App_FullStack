@@ -38,6 +38,9 @@ import * as SecureStore from "expo-secure-store";
 import { useUser } from "../contexts/user.context";
 import { differenceInDays } from "date-fns";
 import Language from "../screens/Language";
+import Notifications from "../screens/Notifications";
+import CompletedTasks from "../screens/CompletedTasks";
+import AddReview from "../screens/AddReview";
 
 export type RootStackParamList = {
   OnBoarding: undefined;
@@ -79,6 +82,9 @@ export type RootStackParamList = {
   CancelSubscription: undefined;
   Language: undefined;
   PostRequest: undefined;
+  Notifications: undefined;
+  CompletedTasks: undefined;
+  AddReview : undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -202,6 +208,9 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="CancelSubscription" component={CancelSubscription} />
           <Stack.Screen name="PostRequest" component={PostRequest} />
+          <Stack.Screen name="Notifications" component={Notifications} />
+          <Stack.Screen name="CompletedTasks" component={CompletedTasks} />
+          <Stack.Screen name="AddReview" component={AddReview} />
         </Stack.Navigator>
       )}
     </NavigationContainer>

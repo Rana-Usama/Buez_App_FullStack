@@ -255,6 +255,8 @@ function PostRequest({ navigation, route }) {
         otherCompensation: compensation,
         monitarily: budget.replace(/^\$/, ""),
         status: REQUEST_STATUS.Active,
+        acceptedBy : null
+
       };
 
       const imgs = imageUris?.filter((img) => Boolean(img));
