@@ -282,8 +282,10 @@
   "profile": {
     "txt1": "Profil",
     "txt2": "Modifier le profil",
-    "txt3": "Notes & avis"
+    "txt3": "Évaluations et avis",
+    "txt4": "Tâches terminées"
   },
+
   "editProfile": {
     "txt1": "Ajoutez votre nom",
     "txt2": "Ajoutez votre numéro de téléphone",

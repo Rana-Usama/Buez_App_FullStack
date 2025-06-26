@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   subHeaderText: {
-    color: Colors.grey,
+    color: Colors.darkGrey,
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_500Medium",
     textAlign: "center",
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_700Bold",
   },
   stepDescription: {
-    color: Colors.grey,
+    color: Colors.heading,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
   },

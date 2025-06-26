@@ -16,6 +16,7 @@ function SuccessScreen({ navigation }) {
 
   return (
     <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
+      {/* <StatusBar translucent={true} backgroundColor={"transparent"} /> */}
       <Octicons name={"check-circle"} style={styles.icon} color={Colors.white} />
 
       {/* Gif */}

@@ -16,6 +16,7 @@ import Toast from "react-native-toast-message";
 import { toastConfig } from "./app/utils/ToastConfig";
 import StackNavigator from "./app/router/StackNavigator";
 import i18n from "./app/translation/i18n";
+import { NotificationProvider } from "./app/contexts/notification.context";
 
 LogBox.ignoreAllLogs();
 
@@ -66,8 +67,12 @@ export default function App() {
   return (
     <UserProvider>
       <PostProvider>
-        <StackNavigator />
-        <Toast config={toastConfig} />
+        <NotificationProvider>
+          <ExpoStripeProvider>
+            <StackNavigator />
+            <Toast config={toastConfig} />
+          </ExpoStripeProvider>
+        </NotificationProvider>
       </PostProvider>
     </UserProvider>
   );

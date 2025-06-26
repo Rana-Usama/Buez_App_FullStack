@@ -16,6 +16,7 @@ import { useUser } from "../contexts/user.context";
 import { getFormatedDate } from "../services/Shared.service";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
+import { useExitAppOnBack } from "../utils/appBack";
 
 function Messages({ navigation }) {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ function Messages({ navigation }) {
   const userId = getAuth().currentUser?.uid;
   const { userData } = useUser();
   const profileImgUrl = userData?.profileImage || "";
-
+  useExitAppOnBack();
   const filters = [`${t("messages.txt2")}`, `${t("messages.txt3")}`];
   const [activeFilter, setActiveFilter] = useState(`${t("messages.txt2")}`);
 

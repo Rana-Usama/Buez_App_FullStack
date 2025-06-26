@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 import { getAuth } from "firebase/auth";
-import { doc, setDoc, getDoc, updateDoc, onSnapshot, addDoc, collection, Timestamp, query, getDocs, where, orderBy, limit, startAfter } from "firebase/firestore";
+import {serverTimestamp, doc, setDoc, getDoc, updateDoc, onSnapshot, addDoc, collection, Timestamp, query, getDocs, where, orderBy, limit, startAfter } from "firebase/firestore";
 // FIREBASE config
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 // shared
@@ -115,7 +115,7 @@ export const getMyReuqests = async (postStatus: any, lastVisiblePost = null, pag
 
 export const getRequestList = async (taskType = "", searchQuery = "", lastVisiblePost = null, pageSize = PAGE_SIZE) => {
   try {
-    console.log(taskType)
+    console.log(taskType);
     const userId = getAuth().currentUser?.uid;
     if (!userId) {
       throw new Error("User is not logged in");
@@ -127,7 +127,7 @@ export const getRequestList = async (taskType = "", searchQuery = "", lastVisibl
     // limit(pageSize));
 
     if (lastVisiblePost) {
-      q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", 'Active'), where("userId", "!=", userId), orderBy("createdAt", "desc"), startAfter(lastVisiblePost));
+      q = query(collection(FIREBASE_DB, "taskRequests"), where("status", "==", "Active"), where("userId", "!=", userId), orderBy("createdAt", "desc"), startAfter(lastVisiblePost));
       // limit(pageSize));
     }
 
@@ -173,6 +173,13 @@ export const updateReqestStatus = async (id: any, status: any, data: any) => {
       ...data,
       status: status,
     });
+
+    const q = query(collection(db, "completedTask"), where("taskId", "==", id));
+    const snapshot = await getDocs(q);
+
+    const updatePromises = snapshot.docs.map((docSnap) => updateDoc(doc(db, "completedTask", docSnap.id), { status,  completedAt: serverTimestamp() }));
+
+    await Promise.all(updatePromises);
 
     return true;
   } catch (error) {

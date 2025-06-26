@@ -1,10 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, ImageSourcePropType } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
+
 // config
 import Colors from "../../config/Colors";
 import { Icons } from "../../config/theme";
+import { useNotifications } from "../../contexts/notification.context"; // 👈 Add this line
 
 interface NavProps {
   dpNull?: boolean;
@@ -21,6 +23,8 @@ interface NavProps {
 }
 
 const Nav: React.FC<NavProps> = ({ dpNull = false, crown = false, marginTop = RFPercentage(6), title, navigation, leftLogo = false, post = false, profileImage }) => {
+  const { unreadCount } = useNotifications();
+  console.log(unreadCount);
   return (
     <View style={[styles.container, { marginTop }]}>
       {leftLogo ? (
@@ -43,6 +47,7 @@ const Nav: React.FC<NavProps> = ({ dpNull = false, crown = false, marginTop = RF
       ) : dpNull ? null : (
         <TouchableOpacity onPress={() => navigation.navigate("Notifications")} activeOpacity={0.8} style={styles.notify}>
           <Image style={{ width: RFPercentage(3.5), height: RFPercentage(3.5) }} source={Icons.notify2} />
+          {unreadCount > 0 && <View style={styles.dot} />}
         </TouchableOpacity>
       )}
     </View>
@@ -56,15 +61,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
   },
-  touch: { position: "absolute", left: 0, bottom: RFPercentage(-1) },
-  crown: { right: RFPercentage(-3.9), top: RFPercentage(2.2), zIndex: 1, width: RFPercentage(3), height: RFPercentage(3) },
+  touch: {
+    position: "absolute",
+    left: 0,
+    bottom: RFPercentage(-1),
+  },
+  crown: {
+    right: RFPercentage(-3.9),
+    top: RFPercentage(2.2),
+    zIndex: 1,
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+  },
   buez: {
     width: RFPercentage(5),
     height: RFPercentage(5),
   },
-  title: { color: Colors.primary, fontSize: RFPercentage(2.3), fontFamily: "Poppins_500Medium" },
-  post: { color: Colors.primary, fontSize: RFPercentage(1.9), fontFamily: "Poppins-Medium" },
-  profile: { borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.2), width: RFPercentage(6), height: RFPercentage(6) },
+  title: {
+    color: Colors.primary,
+    fontSize: RFPercentage(2.3),
+    fontFamily: "Poppins_500Medium",
+  },
+  post: {
+    color: Colors.primary,
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins-Medium",
+  },
+  profile: {
+    borderRadius: RFPercentage(100),
+    borderColor: Colors.primary,
+    borderWidth: RFPercentage(0.2),
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+  },
   notify: {
     position: "absolute",
     right: 0,
@@ -74,13 +103,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "white",
     borderRadius: RFPercentage(1),
-    elevation: 6, // Android shadow
-
-    // iOS shadow
+    elevation: 6,
     shadowColor: "rgba(93, 88, 88, 0.8)",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  dot: {
+    position: "absolute",
+    top: RFPercentage(1),
+    right: RFPercentage(0.6),
+    width: RFPercentage(0.9),
+    height: RFPercentage(0.9),
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.primary,
   },
 });
 

@@ -282,7 +282,8 @@
   "profile": {
     "txt1": "Profilo",
     "txt2": "Modifica profilo",
-    "txt3": "Valutazioni & Recensioni"
+    "txt3": "Valutazioni e recensioni",
+    "txt4": "Attività completate"
   },
   "editProfile": {
     "txt1": "Aggiungi il tuo nome",
@@ -297,11 +298,10 @@
     "txt3": "Di:"
   },
   "bottomTab": {
-  "txt1": "Mie Rich.",
-  "txt2": "Pubblica",
-  "txt3": "Home",
-  "txt4": "Messaggi",
-  "txt5": "Impostazioni"
-}
-
+    "txt1": "Mie Rich.",
+    "txt2": "Pubblica",
+    "txt3": "Home",
+    "txt4": "Messaggi",
+    "txt5": "Impostazioni"
+  }
 }

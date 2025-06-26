@@ -35,6 +35,7 @@ import NotFound from "../components/common/NotFound";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
+import { useExitAppOnBack } from "../utils/appBack";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -53,7 +54,7 @@ function MyRequests({ navigation }) {
   const [selectedRequestIndex, setSelectedRequestIndex] = useState(null);
   const [selectedRequestItem, setSelectedRequestItem] = useState(null);
   const [activeIndices, setActiveIndices] = useState({});
-
+  useExitAppOnBack();
   const param = activeFilter === `${t("myRequests.txt2")}` ? REQUEST_STATUS.Active : REQUEST_STATUS.Completed;
 
   useFocusEffect(
@@ -291,7 +292,6 @@ function MyRequests({ navigation }) {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-
       {/* Modal */}
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
         <BlurView intensity={100} style={styles.modalBackground}>
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
   },
-  text2: { color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.7) },
+  text2: { color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.7), textAlign: "center" },
   postDate: {
     fontSize: RFPercentage(1.6),
     position: "absolute",
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },
   notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   cartContainer2: { width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) },
-  text3: { color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.8) },
+  text3: { color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.8), textAlign: "center" },
 });
 
 export default MyRequests;

@@ -282,7 +282,8 @@
   "profile": {
     "txt1": "Profile",
     "txt2": "Edit Profile",
-    "txt3": "Rating & Reviews"
+    "txt3": "Rating & Reviews",
+    "txt4" : "Completed Tasks"
   },
   "editProfile": {
     "txt1": "Add your Name",

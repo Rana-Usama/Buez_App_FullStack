@@ -69,19 +69,20 @@ function SubscriptionV2(props) {
   const openPaymentSheet = async () => {
     setLoading(true);
     const setupData = await fetchSetupIntent();
+    console.log("setup data........", setupData);
     if (!setupData) return;
     const { setupIntentClientSecret, customerId } = setupData;
     const { error: initError } = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: "BUEZ",
     });
-
+    console.log("init error.........", initError);
     if (initError) {
       setLoading(false);
       return;
     }
     const { error: paymentError } = await presentPaymentSheet();
-    // console.log("paymentError............", paymentError);
+    console.log("paymentError............", paymentError);
     if (paymentError) {
       Toast.show({
         type: "info",
@@ -101,9 +102,9 @@ function SubscriptionV2(props) {
       body: JSON.stringify({ customerId, setupIntentId }),
     });
 
-    // console.log("res......", res);
+    console.log("res......", res);
     const result = await res.json();
-    // console.log("result...........", result);
+    console.log("result...........", result);
 
     if (result.success) {
       await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);

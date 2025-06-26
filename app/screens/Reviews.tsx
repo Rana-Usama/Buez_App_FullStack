@@ -1,140 +1,231 @@
-import React from "react";
-import { View, Text, StyleSheet, Image, ScrollView, Platform } from "react-native";
+// Full updated code with rating summary at top
+import React, { useState, useCallback, useEffect } from "react";
+import { View, Text, StyleSheet, Image, Platform, ActivityIndicator, RefreshControl, SectionList } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { useFocusEffect } from "@react-navigation/native";
+import moment from "moment";
+import * as SecureStore from "expo-secure-store";
+import * as Localization from "expo-localization";
 
-// components
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
-
-// config
+import NotFound from "../components/common/NotFound";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
+import { fetchMyReviewsFromFirebase } from "../services/Review.service";
+import { translateText } from "../translation/googleTranslation";
 import { useTranslation } from "react-i18next";
 
-function Reviews({ navigation }) {
+const sameDay = (d1, d2) => d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
+
+const getTargetLanguage = async () => {
+  const stored = await SecureStore.getItemAsync("appLanguage");
+  return stored || Localization.locale.split("-")[0] || "en";
+};
+
+const getSectionTitle = (date, lang) => {
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (sameDay(date, today)) return "Today";
+  if (sameDay(date, yesterday)) return "Yesterday";
+  return date.toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric" });
+};
+
+export default function Reviews({ navigation }) {
+  const [sections, setSections] = useState([]);
+  const [lang, setLang] = useState("en");
+  const [translations, setTranslations] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [averageRating, setAverageRating] = useState(null);
   const { t } = useTranslation();
+  const [labels, setLabels] = useState({ today: "Today", yesterday: "Yesterday", dated: "Dated", by: "By", reviews: "Reviews", noReviews: "No reviews yet", translating: "Translating..." });
+
+  useEffect(() => {
+    (async () => {
+      const userLang = await getTargetLanguage();
+      setLang(userLang);
+      const keys = Object.keys(labels);
+      const translated = await Promise.all(keys.map((k) => translateText(labels[k], userLang)));
+      const newLabels = keys.reduce((obj, key, index) => {
+        obj[key] = translated[index] || labels[key];
+        return obj;
+      }, {});
+      setLabels(newLabels);
+    })();
+  }, []);
+
+  const fetchMyReviews = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchMyReviewsFromFirebase();
+      const translationMap = { ...translations };
+      const grouped = new Map();
+
+      for (const review of data) {
+        const createdAt = review.createdAt?.toDate?.() ?? review.createdAt ?? new Date();
+        const title = getSectionTitle(new Date(createdAt), lang);
+        if (!translationMap[review.id]) {
+          const translatedText = await translateText(review.reviewText || "", lang);
+          translationMap[review.id] = translatedText;
+        }
+        const arr = grouped.get(title) || [];
+        arr.push({ ...review, createdAt });
+        grouped.set(title, arr);
+      }
+
+      const finalSections = Array.from(grouped.entries())
+        .map(([title, data]) => ({ title, data: data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) }))
+        .sort((a, b) => {
+          const pA = title === "Today" ? 0 : title === "Yesterday" ? 1 : 2;
+          const pB = title === "Today" ? 0 : title === "Yesterday" ? 1 : 2;
+          return pA - pB || new Date(b.data[0].createdAt) - new Date(a.data[0].createdAt);
+        });
+   
+      const ratings = data.map((r) => r.rating).filter(Boolean);
+      if (ratings.length > 0) {
+        const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
+        setAverageRating(avg.toFixed(1));
+      } else {
+        setAverageRating(null);
+      }
+
+      setTranslations(translationMap);
+      setSections(finalSections);
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchMyReviews();
+    setRefreshing(false);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchMyReviews();
+    }, [lang])
+  );
+
+  const renderItem = ({ item }) => {
+    const created = moment(item.createdAt).format("MMM-D-YYYY");
+    const translatedReview = translations[item.id] || labels.translating || "Translating...";
+    return (
+      <View style={styles.card}>
+        <View style={styles.textWrap}>
+          <Text style={styles.reviewText}>{translatedReview}</Text>
+        </View>
+        <View style={styles.footer}>
+          <Text style={styles.reviewDate}>
+            {labels.dated}: {created}
+          </Text>
+          <View style={styles.authorWrap}>
+            <Text style={styles.authorText}>
+              {labels.by}: {item.reviewer?.userName || "-"}
+            </Text>
+            <Image style={styles.avatar} source={item.reviewer?.profileImage ? { uri: item.reviewer.profileImage } : Icons.profile2} />
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const renderHeader = ({ section: { title } }) => (
+    <View>
+      <Text style={styles.sectionHeader}>{title}</Text>
+      <View style={styles.separator} />
+    </View>
+  );
 
   return (
     <View style={styles.screen}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        {/* Nav */}
+      <View style={{ width: "90%", alignSelf: "center" }}>
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("profile.txt3")}`} />
-
-        {/* My Reviews */}
-        <View style={styles.reviewsHeader}>
-          <Text style={styles.headerText}>{`${t("reviews.txt1")}`}</Text>
-          <View style={styles.separator} />
-        </View>
-
-        {/* Review Card */}
-        <View style={styles.reviewCard}>
-          <View style={styles.reviewTextContainer}>
-            <Text style={styles.reviewText}>It was fun to do gardening with Jake.</Text>
+      </View>
+      {averageRating && (
+        <>
+          <View style={styles.ratingBox}>
+            <Text style={styles.ratingLabel}>Ratings</Text>
+            <Text style={styles.ratingValue}>⭐ {averageRating}</Text>
           </View>
-          <View style={styles.reviewFooter}>
-            <Text style={styles.reviewDate}>{`${t("reviews.txt2")}`} 25 Jul 2024</Text>
-            <View style={styles.authorContainer}>
-              <Text style={styles.authorText}>{`${t("reviews.txt3")}`} Jhon Brown</Text>
-              <Image style={styles.authorAvatar} source={Icons.profile2} />
-            </View>
-          </View>
+          {/* <View style={styles.separator}></View> */}
+        </>
+      )}
+      {loading ? (
+        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: RFPercentage(8) }} />
+      ) : sections.length === 0 ? (
+        <NotFound title={labels.noReviews} />
+      ) : (
+        <View>
+          {/* <Text style={[styles.ratingLabel, { left: RFPercentage(2.5) }]}>Reviews:</Text> */}
+          <SectionList
+            sections={sections}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            renderSectionHeader={renderHeader}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} tintColor={Colors.primary} />}
+            contentContainerStyle={{ paddingBottom: RFPercentage(6) }}
+            stickySectionHeadersEnabled={false}
+          />
         </View>
-      </ScrollView>
-      {/* Bottom Tab */}
-      {/* <CustomTabBar settingTab={true} navigation={navigation} /> */}
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    justifyContent: "flex-start",
+  screen: { flex: 1, backgroundColor: Colors.white },
+  ratingBox: {
+    width: "97%",
+    alignSelf: "center",
+    marginTop: RFPercentage(2),
+    marginBottom: RFPercentage(1),
+    // backgroundColor: "#F8F8F8",
+    padding: RFPercentage(2),
+    // borderRadius: RFPercentage(1),
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: Colors.white,
+    // borderWidth: 1,
+    // borderColor: Colors.border,
   },
-  scrollView: {
-    width: "100%",
+  ratingLabel: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_500Medium",
+    color: Colors.darkGrey2,
   },
-  scrollViewContent: {
-    width: "100%",
-    alignItems: "center",
+  ratingValue: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_500Medium",
+    color: Colors.heading,
   },
-  reviewsHeader: {
+  separator: { width: "60%", height: RFPercentage(0.1), backgroundColor: "rgb(226,226,226)", marginTop: RFPercentage(0.5), left: RFPercentage(3) },
+  sectionHeader: { width: "90%", alignSelf: "center", color: Colors.grey, fontSize: RFPercentage(1.9), fontFamily: "Poppins_500Medium" },
+  card: {
     width: "90%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    marginTop: RFPercentage(3.5),
-  },
-  headerText: {
-    color: Colors.grey,
-    fontSize: RFPercentage(1.9),
-    fontFamily: "Poppins-Regular",
-  },
-  separator: {
-    width: "75%",
-    height: RFPercentage(0.1),
-    backgroundColor: "#F3F4F6",
-    marginTop: RFPercentage(1),
-  },
-  reviewCard: {
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    marginTop: RFPercentage(4),
-    width: "90%",
-    height: RFPercentage(14),
-    borderRadius: RFPercentage(1),
+    alignSelf: "center",
+    marginTop: RFPercentage(2),
+    borderRadius: RFPercentage(1.5),
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
+    paddingBottom: RFPercentage(2),
+    height: RFPercentage(17),
+    backgroundColor: Colors.white,
+    elevation: 5,
+    shadowColor: "rgb(176,174,174)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3.84,
   },
-  reviewTextContainer: {
-    width: "90%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    alignSelf: "center",
-    marginTop: RFPercentage(1.6),
-  },
-  reviewText: {
-    color: Colors.darkGrey2,
-    textAlign: "left",
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  reviewFooter: {
-    width: "90%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    alignSelf: "center",
-    bottom: RFPercentage(2),
-    position: "absolute",
-  },
-  reviewDate: {
-    color: Colors.darkGrey,
-    textAlign: "left",
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  authorContainer: {
-    position: "absolute",
-    right: 0,
-    top: RFPercentage(-1),
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  authorText: {
-    color: Colors.darkGrey,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  authorAvatar: {
-    marginLeft: RFPercentage(1),
-    width: RFPercentage(4),
-    height: RFPercentage(4),
-    borderRadius: RFPercentage(100),
-    borderColor: Colors.primary,
-    borderWidth: RFPercentage(0.1),
-  },
+  textWrap: { width: "90%", alignSelf: "center", marginTop: RFPercentage(1.6) },
+  reviewText: { color: Colors.darkGrey2, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
+  footer: { width: "90%", alignSelf: "center", position: "absolute", bottom: RFPercentage(2), alignItems: "center", flexDirection: "row" },
+  reviewDate: { color: Colors.darkGrey, fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular" },
+  authorWrap: { position: "absolute", right: 0, flexDirection: "row", alignItems: "center" },
+  authorText: { color: Colors.darkGrey, fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular" },
+  avatar: { marginLeft: RFPercentage(1), width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.1) },
 });
-
-export default Reviews;

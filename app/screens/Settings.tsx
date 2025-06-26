@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Platform, Modal, Pressable } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
-import { logout, removeCredentials } from "../services/Auth.service";
+import { removeCredentials } from "../services/Auth.service";
 import { deleteCurrentUser } from "../services/Auth.service";
 import { BlurView } from "expo-blur";
-import { getCredentials } from "../services/Auth.service";
 import * as SecureStore from "expo-secure-store";
 // components
 import Nav from "../components/common/Nav";
@@ -15,9 +14,9 @@ import MyAppButton from "../components/common/MyAppButton";
 // config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
-import { usePostContext } from "../contexts/PostContext";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
+import { useExitAppOnBack } from "../utils/appBack";
 
 function Settings({ navigation }) {
   const { userData: user } = useUser();
@@ -25,15 +24,7 @@ function Settings({ navigation }) {
   const profileImgUrl = user?.profileImage || "";
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
-  const [password, setPassword] = useState("");
-
-  const fetchCredentials = async () => {
-    const { email, password } = await getCredentials();
-    console.log(email, password);
-    setPassword(password);
-  };
-
-  fetchCredentials();
+  useExitAppOnBack();
 
   const navigationsList = [
     {
@@ -167,7 +158,10 @@ function Settings({ navigation }) {
                   removeCredentials();
                   setIsModalVisible2(false);
                   await SecureStore.setItemAsync("loggedOut", "true");
-                  navigation.navigate("Login");
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: "Login" }],
+                  });
                 }}
               />
             </View>

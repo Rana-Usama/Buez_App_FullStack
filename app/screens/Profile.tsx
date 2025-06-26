@@ -18,7 +18,7 @@ function Profile({ navigation }) {
   const { t } = useTranslation();
   const profileImgUrl = user?.profileImage || "";
   const userName = user?.userName || "";
-  console.log(user)
+  console.log(user);
   const navigationsList = [
     {
       iconSource: Icons.editP,
@@ -30,9 +30,9 @@ function Profile({ navigation }) {
       title: `${t("profile.txt3")}`,
       navigation: () => navigation.navigate("Reviews"),
     },
-     {
+    {
       iconSource: Icons.map2,
-      title: `Completed Tasks`,
+      title: `${t("profile.txt4")}`,
       navigation: () => navigation.navigate("CompletedTasks"),
     },
   ];

@@ -19,6 +19,8 @@ import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
+import { useNotifications } from "../contexts/notification.context";
+import { useExitAppOnBack } from "../utils/appBack";
 
 type InputFieldType = {
   placeholder: string;
@@ -33,17 +35,16 @@ function Home({ navigation }) {
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
   const [filterMap, setFilterMap] = useState({});
-
   const [inputField, SetInputField] = useState<InputFieldType[]>([
     {
       placeholder: `${t("home.txt2")}`,
       value: "",
     },
   ]);
-
   const [activeFilter, setActiveFilter] = useState("");
   const [filterOptions, setFilterOptions] = useState([]);
   const originalFilters = ["All", "Cleaning", "Moving", "Gardening", "Gaming", "Other"];
+  useExitAppOnBack();
 
   useFocusEffect(
     useCallback(() => {
@@ -345,7 +346,9 @@ function Home({ navigation }) {
                         </TouchableOpacity>
 
                         <Text style={styles.userName}>{item.user.userName}</Text>
-                        <Text style={styles.postDate}>{t("myRequests.txt4")} {getFormatedDate(item.createdAt)}</Text>
+                        <Text style={styles.postDate}>
+                          {t("myRequests.txt4")} {getFormatedDate(item.createdAt)}
+                        </Text>
                       </View>
 
                       <View style={styles.taskInfoContainer}>
@@ -414,7 +417,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
   },
   filterButtonsContainer: {
-    paddingHorizontal: RFPercentage(2.2),
+    paddingHorizontal: RFPercentage(1.4),
     marginTop: RFPercentage(1.4),
     // backgroundColor: "red",
   },

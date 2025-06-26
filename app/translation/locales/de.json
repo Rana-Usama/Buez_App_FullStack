@@ -280,8 +280,9 @@
   },
   "profile": {
     "txt1": "Profil",
-    "txt2": "Profil bearbeite",
-    "txt3": "Bewärtige & Rückmäldige"
+    "txt2": "Profil bearbeiten",
+    "txt3": "Bewertungen & Rückmeldungen",
+    "txt4": "Abgeschlossene Aufgaben"
   },
   "editProfile": {
     "txt1": "Gib dis Name a",
@@ -296,11 +297,10 @@
     "txt3": "Vo:"
   },
   "bottomTab": {
-  "txt1": "Meine Anf.",
-  "txt2": "Anfrage",
-  "txt3": "Start",
-  "txt4": "Nachrichten",
-  "txt5": "Einstellungen"
-}
-
+    "txt1": "Meine Anf.",
+    "txt2": "Anfrage",
+    "txt3": "Start",
+    "txt4": "Nachrichten",
+    "txt5": "Einstellungen"
+  }
 }

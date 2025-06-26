@@ -27,14 +27,18 @@ function OfferDetail({ navigation, route }) {
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
   const postRequest = route.params?.postRequest;
+  const [showAll, setShowAll] = useState(false);
+  const reviews = postRequest?.reviews || [];
+  const visibleReviews = showAll ? reviews : reviews.slice(0, 3);
+  const hiddenCount = reviews.length - 3;
   const db = FIREBASE_DB;
   const [isExpanded, setIsExpanded] = useState(false);
-
   const [translatedOffer, setTranslatedOffer] = useState({
     taskType: "",
     description: "",
     otherCompensation: "",
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const translateOfferData = async () => {
@@ -75,10 +79,11 @@ function OfferDetail({ navigation, route }) {
           userId: currentUserId,
           name: currentUser?.userData?.userName,
           email: currentUser?.userData?.email,
-          image: currentUser?.userData?.image || null,
+          image: currentUser?.userData?.profileImage || null,
           phone: currentUser?.userData?.phone || null,
         },
         taskDetails: postRequest,
+        reviewd: false,
         status: "pending",
         acceptedAt: new Date().toISOString(),
       });
@@ -96,7 +101,7 @@ function OfferDetail({ navigation, route }) {
           userId: currentUserId,
           name: currentUser?.userData?.userName,
           email: currentUser?.userData?.email,
-          image: currentUser?.userData?.image || null,
+          profileImage: currentUser?.userData?.profileImage || null,
           phone: currentUser?.userData?.phone || null,
         },
       });
@@ -133,9 +138,9 @@ function OfferDetail({ navigation, route }) {
       await addDoc(collection(db, "notifications"), {
         sender: {
           userId: currentUserId,
-          name: currentUser?.userData?.userName,
+          userName: currentUser?.userData?.userName,
           email: currentUser?.userData?.email,
-          image: currentUser?.userData?.image || null,
+          profileImage: currentUser?.userData?.profileImage || null,
           token: currentUser?.userData?.token,
         },
         receiver: {
@@ -153,6 +158,21 @@ function OfferDetail({ navigation, route }) {
       console.log("Notification saved in notifications collection.");
     } catch (error) {
       console.log("Error saving notification:", error);
+    }
+  };
+
+  const handleAccept = async () => {
+    setLoading(true); // show spinner
+    try {
+      await sendPushNotification();
+      await storeAcceptedTask();
+      await updateRequestAcceptedBy();
+      await saveNotification();
+      navigation.goBack();
+    } catch (error) {
+      console.log("Error accepting task:", error);
+    } finally {
+      setLoading(false); // hide spinner
     }
   };
 
@@ -183,7 +203,7 @@ function OfferDetail({ navigation, route }) {
 
         {/* Translated Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>{translatedOffer.taskType}</Text>
+          <Text style={styles.title}>Category: {translatedOffer.taskType}</Text>
           <Text style={styles.description}>
             {isExpanded || translatedOffer.description.length <= 120 ? translatedOffer.description : translatedOffer.description.slice(0, 120) + "... "}
             {translatedOffer.description.length > 120 && (
@@ -210,37 +230,69 @@ function OfferDetail({ navigation, route }) {
           <Text style={styles.compensationTitle}>{`${t("details.txt6")}`}:</Text>
           <Text style={styles.description}>{postRequest.compensationType === "Monitarely" ? `${postRequest.monitarily}$` : translatedOffer.otherCompensation}</Text>
         </View>
-      </ScrollView>
 
-      {/* Buttons */}
-      <View style={styles.buttonWrapper}>
-        {postRequest?.acceptedBy ? (
-          <>
-            <MyAppButton title="Messsage" disabled={currentUserId === postRequest.userId} onPress={handleStartChat} />
-          </>
-        ) : (
-          <>
-            <TouchableOpacity style={styles.chatButton} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
-              <Text style={styles.text}>{`Message`}</Text>
-            </TouchableOpacity>
-            <MyAppButton
-              title={`Accept Task`}
-              marginTop={RFPercentage(0)}
-              onPress={async () => {
-                try {
-                  await sendPushNotification();
-                  await storeAcceptedTask();
-                  await updateRequestAcceptedBy();
-                  await saveNotification();
-                  navigation.goBack();
-                } catch (error) {
-                  console.log("Error accepting task:", error);
-                }
-              }}
-            />
-          </>
-        )}
-      </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.compensationTitle}>Rating and Reviews</Text>
+        </View>
+        <View style={{ width: "90%", alignSelf: "center" }}>
+          {visibleReviews.length > 0 ? (
+            <>
+              <FlatList
+                data={visibleReviews}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => {
+                  return (
+                    <View style={{ flexDirection: "row", alignItems: "center", marginTop: RFPercentage(2) }}>
+                      <Image
+                        source={item?.reviewer?.profileImage ? { uri: item?.reviewer?.profileImage } : Icons.profile}
+                        resizeMode="cover"
+                        style={{ width: RFPercentage(5), height: RFPercentage(5), borderRadius: RFPercentage(100), borderWidth: RFPercentage(0.3), borderColor: Colors.primary }}
+                      />
+                      <View style={{ marginLeft: RFPercentage(1), top: RFPercentage(0.5) }}>
+                        <Text style={{ color: Colors.heading, fontFamily: "Poppins_500Medium" }}>{item?.reviewer?.userName}</Text>
+                        <Text style={{ color: Colors.heading, fontFamily: "Poppins_400Regular" }}>{item?.reviewText}</Text>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+              {!showAll && hiddenCount > 0 && (
+                <TouchableOpacity onPress={() => setShowAll(true)}>
+                  <Text
+                    style={{
+                      color: Colors.primary,
+                      marginTop: RFPercentage(1),
+                      fontFamily: "Poppins_500Medium",
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    +{hiddenCount} more
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
+          ) : (
+            <>
+              <Text style={{ color: Colors.heading, fontFamily: "Poppins_400Regular" }}>No any reviews yet!</Text>
+            </>
+          )}
+        </View>
+        {/* Buttons */}
+        <View style={styles.buttonWrapper}>
+          {postRequest?.acceptedBy ? (
+            <>
+              <MyAppButton title="Messsage" disabled={currentUserId === postRequest.userId} onPress={handleStartChat} />
+            </>
+          ) : (
+            <>
+              <TouchableOpacity style={styles.chatButton} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
+                <Text style={styles.text}>{`Message`}</Text>
+              </TouchableOpacity>
+              <MyAppButton title={`Accept Task`} marginTop={RFPercentage(0)} loading={loading} onPress={handleAccept} />
+            </>
+          )}
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -257,6 +309,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
+    paddingBottom: RFPercentage(5),
   },
   carousal: {
     width: "90%",
@@ -369,12 +422,13 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
   },
   buttonWrapper: {
-    position: "absolute",
-    bottom: RFPercentage(15),
+    // position: "absolute",
+    // bottom: RFPercentage(8),
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
+    marginTop: RFPercentage(5),
   },
 });
 

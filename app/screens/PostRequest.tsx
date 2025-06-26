@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, TextInput, Image, Platform, KeyboardAvoidingView } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -24,6 +24,9 @@ import InputFieldNew from "../components/common/NewField";
 import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
 
+import { fetchMyReviewsFromFirebase } from "../services/Review.service";
+import { useExitAppOnBack } from "../utils/appBack";
+
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
   const { userData: user } = useUser();
@@ -39,6 +42,8 @@ function PostRequest({ navigation, route }) {
   const [location, setLocation] = useState("");
   const [budget, setBudget] = useState("");
   const [compensation, setCompensation] = useState("");
+  const [reviews, setReviews] = useState([]);
+  useExitAppOnBack();
 
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
@@ -61,6 +66,19 @@ function PostRequest({ navigation, route }) {
   const [translatedCompensationOptions, setTranslatedCompensationOptions] = useState([]);
   const [originalTaskType, setOriginalTaskType] = useState("");
   const [originalCompensationType, setOriginalCompensationType] = useState("");
+
+  const fetchMyReviews = async () => {
+    try {
+      const records = await fetchMyReviewsFromFirebase();
+      setReviews(records);
+    } catch (err) {
+      console.log("Error loading reviews:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyReviews();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -255,8 +273,8 @@ function PostRequest({ navigation, route }) {
         otherCompensation: compensation,
         monitarily: budget.replace(/^\$/, ""),
         status: REQUEST_STATUS.Active,
-        acceptedBy : null
-
+        acceptedBy: null,
+        reviews: reviews || null,
       };
 
       const imgs = imageUris?.filter((img) => Boolean(img));
@@ -403,7 +421,7 @@ function PostRequest({ navigation, route }) {
             ) : (
               <>
                 <InputFieldNew
-                  placeholder={`e.g; 90$2`}
+                  placeholder={`e.g; 90$`}
                   value={budget}
                   onChangeText={(text) => {
                     const numeric = text.replace(/[^0-9]/g, "");
