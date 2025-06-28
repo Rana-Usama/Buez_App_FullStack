@@ -159,11 +159,14 @@
     "txt1": "Détails",
     "txt2": "Lire moins",
     "txt3": "Lire plus",
-    "txt4": "Lieu",
+    "txt4": "Emplacement",
     "txt5": "Date/Heure",
     "txt6": "Rémunération",
-    "txt7": "Contacter le demandeur",
-    "txt8": "Mes demandes"
+    "txt7": "Message au demandeur",
+    "txt8": "Mes demandes",
+    "txt9": "Message",
+    "txt10": "Pas encore d'avis !",
+    "txt11" : "plus"
   },
   "myRequests": {
     "txt1": "Mes demandes",

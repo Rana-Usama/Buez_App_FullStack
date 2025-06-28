@@ -338,7 +338,7 @@ function PostRequest({ navigation, route }) {
               style={[
                 styles.dropdown,
                 {
-                  maxHeight: RFPercentage(21),
+                  maxHeight: RFPercentage(24),
                   borderTopLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
                   borderTopRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
                   paddingVertical: RFPercentage(1),

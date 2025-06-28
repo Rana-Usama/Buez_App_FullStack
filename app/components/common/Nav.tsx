@@ -24,7 +24,7 @@ interface NavProps {
 
 const Nav: React.FC<NavProps> = ({ dpNull = false, crown = false, marginTop = RFPercentage(6), title, navigation, leftLogo = false, post = false, profileImage }) => {
   const { unreadCount } = useNotifications();
-  console.log(unreadCount);
+  // console.log(unreadCount);
   return (
     <View style={[styles.container, { marginTop }]}>
       {leftLogo ? (

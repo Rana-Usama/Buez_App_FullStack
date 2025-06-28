@@ -119,7 +119,7 @@ function Home({ navigation }) {
             ...task,
             description: translatedDescription,
             otherCompensation: translatedCompensation,
-            taskType: translatedTaskType,
+            // taskType2: translatedTaskType,
           };
         })
       );
@@ -134,6 +134,9 @@ function Home({ navigation }) {
       setLoading(false);
     }
   };
+
+
+  // console.log('all task.........', allTasks)
 
   const fetchMorePosts = async () => {
     if (!hasMore || loadingMore) return;

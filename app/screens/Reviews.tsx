@@ -6,7 +6,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import moment from "moment";
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
-
 import Nav from "../components/common/Nav";
 import NotFound from "../components/common/NotFound";
 import Colors from "../config/Colors";

@@ -128,7 +128,10 @@ function MyRequests({ navigation }) {
     setRefreshing(false);
   };
 
+  const [loader, setLoader] = useState(false);
+
   const changeReqestStatus = async (i, status, item) => {
+    setLoader(true);
     try {
       await updateReqestStatus(item.id, status, item);
       setTaskRecords((p) => {
@@ -148,6 +151,8 @@ function MyRequests({ navigation }) {
         text1: `${t("toast.myRequests.five")}`,
         text2: `${t("toast.myRequests.six")}`,
       });
+    } finally {
+      setLoader(false);
     }
   };
 
@@ -263,10 +268,19 @@ function MyRequests({ navigation }) {
 
             {cart?.status === REQUEST_STATUS.Active && (
               <View style={styles.cartContainer2}>
-                <TouchableOpacity style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
-                  <Text style={styles.text2}>{`${t("myRequests.txt5")}`}</Text>
+                <TouchableOpacity disabled={loader} style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
+                  {loader ? (
+                    <>
+                      <ActivityIndicator size={"small"} color={"white"} />
+                    </>
+                  ) : (
+                    <>
+                      <Text style={styles.text2}>{`${t("myRequests.txt5")}`}</Text>
+                    </>
+                  )}
                 </TouchableOpacity>
                 <TouchableOpacity
+                  disabled={loader}
                   onPress={() => {
                     setSelectedRequestIndex(index);
                     setSelectedRequestItem(cart);

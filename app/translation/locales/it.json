@@ -162,8 +162,11 @@
     "txt4": "Posizione",
     "txt5": "Data/Ora",
     "txt6": "Compenso",
-    "txt7": "Contatta il richiedente",
-    "txt8": "Le mie richieste"
+    "txt7": "Messaggio al richiedente",
+    "txt8": "Le mie richieste",
+    "txt9": "Messaggio",
+    "txt10": "Nessuna recensione ancora!",
+    "txt11" : "di più"
   },
   "myRequests": {
     "txt1": "Le mie richieste",

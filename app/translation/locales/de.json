@@ -156,14 +156,17 @@
     "txt11": "Kei Eintrag gfunde!"
   },
   "details": {
-    "txt1": "Detail",
-    "txt2": "Weniger aazeige",
-    "txt3": "Meh aazeige",
-    "txt4": "Ort",
-    "txt5": "Datum/Zyt",
-    "txt6": "Entlöhnig",
-    "txt7": "Nachricht a d’Persoon schicke",
-    "txt8": "Mini Ufträgi"
+    "txt1": "Einzelheiten",
+    "txt2": "Weniger lesen",
+    "txt3": "Mehr lesen",
+    "txt4": "Standort",
+    "txt5": "Datum/Uhrzeit",
+    "txt6": "Vergütung",
+    "txt7": "Nachricht an Anfragenden",
+    "txt8": "Meine Anfragen",
+    "txt9": "Nachricht",
+    "txt10": "Noch keine Bewertungen!",
+    "txt11" : "mehr"
   },
   "myRequests": {
     "txt1": "Mini Ufträgi",

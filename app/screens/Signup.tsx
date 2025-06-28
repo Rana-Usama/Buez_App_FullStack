@@ -1,22 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { getAuth, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { FIREBASE_DB } from "../../firebaseConfig";
-import { getDoc, doc } from "firebase/firestore";
 import * as SecureStore from "expo-secure-store";
-
-// components
 import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
 import InputFieldNew from "../components/common/NewField";
-
-// auth
-// eslint-disable-next-line import/no-unresolved
 import { createUserWithEmailAndPassword } from "firebase/auth";
-
-// config
 import Colors from "../config/Colors";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { addUser } from "../services/User.service";
@@ -26,14 +15,12 @@ import { Formik } from "formik";
 import Toast from "react-native-toast-message";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
 import { saveCredentials } from "../services/Auth.service";
-import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+import GoogleLoginButton from "../utils/googleLogin";
 
-const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
 function Signup({ navigation }: any) {
   const { t } = useTranslation();
-
   let validationSchema = yup.object({
     name: yup.string().required(`${t("validations.userReq")}`),
     email: yup
@@ -49,8 +36,10 @@ function Signup({ navigation }: any) {
       .oneOf([yup.ref("password")], `${t("validations.passwordMatch")}`)
       .required(`${t("validations.passwordMatch")}`),
   });
+
   const [indicator, showIndicator] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function getToken() {
@@ -59,59 +48,6 @@ function Signup({ navigation }: any) {
     }
     getToken();
   }, []);
-
-  // console.log('expoPushToken...................', expoPushToken)
-
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: webClientId,
-    });
-  }, []);
-
-  const onGoogleButtonPress = async () => {
-    try {
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-
-      const userInfo = await GoogleSignin.signIn();
-      console.log(userInfo);
-      const { idToken } = userInfo?.data;
-
-      const googleCredential = GoogleAuthProvider.credential(idToken);
-      const userCredential = await signInWithCredential(FIREBASE_AUTH, googleCredential);
-
-      const user = userCredential.user;
-      console.log("Firebase User:", user);
-
-      const userRef = doc(FIREBASE_DB, "users", user.uid);
-      const userSnapshot = await getDoc(userRef);
-      if (!userSnapshot.exists()) {
-        const userData = {
-          userName: user?.displayName,
-          email: user?.email,
-          isSubscribed: false,
-          profileImage: user?.photoURL,
-          phoneNumber: user?.phoneNumber,
-          token: expoPushToken,
-          isFreeTrial: false,
-        };
-        await addUser(user?.uid, userData);
-        Toast.show({
-          type: "success",
-          text1: `${t("toast.signup.one")}`,
-          text2: `${t("toast.signup.two")}`,
-        });
-      } else {
-        Toast.show({
-          type: "success",
-          text1: `${t("toast.signup.one")}`,
-          text2: `${t("toast.login.two")}`,
-        });
-      }
-      navigation.navigate("TabNavigator");
-    } catch (error) {
-      console.log("Google Sign-In Error:", error?.code ?? "Unknown Code", error?.message ?? error);
-    }
-  };
 
   const createAccountWithEmail = async (email, password) => {
     try {
@@ -157,6 +93,7 @@ function Signup({ navigation }: any) {
     }
     showIndicator(false);
   };
+
 
   return (
     <Screen style={styles.screen}>
@@ -266,16 +203,22 @@ function Signup({ navigation }: any) {
 
         {/* Social Media Icons */}
         <View style={styles.socialIconsContainer}>
-          <TouchableOpacity activeOpacity={0.8}>
-            <Image style={styles.socialIcon} source={Icons.fb} />
-          </TouchableOpacity>
-          <View style={styles.socialIconSpacing}></View>
-          {/* <TouchableOpacity activeOpacity={0.8}>
+          {loading ? (
+            <>
+              <ActivityIndicator size={"small"} color={Colors.primary} />
+            </>
+          ) : (
+            <>
+              <TouchableOpacity activeOpacity={0.8}>
+                <Image style={styles.socialIcon} source={Icons.fb} />
+              </TouchableOpacity>
+              <View style={styles.socialIconSpacing}></View>
+              {/* <TouchableOpacity activeOpacity={0.8}>
             <Image style={[styles.socialIcon, styles.socialIconSpacing]} source={Icons.apple} />
           </TouchableOpacity> */}
-          <TouchableOpacity activeOpacity={0.8} onPress={onGoogleButtonPress}>
-            <Image style={styles.socialIcon} source={Icons.google} />
-          </TouchableOpacity>
+              <GoogleLoginButton navigation={navigation} />
+            </>
+          )}
         </View>
 
         <View style={styles.footer}>

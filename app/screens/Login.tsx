@@ -1,46 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-// import auth from "@react-native-firebase/auth";
-import { getAuth, GoogleAuthProvider, signInWithCredential } from "firebase/auth";
-import { FIREBASE_DB } from "../../firebaseConfig";
-import { getDoc, doc } from "firebase/firestore";
 import * as SecureStore from "expo-secure-store";
-
-// auth
-// eslint-disable-next-line import/no-unresolved
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { getCredentials, saveCredentials } from "../services/Auth.service";
+import { saveCredentials } from "../services/Auth.service";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
-
-// components
 import Screen from "../components/Screen";
-import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
 import InputFieldNew from "../components/common/NewField";
 import Toast from "react-native-toast-message";
-
-// utils
-import { validateEmail } from "../utils/helperFunctions";
-import { addUser, updateUserToken } from "../services/User.service";
+import { updateUserToken } from "../services/User.service";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
-// import { FacebookAuthProvider } from "firebase/auth";
-
-// config
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
-
 import * as yup from "yup";
 import { Formik } from "formik";
-import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-
-// WebBrowser.maybeCompleteAuthSession();
-const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
+import GoogleLoginButton from "../utils/googleLogin";
 
 function Login({ navigation }: any) {
-  
   const [indicator, showIndicator] = useState(false);
   const [remember, setRemember] = useState(false);
   const { t } = useTranslation();
@@ -52,61 +30,6 @@ function Login({ navigation }: any) {
     password: yup.string().required(`${t("validations.passwordReq")}`),
   });
   const [loading, setLoading] = useState(false);
-  const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function getToken() {
-      const token = await registerForPushNotificationsAsync();
-      setExpoPushToken(token);
-    }
-    getToken();
-  }, []);
-
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: webClientId,
-    });
-  }, []);
-
-
-  const onGoogleButtonPress = async () => {
-    setLoading(true);
-    try {
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      const userInfo = await GoogleSignin.signIn();
-      const { idToken } = userInfo?.data;
-      const googleCredential = GoogleAuthProvider.credential(idToken);
-      const userCredential = await signInWithCredential(FIREBASE_AUTH, googleCredential);
-      const user = userCredential.user;
-      const userRef = doc(FIREBASE_DB, "users", user.uid);
-      const userSnapshot = await getDoc(userRef);
-        const userData = {
-          userName: user?.displayName,
-          email: user?.email,
-          isSubscribed: false,
-          profileImage: user?.photoURL,
-          phoneNumber: user?.phoneNumber,
-          token: expoPushToken,
-          isFreeTrial: false,
-        };
-        await addUser(user?.uid, userData);
-        Toast.show({
-          type: "success",
-          text1: `${t("toast.login.one")}`,
-          text2: `${t("toast.login.two")}`,
-        });
-      // }
-      navigation.navigate("TabNavigator");
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: `${t("toast.login.three")}`,
-        text2: `${t("toast.login.four")}`,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const signInWithEmail = async (email, password) => {
     try {
@@ -128,7 +51,6 @@ function Login({ navigation }: any) {
       if (remember) {
         await saveCredentials(email, password);
       }
-
       const pushToken = await registerForPushNotificationsAsync();
       if (user && pushToken) {
         await updateUserToken(user.uid, pushToken);
@@ -244,9 +166,7 @@ function Login({ navigation }: any) {
             {/* <TouchableOpacity activeOpacity={0.8}>
           <Image style={[styles.socialIcon, styles.socialIconMargin]} source={Icons.apple} />
         </TouchableOpacity> */}
-            <TouchableOpacity activeOpacity={0.8} onPress={onGoogleButtonPress}>
-              <Image style={styles.socialIcon} source={Icons.google} />
-            </TouchableOpacity>
+            <GoogleLoginButton navigation={navigation} />
           </>
         )}
       </View>
@@ -360,8 +280,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   socialIcon: {
-    width: RFPercentage(4.4),
-    height: RFPercentage(4.4),
+    width: RFPercentage(4.7),
+    height: RFPercentage(4.7),
   },
   socialIconMargin: {
     marginHorizontal: RFPercentage(0.7),

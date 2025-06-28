@@ -84,7 +84,7 @@ export type RootStackParamList = {
   PostRequest: undefined;
   Notifications: undefined;
   CompletedTasks: undefined;
-  AddReview : undefined;
+  AddReview: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -96,7 +96,6 @@ const StackNavigator: React.FC = () => {
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
 
   const { userData, loading: userLoading } = useUser();
-  console.log(credentials);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,8 +107,6 @@ const StackNavigator: React.FC = () => {
     };
     fetchData();
   }, []);
-
-  console.log(isLoading, userData, loggedOut, userLoading);
 
   useEffect(() => {
     const { email, password } = credentials;
@@ -138,17 +135,6 @@ const StackNavigator: React.FC = () => {
         const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
 
         const isWithinPaidPeriod = subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
-
-        // console.log("== ROUTING LOGIC ==");
-        // console.log("email:", email);
-        // console.log("password:", password);
-        // console.log("isSubscribed:", isSubscribed);
-        // console.log("isFreeTrial:", isFreeTrial);
-        // console.log("trialDays:", trialDays);
-        // console.log("isTrialValid:", isTrialValid);
-        // console.log("subStartDate:", subStartDate);
-        // console.log("subEndDate:", subEndDate);
-        // console.log("isWithinPaidPeriod:", isWithinPaidPeriod);
 
         if (isSubscribed || isWithinPaidPeriod) {
           setInitialRoute("TabNavigator");

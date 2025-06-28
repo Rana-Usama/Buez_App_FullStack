@@ -163,7 +163,10 @@
     "txt5": "Date/Time",
     "txt6": "Compensation",
     "txt7": "Message Requester",
-    "txt8": "My Requests"
+    "txt8": "My Requests",
+    "txt9" : "Message",
+    "txt10" : "No any reviews yet!",
+    "txt11" : "more"
   },
   "myRequests": {
     "txt1": "My Requests",

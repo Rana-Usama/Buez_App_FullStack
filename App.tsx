@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, ActivityIndicator, LogBox, Alert, Platform } from "react-native";
-import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold, Poppins_900Black, useFonts } from "@expo-google-fonts/poppins";
+import { 
+  Poppins_300Light,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  Poppins_800ExtraBold,
+  Poppins_900Black,
+  useFonts
+} from "@expo-google-fonts/poppins";
 import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
+
 import { registerForPushNotificationsAsync } from "./app/utils/notificationService";
 
 // Contexts
@@ -10,22 +21,26 @@ import { UserProvider } from "./app/contexts/user.context";
 import { FIREBASE_AUTH } from "./firebaseConfig";
 import { PostProvider } from "./app/contexts/PostContext";
 import ExpoStripeProvider from "./app/contexts/stripe-provider";
+import { NotificationProvider } from "./app/contexts/notification.context";
 
 // Config
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./app/utils/ToastConfig";
 import StackNavigator from "./app/router/StackNavigator";
 import i18n from "./app/translation/i18n";
-import { NotificationProvider } from "./app/contexts/notification.context";
 
 LogBox.ignoreAllLogs();
 
-// Root App
-export default function App() {
-  useEffect(() => {
-    console.log("i18n is initialized:", i18n.isInitialized);
-  }, []);
+/*Foreground notification handler */
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,     //Show notification banner in foreground
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
+export default function App() {
   const [fontsLoaded] = useFonts({
     Poppins_300Light,
     Poppins_400Regular,
@@ -37,32 +52,44 @@ export default function App() {
   });
 
   const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState(false);
+  const [notification, setNotification] = useState(null);
   const notificationListener = useRef();
   const responseListener = useRef();
 
-  // console.log("user...............", user);
+  useEffect(() => {
+    console.log("i18n is initialized:", i18n.isInitialized);
+  }, []);
 
   useEffect(() => {
-    // Register for push notifications and get token
-    registerForPushNotificationsAsync().then((token) => setExpoPushToken(token));
+    // Register for push notifications
+    registerForPushNotificationsAsync().then((token) => {
+      if (token) {
+        setExpoPushToken(token);
+        // console.log("Expo Push Token:", token);
+      }
+    });
 
-    // Store the listener references
+    // Listener for foreground notifications
     notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-      console.log("Notification received:", notification);
-      setNotification(notification); // if you want to update state
+      // console.log("Foreground notification received:", notification);
+      setNotification(notification);
     });
 
+    // Listener for user tapping the notification
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log("User interacted with notification:", response);
-      // You can navigate or do something on notification tap
+      // console.log("Notification tapped:", response);
     });
 
+    // Cleanup
     return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
+      if (notificationListener.current)
+        Notifications.removeNotificationSubscription(notificationListener.current);
+      if (responseListener.current)
+        Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
+
+  if (!fontsLoaded) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
 
   return (
     <UserProvider>

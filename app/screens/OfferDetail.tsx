@@ -29,16 +29,18 @@ function OfferDetail({ navigation, route }) {
   const postRequest = route.params?.postRequest;
   const [showAll, setShowAll] = useState(false);
   const reviews = postRequest?.reviews || [];
-  const visibleReviews = showAll ? reviews : reviews.slice(0, 3);
-  const hiddenCount = reviews.length - 3;
   const db = FIREBASE_DB;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [translatedReviews, setTranslatedReviews] = useState([]);
   const [translatedOffer, setTranslatedOffer] = useState({
     taskType: "",
     description: "",
     otherCompensation: "",
   });
   const [loading, setLoading] = useState(false);
+  const visibleReviews = showAll ? translatedReviews : translatedReviews.slice(0, 3);
+  const hiddenCount = translatedReviews.length - 3;
+  const [averageRating, setAverageRating] = useState(null);
 
   useEffect(() => {
     const translateOfferData = async () => {
@@ -59,6 +61,31 @@ function OfferDetail({ navigation, route }) {
       translateOfferData();
     }
   }, [postRequest]);
+
+  useEffect(() => {
+    const translateReviews = async () => {
+      if (postRequest?.reviews && postRequest.reviews.length > 0) {
+        const translated = await Promise.all(
+          postRequest.reviews.map(async (review) => ({
+            ...review,
+            translatedText: await translateText(review.reviewText || ""),
+          }))
+        );
+        setTranslatedReviews(translated);
+
+        // Calculate average rating
+        const ratings = postRequest.reviews.map((r) => r.rating).filter(Boolean);
+        if (ratings.length > 0) {
+          const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
+          setAverageRating(avg.toFixed(1));
+        } else {
+          setAverageRating(null);
+        }
+      }
+    };
+
+    translateReviews();
+  }, [postRequest?.reviews]);
 
   const handleStartChat = async () => {
     const chatId = await createNewChat(currentUserId, postRequest.userId);
@@ -232,9 +259,16 @@ function OfferDetail({ navigation, route }) {
         </View>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.compensationTitle}>Rating and Reviews</Text>
+          <Text style={styles.compensationTitle}>{t("profile.txt3")}</Text>
         </View>
         <View style={{ width: "90%", alignSelf: "center" }}>
+          {averageRating && (
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", }}>
+              <Text style={{ fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", color: Colors.heading }}>{"Rating"}:</Text>
+              <Text style={{ fontSize: RFPercentage(2), fontFamily: "Poppins_600SemiBold", color: Colors.darkGrey }}>⭐ {averageRating}</Text>
+            </View>
+          )}
+
           {visibleReviews.length > 0 ? (
             <>
               <FlatList
@@ -250,7 +284,7 @@ function OfferDetail({ navigation, route }) {
                       />
                       <View style={{ marginLeft: RFPercentage(1), top: RFPercentage(0.5) }}>
                         <Text style={{ color: Colors.heading, fontFamily: "Poppins_500Medium" }}>{item?.reviewer?.userName}</Text>
-                        <Text style={{ color: Colors.heading, fontFamily: "Poppins_400Regular" }}>{item?.reviewText}</Text>
+                        <Text style={{ color: Colors.heading, fontFamily: "Poppins_400Regular" }}>{item?.translatedText}</Text>
                       </View>
                     </View>
                   );
@@ -266,14 +300,14 @@ function OfferDetail({ navigation, route }) {
                       alignSelf: "flex-start",
                     }}
                   >
-                    +{hiddenCount} more
+                    +{hiddenCount} {t("details.txt11")}
                   </Text>
                 </TouchableOpacity>
               )}
             </>
           ) : (
             <>
-              <Text style={{ color: Colors.heading, fontFamily: "Poppins_400Regular" }}>No any reviews yet!</Text>
+              <Text style={{ color: Colors.heading, fontFamily: "Poppins_400Regular" }}>{t("details.txt10")}</Text>
             </>
           )}
         </View>
@@ -281,12 +315,12 @@ function OfferDetail({ navigation, route }) {
         <View style={styles.buttonWrapper}>
           {postRequest?.acceptedBy ? (
             <>
-              <MyAppButton title="Messsage" disabled={currentUserId === postRequest.userId} onPress={handleStartChat} />
+              <MyAppButton title={t("details.txt9")} disabled={currentUserId === postRequest.userId} onPress={handleStartChat} />
             </>
           ) : (
             <>
               <TouchableOpacity style={styles.chatButton} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
-                <Text style={styles.text}>{`Message`}</Text>
+                <Text style={styles.text}>{t("details.txt9")}</Text>
               </TouchableOpacity>
               <MyAppButton title={`Accept Task`} marginTop={RFPercentage(0)} loading={loading} onPress={handleAccept} />
             </>

@@ -32,7 +32,7 @@ function CancelSubscription({ navigation }: any) {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [isloading, setIsLoading] = useState(false);
 
-  console.log(userData?.subscriptionId);
+  // console.log(userData?.subscriptionId);
 
   const cancelSubscription = async () => {
     if (!userData?.subscriptionId) {
@@ -62,7 +62,7 @@ function CancelSubscription({ navigation }: any) {
                 isSubscribed: false,
                 subscriptionId: null,
               });
-              console.log("User subscription status updated in Firestore");
+              // console.log("User subscription status updated in Firestore");
             } catch (error) {
               console.log("Failed to update subscription status:", error);
             }

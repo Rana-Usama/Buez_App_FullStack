@@ -67,21 +67,21 @@ function EditProfile({ navigation }) {
       quality: 1,
     });
 
-    console.log(result);
+    // console.log(result);
 
     if (!result.canceled && result.assets) {
       const compressedImage = await ImageManipulator.manipulateAsync(result.assets[0].uri, [], {
         compress: 0.5, // change compression level (0 to 1)
         format: ImageManipulator.SaveFormat.JPEG,
       });
-      console.log(compressedImage);
+      // console.log(compressedImage);
       setImageUri(compressedImage.uri);
     }
   };
 
   useFocusEffect(
     useCallback(() => {
-      console.log("getLoggedInUser");
+      // console.log("getLoggedInUser");
       fetchUserData();
     }, [])
   );
@@ -116,12 +116,12 @@ function EditProfile({ navigation }) {
 
     try {
       await updateProfile(userData, imageUri);
-      navigation.navigate("Profile");
       Toast.show({
         type: "success",
         text1: `${t("toast.editProfile.one")}`,
         text2: `${t("toast.editProfile.two")}`,
       });
+      navigation.goBack();
     } catch (error) {
       Toast.show({
         type: "error",

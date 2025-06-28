@@ -17,7 +17,7 @@ const Chat = ({ navigation, route }) => {
   const [messages, setMessages] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
   const { chatId, senderId: currentUserId, senderName, receiver } = route.params;
-  console.log({ chatId, senderId: currentUserId, senderName, receiver });
+  // console.log({ chatId, senderId: currentUserId, senderName, receiver });
   const [message, setMessage] = useState("");
 
   useEffect(() => {

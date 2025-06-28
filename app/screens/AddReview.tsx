@@ -178,7 +178,7 @@ function AddReview() {
       });
       navigation.goBack();
     } catch (e) {
-      console.log("Review save error:", e);
+      // console.log("Review save error:", e);
       Toast.show({
         type: "error",
         text1: tr.error || "Error",
