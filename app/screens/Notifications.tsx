@@ -185,9 +185,9 @@ export default function Notifications({ navigation }) {
       <View style={styles.card}>
         {/* main row */}
         <View style={styles.row}>
-          <Image source={profileImage ? { uri: profileImage } : Icons.profile2} style={styles.avatar} />
+          <Image source={profileImage ? { uri: profileImage } : Icons.dp} style={styles.avatar} />
           <View style={{ marginLeft: RFPercentage(1.5), width: RFPercentage(35) }}>
-            <Text style={styles.title}>{`${senderName} ${tr.accepted || "accepted your task!"}`}</Text>
+            <Text style={styles.title}>{`${senderName}${tr.accepted || "accepted your task!"}`}</Text>
             {!!shortDesc && <Text style={styles.sub}>{shortDesc}</Text>}
           </View>
         </View>

@@ -221,7 +221,7 @@ function AddReview() {
             source={
               recipientUser.profileImage
                 ? { uri: recipientUser.profileImage }
-                : Icons.profile2
+                : Icons.dp
             }
             resizeMode="cover"
             style={{

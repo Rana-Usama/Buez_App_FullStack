@@ -130,7 +130,7 @@ const StackNavigator: React.FC = () => {
           trialDays = differenceInDays(now, trialStartDate);
           isTrialValid = trialDays >= 0 && trialDays <= 14;
         }
-
+        console.log(trialDays);
         const subStartDate = subscriptionStart ? new Date(subscriptionStart) : null;
         const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
 
@@ -140,7 +140,7 @@ const StackNavigator: React.FC = () => {
           setInitialRoute("TabNavigator");
         } else if (isTrialValid) {
           setInitialRoute("TabNavigator");
-        } else if (isFreeTrial && trialDays !== null && trialDays > 14) {
+        } else if (isFreeTrial && trialDays !== null && (trialDays < 0 || trialDays > 14)) {
           setInitialRoute("Subscription");
         } else {
           setInitialRoute("FreeTrial");

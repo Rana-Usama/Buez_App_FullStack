@@ -126,7 +126,7 @@ export default function Reviews({ navigation }) {
             <Text style={styles.authorText}>
               {labels.by}: {item.reviewer?.userName || "-"}
             </Text>
-            <Image style={styles.avatar} source={item.reviewer?.profileImage ? { uri: item.reviewer.profileImage } : Icons.profile2} />
+            <Image style={styles.avatar} source={item.reviewer?.profileImage ? { uri: item.reviewer.profileImage } : Icons.dp} />
           </View>
         </View>
       </View>

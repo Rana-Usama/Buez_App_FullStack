@@ -122,7 +122,7 @@ export default function CompletedTasks({ navigation }) {
         {/* header */}
         <View style={styles.headerRow}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Image style={styles.avatar} source={owner.profileImage ? { uri: owner.profileImage } : Icons.profile2} />
+            <Image style={styles.avatar} source={owner.profileImage ? { uri: owner.profileImage } : Icons.dp} />
             <Text style={styles.userName}>{owner.userName || "User"}</Text>
           </View>
           <Text style={styles.category}>{`${tr.category || "Category"}: ${catName}`}</Text>
