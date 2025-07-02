@@ -18,6 +18,7 @@ import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
 import { FIREBASE_DB } from "../../firebaseConfig";
+import { useAppTheme } from "../contexts/themeContext";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -41,6 +42,7 @@ function OfferDetail({ navigation, route }) {
   const visibleReviews = showAll ? translatedReviews : translatedReviews.slice(0, 3);
   const hiddenCount = translatedReviews.length - 3;
   const [averageRating, setAverageRating] = useState(null);
+  const { theme } = useAppTheme();
 
   useEffect(() => {
     const translateOfferData = async () => {
@@ -204,7 +206,7 @@ function OfferDetail({ navigation, route }) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("details.txt1")}`} />
 
@@ -225,16 +227,17 @@ function OfferDetail({ navigation, route }) {
 
         {/* Dots */}
         <View style={styles.dotsContainer}>
-          {postRequest?.imageUrls?.length > 1 && postRequest.imageUrls.map((_, index) => <View key={index} style={[styles.dot, index === activeIndex ? styles.activeDot : styles.inactiveDot]} />)}
+          {postRequest?.imageUrls?.length > 1 &&
+            postRequest.imageUrls.map((_, index) => <View key={index} style={[styles.dot, { backgroundColor: index === activeIndex ? theme.primary : theme.stroke }]} />)}
         </View>
 
         {/* Translated Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>Category: {translatedOffer.taskType}</Text>
-          <Text style={styles.description}>
-            {isExpanded || translatedOffer.description.length <= 120 ? translatedOffer.description : translatedOffer.description.slice(0, 120) + "... "}
-            {translatedOffer.description.length > 120 && (
-              <Text onPress={() => setIsExpanded(!isExpanded)} style={styles.readMoreText}>
+          <Text style={[styles.title, { color: theme.heading }]}>Category: {translatedOffer?.taskType}</Text>
+          <Text style={[styles.description, { color: theme.darkGrey }]}>
+            {isExpanded || translatedOffer?.description?.length <= 120 ? translatedOffer?.description : translatedOffer?.description.slice(0, 120) + "... "}
+            {translatedOffer?.description?.length > 120 && (
+              <Text onPress={() => setIsExpanded(!isExpanded)} style={[styles.readMoreText, { color: theme.primary }]}>
                 {isExpanded ? `${t("details.txt2")}` : `${t("details.txt3")}`}
               </Text>
             )}
@@ -242,30 +245,30 @@ function OfferDetail({ navigation, route }) {
         </View>
 
         <View style={styles.infoContainer}>
-          <Image style={styles.icon} source={Icons.location} />
-          <Text style={styles.infoText}>{`${t("details.txt4")}`}</Text>
-          <Text style={styles.infoDetail}>{postRequest.address}</Text>
+          <Image style={styles.icon} source={Icons.location} tintColor={theme.heading} />
+          <Text style={[styles.infoText, { color: theme.heading }]}>{`${t("details.txt4")}`}</Text>
+          <Text style={[styles.infoDetail, { color: theme.darkGrey }]}>{postRequest.address}</Text>
         </View>
 
         <View style={styles.infoContainer}>
-          <Image style={styles.icon} source={Icons.cal} />
-          <Text style={styles.infoText}>{`${t("details.txt5")}`}</Text>
-          <Text style={styles.infoDetail}>{getDateTime(postRequest.createdAt)}</Text>
+          <Image style={styles.icon} source={Icons.cal} tintColor={theme.heading} />
+          <Text style={[styles.infoText, { color: theme.heading }]}>{`${t("details.txt5")}`}</Text>
+          <Text style={[styles.infoDetail, { color: theme.darkGrey }]}>{getDateTime(postRequest.createdAt)}</Text>
         </View>
 
         <View style={styles.compensationContainer}>
-          <Text style={styles.compensationTitle}>{`${t("details.txt6")}`}:</Text>
-          <Text style={styles.description}>{postRequest.compensationType === "Monitarely" ? `${postRequest.monitarily}$` : translatedOffer.otherCompensation}</Text>
+          <Text style={[styles.compensationTitle, { color: theme.heading }]}>{`${t("details.txt6")}`}:</Text>
+          <Text style={[styles.description, { color: theme.darkGrey }]}>{postRequest.compensationType === "Monitarely" ? `${postRequest.monitarily}$` : translatedOffer.otherCompensation}</Text>
         </View>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.compensationTitle}>{t("profile.txt3")}</Text>
+          <Text style={[styles.compensationTitle, { color: theme.heading }]}>{t("profile.txt3")}</Text>
         </View>
         <View style={{ width: "90%", alignSelf: "center" }}>
           {averageRating && (
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={styles.rating}>{"Rating"}:</Text>
-              <Text style={styles.ratingText}>⭐ {averageRating}</Text>
+              <Text style={[styles.rating, { color: theme.heading }]}>{"Rating"}:</Text>
+              <Text style={[styles.ratingText, { color: theme.heading }]}>⭐ {averageRating}</Text>
             </View>
           )}
 
@@ -279,8 +282,8 @@ function OfferDetail({ navigation, route }) {
                     <View style={styles.review}>
                       <Image source={item?.reviewer?.profileImage ? { uri: item?.reviewer?.profileImage } : Icons.profile} resizeMode="cover" style={styles.reviewPic} />
                       <View style={{ marginLeft: RFPercentage(1), top: RFPercentage(0.5) }}>
-                        <Text style={styles.userName}>{item?.reviewer?.userName}</Text>
-                        <Text style={styles.userName}>{item?.translatedText}</Text>
+                        <Text style={[styles.userName, { color: theme.heading }]}>{item?.reviewer?.userName}</Text>
+                        <Text style={[styles.userName, { color: theme.darkGrey }]}>{item?.translatedText}</Text>
                       </View>
                     </View>
                   );
@@ -288,7 +291,7 @@ function OfferDetail({ navigation, route }) {
               />
               {!showAll && hiddenCount > 0 && (
                 <TouchableOpacity onPress={() => setShowAll(true)}>
-                  <Text style={styles.reviewCount}>
+                  <Text style={[styles.reviewCount, { color: theme.primary }]}>
                     +{hiddenCount} {t("details.txt11")}
                   </Text>
                 </TouchableOpacity>
@@ -296,7 +299,7 @@ function OfferDetail({ navigation, route }) {
             </>
           ) : (
             <>
-              <Text style={styles.detail}>{t("details.txt10")}</Text>
+              <Text style={[styles.detail, { color: theme.heading }]}>{t("details.txt10")}</Text>
             </>
           )}
         </View>
@@ -308,8 +311,8 @@ function OfferDetail({ navigation, route }) {
             </>
           ) : (
             <>
-              <TouchableOpacity style={styles.chatButton} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
-                <Text style={styles.text}>{t("details.txt9")}</Text>
+              <TouchableOpacity style={[styles.chatButton, { borderColor: theme.darkGrey }]} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
+                <Text style={[styles.text, { color: theme.darkGrey }]}>{t("details.txt9")}</Text>
               </TouchableOpacity>
               <MyAppButton title={`Accept Task`} marginTop={RFPercentage(0)} loading={loading} onPress={handleAccept} />
             </>
@@ -439,7 +442,7 @@ const styles = StyleSheet.create({
   review: { flexDirection: "row", alignItems: "center", marginTop: RFPercentage(2) },
   chatButton: {
     marginRight: RFPercentage(2),
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "transparent",
     width: RFPercentage(21),
     height: RFPercentage(6.2),
     borderRadius: RFPercentage(100),

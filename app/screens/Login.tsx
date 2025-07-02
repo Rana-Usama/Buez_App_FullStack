@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -17,11 +17,14 @@ import * as yup from "yup";
 import { Formik } from "formik";
 import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../utils/googleLogin";
+import { useAppTheme } from "../contexts/themeContext";
 
 function Login({ navigation }: any) {
   const [indicator, showIndicator] = useState(false);
   const [remember, setRemember] = useState(false);
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
+
   let validationSchema = yup.object({
     email: yup
       .string()
@@ -76,10 +79,11 @@ function Login({ navigation }: any) {
   };
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <Image style={styles.logo} source={Icons.logo} />
       <Image style={styles.crown} source={Icons.crown} />
-      <Text style={styles.welcomeText}>{`${t("login.txt1")}`}</Text>
+      <Text style={[styles.welcomeText, { color: theme.heading }]}>{`${t("login.txt1")}`}</Text>
 
       <Formik
         initialValues={{
@@ -99,7 +103,7 @@ function Login({ navigation }: any) {
                 handleBlur={handleBlur("email")}
                 value={values.email}
                 customStyle={{
-                  borderColor: touched.email && errors.email ? Colors.red : "#E5E7EB",
+                  borderColor: touched.email && errors.email ? Colors.red : theme.border,
                 }}
               />
               {touched.email && errors.email && (
@@ -118,7 +122,7 @@ function Login({ navigation }: any) {
                 handleBlur={handleBlur("password")}
                 value={values.password}
                 customStyle={{
-                  borderColor: touched.password && errors.password ? Colors.red : "#E5E7EB",
+                  borderColor: touched.password && errors.password ? Colors.red : theme.border,
                 }}
               />
               {touched.password && errors.password && (
@@ -133,12 +137,12 @@ function Login({ navigation }: any) {
             <TouchableOpacity activeOpacity={0.8} onPress={toggleRemember} style={styles.rememberContainer}>
               <View style={styles.rememberWrapper}>
                 <View style={styles.rememberBox}>
-                  <View style={[styles.rememberIndicator, { backgroundColor: remember ? Colors.primary : null }]} />
+                  <View style={[styles.rememberIndicator, { backgroundColor: remember ? theme.primary : null }]} />
                 </View>
-                <Text style={styles.rememberText}>{`${t("login.txt2")}`}</Text>
+                <Text style={[styles.rememberText, { color: theme.darkGrey }]}>{`${t("login.txt2")}`}</Text>
               </View>
               <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
-                <Text style={styles.forgotPasswordText}>{`${t("login.txt3")}`}</Text>
+                <Text style={[styles.forgotPasswordText, { color: theme.darkGrey }]}>{`${t("login.txt3")}`}</Text>
               </TouchableOpacity>
             </TouchableOpacity>
 
@@ -147,15 +151,15 @@ function Login({ navigation }: any) {
         )}
       </Formik>
       <View style={styles.socialLoginContainer}>
-        <View style={styles.divider} />
-        <Text style={styles.orText}>{`${t("login.txt4")}`}</Text>
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+        <Text style={[styles.orText, { color: theme.darkGrey }]}>{`${t("login.txt4")}`}</Text>
+        <View style={[styles.divider, { backgroundColor: theme.border }]} />
       </View>
 
       <View style={styles.socialIconsContainer}>
         {loading ? (
           <>
-            <ActivityIndicator size={"small"} color={Colors.primary} />
+            <ActivityIndicator size={"small"} color={theme.primary} />
           </>
         ) : (
           <>
@@ -172,9 +176,9 @@ function Login({ navigation }: any) {
       </View>
 
       <View style={styles.signupContainer}>
-        <Text style={styles.signupText}>{`${t("login.txt5")}`}</Text>
+        <Text style={[styles.signupText, { color: theme.darkGrey }]}>{`${t("login.txt5")}`}</Text>
         <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={styles.signupLink}>{`${t("buttons.signup")}`}</Text>
+          <Text style={[styles.signupLink, { color: theme.primary }]}>{`${t("buttons.signup")}`}</Text>
         </TouchableOpacity>
       </View>
     </Screen>
@@ -272,7 +276,7 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     marginHorizontal: RFPercentage(0.7),
     fontFamily: "Poppins_300Light",
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
   },
   socialIconsContainer: {
     marginTop: RFPercentage(3),
@@ -291,12 +295,11 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(5),
   },
   signupText: {
-    fontSize: RFPercentage(1.6),
-    color: "#4B5563",
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
   },
   signupLink: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.primary,
     marginLeft: RFPercentage(0.5),
     fontFamily: "Poppins_500Medium",

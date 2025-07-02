@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StatusBar, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import Screen from "../components/Screen";
 import Colors from "../config/Colors";
@@ -6,52 +6,55 @@ import { Icons } from "../config/theme";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "../components/common/MyAppButton";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 const FreeTrial = ({ navigation }: any) => {
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <Image style={styles.logo} source={Icons.logo} />
       <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>{`${t("freeTrial.txt1")}`}</Text>
-        <Text style={styles.subHeaderText}>🎁 {`${t("freeTrial.txt2")}`}</Text>
+        <Text style={[styles.headerText, { color: theme.primary }]}>{`${t("freeTrial.txt1")}`}</Text>
+        <Text style={[styles.subHeaderText, { color: theme.darkGrey }]}>🎁 {`${t("freeTrial.txt2")}`}</Text>
         <View style={styles.stepsWrapper}>
           {/* Step 1 */}
           <View style={styles.stepRow}>
-            <View style={styles.iconCircle}>
+            <View style={[styles.iconCircle, { backgroundColor: theme.lightGrey }]}>
               <Image source={Icons.key} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainer}>
-              <Text style={styles.stepTitle}>{`${t("freeTrial.txt3")}`}</Text>
-              <Text style={styles.stepDescription}>{`${t("freeTrial.txt4")}`}</Text>
+              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t("freeTrial.txt3")}`}</Text>
+              <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt4")}`}</Text>
             </View>
           </View>
-          <View style={styles.connectorLine1} />
+          <View style={[styles.connectorLine1, { backgroundColor: theme.lightGrey }]} />
 
           {/* Step 2 */}
           <View style={styles.stepRowSecond}>
-            <View style={styles.iconCircle}>
+            <View style={[styles.iconCircle, { backgroundColor: theme.lightGrey }]}>
               <Image source={Icons.notify} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainerSecond}>
-              <Text style={styles.stepTitle}>{`${t("freeTrial.txt5")}`}</Text>
-              <Text style={styles.stepDescription}>{`${t("freeTrial.txt6")}`}</Text>
+              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t("freeTrial.txt5")}`}</Text>
+              <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt6")}`}</Text>
             </View>
           </View>
-          <View style={styles.connectorLine2} />
+          <View style={[styles.connectorLine2, { backgroundColor: theme.lightGrey }]} />
 
           {/* Step 3 */}
           <View style={styles.stepRowThird}>
-            <View style={styles.iconCircle}>
+            <View style={[styles.iconCircle, { backgroundColor: theme.lightGrey }]}>
               <Image source={Icons.star} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainer}>
-              <Text style={styles.stepTitle}>{`${t("freeTrial.txt7")}`}</Text>
-              <Text style={styles.stepDescription}>{`${t("freeTrial.txt8")}`}</Text>
+              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t("freeTrial.txt7")}`}</Text>
+              <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt8")}`}</Text>
             </View>
           </View>
-          <View style={styles.connectorLine3} />
+          <View style={[styles.connectorLine3, { backgroundColor: theme.lightGrey }]} />
         </View>
       </View>
       <MyAppButton title={`${t("freeTrial.txt9")}`} marginTop={RFPercentage(-10)} onPress={() => navigation.navigate("SubscriptionV2")} />

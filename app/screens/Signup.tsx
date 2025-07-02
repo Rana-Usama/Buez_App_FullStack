@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
 import Screen from "../components/Screen";
@@ -17,6 +17,7 @@ import { registerForPushNotificationsAsync } from "../utils/notificationService"
 import { saveCredentials } from "../services/Auth.service";
 import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../utils/googleLogin";
+import { useAppTheme } from "../contexts/themeContext";
 
 function Signup({ navigation }: any) {
   const { t } = useTranslation();
@@ -39,6 +40,7 @@ function Signup({ navigation }: any) {
   const [indicator, showIndicator] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { theme } = useAppTheme();
 
   useEffect(() => {
     async function getToken() {
@@ -94,10 +96,11 @@ function Signup({ navigation }: any) {
   };
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <Image style={styles.logo} source={Icons.logo} />
-        <Text style={styles.welcomeText}>{`${t("signup.txt1")}`}</Text>
+        <Text style={[styles.welcomeText, { color: theme.heading }]}>{`${t("signup.txt1")}`}</Text>
 
         <Formik
           initialValues={{
@@ -119,7 +122,7 @@ function Signup({ navigation }: any) {
                   handleBlur={handleBlur("name")}
                   value={values.name}
                   customStyle={{
-                    borderColor: touched.name && errors.name ? Colors.red : "#E5E7EB",
+                    borderColor: touched.name && errors.name ? Colors.red : theme.border,
                   }}
                 />
                 {touched.name && errors.name && (
@@ -137,7 +140,7 @@ function Signup({ navigation }: any) {
                   handleBlur={handleBlur("email")}
                   value={values.email}
                   customStyle={{
-                    borderColor: touched.email && errors.email ? Colors.red : "#E5E7EB",
+                    borderColor: touched.email && errors.email ? Colors.red : theme.border,
                   }}
                 />
                 {touched.email && errors.email && (
@@ -156,7 +159,7 @@ function Signup({ navigation }: any) {
                   handleBlur={handleBlur("password")}
                   value={values.password}
                   customStyle={{
-                    borderColor: touched.password && errors.password ? Colors.red : "#E5E7EB",
+                    borderColor: touched.password && errors.password ? Colors.red : theme.border,
                   }}
                 />
                 {touched.password && errors.password && (
@@ -175,7 +178,7 @@ function Signup({ navigation }: any) {
                   handleBlur={handleBlur("confirmPassword")}
                   value={values.confirmPassword}
                   customStyle={{
-                    borderColor: touched.confirmPassword && errors.confirmPassword ? Colors.red : "#E5E7EB",
+                    borderColor: touched.confirmPassword && errors.confirmPassword ? Colors.red : theme.border,
                   }}
                 />
                 {touched.confirmPassword && errors.confirmPassword && (
@@ -194,16 +197,16 @@ function Signup({ navigation }: any) {
 
         {/* Social Media Login */}
         <View style={styles.socialMediaContainer}>
-          <View style={styles.divider} />
-          <Text style={styles.socialMediaText}>{`${t("signup.txt2")}`}</Text>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
+          <Text style={[styles.socialMediaText, { color: theme.darkGrey }]}>{`${t("signup.txt2")}`}</Text>
+          <View style={[styles.divider, { backgroundColor: theme.border }]} />
         </View>
 
         {/* Social Media Icons */}
         <View style={styles.socialIconsContainer}>
           {loading ? (
             <>
-              <ActivityIndicator size={"small"} color={Colors.primary} />
+              <ActivityIndicator size={"small"} color={theme.primary} />
             </>
           ) : (
             <>
@@ -220,9 +223,9 @@ function Signup({ navigation }: any) {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>{`${t("signup.txt3")}`}</Text>
+          <Text style={[styles.footerText, { color: theme.darkGrey }]}>{`${t("signup.txt3")}`}</Text>
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.loginText}>{`${t("buttons.login")}`}</Text>
+            <Text style={[styles.loginText, { color: theme.primary }]}>{`${t("buttons.login")}`}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -284,7 +287,7 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     marginHorizontal: RFPercentage(0.7),
     fontFamily: "Poppins_300Light",
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
   },
   socialIconsContainer: {
     marginTop: RFPercentage(3),
@@ -304,12 +307,12 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
   },
   footerText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     color: "#4B5563",
     fontFamily: "Poppins_400Regular",
   },
   loginText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     color: Colors.primary,
     marginLeft: RFPercentage(0.5),
     fontFamily: "Poppins_500Medium",

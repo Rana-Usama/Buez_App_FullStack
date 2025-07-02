@@ -11,6 +11,7 @@ import Colors from "../config/Colors";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 const Chat = ({ navigation, route }) => {
   const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
@@ -18,6 +19,7 @@ const Chat = ({ navigation, route }) => {
   const { chatId, senderId: currentUserId, senderName, receiver } = route.params;
   // console.log({ chatId, senderId: currentUserId, senderName, receiver });
   const [message, setMessage] = useState("");
+  const { theme } = useAppTheme();
 
   useEffect(() => {
     const listenForNewMessages = () => {
@@ -191,11 +193,10 @@ const Chat = ({ navigation, route }) => {
   }
 
   return (
-    <LinearGradient colors={["rgba(161, 172, 235, 0)", "rgba(95, 96, 142, 0.53)"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.screen}>
-      {/* Nav */}
-      <View style={styles.profileContainer}>
+    <LinearGradient colors={[theme.chat1, theme.chat2]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.screen}>
+      <View style={[styles.profileContainer, {borderBottomColor:theme.lightGrey}]}>
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={20} color={Colors.primary} />
+          <Ionicons name="chevron-back" size={20} color={theme.heading} />
         </TouchableOpacity>
         <View style={{ marginLeft: RFPercentage(2.5) }}>
           {receiver?.profileImage ? (
@@ -205,13 +206,13 @@ const Chat = ({ navigation, route }) => {
           ) : (
             <>
               <View style={styles.noProfile}>
-                <Text style={styles.noProfileInner}>{receiver?.userName[0]}</Text>
+                <Text style={[styles.noProfileInner, {color:theme.primary}]}>{receiver?.userName[0]}</Text>
               </View>
             </>
           )}
         </View>
         <View style={{ marginLeft: RFPercentage(1.5) }}>
-          <Text style={{ color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" }}>{receiver?.userName}</Text>
+          <Text style={{ color: theme.heading, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" }}>{receiver?.userName}</Text>
         </View>
       </View>
 
@@ -294,6 +295,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingHorizontal: RFPercentage(1),
+    paddingTop:RFPercentage(2)
   },
   messageContainer: {
     flex: 1,

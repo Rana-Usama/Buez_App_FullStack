@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Modal, Pressable } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Modal, Pressable, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
@@ -16,6 +16,7 @@ import Toast from "react-native-toast-message";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
@@ -24,6 +25,7 @@ function CancelSubscription({ navigation }: any) {
   const firestore = getFirestore();
   const [modalVisible2, setModalVisible2] = useState(false);
   const [isloading, setIsLoading] = useState(false);
+  const { theme } = useAppTheme();
 
   const cancelSubscription = async () => {
     if (!userData?.subscriptionId) {
@@ -74,34 +76,35 @@ function CancelSubscription({ navigation }: any) {
   };
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <Image style={styles.logo} source={Icons.logo} />
       <TouchableOpacity style={{ position: "absolute", left: RFPercentage(2), top: RFPercentage(5) }} onPress={() => navigation.goBack()}>
-        <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={Colors.primary} />
+        <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={theme.heading} />
       </TouchableOpacity>
       {userData?.subscriptionId ? (
         <>
           <View style={styles.premiumInfo}>
-            <Text style={styles.premiumText}>{`${t("cancelSubscription.txt1")}`}</Text>
+            <Text style={[styles.premiumText, { color: theme.heading }]}>{`${t("cancelSubscription.txt1")}`}</Text>
           </View>
 
-          <View style={styles.subscriptionContainer}>
+          <View style={[styles.subscriptionContainer, { borderColor: theme.stroke }]}>
             <View style={styles.priceContainer}>
               <Image style={styles.starIconLeft} source={Icons.stars} />
-              <Text style={{ fontFamily: "Poppins_600SemiBold", color: Colors.darkGrey }}>{`${t("cancelSubscription.txt2")}`}</Text>
-              <Text style={styles.priceText}>
+              <Text style={{ fontFamily: "Poppins_600SemiBold", color: theme.darkGrey }}>{`${t("cancelSubscription.txt2")}`}</Text>
+              <Text style={[styles.priceText, { color: theme.darkGrey }]}>
                 $12<Text style={styles.priceSubText}>{`${t("cancelSubscription.txt3")}`}</Text>
               </Text>
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { borderColor: theme.stroke }]} />
 
             {/* Details */}
             <View style={styles.detailsContainer}>
-              <Text style={styles.detailText}>⊙ {`${t("cancelSubscription.txt4")}`}</Text>
-              <Text style={styles.detailText}>⊙ {`${t("cancelSubscription.txt5")}`}</Text>
-              <Text style={styles.detailText}>⊙ {`${t("cancelSubscription.txt6")}`}</Text>
-              <Text style={styles.detailText}>⊙ {`${t("cancelSubscription.txt7")}`}</Text>
+              <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("cancelSubscription.txt4")}`}</Text>
+              <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("cancelSubscription.txt5")}`}</Text>
+              <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("cancelSubscription.txt6")}`}</Text>
+              <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("cancelSubscription.txt7")}`}</Text>
             </View>
 
             <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
@@ -115,21 +118,21 @@ function CancelSubscription({ navigation }: any) {
       ) : (
         <>
           <Image style={styles.vector} source={Icons.notActive} resizeMode="contain" />
-          <Text style={styles.notActive}>{`${t("cancelSubscription.txt8")}`}</Text>
+          <Text style={[styles.notActive, { color: theme.heading }]}>{`${t("cancelSubscription.txt8")}`}</Text>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Subscription")}>
-            <Text style={styles.buttonText}>{`${t("cancelSubscription.txt9")}`}</Text>
-            <AntDesign name="arrowright" color={Colors.primary} size={RFPercentage(3)} style={{ left: RFPercentage(1) }} />
+            <Text style={[styles.buttonText, { color: theme.primary }]}>{`${t("cancelSubscription.txt9")}`}</Text>
+            <AntDesign name="arrowright" color={theme.primary} size={RFPercentage(3)} style={{ left: RFPercentage(1) }} />
           </TouchableOpacity>
         </>
       )}
 
       <Modal animationType="fade" transparent={true} visible={modalVisible2} onRequestClose={() => setModalVisible2(false)}>
-        <BlurView intensity={100} style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>{`${t("cancelSubscription.txt10")}`}</Text>
+        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
+          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+            <Text style={[styles.modalText, { color: theme.heading }]}>{`${t("cancelSubscription.txt10")}`}</Text>
             <View style={styles.modalButtons}>
-              <Pressable style={styles.cancelButton} onPress={() => setModalVisible2(false)}>
-                <Text style={styles.cancelButtonText}>{`${t("buttons.cancel")}`}</Text>
+              <Pressable style={[styles.cancelButton, { borderColor: theme.darkGrey }]} onPress={() => setModalVisible2(false)}>
+                <Text style={[styles.cancelButtonText, { color: theme.darkGrey }]}>{`${t("buttons.cancel")}`}</Text>
               </Pressable>
               <MyAppButton
                 title={`${t("buttons.yes")}`}

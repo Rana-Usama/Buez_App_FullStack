@@ -14,12 +14,15 @@ import Settings from "../screens/Settings";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   const { t } = useTranslation();
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const { theme } = useAppTheme();
+
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
@@ -46,9 +49,10 @@ const TabNavigator = () => {
         tabBarShowLabel: true,
         tabBarStyle: {
           height: RFPercentage(10.5),
-          borderTopColor: Colors.detailsBorder,
-          backgroundColor: Colors.detailsBorder,
+          borderTopColor: theme.detailsBorder,
+          backgroundColor: theme.detailsBorder,
           borderTopWidth: 0,
+
         },
         tabBarIcon: ({ focused }) => {
           let icon;
@@ -75,6 +79,7 @@ const TabNavigator = () => {
           return (
             <Image
               source={icon}
+              // tintColor={isMiddle ? null : theme.darkGrey}
               style={{
                 width: isMiddle ? RFPercentage(8) : RFPercentage(3),
                 height: isMiddle ? RFPercentage(8) : RFPercentage(3),
@@ -91,7 +96,7 @@ const TabNavigator = () => {
               style={{
                 fontFamily: "Poppins_500Medium",
                 fontSize: RFPercentage(1.5),
-                color: focused ? Colors.primary : Colors.detailsText,
+                color: focused ? theme.primary : theme.detailsText,
                 top: RFPercentage(1),
                 width: RFPercentage(9),
                 textAlign: "center",

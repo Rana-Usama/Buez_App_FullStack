@@ -10,7 +10,8 @@ import * as SecureStore from "expo-secure-store";
 import Nav from "../components/common/Nav";
 import CustomTabBar from "../components/common/CustomTabBar";
 import MyAppButton from "../components/common/MyAppButton";
-
+import ToggleSwitch from "toggle-switch-react-native";
+import { useAppTheme } from "../contexts/themeContext";
 // config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
@@ -25,6 +26,7 @@ function Settings({ navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   useExitAppOnBack();
+  const { theme, toggleTheme } = useAppTheme();
 
   const navigationsList = [
     {
@@ -62,8 +64,6 @@ function Settings({ navigation }) {
       title: `${t("settings.txt6")}`,
       redColor: true,
       navigation: () => {
-        // resetPostsData();
-        // logout();
         setIsModalVisible2(true);
       },
     },
@@ -73,22 +73,39 @@ function Settings({ navigation }) {
       redColor: true,
       navigation: () => {
         setIsModalVisible(true);
-        // resetPostsData();
-        // deleteAccount();
       },
     },
   ];
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
         <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("settings.txt9")}`} />
 
         <View style={styles.content}>
-          <Text style={styles.txt}>{`${t("settings.txt8")}`}</Text>
-          <View style={styles.wrap} />
+          <Text style={[styles.txt, { color: theme.lightGrey }]}>{`${t("settings.txt8")}`}</Text>
+          <View style={[styles.wrap, { backgroundColor: theme.lightGrey }]} />
         </View>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[
+            styles.navigationWrap,
+            {
+              marginTop: RFPercentage(3),
+              borderColor: theme.border,
+            },
+          ]}
+        >
+          <View style={styles.content2}>
+            <Image style={styles.img} source={Icons.language} tintColor={theme.heading} />
+            <Text style={[styles.title, { color: theme.heading }]}>{`Change Theme`}</Text>
+            <View style={{ position: "absolute", right: 0 }}>
+              <ToggleSwitch isOn={theme.mode === "dark"} onColor={Colors.primary} offColor={"rgb(224, 224, 227)"} size="small" onToggle={toggleTheme} />
+            </View>
+          </View>
+        </TouchableOpacity>
 
         {/* Navigation List */}
         {navigationsList.map((item, i) => (
@@ -99,14 +116,15 @@ function Settings({ navigation }) {
             style={[
               styles.navigationWrap,
               {
-                marginTop: i == 0 ? RFPercentage(3) : RFPercentage(2.5),
+                marginTop: RFPercentage(2.5),
+                borderColor: theme.border,
               },
             ]}
           >
             <View style={styles.content2}>
-              <Image style={styles.img} source={item.iconSource} />
-              <Text style={[styles.title, { color: item.redColor ? Colors.red : "#44403C" }]}>{item.title}</Text>
-              <MaterialIcons name="arrow-forward-ios" style={[styles.icon, { color: item.redColor ? Colors.red : "#44403C" }]} color={Colors.heading} />
+              <Image style={styles.img} source={item.iconSource} tintColor={item.redColor ? Colors.red : theme.heading} />
+              <Text style={[styles.title, { color: item.redColor ? Colors.red : theme.heading }]}>{item.title}</Text>
+              <MaterialIcons name="arrow-forward-ios" style={[styles.icon, { color: item.redColor ? Colors.red : theme.heading }]} color={Colors.heading} />
             </View>
           </TouchableOpacity>
         ))}
@@ -116,12 +134,12 @@ function Settings({ navigation }) {
       {/* <CustomTabBar settingTab={true} navigation={navigation} /> */}
 
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
-        <BlurView intensity={100} style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>{`${t("settings.txt10")}`}</Text>
+        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
+          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+            <Text style={[styles.modalText, { color: theme.heading }]}>{`${t("settings.txt10")}`}</Text>
             <View style={styles.modalButtons}>
-              <Pressable style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>{`${t("buttons.cancel")}`}</Text>
+              <Pressable style={[styles.cancelButton, { borderColor: theme.darkGrey }]} onPress={() => setIsModalVisible(false)}>
+                <Text style={[styles.cancelButtonText, { color: theme.darkGrey }]}>{`${t("buttons.cancel")}`}</Text>
               </Pressable>
               <MyAppButton
                 title={`${t("buttons.yes")}`}
@@ -142,12 +160,12 @@ function Settings({ navigation }) {
       </Modal>
 
       <Modal animationType="fade" transparent={true} visible={isModalVisible2} onRequestClose={() => setIsModalVisible2(false)}>
-        <BlurView intensity={100} style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>{`${t("settings.txt11")}`}</Text>
+        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
+          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+            <Text style={[styles.modalText, { color: theme.heading }]}>{`${t("settings.txt11")}`}</Text>
             <View style={styles.modalButtons}>
-              <Pressable style={styles.cancelButton} onPress={() => setIsModalVisible2(false)}>
-                <Text style={styles.cancelButtonText}>{`${t("buttons.cancel")}`}</Text>
+              <Pressable style={[styles.cancelButton, { borderColor: theme.darkGrey }]} onPress={() => setIsModalVisible2(false)}>
+                <Text style={[styles.cancelButtonText, { color: theme.darkGrey }]}>{`${t("buttons.cancel")}`}</Text>
               </Pressable>
               <MyAppButton
                 title={`${t("buttons.yes")}`}

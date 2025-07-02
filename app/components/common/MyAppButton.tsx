@@ -4,14 +4,13 @@ import {
   Text,
   ActivityIndicator,
   GestureResponderEvent,
-  StyleProp,
-  ViewStyle,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 
 // Config
 import Colors from "../../config/Colors";
+import { useAppTheme } from "../../contexts/themeContext";
 
 // Props interface
 interface MyAppButtonProps {
@@ -35,6 +34,8 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
   onPress,
   navigation,
 }) => {
+
+  const {theme} = useAppTheme()
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -66,7 +67,7 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
             style={{
               color: Colors.white,
               fontSize: RFPercentage(1.8),
-              fontFamily: "Poppins_500Medium",
+              fontFamily: "Poppins_600SemiBold",
             }}
           >
             {title}

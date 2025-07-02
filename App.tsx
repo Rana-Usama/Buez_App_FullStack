@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, ActivityIndicator, LogBox, Alert, Platform } from "react-native";
-import { 
-  Poppins_300Light,
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-  Poppins_800ExtraBold,
-  Poppins_900Black,
-  useFonts
-} from "@expo-google-fonts/poppins";
+import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold, Poppins_900Black, useFonts } from "@expo-google-fonts/poppins";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 
@@ -28,13 +19,14 @@ import Toast from "react-native-toast-message";
 import { toastConfig } from "./app/utils/ToastConfig";
 import StackNavigator from "./app/router/StackNavigator";
 import i18n from "./app/translation/i18n";
+import { ThemeProvider } from "./app/contexts/themeContext";
 
 LogBox.ignoreAllLogs();
 
 /*Foreground notification handler */
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,     //Show notification banner in foreground
+    shouldShowAlert: true, //Show notification banner in foreground
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
@@ -82,25 +74,25 @@ export default function App() {
 
     // Cleanup
     return () => {
-      if (notificationListener.current)
-        Notifications.removeNotificationSubscription(notificationListener.current);
-      if (responseListener.current)
-        Notifications.removeNotificationSubscription(responseListener.current);
+      if (notificationListener.current) Notifications.removeNotificationSubscription(notificationListener.current);
+      if (responseListener.current) Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
 
   if (!fontsLoaded) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
 
   return (
-    <UserProvider>
-      <PostProvider>
-        <NotificationProvider>
-          <ExpoStripeProvider>
-            <StackNavigator />
-            <Toast config={toastConfig} />
-          </ExpoStripeProvider>
-        </NotificationProvider>
-      </PostProvider>
-    </UserProvider>
+    <ThemeProvider>
+      <UserProvider>
+        <PostProvider>
+          <NotificationProvider>
+            <ExpoStripeProvider>
+              <StackNavigator />
+              <Toast config={toastConfig} />
+            </ExpoStripeProvider>
+          </NotificationProvider>
+        </PostProvider>
+      </UserProvider>
+    </ThemeProvider>
   );
 }

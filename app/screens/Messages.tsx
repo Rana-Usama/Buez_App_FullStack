@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, FlatList, ActivityIndicator, Platform, RefreshControl } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, FlatList, ActivityIndicator, Platform, RefreshControl, StatusBar } from "react-native";
 import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDocs, getDoc, doc } from "firebase/firestore";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,6 +17,7 @@ import { getFormatedDate } from "../services/Shared.service";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
 import { useExitAppOnBack } from "../utils/appBack";
+import { useAppTheme } from "../contexts/themeContext";
 
 function Messages({ navigation }) {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ function Messages({ navigation }) {
   useExitAppOnBack();
   const filters = [`${t("messages.txt2")}`, `${t("messages.txt3")}`];
   const [activeFilter, setActiveFilter] = useState(`${t("messages.txt2")}`);
-
+  const { theme } = useAppTheme();
   useEffect(() => {
     fetchInitialChats();
     listenForNewChats();
@@ -156,15 +157,15 @@ function Messages({ navigation }) {
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
       activeOpacity={0.8}
-      style={[styles.filterButton, isActive ? styles.activeFilterButton : styles.inactiveFilterButton, isFirst && styles.firstFilterButton]}
+      style={[styles.filterButton, { backgroundColor: isActive ? "transparent" : theme.white, borderColor: isActive ? "transparent" : theme.border }, isFirst && styles.firstFilterButton]}
       onPress={() => setActiveFilter(title)}
     >
       {isActive ? (
         <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={styles.gradient}>
-          <Text style={styles.filterButtonTextActive}>{title}</Text>
+          <Text style={[styles.filterButtonTextActive]}>{title}</Text>
         </LinearGradient>
       ) : (
-        <Text style={styles.filterButtonTextInactive}>{title}</Text>
+        <Text style={[styles.filterButtonTextInactive, {color:theme.heading}]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -181,17 +182,17 @@ function Messages({ navigation }) {
           <Image style={styles.messageImage} source={item.user.profileImage ? { uri: item.user.profileImage } : Icons.dp} />
           <View style={styles.messageTextContainer}>
             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-              <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>{item.user.userName}</Text>
-              {item.unread && item.senderId !== userId && <View style={styles.unreadDot} />}
+              <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText,{color:theme.darkGrey2}]}>{item?.user?.userName}</Text>
+              {item.unread && item.senderId !== userId && <View style={[styles.unreadDot, {backgroundColor:theme.primary}]} />}
             </View>
 
-            <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText]}>
+            <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText,{color:theme.darkGrey}]}>
               {item?.lastMessage?.text?.length > 50 ? `${item.lastMessage.text.substring(0, 30)}...` : item.lastMessage.text}
             </Text>
           </View>
-          <Text style={styles.messageTime}>{getFormatedDate(item.lastMessage.createdAt)}</Text>
+          <Text style={[styles.messageTime, {color:theme.darkGrey}]}>{getFormatedDate(item.lastMessage.createdAt)}</Text>
         </View>
-        <View style={styles.separator} />
+        <View style={[styles.separator, {backgroundColor:theme.border}]} />
       </TouchableOpacity>
     );
   };
@@ -205,7 +206,8 @@ function Messages({ navigation }) {
   }, [chats, activeFilter, userId]);
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
@@ -242,12 +244,11 @@ function Messages({ navigation }) {
                   {!loading && filteredChats?.length === 0 && (
                     <View style={{ justifyContent: "center", alignItems: "center" }}>
                       <Image style={styles.noMessageIcon} source={Icons.noMessage} />
-                      <Text style={styles.emptyText}>{activeFilter === `${t("messages.txt3")}` ? `${t("messages.txt4")}` : `${t("messages.txt5")}`}</Text>
+                      <Text style={[styles.emptyText, {color:theme.darkGrey}]}>{activeFilter === `${t("messages.txt3")}` ? `${t("messages.txt4")}` : `${t("messages.txt5")}`}</Text>
                     </View>
                   )}
                 </View>
               )}
-              // ListFooterComponent={loading && <ActivityIndicator size="large" color={Colors.primary} />}
             />
           </>
         )}
@@ -288,6 +289,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: RFPercentage(2),
     alignSelf: "flex-start",
+    borderWidth: 1,
   },
   activeFilterButton: {
     borderColor: "transparent",
@@ -309,12 +311,12 @@ const styles = StyleSheet.create({
   filterButtonTextActive: {
     color: Colors.white,
     fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "Poppins_500Medium",
   },
   filterButtonTextInactive: {
     color: Colors.heading,
     fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "Poppins_500Medium",
   },
   messageContainer: {
     width: "90%",
@@ -365,7 +367,6 @@ const styles = StyleSheet.create({
   },
   unreadText: {
     fontFamily: "Poppins_500Medium",
-    color: Colors.heading,
   },
   unreadDot: {
     width: RFPercentage(1),

@@ -1,14 +1,25 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, FlatList, KeyboardAvoidingView, RefreshControl, ActivityIndicator, Platform, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ImageBackground,
+  Image,
+  FlatList,
+  KeyboardAvoidingView,
+  RefreshControl,
+  ActivityIndicator,
+  Platform,
+  Dimensions,
+  StatusBar,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
-
-// components
 import Nav from "../components/common/Nav";
 import CustomTabBar from "../components/common/CustomTabBar";
 import InputField from "../components/common/AuthInputField";
-
-// config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { getRequestList } from "../services/Post.service";
@@ -19,8 +30,8 @@ import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
-import { useNotifications } from "../contexts/notification.context";
 import { useExitAppOnBack } from "../utils/appBack";
+import { useAppTheme } from "../contexts/themeContext";
 
 type InputFieldType = {
   placeholder: string;
@@ -45,6 +56,7 @@ function Home({ navigation }) {
   const [filterOptions, setFilterOptions] = useState([]);
   const originalFilters = ["All", "Cleaning", "Moving", "Gardening", "Gaming", "Other"];
   useExitAppOnBack();
+  const { theme } = useAppTheme();
 
   useFocusEffect(
     useCallback(() => {
@@ -52,7 +64,7 @@ function Home({ navigation }) {
         const translations = await Promise.all(originalFilters.map((item) => translateText(item)));
         const map = {};
         originalFilters.forEach((original, i) => {
-          map[translations[i]] = original; 
+          map[translations[i]] = original;
         });
         setFilterOptions(translations);
         setFilterMap(map);
@@ -83,13 +95,10 @@ function Home({ navigation }) {
     unsubscribeRef,
   } = usePostContext();
 
-
   useEffect(() => {
     fetchRequests(null);
-    return () => {
-    };
+    return () => {};
   }, [activeFilter]);
-
 
   const [activeIndices, setActiveIndices] = useState({});
   const fetchRequests = async (islastVisiblePost = undefined) => {
@@ -127,8 +136,6 @@ function Home({ navigation }) {
       setLoading(false);
     }
   };
-
-
 
   const fetchMorePosts = async () => {
     if (!hasMore || loadingMore) return;
@@ -207,10 +214,9 @@ function Home({ navigation }) {
     setActiveIndices(initialIndices);
   }, [displayTasks]);
 
-
-
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ScrollView
           onScroll={(e) => (scrollPosition.current = e.nativeEvent.contentOffset.y)}
@@ -236,12 +242,12 @@ function Home({ navigation }) {
                   placeholder={item.placeholder}
                   placeholderColor={"#6B7280"}
                   height={RFPercentage(6.4)}
-                  backgroundColor={Colors.white}
+                  backgroundColor={theme.white}
                   borderWidth={RFPercentage(0.1)}
-                  borderColor={"#E5E7EB"}
+                  borderColor={theme.border}
                   secure={item.secure}
                   borderRadius={RFPercentage(1.2)}
-                  color={Colors.black}
+                  color={theme.black}
                   fontSize={RFPercentage(1.7)}
                   fontFamily={"Poppins_400Regular"}
                   handleFeild={(text) => handleChange(text, i)}
@@ -253,7 +259,7 @@ function Home({ navigation }) {
           </View>
 
           <View style={styles.categoriesContainer}>
-            <Text style={styles.categoriesText}>{`${t("home.txt3")}`}</Text>
+            <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t("home.txt3")}`}</Text>
           </View>
 
           {/* Filter Buttons */}
@@ -270,7 +276,7 @@ function Home({ navigation }) {
                     <Text style={{ fontFamily: "Poppins_400Regular", color: "white" }}>{item}</Text>
                   </LinearGradient>
                 ) : (
-                  <View style={styles.nonGradient}>
+                  <View style={[styles.nonGradient, { borderColor: theme.border }]}>
                     <Text style={{ fontFamily: "Poppins_400Regular", color: Colors.heading }}>{item}</Text>
                   </View>
                 )}
@@ -279,13 +285,13 @@ function Home({ navigation }) {
           />
 
           <View style={[styles.categoriesContainer, styles.recentRequestsContainer]}>
-            <Text style={styles.categoriesText}>{`${t("home.txt9")}`}</Text>
+            <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t("home.txt9")}`}</Text>
           </View>
 
           {/* Carts */}
           {loading ? (
             <View style={{ marginTop: RFPercentage(20) }}>
-              <ActivityIndicator size="large" color={Colors.primary} />
+              <ActivityIndicator size="large" color={theme.primary} />
             </View>
           ) : (
             <>
@@ -295,7 +301,7 @@ function Home({ navigation }) {
                 scrollEventThrottle={16}
                 nestedScrollEnabled={true}
                 renderItem={({ item, index }) => (
-                  <TouchableOpacity onPress={() => navigation.navigate("OfferDetail", { postRequest: item })} activeOpacity={0.8} style={[styles.cartContainer]}>
+                  <TouchableOpacity onPress={() => navigation.navigate("OfferDetail", { postRequest: item })} activeOpacity={0.8} style={[styles.cartContainer, { borderColor: theme.border }]}>
                     <FlatList
                       data={item.imageUrls}
                       keyExtractor={(_, imgIndex) => imgIndex.toString()}
@@ -308,24 +314,13 @@ function Home({ navigation }) {
                         const slideIndex = Math.round(e.nativeEvent.contentOffset.x / (width * 0.9));
                         setActiveIndices((prev) => ({ ...prev, [index]: slideIndex }));
                       }}
-                      renderItem={({ item: imageUrl }) => (
-                        <Image
-                          resizeMode="cover"
-                          source={{ uri: imageUrl }}
-                          style={{
-                            width: width * 0.9,
-                            height: RFPercentage(35),
-                            borderTopLeftRadius: RFPercentage(1),
-                            borderTopRightRadius: RFPercentage(1),
-                          }}
-                        />
-                      )}
+                      renderItem={({ item: imageUrl }) => <Image resizeMode="cover" source={{ uri: imageUrl }} style={styles.img} />}
                     />
 
                     {item?.imageUrls?.length > 1 && (
                       <View style={styles.dotsContainer}>
                         {item.imageUrls.map((_, imageIndex) => (
-                          <View key={imageIndex} style={[styles.dot, imageIndex === activeIndices[index] ? styles.activeDot : styles.inactiveDot]} />
+                          <View key={imageIndex} style={[styles.dot, { backgroundColor: imageIndex === activeIndices[index] ? theme.primary : theme.stroke }]} />
                         ))}
                       </View>
                     )}
@@ -335,19 +330,19 @@ function Home({ navigation }) {
                         <TouchableOpacity activeOpacity={0.8}>
                           <Image style={styles.userImage} source={item.user.profileImage ? { uri: item.user.profileImage } : Icons.dp} />
                         </TouchableOpacity>
-                        <Text style={styles.userName}>{item.user.userName}</Text>
-                        <Text style={styles.postDate}>
+                        <Text style={[styles.userName, {color:theme.heading}]}>{item.user.userName}</Text>
+                        <Text style={[styles.postDate, {color:theme.darkGrey}]}>
                           {t("myRequests.txt4")} {getFormatedDate(item.createdAt)}
                         </Text>
                       </View>
 
                       <View style={styles.taskInfoContainer}>
-                        <Text style={styles.taskText}>{item.description?.substr(0, 35) + (item.description?.length > 35 ? "..." : "")}</Text>
+                        <Text style={[styles.taskText, {color:theme.darkGrey2}]}>{item.description?.substr(0, 35) + (item.description?.length > 35 ? "..." : "")}</Text>
                         <View style={styles.compensationWrapper}>
-                          <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
-                          <Text style={styles.compensationText}>
+                          <Image tintColor={theme.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
+                          <Text style={[styles.compensationText, {color:theme.darkGrey2}]}>
                             {`${t("home.txt10")}`}:{" "}
-                            <Text style={styles.compensationAmount}>
+                            <Text style={[styles.compensationAmount,{color:theme.primary}]}>
                               {item.compensationType === "Monitarely" ? `$${item.monitarily}` : item.otherCompensation?.substr(0, 20) + (item.otherCompensation?.length > 20 ? "..." : "")}
                             </Text>
                           </Text>
@@ -434,11 +429,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: RFPercentage(1),
-    height: RFPercentage(5.4),
+    height: RFPercentage(5.2),
     marginHorizontal: RFPercentage(1),
   },
   nonGradient: {
-    height: RFPercentage(5.4),
+    height: RFPercentage(5.2),
     paddingHorizontal: RFPercentage(2),
     alignItems: "center",
     justifyContent: "center",
@@ -468,6 +463,12 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1),
     paddingBottom: RFPercentage(2),
     marginTop: 20,
+  },
+  img: {
+    width: width * 0.895,
+    height: RFPercentage(37),
+    borderTopLeftRadius: RFPercentage(1),
+    borderTopRightRadius: RFPercentage(1),
   },
   cartImageBackground: {
     width: "100%",

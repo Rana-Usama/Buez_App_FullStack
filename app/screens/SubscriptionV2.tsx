@@ -1,23 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
+import React, { useState} from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import * as Linking from "expo-linking";
 import { useStripe } from "@stripe/stripe-react-native";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
-// components
 import Screen from "../components/Screen";
-import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
 import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
-
-// config
 import Colors from "../config/Colors";
-import SubscriptionListener from "../components/SubscriptionListener";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import { saveSubscription } from "../services/User.service";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function SubscriptionV2(props) {
   const { t } = useTranslation();
@@ -27,6 +22,7 @@ function SubscriptionV2(props) {
   const { initPaymentSheet, presentPaymentSheet, confirmPayment } = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
+  const { theme } = useAppTheme();
 
   const updateSubscriptionStatus = async (start, end) => {
     if (!userId) return;
@@ -69,20 +65,20 @@ function SubscriptionV2(props) {
   const openPaymentSheet = async () => {
     setLoading(true);
     const setupData = await fetchSetupIntent();
-    console.log("setup data........", setupData);
+    // console.log("setup data........", setupData);
     if (!setupData) return;
     const { setupIntentClientSecret, customerId } = setupData;
     const { error: initError } = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: "BUEZ",
     });
-    console.log("init error.........", initError);
+    // console.log("init error.........", initError);
     if (initError) {
       setLoading(false);
       return;
     }
     const { error: paymentError } = await presentPaymentSheet();
-    console.log("paymentError............", paymentError);
+    // console.log("paymentError............", paymentError);
     if (paymentError) {
       Toast.show({
         type: "info",
@@ -102,9 +98,9 @@ function SubscriptionV2(props) {
       body: JSON.stringify({ customerId, setupIntentId }),
     });
 
-    console.log("res......", res);
+    // console.log("res......", res);
     const result = await res.json();
-    console.log("result...........", result);
+    // console.log("result...........", result);
 
     if (result.success) {
       await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);
@@ -121,31 +117,32 @@ function SubscriptionV2(props) {
   };
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <Image style={styles.logo} source={Icons.logo} />
       <Image style={styles.vector} source={Icons.vec} />
 
       <View style={styles.premiumInfo}>
         <Image style={styles.crownIcon} source={Icons.crown} />
-        <Text style={styles.premiumText}>{`${t("subscriptionV2.txt1")}`}</Text>
+        <Text style={[styles.premiumText, { color: theme.darkGrey }]}>{`${t("subscriptionV2.txt1")}`}</Text>
       </View>
 
-      <View style={styles.subscriptionContainer}>
+      <View style={[styles.subscriptionContainer, { borderColor: theme.stroke }]}>
         <View style={styles.priceContainer}>
           <Image style={styles.starIconLeft} source={Icons.stars} />
-          <Text style={styles.priceText}>
+          <Text style={[styles.priceText, { color: theme.darkGrey }]}>
             $12<Text style={styles.priceSubText}>{`${t("subscriptionV2.txt2")}`}</Text>
           </Text>
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { borderColor: theme.stroke }]} />
 
         {/* Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt3")}`}</Text>
-          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt4")}`}</Text>
-          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt5")}`}</Text>
-          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt6")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt3")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt4")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt5")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt6")}`}</Text>
         </View>
 
         <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
@@ -167,9 +164,9 @@ function SubscriptionV2(props) {
               props.navigation.navigate("TabNavigator");
             } catch (error) {}
           }}
-          style={styles.skip}
+          style={[styles.skip, {borderColor:theme.stroke}]}
         >
-          <Text style={{ color: Colors.primary, fontFamily: "Poppins_500Medium" }}>{`${t("buttons.skip")}`}</Text>
+          <Text style={{ color: theme.stroke, fontFamily: "Poppins_500Medium" }}>{`${t("buttons.skip")}`}</Text>
         </TouchableOpacity>
       </View>
     </Screen>

@@ -9,6 +9,7 @@ import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
 import Feather from "@expo/vector-icons/Feather";
 import Colors from '../../config/Colors';
+import { useAppTheme } from '../../contexts/themeContext';
 
 interface Props {
   value?: any;
@@ -24,6 +25,7 @@ interface Props {
 
 const InputFieldNew = (props: Props) => {
   const [visible, setVisible] = useState<boolean>(props.password ?  false : true);
+  const {theme} = useAppTheme()
   const togglePasswordVisibility = () => {
     setVisible(!visible);
   };
@@ -32,10 +34,10 @@ const InputFieldNew = (props: Props) => {
     <View style={[styles.container, props.customStyle]}>
       <TextInput
         placeholder={props.placeholder}
-        style={styles.textInput}
+        style={[styles.textInput, {color:theme.black}]}
         value={props.value}
         onChangeText={props.onChangeText}
-        placeholderTextColor={'#6B7280'}
+        placeholderTextColor={theme.darkGrey}
         secureTextEntry={!visible}
         keyboardType={props.keyboardType}
         onBlur={props.handleBlur}
@@ -48,7 +50,7 @@ const InputFieldNew = (props: Props) => {
           <Feather
             name={visible ? 'eye' : 'eye-off'}
             size={RFPercentage(1.8)}
-            color={Colors.lightGrey}
+            color={theme.lightGrey}
             style={{right: RFPercentage(0.7)}}
           />
         </TouchableOpacity>

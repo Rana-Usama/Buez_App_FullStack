@@ -3,16 +3,18 @@ import React from "react";
 import Colors from "../../config/Colors";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Icons } from "../../config/theme";
+import { useAppTheme } from "../../contexts/themeContext";
 
 interface NotFoundProps {
   title: string;
 }
 
 const NotFound: React.FC<NotFoundProps> = ({ title }) => {
+  const {theme} = useAppTheme()
   return (
     <View style={styles.notFoundWrapper}>
       <Image style={styles.notFoundImg} source={Icons.empty} />
-      <Text style={styles.notFoundText}>{title}</Text>
+      <Text style={[styles.notFoundText, {color:theme.darkGrey}]}>{title}</Text>
     </View>
   );
 };

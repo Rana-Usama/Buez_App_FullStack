@@ -1,33 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Image, Alert, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import * as Linking from "expo-linking";
 import { useStripe } from "@stripe/stripe-react-native";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
-// components
 import Screen from "../components/Screen";
-import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
-import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
-
-// config
+import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import Colors from "../config/Colors";
-import SubscriptionListener from "../components/SubscriptionListener";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import { saveSubscription } from "../services/User.service";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function Subscription(props) {
   const { t } = useTranslation();
   const { userData } = useUser();
   const userId = getAuth()?.currentUser?.uid;
   const firestore = getFirestore();
-  const [indicator, showIndicator] = useState(false);
   const { initPaymentSheet, presentPaymentSheet, confirmPayment } = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
+  const { theme } = useAppTheme();
 
   const updateSubscriptionStatus = async (start, end) => {
     if (!userId) return;
@@ -119,39 +114,39 @@ function Subscription(props) {
   };
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <Image style={styles.logo} source={Icons.logo} />
       <Image style={styles.vector} source={Icons.vec} />
 
-      <Text style={{ top: RFPercentage(4), color: Colors.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(2) }}>{`${t("subscription.txt1")}`}</Text>
+      <Text style={{ top: RFPercentage(4), color: theme.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(2) }}>{`${t("subscription.txt1")}`}</Text>
       <View style={styles.premiumInfo}>
         <Image style={styles.crownIcon} source={Icons.crown} />
-        <Text style={styles.premiumText}>{`${t("subscription.txt2")}`}</Text>
+        <Text style={[styles.premiumText, { color: theme.darkGrey }]}>{`${t("subscription.txt2")}`}</Text>
       </View>
 
       <View style={styles.subscriptionContainer}>
         <View style={styles.priceContainer}>
           <Image style={styles.starIconLeft} source={Icons.stars} />
-          <Text style={styles.priceText}>
+          <Text style={[styles.priceText, { color: theme.darkGrey }]}>
             $12<Text style={styles.priceSubText}>{`${t("subscriptionV2.txt2")}`}</Text>
           </Text>
         </View>
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { borderColor: theme.stroke }]} />
 
         {/* Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt3")}`}</Text>
-          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt4")}`}</Text>
-          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt5")}`}</Text>
-          <Text style={styles.detailText}>⊙ {`${t("subscriptionV2.txt6")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt3")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt4")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt5")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt6")}`}</Text>
         </View>
 
         <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
           <Image style={styles.starIconRight} source={Icons.stars} />
         </View>
       </View>
-      {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
       <View style={{ alignItems: "center", justifyContent: "center", width: "80%" }}>
         <MyAppButton title={`${t("subscription.txt3")}`} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(20)} loading={loading} />
       </View>

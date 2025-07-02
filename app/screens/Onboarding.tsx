@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Animated, Platform } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Animated, Platform, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from "expo-secure-store";
@@ -12,11 +12,13 @@ import Screen from "../components/Screen";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function Onboarding(props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
 
   useEffect(() => {
     console.log("i18n is initialized:", i18n.isInitialized);
@@ -40,7 +42,7 @@ function Onboarding(props) {
       image: Icons.onBoarding1,
       title: `${t("onBoarding.onBoarding3.Title")}`,
       description: `${t("onBoarding.onBoarding3.Desc")}`,
-      lottie: require("../../assets/lottie/chatBoth.json"),
+      lottie: require("../../assets/lottie/chatMob.json"),
     },
     {
       image: Icons.onBoarding2,
@@ -98,7 +100,7 @@ function Onboarding(props) {
           marginHorizontal: RFPercentage(0.3),
           width: index === activeIndex ? RFPercentage(3) : RFPercentage(0.9),
           height: RFPercentage(0.9),
-          backgroundColor: index === activeIndex ? Colors.primary : "#D1D5DB",
+          backgroundColor: index === activeIndex ? theme.primary : theme.stroke,
           borderRadius: RFPercentage(20),
         }}
       />
@@ -126,7 +128,8 @@ function Onboarding(props) {
   }, [activeIndex]);
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'}  backgroundColor={theme.white} />
       <Image style={styles.img} source={Icons.logo} />
 
       {/* Body */}
@@ -136,11 +139,11 @@ function Onboarding(props) {
       </View>
       <View style={{ top: RFPercentage(45), alignItems: "center", justifyContent: "center" }}>
         <View style={styles.wrapper}>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={[styles.title, {color:theme.heading}]}>{title}</Text>
         </View>
 
         <View style={styles.wrapper2}>
-          <Text style={styles.desc}>{description}</Text>
+          <Text style={[styles.desc, {color:theme.desc}]}>{description}</Text>
         </View>
         <View style={styles.dot}>{renderDots()}</View>
       </View>
@@ -148,11 +151,11 @@ function Onboarding(props) {
       {/* Buttons */}
       <View style={styles.buttonWrapper}>
         <TouchableOpacity activeOpacity={0.8} style={styles.skip} onPress={() => props.navigation.navigate("Login")}>
-          <Text style={styles.skipText}>{`${t("buttons.skip")}`}</Text>
+          <Text style={[styles.skipText, {color:theme.skip}]}>{`${t("buttons.skip")}`}</Text>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} onPress={handleNext} style={styles.nextContainer}>
           <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={styles.gradient}>
-            <Text style={styles.gradientText}>{renderNextButtonText()}</Text>
+            <Text style={[styles.gradientText, {color:theme.pureWhite}]}>{renderNextButtonText()}</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>

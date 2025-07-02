@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -16,9 +16,11 @@ import * as yup from "yup";
 import { Formik } from "formik";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function ForgotPassword(props: any) {
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
   let validationSchema = yup.object({
     email: yup
       .string()
@@ -51,12 +53,13 @@ function ForgotPassword(props: any) {
   };
 
   return (
-    <Screen style={styles.screen}>
+    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <View style={styles.container}>
         <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={{ position: "absolute", left: 0 }}>
-          <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.5) }} color={Colors.heading} />
+          <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.5) }} color={theme.heading} />
         </TouchableOpacity>
-        <Text style={styles.heading}>{`${t("forgetPassword.txt1")}`}</Text>
+        <Text style={[styles.heading, { color: theme.heading }]}>{`${t("forgetPassword.txt1")}`}</Text>
       </View>
 
       {/* Input field */}
@@ -71,12 +74,12 @@ function ForgotPassword(props: any) {
           <>
             <View style={styles.fieldWrapper}>
               <InputFieldNew
-                placeholder={`${t("validations.email")}`}
+                placeholder={`${t("common.email")}`}
                 onChangeText={handleChange("email")}
                 handleBlur={handleBlur("email")}
                 value={values.email}
                 customStyle={{
-                  borderColor: touched.email && errors.email ? Colors.red : "#E5E7EB",
+                  borderColor: touched.email && errors.email ? Colors.red : theme.border,
                 }}
               />
               {touched.email && errors.email && (

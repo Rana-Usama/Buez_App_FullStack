@@ -36,6 +36,7 @@ import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
 import { useExitAppOnBack } from "../utils/appBack";
+import { useAppTheme } from "../contexts/themeContext";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -56,7 +57,7 @@ function MyRequests({ navigation }) {
   const [activeIndices, setActiveIndices] = useState({});
   useExitAppOnBack();
   const param = activeFilter === `${t("myRequests.txt2")}` ? REQUEST_STATUS.Active : REQUEST_STATUS.Completed;
-
+  const { theme } = useAppTheme();
   useFocusEffect(
     useCallback(() => {
       setTaskRecords([]);
@@ -159,7 +160,7 @@ function MyRequests({ navigation }) {
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
       activeOpacity={0.8}
-      style={[styles.filterButton, isActive ? styles.activeFilterButton : styles.inactiveFilterButton, isFirst && styles.firstFilterButton]}
+      style={[styles.filterButton, { borderColor: isActive ? "transparent" : theme.border }, isFirst && styles.firstFilterButton]}
       onPress={() => setActiveFilter(title)}
     >
       {isActive ? (
@@ -167,7 +168,7 @@ function MyRequests({ navigation }) {
           <Text style={styles.filterButtonTextActive}>{title}</Text>
         </LinearGradient>
       ) : (
-        <Text style={styles.filterButtonTextInactive}>{title}</Text>
+        <Text style={[styles.filterButtonTextInactive, { color: theme.heading }]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -188,12 +189,12 @@ function MyRequests({ navigation }) {
   };
 
   return (
-    <View style={styles.screen}>
-      <StatusBar barStyle="dark-content" />
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[theme.primary]} tintColor={theme.primary} />}
       >
         {/* Nav */}
         <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title={`${t("myRequests.txt1")}`} />
@@ -207,7 +208,7 @@ function MyRequests({ navigation }) {
 
         {/* Carts */}
         {taskRecords.map((cart, index) => (
-          <View key={index} style={[styles.cartContainer, { marginTop: index === 1 ? RFPercentage(3) : RFPercentage(3) }]}>
+          <View key={index} style={[styles.cartContainer, { marginTop: index === 1 ? RFPercentage(3) : RFPercentage(3), borderColor: theme.border }]}>
             <FlatList
               data={cart.imageUrls}
               horizontal
@@ -236,7 +237,7 @@ function MyRequests({ navigation }) {
             {cart?.imageUrls?.length > 1 && (
               <View style={styles.dotsContainer}>
                 {cart.imageUrls.map((_, imageIndex) => (
-                  <View key={imageIndex} style={[styles.dot, (activeIndices[index] ?? 0) === imageIndex ? styles.activeDot : styles.inactiveDot]} />
+                  <View key={imageIndex} style={[styles.dot, { backgroundColor: (activeIndices[index] ?? 0) === imageIndex ? theme.primary : theme.border }]} />
                 ))}
               </View>
             )}
@@ -247,20 +248,20 @@ function MyRequests({ navigation }) {
                 <Image style={styles.userImage} source={cart?.user?.profileImage ? { uri: cart?.user?.profileImage } : Icons.dp} />
               </TouchableOpacity>
 
-              <Text style={styles.userName}>{cart.user.userName}</Text>
-              <Text style={styles.postDate}>
+              <Text style={[styles.userName, {color:theme.heading}]}>{cart.user.userName}</Text>
+              <Text style={[styles.postDate, {color:theme.darkGrey}]}>
                 {`${t("myRequests.txt4")}`} {getFormatedDate(cart?.createdAt)}
               </Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={styles.taskText}>{cart?.description?.substr(0, 30) + (cart?.description?.length > 15 ? "..." : "")}</Text>
+              <Text style={[styles.taskText, {color:theme.darkGrey}]}>{cart?.description?.substr(0, 30) + (cart?.description?.length > 15 ? "..." : "")}</Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={styles.compensation}>
+              <Text style={[styles.compensation, {color:theme.heading}]}>
                 {`${t("home.txt10")}`}:{" "}
-                <Text style={styles.compensationAmount}>
+                <Text style={[styles.compensationAmount, {color:theme.primary}]}>
                   {cart.compensationType === `Monitarely` ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
               </Text>
@@ -286,9 +287,9 @@ function MyRequests({ navigation }) {
                     setSelectedRequestItem(cart);
                     setIsModalVisible(true);
                   }}
-                  style={styles.cancel}
+                  style={[styles.cancel, {borderColor:theme.border}]}
                 >
-                  <Text style={styles.text3}>{`${t("myRequests.txt6")}`}</Text>
+                  <Text style={[styles.text3, {color:theme.border}]}>{`${t("myRequests.txt6")}`}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -308,12 +309,12 @@ function MyRequests({ navigation }) {
 
       {/* Modal */}
       <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
-        <BlurView intensity={100} style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>{`${t("myRequests.txt7")}`}</Text>
+        <BlurView intensity={100} style={[styles.modalBackground,{backgroundColor:theme.modal}]} >
+          <View style={[styles.modalContainer, {backgroundColor:theme.white}]}>
+            <Text style={[styles.modalText, {color:theme.heading}]}>{`${t("myRequests.txt7")}`}</Text>
             <View style={styles.modalButtons}>
-              <Pressable style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>{`${t("buttons.cancel")}`}</Text>
+              <Pressable style={[styles.cancelButton, {borderColor:theme.border}]} onPress={() => setIsModalVisible(false)}>
+                <Text style={[styles.cancelButtonText, {color:theme.border}]}>{`${t("buttons.cancel")}`}</Text>
               </Pressable>
               <MyAppButton
                 title={`${t("buttons.yes")}`}
@@ -356,6 +357,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: RFPercentage(2),
     alignSelf: "flex-start",
+    borderWidth: 1,
   },
   activeFilterButton: {
     borderColor: "transparent",
@@ -377,7 +379,7 @@ const styles = StyleSheet.create({
   filterButtonTextActive: {
     color: Colors.white,
     fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "Poppins_500Medium",
   },
   filterButtonTextInactive: {
     color: Colors.heading,
@@ -461,7 +463,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
   },
-  text2: { color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.7), textAlign: "center" },
+  text2: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.7), textAlign: "center" },
   postDate: {
     fontSize: RFPercentage(1.6),
     position: "absolute",
@@ -497,7 +499,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(218, 218, 218, 0.5)",
   },
   modalContainer: {
     width: "80%",
@@ -584,13 +585,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "absolute",
     right: 0,
-    backgroundColor: "rgb(204, 204, 216)",
+    backgroundColor: "transparent",
   },
   notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },
   notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   cartContainer2: { width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) },
-  text3: { color: Colors.white, fontFamily: "Poppins_400Regular", fontSize: RFPercentage(1.8), textAlign: "center" },
+  text3: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.8), textAlign: "center" },
 });
 
 export default MyRequests;

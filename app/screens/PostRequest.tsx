@@ -26,6 +26,7 @@ import { translateText } from "../translation/googleTranslation";
 
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { useExitAppOnBack } from "../utils/appBack";
+import { useAppTheme } from "../contexts/themeContext";
 
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
@@ -43,6 +44,7 @@ function PostRequest({ navigation, route }) {
   const [compensation, setCompensation] = useState("");
   const [reviews, setReviews] = useState([]);
   useExitAppOnBack();
+  const { theme } = useAppTheme();
 
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
@@ -117,7 +119,6 @@ function PostRequest({ navigation, route }) {
       translateAndSet();
     }, [route.params?.postRequest])
   );
-
 
   const toggleDropdown = (dropdownType) => {
     if (dropdownType === "task") {
@@ -289,7 +290,7 @@ function PostRequest({ navigation, route }) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
           {/* Nav */}
@@ -305,11 +306,17 @@ function PostRequest({ navigation, route }) {
           <TouchableOpacity
             style={[
               styles.dropdownHeader,
-              { marginTop: RFPercentage(4), borderBottomLeftRadius: showTaskDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showTaskDropdown ? 0 : RFPercentage(1) },
+              {
+                marginTop: RFPercentage(4),
+                borderBottomLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                borderBottomRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                backgroundColor: theme.white,
+                borderColor: theme.border,
+              },
             ]}
             onPress={() => toggleDropdown("task")}
           >
-            <Text style={[styles.dropdownHeaderText, { color: selectedTask ? Colors.black : Colors.heading }]}>{selectedTask || `${t("postRequest.txt3")}`}</Text>
+            <Text style={[styles.dropdownHeaderText, { color: selectedTask ? theme.black : theme.heading }]}>{selectedTask || `${t("postRequest.txt3")}`}</Text>
             <MaterialIcons name={showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
           </TouchableOpacity>
 
@@ -326,11 +333,13 @@ function PostRequest({ navigation, route }) {
                   borderTopLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
                   borderTopRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
                   paddingVertical: RFPercentage(1),
+                  backgroundColor: theme.white,
+                  borderColor: theme.border,
                 },
               ]}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => selectTask(item)} style={styles.dropdownItem}>
-                  <Text style={styles.dropdownItemText}>{item.name}</Text>
+                  <Text style={[styles.dropdownItemText, { color: theme.darkGrey }]}>{item.name}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -340,11 +349,17 @@ function PostRequest({ navigation, route }) {
             <TouchableOpacity
               style={[
                 styles.dropdownHeader,
-                { marginTop: RFPercentage(2.2), borderBottomLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1), borderBottomRightRadius: showCompensationDropdown ? 0 : RFPercentage(1) },
+                {
+                  marginTop: RFPercentage(2.2),
+                  borderBottomLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1),
+                  borderBottomRightRadius: showCompensationDropdown ? 0 : RFPercentage(1),
+                  backgroundColor: theme.white,
+                  borderColor: theme.border,
+                },
               ]}
               onPress={() => toggleDropdown("compensation")}
             >
-              <Text style={[styles.dropdownHeaderText, { color: selectedCompensation ? Colors.black : Colors.heading }]}>{selectedCompensation || `${t("postRequest.txt7")}`}</Text>
+              <Text style={[styles.dropdownHeaderText, { color: selectedCompensation ? theme.black : theme.heading }]}>{selectedCompensation || `${t("postRequest.txt7")}`}</Text>
               <MaterialIcons name={showCompensationDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
             </TouchableOpacity>
 
@@ -360,11 +375,13 @@ function PostRequest({ navigation, route }) {
                     borderTopLeftRadius: showCompensationDropdown ? 0 : RFPercentage(1),
                     borderTopRightRadius: showCompensationDropdown ? 0 : RFPercentage(1),
                     paddingVertical: RFPercentage(1),
+                    backgroundColor: theme.white,
+                    borderColor: theme.border,
                   },
                 ]}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => selectCompensation(item)} style={styles.dropdownItem}>
-                    <Text style={styles.dropdownItemText}>{item.type}</Text>
+                    <Text style={[styles.dropdownItemText, { color: theme.darkGrey }]}>{item.type}</Text>
                   </TouchableOpacity>
                 )}
               />
@@ -372,17 +389,17 @@ function PostRequest({ navigation, route }) {
           </View>
 
           {/* decsription */}
-          <View style={styles.descriptionContainer}>
+          <View style={[styles.descriptionContainer, { borderColor: theme.border }]}>
             <TextInput
               placeholder={`${t("postRequest.txt8")}`}
-              placeholderTextColor={Colors.heading}
+              placeholderTextColor={theme.heading}
               value={description}
               multiline
               onChangeText={(e) => setDescription(e)}
               maxLength={250}
-              style={styles.desc}
+              style={[styles.desc, { color: theme.black }]}
             />
-            <Text style={styles.charCount}>{description.length}/250</Text>
+            <Text style={[styles.charCount, { color: theme.darkGrey }]}>{description.length}/250</Text>
           </View>
 
           {/* Input field */}
@@ -391,7 +408,7 @@ function PostRequest({ navigation, route }) {
               placeholder={`${t("postRequest.txt9")}`}
               value={location}
               onChangeText={setLocation}
-              customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }}
+              customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: theme.white, borderColor: theme.border }}
             />
             {originalCompensationType === `Other` ? (
               <>
@@ -399,7 +416,7 @@ function PostRequest({ navigation, route }) {
                   placeholder={`${t("postRequest.txt10")}`}
                   value={compensation}
                   onChangeText={setCompensation}
-                  customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }}
+                  customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: theme.white, borderColor: theme.border }}
                 />
               </>
             ) : (
@@ -411,7 +428,7 @@ function PostRequest({ navigation, route }) {
                     const numeric = text.replace(/[^0-9]/g, "");
                     setBudget(numeric ? `$${numeric}` : "");
                   }}
-                  customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: Colors.white }}
+                  customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: theme.white, borderColor: theme.border }}
                   keyboardType="numeric"
                 />
               </>
@@ -420,10 +437,10 @@ function PostRequest({ navigation, route }) {
 
           {/* Image Picker */}
           <View style={styles.imageWrapper}>
-            <Text style={styles.imgText}>{`${t("postRequest.txt12")}`}</Text>
+            <Text style={[styles.imgText,{color:theme.darkGrey}]}>{`${t("postRequest.txt12")}`}</Text>
             <View style={styles.imgContainer}>
               {[0, 1, 2].map((index) => (
-                <TouchableOpacity key={index} activeOpacity={0.8} onPress={() => pickImage(index)} style={styles.imgPick}>
+                <TouchableOpacity key={index} activeOpacity={0.8} onPress={() => pickImage(index)} style={[styles.imgPick, {backgroundColor:theme.white, borderWidth:1, borderColor:theme.border}]}>
                   {imageUris[index] ? (
                     <>
                       <Image style={styles.img2} source={{ uri: imageUris[index] }} />
@@ -432,7 +449,7 @@ function PostRequest({ navigation, route }) {
                       </TouchableOpacity>
                     </>
                   ) : (
-                    <Image style={styles.img3} source={Icons.gal} />
+                    <Image style={styles.img3} source={Icons.gal} tintColor={theme.darkGrey} />
                   )}
                 </TouchableOpacity>
               ))}

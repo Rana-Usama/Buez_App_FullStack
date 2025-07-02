@@ -15,6 +15,7 @@ import * as yup from "yup";
 import { Formik } from "formik";
 import InputFieldNew from "../components/common/NewField";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 interface ChangePasswordProps {
   navigation: any;
@@ -34,6 +35,8 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
       .oneOf([yup.ref("password")], `${t("validations.passwordMatch")}`)
       .required(`${t("validations.passwordMatch")}`),
   });
+
+  const {theme} = useAppTheme()
 
   const handlePasswordChange = async (values: any) => {
     try {
@@ -58,7 +61,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor:theme.white}]}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("settings.txt2")}`} />

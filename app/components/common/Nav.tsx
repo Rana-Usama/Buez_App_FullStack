@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
 import { Icons } from "../../config/theme";
 import { useNotifications } from "../../contexts/notification.context"; // 👈 Add this line
+import { useAppTheme } from "../../contexts/themeContext";
 
 interface NavProps {
   dpNull?: boolean;
@@ -24,7 +25,7 @@ interface NavProps {
 
 const Nav: React.FC<NavProps> = ({ dpNull = false, crown = false, marginTop = RFPercentage(6), title, navigation, leftLogo = false, post = false, profileImage }) => {
   const { unreadCount } = useNotifications();
-  // console.log(unreadCount);
+  const {theme} = useAppTheme()
   return (
     <View style={[styles.container, { marginTop }]}>
       {leftLogo ? (
@@ -34,18 +35,18 @@ const Nav: React.FC<NavProps> = ({ dpNull = false, crown = false, marginTop = RF
         </TouchableOpacity>
       ) : (
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()} style={{ position: "absolute", left: 0 }}>
-          <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={Colors.primary} />
+          <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={theme.heading} />
         </TouchableOpacity>
       )}
 
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, {color:theme.heading}]}>{title}</Text>
 
       {post ? (
         <TouchableOpacity onPress={() => navigation.navigate("Post")} activeOpacity={0.8} style={{ position: "absolute", right: 0 }}>
-          <Text style={styles.post}>Post</Text>
+          <Text style={[styles.post,{color:theme.primary}]}>Post</Text>
         </TouchableOpacity>
       ) : dpNull ? null : (
-        <TouchableOpacity onPress={() => navigation.navigate("Notifications")} activeOpacity={0.8} style={styles.notify}>
+        <TouchableOpacity onPress={() => navigation.navigate("Notifications")} activeOpacity={0.8} style={[styles.notify, {backgroundColor:theme.white, borderColor:theme.border}]}>
           <Image style={{ width: RFPercentage(3.5), height: RFPercentage(3.5) }} source={Icons.notify2} />
           {unreadCount > 0 && <View style={styles.dot} />}
         </TouchableOpacity>
@@ -108,6 +109,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    borderWidth:1
   },
   dot: {
     position: "absolute",
