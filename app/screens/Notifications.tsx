@@ -18,6 +18,7 @@ import { useNotifications } from "../contexts/notification.context";
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
 import { translateText } from "../translation/googleTranslation";
+import NotFound from "../components/common/NotFound";
 
 const getTargetLanguage = async () => {
   try {
@@ -30,7 +31,6 @@ const getTargetLanguage = async () => {
 
 /* ---------- date helpers ---------- */
 const sameDay = (a, b) => a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
-
 const getSectionTitle = (dateObj, lang) => {
   const today = new Date();
   const yesterday = new Date();
@@ -46,24 +46,20 @@ const getSectionTitle = (dateObj, lang) => {
 };
 
 export default function Notifications({ navigation }) {
-  /* ---------- local state ---------- */
   const [lang, setLang] = useState("en");
   const [tr, setTr] = useState({});
   const [busy, setBusy] = useState(true);
   const [raw, setRaw] = useState([]);
   const [sections, setSections] = useState([]);
   const [descCache, setDescCache] = useState({});
-
   const currentUserId = getAuth().currentUser?.uid;
   const currentUser = useUser();
   const { markAllRead } = useNotifications();
-
 
   useEffect(() => {
     (async () => {
       const l = await getTargetLanguage();
       setLang(l);
-
       const phrases = {
         today: "Today",
         yesterday: "Yesterday",
@@ -82,10 +78,9 @@ export default function Notifications({ navigation }) {
     })();
   }, []);
 
-  /* ---------- fetch notifications ---------- */
+
   useEffect(() => {
     if (!lang || !currentUserId) return;
-
     (async () => {
       setBusy(true);
       try {
@@ -101,7 +96,7 @@ export default function Notifications({ navigation }) {
     })();
   }, [lang, currentUserId]);
 
-  /* ---------- mark as read once items fetched ---------- */
+
   useEffect(() => {
     markAllRead();
   }, [markAllRead]);
@@ -123,10 +118,11 @@ export default function Notifications({ navigation }) {
     setSections(built);
   }, [raw, lang]);
 
+
+
   /* ---------- translate task descriptions ---------- */
   useEffect(() => {
     if (!raw.length) return;
-
     (async () => {
       const newCache = { ...descCache };
       await Promise.all(
@@ -187,7 +183,7 @@ export default function Notifications({ navigation }) {
         <View style={styles.row}>
           <Image source={profileImage ? { uri: profileImage } : Icons.dp} style={styles.avatar} />
           <View style={{ marginLeft: RFPercentage(1.5), width: RFPercentage(35) }}>
-            <Text style={styles.title}>{`${senderName}${tr.accepted || "accepted your task!"}`}</Text>
+            <Text style={styles.title}>{`${senderName} ${tr.accepted || "accepted your task!"}`}</Text>
             {!!shortDesc && <Text style={styles.sub}>{shortDesc}</Text>}
           </View>
         </View>
@@ -225,7 +221,7 @@ export default function Notifications({ navigation }) {
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             renderSectionHeader={renderHeader}
-            ListEmptyComponent={<Text style={styles.empty}>{tr.noNotifications || "No notifications yet."}</Text>}
+            ListEmptyComponent={<NotFound title={tr?.noNotifications || "No notifications yet."} />}
             contentContainerStyle={{ paddingBottom: RFPercentage(5) }}
             stickySectionHeadersEnabled={false}
           />

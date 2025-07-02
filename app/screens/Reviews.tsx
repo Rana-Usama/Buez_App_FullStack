@@ -60,7 +60,6 @@ export default function Reviews({ navigation }) {
       const data = await fetchMyReviewsFromFirebase();
       const translationMap = { ...translations };
       const grouped = new Map();
-
       for (const review of data) {
         const createdAt = review.createdAt?.toDate?.() ?? review.createdAt ?? new Date();
         const title = getSectionTitle(new Date(createdAt), lang);
@@ -72,7 +71,6 @@ export default function Reviews({ navigation }) {
         arr.push({ ...review, createdAt });
         grouped.set(title, arr);
       }
-
       const finalSections = Array.from(grouped.entries())
         .map(([title, data]) => ({ title, data: data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) }))
         .sort((a, b) => {
@@ -80,7 +78,6 @@ export default function Reviews({ navigation }) {
           const pB = title === "Today" ? 0 : title === "Yesterday" ? 1 : 2;
           return pA - pB || new Date(b.data[0].createdAt) - new Date(a.data[0].createdAt);
         });
-   
       const ratings = data.map((r) => r.rating).filter(Boolean);
       if (ratings.length > 0) {
         const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
@@ -88,7 +85,6 @@ export default function Reviews({ navigation }) {
       } else {
         setAverageRating(null);
       }
-
       setTranslations(translationMap);
       setSections(finalSections);
     } catch (err) {

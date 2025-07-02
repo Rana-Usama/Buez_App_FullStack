@@ -7,7 +7,6 @@ import { FIREBASE_AUTH } from "../../firebaseConfig";
 
 // components
 import Screen from "../components/Screen";
-import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
 import InputFieldNew from "../components/common/NewField";
 
@@ -20,7 +19,6 @@ import { useTranslation } from "react-i18next";
 
 function ForgotPassword(props: any) {
   const { t } = useTranslation();
-
   let validationSchema = yup.object({
     email: yup
       .string()

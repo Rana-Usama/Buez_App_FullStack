@@ -171,7 +171,7 @@ function OfferDetail({ navigation, route }) {
           token: currentUser?.userData?.token,
         },
         receiver: {
-          userId: postRequest?.user?.id || postRequest?.userId,
+          userId: postRequest?.userId,
           name: postRequest?.user?.userName,
           email: postRequest?.user?.email,
         },
@@ -263,9 +263,9 @@ function OfferDetail({ navigation, route }) {
         </View>
         <View style={{ width: "90%", alignSelf: "center" }}>
           {averageRating && (
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", }}>
-              <Text style={{ fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", color: Colors.heading }}>{"Rating"}:</Text>
-              <Text style={{ fontSize: RFPercentage(2), fontFamily: "Poppins_600SemiBold", color: Colors.darkGrey }}>⭐ {averageRating}</Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <Text style={styles.rating}>{"Rating"}:</Text>
+              <Text style={styles.ratingText}>⭐ {averageRating}</Text>
             </View>
           )}
 
@@ -276,15 +276,11 @@ function OfferDetail({ navigation, route }) {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => {
                   return (
-                    <View style={{ flexDirection: "row", alignItems: "center", marginTop: RFPercentage(2) }}>
-                      <Image
-                        source={item?.reviewer?.profileImage ? { uri: item?.reviewer?.profileImage } : Icons.profile}
-                        resizeMode="cover"
-                        style={{ width: RFPercentage(5), height: RFPercentage(5), borderRadius: RFPercentage(100), borderWidth: RFPercentage(0.3), borderColor: Colors.primary }}
-                      />
+                    <View style={styles.review}>
+                      <Image source={item?.reviewer?.profileImage ? { uri: item?.reviewer?.profileImage } : Icons.profile} resizeMode="cover" style={styles.reviewPic} />
                       <View style={{ marginLeft: RFPercentage(1), top: RFPercentage(0.5) }}>
-                        <Text style={{ color: Colors.heading, fontFamily: "Poppins_500Medium" }}>{item?.reviewer?.userName}</Text>
-                        <Text style={{ color: Colors.heading, fontFamily: "Poppins_400Regular" }}>{item?.translatedText}</Text>
+                        <Text style={styles.userName}>{item?.reviewer?.userName}</Text>
+                        <Text style={styles.userName}>{item?.translatedText}</Text>
                       </View>
                     </View>
                   );
@@ -292,14 +288,7 @@ function OfferDetail({ navigation, route }) {
               />
               {!showAll && hiddenCount > 0 && (
                 <TouchableOpacity onPress={() => setShowAll(true)}>
-                  <Text
-                    style={{
-                      color: Colors.primary,
-                      marginTop: RFPercentage(1),
-                      fontFamily: "Poppins_500Medium",
-                      alignSelf: "flex-start",
-                    }}
-                  >
+                  <Text style={styles.reviewCount}>
                     +{hiddenCount} {t("details.txt11")}
                   </Text>
                 </TouchableOpacity>
@@ -307,7 +296,7 @@ function OfferDetail({ navigation, route }) {
             </>
           ) : (
             <>
-              <Text style={{ color: Colors.heading, fontFamily: "Poppins_400Regular" }}>{t("details.txt10")}</Text>
+              <Text style={styles.detail}>{t("details.txt10")}</Text>
             </>
           )}
         </View>
@@ -434,11 +423,20 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "flex-start",
   },
+  reviewCount: {
+    color: Colors.primary,
+    marginTop: RFPercentage(1),
+    fontFamily: "Poppins_500Medium",
+    alignSelf: "flex-start",
+  },
+  detail: { color: Colors.heading, fontFamily: "Poppins_400Regular" },
+  reviewPic: { width: RFPercentage(5), height: RFPercentage(5), borderRadius: RFPercentage(100), borderWidth: RFPercentage(0.3), borderColor: Colors.primary },
   compensationTitle: {
     color: Colors.heading,
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
   },
+  review: { flexDirection: "row", alignItems: "center", marginTop: RFPercentage(2) },
   chatButton: {
     marginRight: RFPercentage(2),
     backgroundColor: "#F8FAFC",
@@ -450,6 +448,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  rating: { fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", color: Colors.heading },
+  ratingText: { fontSize: RFPercentage(2), fontFamily: "Poppins_600SemiBold", color: Colors.darkGrey },
+  userName: { color: Colors.heading, fontFamily: "Poppins_500Medium" },
   text: {
     color: Colors.primary,
     fontSize: RFPercentage(1.8),

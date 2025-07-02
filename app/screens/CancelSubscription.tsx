@@ -1,27 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Modal, Pressable } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import * as Linking from "expo-linking";
-import { useStripe } from "@stripe/stripe-react-native";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
 // components
 import Screen from "../components/Screen";
-import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
 import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { BlurView } from "expo-blur";
 
 // config
 import Colors from "../config/Colors";
-import SubscriptionListener from "../components/SubscriptionListener";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
-import { saveSubscription } from "../services/User.service";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
-
-import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 
 function CancelSubscription({ navigation }: any) {
@@ -31,8 +24,6 @@ function CancelSubscription({ navigation }: any) {
   const firestore = getFirestore();
   const [modalVisible2, setModalVisible2] = useState(false);
   const [isloading, setIsLoading] = useState(false);
-
-  // console.log(userData?.subscriptionId);
 
   const cancelSubscription = async () => {
     if (!userData?.subscriptionId) {

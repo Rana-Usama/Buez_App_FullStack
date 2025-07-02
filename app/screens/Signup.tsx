@@ -18,7 +18,6 @@ import { saveCredentials } from "../services/Auth.service";
 import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../utils/googleLogin";
 
-
 function Signup({ navigation }: any) {
   const { t } = useTranslation();
   let validationSchema = yup.object({
@@ -62,9 +61,9 @@ function Signup({ navigation }: any) {
   const handleSignup = async (values: any) => {
     showIndicator(true);
     try {
-      const userName = values.name;
-      const email = values.email;
-      const password = values.password;
+      const userName = values.name.trim();
+      const email = values.email.trim();
+      const password = values.password.trim();
       const user = await createAccountWithEmail(email, password);
       await SecureStore.setItemAsync("loggedOut", "false");
       if (user) {
@@ -93,7 +92,6 @@ function Signup({ navigation }: any) {
     }
     showIndicator(false);
   };
-
 
   return (
     <Screen style={styles.screen}>
@@ -295,8 +293,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   socialIcon: {
-    width: RFPercentage(4.4),
-    height: RFPercentage(4.4),
+    width: RFPercentage(4.7),
+    height: RFPercentage(4.7),
   },
   socialIconSpacing: {
     marginHorizontal: RFPercentage(0.7),

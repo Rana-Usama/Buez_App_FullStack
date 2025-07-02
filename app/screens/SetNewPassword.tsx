@@ -18,7 +18,6 @@ type InputField = {
 };
 
 function SetNewPassword(props: any) {
-  const [indicator, showIndicator] = useState(false);
 
   const [inputField, SetInputField] = useState<InputField[]>([
     {
@@ -35,28 +34,6 @@ function SetNewPassword(props: any) {
     let tempfeilds = [...inputField];
     tempfeilds[i].value = text;
     SetInputField(tempfeilds);
-  };
-
-  const handleLogin = () => {
-    showIndicator(true);
-    let tempfeilds = [...inputField];
-
-    if (tempfeilds[0].value === "" || tempfeilds[1].value === "") {
-      alert("Please fill all the feilds to proceed");
-      showIndicator(false);
-      return true;
-    }
-    try {
-    } catch (error) {
-      alert("Error");
-    }
-
-    showIndicator(false);
-  };
-
-  const [remember, setRemember] = useState(false);
-  const toggleRemember = () => {
-    setRemember(!remember);
   };
 
   return (

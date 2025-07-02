@@ -36,7 +36,6 @@ function PostRequest({ navigation, route }) {
   const [showCompensationDropdown, setShowCompensationDropdown] = useState(false);
   const [selectedCompensation, setSelectedCompensation] = useState("");
   const [imageUris, setImageUris] = useState([null, null, null]);
-  // Input Fields
   const [indicator, showIndicator] = useState(false);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -91,7 +90,6 @@ function PostRequest({ navigation, route }) {
           }))
         );
         setTranslatedTaskOptions(translatedTasks);
-
         // Translate compensation options
         const translatedCompensations = await Promise.all(
           compensationOptions.map(async (option) => ({
@@ -100,18 +98,14 @@ function PostRequest({ navigation, route }) {
           }))
         );
         setTranslatedCompensationOptions(translatedCompensations);
-
         if (currentPostRequest) {
           setOriginalTaskType(currentPostRequest.taskType);
           setSelectedTask(await translateText(currentPostRequest.taskType));
-
           setOriginalCompensationType(currentPostRequest.compensationType);
           setSelectedCompensation(await translateText(currentPostRequest.compensationType));
-
           setLocation(currentPostRequest.address);
           setCompensation(await translateText(currentPostRequest.otherCompensation));
           setBudget(`$${currentPostRequest.monitarily}`);
-
           const temp = [...imageUris];
           currentPostRequest.imageUrls.forEach((imgUrl, i) => {
             temp[i] = imgUrl;
@@ -120,10 +114,10 @@ function PostRequest({ navigation, route }) {
           setDescription(await translateText(currentPostRequest.description));
         }
       };
-
       translateAndSet();
     }, [route.params?.postRequest])
   );
+
 
   const toggleDropdown = (dropdownType) => {
     if (dropdownType === "task") {
@@ -157,17 +151,13 @@ function PostRequest({ navigation, route }) {
       aspect: [4, 3],
       quality: 1, // get original quality for picking
     });
-
     if (!result.canceled && result.assets) {
       const selectedImage = result.assets[0];
-
       // Compress the image
       const compressedImage = await ImageManipulator.manipulateAsync(selectedImage.uri, [], {
-        compress: 0.5, // change compression level (0 to 1)
+        compress: 0.5,
         format: ImageManipulator.SaveFormat.JPEG,
       });
-
-      // Update your imageUris state with compressed image URI
       let tempImageUris = [...imageUris];
       tempImageUris[index] = compressedImage.uri;
       setImageUris(tempImageUris);
@@ -242,7 +232,6 @@ function PostRequest({ navigation, route }) {
   function getRandomImage(taskType) {
     const defaultType = t("postRequest.txt6");
     const images = DEFAULT_IMAGES?.[taskType] || DEFAULT_IMAGES?.[defaultType];
-
     if (!Array.isArray(images) || images.length === 0) {
       console.log("No images found for taskType:", taskType);
       return null;
@@ -260,7 +249,6 @@ function PostRequest({ navigation, route }) {
       });
       return;
     }
-
     try {
       showIndicator(true);
       const keywords = description.toLowerCase().split(" ");
@@ -276,21 +264,17 @@ function PostRequest({ navigation, route }) {
         acceptedBy: null,
         reviews: reviews || null,
       };
-
       const imgs = imageUris?.filter((img) => Boolean(img));
-
       if (imgs?.length === 0) {
         // Pick a random image from the selected task type
         const defaultImageForTask = getRandomImage(originalTaskType);
         imgs.push(defaultImageForTask);
       }
-
       if (isEditing) {
         await updatePost(currentPostRequest.id, data, imgs);
       } else {
         await savePost(data, imgs);
       }
-
       navigation.navigate("SuccessScreen");
     } catch (error) {
       console.log("Error stack:", error?.stack);

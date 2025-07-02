@@ -19,7 +19,7 @@ function Onboarding(props) {
   const { t } = useTranslation();
 
   useEffect(() => {
-    console.log("✅ i18n is initialized:", i18n.isInitialized);
+    console.log("i18n is initialized:", i18n.isInitialized);
   }, []);
 
   const onboardingData = [
@@ -86,25 +86,6 @@ function Onboarding(props) {
 
   const handleDotPress = (index) => {
     setActiveIndex(index);
-  };
-
-  const calculateImageHeight = () => {
-    if (activeIndex === 1) {
-      return Platform.OS == "android" ? RFPercentage(25.8) : RFPercentage(24);
-    } else if (activeIndex === 2) {
-      return RFPercentage(30);
-    } else {
-      return RFPercentage(29);
-    }
-  };
-  const calculateImageWidth = () => {
-    if (activeIndex === 1) {
-      return "68%";
-    } else if (activeIndex === 2) {
-      return "60%";
-    } else {
-      return "55%";
-    }
   };
 
   const renderDots = () => {

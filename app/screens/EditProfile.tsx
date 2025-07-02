@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, ActivityIndicator, Platform, Keyboard } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 
 // components
-import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
 import Nav from "../components/common/Nav";
 import CustomTabBar from "../components/common/CustomTabBar";
@@ -66,22 +64,17 @@ function EditProfile({ navigation }) {
       aspect: [4, 3],
       quality: 1,
     });
-
-    // console.log(result);
-
     if (!result.canceled && result.assets) {
       const compressedImage = await ImageManipulator.manipulateAsync(result.assets[0].uri, [], {
         compress: 0.5, // change compression level (0 to 1)
         format: ImageManipulator.SaveFormat.JPEG,
       });
-      // console.log(compressedImage);
       setImageUri(compressedImage.uri);
     }
   };
 
   useFocusEffect(
     useCallback(() => {
-      // console.log("getLoggedInUser");
       fetchUserData();
     }, [])
   );
@@ -96,7 +89,6 @@ function EditProfile({ navigation }) {
         tempFields[0].value = name;
         tempFields[1].value = phone;
         SetInputField(tempFields);
-
         setOriginalData({ name, phone, imageUri: image });
         setImageUri(image);
       }
@@ -113,7 +105,6 @@ function EditProfile({ navigation }) {
       phoneNumber,
     };
     setIsUpdating(true);
-
     try {
       await updateProfile(userData, imageUri);
       Toast.show({

@@ -1,30 +1,11 @@
-// src/screens/AddReview.js
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ScrollView,
-  Platform,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
+import { View, Text, StyleSheet, Image, ScrollView, Platform, TouchableOpacity, TextInput } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { getAuth } from "firebase/auth";
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  updateDoc,
-  getDocs,
-  doc,
-  where,
-} from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, updateDoc, getDocs, doc, where } from "firebase/firestore";
 import moment from "moment";
 
 /* components */
@@ -40,7 +21,6 @@ import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
 import { translateText } from "../translation/googleTranslation";
 
-/* ---------- helpers ---------- */
 const getTargetLanguage = async () => {
   try {
     const stored = await SecureStore.getItemAsync("appLanguage");
@@ -50,13 +30,25 @@ const getTargetLanguage = async () => {
   }
 };
 
+type Translations = {
+  addReview: string;
+  howExperience: string;
+  shareThoughts: string;
+  completedOn: string;
+  translating: string;
+  pleaseWrite: string;
+  addingReview: string;
+  success: string;
+  reviewSubmitted: string;
+  error: string;
+  couldNotSubmit: string;
+};
+
 function AddReview() {
-  /* nav / params */
   const navigation = useNavigation();
   const { params } = useRoute();
   const { userData } = useUser();
 
-  /* task basics */
   const task = params?.task || {};
   const recipientUser = task?.taskDetails?.user ?? {
     userId: "",
@@ -65,21 +57,16 @@ function AddReview() {
   };
   const taskId = task?.taskId || task?.id || "";
   const originalDesc = task?.taskDetails?.description ?? "";
-  const completedOn = moment(
-    task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()
-  ).format("MMM-D-YYYY");
+  const completedOn = moment(task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()).format("MMM-D-YYYY");
 
-  /* lang + translations */
   const [lang, setLang] = useState("en");
-  const [tr, setTr] = useState({});
-  const [taskDesc, setTaskDesc] = useState(originalDesc); // translated desc
+  const [tr, setTr] = useState<Partial<Translations>>({});
+  const [taskDesc, setTaskDesc] = useState(originalDesc);
 
-  /* local ui state */
   const [rating, setRating] = useState([false, false, false, false, false]);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  /* ---------- load language & static translations ---------- */
   useEffect(() => {
     (async () => {
       const l = await getTargetLanguage();
@@ -98,9 +85,7 @@ function AddReview() {
         error: "Error",
         couldNotSubmit: "Could not submit review.",
       };
-      const vals = await Promise.all(
-        Object.values(phrases).map((txt) => translateText(txt))
-      );
+      const vals = await Promise.all(Object.values(phrases).map((txt) => translateText(txt)));
       const map = Object.keys(phrases).reduce((acc, k, i) => {
         acc[k] = vals[i] || phrases[k];
         return acc;
@@ -109,7 +94,6 @@ function AddReview() {
     })();
   }, []);
 
-  /* ---------- translate task description ---------- */
   useEffect(() => {
     if (!originalDesc) return;
     (async () => {
@@ -120,16 +104,12 @@ function AddReview() {
         setTaskDesc(originalDesc);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalDesc, lang]);
 
-  /* ---------- handlers ---------- */
-  const toggleStar = (idx) =>
-    setRating(rating.map((_, i) => i <= idx));
+  const toggleStar = (idx) => setRating(rating.map((_, i) => i <= idx));
 
   const submitReview = async () => {
     const stars = rating.filter(Boolean).length;
-
     if (reviewText.trim() === "") {
       Toast.show({
         type: "info",
@@ -138,11 +118,9 @@ function AddReview() {
       });
       return;
     }
-
     try {
       setSubmitting(true);
       const currentUser = getAuth().currentUser;
-      /* save review */
       await addDoc(collection(FIREBASE_DB, "reviews"), {
         reviewer: {
           userId: currentUser?.uid || "",
@@ -156,12 +134,7 @@ function AddReview() {
         createdAt: serverTimestamp(),
         taskOwnerId: task?.taskOwnerId,
       });
-
-      /* mark completedTask as reviewed */
-      const q = query(
-        collection(FIREBASE_DB, "completedTask"),
-        where("taskId", "==", taskId)
-      );
+      const q = query(collection(FIREBASE_DB, "completedTask"), where("taskId", "==", taskId));
       const snap = await getDocs(q);
       await Promise.all(
         snap.docs.map((d) =>
@@ -178,7 +151,6 @@ function AddReview() {
       });
       navigation.goBack();
     } catch (e) {
-      // console.log("Review save error:", e);
       Toast.show({
         type: "error",
         text1: tr.error || "Error",
@@ -189,99 +161,36 @@ function AddReview() {
     }
   };
 
-  /* ---------- ui ---------- */
   return (
     <View style={styles.screen}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-      >
-        {/* Nav */}
-        <View style={{ marginLeft: RFPercentage(2.5) }}>
-          <Nav
-            dpNull
-            marginTop={
-              Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-            }
-            leftLogo={false}
-            navigation={navigation}
-            title={tr.addReview || "Add Review"}
-          />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.navContainer}>
+          <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={tr.addReview || "Add Review"} />
         </View>
 
-        {/* Profile */}
-        <View
-          style={{
-            width: "90%",
-            alignSelf: "center",
-            marginTop: RFPercentage(4),
-          }}
-        >
-          <Image
-            source={
-              recipientUser.profileImage
-                ? { uri: recipientUser.profileImage }
-                : Icons.dp
-            }
-            resizeMode="cover"
-            style={{
-              width: RFPercentage(14),
-              height: RFPercentage(14),
-              borderWidth: 1.5,
-              borderColor: Colors.primary,
-              borderRadius: RFPercentage(100),
-            }}
-          />
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: RFPercentage(2),
-            }}
-          >
+        <View style={styles.profileContainer}>
+          <Image source={recipientUser.profileImage ? { uri: recipientUser.profileImage } : Icons.dp} resizeMode="cover" style={styles.profileImage} />
+          <View style={styles.nameRow}>
             <Text style={styles.nameText}>{recipientUser.userName}</Text>
           </View>
 
-          <Text style={styles.descText}>
-            {taskDesc || tr.translating || "Translating..."}
-          </Text>
+          <Text style={styles.descText}>{taskDesc || tr.translating || "Translating..."}</Text>
 
-          {!!completedOn && (
-            <Text style={styles.completedText}>
-              {`${tr.completedOn || "Completed on"}: ${completedOn}`}
-            </Text>
-          )}
+          {!!completedOn && <Text style={styles.completedText}>{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>}
         </View>
 
-        {/* Stars */}
         <View style={styles.ratingContainer}>
-          <Text style={styles.experienceText}>
-            {tr.howExperience || "How Was Your Experience?"}
-          </Text>
+          <Text style={styles.experienceText}>{tr.howExperience || "How Was Your Experience?"}</Text>
           <View style={styles.starRow}>
             {rating.map((sel, idx) => (
               <TouchableOpacity key={idx} onPress={() => toggleStar(idx)}>
-                <FontAwesome
-                  name="star"
-                  size={30}
-                  color={sel ? "#F3CF2C" : "#D1D5DB"}
-                  style={{ marginHorizontal: 5 }}
-                />
+                <FontAwesome name="star" size={30} color={sel ? "#F3CF2C" : "#D1D5DB"} style={styles.starIcon} />
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Review input */}
-        <View
-          style={{
-            width: "90%",
-            alignItems: "center",
-            alignSelf: "center",
-            marginTop: RFPercentage(4),
-          }}
-        >
+        <View style={styles.reviewContainer}>
           <TextInput
             value={reviewText}
             onChangeText={(txt) => txt.length <= 150 && setReviewText(txt)}
@@ -289,44 +198,22 @@ function AddReview() {
             multiline
             placeholderTextColor={"rgba(169,166,166,0.7)"}
             maxLength={150}
-            style={{
-              borderWidth: 1,
-              width: "100%",
-              height: RFPercentage(15),
-              borderRadius: RFPercentage(1.6),
-              borderColor: "rgba(169,166,166,0.7)",
-              padding: RFPercentage(1.4),
-              fontFamily: "Poppins_400Regular",
-              textAlignVertical: "top",
-            }}
+            style={styles.reviewInput}
           />
-          <View
-            style={{
-              width: "100%",
-              alignItems: "flex-end",
-              marginTop: RFPercentage(0.8),
-              bottom: RFPercentage(3.5),
-              right: RFPercentage(1),
-            }}
-          >
+          <View style={styles.charCounterContainer}>
             <Text
-              style={{
-                fontSize: RFPercentage(1.7),
-                color:
-                  reviewText.length === 150 ? "red" : Colors.lightGrey,
-                fontFamily: "Poppins_400Regular",
-              }}
+              style={[
+                styles.charCounterText,
+                {
+                  color: reviewText.length === 150 ? "red" : Colors.lightGrey,
+                },
+              ]}
             >
               {reviewText.length} / 150
             </Text>
           </View>
 
-          <MyAppButton
-            title={tr.addReview || "Add Review"}
-            disabled={submitting}
-            loading={submitting}
-            onPress={submitReview}
-          />
+          <MyAppButton title={tr.addReview || "Add Review"} disabled={submitting} loading={submitting} onPress={submitReview} />
         </View>
       </ScrollView>
     </View>
@@ -341,6 +228,27 @@ const styles = StyleSheet.create({
   },
   scrollView: { width: "100%" },
   scrollViewContent: { width: "100%" },
+  navContainer: {
+    marginLeft: RFPercentage(2.5),
+  },
+  profileContainer: {
+    width: "90%",
+    alignSelf: "center",
+    marginTop: RFPercentage(4),
+  },
+  profileImage: {
+    width: RFPercentage(14),
+    height: RFPercentage(14),
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    borderRadius: RFPercentage(100),
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: RFPercentage(2),
+  },
   nameText: {
     color: Colors.darkGrey2,
     fontFamily: "Poppins_500Medium",
@@ -369,11 +277,41 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     fontSize: RFPercentage(2.5),
     marginBottom: RFPercentage(2),
-    textAlign:'center'
+    textAlign: "center",
   },
   starRow: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  starIcon: {
+    marginHorizontal: 5,
+  },
+  reviewContainer: {
+    width: "90%",
+    alignItems: "center",
+    alignSelf: "center",
+    marginTop: RFPercentage(4),
+  },
+  reviewInput: {
+    borderWidth: 1,
+    width: "100%",
+    height: RFPercentage(15),
+    borderRadius: RFPercentage(1.6),
+    borderColor: "rgba(169,166,166,0.7)",
+    padding: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    textAlignVertical: "top",
+  },
+  charCounterContainer: {
+    width: "100%",
+    alignItems: "flex-end",
+    marginTop: RFPercentage(0.8),
+    bottom: RFPercentage(3.5),
+    right: RFPercentage(1),
+  },
+  charCounterText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_400Regular",
   },
 });
 

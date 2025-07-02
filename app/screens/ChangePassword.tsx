@@ -5,11 +5,9 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 // components
 import MyAppButton from "../components/common/MyAppButton";
 import Nav from "../components/common/Nav";
-import InputField from "../components/common/InputField";
 
 // config
 import Colors from "../config/Colors";
-import { validateConfirmPassword, validatePassword } from "../utils/helperFunctions";
 import { updatePassword } from "../services/Auth.service";
 
 import Toast from "react-native-toast-message";

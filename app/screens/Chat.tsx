@@ -1,7 +1,6 @@
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View, Image, TextInput, StatusBar } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { GiftedChat, InputToolbar, Bubble, Day } from "react-native-gifted-chat";
-import Nav from "../components/common/Nav";
 import { collection, query, orderBy, limit, onSnapshot, addDoc, getDocs, Timestamp, startAfter, doc, updateDoc, where, writeBatch, getDoc } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -177,7 +176,7 @@ const Chat = ({ navigation, route }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          expoPushToken: receiver.token,
+          expoPushToken: receiver?.token,
           title: senderName,
           message: message,
         }),

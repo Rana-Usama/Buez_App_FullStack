@@ -130,7 +130,6 @@ const StackNavigator: React.FC = () => {
           trialDays = differenceInDays(now, trialStartDate);
           isTrialValid = trialDays >= 0 && trialDays <= 14;
         }
-        console.log(trialDays);
         const subStartDate = subscriptionStart ? new Date(subscriptionStart) : null;
         const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
 

@@ -52,15 +52,13 @@ function Home({ navigation }) {
         const translations = await Promise.all(originalFilters.map((item) => translateText(item)));
         const map = {};
         originalFilters.forEach((original, i) => {
-          map[translations[i]] = original; // { "Nettoyage": "Cleaning", ... }
+          map[translations[i]] = original; 
         });
         setFilterOptions(translations);
         setFilterMap(map);
-
         const translatedAll = translations[0]; // "All"
         setActiveFilter(translatedAll);
       };
-
       translateFilters();
     }, [])
   );
@@ -85,27 +83,24 @@ function Home({ navigation }) {
     unsubscribeRef,
   } = usePostContext();
 
+
   useEffect(() => {
     fetchRequests(null);
     return () => {
-      // console.log("unmounting: Home");
     };
   }, [activeFilter]);
 
-  const [activeIndices, setActiveIndices] = useState({});
 
+  const [activeIndices, setActiveIndices] = useState({});
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
     try {
       const filterToUse = filterMap[activeFilter] || "";
-
       let isLastVisible = lastVisiblePost;
       if (typeof islastVisiblePost !== "undefined") {
         isLastVisible = islastVisiblePost;
       }
-
       const { tasksArray: newRecords, lastVisible } = await getRequestList(filterToUse, "", isLastVisible);
-
       // Translate each task before setting
       const translatedTasks = await Promise.all(
         newRecords.map(async (task) => {
@@ -114,7 +109,6 @@ function Home({ navigation }) {
             translateText(task.otherCompensation || ""),
             translateText(task.taskType || ""),
           ]);
-
           return {
             ...task,
             description: translatedDescription,
@@ -123,7 +117,6 @@ function Home({ navigation }) {
           };
         })
       );
-
       setAllTasks(translatedTasks);
       setTaskRecords(translatedTasks);
       setLastVisiblePost(lastVisible);
@@ -136,16 +129,13 @@ function Home({ navigation }) {
   };
 
 
-  // console.log('all task.........', allTasks)
 
   const fetchMorePosts = async () => {
     if (!hasMore || loadingMore) return;
-
     setLoadingMore(true);
     try {
       const filterToUse = filterMap[activeFilter] || "";
       const { tasksArray: newRecords, lastVisible } = await getRequestList(filterToUse, searchQuery, lastVisiblePost);
-
       const translatedNew = await Promise.all(
         newRecords.map(async (task) => {
           const [translatedDescription, translatedCompensation, translatedTaskType] = await Promise.all([
@@ -158,11 +148,10 @@ function Home({ navigation }) {
             ...task,
             description: translatedDescription,
             otherCompensation: translatedCompensation,
-            taskType: translatedTaskType,
+            // taskType: translatedTaskType,
           };
         })
       );
-
       setTaskRecords([...taskRecords, ...translatedNew]);
       setLastVisiblePost(lastVisible);
       setHasMore(translatedNew.length > 0);
@@ -194,11 +183,9 @@ function Home({ navigation }) {
 
   const getDisplayTasks = () => {
     let list = allTasks;
-
     if (filterMap[activeFilter] !== "All") {
       list = list.filter((task) => task.taskType?.toLowerCase() === filterMap[activeFilter]?.toLowerCase());
     }
-
     if (searchQuery.trim() !== "") {
       list = list.filter(
         (task) =>
@@ -207,7 +194,6 @@ function Home({ navigation }) {
           (task.taskType || "").toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-
     return list;
   };
 
@@ -220,6 +206,8 @@ function Home({ navigation }) {
     });
     setActiveIndices(initialIndices);
   }, [displayTasks]);
+
+
 
   return (
     <View style={styles.screen}>
@@ -345,9 +333,8 @@ function Home({ navigation }) {
                     <View style={styles.infoWrapper}>
                       <View style={styles.cartInfoContainer}>
                         <TouchableOpacity activeOpacity={0.8}>
-                          <Image style={styles.userImage} source={item.user.profileImage ? { uri: item.user.profileImage } : require("../../assets/Images/dp.png")} />
+                          <Image style={styles.userImage} source={item.user.profileImage ? { uri: item.user.profileImage } : Icons.dp} />
                         </TouchableOpacity>
-
                         <Text style={styles.userName}>{item.user.userName}</Text>
                         <Text style={styles.postDate}>
                           {t("myRequests.txt4")} {getFormatedDate(item.createdAt)}
@@ -356,7 +343,6 @@ function Home({ navigation }) {
 
                       <View style={styles.taskInfoContainer}>
                         <Text style={styles.taskText}>{item.description?.substr(0, 35) + (item.description?.length > 35 ? "..." : "")}</Text>
-
                         <View style={styles.compensationWrapper}>
                           <Image tintColor={Colors.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
                           <Text style={styles.compensationText}>
