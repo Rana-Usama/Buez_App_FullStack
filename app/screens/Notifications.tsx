@@ -19,6 +19,7 @@ import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
 import { translateText } from "../translation/googleTranslation";
 import NotFound from "../components/common/NotFound";
+import { useAppTheme } from "../contexts/themeContext";
 
 const getTargetLanguage = async () => {
   try {
@@ -55,6 +56,7 @@ export default function Notifications({ navigation }) {
   const currentUserId = getAuth().currentUser?.uid;
   const currentUser = useUser();
   const { markAllRead } = useNotifications();
+  const { theme } = useAppTheme();
 
   useEffect(() => {
     (async () => {
@@ -78,7 +80,6 @@ export default function Notifications({ navigation }) {
     })();
   }, []);
 
-
   useEffect(() => {
     if (!lang || !currentUserId) return;
     (async () => {
@@ -95,7 +96,6 @@ export default function Notifications({ navigation }) {
       }
     })();
   }, [lang, currentUserId]);
-
 
   useEffect(() => {
     markAllRead();
@@ -117,8 +117,6 @@ export default function Notifications({ navigation }) {
       .sort((a, b) => new Date(b.data[0].timestamp) - new Date(a.data[0].timestamp));
     setSections(built);
   }, [raw, lang]);
-
-
 
   /* ---------- translate task descriptions ---------- */
   useEffect(() => {
@@ -178,19 +176,19 @@ export default function Notifications({ navigation }) {
     });
 
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
         {/* main row */}
         <View style={styles.row}>
           <Image source={profileImage ? { uri: profileImage } : Icons.dp} style={styles.avatar} />
           <View style={{ marginLeft: RFPercentage(1.5), width: RFPercentage(35) }}>
-            <Text style={styles.title}>{`${senderName} ${tr.accepted || "accepted your task!"}`}</Text>
+            <Text style={[styles.title, { color: theme.heading }]}>{`${senderName} ${tr.accepted || "accepted your task!"}`}</Text>
             {!!shortDesc && <Text style={styles.sub}>{shortDesc}</Text>}
           </View>
         </View>
 
         {/* footer */}
         <View style={styles.footer}>
-          <Text style={styles.time}>{postedTime}</Text>
+          <Text style={[styles.time, { color: theme.darkGrey }]}>{postedTime}</Text>
           <TouchableOpacity style={styles.msgBtn} onPress={() => handleStartChat(item.sender)}>
             <Image source={Icons.messages} resizeMode="contain" style={{ width: RFPercentage(3), height: RFPercentage(3) }} />
             <Text style={styles.msgTxt}>{tr.message || "Message"}</Text>
@@ -202,12 +200,12 @@ export default function Notifications({ navigation }) {
 
   const renderHeader = ({ section: { title } }) => {
     const show = title === "Today" ? tr.today || title : title === "Yesterday" ? tr.yesterday || title : title;
-    return <Text style={styles.sectionHeader}>{show}</Text>;
+    return <Text style={[styles.sectionHeader, { color: theme.heading, borderColor: theme.border }]}>{show}</Text>;
   };
 
   /* ---------- ui ---------- */
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={{ marginLeft: RFPercentage(2.5) }}>
           <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={tr.notifications || "Notifications"} />

@@ -12,10 +12,12 @@ import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function Profile({ navigation }) {
   const { userData: user } = useUser();
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
   const profileImgUrl = user?.profileImage || "";
   const userName = user?.userName || "";
   console.log(user);
@@ -38,7 +40,7 @@ function Profile({ navigation }) {
   ];
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
         <Nav
@@ -57,7 +59,7 @@ function Profile({ navigation }) {
         </TouchableOpacity>
 
         {/*User Name */}
-        <Text style={styles.name}>{userName}</Text>
+        <Text style={[styles.name, {color:theme.heading}]}>{userName}</Text>
 
         {/* Navigation List */}
         {navigationsList.map((item, i) => (
@@ -69,13 +71,14 @@ function Profile({ navigation }) {
               styles.navigationContainer,
               {
                 marginTop: i == 0 ? RFPercentage(4) : RFPercentage(2.5),
+                borderColor:theme.border
               },
             ]}
           >
             <View style={styles.content}>
-              <Image style={styles.icon} source={item.iconSource} />
-              <Text style={styles.title}>{item.title}</Text>
-              <MaterialIcons name="arrow-forward-ios" style={styles.arrow} color={Colors.heading} />
+              <Image style={styles.icon} source={item.iconSource} tintColor={theme.heading} />
+              <Text style={[styles.title, {color:theme.heading}]}>{item.title}</Text>
+              <MaterialIcons name="arrow-forward-ios" style={styles.arrow} color={theme.heading} />
             </View>
           </TouchableOpacity>
         ))}
@@ -111,7 +114,7 @@ const styles = StyleSheet.create({
   content: { width: "90%", justifyContent: "flex-start", alignItems: "center", flexDirection: "row" },
   icon: { width: RFPercentage(2.2), height: RFPercentage(2.2) },
   title: { marginLeft: RFPercentage(1.7), color: "#44403C", fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
-  arrow: { fontSize: RFPercentage(1.7), color: "#44403C", position: "absolute", right: 0 },
+  arrow: { fontSize: RFPercentage(1.7), position: "absolute", right: 0 },
 });
 
 export default Profile;

@@ -13,6 +13,7 @@ import { Icons } from "../config/theme";
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { translateText } from "../translation/googleTranslation";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 const sameDay = (d1, d2) => d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
 
@@ -39,7 +40,7 @@ export default function Reviews({ navigation }) {
   const [averageRating, setAverageRating] = useState(null);
   const { t } = useTranslation();
   const [labels, setLabels] = useState({ today: "Today", yesterday: "Yesterday", dated: "Dated", by: "By", reviews: "Reviews", noReviews: "No reviews yet", translating: "Translating..." });
-
+  const { theme } = useAppTheme();
   useEffect(() => {
     (async () => {
       const userLang = await getTargetLanguage();
@@ -110,16 +111,16 @@ export default function Reviews({ navigation }) {
     const created = moment(item.createdAt).format("MMM-D-YYYY");
     const translatedReview = translations[item.id] || labels.translating || "Translating...";
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
         <View style={styles.textWrap}>
-          <Text style={styles.reviewText}>{translatedReview}</Text>
+          <Text style={[styles.reviewText, { color: theme.heading }]}>{translatedReview}</Text>
         </View>
         <View style={styles.footer}>
-          <Text style={styles.reviewDate}>
+          <Text style={[styles.reviewDate, { color: theme.darkGrey }]}>
             {labels.dated}: {created}
           </Text>
           <View style={styles.authorWrap}>
-            <Text style={styles.authorText}>
+            <Text style={[styles.authorText, { color: theme.darkGrey }]}>
               {labels.by}: {item.reviewer?.userName || "-"}
             </Text>
             <Image style={styles.avatar} source={item.reviewer?.profileImage ? { uri: item.reviewer.profileImage } : Icons.dp} />
@@ -131,23 +132,22 @@ export default function Reviews({ navigation }) {
 
   const renderHeader = ({ section: { title } }) => (
     <View>
-      <Text style={styles.sectionHeader}>{title}</Text>
-      <View style={styles.separator} />
+      <Text style={[styles.sectionHeader, { color: theme.heading }]}>{title}</Text>
+      <View style={[styles.separator, { backgroundColor: theme.border }]} />
     </View>
   );
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <View style={{ width: "90%", alignSelf: "center" }}>
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("profile.txt3")}`} />
       </View>
       {averageRating && (
         <>
           <View style={styles.ratingBox}>
-            <Text style={styles.ratingLabel}>Ratings</Text>
-            <Text style={styles.ratingValue}>⭐ {averageRating}</Text>
+            <Text style={[styles.ratingLabel, { color: theme.heading }]}>Ratings</Text>
+            <Text style={[styles.ratingValue, { color: theme.heading }]}>⭐ {averageRating}</Text>
           </View>
-          {/* <View style={styles.separator}></View> */}
         </>
       )}
       {loading ? (
@@ -156,7 +156,6 @@ export default function Reviews({ navigation }) {
         <NotFound title={labels.noReviews} />
       ) : (
         <View>
-          {/* <Text style={[styles.ratingLabel, { left: RFPercentage(2.5) }]}>Reviews:</Text> */}
           <SectionList
             sections={sections}
             keyExtractor={(item) => item.id}
@@ -198,7 +197,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     color: Colors.heading,
   },
-  separator: { width: "60%", height: RFPercentage(0.1), backgroundColor: "rgb(226,226,226)", marginTop: RFPercentage(0.5), left: RFPercentage(3) },
+  separator: { width: "60%", height: RFPercentage(0.1), marginTop: RFPercentage(0.5), left: RFPercentage(3) },
   sectionHeader: { width: "90%", alignSelf: "center", color: Colors.grey, fontSize: RFPercentage(1.9), fontFamily: "Poppins_500Medium" },
   card: {
     width: "90%",

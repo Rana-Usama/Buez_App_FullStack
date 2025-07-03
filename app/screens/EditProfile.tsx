@@ -18,6 +18,7 @@ import { updateProfile } from "../services/User.service";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 type InputFieldType = {
   placeholder: string;
@@ -30,6 +31,7 @@ type InputFieldType = {
 function EditProfile({ navigation }) {
   const { t } = useTranslation();
   const { userData: user } = useUser();
+  const { theme } = useAppTheme();
   const [imageUri, setImageUri] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [originalData, setOriginalData] = useState({
@@ -127,7 +129,7 @@ function EditProfile({ navigation }) {
   const isChanged = inputField[0].value.trim() !== originalData.name.trim() || inputField[1].value.trim() !== originalData.phone.trim() || imageUri !== originalData.imageUri;
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       {/* Nav */}
       <Nav dpNull={true} marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("profile.txt2")}`} />
 
@@ -139,7 +141,7 @@ function EditProfile({ navigation }) {
             <Image style={styles.edit} source={Icons.gallery} />
           </TouchableOpacity>
           <View style={styles.editInfo}>
-            <Text style={styles.infoText}>{`${t("editProfile.txt3")}`}</Text>
+            <Text style={[styles.infoText, {color:theme.heading}]}>{`${t("editProfile.txt3")}`}</Text>
             <View style={styles.infoBottom} />
           </View>
 
@@ -153,18 +155,18 @@ function EditProfile({ navigation }) {
                   alignSelf: "center",
                 }}
               >
-                <Text style={styles.titleText}>{item.title}</Text>
+                <Text style={[styles.titleText, {color:theme.heading}]}>{item.title}</Text>
                 <InputField
                   placeholder={item.placeholder}
-                  placeholderColor={Colors.inputFieldPlaceholder}
+                  placeholderColor={theme.inputFieldPlaceholder}
                   placeholderAtCenter={false}
                   height={RFPercentage(6)}
-                  borderColor={Colors.border}
+                  borderColor={theme.border}
                   borderWidth={RFPercentage(0.1)}
-                  backgroundColor={"white"}
+                  backgroundColor={theme.white}
                   secure={item.secure}
                   borderRadius={RFPercentage(1.4)}
-                  color={Colors.black}
+                  color={theme.black}
                   fontSize={RFPercentage(1.8)}
                   fontFamily={"Poppins_400Regular"}
                   icon={item.icon}

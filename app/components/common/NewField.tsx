@@ -37,7 +37,7 @@ const InputFieldNew = (props: Props) => {
         style={[styles.textInput, {color:theme.black}]}
         value={props.value}
         onChangeText={props.onChangeText}
-        placeholderTextColor={theme.darkGrey}
+        placeholderTextColor={theme.inputFieldPlaceholder}
         secureTextEntry={!visible}
         keyboardType={props.keyboardType}
         onBlur={props.handleBlur}

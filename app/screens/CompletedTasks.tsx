@@ -1,19 +1,5 @@
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ScrollView,
-  Platform,
-  FlatList,
-  ActivityIndicator,
-  RefreshControl,
-} from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, Text, StyleSheet, Image, ScrollView, Platform, FlatList, ActivityIndicator, RefreshControl } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
@@ -29,6 +15,7 @@ import { getFormatedDate } from "../services/Shared.service";
 import { fetchCompletedTasksFromFirebase } from "../services/Review.service";
 import { translateText } from "../translation/googleTranslation";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 type Translations = {
   completedTasks: string;
@@ -57,6 +44,7 @@ export default function CompletedTasks({ navigation }: any) {
   const [cache, setCache] = useState<Record<string, { desc: string; category: string }>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const { theme } = useAppTheme();
 
   useEffect(() => {
     (async () => {
@@ -71,9 +59,7 @@ export default function CompletedTasks({ navigation }: any) {
         noTasks: "No completed tasks",
         translating: "Translating...",
       };
-      const vals = await Promise.all(
-        Object.values(base).map((txt) => translateText(txt))
-      );
+      const vals = await Promise.all(Object.values(base).map((txt) => translateText(txt)));
       const mapped = Object.keys(base).reduce((obj, k, i) => {
         obj[k] = vals[i] || base[k];
         return obj;
@@ -82,8 +68,6 @@ export default function CompletedTasks({ navigation }: any) {
       setTr(mapped);
     })();
   }, []);
-
-
 
   const fetchCompletedTasks = async () => {
     setLoading(true);
@@ -97,10 +81,7 @@ export default function CompletedTasks({ navigation }: any) {
           const originalDesc = task.taskDetails?.description || "";
           const originalCat = task.taskDetails?.taskType || "";
 
-          const [descTr, catTr] = await Promise.all([
-            originalDesc ? translateText(originalDesc) : "",
-            originalCat ? translateText(originalCat) : "",
-          ]);
+          const [descTr, catTr] = await Promise.all([originalDesc ? translateText(originalDesc) : "", originalCat ? translateText(originalCat) : ""]);
 
           newCache[task.id] = {
             desc: descTr || originalDesc,
@@ -118,7 +99,6 @@ export default function CompletedTasks({ navigation }: any) {
     }
   };
 
-
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchCompletedTasks();
@@ -131,125 +111,60 @@ export default function CompletedTasks({ navigation }: any) {
     }, [])
   );
 
-
   /* ---------- list item ---------- */
   const renderItem = ({ item }: { item: any }) => {
     const details = item.taskDetails || {};
     const owner = details.user || {};
-    const doneOn =
-      item.completedAt || item.acceptedAt || new Date().toISOString();
-
+    const doneOn = item.completedAt || item.acceptedAt || new Date().toISOString();
     const cached = cache[item.id] || {};
     const desc = cached?.desc ?? tr.translating;
     const catName = cached?.category ?? tr.translating;
-
-    const shortDesc =
-      desc && desc.length > 30 ? `${desc.slice(0, 30)}…` : desc || "-";
+    const shortDesc = desc && desc.length > 30 ? `${desc.slice(0, 30)}…` : desc || "-";
 
     return (
-      <View style={styles.card}>
-        {/* header */}
+      <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
         <View style={styles.headerRow}>
           <View style={styles.rowCenter}>
-            <Image
-              style={styles.avatar}
-              source={
-                owner.profileImage ? { uri: owner.profileImage } : Icons.dp
-              }
-            />
-            <Text style={styles.userName}>
-              {owner.userName || "User"}
-            </Text>
+            <Image style={styles.avatar} source={owner.profileImage ? { uri: owner.profileImage } : Icons.dp} />
+            <Text style={[styles.userName, { color: theme.heading }]}>{owner.userName || "User"}</Text>
           </View>
-          <Text style={styles.category}>
-            {`${tr.category || "Category"}: ${catName}`}
-          </Text>
+          <Text style={[styles.category, { color: theme.darkGrey }]}>{`${tr.category || "Category"}: ${catName}`}</Text>
         </View>
 
-        {/* description & date */}
         <View style={styles.descWrap}>
-          <Text style={styles.desc}>{shortDesc}</Text>
-          <Text style={styles.date}>
-            {`${tr.completedOn || "Completed on"}: ${getFormatedDate(
-              doneOn,
-            )}`}
-          </Text>
+          <Text style={[styles.desc, {color:theme.darkGrey}]}>{shortDesc}</Text>
+          <Text style={[styles.date, {color:theme.darkGrey}]}>{`${tr.completedOn || "Completed on"}: ${getFormatedDate(doneOn)}`}</Text>
         </View>
 
-        {/* Review / Reviewed */}
         <View style={styles.reviewBtnWrap}>
           {item.reviewed ? (
-            <Text style={styles.reviewed}>
-              {tr.reviewed || "Reviewed"}
-            </Text>
+            <Text style={styles.reviewed}>{tr.reviewed || "Reviewed"}</Text>
           ) : (
-            <MyAppButton
-              title={tr.review || "Review"}
-              height={RFPercentage(4)}
-              width={RFPercentage(12)}
-              onPress={() =>
-                navigation.navigate("AddReview", { task: item })
-              }
-            />
+            <MyAppButton title={tr.review || "Review"} height={RFPercentage(4)} width={RFPercentage(12)} onPress={() => navigation.navigate("AddReview", { task: item })} />
           )}
         </View>
       </View>
     );
   };
 
-
-
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[Colors.primary]}
-            tintColor={Colors.primary}
-          />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} tintColor={Colors.primary} />}
       >
         {/* Nav */}
         <View style={styles.navContainer}>
-          <Nav
-            dpNull
-            marginTop={
-              Platform.OS === "android"
-                ? RFPercentage(4.5)
-                : RFPercentage(7.9)
-            }
-            leftLogo={false}
-            navigation={navigation}
-            title={t("profile.txt4")}
-          />
+          <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={t("profile.txt4")} />
         </View>
 
-        {/* Header */}
-        <View style={styles.headerWrap}>
-          <Text style={styles.headerText}>{t("profile.txt4")}</Text>
-          <View style={styles.separator} />
-        </View>
-
-        {/* List */}
         {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={Colors.primary}
-            style={styles.activityIndicator}
-          />
+          <ActivityIndicator size="large" color={Colors.primary} style={styles.activityIndicator} />
         ) : tasks.length === 0 ? (
           <NotFound title={tr.noTasks || "No completed tasks"} />
         ) : (
-          <FlatList
-            data={tasks}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={styles.flatListContent}
-          />
+          <FlatList data={tasks} keyExtractor={(item) => item.id} renderItem={renderItem} contentContainerStyle={styles.flatListContent} />
         )}
       </ScrollView>
     </View>
@@ -363,5 +278,6 @@ const styles = StyleSheet.create({
   },
   flatListContent: {
     paddingBottom: RFPercentage(5),
+    paddingTop:RFPercentage(2)
   },
 });

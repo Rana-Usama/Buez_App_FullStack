@@ -235,7 +235,7 @@ const Chat = ({ navigation, route }) => {
           renderInputToolbar={(props) => (
             <InputToolbar
               {...props}
-              containerStyle={styles.toolbar}
+              containerStyle={[styles.toolbar, {backgroundColor: theme.mode === 'dark' ? 'transparent' : "rgb(124, 130, 164)", borderColor: theme.mode == 'dark' ? Colors.darkGrey : Colors.primary}]}
               renderComposer={() => <TextInput style={styles.customTextInput} placeholder={`${t("chat.txt2")}`} placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
               renderSend={() => (
                 <TouchableOpacity
@@ -310,9 +310,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2.6),
   },
   toolbar: {
-    backgroundColor: "rgb(124, 130, 164)",
     borderWidth: 1.5,
-    borderColor: Colors.primary,
     borderRadius: RFPercentage(6),
     height: RFPercentage(6),
     justifyContent: "center",

@@ -11,6 +11,7 @@ import Nav from "../components/common/Nav";
 // Config
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 const languages = ["German", "French", "Italian", "English"];
 const languageMap = {
@@ -23,6 +24,8 @@ const languageMap = {
 function Language({ navigation }) {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const { t } = useTranslation();
+  const {theme} = useAppTheme()
+
   useEffect(() => {
     const getStoredLanguage = async () => {
       const code = await SecureStore.getItemAsync("appLanguage");
@@ -51,14 +54,14 @@ function Language({ navigation }) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen,{backgroundColor:theme.white}]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("settings.txt12")}`} />
 
         <View style={styles.container}>
           {languages.map((lang) => (
-            <TouchableOpacity key={lang} style={[styles.languageCard, selectedLanguage === lang && styles.languageCardSelected]} activeOpacity={0.8} onPress={() => changeLanguage(lang)}>
-              <Text style={[styles.languageText, selectedLanguage === lang && styles.languageTextSelected]}>{lang}</Text>
+            <TouchableOpacity key={lang} style={[styles.languageCard,{borderColor:theme.border},]} activeOpacity={0.8} onPress={() => changeLanguage(lang)}>
+              <Text style={[styles.languageText, selectedLanguage === lang && styles.languageTextSelected,{color:theme.heading}]}>{lang}</Text>
               <ToggleSwitch isOn={selectedLanguage === lang} onColor={Colors.primary} offColor={"rgb(224, 224, 227)"} size="small" onToggle={() => changeLanguage(lang)} />
             </TouchableOpacity>
           ))}
@@ -93,11 +96,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: RFPercentage(2),
     marginBottom: RFPercentage(2),
-    backgroundColor: "#F9FAFB",
+    // backgroundColor: "#F9FAFB",
   },
   languageCardSelected: {
     // borderColor: Colors.primary,
-    backgroundColor: "rgba(65, 65, 69, 0.05)",
+    // backgroundColor: "rgba(65, 65, 69, 0.05)",
   },
   languageText: {
     fontSize: RFPercentage(1.9),

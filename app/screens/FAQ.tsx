@@ -10,25 +10,26 @@ import CustomTabBar from "../components/common/CustomTabBar";
 // config
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function FAQ({ navigation }) {
   const { t } = useTranslation();
-
+  const { theme } = useAppTheme();
   const [faqs, setFaqs] = useState([
     {
       question: `${t("faqs.txt1")}`,
       answer: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.`,
     },
     {
-      question:  `${t("faqs.txt2")}`,
+      question: `${t("faqs.txt2")}`,
       answer: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.`,
     },
     {
-      question:  `${t("faqs.txt3")}`,
+      question: `${t("faqs.txt3")}`,
       answer: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.`,
     },
     {
-      question:  `${t("faqs.txt4")}`,
+      question: `${t("faqs.txt4")}`,
       answer: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.`,
     },
   ]);
@@ -47,10 +48,10 @@ function FAQ({ navigation }) {
   }, []);
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor:theme.white}]}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title={ `${t("settings.txt5")}`} />
+        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title={`${t("settings.txt5")}`} />
 
         <View style={{ marginTop: RFPercentage(3.2), width: "90%" }}>
           {faqs.map((item, index) => (
@@ -61,16 +62,17 @@ function FAQ({ navigation }) {
                   styles.toggleFAQ,
                   {
                     marginTop: index !== 0 ? RFPercentage(2.5) : 0,
+                    borderBottomColor:theme.stroke
                   },
                 ]}
               >
                 <View style={{ width: "95%" }}>
-                  <Text style={styles.q}>{item.question}</Text>
+                  <Text style={[styles.q,{color:theme.heading}]}>{item.question}</Text>
                 </View>
 
-                <MaterialIcons name={expandedIndex === index ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.icon} />
+                <MaterialIcons name={expandedIndex === index ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.icon} color={theme.stroke} />
               </TouchableOpacity>
-              {expandedIndex === index && <Text style={styles.ans}>{item.answer}</Text>}
+              {expandedIndex === index && <Text style={[styles.ans, {color:theme.darkGrey}]}>{item.answer}</Text>}
             </View>
           ))}
         </View>
@@ -106,7 +108,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: RFPercentage(3),
-    color: "#57534E",
     position: "absolute",
     right: 0,
   },

@@ -155,9 +155,8 @@ const StackNavigator: React.FC = () => {
       {isLoading || userLoading || !initialRoute ? (
         <DeciderScreen />
       ) : (
-        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-          {/* Auth Screens */}
-          <Stack.Screen name="OnBoarding" component={Onboarding} />
+        <Stack.Navigator screenOptions={{ headerShown: false,}} initialRouteName={initialRoute}>
+          <Stack.Screen name="OnBoarding" component={Onboarding}  />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
@@ -166,7 +165,6 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="FreeTrial" component={FreeTrial} />
           <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
 
-          {/* Main App Screens */}
           <Stack.Screen
             name="TabNavigator"
             children={() => (
@@ -179,7 +177,6 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="InitialScreen" component={InitialScreen} />
           <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
           <Stack.Screen name="Language" component={Language} />
-
           <Stack.Screen name="OfferDetail" component={OfferDetail} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} />
           <Stack.Screen name="EditProfile" component={EditProfile} />

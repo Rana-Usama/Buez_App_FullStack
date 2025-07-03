@@ -9,9 +9,12 @@ import CustomTabBar from "../components/common/CustomTabBar";
 // config
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function TermsAndConditions({ navigation }) {
   const { t } = useTranslation();
+  const {theme} = useAppTheme()
+
   const sections = [
     {
       title: `${t("terms.txt2")}`,
@@ -41,20 +44,20 @@ function TermsAndConditions({ navigation }) {
   ];
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen,{backgroundColor:theme.white}]}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {/* Nav */}
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title={`${t("settings.txt3")}`} />
 
         <View style={styles.content}>
-          <Text style={styles.text}>{`${t("terms.txt1")}`}</Text>
+          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("terms.txt1")}`}</Text>
         </View>
 
         {/* Sections */}
         {sections.map((section, index) => (
           <View key={index} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            <Text style={styles.text}>{section.content}</Text>
+            <Text style={[styles.sectionTitle, {color:theme.heading}]}>{section.title}</Text>
+            <Text style={[styles.text, {color:theme.darkGrey}]}>{section.content}</Text>
           </View>
         ))}
 
@@ -84,8 +87,8 @@ const styles = StyleSheet.create({
     textAlign: "justify",
     lineHeight: RFPercentage(3.2),
     color: "#44403C",
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_600SemiBold",
   },
   text: {
     marginTop: RFPercentage(0.4),

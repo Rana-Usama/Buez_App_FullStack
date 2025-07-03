@@ -17,7 +17,10 @@ import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
+import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { useExitAppOnBack } from "../utils/appBack";
+import Toast from "react-native-toast-message";
+import { updateDoc, doc, deleteField } from "firebase/firestore";
 
 function Settings({ navigation }) {
   const { userData: user } = useUser();
@@ -173,13 +176,31 @@ function Settings({ navigation }) {
                 height={RFPercentage(5.8)}
                 width={RFPercentage(17)}
                 onPress={async () => {
-                  removeCredentials();
-                  setIsModalVisible2(false);
-                  await SecureStore.setItemAsync("loggedOut", "true");
-                  navigation.reset({
-                    index: 0,
-                    routes: [{ name: "Login" }],
-                  });
+                  try {
+                    const currentUser = FIREBASE_AUTH.currentUser;
+                    if (currentUser) {
+                      await updateDoc(doc(FIREBASE_DB, "users", currentUser.uid), {
+                        token: deleteField(),
+                      });
+                    }
+
+                    await removeCredentials();
+                    await SecureStore.setItemAsync("loggedOut", "true");
+
+                    setIsModalVisible2(false);
+
+                    navigation.reset({
+                      index: 0,
+                      routes: [{ name: "Login" }],
+                    });
+                  } catch (error) {
+                    console.log("Error logging out and removing token:", error);
+                    Toast.show({
+                      type: "error",
+                      text1: "Logout failed",
+                      text2: "Please try again.",
+                    });
+                  }
                 }}
               />
             </View>

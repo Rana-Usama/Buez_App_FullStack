@@ -20,6 +20,7 @@ import { useUser } from "../contexts/user.context";
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
 import { translateText } from "../translation/googleTranslation";
+import { useAppTheme } from "../contexts/themeContext";
 
 const getTargetLanguage = async () => {
   try {
@@ -48,7 +49,7 @@ function AddReview() {
   const navigation = useNavigation();
   const { params } = useRoute();
   const { userData } = useUser();
-
+  const { theme } = useAppTheme();
   const task = params?.task || {};
   const recipientUser = task?.taskDetails?.user ?? {
     userId: "",
@@ -162,7 +163,7 @@ function AddReview() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, {backgroundColor:theme.white}]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.navContainer}>
           <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={tr.addReview || "Add Review"} />
@@ -171,16 +172,14 @@ function AddReview() {
         <View style={styles.profileContainer}>
           <Image source={recipientUser.profileImage ? { uri: recipientUser.profileImage } : Icons.dp} resizeMode="cover" style={styles.profileImage} />
           <View style={styles.nameRow}>
-            <Text style={styles.nameText}>{recipientUser.userName}</Text>
+            <Text style={[styles.nameText, {color:theme.heading}]}>{recipientUser.userName}</Text>
           </View>
-
-          <Text style={styles.descText}>{taskDesc || tr.translating || "Translating..."}</Text>
-
-          {!!completedOn && <Text style={styles.completedText}>{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>}
+          <Text style={[styles.descText, {color:theme.darkGrey}]}>{taskDesc || tr.translating || "Translating..."}</Text>
+          {!!completedOn && <Text style={[styles.completedText, {color:theme.darkGrey}]}>{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>}
         </View>
 
         <View style={styles.ratingContainer}>
-          <Text style={styles.experienceText}>{tr.howExperience || "How Was Your Experience?"}</Text>
+          <Text style={[styles.experienceText, {color:theme.heading}]}>{tr.howExperience || "How Was Your Experience?"}</Text>
           <View style={styles.starRow}>
             {rating.map((sel, idx) => (
               <TouchableOpacity key={idx} onPress={() => toggleStar(idx)}>
@@ -196,16 +195,16 @@ function AddReview() {
             onChangeText={(txt) => txt.length <= 150 && setReviewText(txt)}
             placeholder={tr.shareThoughts || "Share your thoughts..."}
             multiline
-            placeholderTextColor={"rgba(169,166,166,0.7)"}
+            placeholderTextColor={theme.inputFieldPlaceholder}
             maxLength={150}
-            style={styles.reviewInput}
+            style={[styles.reviewInput, {borderColor:theme.border}]}
           />
           <View style={styles.charCounterContainer}>
             <Text
               style={[
                 styles.charCounterText,
                 {
-                  color: reviewText.length === 150 ? "red" : Colors.lightGrey,
+                  color: reviewText.length === 150 ? theme.red : theme.lightGrey,
                 },
               ]}
             >

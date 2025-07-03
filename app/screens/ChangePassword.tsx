@@ -36,7 +36,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
       .required(`${t("validations.passwordMatch")}`),
   });
 
-  const {theme} = useAppTheme()
+  const { theme } = useAppTheme();
 
   const handlePasswordChange = async (values: any) => {
     try {
@@ -61,7 +61,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
   };
 
   return (
-    <View style={[styles.screen, {backgroundColor:theme.white}]}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
         {/* Nav */}
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("settings.txt2")}`} />
@@ -78,7 +78,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
           {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
             <>
               <View style={styles.fieldContainer}>
-                <Text style={styles.title}>{`${t("chnagePassword.txt5")}`}</Text>
+                <Text style={[styles.title, { color: theme.heading }]}>{`${t("chnagePassword.txt5")}`}</Text>
                 <InputFieldNew
                   placeholder={`${t("chnagePassword.txt1")}`}
                   password={true}
@@ -88,20 +88,20 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                   customStyle={{
                     width: "100%",
                     marginTop: RFPercentage(1.3),
-                    borderColor: touched.oldPassword && errors.oldPassword ? Colors.red : "#E5E7EB",
+                    borderColor: touched.oldPassword && errors.oldPassword ? theme.red : theme.border,
                   }}
                 />
                 {touched.oldPassword && errors.oldPassword && (
                   <>
                     <View style={styles.errorContainer}>
-                      <Text style={styles.errorText}>{errors.oldPassword}</Text>
+                      <Text style={[styles.errorText, {color:theme.red}]}>{errors.oldPassword}</Text>
                     </View>
                   </>
                 )}
               </View>
 
               <View style={styles.fieldContainer}>
-                <Text style={styles.title}>{`${t("chnagePassword.txt6")}`}</Text>
+                <Text style={[styles.title, { color: theme.heading }]}>{`${t("chnagePassword.txt6")}`}</Text>
                 <InputFieldNew
                   placeholder={`${t("chnagePassword.txt2")}`}
                   password={true}
@@ -111,20 +111,20 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                   customStyle={{
                     width: "100%",
                     marginTop: RFPercentage(1.3),
-                    borderColor: touched.password && errors.password ? Colors.red : "#E5E7EB",
+                    borderColor: touched.password && errors.password ? theme.red : theme.border,
                   }}
                 />
                 {touched.password && errors.password && (
                   <>
                     <View style={styles.errorContainer}>
-                      <Text style={styles.errorText}>{errors.password}</Text>
+                      <Text style={[styles.errorText, {color:theme.red}]}>{errors.password}</Text>
                     </View>
                   </>
                 )}
               </View>
 
               <View style={styles.fieldContainer}>
-                <Text style={styles.title}>{`${t("chnagePassword.txt7")}`}</Text>
+                <Text style={[styles.title, { color: theme.heading }]}>{`${t("chnagePassword.txt7")}`}</Text>
                 <InputFieldNew
                   placeholder={`${t("chnagePassword.txt3")}`}
                   password={true}
@@ -134,13 +134,13 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                   customStyle={{
                     width: "100%",
                     marginTop: RFPercentage(1.3),
-                    borderColor: touched.confirmPassword && errors.confirmPassword ? Colors.red : "#E5E7EB",
+                    borderColor: touched.confirmPassword && errors.confirmPassword ? theme.red : theme.border,
                   }}
                 />
                 {touched.confirmPassword && errors.confirmPassword && (
                   <>
                     <View style={styles.errorContainer}>
-                      <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                      <Text style={[styles.errorText, {color:theme.red}]}>{errors.confirmPassword}</Text>
                     </View>
                   </>
                 )}
