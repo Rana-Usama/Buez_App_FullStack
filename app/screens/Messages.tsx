@@ -4,16 +4,16 @@ import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDo
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
-import { translateText } from "../translation/googleTranslation"; 
+import { translateText } from "../translation/googleTranslation";
 import Nav from "../components/common/Nav";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
-import { getFormatedDate } from "../services/Shared.service";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
+import { formatChatTimestamp } from "../services/Shared.service";
 
 function Messages({ navigation }) {
   const { t } = useTranslation();
@@ -92,12 +92,19 @@ function Messages({ navigation }) {
       }
     }
 
+     const createdAt =
+    chatData?.lastMessage?.createdAt?.toDate?.() ?? 
+    (chatData?.lastMessage?.createdAt instanceof Date
+      ? chatData.lastMessage.createdAt
+      : new Date());
+
     return {
       id: d.id,
       ...chatData,
       lastMessage: {
         ...chatData.lastMessage,
-        text: translatedText, // replaced with translated version
+        text: translatedText,
+        createdAt
       },
       user: userData,
     };
@@ -161,7 +168,7 @@ function Messages({ navigation }) {
           <Text style={[styles.filterButtonTextActive]}>{title}</Text>
         </LinearGradient>
       ) : (
-        <Text style={[styles.filterButtonTextInactive, {color:theme.heading}]}>{title}</Text>
+        <Text style={[styles.filterButtonTextInactive, { color: theme.heading }]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -177,16 +184,16 @@ function Messages({ navigation }) {
           <Image style={styles.messageImage} source={item.user.profileImage ? { uri: item.user.profileImage } : Icons.dp} />
           <View style={styles.messageTextContainer}>
             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-              <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText,{color:theme.darkGrey2}]}>{item?.user?.userName}</Text>
-              {item.unread && item.senderId !== userId && <View style={[styles.unreadDot, {backgroundColor:theme.primary}]} />}
+              <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText, { color: theme.darkGrey2 }]}>{item?.user?.userName}</Text>
+              {item.unread && item.senderId !== userId && <View style={[styles.unreadDot, { backgroundColor: theme.primary }]} />}
             </View>
-            <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText,{color:theme.darkGrey}]}>
+            <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText, { color: theme.darkGrey }]}>
               {item?.lastMessage?.text?.length > 50 ? `${item.lastMessage.text.substring(0, 30)}...` : item.lastMessage.text}
             </Text>
           </View>
-          <Text style={[styles.messageTime, {color:theme.darkGrey}]}>{getFormatedDate(item.lastMessage.createdAt)}</Text>
+          <Text style={[styles.messageTime, { color: theme.darkGrey }]}>{formatChatTimestamp(item?.lastMessage?.createdAt)}</Text>
         </View>
-        <View style={[styles.separator, {backgroundColor:theme.border}]} />
+        <View style={[styles.separator, { backgroundColor: theme.border }]} />
       </TouchableOpacity>
     );
   };
@@ -238,7 +245,7 @@ function Messages({ navigation }) {
                   {!loading && filteredChats?.length === 0 && (
                     <View style={{ justifyContent: "center", alignItems: "center" }}>
                       <Image style={styles.noMessageIcon} source={Icons.noMessage} />
-                      <Text style={[styles.emptyText, {color:theme.darkGrey}]}>{activeFilter === `${t("messages.txt3")}` ? `${t("messages.txt4")}` : `${t("messages.txt5")}`}</Text>
+                      <Text style={[styles.emptyText, { color: theme.darkGrey }]}>{activeFilter === `${t("messages.txt3")}` ? `${t("messages.txt4")}` : `${t("messages.txt5")}`}</Text>
                     </View>
                   )}
                 </View>
@@ -265,7 +272,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
-    paddingBottom:RFPercentage(10)
+    paddingBottom: RFPercentage(10),
   },
   filterContainer: {
     marginTop: RFPercentage(5),

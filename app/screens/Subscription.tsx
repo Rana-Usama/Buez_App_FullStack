@@ -229,7 +229,6 @@ const styles = StyleSheet.create({
     width: "90%",
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    // backgroundColor:'red'
   },
   detailText: {
     color: Colors.darkGrey,

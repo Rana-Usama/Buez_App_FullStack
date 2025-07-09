@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
   },
-  text2: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.7), textAlign: "center" },
+  text2: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.6), textAlign: "center", },
   postDate: {
     fontSize: RFPercentage(1.6),
     position: "absolute",
@@ -494,17 +494,18 @@ const styles = StyleSheet.create({
   },
   markButton: {
     borderRadius: RFPercentage(100),
-    width: RFPercentage(16),
     height: RFPercentage(5.2),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary,
+    width:RFPercentage(18),
+    paddingVertical:RFPercentage(1)
   },
   cancel: {
     borderRadius: RFPercentage(100),
-    width: RFPercentage(16),
+    width: RFPercentage(18),
     height: RFPercentage(5.2),
     borderColor: "rgb(204, 204, 216)",
     borderWidth: RFPercentage(0.2),
@@ -518,7 +519,7 @@ const styles = StyleSheet.create({
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },
   notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   cartContainer2: { width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) },
-  text3: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.8), textAlign: "center" },
+  text3: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.7), textAlign: "center" },
 });
 
 export default MyRequests;

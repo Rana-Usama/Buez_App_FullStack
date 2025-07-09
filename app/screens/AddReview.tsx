@@ -182,7 +182,7 @@ function AddReview() {
           <View style={styles.starRow}>
             {rating.map((sel, idx) => (
               <TouchableOpacity key={idx} onPress={() => toggleStar(idx)}>
-                <FontAwesome name="star" size={30} color={sel ? "#F3CF2C" : "#D1D5DB"} style={styles.starIcon} />
+                <FontAwesome name="star" size={30} color={sel ? Colors.star : Colors.stroke} style={styles.starIcon} />
               </TouchableOpacity>
             ))}
           </View>

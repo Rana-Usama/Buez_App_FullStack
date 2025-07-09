@@ -316,7 +316,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
     marginBottom: RFPercentage(2.5),
-    // bottom: keyboardVisible ? RFPercentage(25) : 0,
   },
   customTextInput: {
     color: Colors.white,

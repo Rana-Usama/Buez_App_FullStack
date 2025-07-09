@@ -58,7 +58,7 @@ const TabNavigator = () => {
           let icon;
           switch (route.name) {
             case `${t("bottomTab.txt3")}`:
-              icon = focused ? Icons.homeActive : Icons.homeInActive;
+              icon = focused ? Icons.homeActive : theme.mode === "dark" ? Icons.dark_tab : Icons.homeInActive;
               break;
             case `${t("bottomTab.txt1")}`:
               icon = focused ? Icons.myRequestsActive : Icons.order;
@@ -79,7 +79,6 @@ const TabNavigator = () => {
           return (
             <Image
               source={icon}
-              // tintColor={isMiddle ? null : theme.darkGrey}
               style={{
                 width: isMiddle ? RFPercentage(8) : RFPercentage(3),
                 height: isMiddle ? RFPercentage(8) : RFPercentage(3),

@@ -82,3 +82,35 @@ export const uploadImage = async (imageUri: string): Promise<string> => {
     throw error;
   }
 };
+
+
+// utils/dateUtils.js
+export function formatChatTimestamp(date) {
+  const now = new Date();
+  const msgDate = new Date(date);
+  const isToday = msgDate.toDateString() === now.toDateString();
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = msgDate.toDateString() === yesterday.toDateString();
+  const timeStr = msgDate.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const daysAgo = Math.floor((now - msgDate) / (1000 * 60 * 60 * 24));
+  if (isToday) {
+    return timeStr; // e.g., 09:21 PM
+  } else if (isYesterday) {
+    return "Yesterday";
+  } else if (daysAgo < 7) {
+    return msgDate.toLocaleDateString("en-US", { weekday: "long" }); // e.g., Monday
+  } else {
+    return msgDate.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }); // e.g., 30 Jun 2025
+  }
+}
+

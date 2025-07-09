@@ -55,4 +55,5 @@ export const Icons: { [key: string]: ImageRequireSource } = {
   messages: require("../../assets/Images/messages.png"),
   rate: require("../../assets/Images/rate.png"),
   map2: require("../../assets/Images/map2.png"),
+  dark_tab: require("../../assets/Images/dark-tab.png"),
 };

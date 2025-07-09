@@ -22,6 +22,8 @@ const Colors: { [key: string]: string } = {
   border: "#E5E7EB",
   stroke: "#D1D5DB",
   chat: "#A7ADCE",
+  star : "#F3CF2C",
+  success2 : "#4557B0"
 };
 
 export default Colors;

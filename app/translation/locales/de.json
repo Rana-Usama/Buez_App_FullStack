@@ -143,7 +143,7 @@
     "txt3": "Zahlä"
   },
   "home": {
-    "txt1": "Start",
+    "txt1": "Home",
     "txt2": "Sueche",
     "txt3": "Kategorie",
     "txt4": "Alli",
@@ -215,7 +215,7 @@
     "txt8": "Hilf & Sicherheit",
     "txt9": "Einstellige",
     "txt10": "Bisch sicher, dass du die Konto wotsch lösche?",
-    "txt11": "Bisch sicher, dass du dich uslogge wotsch\nus däm Konto?",
+    "txt11": "Bisch sicher, dass du dich uslogge wotsch us däm Konto?",
     "txt12": "Sprache ändern"
   },
   "cancelSubscription": {
@@ -228,7 +228,7 @@
     "txt7": "Du verlüsch dä flexible Kündigungs-Zugang",
     "txt8": "Du hesch ke aktivs Abo.",
     "txt9": "Abo aktiviere",
-    "txt10": "Bisch sicher, dass du dini monatlichi Abo kündige wotsch?\n"
+    "txt10": "Bisch sicher, dass du dini monatlichi Abo kündige wotsch?"
   },
   "chnagePassword": {
     "txt1": "Alts Passwort iigäh",

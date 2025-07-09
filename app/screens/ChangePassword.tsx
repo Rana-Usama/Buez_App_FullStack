@@ -160,14 +160,10 @@ const styles = StyleSheet.create({
   },
   fieldContainer: {
     marginTop: RFPercentage(3),
-    // justifyContent: "center",
-    // alignItems: "center",
     width: "88%",
     alignSelf: "center",
   },
   title: {
-    // left: RFPercentage(1.6),
-    // marginBottom: RFPercentage(1.2),
     color: "#57534E",
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",

@@ -22,7 +22,7 @@ const FreeTrial = ({ navigation }: any) => {
         <View style={styles.stepsWrapper}>
           {/* Step 1 */}
           <View style={styles.stepRow}>
-            <View style={[styles.iconCircle, { backgroundColor: theme.lightGrey }]}>
+            <View style={[styles.iconCircle, { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]}>
               <Image source={Icons.key} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainer}>
@@ -30,11 +30,11 @@ const FreeTrial = ({ navigation }: any) => {
               <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt4")}`}</Text>
             </View>
           </View>
-          <View style={[styles.connectorLine1, { backgroundColor: theme.lightGrey }]} />
+          <View style={[styles.connectorLine1,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]} />
 
           {/* Step 2 */}
           <View style={styles.stepRowSecond}>
-            <View style={[styles.iconCircle, { backgroundColor: theme.lightGrey }]}>
+            <View style={[styles.iconCircle, { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]}>
               <Image source={Icons.notify} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainerSecond}>
@@ -42,11 +42,11 @@ const FreeTrial = ({ navigation }: any) => {
               <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt6")}`}</Text>
             </View>
           </View>
-          <View style={[styles.connectorLine2, { backgroundColor: theme.lightGrey }]} />
+          <View style={[styles.connectorLine2,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]} />
 
           {/* Step 3 */}
           <View style={styles.stepRowThird}>
-            <View style={[styles.iconCircle, { backgroundColor: theme.lightGrey }]}>
+            <View style={[styles.iconCircle,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]}>
               <Image source={Icons.star} resizeMode="contain" style={styles.iconImage} />
             </View>
             <View style={styles.stepTextContainer}>
@@ -54,7 +54,7 @@ const FreeTrial = ({ navigation }: any) => {
               <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt8")}`}</Text>
             </View>
           </View>
-          <View style={[styles.connectorLine3, { backgroundColor: theme.lightGrey }]} />
+          <View style={[styles.connectorLine3,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]} />
         </View>
       </View>
       <MyAppButton title={`${t("freeTrial.txt9")}`} marginTop={RFPercentage(-10)} onPress={() => navigation.navigate("SubscriptionV2")} />
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   stepRowThird: {
     flexDirection: "row",
     alignItems: "center",
-    bottom: RFPercentage(12.5),
+    bottom: RFPercentage(14),
   },
   iconCircle: {
     width: RFPercentage(6),
@@ -149,21 +149,21 @@ const styles = StyleSheet.create({
     width: RFPercentage(0.8),
     height: RFPercentage(12),
     backgroundColor: "#F3F4F6",
-    bottom: RFPercentage(2.6),
+    bottom: RFPercentage(2.8),
     left: RFPercentage(2.4),
   },
   connectorLine2: {
     width: RFPercentage(0.8),
     height: RFPercentage(12),
     backgroundColor: "#F3F4F6",
-    bottom: RFPercentage(7.6),
+    bottom: RFPercentage(8.9),
     left: RFPercentage(2.4),
   },
   connectorLine3: {
     width: RFPercentage(0.8),
     height: RFPercentage(12),
     backgroundColor: "#F3F4F6",
-    bottom: RFPercentage(15.2),
+    bottom: RFPercentage(18.2),
     left: RFPercentage(2.4),
   },
 });

@@ -17,6 +17,7 @@ import { useExitAppOnBack } from "../utils/appBack";
 import Toast from "react-native-toast-message";
 import { updateDoc, doc, deleteField } from "firebase/firestore";
 import ConfirmationModal from "../components/common/ConfirmationModal";
+import Feather from "@expo/vector-icons/Feather";
 
 function Settings({ navigation }) {
   const { userData: user } = useUser();
@@ -121,7 +122,15 @@ function Settings({ navigation }) {
             ]}
           >
             <View style={styles.content2}>
-              <Image style={styles.img} source={item.iconSource} tintColor={item.redColor ? Colors.red : theme.heading} />
+              {i === 2 ? (
+                <>
+                  <Feather name="globe" size={24} color={theme.heading} />
+                </>
+              ) : (
+                <>
+                  <Image style={styles.img} source={item.iconSource} tintColor={item.redColor ? Colors.red : theme.heading} />
+                </>
+              )}
               <Text style={[styles.title, { color: item.redColor ? Colors.red : theme.heading }]}>{item.title}</Text>
               <MaterialIcons name="arrow-forward-ios" style={[styles.icon, { color: item.redColor ? Colors.red : theme.heading }]} color={Colors.heading} />
             </View>

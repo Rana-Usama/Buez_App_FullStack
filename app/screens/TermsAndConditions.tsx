@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     textAlign: "justify",
     lineHeight: RFPercentage(3.2),
-    color: "#44403C",
     fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -86,7 +85,6 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.4),
     textAlign: "justify",
     lineHeight: RFPercentage(3.2),
-    color: "#44403C",
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },

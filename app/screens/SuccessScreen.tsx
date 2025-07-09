@@ -10,13 +10,12 @@ function SuccessScreen({ navigation }) {
   const { t } = useTranslation();
 
   return (
-    <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
+    <LinearGradient colors={[Colors.primary, Colors.success2]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
       <StatusBar backgroundColor={"transparent"} />
       <Octicons name={"check-circle"} style={styles.icon} color={Colors.white} />
 
-      {/* Gif */}
+      {/* Icon */}
       <Text style={styles.txt}>{t("successScreen.txt1")}</Text>
-
       <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={() => navigation.navigate("TabNavigator")}>
         <Text style={styles.home}>{t("successScreen.txt2")}</Text>
       </TouchableOpacity>

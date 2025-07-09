@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { sendEmailVerification, signOut, updatePassword as firebaseUpdatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "firebase/auth";
 import { deleteUser } from "firebase/auth";

@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(2),
     textAlign: "center",
     fontFamily: "Poppins_500Medium",
+    marginHorizontal:RFPercentage(1)
   },
   modalButtons: {
     flexDirection: "row",
