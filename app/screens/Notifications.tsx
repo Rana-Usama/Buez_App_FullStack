@@ -4,17 +4,12 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { collection, getDocs, query, where, writeBatch, doc } from "firebase/firestore";
 import { createNewChat } from "../services/Chat.service";
-
-/* components */
 import Nav from "../components/common/Nav";
-
-/* config */
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { useUser } from "../contexts/user.context";
 import { useNotifications } from "../contexts/notification.context";
-
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
 import { translateText } from "../translation/googleTranslation";
@@ -30,7 +25,6 @@ const getTargetLanguage = async () => {
   }
 };
 
-/* ---------- date helpers ---------- */
 const sameDay = (a, b) => a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
 const getSectionTitle = (dateObj, lang) => {
   const today = new Date();
@@ -46,9 +40,27 @@ const getSectionTitle = (dateObj, lang) => {
   });
 };
 
+interface Translations {
+  today: string;
+  yesterday: string;
+  accepted: string;
+  message: string;
+  noNotifications: string;
+  notifications: string;
+  translating: string;
+}
+
 export default function Notifications({ navigation }) {
   const [lang, setLang] = useState("en");
-  const [tr, setTr] = useState({});
+  const [tr, setTr] = useState<Translations>({
+    today: "",
+    yesterday: "",
+    accepted: "",
+    message: "",
+    noNotifications: "",
+    notifications: "",
+    translating: "",
+  });
   const [busy, setBusy] = useState(true);
   const [raw, setRaw] = useState([]);
   const [sections, setSections] = useState([]);
@@ -71,11 +83,11 @@ export default function Notifications({ navigation }) {
         notifications: "Notifications",
         translating: "Translating...",
       };
-      const translatedVals = await Promise.all(Object.values(phrases).map((txt) => translateText(txt, l)));
-      const mapped = Object.keys(phrases).reduce((acc, key, idx) => {
-        acc[key] = translatedVals[idx] || phrases[key];
+      const translatedVals = await Promise.all(Object.values(phrases).map((txt) => translateText(txt)));
+      const mapped: Translations = Object.keys(phrases).reduce((acc, key, idx) => {
+        acc[key as keyof Translations] = translatedVals[idx] || phrases[key];
         return acc;
-      }, {});
+      }, {} as Translations);
       setTr(mapped);
     })();
   }, []);
@@ -103,7 +115,6 @@ export default function Notifications({ navigation }) {
 
   useEffect(() => {
     if (!raw.length) return setSections([]);
-
     const grouped = new Map();
     raw.forEach((item) => {
       const title = getSectionTitle(new Date(item.timestamp), lang);
@@ -111,14 +122,16 @@ export default function Notifications({ navigation }) {
       arr.push(item);
       grouped.set(title, arr);
     });
-
     const built = Array.from(grouped.entries())
       .map(([title, data]) => ({ title, data }))
-      .sort((a, b) => new Date(b.data[0].timestamp) - new Date(a.data[0].timestamp));
+      .sort((a, b) => {
+        const timeA = new Date(a.data[0]?.timestamp).getTime() || 0;
+        const timeB = new Date(b.data[0]?.timestamp).getTime() || 0;
+        return timeB - timeA;
+      });
     setSections(built);
   }, [raw, lang]);
 
-  /* ---------- translate task descriptions ---------- */
   useEffect(() => {
     if (!raw.length) return;
     (async () => {
@@ -132,7 +145,7 @@ export default function Notifications({ navigation }) {
             return;
           }
           try {
-            newCache[item.id] = await translateText(original, lang);
+            newCache[item.id] = await translateText(original);
           } catch {
             newCache[item.id] = original;
           }
@@ -164,17 +177,15 @@ export default function Notifications({ navigation }) {
   const renderItem = ({ item }) => {
     const senderName = item.sender?.userName || "Someone";
     const profileImage = item.sender?.profileImage || null;
-
     const translatedDesc = descCache[item.id];
-    const taskDescription = translatedDesc !== undefined ? translatedDesc : tr.translating || "Translating...";
+    const taskDescription = translatedDesc ?? tr.translating;
     const shortDesc = taskDescription.length > 30 ? `${taskDescription.substring(0, 30)}…` : taskDescription;
-
     const postedTime = new Date(item.timestamp).toLocaleTimeString(lang, {
       hour: "numeric",
       minute: "numeric",
       hour12: true,
     });
-
+    
     return (
       <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
         {/* main row */}

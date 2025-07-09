@@ -149,7 +149,7 @@ function SubscriptionV2(props) {
           <Image style={styles.starIconRight} source={Icons.stars} />
         </View>
       </View>
-      {/* {userId && <SubscriptionListener navigation={props.navigation} userId={userId} />} */}
+
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "80%" }}>
         <MyAppButton title={`${t("subscriptionV2.txt7")}`} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(18)} loading={loading} />
         <TouchableOpacity

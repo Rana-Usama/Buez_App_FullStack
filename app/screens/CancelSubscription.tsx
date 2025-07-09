@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Modal, Pressable, StatusBar } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
-// components
 import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
-import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { BlurView } from "expo-blur";
-
-// config
+import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
@@ -17,6 +13,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import ConfirmationModal from "../components/common/ConfirmationModal";
 
 function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
@@ -126,28 +123,17 @@ function CancelSubscription({ navigation }: any) {
         </>
       )}
 
-      <Modal animationType="fade" transparent={true} visible={modalVisible2} onRequestClose={() => setModalVisible2(false)}>
-        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
-          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
-            <Text style={[styles.modalText, { color: theme.heading }]}>{`${t("cancelSubscription.txt10")}`}</Text>
-            <View style={styles.modalButtons}>
-              <Pressable style={[styles.cancelButton, { borderColor: theme.darkGrey }]} onPress={() => setModalVisible2(false)}>
-                <Text style={[styles.cancelButtonText, { color: theme.darkGrey }]}>{`${t("buttons.cancel")}`}</Text>
-              </Pressable>
-              <MyAppButton
-                title={`${t("buttons.yes")}`}
-                marginTop={RFPercentage(0)}
-                height={RFPercentage(5.8)}
-                width={RFPercentage(17)}
-                onPress={() => {
-                  cancelSubscription();
-                  setModalVisible2(false);
-                }}
-              />
-            </View>
-          </View>
-        </BlurView>
-      </Modal>
+      <ConfirmationModal
+        isVisible={modalVisible2}
+        onClose={() => setModalVisible2(false)}
+        onConfirm={() => {
+          cancelSubscription();
+          setModalVisible2(false);
+        }}
+        title={t("cancelSubscription.txt10")}
+        theme={theme}
+        t={t}
+      />
     </Screen>
   );
 }
@@ -252,63 +238,6 @@ const styles = StyleSheet.create({
     width: RFPercentage(6),
     height: RFPercentage(6),
     bottom: RFPercentage(0.1),
-  },
-
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(218, 218, 218, 0.5)",
-  },
-  modalContainer: {
-    width: "80%",
-    backgroundColor: Colors.white,
-    borderRadius: RFPercentage(2),
-    alignItems: "center",
-    height: RFPercentage(28),
-    justifyContent: "center",
-  },
-  modalText: {
-    fontSize: RFPercentage(1.9),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-    marginBottom: RFPercentage(4),
-    lineHeight: RFPercentage(3.2),
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    width: "90%",
-    alignItems: "center",
-  },
-  cancelButton: {
-    width: RFPercentage(17),
-    borderRadius: RFPercentage(10),
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: RFPercentage(2),
-    height: RFPercentage(5.8),
-  },
-  cancelButtonText: {
-    fontSize: RFPercentage(2),
-    color: Colors.primary,
-    fontFamily: "Poppins_500Medium",
-  },
-  confirmButton: {
-    width: "45%",
-    padding: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
-    backgroundColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  confirmButtonText: {
-    fontSize: RFPercentage(2),
-    color: Colors.white,
-    fontFamily: "Poppins_500Medium",
   },
 });
 

@@ -4,12 +4,8 @@ import { collection, query, where, orderBy, limit, onSnapshot, startAfter, getDo
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
-import { translateText } from "../translation/googleTranslation"; // make sure this import is correct
-
-// components
+import { translateText } from "../translation/googleTranslation"; 
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
-
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
@@ -171,7 +167,6 @@ function Messages({ navigation }) {
   );
 
   const renderItem = ({ item }) => {
-    // console.log("MSG INFO:: ", item.lastMessage, item.lastMessage?.senderId !== userId)
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate("Chat", { chatId: item.id, senderId: userId, senderName: userData.userName, receiver: item.user })}
@@ -185,7 +180,6 @@ function Messages({ navigation }) {
               <Text style={[styles.messageUserName, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText,{color:theme.darkGrey2}]}>{item?.user?.userName}</Text>
               {item.unread && item.senderId !== userId && <View style={[styles.unreadDot, {backgroundColor:theme.primary}]} />}
             </View>
-
             <Text style={[styles.messageText, item.lastMessage?.unread && item.lastMessage?.senderId !== userId && styles.unreadText,{color:theme.darkGrey}]}>
               {item?.lastMessage?.text?.length > 50 ? `${item.lastMessage.text.substring(0, 30)}...` : item.lastMessage.text}
             </Text>
@@ -214,7 +208,7 @@ function Messages({ navigation }) {
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refreshChats} colors={[Colors.primary]} tintColor={Colors.primary} />}
       >
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title={`${t("messages.txt1")}`} />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("messages.txt1")}`} />
 
         {/* Filter Buttons */}
         <View style={styles.filterContainer}>
@@ -255,9 +249,6 @@ function Messages({ navigation }) {
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-
-      {/* Bottom Tab */}
-      {/* <CustomTabBar messagesTab={true} navigation={navigation} /> */}
     </View>
   );
 }
@@ -274,9 +265,10 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
+    paddingBottom:RFPercentage(10)
   },
   filterContainer: {
-    marginTop: RFPercentage(3.6),
+    marginTop: RFPercentage(5),
     flexDirection: "row",
     width: "90%",
     marginBottom: RFPercentage(1),
@@ -322,7 +314,7 @@ const styles = StyleSheet.create({
     width: "90%",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(5),
   },
   messageImage: {
     width: RFPercentage(5.8),

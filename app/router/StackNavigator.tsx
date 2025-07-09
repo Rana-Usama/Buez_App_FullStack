@@ -1,7 +1,7 @@
-import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, KeyboardAvoidingView, Platform, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
 
 // Screens
 import Onboarding from "../screens/Onboarding";
@@ -14,8 +14,6 @@ import SuccessScreen from "../screens/SuccessScreen";
 import ChangePassword from "../screens/ChangePassword";
 import OfferDetail from "../screens/OfferDetail";
 import PostRequest from "../screens/PostRequest";
-import MyRequests from "../screens/MyRequests";
-import Settings from "../screens/Settings";
 import TermsAndConditions from "../screens/TermsAndConditions";
 import FAQ from "../screens/FAQ";
 import PrivacyPolicy from "../screens/PrivacyPolicy";
@@ -41,6 +39,7 @@ import Language from "../screens/Language";
 import Notifications from "../screens/Notifications";
 import CompletedTasks from "../screens/CompletedTasks";
 import AddReview from "../screens/AddReview";
+import { useAppTheme } from "../contexts/themeContext";
 
 export type RootStackParamList = {
   OnBoarding: undefined;
@@ -87,7 +86,7 @@ export type RootStackParamList = {
   AddReview: undefined;
 };
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 const StackNavigator: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -149,14 +148,25 @@ const StackNavigator: React.FC = () => {
       }
     }
   }, [isLoading, userLoading, userData, credentials, loggedOut]);
+  const { theme } = useAppTheme();
 
   return (
     <NavigationContainer>
       {isLoading || userLoading || !initialRoute ? (
         <DeciderScreen />
       ) : (
-        <Stack.Navigator screenOptions={{ headerShown: false,}} initialRouteName={initialRoute}>
-          <Stack.Screen name="OnBoarding" component={Onboarding}  />
+        <Stack.Navigator
+          initialRouteName={initialRoute}
+          screenOptions={{
+            keyboardHandlingEnabled:true,
+            headerShown: false,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+            cardStyle: { backgroundColor: theme.white, flex: 1 },
+            presentation: "modal",
+            cardOverlay: () => <View style={{backgroundColor:theme.white }} />,
+          }}
+        >
+          <Stack.Screen name="OnBoarding" component={Onboarding} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Signup" component={Signup} />
           <Stack.Screen name="ForgotPassword" component={ForgotPassword} />

@@ -2,12 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, LayoutAnimation, Platform, UIManager, TouchableOpacity, ScrollView, Switch } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
-
-// components
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
-
-// config
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
@@ -77,9 +72,6 @@ function FAQ({ navigation }) {
           ))}
         </View>
       </ScrollView>
-
-      {/* Bottom Tab */}
-      {/* <CustomTabBar settingTab={true} navigation={navigation} /> */}
     </View>
   );
 }

@@ -3,11 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from "react-nativ
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import { Octicons } from "@expo/vector-icons";
-
-// components
-import MyAppButton from "../components/common/MyAppButton";
-
-// config
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 

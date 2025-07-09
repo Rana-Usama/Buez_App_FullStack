@@ -133,7 +133,6 @@ function Onboarding(props) {
       <Image style={styles.img} source={Icons.logo} />
 
       {/* Body */}
-
       <View style={{ width: "90%", alignItems: "center", justifyContent: "center", marginTop: RFPercentage(8), position: "absolute", top: RFPercentage(10) }}>
         <LottieView source={lottie} autoPlay loop style={{ width: RFPercentage(40), height: activeIndex === 2 ? RFPercentage(34) : RFPercentage(40) }} />
       </View>

@@ -10,24 +10,17 @@ import {
   Platform,
   FlatList,
   Dimensions,
-  Modal,
-  Pressable,
   RefreshControl,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
 import Colors from "../config/Colors";
-
-// components
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
-import MyAppButton from "../components/common/MyAppButton";
 import { getMyReuqests, updateReqestStatus } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
-import { getFormatedDate, getRelativePostTime } from "../services/Shared.service";
+import { getFormatedDate } from "../services/Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
@@ -37,6 +30,7 @@ import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
+import ConfirmationModal from "../components/common/ConfirmationModal";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -58,14 +52,12 @@ function MyRequests({ navigation }) {
   useExitAppOnBack();
   const param = activeFilter === `${t("myRequests.txt2")}` ? REQUEST_STATUS.Active : REQUEST_STATUS.Completed;
   const { theme } = useAppTheme();
+
   useFocusEffect(
     useCallback(() => {
       setTaskRecords([]);
       setLastVisiblePost(null);
       fetchRequests(null);
-      return () => {
-        // console.log("unmounting: MyRequests");
-      };
     }, [param])
   );
 
@@ -197,7 +189,7 @@ function MyRequests({ navigation }) {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[theme.primary]} tintColor={theme.primary} />}
       >
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={false} navigation={navigation} title={`${t("myRequests.txt1")}`} />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("myRequests.txt1")}`} />
 
         {/* Filter Buttons */}
         <View style={styles.filterContainer}>
@@ -248,20 +240,20 @@ function MyRequests({ navigation }) {
                 <Image style={styles.userImage} source={cart?.user?.profileImage ? { uri: cart?.user?.profileImage } : Icons.dp} />
               </TouchableOpacity>
 
-              <Text style={[styles.userName, {color:theme.heading}]}>{cart.user.userName}</Text>
-              <Text style={[styles.postDate, {color:theme.darkGrey}]}>
+              <Text style={[styles.userName, { color: theme.heading }]}>{cart.user.userName}</Text>
+              <Text style={[styles.postDate, { color: theme.darkGrey }]}>
                 {`${t("myRequests.txt4")}`} {getFormatedDate(cart?.createdAt)}
               </Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={[styles.taskText, {color:theme.darkGrey}]}>{cart?.description?.substr(0, 30) + (cart?.description?.length > 15 ? "..." : "")}</Text>
+              <Text style={[styles.taskText, { color: theme.darkGrey }]}>{cart?.description?.substr(0, 30) + (cart?.description?.length > 15 ? "..." : "")}</Text>
             </View>
 
             <View style={styles.taskInfoContainer}>
-              <Text style={[styles.compensation, {color:theme.heading}]}>
+              <Text style={[styles.compensation, { color: theme.heading }]}>
                 {`${t("home.txt10")}`}:{" "}
-                <Text style={[styles.compensationAmount, {color:theme.primary}]}>
+                <Text style={[styles.compensationAmount, { color: theme.primary }]}>
                   {cart.compensationType === `Monitarely` ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
               </Text>
@@ -287,9 +279,9 @@ function MyRequests({ navigation }) {
                     setSelectedRequestItem(cart);
                     setIsModalVisible(true);
                   }}
-                  style={[styles.cancel, {borderColor:theme.border}]}
+                  style={[styles.cancel, { borderColor: theme.border }]}
                 >
-                  <Text style={[styles.text3, {color:theme.border}]}>{`${t("myRequests.txt6")}`}</Text>
+                  <Text style={[styles.text3, { color: theme.border }]}>{`${t("myRequests.txt6")}`}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -307,31 +299,19 @@ function MyRequests({ navigation }) {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Modal */}
-      <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
-        <BlurView intensity={100} style={[styles.modalBackground,{backgroundColor:theme.modal}]} >
-          <View style={[styles.modalContainer, {backgroundColor:theme.white}]}>
-            <Text style={[styles.modalText, {color:theme.heading}]}>{`${t("myRequests.txt7")}`}</Text>
-            <View style={styles.modalButtons}>
-              <Pressable style={[styles.cancelButton, {borderColor:theme.border}]} onPress={() => setIsModalVisible(false)}>
-                <Text style={[styles.cancelButtonText, {color:theme.border}]}>{`${t("buttons.cancel")}`}</Text>
-              </Pressable>
-              <MyAppButton
-                title={`${t("buttons.yes")}`}
-                marginTop={RFPercentage(0)}
-                height={RFPercentage(5.8)}
-                width={RFPercentage(17)}
-                onPress={() => {
-                  if (selectedRequestIndex !== null && selectedRequestItem) {
-                    changeReqestStatus(selectedRequestIndex, REQUEST_STATUS.Cancelled, selectedRequestItem);
-                    setIsModalVisible(false);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </BlurView>
-      </Modal>
+      <ConfirmationModal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onConfirm={() => {
+          if (selectedRequestIndex !== null && selectedRequestItem) {
+            changeReqestStatus(selectedRequestIndex, REQUEST_STATUS.Cancelled, selectedRequestItem);
+            setIsModalVisible(false);
+          }
+        }}
+        title={t("myRequests.txt7")}
+        theme={theme}
+        t={t}
+      />
     </View>
   );
 }
@@ -348,6 +328,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
+    paddingBottom: RFPercentage(10),
   },
   filterButton: {
     width: RFPercentage(13),
@@ -495,63 +476,9 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     marginBottom: RFPercentage(6),
   },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    width: "80%",
-    backgroundColor: Colors.white,
-    borderRadius: RFPercentage(2),
-    alignItems: "center",
-    height: RFPercentage(25),
-    justifyContent: "center",
-  },
-  modalText: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-    marginBottom: RFPercentage(4),
-    lineHeight: RFPercentage(3.2),
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    width: "90%",
-    alignItems: "center",
-  },
-  cancelButton: {
-    width: RFPercentage(17),
-    borderRadius: RFPercentage(10),
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: RFPercentage(2),
-    height: RFPercentage(5.8),
-  },
-  cancelButtonText: {
-    fontSize: RFPercentage(2),
-    color: Colors.primary,
-    fontFamily: "Poppins_500Medium",
-  },
-  confirmButton: {
-    width: "45%",
-    padding: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
-    backgroundColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  confirmButtonText: {
-    fontSize: RFPercentage(2),
-    color: Colors.white,
-    fontFamily: "Poppins_500Medium",
-  },
+
   filterContainer: {
-    marginTop: RFPercentage(3.2),
+    marginTop: RFPercentage(5),
     justifyContent: "flex-start",
     alignItems: "flex-start",
     flexDirection: "row",

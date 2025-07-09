@@ -4,15 +4,10 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import { removeCredentials } from "../services/Auth.service";
 import { deleteCurrentUser } from "../services/Auth.service";
-import { BlurView } from "expo-blur";
 import * as SecureStore from "expo-secure-store";
-// components
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
-import MyAppButton from "../components/common/MyAppButton";
 import ToggleSwitch from "toggle-switch-react-native";
 import { useAppTheme } from "../contexts/themeContext";
-// config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
@@ -21,6 +16,7 @@ import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { useExitAppOnBack } from "../utils/appBack";
 import Toast from "react-native-toast-message";
 import { updateDoc, doc, deleteField } from "firebase/firestore";
+import ConfirmationModal from "../components/common/ConfirmationModal";
 
 function Settings({ navigation }) {
   const { userData: user } = useUser();
@@ -88,7 +84,7 @@ function Settings({ navigation }) {
 
         <View style={styles.content}>
           <Text style={[styles.txt, { color: theme.lightGrey }]}>{`${t("settings.txt8")}`}</Text>
-          <View style={[styles.wrap, { backgroundColor: theme.lightGrey }]} />
+          <View style={[styles.wrap, { backgroundColor: theme.border }]} />
         </View>
 
         <TouchableOpacity
@@ -133,80 +129,52 @@ function Settings({ navigation }) {
         ))}
       </ScrollView>
 
-      {/* Bottom Tab */}
-      {/* <CustomTabBar settingTab={true} navigation={navigation} /> */}
+      <ConfirmationModal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onConfirm={async () => {
+          deleteCurrentUser();
+          setIsModalVisible(false);
+          removeCredentials();
+          await SecureStore.deleteItemAsync("appLanguage");
+          navigation.navigate("OnBoarding");
+        }}
+        title={t("settings.txt10")}
+        theme={theme}
+        t={t}
+      />
 
-      <Modal animationType="fade" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
-        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
-          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
-            <Text style={[styles.modalText, { color: theme.heading }]}>{`${t("settings.txt10")}`}</Text>
-            <View style={styles.modalButtons}>
-              <Pressable style={[styles.cancelButton, { borderColor: theme.darkGrey }]} onPress={() => setIsModalVisible(false)}>
-                <Text style={[styles.cancelButtonText, { color: theme.darkGrey }]}>{`${t("buttons.cancel")}`}</Text>
-              </Pressable>
-              <MyAppButton
-                title={`${t("buttons.yes")}`}
-                marginTop={RFPercentage(0)}
-                height={RFPercentage(5.8)}
-                width={RFPercentage(17)}
-                onPress={async () => {
-                  deleteCurrentUser();
-                  setIsModalVisible(false);
-                  removeCredentials();
-                  await SecureStore.deleteItemAsync("appLanguage");
-                  navigation.navigate("OnBoarding");
-                }}
-              />
-            </View>
-          </View>
-        </BlurView>
-      </Modal>
-
-      <Modal animationType="fade" transparent={true} visible={isModalVisible2} onRequestClose={() => setIsModalVisible2(false)}>
-        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
-          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
-            <Text style={[styles.modalText, { color: theme.heading }]}>{`${t("settings.txt11")}`}</Text>
-            <View style={styles.modalButtons}>
-              <Pressable style={[styles.cancelButton, { borderColor: theme.darkGrey }]} onPress={() => setIsModalVisible2(false)}>
-                <Text style={[styles.cancelButtonText, { color: theme.darkGrey }]}>{`${t("buttons.cancel")}`}</Text>
-              </Pressable>
-              <MyAppButton
-                title={`${t("buttons.yes")}`}
-                marginTop={RFPercentage(0)}
-                height={RFPercentage(5.8)}
-                width={RFPercentage(17)}
-                onPress={async () => {
-                  try {
-                    const currentUser = FIREBASE_AUTH.currentUser;
-                    if (currentUser) {
-                      await updateDoc(doc(FIREBASE_DB, "users", currentUser.uid), {
-                        token: deleteField(),
-                      });
-                    }
-
-                    await removeCredentials();
-                    await SecureStore.setItemAsync("loggedOut", "true");
-
-                    setIsModalVisible2(false);
-
-                    navigation.reset({
-                      index: 0,
-                      routes: [{ name: "Login" }],
-                    });
-                  } catch (error) {
-                    console.log("Error logging out and removing token:", error);
-                    Toast.show({
-                      type: "error",
-                      text1: "Logout failed",
-                      text2: "Please try again.",
-                    });
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </BlurView>
-      </Modal>
+      <ConfirmationModal
+        isVisible={isModalVisible2}
+        onClose={() => setIsModalVisible2(false)}
+        onConfirm={async () => {
+          try {
+            const currentUser = FIREBASE_AUTH.currentUser;
+            if (currentUser) {
+              await updateDoc(doc(FIREBASE_DB, "users", currentUser.uid), {
+                token: deleteField(),
+              });
+            }
+            await removeCredentials();
+            await SecureStore.setItemAsync("loggedOut", "true");
+            setIsModalVisible2(false);
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
+          } catch (error) {
+            console.log("Error logging out and removing token:", error);
+            Toast.show({
+              type: "error",
+              text1: "Logout failed",
+              text2: "Please try again.",
+            });
+          }
+        }}
+        title={t("settings.txt11")}
+        theme={theme}
+        t={t}
+      />
     </View>
   );
 }
@@ -219,7 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   scroll: { width: "100%" },
-  scrollContent: { width: "100%", alignItems: "center", paddingBottom: RFPercentage(5) },
+  scrollContent: { width: "100%", alignItems: "center", paddingBottom: RFPercentage(15) },
   content: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(3.5) },
   txt: { color: Colors.lightGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
   wrap: { width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) },
@@ -236,63 +204,6 @@ const styles = StyleSheet.create({
   img: { width: RFPercentage(2.8), height: RFPercentage(2.8) },
   title: { fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular", marginLeft: RFPercentage(1.6) },
   icon: { position: "absolute", right: 0, fontSize: RFPercentage(1.7) },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(218, 218, 218, 0.5)",
-  },
-  modalContainer: {
-    width: "80%",
-    backgroundColor: Colors.white,
-    borderRadius: RFPercentage(2),
-    alignItems: "center",
-    height: RFPercentage(28),
-    justifyContent: "center",
-  },
-  modalText: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-    marginBottom: RFPercentage(4),
-    lineHeight: RFPercentage(3.2),
-    paddingHorizontal: RFPercentage(2),
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    width: "90%",
-    alignItems: "center",
-  },
-  cancelButton: {
-    width: RFPercentage(17),
-    borderRadius: RFPercentage(10),
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: RFPercentage(2),
-    height: RFPercentage(5.8),
-  },
-  cancelButtonText: {
-    fontSize: RFPercentage(2),
-    color: Colors.primary,
-    fontFamily: "Poppins_500Medium",
-  },
-  confirmButton: {
-    width: "45%",
-    padding: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
-    backgroundColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  confirmButtonText: {
-    fontSize: RFPercentage(2),
-    color: Colors.white,
-    fontFamily: "Poppins_500Medium",
-  },
 });
 
 export default Settings;

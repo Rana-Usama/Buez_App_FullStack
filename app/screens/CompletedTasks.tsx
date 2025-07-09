@@ -4,11 +4,9 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
-
 import Nav from "../components/common/Nav";
 import MyAppButton from "../components/common/MyAppButton";
 import NotFound from "../components/common/NotFound";
-
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { getFormatedDate } from "../services/Shared.service";
@@ -116,9 +114,9 @@ export default function CompletedTasks({ navigation }: any) {
     const details = item.taskDetails || {};
     const owner = details.user || {};
     const doneOn = item.completedAt || item.acceptedAt || new Date().toISOString();
-    const cached = cache[item.id] || {};
-    const desc = cached?.desc ?? tr.translating;
-    const catName = cached?.category ?? tr.translating;
+    const cached = (cache[item.id] || {}) as { desc?: string; category?: string };
+    const desc = cached.desc ?? tr.translating;
+    const catName = cached.category ?? tr.translating;
     const shortDesc = desc && desc.length > 30 ? `${desc.slice(0, 30)}…` : desc || "-";
 
     return (
@@ -132,8 +130,8 @@ export default function CompletedTasks({ navigation }: any) {
         </View>
 
         <View style={styles.descWrap}>
-          <Text style={[styles.desc, {color:theme.darkGrey}]}>{shortDesc}</Text>
-          <Text style={[styles.date, {color:theme.darkGrey}]}>{`${tr.completedOn || "Completed on"}: ${getFormatedDate(doneOn)}`}</Text>
+          <Text style={[styles.desc, { color: theme.darkGrey }]}>{shortDesc}</Text>
+          <Text style={[styles.date, { color: theme.darkGrey }]}>{`${tr.completedOn || "Completed on"}: ${getFormatedDate(doneOn)}`}</Text>
         </View>
 
         <View style={styles.reviewBtnWrap}>
@@ -278,6 +276,6 @@ const styles = StyleSheet.create({
   },
   flatListContent: {
     paddingBottom: RFPercentage(5),
-    paddingTop:RFPercentage(2)
+    paddingTop: RFPercentage(2),
   },
 });

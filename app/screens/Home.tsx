@@ -18,7 +18,6 @@ import {
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
 import InputField from "../components/common/AuthInputField";
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
@@ -77,7 +76,6 @@ function Home({ navigation }) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [allTasks, setAllTasks] = useState([]);
-
   const {
     taskRecords,
     setTaskRecords,
@@ -359,9 +357,6 @@ function Home({ navigation }) {
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </KeyboardAvoidingView>
-
-      {/* Bottom Tab */}
-      {/* <CustomTabBar homeTab={true} navigation={navigation} /> */}
     </View>
   );
 }
@@ -378,6 +373,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
+    paddingBottom:RFPercentage(9)
   },
   inputFieldContainer: {
     justifyContent: "center",

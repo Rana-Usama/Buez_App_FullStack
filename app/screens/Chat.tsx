@@ -6,18 +6,17 @@ import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { translateText } from "../translation/googleTranslation";
-
 import Colors from "../config/Colors";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+
 const Chat = ({ navigation, route }) => {
   const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
   const { chatId, senderId: currentUserId, senderName, receiver } = route.params;
-  // console.log({ chatId, senderId: currentUserId, senderName, receiver });
   const [message, setMessage] = useState("");
   const { theme } = useAppTheme();
 
@@ -155,8 +154,6 @@ const Chat = ({ navigation, route }) => {
     }
   }, []);
 
-  // Add a new useEffect to mark messages as read when the chat is opened
-
   const markMessagesAsRead = async () => {
     if (!chatId || !currentUserId) return;
     try {
@@ -167,8 +164,6 @@ const Chat = ({ navigation, route }) => {
       console.error("Error marking messages as read:", error);
     }
   };
-
-  // console.log(messages);
 
   async function sendPushNotification(message) {
     try {
@@ -194,7 +189,8 @@ const Chat = ({ navigation, route }) => {
 
   return (
     <LinearGradient colors={[theme.chat1, theme.chat2]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.screen}>
-      <View style={[styles.profileContainer, {borderBottomColor:theme.lightGrey}]}>
+      <StatusBar backgroundColor={theme.chat1} barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} />
+      <View style={[styles.profileContainer, { borderBottomColor: theme.lightGrey }]}>
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={20} color={theme.heading} />
         </TouchableOpacity>
@@ -206,7 +202,7 @@ const Chat = ({ navigation, route }) => {
           ) : (
             <>
               <View style={styles.noProfile}>
-                <Text style={[styles.noProfileInner, {color:theme.primary}]}>{receiver?.userName[0]}</Text>
+                <Text style={[styles.noProfileInner, { color: theme.primary }]}>{receiver?.userName[0]}</Text>
               </View>
             </>
           )}
@@ -226,7 +222,7 @@ const Chat = ({ navigation, route }) => {
           }}
           loadEarlier={!!lastVisible}
           onLoadEarlier={fetchMoreMessages}
-          // bottomOffset={RFPercentage(2)} // Adjusted bottomOffset
+          // bottomOffset={RFPercentage(2)}
           renderLoadEarlier={(props) => (
             <TouchableOpacity style={styles.loadMessages} onPress={props.onLoadEarlier}>
               <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>{`${t("chat.txt1")}`}</Text>
@@ -235,11 +231,12 @@ const Chat = ({ navigation, route }) => {
           renderInputToolbar={(props) => (
             <InputToolbar
               {...props}
-              containerStyle={[styles.toolbar, {backgroundColor: theme.mode === 'dark' ? 'transparent' : "rgb(124, 130, 164)", borderColor: theme.mode == 'dark' ? Colors.darkGrey : Colors.primary}]}
+              containerStyle={[styles.toolbar, { backgroundColor: theme.mode === "dark" ? "transparent" : "rgb(124, 130, 164)", borderColor: theme.mode == "dark" ? Colors.darkGrey : Colors.primary }]}
               renderComposer={() => <TextInput style={styles.customTextInput} placeholder={`${t("chat.txt2")}`} placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
               renderSend={() => (
                 <TouchableOpacity
                   style={styles.sendButton}
+                  disabled={!message}
                   onPress={() => {
                     onSend([
                       {
@@ -295,7 +292,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingHorizontal: RFPercentage(1),
-    paddingTop:RFPercentage(2)
+    paddingTop: RFPercentage(2),
   },
   messageContainer: {
     flex: 1,

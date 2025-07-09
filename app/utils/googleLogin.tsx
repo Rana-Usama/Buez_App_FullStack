@@ -10,6 +10,7 @@ import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { saveCredentials } from "../services/Auth.service";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
 import { Icons } from "../config/theme";
+import { differenceInDays } from "date-fns";
 
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 
@@ -64,16 +65,37 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       } else {
         const existingUser = userSnapshot.data();
         await saveCredentials(user.email, "123456");
+        const subscriptionStart = existingUser?.subscriptionStart;
+        const subscriptionEnd = existingUser?.subscriptionEnd;
+        const now = new Date();
+        let trialDays = null;
+        let isTrialValid = false;
+
+        if (existingUser.isFreeTrial && existingUser?.freeTrialStartedAt?.seconds) {
+          const trialStartDate = new Date(existingUser.freeTrialStartedAt.seconds * 1000);
+          trialDays = differenceInDays(now, trialStartDate);
+          isTrialValid = trialDays >= 0 && trialDays <= 14;
+        }
+
+        const subStartDate = subscriptionStart ? new Date(subscriptionStart) : null;
+        const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
+
+        const isWithinPaidPeriod = subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
+
         Toast.show({
           type: "success",
           text1: `${t("toast.login.one")}`,
           text2: `${t("toast.login.two")}`,
         });
 
-        if (!existingUser.isFreeTrial) {
-          navigation.navigate("FreeTrial");
-        } else {
+        if (existingUser.isSubscribed || isWithinPaidPeriod) {
           navigation.navigate("TabNavigator");
+        } else if (isTrialValid) {
+          navigation.navigate("TabNavigator");
+        } else if (existingUser.isFreeTrial && trialDays !== null && (trialDays < 0 || trialDays > 14)) {
+          navigation.navigate("Subscription");
+        } else {
+          navigation.navigate("FreeTrial");
         }
       }
     } catch (error) {

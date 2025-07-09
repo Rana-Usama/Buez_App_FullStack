@@ -23,7 +23,6 @@ const TabNavigator = () => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const { theme } = useAppTheme();
 
-
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
       setKeyboardVisible(true);
@@ -48,11 +47,12 @@ const TabNavigator = () => {
         tabBarHideOnKeyboard: true,
         tabBarShowLabel: true,
         tabBarStyle: {
+          position: "absolute",
           height: RFPercentage(10.5),
           borderTopColor: theme.detailsBorder,
           backgroundColor: theme.detailsBorder,
           borderTopWidth: 0,
-
+          bottom: 0,
         },
         tabBarIcon: ({ focused }) => {
           let icon;
@@ -83,7 +83,7 @@ const TabNavigator = () => {
               style={{
                 width: isMiddle ? RFPercentage(8) : RFPercentage(3),
                 height: isMiddle ? RFPercentage(8) : RFPercentage(3),
-                bottom: isMiddle ? (isKeyboardVisible ? RFPercentage(-1) : RFPercentage(2)) : RFPercentage(-0.6),
+                bottom: isMiddle ? (isKeyboardVisible ? RFPercentage(-1.5) : RFPercentage(2)) : RFPercentage(-0.6),
               }}
               resizeMode="contain"
             />

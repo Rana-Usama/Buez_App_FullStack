@@ -4,11 +4,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import ToggleSwitch from "toggle-switch-react-native";
 import i18n from "../translation/i18n";
 import * as SecureStore from "expo-secure-store";
-
-// Components
 import Nav from "../components/common/Nav";
-
-// Config
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
@@ -57,7 +53,6 @@ function Language({ navigation }) {
     <View style={[styles.screen,{backgroundColor:theme.white}]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("settings.txt12")}`} />
-
         <View style={styles.container}>
           {languages.map((lang) => (
             <TouchableOpacity key={lang} style={[styles.languageCard,{borderColor:theme.border},]} activeOpacity={0.8} onPress={() => changeLanguage(lang)}>
@@ -97,10 +92,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2),
     marginBottom: RFPercentage(2),
     // backgroundColor: "#F9FAFB",
-  },
-  languageCardSelected: {
-    // borderColor: Colors.primary,
-    // backgroundColor: "rgba(65, 65, 69, 0.05)",
   },
   languageText: {
     fontSize: RFPercentage(1.9),

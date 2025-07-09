@@ -7,12 +7,8 @@ import Toast from "react-native-toast-message";
 import { getAuth } from "firebase/auth";
 import { collection, addDoc, serverTimestamp, query, updateDoc, getDocs, doc, where } from "firebase/firestore";
 import moment from "moment";
-
-/* components */
 import Nav from "../components/common/Nav";
 import MyAppButton from "../components/common/MyAppButton";
-
-/* config / utils */
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { FIREBASE_DB } from "../../firebaseConfig";
@@ -45,12 +41,17 @@ type Translations = {
   couldNotSubmit: string;
 };
 
+interface ParamsType {
+  task?: any;
+}
+
 function AddReview() {
   const navigation = useNavigation();
   const { params } = useRoute();
   const { userData } = useUser();
   const { theme } = useAppTheme();
-  const task = params?.task || {};
+  const typedParams = params as ParamsType;
+  const task = typedParams.task || {};
   const recipientUser = task?.taskDetails?.user ?? {
     userId: "",
     userName: "User",
@@ -72,7 +73,6 @@ function AddReview() {
     (async () => {
       const l = await getTargetLanguage();
       setLang(l);
-
       const phrases = {
         addReview: "Add Review",
         howExperience: "How Was Your Experience?",
@@ -144,7 +144,6 @@ function AddReview() {
           })
         )
       );
-
       Toast.show({
         type: "success",
         text1: tr.success || "Success",
@@ -163,7 +162,7 @@ function AddReview() {
   };
 
   return (
-    <View style={[styles.screen, {backgroundColor:theme.white}]}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.navContainer}>
           <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={tr.addReview || "Add Review"} />
@@ -172,14 +171,14 @@ function AddReview() {
         <View style={styles.profileContainer}>
           <Image source={recipientUser.profileImage ? { uri: recipientUser.profileImage } : Icons.dp} resizeMode="cover" style={styles.profileImage} />
           <View style={styles.nameRow}>
-            <Text style={[styles.nameText, {color:theme.heading}]}>{recipientUser.userName}</Text>
+            <Text style={[styles.nameText, { color: theme.heading }]}>{recipientUser.userName}</Text>
           </View>
-          <Text style={[styles.descText, {color:theme.darkGrey}]}>{taskDesc || tr.translating || "Translating..."}</Text>
-          {!!completedOn && <Text style={[styles.completedText, {color:theme.darkGrey}]}>{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>}
+          <Text style={[styles.descText, { color: theme.darkGrey }]}>{taskDesc || tr.translating || "Translating..."}</Text>
+          {!!completedOn && <Text style={[styles.completedText, { color: theme.darkGrey }]}>{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>}
         </View>
 
         <View style={styles.ratingContainer}>
-          <Text style={[styles.experienceText, {color:theme.heading}]}>{tr.howExperience || "How Was Your Experience?"}</Text>
+          <Text style={[styles.experienceText, { color: theme.heading }]}>{tr.howExperience || "How Was Your Experience?"}</Text>
           <View style={styles.starRow}>
             {rating.map((sel, idx) => (
               <TouchableOpacity key={idx} onPress={() => toggleStar(idx)}>
@@ -197,7 +196,7 @@ function AddReview() {
             multiline
             placeholderTextColor={theme.inputFieldPlaceholder}
             maxLength={150}
-            style={[styles.reviewInput, {borderColor:theme.border}]}
+            style={[styles.reviewInput, { borderColor: theme.border }]}
           />
           <View style={styles.charCounterContainer}>
             <Text

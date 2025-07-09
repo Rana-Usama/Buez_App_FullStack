@@ -20,7 +20,7 @@ export const lightTheme = {
   red: "#EF4444",
   cartsBackground: "#F8FAFC",
   cartsTitle: "#4B5563",
-  border: "#E5E7EB",
+  border: "rgb(213, 216, 222)",
   stroke: "#D1D5DB",
   chat: "#A7ADCE",
   desc: "#64748B",
@@ -29,8 +29,8 @@ export const lightTheme = {
   pureWhite: "white",
   pureBlack: "black",
   modal: "rgba(218, 218, 218, 0.5)",
-  chat1 : "rgba(161, 172, 235, 0)",
-  chat2 : "rgba(95, 96, 142, 0.53)"
+  chat1: "rgb(255, 255, 255)",
+  chat2: "rgb(87, 90, 138)",
 };
 
 export const darkTheme = {
@@ -64,6 +64,6 @@ export const darkTheme = {
   pureWhite: "white",
   pureBlack: "black",
   modal: "rgba(0, 0, 0, 0.5)",
-  chat1 : "rgb(5, 9, 29)",
-  chat2 : "rgb(0, 0, 2)"
+  chat1: "rgb(5, 9, 29)",
+  chat2: "rgb(0, 0, 2)",
 };

@@ -11,7 +11,7 @@ const InitialScreen = ({navigation}) => {
     <View>
       <Text>Checking for subscription</Text>
       {loading && <Text>Loading...</Text>}
-      {userId && <SubscriptionListener navigation={navigation} userId={userId} />}
+      {/* {userId && <SubscriptionListener navigation={navigation} userId={userId} />} */}
     </View>
   )
 }

@@ -3,11 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackg
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { getFirestore, collection, addDoc, updateDoc, doc } from "firebase/firestore";
-
 // components
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
-
 // config
 import Colors from "../config/Colors";
 import MyAppButton from "../components/common/MyAppButton";
@@ -29,7 +26,6 @@ function OfferDetail({ navigation, route }) {
   const currentUserId = getAuth().currentUser?.uid;
   const postRequest = route.params?.postRequest;
   const [showAll, setShowAll] = useState(false);
-  const reviews = postRequest?.reviews || [];
   const db = FIREBASE_DB;
   const [isExpanded, setIsExpanded] = useState(false);
   const [translatedReviews, setTranslatedReviews] = useState([]);
@@ -51,18 +47,17 @@ function OfferDetail({ navigation, route }) {
         translateText(postRequest.description || ""),
         translateText(postRequest.otherCompensation || ""),
       ]);
-
       setTranslatedOffer({
         taskType: translatedTaskType,
         description: translatedDescription,
         otherCompensation: translatedCompensation,
       });
     };
-
     if (postRequest) {
       translateOfferData();
     }
   }, [postRequest]);
+
 
   useEffect(() => {
     const translateReviews = async () => {
@@ -74,7 +69,6 @@ function OfferDetail({ navigation, route }) {
           }))
         );
         setTranslatedReviews(translated);
-
         // Calculate average rating
         const ratings = postRequest.reviews.map((r) => r.rating).filter(Boolean);
         if (ratings.length > 0) {
@@ -85,7 +79,6 @@ function OfferDetail({ navigation, route }) {
         }
       }
     };
-
     translateReviews();
   }, [postRequest?.reviews]);
 
@@ -124,7 +117,7 @@ function OfferDetail({ navigation, route }) {
 
   const updateRequestAcceptedBy = async () => {
     try {
-      const taskDocRef = doc(db, "taskRequests", postRequest.id); // replace with your actual collection name
+      const taskDocRef = doc(db, "taskRequests", postRequest.id); 
       await updateDoc(taskDocRef, {
         acceptedBy: {
           userId: currentUserId,
@@ -303,6 +296,7 @@ function OfferDetail({ navigation, route }) {
             </>
           )}
         </View>
+        
         {/* Buttons */}
         <View style={styles.buttonWrapper}>
           {postRequest?.acceptedBy ? (

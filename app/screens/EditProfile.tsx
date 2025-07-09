@@ -3,17 +3,12 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, KeyboardAv
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
-
-// components
 import MyAppButton from "../components/common/MyAppButton";
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
 import InputField from "../components/common/InputField";
-
-// config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
-import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import { updateProfile } from "../services/User.service";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
@@ -177,15 +172,13 @@ function EditProfile({ navigation }) {
               </View>
             ))}
           </View>
+
           {/* Button */}
           <View style={styles.buttonWrapper}>
             <MyAppButton title={`${t("editProfile.txt4")}`} marginTop={RFPercentage(2)} onPress={updateProfileData} loading={isUpdating} disabled={!isChanged || isUpdating} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      {/* Bottom Tab */}
-      {/* <CustomTabBar profileTab={true} navigation={navigation} /> */}
     </View>
   );
 }

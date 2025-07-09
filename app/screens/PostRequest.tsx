@@ -291,12 +291,16 @@ function PostRequest({ navigation, route }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+      >
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
           {/* Nav */}
           <Nav
             marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)}
-            leftLogo={false}
+            leftLogo={true}
             profileImage={profileImgUrl}
             navigation={navigation}
             title={title === `${t("postRequest.txt2")}` ? `${t("postRequest.txt2")}` : `${t("postRequest.txt1")}`}
@@ -316,8 +320,8 @@ function PostRequest({ navigation, route }) {
             ]}
             onPress={() => toggleDropdown("task")}
           >
-            <Text style={[styles.dropdownHeaderText, { color: selectedTask ? theme.black : theme.heading }]}>{selectedTask || `${t("postRequest.txt3")}`}</Text>
-            <MaterialIcons name={showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
+            <Text style={[styles.dropdownHeaderText, { color: selectedTask ? theme.black : theme.inputFieldPlaceholder }]}>{selectedTask || `${t("postRequest.txt3")}`}</Text>
+            <MaterialIcons name={showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} color={theme.inputFieldPlaceholder} />
           </TouchableOpacity>
 
           {showTaskDropdown && (
@@ -359,8 +363,8 @@ function PostRequest({ navigation, route }) {
               ]}
               onPress={() => toggleDropdown("compensation")}
             >
-              <Text style={[styles.dropdownHeaderText, { color: selectedCompensation ? theme.black : theme.heading }]}>{selectedCompensation || `${t("postRequest.txt7")}`}</Text>
-              <MaterialIcons name={showCompensationDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} />
+              <Text style={[styles.dropdownHeaderText, { color: selectedCompensation ? theme.black : theme.inputFieldPlaceholder }]}>{selectedCompensation || `${t("postRequest.txt7")}`}</Text>
+              <MaterialIcons name={showCompensationDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.dropdownIcon} color={theme.inputFieldPlaceholder} />
             </TouchableOpacity>
 
             {showCompensationDropdown && (
@@ -392,7 +396,7 @@ function PostRequest({ navigation, route }) {
           <View style={[styles.descriptionContainer, { borderColor: theme.border }]}>
             <TextInput
               placeholder={`${t("postRequest.txt8")}`}
-              placeholderTextColor={theme.heading}
+              placeholderTextColor={theme.inputFieldPlaceholder}
               value={description}
               multiline
               onChangeText={(e) => setDescription(e)}
@@ -437,10 +441,15 @@ function PostRequest({ navigation, route }) {
 
           {/* Image Picker */}
           <View style={styles.imageWrapper}>
-            <Text style={[styles.imgText,{color:theme.darkGrey}]}>{`${t("postRequest.txt12")}`}</Text>
+            <Text style={[styles.imgText, { color: theme.darkGrey }]}>{`${t("postRequest.txt12")}`}</Text>
             <View style={styles.imgContainer}>
               {[0, 1, 2].map((index) => (
-                <TouchableOpacity key={index} activeOpacity={0.8} onPress={() => pickImage(index)} style={[styles.imgPick, {backgroundColor:theme.white, borderWidth:1, borderColor:theme.border}]}>
+                <TouchableOpacity
+                  key={index}
+                  activeOpacity={0.8}
+                  onPress={() => pickImage(index)}
+                  style={[styles.imgPick, { backgroundColor: theme.white, borderWidth: 1, borderColor: theme.border }]}
+                >
                   {imageUris[index] ? (
                     <>
                       <Image style={styles.img2} source={{ uri: imageUris[index] }} />
@@ -485,6 +494,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
+    paddingBottom:RFPercentage(8)
   },
   charCount: {
     alignSelf: "flex-end",
@@ -515,7 +525,6 @@ const styles = StyleSheet.create({
   },
   dropdownIcon: {
     fontSize: RFPercentage(2.8),
-    color: Colors.heading,
   },
   dropdown: {
     width: "90%",

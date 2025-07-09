@@ -1,15 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Platform, ScrollView } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-
-// components
 import MyAppButton from "../components/common/MyAppButton";
 import Nav from "../components/common/Nav";
-
-// config
 import Colors from "../config/Colors";
 import { updatePassword } from "../services/Auth.service";
-
 import Toast from "react-native-toast-message";
 import * as yup from "yup";
 import { Formik } from "formik";

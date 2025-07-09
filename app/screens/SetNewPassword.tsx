@@ -2,13 +2,9 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
-
-// components
 import Screen from "../components/Screen";
 import InputField from "../components/common/AuthInputField";
 import MyAppButton from "../components/common/MyAppButton";
-
-// config
 import Colors from "../config/Colors";
 
 type InputField = {

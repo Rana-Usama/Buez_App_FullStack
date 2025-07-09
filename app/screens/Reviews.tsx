@@ -1,4 +1,3 @@
-// Full updated code with rating summary at top
 import React, { useState, useCallback, useEffect } from "react";
 import { View, Text, StyleSheet, Image, Platform, ActivityIndicator, RefreshControl, SectionList } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -12,8 +11,8 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { translateText } from "../translation/googleTranslation";
-import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { useTranslation } from "react-i18next";
 
 const sameDay = (d1, d2) => d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
 
@@ -31,26 +30,59 @@ const getSectionTitle = (date, lang) => {
   return date.toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric" });
 };
 
+type Labels = {
+  today: string;
+  yesterday: string;
+  dated: string;
+  by: string;
+  reviews: string;
+  noReviews: string;
+  translating: string;
+};
+
+type TranslationsMap = Record<string, string>;
+type Review = {
+  id: string;
+  reviewText: string;
+  rating: number;
+  createdAt: Date;
+  [key: string]: any; // for other dynamic keys like reviewer info
+};
+
+type Section = {
+  title: string;
+  data: Review[];
+};
+
 export default function Reviews({ navigation }) {
-  const [sections, setSections] = useState([]);
-  const [lang, setLang] = useState("en");
-  const [translations, setTranslations] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [averageRating, setAverageRating] = useState(null);
   const { t } = useTranslation();
-  const [labels, setLabels] = useState({ today: "Today", yesterday: "Yesterday", dated: "Dated", by: "By", reviews: "Reviews", noReviews: "No reviews yet", translating: "Translating..." });
+  const [sections, setSections] = useState<Section[]>([]);
+  const [lang, setLang] = useState<string>("en");
+  const [translations, setTranslations] = useState<TranslationsMap>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [averageRating, setAverageRating] = useState<string | null>(null);
+  const [labels, setLabels] = useState<Labels>({
+    today: "Today",
+    yesterday: "Yesterday",
+    dated: "Dated",
+    by: "By",
+    reviews: "Reviews",
+    noReviews: "No reviews yet",
+    translating: "Translating...",
+  });
+
   const { theme } = useAppTheme();
   useEffect(() => {
     (async () => {
       const userLang = await getTargetLanguage();
       setLang(userLang);
       const keys = Object.keys(labels);
-      const translated = await Promise.all(keys.map((k) => translateText(labels[k], userLang)));
+      const translated = await Promise.all(keys.map((k) => translateText(labels[k])));
       const newLabels = keys.reduce((obj, key, index) => {
-        obj[key] = translated[index] || labels[key];
+        obj[key as keyof Labels] = translated[index] || labels[key];
         return obj;
-      }, {});
+      }, {} as Labels);
       setLabels(newLabels);
     })();
   }, []);
@@ -75,10 +107,12 @@ export default function Reviews({ navigation }) {
       const finalSections = Array.from(grouped.entries())
         .map(([title, data]) => ({ title, data: data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) }))
         .sort((a, b) => {
-          const pA = title === "Today" ? 0 : title === "Yesterday" ? 1 : 2;
-          const pB = title === "Today" ? 0 : title === "Yesterday" ? 1 : 2;
-          return pA - pB || new Date(b.data[0].createdAt) - new Date(a.data[0].createdAt);
+          const getPriority = (t: string) => (t === labels.today ? 0 : t === labels.yesterday ? 1 : 2);
+          const pA = getPriority(a.title);
+          const pB = getPriority(b.title);
+          return pA - pB || new Date(b.data[0].createdAt).getTime() - new Date(a.data[0].createdAt).getTime();
         });
+
       const ratings = data.map((r) => r.rating).filter(Boolean);
       if (ratings.length > 0) {
         const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
@@ -178,14 +212,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: RFPercentage(2),
     marginBottom: RFPercentage(1),
-    // backgroundColor: "#F8F8F8",
     padding: RFPercentage(2),
-    // borderRadius: RFPercentage(1),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    // borderWidth: 1,
-    // borderColor: Colors.border,
   },
   ratingLabel: {
     fontSize: RFPercentage(2.2),

@@ -4,13 +4,9 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
-
-// components
 import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
 import InputFieldNew from "../components/common/NewField";
-
-// config
 import Colors from "../config/Colors";
 import * as yup from "yup";
 import { Formik } from "formik";

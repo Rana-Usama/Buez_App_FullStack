@@ -2,12 +2,7 @@ import React, { useCallback, useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
-
-// components
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
-
-// config
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
@@ -83,9 +78,6 @@ function Profile({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
-      {/* Bottom Tab */}
-      {/* <CustomTabBar homeTab={true} navigation={navigation} /> */}
     </View>
   );
 }
