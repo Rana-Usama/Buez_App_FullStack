@@ -54,7 +54,7 @@ function Onboarding(props) {
       image: Icons.onBoarding3,
       title: `${t("onBoarding.onBoarding5.Title")}`,
       description: `${t("onBoarding.onBoarding5.Desc")}`,
-      lottie: require("../../assets/lottie/pay2.json"),
+      lottie: require("../../assets/lottie/pay1.json"),
     },
   ];
 
@@ -129,8 +129,8 @@ function Onboarding(props) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'}  backgroundColor={theme.white} />
-      <Image style={styles.img} source={Icons.logo} />
+      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
+      <Image style={theme.mode === "dark" ? styles.darkImg : styles.img} source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo} />
 
       {/* Body */}
       <View style={{ width: "90%", alignItems: "center", justifyContent: "center", marginTop: RFPercentage(8), position: "absolute", top: RFPercentage(10) }}>
@@ -138,11 +138,11 @@ function Onboarding(props) {
       </View>
       <View style={{ top: RFPercentage(45), alignItems: "center", justifyContent: "center" }}>
         <View style={styles.wrapper}>
-          <Text style={[styles.title, {color:theme.heading}]}>{title}</Text>
+          <Text style={[styles.title, { color: theme.heading }]}>{title}</Text>
         </View>
 
         <View style={styles.wrapper2}>
-          <Text style={[styles.desc, {color:theme.desc}]}>{description}</Text>
+          <Text style={[styles.desc, { color: theme.desc }]}>{description}</Text>
         </View>
         <View style={styles.dot}>{renderDots()}</View>
       </View>
@@ -150,11 +150,11 @@ function Onboarding(props) {
       {/* Buttons */}
       <View style={styles.buttonWrapper}>
         <TouchableOpacity activeOpacity={0.8} style={styles.skip} onPress={() => props.navigation.navigate("Login")}>
-          <Text style={[styles.skipText, {color:theme.skip}]}>{`${t("buttons.skip")}`}</Text>
+          <Text style={[styles.skipText, { color: theme.skip }]}>{`${t("buttons.skip")}`}</Text>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.8} onPress={handleNext} style={styles.nextContainer}>
           <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={styles.gradient}>
-            <Text style={[styles.gradientText, {color:theme.pureWhite}]}>{renderNextButtonText()}</Text>
+            <Text style={[styles.gradientText, { color: theme.pureWhite }]}>{renderNextButtonText()}</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
   },
+  darkImg: { width: RFPercentage(20), height: RFPercentage(10.6), marginTop: RFPercentage(3) },
   img: { width: RFPercentage(6.5), height: RFPercentage(9.5), marginTop: RFPercentage(3) },
   wrapper: { width: "90%", justifyContent: "center", alignItems: "center" },
   title: { textAlign: "center", marginTop: RFPercentage(2), color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_600SemiBold" },

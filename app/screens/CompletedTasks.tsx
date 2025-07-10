@@ -136,7 +136,7 @@ export default function CompletedTasks({ navigation }: any) {
 
         <View style={styles.reviewBtnWrap}>
           {item.reviewed ? (
-            <Text style={styles.reviewed}>{tr.reviewed || "Reviewed"}</Text>
+            <Text style={[styles.reviewed, { color: theme.primary }]}>{tr.reviewed || "Reviewed"}</Text>
           ) : (
             <MyAppButton title={tr.review || "Review"} height={RFPercentage(4)} width={RFPercentage(12)} onPress={() => navigation.navigate("AddReview", { task: item })} />
           )}
@@ -209,9 +209,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
-    elevation: 5,
-    shadowColor: "rgb(96,94,94)",
-    shadowOffset: { width: 0, height: 3 },
+    elevation: 10,
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
@@ -265,7 +265,6 @@ const styles = StyleSheet.create({
     bottom: RFPercentage(2),
   },
   reviewed: {
-    color: Colors.primary,
     fontFamily: "Poppins_500Medium",
     right: RFPercentage(1),
   },

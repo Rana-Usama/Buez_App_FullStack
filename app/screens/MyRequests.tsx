@@ -1,19 +1,5 @@
 import React, { useCallback, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  ImageBackground,
-  Image,
-  Platform,
-  FlatList,
-  Dimensions,
-  RefreshControl,
-  ActivityIndicator,
-  StatusBar,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, Platform, FlatList, Dimensions, RefreshControl, ActivityIndicator, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
@@ -50,8 +36,9 @@ function MyRequests({ navigation }) {
   const [selectedRequestItem, setSelectedRequestItem] = useState(null);
   const [activeIndices, setActiveIndices] = useState({});
   useExitAppOnBack();
-  const param = activeFilter === `${t("myRequests.txt2")}` ? REQUEST_STATUS.Active : REQUEST_STATUS.Completed;
   const { theme } = useAppTheme();
+
+  const param = activeFilter === `${t("myRequests.txt2")}` ? REQUEST_STATUS.Active : activeFilter === `${t("myRequests.txt3")}` ? REQUEST_STATUS.Completed : REQUEST_STATUS.Cancelled;
 
   useFocusEffect(
     useCallback(() => {
@@ -80,7 +67,7 @@ function MyRequests({ navigation }) {
             title: translatedTitle,
             description: translatedDescription,
             taskType: translatedTaskType,
-            otherCompensation: otherCompensation,
+            otherCompensation,
           };
         })
       );
@@ -132,7 +119,16 @@ function MyRequests({ navigation }) {
         newRecords.splice(i, 1);
         return newRecords;
       });
-      const action = status === REQUEST_STATUS.Completed ? `${t("toast.myRequests.three")}` : `${t("toast.myRequests.four")}`;
+
+      let action;
+      if (status === REQUEST_STATUS.Completed) {
+        action = `${t("toast.myRequests.three")}`;
+      } else if (status === REQUEST_STATUS.Cancelled) {
+        action = `${t("toast.myRequests.cancelled")}`;
+      } else {
+        action = `${t("toast.myRequests.four")}`;
+      }
+
       Toast.show({
         type: "success",
         text1: `${t("toast.myRequests.one")}`,
@@ -166,14 +162,13 @@ function MyRequests({ navigation }) {
   );
 
   const postEditHandler = (cart) => {
-    navigation.navigate("PostRequest", { title: "Edit Requestt", postRequest: cart });
+    navigation.navigate("PostRequest", { title: "Edit Request", postRequest: cart });
   };
 
   const handleImageScroll = (event, cardIndex) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const viewSize = event.nativeEvent.layoutMeasurement.width;
     const currentIndex = Math.floor(contentOffsetX / viewSize);
-
     setActiveIndices((prev) => ({
       ...prev,
       [cardIndex]: currentIndex,
@@ -183,24 +178,24 @@ function MyRequests({ navigation }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[theme.primary]} tintColor={theme.primary} />}
       >
-        {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("myRequests.txt1")}`} />
+        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo navigation={navigation} title={`${t("myRequests.txt1")}`} />
 
-        {/* Filter Buttons */}
+        {/* Updated Filter Tabs: Active, Completed, Cancelled */}
         <View style={styles.filterContainer}>
-          {[`${t("myRequests.txt2")}`, `${t("myRequests.txt3")}`].map((title, index) => (
+          {[`${t("myRequests.txt2")}`, `${t("myRequests.txt3")}`, `${t("myRequests.txt8")}`].map((title, index) => (
             <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
           ))}
         </View>
 
-        {/* Carts */}
+        {/* Cards */}
         {taskRecords.map((cart, index) => (
-          <View key={index} style={[styles.cartContainer, { marginTop: index === 1 ? RFPercentage(3) : RFPercentage(3), borderColor: theme.border }]}>
+          <View key={index} style={[styles.cartContainer, { borderColor: theme.border }]}>
             <FlatList
               data={cart.imageUrls}
               horizontal
@@ -214,7 +209,6 @@ function MyRequests({ navigation }) {
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{cart.taskType}</Text>
                   </View>
-
                   {cart.status === REQUEST_STATUS.Active && (
                     <View style={styles.cartWrapper}>
                       <TouchableOpacity activeOpacity={0.8} onPress={() => postEditHandler(cart)}>
@@ -226,51 +220,42 @@ function MyRequests({ navigation }) {
               )}
               keyExtractor={(item, index) => index.toString()}
             />
-            {cart?.imageUrls?.length > 1 && (
+            {cart.imageUrls.length > 1 && (
               <View style={styles.dotsContainer}>
                 {cart.imageUrls.map((_, imageIndex) => (
                   <View key={imageIndex} style={[styles.dot, { backgroundColor: (activeIndices[index] ?? 0) === imageIndex ? theme.primary : theme.border }]} />
                 ))}
               </View>
             )}
-
-            {/* Info */}
+            {/* User Info */}
             <View style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
                 <Image style={styles.userImage} source={cart?.user?.profileImage ? { uri: cart?.user?.profileImage } : Icons.dp} />
               </TouchableOpacity>
-
               <Text style={[styles.userName, { color: theme.heading }]}>{cart.user.userName}</Text>
-              <Text style={[styles.postDate, { color: theme.darkGrey }]}>
-                {`${t("myRequests.txt4")}`} {getFormatedDate(cart?.createdAt)}
-              </Text>
+              <Text style={[styles.postDate, { color: theme.darkGrey }]}>{`${t("myRequests.txt4")} ${getFormatedDate(cart?.createdAt)}`}</Text>
             </View>
 
+            {/* Description */}
             <View style={styles.taskInfoContainer}>
               <Text style={[styles.taskText, { color: theme.darkGrey }]}>{cart?.description?.substr(0, 30) + (cart?.description?.length > 15 ? "..." : "")}</Text>
             </View>
 
+            {/* Compensation */}
             <View style={styles.taskInfoContainer}>
               <Text style={[styles.compensation, { color: theme.heading }]}>
                 {`${t("home.txt10")}`}:{" "}
                 <Text style={[styles.compensationAmount, { color: theme.primary }]}>
-                  {cart.compensationType === `Monitarely` ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                  {cart.compensationType === "Monitarely" ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
               </Text>
             </View>
 
+            {/* Actions (only for active posts) */}
             {cart?.status === REQUEST_STATUS.Active && (
               <View style={styles.cartContainer2}>
                 <TouchableOpacity disabled={loader} style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
-                  {loader ? (
-                    <>
-                      <ActivityIndicator size={"small"} color={"white"} />
-                    </>
-                  ) : (
-                    <>
-                      <Text style={styles.text2}>{`${t("myRequests.txt5")}`}</Text>
-                    </>
-                  )}
+                  <Text style={styles.text2}>{`${t("myRequests.txt5")}`}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   disabled={loader}
@@ -279,9 +264,9 @@ function MyRequests({ navigation }) {
                     setSelectedRequestItem(cart);
                     setIsModalVisible(true);
                   }}
-                  style={[styles.cancel, { borderColor: theme.border }]}
+                  style={[styles.cancel, { borderColor: theme.mode === "dark" ? theme.lightGrey : theme.lightGrey }]}
                 >
-                  <Text style={[styles.text3, { color: theme.border }]}>{`${t("myRequests.txt6")}`}</Text>
+                  <Text style={[styles.text3, { color: theme.mode === "dark" ? theme.lightGrey : theme.lightGrey }]}>{`${t("myRequests.txt6")}`}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -294,7 +279,7 @@ function MyRequests({ navigation }) {
           </View>
         )}
 
-        {!loading && taskRecords?.length === 0 && <NotFound title={`${t("home.txt11")}`} />}
+        {!loading && taskRecords.length === 0 && <NotFound title={`${t("home.txt11")}`} />}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -315,6 +300,8 @@ function MyRequests({ navigation }) {
     </View>
   );
 }
+
+export default MyRequests;
 
 const styles = StyleSheet.create({
   screen: {
@@ -377,6 +364,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     overflow: "hidden",
     paddingBottom: RFPercentage(2),
+    marginTop: RFPercentage(3.6),
   },
   cartImageBackground: {
     width: screenWidth * 0.9,
@@ -444,7 +432,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
   },
-  text2: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.6), textAlign: "center", },
+  text2: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.6), textAlign: "center" },
   postDate: {
     fontSize: RFPercentage(1.6),
     position: "absolute",
@@ -500,15 +488,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary,
-    width:RFPercentage(18),
-    paddingVertical:RFPercentage(1)
+    width: RFPercentage(18),
+    paddingVertical: RFPercentage(1),
   },
   cancel: {
     borderRadius: RFPercentage(100),
     width: RFPercentage(18),
     height: RFPercentage(5.2),
     borderColor: "rgb(204, 204, 216)",
-    borderWidth: RFPercentage(0.2),
+    borderWidth: 1.5,
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
@@ -521,5 +509,3 @@ const styles = StyleSheet.create({
   cartContainer2: { width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) },
   text3: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.7), textAlign: "center" },
 });
-
-export default MyRequests;

@@ -12,8 +12,8 @@ const ConfirmationModal = ({ isVisible, onClose, onConfirm, title, theme, t }) =
           <Text style={[styles.modalText, { color: theme.heading }]}>{title}</Text>
 
           <View style={styles.modalButtons}>
-            <Pressable style={[styles.cancelButton, { borderColor: theme.border }]} onPress={onClose}>
-              <Text style={[styles.cancelButtonText, { color: theme.border }]}>{t("buttons.cancel")}</Text>
+            <Pressable style={[styles.cancelButton, { borderColor:  theme.lightGrey }]} onPress={onClose}>
+              <Text style={[styles.cancelButtonText, { color:  theme.lightGrey }]}>{t("buttons.cancel")}</Text>
             </Pressable>
 
             <MyAppButton title={t("buttons.yes")} marginTop={RFPercentage(0)} height={RFPercentage(5.8)} width={RFPercentage(17)} onPress={onConfirm} />
@@ -44,14 +44,14 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(2),
     textAlign: "center",
     fontFamily: "Poppins_500Medium",
-    marginHorizontal:RFPercentage(1)
+    marginHorizontal: RFPercentage(1),
   },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: RFPercentage(2),
     width: "100%",
-    paddingHorizontal:RFPercentage(2)
+    paddingHorizontal: RFPercentage(2),
   },
   cancelButton: {
     height: RFPercentage(5.8),

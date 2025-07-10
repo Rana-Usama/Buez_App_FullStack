@@ -292,9 +292,9 @@ function PostRequest({ navigation, route }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        // behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{}}
+        // keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
           {/* Nav */}
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   imgPick: { width: "32%", height: RFPercentage(14), borderRadius: RFPercentage(1.4), justifyContent: "center", alignItems: "center", backgroundColor: "#F3F4F6", position: "relative" },
   img2: { width: "100%", height: "100%", borderRadius: RFPercentage(1.4) },
   img3: { width: RFPercentage(3), height: RFPercentage(3) },
-  space: { marginBottom: RFPercentage(8) },
+  space: { marginBottom: RFPercentage(13) },
 });
 
 export default PostRequest;

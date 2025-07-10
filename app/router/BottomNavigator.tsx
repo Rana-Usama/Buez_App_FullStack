@@ -47,12 +47,12 @@ const TabNavigator = () => {
         tabBarHideOnKeyboard: true,
         tabBarShowLabel: true,
         tabBarStyle: {
-          position: "absolute",
           height: RFPercentage(10.5),
           borderTopColor: theme.detailsBorder,
           backgroundColor: theme.detailsBorder,
           borderTopWidth: 0,
           bottom: 0,
+          position: "absolute",
         },
         tabBarIcon: ({ focused }) => {
           let icon;

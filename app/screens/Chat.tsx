@@ -231,7 +231,7 @@ const Chat = ({ navigation, route }) => {
           renderInputToolbar={(props) => (
             <InputToolbar
               {...props}
-              containerStyle={[styles.toolbar, { backgroundColor: theme.mode === "dark" ? "transparent" : "rgb(124, 130, 164)", borderColor: theme.mode == "dark" ? Colors.darkGrey : Colors.primary }]}
+              containerStyle={[styles.toolbar, { backgroundColor: theme.mode === "dark" ? "transparent" : "rgb(124, 130, 164)", borderColor: theme.mode == "dark" ? Colors.darkGrey : 'rgb(94, 91, 137)' }]}
               renderComposer={() => <TextInput style={styles.customTextInput} placeholder={`${t("chat.txt2")}`} placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
               renderSend={() => (
                 <TouchableOpacity

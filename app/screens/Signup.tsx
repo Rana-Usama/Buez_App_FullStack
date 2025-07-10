@@ -99,7 +99,8 @@ function Signup({ navigation }: any) {
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        <Image style={styles.logo} source={Icons.logo} />
+        {/* <Image style={styles.logo} source={Icons.logo} /> */}
+        <Image style={theme.mode === "dark" ? styles.darkImg : styles.logo} source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo} />
         <Text style={[styles.welcomeText, { color: theme.heading }]}>{`${t("signup.txt1")}`}</Text>
 
         <Formik
@@ -253,6 +254,8 @@ const styles = StyleSheet.create({
     height: RFPercentage(9.5),
     marginTop: RFPercentage(3),
   },
+  darkImg: { width: RFPercentage(20), height: RFPercentage(10.6), marginTop: RFPercentage(3) },
+
   welcomeText: {
     color: Colors.heading,
     fontSize: RFPercentage(2.6),
