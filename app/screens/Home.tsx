@@ -31,6 +31,7 @@ import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
+import HomeSkeleton from "../components/common/HomeSkelton";
 
 type InputFieldType = {
   placeholder: string;
@@ -291,7 +292,11 @@ function Home({ navigation }) {
             <View style={{ marginTop: RFPercentage(20) }}>
               <ActivityIndicator size="large" color={theme.primary} />
             </View>
+            // <HomeSkeleton />
           ) : (
+            // <View style={{ marginTop: RFPercentage(20) }}>
+            //   <ActivityIndicator size="large" color={theme.primary} />
+            // </View>
             <>
               <FlatList
                 data={displayTasks}
@@ -328,19 +333,19 @@ function Home({ navigation }) {
                         <TouchableOpacity activeOpacity={0.8}>
                           <Image style={styles.userImage} source={item.user.profileImage ? { uri: item.user.profileImage } : Icons.dp} />
                         </TouchableOpacity>
-                        <Text style={[styles.userName, {color:theme.heading}]}>{item.user.userName}</Text>
-                        <Text style={[styles.postDate, {color:theme.darkGrey}]}>
+                        <Text style={[styles.userName, { color: theme.heading }]}>{item.user.userName}</Text>
+                        <Text style={[styles.postDate, { color: theme.darkGrey }]}>
                           {t("myRequests.txt4")} {getFormatedDate(item.createdAt)}
                         </Text>
                       </View>
 
                       <View style={styles.taskInfoContainer}>
-                        <Text style={[styles.taskText, {color:theme.darkGrey2}]}>{item.description?.substr(0, 35) + (item.description?.length > 35 ? "..." : "")}</Text>
+                        <Text style={[styles.taskText, { color: theme.darkGrey2 }]}>{item.description?.substr(0, 35) + (item.description?.length > 35 ? "..." : "")}</Text>
                         <View style={styles.compensationWrapper}>
                           <Image tintColor={theme.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
-                          <Text style={[styles.compensationText, {color:theme.darkGrey2}]}>
+                          <Text style={[styles.compensationText, { color: theme.darkGrey2 }]}>
                             {`${t("home.txt10")}`}:{" "}
-                            <Text style={[styles.compensationAmount,{color:theme.primary}]}>
+                            <Text style={[styles.compensationAmount, { color: theme.primary }]}>
                               {item.compensationType === "Monitarely" ? `$${item.monitarily}` : item.otherCompensation?.substr(0, 20) + (item.otherCompensation?.length > 20 ? "..." : "")}
                             </Text>
                           </Text>
@@ -373,7 +378,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
-    paddingBottom:RFPercentage(9)
+    paddingBottom: RFPercentage(9),
   },
   inputFieldContainer: {
     justifyContent: "center",

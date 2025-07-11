@@ -16,12 +16,14 @@ import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 
+
+
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   const { t } = useTranslation();
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const { theme } = useAppTheme();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
@@ -47,12 +49,10 @@ const TabNavigator = () => {
         tabBarHideOnKeyboard: true,
         tabBarShowLabel: true,
         tabBarStyle: {
-          height: RFPercentage(10.5),
+          height: isKeyboardVisible ? 0 : RFPercentage(10.5),
           borderTopColor: theme.detailsBorder,
           backgroundColor: theme.detailsBorder,
           borderTopWidth: 0,
-          bottom: 0,
-          position: "absolute",
         },
         tabBarIcon: ({ focused }) => {
           let icon;
