@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Modal, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
 import Screen from "../components/Screen";
@@ -18,6 +18,7 @@ import { saveCredentials } from "../services/Auth.service";
 import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../utils/googleLogin";
 import { useAppTheme } from "../contexts/themeContext";
+import { BlurView } from "expo-blur";
 
 function Signup({ navigation }: any) {
   const { t } = useTranslation();
@@ -39,7 +40,7 @@ function Signup({ navigation }: any) {
 
   const [indicator, showIndicator] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const { theme } = useAppTheme();
 
   useEffect(() => {
@@ -205,22 +206,18 @@ function Signup({ navigation }: any) {
 
         {/* Social Media Icons */}
         <View style={styles.socialIconsContainer}>
-          {loading ? (
-            <>
-              <ActivityIndicator size={"small"} color={theme.primary} />
-            </>
-          ) : (
-            <>
-              <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.socialIcon} source={Icons.fb} />
-              </TouchableOpacity>
-              <View style={styles.socialIconSpacing}></View>
-              {/* <TouchableOpacity activeOpacity={0.8}>
-            <Image style={[styles.socialIcon, styles.socialIconSpacing]} source={Icons.apple} />
-          </TouchableOpacity> */}
-              <GoogleLoginButton navigation={navigation} />
-            </>
-          )}
+          {/* <FacebookLoginButton navigation={navigation} /> */}
+          <View>
+            <TouchableOpacity onPress={() => navigation.navigate("FacebookLoginWebView")}>
+              <Image source={Icons.fb} style={styles.socialIcon} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.socialIconMargin}>
+            <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+              <Image source={Icons.instagram} style={styles.socialIcon} />
+            </TouchableOpacity>
+          </View>
+          <GoogleLoginButton navigation={navigation} />
         </View>
 
         <View style={styles.footer}>
@@ -230,6 +227,17 @@ function Signup({ navigation }: any) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal visible={isModalVisible} animationType="fade" onRequestClose={() => setIsModalVisible(false)}>
+        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
+          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+            <Text style={styles.modalText}>Instagram Login Requirements</Text>
+            <Text style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}>i) The user must have an Instagram Business or Creator account</Text>
+            <Text style={{ fontFamily: "Poppins_400Regular", marginTop: RFPercentage(1), color: theme.grey }}>ii) The Instagram account must be linked to a Facebook Page that the user manages.</Text>
+            <MyAppButton title="Login" onPress={() => navigation.navigate("InstagramLoginWebView")} />
+          </View>
+        </BlurView>
+      </Modal>
     </Screen>
   );
 }
@@ -243,6 +251,25 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     width: "100%",
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    borderRadius: 14,
+    paddingVertical: RFPercentage(5),
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: RFPercentage(3),
+  },
+  modalText: {
+    fontSize: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    textAlign: "center",
+    fontFamily: "Poppins_500Medium",
   },
   scrollViewContent: {
     width: "100%",
@@ -299,8 +326,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   socialIcon: {
-    width: RFPercentage(4.7),
-    height: RFPercentage(4.7),
+    width: RFPercentage(4.8),
+    height: RFPercentage(4.8),
   },
   socialIconSpacing: {
     marginHorizontal: RFPercentage(0.7),
@@ -332,6 +359,9 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     color: Colors.red,
     left: RFPercentage(0.2),
+  },
+  socialIconMargin: {
+    marginHorizontal: RFPercentage(1),
   },
 });
 

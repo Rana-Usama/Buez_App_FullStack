@@ -123,7 +123,7 @@ export default function CompletedTasks({ navigation }: any) {
       <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
         <View style={styles.headerRow}>
           <View style={styles.rowCenter}>
-            <Image style={styles.avatar} source={owner.profileImage ? { uri: owner.profileImage } : Icons.dp} />
+            <Image style={styles.avatar} source={owner?.profileImage ? { uri: owner?.profileImage } : Icons.dp} />
             <Text style={[styles.userName, { color: theme.heading }]}>{owner.userName || "User"}</Text>
           </View>
           <Text style={[styles.category, { color: theme.darkGrey }]}>{`${tr.category || "Category"}: ${catName}`}</Text>

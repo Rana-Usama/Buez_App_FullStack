@@ -292,8 +292,8 @@ function Home({ navigation }) {
             <View style={{ marginTop: RFPercentage(20) }}>
               <ActivityIndicator size="large" color={theme.primary} />
             </View>
-            // <HomeSkeleton />
           ) : (
+            // <HomeSkeleton />
             // <View style={{ marginTop: RFPercentage(20) }}>
             //   <ActivityIndicator size="large" color={theme.primary} />
             // </View>
@@ -331,9 +331,9 @@ function Home({ navigation }) {
                     <View style={styles.infoWrapper}>
                       <View style={styles.cartInfoContainer}>
                         <TouchableOpacity activeOpacity={0.8}>
-                          <Image style={styles.userImage} source={item.user.profileImage ? { uri: item.user.profileImage } : Icons.dp} />
+                          <Image style={styles.userImage} source={item?.user?.profileImage ? { uri: item?.user?.profileImage } : Icons.dp} />
                         </TouchableOpacity>
-                        <Text style={[styles.userName, { color: theme.heading }]}>{item.user.userName}</Text>
+                        <Text style={[styles.userName, { color: theme.heading }]}>{item?.user?.userName}</Text>
                         <Text style={[styles.postDate, { color: theme.darkGrey }]}>
                           {t("myRequests.txt4")} {getFormatedDate(item.createdAt)}
                         </Text>
@@ -358,7 +358,11 @@ function Home({ navigation }) {
             </>
           )}
 
-          {!loading && displayTasks?.length === 0 && <NotFound title={`${t("home.txt11")}`} />}
+          {!loading && displayTasks?.length === 0 && (
+            <View style={{bottom:RFPercentage(12)}}>
+              <NotFound title={`${t("home.txt11")}`} />
+            </View>
+          )}
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </KeyboardAvoidingView>

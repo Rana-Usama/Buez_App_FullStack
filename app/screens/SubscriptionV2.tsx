@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -164,9 +164,9 @@ function SubscriptionV2(props) {
               props.navigation.navigate("TabNavigator");
             } catch (error) {}
           }}
-          style={[styles.skip, {borderColor:theme.stroke}]}
+          style={[styles.skip, { borderColor: theme.grey }]}
         >
-          <Text style={{ color: theme.stroke, fontFamily: "Poppins_500Medium" }}>{`${t("buttons.skip")}`}</Text>
+          <Text style={{ color: theme.grey, fontFamily: "Poppins_500Medium" }}>{`${t("buttons.skip")}`}</Text>
         </TouchableOpacity>
       </View>
     </Screen>

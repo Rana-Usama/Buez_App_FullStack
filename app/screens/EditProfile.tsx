@@ -79,9 +79,9 @@ function EditProfile({ navigation }) {
   const fetchUserData = async () => {
     try {
       if (user) {
-        const name = user.userName || "";
-        const phone = user.phoneNumber || "";
-        const image = user.profileImage || null;
+        const name = user?.userName || "";
+        const phone = user?.phoneNumber || "";
+        const image = user?.profileImage || null;
         const tempFields = [...inputField];
         tempFields[0].value = name;
         tempFields[1].value = phone;

@@ -14,19 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "291364316025-baf68r6qls0q419j58jtbn8liin8r6si.apps.googleusercontent.com",
+          "client_id": "291364316025-fngt1ic8ojaituaoei31jutk7pnmmclb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.adamburg.Buez",
-            "certificate_hash": "4359795a947e16f6c2277d599e9acdf128d41abe"
-          }
-        },
-        {
-          "client_id": "291364316025-e6865419mldibgleh55n6jo68mt3u1kn.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.adamburg.Buez",
-            "certificate_hash": "69cfe342186c471c2ef0e2dba50b3fb70b1ae837"
+            "certificate_hash": "ffd91503ca7b3bb37c036f52b376d4099ab60d13"
           }
         },
         {
@@ -43,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "291364316025-73q230c3tjj0qh6k3m5148kk2mh2qjft.apps.googleusercontent.com",
+              "client_id": "291364316025-00v6oroakujt01a10cht0kjacsbm1drd.apps.googleusercontent.com",
               "client_type": 3
             },
             {

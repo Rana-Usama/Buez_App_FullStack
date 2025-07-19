@@ -124,7 +124,7 @@ function MyRequests({ navigation }) {
       if (status === REQUEST_STATUS.Completed) {
         action = `${t("toast.myRequests.three")}`;
       } else if (status === REQUEST_STATUS.Cancelled) {
-        action = `${t("toast.myRequests.cancelled")}`;
+        action = `${t("toast.myRequests.four")}`;
       } else {
         action = `${t("toast.myRequests.four")}`;
       }
@@ -232,7 +232,7 @@ function MyRequests({ navigation }) {
               <TouchableOpacity activeOpacity={0.8}>
                 <Image style={styles.userImage} source={cart?.user?.profileImage ? { uri: cart?.user?.profileImage } : Icons.dp} />
               </TouchableOpacity>
-              <Text style={[styles.userName, { color: theme.heading }]}>{cart.user.userName}</Text>
+              <Text style={[styles.userName, { color: theme.heading }]}>{cart?.user?.userName}</Text>
               <Text style={[styles.postDate, { color: theme.darkGrey }]}>{`${t("myRequests.txt4")} ${getFormatedDate(cart?.createdAt)}`}</Text>
             </View>
 

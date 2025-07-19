@@ -337,13 +337,13 @@ const styles = StyleSheet.create({
     top: RFPercentage(-0.8),
   },
   dateText: {
-    color: Colors.primary,
+    color: Colors.white,
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.6),
-    backgroundColor: Colors.chat,
-    paddingVertical: RFPercentage(0.8),
-    borderRadius: RFPercentage(20),
-    paddingHorizontal: RFPercentage(1.2),
+    // backgroundColor: Colors.chat,
+    // paddingVertical: RFPercentage(0.8),
+    // borderRadius: RFPercentage(20),
+    // paddingHorizontal: RFPercentage(1.2),
   },
   noProfile: {
     width: RFPercentage(7),

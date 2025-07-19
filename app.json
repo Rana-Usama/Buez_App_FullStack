@@ -56,12 +56,35 @@
           "icon": "./assets/notification-icon.png"
         }
       ],
+      [
+        "react-native-fbsdk-next",
+        {
+          "appID": "716889610970681",
+          "clientToken": "c8a58652897a506d888c812044c4f7ab",
+          "displayName": "Buez",
+          "scheme": "fb716889610970681",
+          "advertiserIDCollectionEnabled": false,
+          "autoLogAppEventsEnabled": false,
+          "isAutoInitEnabled": true,
+          "iosUserTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+        }
+      ],
       "@react-native-google-signin/google-signin",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
       "expo-localization"
     ],
     "extra": {
+      "facebookAppId": "716889610970681",
+      "facebookScheme": "fb716889610970681",
       "router": {
         "origin": "https://buez.expo.app"
       },

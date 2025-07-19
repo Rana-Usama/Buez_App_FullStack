@@ -157,7 +157,7 @@ export default function Reviews({ navigation }) {
             <Text style={[styles.authorText, { color: theme.darkGrey }]}>
               {labels.by}: {item.reviewer?.userName || "-"}
             </Text>
-            <Image style={styles.avatar} source={item.reviewer?.profileImage ? { uri: item.reviewer.profileImage } : Icons.dp} />
+            <Image style={styles.avatar} source={item?.reviewer?.profileImage ? { uri: item?.reviewer?.profileImage } : Icons.dp} />
           </View>
         </View>
       </View>

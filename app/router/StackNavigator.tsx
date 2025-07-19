@@ -40,6 +40,8 @@ import Notifications from "../screens/Notifications";
 import CompletedTasks from "../screens/CompletedTasks";
 import AddReview from "../screens/AddReview";
 import { useAppTheme } from "../contexts/themeContext";
+import InstagramBusinessLoginWebView from "../utils/InstagramLogin";
+import FacebookLoginWebView from "../utils/facebookLogin";
 
 export type RootStackParamList = {
   OnBoarding: undefined;
@@ -84,6 +86,8 @@ export type RootStackParamList = {
   Notifications: undefined;
   CompletedTasks: undefined;
   AddReview: undefined;
+  InstagramLoginWebView: undefined;
+  FacebookLoginWebView: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -109,7 +113,10 @@ const StackNavigator: React.FC = () => {
 
   useEffect(() => {
     const { email, password } = credentials;
+    console.log("credentials....", credentials);
     const isUserDataReady = userData && typeof userData?.isSubscribed === "boolean" && typeof userData?.isFreeTrial === "boolean";
+    console.log("isUserDataReady....", isUserDataReady);
+    console.log("userData....", userData);
 
     if (!isLoading && !userLoading) {
       if (loggedOut === "true") {
@@ -150,6 +157,10 @@ const StackNavigator: React.FC = () => {
   }, [isLoading, userLoading, userData, credentials, loggedOut]);
   const { theme } = useAppTheme();
 
+  console.log("isLoading:", isLoading);
+  console.log("userLoading:", userLoading);
+  console.log("initialRoute:", initialRoute);
+
   return (
     <NavigationContainer>
       {isLoading || userLoading || !initialRoute ? (
@@ -158,12 +169,12 @@ const StackNavigator: React.FC = () => {
         <Stack.Navigator
           initialRouteName={initialRoute}
           screenOptions={{
-            keyboardHandlingEnabled:true,
+            keyboardHandlingEnabled: true,
             headerShown: false,
             cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
             cardStyle: { backgroundColor: theme.white, flex: 1 },
             presentation: "modal",
-            cardOverlay: () => <View style={{backgroundColor:theme.white }} />,
+            cardOverlay: () => <View style={{ backgroundColor: theme.white }} />,
           }}
         >
           <Stack.Screen name="OnBoarding" component={Onboarding} />
@@ -174,6 +185,8 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="OTPInput" component={OTPInput} />
           <Stack.Screen name="FreeTrial" component={FreeTrial} />
           <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
+          <Stack.Screen name="InstagramLoginWebView" component={InstagramBusinessLoginWebView} />
+          <Stack.Screen name="FacebookLoginWebView" component={FacebookLoginWebView} />
 
           <Stack.Screen
             name="TabNavigator"

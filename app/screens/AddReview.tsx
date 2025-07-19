@@ -169,7 +169,7 @@ function AddReview() {
         </View>
 
         <View style={styles.profileContainer}>
-          <Image source={recipientUser.profileImage ? { uri: recipientUser.profileImage } : Icons.dp} resizeMode="cover" style={styles.profileImage} />
+          <Image source={recipientUser?.profileImage ? { uri: recipientUser?.profileImage } : Icons.dp} resizeMode="cover" style={styles.profileImage} />
           <View style={styles.nameRow}>
             <Text style={[styles.nameText, { color: theme.heading }]}>{recipientUser.userName}</Text>
           </View>

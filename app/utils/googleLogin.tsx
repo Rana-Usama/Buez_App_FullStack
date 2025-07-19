@@ -13,6 +13,7 @@ import { Icons } from "../config/theme";
 import { differenceInDays } from "date-fns";
 
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
+// const webClientId = "291364316025-00v6oroakujt01a10cht0kjacsbm1drd.apps.googleusercontent.com"
 
 const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);

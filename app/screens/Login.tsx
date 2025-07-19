@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert, StatusBar } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert, StatusBar, ScrollView, Button, Modal } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -18,57 +18,57 @@ import { Formik } from "formik";
 import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../utils/googleLogin";
 import { useAppTheme } from "../contexts/themeContext";
+import { BlurView } from "expo-blur";
 
-function Login({ navigation }: any) {
+function Login({ navigation }) {
   const [indicator, showIndicator] = useState(false);
   const [remember, setRemember] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const { t } = useTranslation();
   const { theme } = useAppTheme();
 
-  let validationSchema = yup.object({
-    email: yup
-      .string()
-      .email(`${t("validations.inValid")}`)
-      .required(`${t("validations.emailReq")}`),
-    password: yup.string().required(`${t("validations.passwordReq")}`),
+  const validationSchema = yup.object({
+    email: yup.string().email(t("validations.inValid")).required(t("validations.emailReq")),
+    password: yup.string().required(t("validations.passwordReq")),
   });
-  const [loading, setLoading] = useState(false);
 
   const signInWithEmail = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
-      const user = userCredential.user;
-      return user;
+      return userCredential.user;
     } catch (error) {
       throw error;
     }
   };
 
-  const handleLogin = async (values: any) => {
+  const handleLogin = async (values) => {
     showIndicator(true);
     try {
-      const email = values.email;
-      const password = values.password;
+      const { email, password } = values;
       const user = await signInWithEmail(email, password);
       await SecureStore.setItemAsync("loggedOut", "false");
+
       if (remember) {
         await saveCredentials(email, password);
       }
+
       const pushToken = await registerForPushNotificationsAsync();
       if (user && pushToken) {
         await updateUserToken(user.uid, pushToken);
       }
+
       Toast.show({
         type: "success",
-        text1: `${t("toast.login.one")}`,
-        text2: `${t("toast.login.two")}`,
+        text1: t("toast.login.one"),
+        text2: t("toast.login.two"),
       });
+
       navigation.navigate("TabNavigator");
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: `${t("toast.login.three")}`,
-        text2: `${t("toast.login.five")}`,
+        text1: t("toast.login.three"),
+        text2: t("toast.login.five"),
       });
     }
     showIndicator(false);
@@ -81,26 +81,16 @@ function Login({ navigation }: any) {
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
-      {/* <Image style={styles.logo} source={Icons.logo} /> */}
       <Image style={theme.mode === "dark" ? styles.darkImg : styles.logo} source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo} />
-
       <Image style={styles.crown} source={Icons.crown} />
-      <Text style={[styles.welcomeText, { color: theme.heading }]}>{`${t("login.txt1")}`}</Text>
+      <Text style={[styles.welcomeText, { color: theme.heading }]}>{t("login.txt1")}</Text>
 
-      <Formik
-        initialValues={{
-          email: "",
-          password: "",
-        }}
-        validationSchema={validationSchema}
-        onSubmit={(values) => handleLogin(values)}
-      >
+      <Formik initialValues={{ email: "", password: "" }} validationSchema={validationSchema} onSubmit={handleLogin}>
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
           <>
             <View style={styles.inputContainer}>
-              {/* Email */}
               <InputFieldNew
-                placeholder={`${t("common.email")}`}
+                placeholder={t("common.email")}
                 onChangeText={handleChange("email")}
                 handleBlur={handleBlur("email")}
                 value={values.email}
@@ -109,17 +99,14 @@ function Login({ navigation }: any) {
                 }}
               />
               {touched.email && errors.email && (
-                <>
-                  <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{errors.email}</Text>
-                  </View>
-                </>
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                </View>
               )}
 
-              {/* Password */}
               <InputFieldNew
-                placeholder={`${t("common.password")}`}
-                password={true}
+                placeholder={t("common.password")}
+                password
                 onChangeText={handleChange("password")}
                 handleBlur={handleBlur("password")}
                 value={values.password}
@@ -128,11 +115,9 @@ function Login({ navigation }: any) {
                 }}
               />
               {touched.password && errors.password && (
-                <>
-                  <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{errors.password}</Text>
-                  </View>
-                </>
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{errors.password}</Text>
+                </View>
               )}
             </View>
 
@@ -141,48 +126,56 @@ function Login({ navigation }: any) {
                 <View style={styles.rememberBox}>
                   <View style={[styles.rememberIndicator, { backgroundColor: remember ? theme.primary : null }]} />
                 </View>
-                <Text style={[styles.rememberText, { color: theme.darkGrey }]}>{`${t("login.txt2")}`}</Text>
+                <Text style={[styles.rememberText, { color: theme.darkGrey }]}>{t("login.txt2")}</Text>
               </View>
               <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
-                <Text style={[styles.forgotPasswordText, { color: theme.darkGrey }]}>{`${t("login.txt3")}`}</Text>
+                <Text style={[styles.forgotPasswordText, { color: theme.darkGrey }]}>{t("login.txt3")}</Text>
               </TouchableOpacity>
             </TouchableOpacity>
 
-            <MyAppButton title={`${t("buttons.login")}`} loading={indicator} marginTop={RFPercentage(7)} onPress={() => handleSubmit()} disabled={indicator} />
+            <MyAppButton title={t("buttons.login")} loading={indicator} marginTop={RFPercentage(7)} onPress={handleSubmit} disabled={indicator} />
           </>
         )}
       </Formik>
+
       <View style={styles.socialLoginContainer}>
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
-        <Text style={[styles.orText, { color: theme.darkGrey }]}>{`${t("login.txt4")}`}</Text>
+        <Text style={[styles.orText, { color: theme.darkGrey }]}>{t("login.txt4")}</Text>
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
       </View>
 
       <View style={styles.socialIconsContainer}>
-        {loading ? (
-          <>
-            <ActivityIndicator size={"small"} color={theme.primary} />
-          </>
-        ) : (
-          <>
-            <TouchableOpacity activeOpacity={0.8}>
-              <Image style={styles.socialIcon} source={Icons.fb} />
-            </TouchableOpacity>
-            <View style={styles.socialIconMargin}></View>
-            {/* <TouchableOpacity activeOpacity={0.8}>
-          <Image style={[styles.socialIcon, styles.socialIconMargin]} source={Icons.apple} />
-        </TouchableOpacity> */}
-            <GoogleLoginButton navigation={navigation} />
-          </>
-        )}
+        {/* <FacebookLoginButton navigation={navigation} /> */}
+        <View>
+          <TouchableOpacity onPress={() => navigation.navigate("FacebookLoginWebView")}>
+            <Image source={Icons.fb} style={styles.socialIcon} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.socialIconMargin}>
+          <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+            <Image source={Icons.instagram} style={styles.socialIcon} />
+          </TouchableOpacity>
+        </View>
+        <GoogleLoginButton navigation={navigation} />
       </View>
 
       <View style={styles.signupContainer}>
-        <Text style={[styles.signupText, { color: theme.darkGrey }]}>{`${t("login.txt5")}`}</Text>
+        <Text style={[styles.signupText, { color: theme.darkGrey }]}>{t("login.txt5")}</Text>
         <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={[styles.signupLink, { color: theme.primary }]}>{`${t("buttons.signup")}`}</Text>
+          <Text style={[styles.signupLink, { color: theme.primary }]}>{t("buttons.signup")}</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal visible={isModalVisible} animationType="fade" onRequestClose={() => setIsModalVisible(false)}>
+        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
+          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+            <Text style={styles.modalText}>Instagram Login Requirements</Text>
+            <Text style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}>i) The user must have an Instagram Business or Creator account</Text>
+            <Text style={{ fontFamily: "Poppins_400Regular", marginTop: RFPercentage(1), color: theme.grey }}>ii) The Instagram account must be linked to a Facebook Page that the user manages.</Text>
+            <MyAppButton title="Login" onPress={() => navigation.navigate("InstagramLoginWebView")} />
+          </View>
+        </BlurView>
+      </Modal>
     </Screen>
   );
 }
@@ -193,6 +186,25 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: Colors.white,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    borderRadius: 14,
+    paddingVertical: RFPercentage(5),
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: RFPercentage(3),
+  },
+  modalText: {
+    fontSize: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    textAlign: "center",
+    fontFamily: "Poppins_500Medium",
   },
   logo: {
     width: RFPercentage(6.5),
@@ -288,11 +300,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   socialIcon: {
-    width: RFPercentage(4.7),
-    height: RFPercentage(4.7),
+    width: RFPercentage(4.8),
+    height: RFPercentage(4.8),
   },
   socialIconMargin: {
-    marginHorizontal: RFPercentage(0.7),
+    marginHorizontal: RFPercentage(1),
   },
   signupContainer: {
     flexDirection: "row",
