@@ -7,13 +7,10 @@ import * as ImageManipulator from "expo-image-manipulator";
 
 // components
 import Nav from "../components/common/Nav";
-import CustomTabBar from "../components/common/CustomTabBar";
-import InputField from "../components/common/InputField";
 import MyAppButton from "../components/common/MyAppButton";
 
 // config
 import Colors from "../config/Colors";
-import { validateRequired } from "../utils/helperFunctions";
 import { savePost, updatePost } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
 import { REQUEST_STATUS } from "../utils/gloabals";
@@ -291,11 +288,7 @@ function PostRequest({ navigation, route }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <KeyboardAvoidingView
-        // behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{}}
-        // keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-      >
+      <KeyboardAvoidingView>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
           {/* Nav */}
           <Nav
@@ -477,9 +470,6 @@ function PostRequest({ navigation, route }) {
           <View style={styles.space} />
         </ScrollView>
       </KeyboardAvoidingView>
-
-      {/* Bottom Tab */}
-      {/* <CustomTabBar postRequest={true} navigation={navigation} /> */}
     </View>
   );
 }
@@ -494,7 +484,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
-    paddingBottom:RFPercentage(8)
+    paddingBottom: RFPercentage(8),
   },
   charCount: {
     alignSelf: "flex-end",

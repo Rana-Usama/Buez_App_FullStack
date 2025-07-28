@@ -57,7 +57,7 @@ function Language({ navigation }) {
           {languages.map((lang) => (
             <TouchableOpacity key={lang} style={[styles.languageCard,{borderColor:theme.border},]} activeOpacity={0.8} onPress={() => changeLanguage(lang)}>
               <Text style={[styles.languageText, selectedLanguage === lang && styles.languageTextSelected,{color:theme.heading}]}>{lang}</Text>
-              <ToggleSwitch isOn={selectedLanguage === lang} onColor={Colors.primary} offColor={"rgb(224, 224, 227)"} size="small" onToggle={() => changeLanguage(lang)} />
+              <ToggleSwitch isOn={selectedLanguage === lang} onColor={Colors.primary} offColor={Colors.switch} size="small" onToggle={() => changeLanguage(lang)} />
             </TouchableOpacity>
           ))}
         </View>

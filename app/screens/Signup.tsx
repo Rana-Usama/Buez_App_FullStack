@@ -100,7 +100,6 @@ function Signup({ navigation }: any) {
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        {/* <Image style={styles.logo} source={Icons.logo} /> */}
         <Image style={theme.mode === "dark" ? styles.darkImg : styles.logo} source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo} />
         <Text style={[styles.welcomeText, { color: theme.heading }]}>{`${t("signup.txt1")}`}</Text>
 

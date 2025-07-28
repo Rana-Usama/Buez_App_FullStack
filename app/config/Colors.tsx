@@ -23,7 +23,8 @@ const Colors: { [key: string]: string } = {
   stroke: "#D1D5DB",
   chat: "#A7ADCE",
   star : "#F3CF2C",
-  success2 : "#4557B0"
+  success2 : "#4557B0",
+  switch : "rgb(224, 224, 227)"
 };
 
 export default Colors;

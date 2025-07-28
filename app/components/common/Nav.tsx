@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.primary,
-    fontSize: RFPercentage(2.3),
+    fontSize: RFPercentage(2.1),
     fontFamily: "Poppins_500Medium",
   },
   post: {

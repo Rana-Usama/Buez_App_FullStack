@@ -406,12 +406,7 @@ const styles = StyleSheet.create({
     margin: RFPercentage(0.5),
     marginTop: RFPercentage(3),
   },
-  activeDot: {
-    backgroundColor: Colors.primary,
-  },
-  inactiveDot: {
-    backgroundColor: "#D3D3D3",
-  },
+
   cartInfoContainer: {
     width: "92%",
     justifyContent: "flex-start",
@@ -495,7 +490,6 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     width: RFPercentage(18),
     height: RFPercentage(5.2),
-    borderColor: "rgb(204, 204, 216)",
     borderWidth: 1.5,
     justifyContent: "center",
     alignItems: "center",

@@ -100,7 +100,7 @@ function Login({ navigation }) {
               />
               {touched.email && errors.email && (
                 <View style={styles.errorContainer}>
-                  <Text style={styles.errorText}>{errors.email}</Text>
+                  <Text style={styles.errorText}>{errors?.email}</Text>
                 </View>
               )}
 
@@ -116,7 +116,7 @@ function Login({ navigation }) {
               />
               {touched.password && errors.password && (
                 <View style={styles.errorContainer}>
-                  <Text style={styles.errorText}>{errors.password}</Text>
+                  <Text style={styles.errorText}>{errors?.password}</Text>
                 </View>
               )}
             </View>
@@ -170,8 +170,10 @@ function Login({ navigation }) {
         <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
           <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
             <Text style={styles.modalText}>Instagram Login Requirements</Text>
-            <Text style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}>i) The user must have an Instagram Business or Creator account</Text>
-            <Text style={{ fontFamily: "Poppins_400Regular", marginTop: RFPercentage(1), color: theme.grey }}>ii) The Instagram account must be linked to a Facebook Page that the user manages.</Text>
+            <Text style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}>{`i) The user must have an Instagram Business or Creator account`}</Text>
+            <Text
+              style={{ fontFamily: "Poppins_400Regular", marginTop: RFPercentage(1), color: theme.grey }}
+            >{`ii) The Instagram account must be linked to a Facebook Page that the user manages.`}</Text>
             <MyAppButton title="Login" onPress={() => navigation.navigate("InstagramLoginWebView")} />
           </View>
         </BlurView>
@@ -265,7 +267,6 @@ const styles = StyleSheet.create({
   },
   rememberText: {
     marginLeft: RFPercentage(0.6),
-    color: "#4B5563",
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
   },
@@ -274,7 +275,6 @@ const styles = StyleSheet.create({
     right: 0,
   },
   forgotPasswordText: {
-    color: "#4B5563",
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
   },
@@ -286,7 +286,6 @@ const styles = StyleSheet.create({
   divider: {
     width: RFPercentage(3),
     height: RFPercentage(0.1),
-    backgroundColor: "#E5E7EB",
   },
   orText: {
     color: Colors.darkGrey,

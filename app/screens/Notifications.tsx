@@ -257,7 +257,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_500Medium",
     borderBottomWidth: RFPercentage(0.1),
-    borderColor: "rgb(235, 234, 234)",
     paddingBottom: RFPercentage(0.5),
     left: RFPercentage(3),
   },
