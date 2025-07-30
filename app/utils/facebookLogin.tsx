@@ -182,13 +182,12 @@ import { FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { registerForPushNotificationsAsync } from "./notificationService";
-import * as SecureStore from "expo-secure-store";
 import { differenceInDays } from "date-fns";
 import { saveCredentials } from "../services/Auth.service";
 import { checkExistingEmailLoginType, saveEmailLoginType } from "./loginType";
 
-const FB_APP_ID = "716889610970681";
-const APP_SECRET = "2fc223957e3ccdcdfceb59311e226adc";
+const FB_APP_ID = process.env.FB_ID_IG;        // "716889610970681";
+const APP_SECRET = process.env.APP_SECRET_IG;  // "2fc223957e3ccdcdfceb59311e226adc";
 const REDIRECT_URI = "https://auth.expo.io/@native-team/Buez";
 
 const FB_LOGIN_URL = `https://www.facebook.com/v23.0/dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${encodeURIComponent(

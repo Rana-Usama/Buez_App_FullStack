@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import uuid from 'react-native-uuid';
-import { formatDistanceToNow, format } from 'date-fns';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import uuid from "react-native-uuid";
+import { formatDistanceToNow, format } from "date-fns";
 
 const storage = getStorage();
 
@@ -21,45 +21,40 @@ export const getRelativePostTime = (createdAt: Timestamp): string => {
   }
 
   if (differenceInDays > 30) {
-    return format(postDate, 'MMM d, yyyy');
+    return format(postDate, "MMM d, yyyy");
   }
   return formatDistanceToNow(postDate, { addSuffix: true });
 };
 
-
-
 export const getFormatedDate = (date: Timestamp | null | undefined): string => {
   if (!date) {
-    return '';
+    return "";
   }
-  console.log(date)
+  console.log(date);
   const postDate = new Date(date.seconds * 1000);
   try {
-    return format(postDate, 'MMM-d-yyyy');
+    return format(postDate, "MMM-d-yyyy");
   } catch (e) {
     console.log(e);
-    return '';
+    return "";
   }
 };
 
 export const getDateTime = (date: Timestamp | null | undefined): string => {
   if (!date) {
-    return '';
+    return "";
   }
   const postDate = new Date(date.seconds * 1000);
   try {
-    return format(postDate, 'MMM-d-yyyy HH:mm aaa');
+    return format(postDate, "MMM-d-yyyy HH:mm aaa");
   } catch (e) {
     console.log(e);
-    return '';
+    return "";
   }
 };
 
 export const processHashtags = (hashtagsInput: string): string[] => {
-  const hashtagsArray = hashtagsInput
-    .replace(/\s+/g, '')
-    .split('#')
-    .filter(Boolean);
+  const hashtagsArray = hashtagsInput.replace(/\s+/g, "").split("#").filter(Boolean);
 
   return hashtagsArray;
 };
@@ -69,20 +64,21 @@ export const uploadImage = async (imageUri: string): Promise<string> => {
     const response = await fetch(imageUri);
     const blob = await response.blob();
     const mimeType = blob.type;
-    const fileExtension = mimeType.split('/')[1];
+    const fileExtension = mimeType.split("/")[1];
     const uniqueFileName = `${uuid.v4()}.${fileExtension}`;
 
     const imageRef = ref(storage, `images/${uniqueFileName}`);
-    await uploadBytes(imageRef, blob);
+    console.log("imageRef............", imageRef);
+    const upload = await uploadBytes(imageRef, blob);
+    console.log("upload............", upload);
     const downloadURL = await getDownloadURL(imageRef);
-
+    console.log("downloadURL............", downloadURL);
     return downloadURL;
   } catch (error) {
-    console.error("Error uploading image: ", error);
+    console.log("Error uploading image: ", error);
     throw error;
   }
 };
-
 
 // utils/dateUtils.js
 export function formatChatTimestamp(date) {
@@ -113,4 +109,3 @@ export function formatChatTimestamp(date) {
     }); // e.g., 30 Jun 2025
   }
 }
-
