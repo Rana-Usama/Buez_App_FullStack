@@ -20,7 +20,7 @@ import Toast from "react-native-toast-message";
 import InputFieldNew from "../components/common/NewField";
 import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
-
+import { useSelector } from "react-redux";
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
@@ -36,12 +36,12 @@ function PostRequest({ navigation, route }) {
   const [imageUris, setImageUris] = useState([null, null, null]);
   const [indicator, showIndicator] = useState(false);
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState({});
   const [budget, setBudget] = useState("");
   const [compensation, setCompensation] = useState("");
   const [reviews, setReviews] = useState([]);
-  useExitAppOnBack();
   const { theme } = useAppTheme();
+  const selectedLocation = useSelector((state) => state.location);
 
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
@@ -255,7 +255,7 @@ function PostRequest({ navigation, route }) {
         compensationType: originalCompensationType,
         description: description,
         descriptionKeywords: keywords,
-        address: location,
+        address: selectedLocation,
         otherCompensation: compensation,
         monitarily: budget.replace(/^\$/, ""),
         status: REQUEST_STATUS.Active,
@@ -401,12 +401,27 @@ function PostRequest({ navigation, route }) {
 
           {/* Input field */}
           <View style={styles.typeWrapper}>
-            <InputFieldNew
-              placeholder={`${t("postRequest.txt9")}`}
-              value={location}
-              onChangeText={setLocation}
-              customStyle={{ width: "90%", borderRadius: RFPercentage(1), backgroundColor: theme.white, borderColor: theme.border }}
-            />
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Location", { home: false })}
+              activeOpacity={0.8}
+              style={{
+                width: "90%",
+                borderRadius: RFPercentage(0.9),
+                backgroundColor: theme.white,
+                borderColor: theme.border,
+                alignSelf: "center",
+                height: RFPercentage(6.6),
+                borderWidth: 1,
+                paddingHorizontal: RFPercentage(2),
+                justifyContent: "center",
+                marginTop: RFPercentage(2.5),
+              }}
+            >
+              <Text style={{ fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular", color: selectedLocation?.name ? Colors.black : theme.inputFieldPlaceholder }}>
+                {location.name ? location.name : selectedLocation.name ? selectedLocation?.name : `${t("postRequest.txt9")}`}
+              </Text>
+            </TouchableOpacity>
+
             {originalCompensationType === `Other` ? (
               <>
                 <InputFieldNew
@@ -484,7 +499,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
-    paddingBottom: RFPercentage(8),
+    // paddingBottom: RFPercentage(1),
   },
   charCount: {
     alignSelf: "flex-end",

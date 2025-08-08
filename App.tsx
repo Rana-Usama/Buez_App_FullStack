@@ -14,13 +14,16 @@ import { toastConfig } from "./app/utils/ToastConfig";
 import StackNavigator from "./app/router/StackNavigator";
 import i18n from "./app/translation/i18n";
 import { ThemeProvider } from "./app/contexts/themeContext";
+import "react-native-get-random-values";
+import { Provider } from "react-redux";
+import store from "./app/redux/store";
 
 LogBox.ignoreAllLogs();
 
 /*Foreground notification handler */
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true, //Show notification banner in foreground
+    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
@@ -59,8 +62,7 @@ export default function App() {
     });
 
     // Listener for user tapping the notification
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-    });
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {});
 
     // Cleanup
     return () => {
@@ -77,7 +79,9 @@ export default function App() {
         <PostProvider>
           <NotificationProvider>
             <ExpoStripeProvider>
-              <StackNavigator />
+              <Provider store={store}>
+                <StackNavigator />
+              </Provider>
               <Toast config={toastConfig} />
             </ExpoStripeProvider>
           </NotificationProvider>

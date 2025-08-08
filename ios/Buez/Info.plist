@@ -139,6 +139,8 @@
     </array>
     <key>UIUserInterfaceStyle</key>
     <string>Light</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to your location to show maps</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
   </dict>

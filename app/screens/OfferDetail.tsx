@@ -58,7 +58,6 @@ function OfferDetail({ navigation, route }) {
     }
   }, [postRequest]);
 
-
   useEffect(() => {
     const translateReviews = async () => {
       if (postRequest?.reviews && postRequest.reviews.length > 0) {
@@ -117,7 +116,7 @@ function OfferDetail({ navigation, route }) {
 
   const updateRequestAcceptedBy = async () => {
     try {
-      const taskDocRef = doc(db, "taskRequests", postRequest.id); 
+      const taskDocRef = doc(db, "taskRequests", postRequest.id);
       await updateDoc(taskDocRef, {
         acceptedBy: {
           userId: currentUserId,
@@ -240,8 +239,10 @@ function OfferDetail({ navigation, route }) {
         <View style={styles.infoContainer}>
           <Image style={styles.icon} source={Icons.location} tintColor={theme.heading} />
           <Text style={[styles.infoText, { color: theme.heading }]}>{`${t("details.txt4")}`}</Text>
-          <Text style={[styles.infoDetail, { color: theme.darkGrey }]}>{postRequest.address}</Text>
         </View>
+        <Text style={[{ color: theme.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular", alignSelf: "center", width: "90%", marginTop: RFPercentage(0.5) }]}>
+          {postRequest.address.name}
+        </Text>
 
         <View style={styles.infoContainer}>
           <Image style={styles.icon} source={Icons.cal} tintColor={theme.heading} />
@@ -296,7 +297,7 @@ function OfferDetail({ navigation, route }) {
             </>
           )}
         </View>
-        
+
         {/* Buttons */}
         <View style={styles.buttonWrapper}>
           {postRequest?.acceptedBy ? (
@@ -382,6 +383,7 @@ const styles = StyleSheet.create({
     color: Colors.heading,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
+    width: "100%",
   },
   readMoreText: {
     color: Colors.primary,

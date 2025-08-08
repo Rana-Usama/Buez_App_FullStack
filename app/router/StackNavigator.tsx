@@ -29,6 +29,7 @@ import TabNavigator from "./BottomNavigator";
 import FreeTrial from "../screens/FreeTrial";
 import SubscriptionV2 from "../screens/SubscriptionV2";
 import CancelSubscription from "../screens/CancelSubscription";
+import Location from "../screens/Location";
 
 // Utils
 import { getCredentials } from "../services/Auth.service";
@@ -88,6 +89,7 @@ export type RootStackParamList = {
   AddReview: undefined;
   InstagramLoginWebView: undefined;
   FacebookLoginWebView: undefined;
+  Location : undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -113,10 +115,10 @@ const StackNavigator: React.FC = () => {
 
   useEffect(() => {
     const { email, password } = credentials;
-    console.log("credentials....", credentials);
+    // console.log("credentials....", credentials);
     const isUserDataReady = userData && typeof userData?.isSubscribed === "boolean" && typeof userData?.isFreeTrial === "boolean";
-    console.log("isUserDataReady....", isUserDataReady);
-    console.log("userData....", userData);
+    // console.log("isUserDataReady....", isUserDataReady);
+    // console.log("userData....", userData);
 
     if (!isLoading && !userLoading) {
       if (loggedOut === "true") {
@@ -187,6 +189,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
           <Stack.Screen name="InstagramLoginWebView" component={InstagramBusinessLoginWebView} />
           <Stack.Screen name="FacebookLoginWebView" component={FacebookLoginWebView} />
+          <Stack.Screen name="Location" component={Location} />
 
           <Stack.Screen
             name="TabNavigator"

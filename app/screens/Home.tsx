@@ -31,7 +31,9 @@ import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
-import HomeSkeleton from "../components/common/HomeSkelton";
+import haversine from "haversine";
+import * as Location from "expo-location";
+import { useSelector } from "react-redux";
 
 type InputFieldType = {
   placeholder: string;
@@ -57,6 +59,25 @@ function Home({ navigation }) {
   const originalFilters = ["All", "Cleaning", "Moving", "Gardening", "Gaming", "Other"];
   useExitAppOnBack();
   const { theme } = useAppTheme();
+  const selectedLocation = useSelector((state) => state.location);
+  console.log("selectedLocation home...........", selectedLocation);
+
+  const getCurrentLocation = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Location permission denied");
+      return null;
+    }
+    const location = await Location.getCurrentPositionAsync({});
+    return {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    };
+  };
+
+  const isWithin100km = (userLocation, taskLocation) => {
+    return haversine(userLocation, taskLocation, { unit: "km" }) <= 100;
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -97,12 +118,24 @@ function Home({ navigation }) {
   useEffect(() => {
     fetchRequests(null);
     return () => {};
-  }, [activeFilter]);
+  }, [activeFilter, selectedLocation]);
 
   const [activeIndices, setActiveIndices] = useState({});
+
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
     try {
+      const currentLocation = await getCurrentLocation();
+      if (!currentLocation) return;
+
+      const referenceLocation =
+        selectedLocation?.latitude2 && selectedLocation?.longitude2
+          ? {
+              latitude: selectedLocation.latitude2,
+              longitude: selectedLocation.longitude2,
+            }
+          : currentLocation;
+
       const filterToUse = filterMap[activeFilter] || "";
       let isLastVisible = lastVisiblePost;
       if (typeof islastVisiblePost !== "undefined") {
@@ -110,8 +143,17 @@ function Home({ navigation }) {
       }
       const { tasksArray: newRecords, lastVisible } = await getRequestList(filterToUse, "", isLastVisible);
       // Translate each task before setting
+      const filteredTasks = newRecords.filter((task) => {
+        const loc = task.address;
+        if (!loc?.latitude || !loc?.longitude) return false;
+        return isWithin100km(referenceLocation, {
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+        });
+      });
+
       const translatedTasks = await Promise.all(
-        newRecords.map(async (task) => {
+        filteredTasks.map(async (task) => {
           const [translatedDescription, translatedCompensation, translatedTaskType] = await Promise.all([
             translateText(task.description || ""),
             translateText(task.otherCompensation || ""),
@@ -125,6 +167,7 @@ function Home({ navigation }) {
           };
         })
       );
+
       setAllTasks(translatedTasks);
       setTaskRecords(translatedTasks);
       setLastVisiblePost(lastVisible);
@@ -285,6 +328,11 @@ function Home({ navigation }) {
 
           <View style={[styles.categoriesContainer, styles.recentRequestsContainer]}>
             <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t("home.txt9")}`}</Text>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Location", { home: true })}>
+              <Text style={[styles.categoriesText, { color: theme.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(1.8) }]}>
+                {selectedLocation.name2 ? (selectedLocation.name2.length > 20 ? `${selectedLocation.name2.slice(0, 20)}...` : selectedLocation.name2) : `By Location`}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Carts */}
@@ -293,10 +341,6 @@ function Home({ navigation }) {
               <ActivityIndicator size="large" color={theme.primary} />
             </View>
           ) : (
-            // <HomeSkeleton />
-            // <View style={{ marginTop: RFPercentage(20) }}>
-            //   <ActivityIndicator size="large" color={theme.primary} />
-            // </View>
             <>
               <FlatList
                 data={displayTasks}
@@ -340,7 +384,7 @@ function Home({ navigation }) {
                       </View>
 
                       <View style={styles.taskInfoContainer}>
-                        <Text style={[styles.taskText, { color: theme.darkGrey2 }]}>{item.description?.substr(0, 35) + (item.description?.length > 35 ? "..." : "")}</Text>
+                        <Text style={[styles.taskText, { color: theme.darkGrey2 }]}>{item.description?.substr(0, 45) + (item.description?.length > 45 ? "..." : "")}</Text>
                         <View style={styles.compensationWrapper}>
                           <Image tintColor={theme.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
                           <Text style={[styles.compensationText, { color: theme.darkGrey2 }]}>
@@ -359,7 +403,7 @@ function Home({ navigation }) {
           )}
 
           {!loading && displayTasks?.length === 0 && (
-            <View style={{bottom:RFPercentage(12)}}>
+            <View style={{ bottom: RFPercentage(12) }}>
               <NotFound title={`${t("home.txt11")}`} />
             </View>
           )}
@@ -394,7 +438,7 @@ const styles = StyleSheet.create({
   },
   categoriesContainer: {
     width: "90%",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
     alignItems: "center",
     flexDirection: "row",
     marginTop: RFPercentage(2),
@@ -555,14 +599,12 @@ const styles = StyleSheet.create({
     width: "92%",
     justifyContent: "flex-start",
     alignItems: "flex-start",
-
-    // bottom: RFPercentage(3),
   },
   taskText: {
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
-    // marginTop: RFPercentage(-1),
     color: Colors.darkGrey2,
+    width:"100%"
   },
   compensationText: {
     fontSize: RFPercentage(1.8),
