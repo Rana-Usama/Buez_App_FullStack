@@ -60,7 +60,7 @@ function Home({ navigation }) {
   useExitAppOnBack();
   const { theme } = useAppTheme();
   const selectedLocation = useSelector((state) => state.location);
-  console.log("selectedLocation home...........", selectedLocation);
+  // console.log("selectedLocation home...........", selectedLocation);
 
   const getCurrentLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();

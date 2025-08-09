@@ -1,5 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert, StatusBar, ScrollView, Button, Modal } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+  Alert,
+  StatusBar,
+  ScrollView,
+  Button,
+  Modal,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -28,15 +40,24 @@ function Login({ navigation }) {
   const { theme } = useAppTheme();
 
   const validationSchema = yup.object({
-    email: yup.string().email(t("validations.inValid")).required(t("validations.emailReq")),
+    email: yup
+      .string()
+      .email(t("validations.inValid"))
+      .required(t("validations.emailReq")),
     password: yup.string().required(t("validations.passwordReq")),
   });
 
   const signInWithEmail = async (email, password) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        FIREBASE_AUTH,
+        email,
+        password
+      );
+      console.log("userCredential...........", userCredential);
       return userCredential.user;
     } catch (error) {
+      console.log("user...........", error);
       throw error;
     }
   };
@@ -46,6 +67,7 @@ function Login({ navigation }) {
     try {
       const { email, password } = values;
       const user = await signInWithEmail(email, password);
+      console.log("user...........", user);
       await SecureStore.setItemAsync("loggedOut", "false");
 
       if (remember) {
@@ -65,6 +87,8 @@ function Login({ navigation }) {
 
       navigation.navigate("TabNavigator");
     } catch (error) {
+      console.log("user...........", error);
+
       Toast.show({
         type: "error",
         text1: t("toast.login.three"),
@@ -80,13 +104,32 @@ function Login({ navigation }) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
-      <Image style={theme.mode === "dark" ? styles.darkImg : styles.logo} source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo} />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+      />
+      <Image
+        style={theme.mode === "dark" ? styles.darkImg : styles.logo}
+        source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo}
+      />
       <Image style={styles.crown} source={Icons.crown} />
-      <Text style={[styles.welcomeText, { color: theme.heading }]}>{t("login.txt1")}</Text>
+      <Text style={[styles.welcomeText, { color: theme.heading }]}>
+        {t("login.txt1")}
+      </Text>
 
-      <Formik initialValues={{ email: "", password: "" }} validationSchema={validationSchema} onSubmit={handleLogin}>
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+      <Formik
+        initialValues={{ email: "", password: "" }}
+        validationSchema={validationSchema}
+        onSubmit={handleLogin}
+      >
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+        }) => (
           <>
             <View style={styles.inputContainer}>
               <InputFieldNew
@@ -95,7 +138,8 @@ function Login({ navigation }) {
                 handleBlur={handleBlur("email")}
                 value={values.email}
                 customStyle={{
-                  borderColor: touched.email && errors.email ? Colors.red : theme.border,
+                  borderColor:
+                    touched.email && errors.email ? Colors.red : theme.border,
                 }}
               />
               {touched.email && errors.email && (
@@ -111,7 +155,10 @@ function Login({ navigation }) {
                 handleBlur={handleBlur("password")}
                 value={values.password}
                 customStyle={{
-                  borderColor: touched.password && errors.password ? Colors.red : theme.border,
+                  borderColor:
+                    touched.password && errors.password
+                      ? Colors.red
+                      : theme.border,
                 }}
               />
               {touched.password && errors.password && (
@@ -121,33 +168,61 @@ function Login({ navigation }) {
               )}
             </View>
 
-            <TouchableOpacity activeOpacity={0.8} onPress={toggleRemember} style={styles.rememberContainer}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={toggleRemember}
+              style={styles.rememberContainer}
+            >
               <View style={styles.rememberWrapper}>
                 <View style={styles.rememberBox}>
-                  <View style={[styles.rememberIndicator, { backgroundColor: remember ? theme.primary : null }]} />
+                  <View
+                    style={[
+                      styles.rememberIndicator,
+                      { backgroundColor: remember ? theme.primary : null },
+                    ]}
+                  />
                 </View>
-                <Text style={[styles.rememberText, { color: theme.darkGrey }]}>{t("login.txt2")}</Text>
+                <Text style={[styles.rememberText, { color: theme.darkGrey }]}>
+                  {t("login.txt2")}
+                </Text>
               </View>
-              <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")} style={styles.forgotPassword}>
-                <Text style={[styles.forgotPasswordText, { color: theme.darkGrey }]}>{t("login.txt3")}</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("ForgotPassword")}
+                style={styles.forgotPassword}
+              >
+                <Text
+                  style={[styles.forgotPasswordText, { color: theme.darkGrey }]}
+                >
+                  {t("login.txt3")}
+                </Text>
               </TouchableOpacity>
             </TouchableOpacity>
 
-            <MyAppButton title={t("buttons.login")} loading={indicator} marginTop={RFPercentage(7)} onPress={handleSubmit} disabled={indicator} />
+            <MyAppButton
+              title={t("buttons.login")}
+              loading={indicator}
+              marginTop={RFPercentage(7)}
+              onPress={handleSubmit}
+              disabled={indicator}
+            />
           </>
         )}
       </Formik>
 
       <View style={styles.socialLoginContainer}>
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
-        <Text style={[styles.orText, { color: theme.darkGrey }]}>{t("login.txt4")}</Text>
+        <Text style={[styles.orText, { color: theme.darkGrey }]}>
+          {t("login.txt4")}
+        </Text>
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
       </View>
 
       <View style={styles.socialIconsContainer}>
         {/* <FacebookLoginButton navigation={navigation} /> */}
         <View>
-          <TouchableOpacity onPress={() => navigation.navigate("FacebookLoginWebView")}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("FacebookLoginWebView")}
+          >
             <Image source={Icons.fb} style={styles.socialIcon} />
           </TouchableOpacity>
         </View>
@@ -160,21 +235,43 @@ function Login({ navigation }) {
       </View>
 
       <View style={styles.signupContainer}>
-        <Text style={[styles.signupText, { color: theme.darkGrey }]}>{t("login.txt5")}</Text>
+        <Text style={[styles.signupText, { color: theme.darkGrey }]}>
+          {t("login.txt5")}
+        </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={[styles.signupLink, { color: theme.primary }]}>{t("buttons.signup")}</Text>
+          <Text style={[styles.signupLink, { color: theme.primary }]}>
+            {t("buttons.signup")}
+          </Text>
         </TouchableOpacity>
       </View>
 
-      <Modal visible={isModalVisible} animationType="fade" onRequestClose={() => setIsModalVisible(false)}>
-        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
-          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+      <Modal
+        visible={isModalVisible}
+        animationType="fade"
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <BlurView
+          intensity={100}
+          style={[styles.modalBackground, { backgroundColor: theme.modal }]}
+        >
+          <View
+            style={[styles.modalContainer, { backgroundColor: theme.white }]}
+          >
             <Text style={styles.modalText}>Instagram Login Requirements</Text>
-            <Text style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}>{`i) The user must have an Instagram Business or Creator account`}</Text>
             <Text
-              style={{ fontFamily: "Poppins_400Regular", marginTop: RFPercentage(1), color: theme.grey }}
+              style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}
+            >{`i) The user must have an Instagram Business or Creator account`}</Text>
+            <Text
+              style={{
+                fontFamily: "Poppins_400Regular",
+                marginTop: RFPercentage(1),
+                color: theme.grey,
+              }}
             >{`ii) The Instagram account must be linked to a Facebook Page that the user manages.`}</Text>
-            <MyAppButton title="Login" onPress={() => navigation.navigate("InstagramLoginWebView")} />
+            <MyAppButton
+              title="Login"
+              onPress={() => navigation.navigate("InstagramLoginWebView")}
+            />
           </View>
         </BlurView>
       </Modal>
@@ -213,7 +310,11 @@ const styles = StyleSheet.create({
     height: RFPercentage(9.5),
     marginTop: RFPercentage(3),
   },
-  darkImg: { width: RFPercentage(20), height: RFPercentage(10.6), marginTop: RFPercentage(3) },
+  darkImg: {
+    width: RFPercentage(20),
+    height: RFPercentage(10.6),
+    marginTop: RFPercentage(3),
+  },
 
   crown: {
     marginTop: RFPercentage(6),

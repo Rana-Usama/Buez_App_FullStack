@@ -22,6 +22,8 @@
     <string>1.0.0</string>
     <key>CFBundleSignature</key>
     <string>????</string>
+
+    <!-- Firebase Auth (Google/FB/Apple sign-in callbacks) -->
     <key>CFBundleURLTypes</key>
     <array>
       <dict>
@@ -50,8 +52,11 @@
         </array>
       </dict>
     </array>
+
     <key>CFBundleVersion</key>
     <string>1</string>
+
+    <!-- Facebook config -->
     <key>FacebookAdvertiserIDCollectionEnabled</key>
     <false/>
     <key>FacebookAppID</key>
@@ -64,6 +69,12 @@
     <string>c8a58652897a506d888c812044c4f7ab</string>
     <key>FacebookDisplayName</key>
     <string>Buez</string>
+
+    <!-- Google Maps -->
+    <key>GMSApiKey</key>
+    <string>AIzaSyBSq361kA1Z14M0ymJ_u6UlKn4ulBLLrKQ</string>
+
+    <!-- LS Schemes -->
     <key>LSApplicationQueriesSchemes</key>
     <array>
       <string>fbapi</string>
@@ -71,31 +82,59 @@
       <string>fbauth2</string>
       <string>fbshareextension</string>
     </array>
+
     <key>LSMinimumSystemVersion</key>
     <string>12.0</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
+
+    <!-- App Transport -->
     <key>NSAppTransportSecurity</key>
     <dict>
       <key>NSAllowsArbitraryLoads</key>
-      <false/>
+      <true/>
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
+    <key>NSAllowsArbitraryLoadsInWebContent</key>
+    <true/>
+
+    <!-- Firebase Auth + In-App Messaging Permissions -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>We need network access for authentication</string>
     <key>NSCameraUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your camera</string>
+    <string>Allow $(PRODUCT_NAME) to access your camera for profile photos or verification.</string>
     <key>NSFaceIDUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location for personalized app experiences.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location for personalized app experiences.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location for personalized app experiences.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your microphone</string>
+    <string>Allow $(PRODUCT_NAME) to access your microphone for voice input and video calls.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your photos</string>
+    <string>Allow $(PRODUCT_NAME) to access your photos for profile images or media sharing.</string>
+
+    <!-- Tracking -->
+    <key>NSUserTrackingUsageDescription</key>
+    <string>We use your identifier to provide personalized ads, in-app messages, and improve the user experience.</string>
+
+    <!-- Background modes for Firebase messaging -->
+    <key>UIBackgroundModes</key>
+    <array>
+      <string>fetch</string>
+      <string>remote-notification</string>
+    </array>
+
+    <!-- Other existing keys -->
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
     </array>
-    <key>NSUserTrackingUsageDescription</key>
-    <string>This identifier will be used to deliver personalized ads to you.</string>
+
+    <!-- SKAdNetwork -->
     <key>SKAdNetworkItems</key>
     <array>
       <dict>
@@ -115,6 +154,8 @@
         <string>n38lu8286q.skadnetwork</string>
       </dict>
     </array>
+
+    <!-- UI -->
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>
@@ -139,8 +180,6 @@
     </array>
     <key>UIUserInterfaceStyle</key>
     <string>Light</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>This app needs access to your location to show maps</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
   </dict>
