@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Text, Pressable, StyleSheet } from "react-native";
+import { Modal, View, Text, Pressable, StyleSheet, Platform } from "react-native";
 import { BlurView } from "expo-blur";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "./MyAppButton";
@@ -7,7 +7,7 @@ import MyAppButton from "./MyAppButton";
 const ConfirmationModal = ({ isVisible, onClose, onConfirm, title, theme, t,}) => {
   return (
     <Modal animationType="fade" transparent visible={isVisible} onRequestClose={onClose}>
-      <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
+      <BlurView intensity={5} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
         <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
           <Text style={[styles.modalText, { color: theme.heading }]}>{title}</Text>
           <View style={styles.modalButtons}>
@@ -15,7 +15,7 @@ const ConfirmationModal = ({ isVisible, onClose, onConfirm, title, theme, t,}) =
               <Text style={[styles.cancelButtonText, { color: theme.lightGrey }]}>{t("buttons.cancel")}</Text>
             </Pressable>
 
-            <MyAppButton title={t("buttons.yes")} marginTop={RFPercentage(0)} height={RFPercentage(5.8)} width={RFPercentage(17)} onPress={onConfirm} />
+            <MyAppButton title={t("buttons.yes")} marginTop={RFPercentage(0)} height={Platform.OS === 'android' ? RFPercentage(5.8) : RFPercentage(5)} width={Platform.OS === 'android' ? RFPercentage(17) : RFPercentage(15)} onPress={onConfirm} />
           </View>
         </View>
       </BlurView>
@@ -53,8 +53,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2),
   },
   cancelButton: {
-    height: RFPercentage(5.8),
-    width: RFPercentage(17),
+    height: Platform.OS === 'android' ? RFPercentage(5.8) : RFPercentage(5),
+    width: Platform.OS === 'android' ? RFPercentage(17) : RFPercentage(15),
     borderRadius: RFPercentage(100),
     borderWidth: 1,
     justifyContent: "center",

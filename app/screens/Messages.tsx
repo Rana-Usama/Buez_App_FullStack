@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: RFPercentage(25),
+    marginTop: RFPercentage(20),
   },
   emptyText: {
     fontFamily: "Poppins_400Regular",

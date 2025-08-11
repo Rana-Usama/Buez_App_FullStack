@@ -10,7 +10,7 @@ export const Icons: { [key: string]: ImageRequireSource } = {
   apple: require("../../assets/Images/apple.png"),
   google: require("../../assets/Images/goicon.png"),
   buez: require("../../assets/Images/buez.png"),
-  dp: require("../../assets/Images/defaultProfile.png"),
+  dp: require("../../assets/Images/user.png"),
   gallery: require("../../assets/Images/gallery.png"),
   empty: require("../../assets/Images/empty.png"),
   noMessage: require("../../assets/Images/noMessage.png"),

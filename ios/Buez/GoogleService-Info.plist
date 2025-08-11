@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>291364316025-ei4kkql4mobs21k17gop81os2lcttjgp.apps.googleusercontent.com</string>
+	<string>291364316025-4kor9g99j9huha1mlr9jvtbv7k5n4t1k.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.291364316025-ei4kkql4mobs21k17gop81os2lcttjgp</string>
+	<string>com.googleusercontent.apps.291364316025-4kor9g99j9huha1mlr9jvtbv7k5n4t1k</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>291364316025-baf68r6qls0q419j58jtbn8liin8r6si.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.sahil.wildlife</string>
+	<string>com.adamburg.Buez</string>
 	<key>PROJECT_ID</key>
 	<string>socially-1720865151833</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:291364316025:ios:28dff064f9dfe8734285a8</string>
+	<string>1:291364316025:ios:b47e8ea12cba6ff44285a8</string>
 </dict>
 </plist>

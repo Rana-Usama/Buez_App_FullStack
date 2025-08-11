@@ -318,8 +318,8 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(10),
   },
   filterButton: {
-    width: RFPercentage(13),
-    height: RFPercentage(4.8),
+    width: RFPercentage(12),
+    height: RFPercentage(4.6),
     borderRadius: RFPercentage(1),
     justifyContent: "center",
     alignItems: "center",
@@ -346,12 +346,12 @@ const styles = StyleSheet.create({
   },
   filterButtonTextActive: {
     color: Colors.white,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
   },
   filterButtonTextInactive: {
     color: Colors.heading,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
   },
   cartContainer: {

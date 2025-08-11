@@ -133,10 +133,10 @@ function Onboarding(props) {
       <Image style={theme.mode === "dark" ? styles.darkImg : styles.img} source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo} />
 
       {/* Body */}
-      <View style={{ width: "90%", alignItems: "center", justifyContent: "center", marginTop: RFPercentage(8), position: "absolute", top: RFPercentage(10) }}>
+      <View style={{ width: "90%", alignItems: "center", justifyContent: "center",}}>
         <LottieView source={lottie} autoPlay loop style={{ width: RFPercentage(40), height: activeIndex === 2 ? RFPercentage(34) : RFPercentage(40) }} />
       </View>
-      <View style={{ top: RFPercentage(45), alignItems: "center", justifyContent: "center" }}>
+      <View style={{  alignItems: "center", justifyContent: "center" }}>
         <View style={styles.wrapper}>
           <Text style={[styles.title, { color: theme.heading }]}>{title}</Text>
         </View>

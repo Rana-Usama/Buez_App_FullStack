@@ -4,6 +4,7 @@ import {
   TextInput,
   View,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import React, {useState} from 'react';
 import {RFPercentage} from 'react-native-responsive-fontsize';
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     paddingHorizontal: RFPercentage(1.5),
-    height: RFPercentage(6.5),
+    height: Platform.OS === 'android' ? RFPercentage(6.5) : RFPercentage(5.8),
   },
   textInput: {
     width: '92%',

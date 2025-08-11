@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.4),
   },
   text: {
-    textAlign: "justify",
+    // textAlign: "justify",
     lineHeight: RFPercentage(3.2),
     color: "#44403C",
     fontSize: RFPercentage(1.7),

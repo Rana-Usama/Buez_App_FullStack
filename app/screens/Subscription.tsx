@@ -69,6 +69,7 @@ function Subscription(props) {
     const { error: initError } = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: "BUEZ",
+      returnURL: 'buez://payment-complete'
     });
 
     if (initError) {
@@ -76,7 +77,7 @@ function Subscription(props) {
       return;
     }
     const { error: paymentError } = await presentPaymentSheet();
-    // console.log("paymentError............", paymentError);
+    console.log("paymentError............", paymentError);
     if (paymentError) {
       Toast.show({
         type: "info",
@@ -95,9 +96,9 @@ function Subscription(props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ customerId, setupIntentId }),
     });
-    // console.log("res......", res);
+    console.log("res......", res);
     const result = await res.json();
-    // console.log("result...........", result);
+    console.log("result...........", result);
 
     if (result.success) {
       await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);
@@ -148,7 +149,7 @@ function Subscription(props) {
         </View>
       </View>
       <View style={{ alignItems: "center", justifyContent: "center", width: "80%" }}>
-        <MyAppButton title={`${t("subscription.txt3")}`} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(20)} loading={loading} />
+        <MyAppButton title={`${t("subscription.txt3")}`} marginTop={RFPercentage(4)} onPress={() => openPaymentSheet()} width={RFPercentage(20)} loading={loading} />
       </View>
     </Screen>
   );
@@ -168,8 +169,8 @@ const styles = StyleSheet.create({
   },
   vector: {
     marginTop: RFPercentage(3),
-    width: RFPercentage(20),
-    height: RFPercentage(20),
+    width: RFPercentage(18),
+    height: RFPercentage(18),
   },
   premiumInfo: {
     marginTop: RFPercentage(4),

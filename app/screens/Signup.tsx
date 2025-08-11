@@ -74,7 +74,8 @@ function Signup({ navigation }: any) {
           userName: userName,
           email: email,
           isSubscribed: false,
-          token: expoPushToken,
+          // token: expoPushToken,
+          token : "1223suncvc32",
           isFreeTrial: false,
         };
         await addUser(user?.uid, userData);
@@ -337,12 +338,12 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
   },
   footerText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     color: "#4B5563",
     fontFamily: "Poppins_400Regular",
   },
   loginText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     color: Colors.primary,
     marginLeft: RFPercentage(0.5),
     fontFamily: "Poppins_500Medium",

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, StatusBar, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useStripe } from "@stripe/stripe-react-native";
 import { getAuth } from "firebase/auth";
@@ -65,20 +65,21 @@ function SubscriptionV2(props) {
   const openPaymentSheet = async () => {
     setLoading(true);
     const setupData = await fetchSetupIntent();
-    // console.log("setup data........", setupData);
+    console.log("setup data........", setupData);
     if (!setupData) return;
     const { setupIntentClientSecret, customerId } = setupData;
     const { error: initError } = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: "BUEZ",
+      returnURL: 'buez://payment-complete'
     });
-    // console.log("init error.........", initError);
+    console.log("init error.........", initError);
     if (initError) {
       setLoading(false);
       return;
     }
     const { error: paymentError } = await presentPaymentSheet();
-    // console.log("paymentError............", paymentError);
+    console.log("paymentError............", paymentError);
     if (paymentError) {
       Toast.show({
         type: "info",
@@ -98,9 +99,9 @@ function SubscriptionV2(props) {
       body: JSON.stringify({ customerId, setupIntentId }),
     });
 
-    // console.log("res......", res);
+    console.log("res......", res);
     const result = await res.json();
-    // console.log("result...........", result);
+    console.log("result...........", result);
 
     if (result.success) {
       await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);
@@ -150,8 +151,8 @@ function SubscriptionV2(props) {
         </View>
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "80%" }}>
-        <MyAppButton title={`${t("subscriptionV2.txt7")}`} marginTop={RFPercentage(7)} onPress={() => openPaymentSheet()} width={RFPercentage(18)} loading={loading} />
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "80%", marginTop:RFPercentage(4)}}>
+        <MyAppButton title={`${t("subscriptionV2.txt7")}`} marginTop={RFPercentage(0)} onPress={() => openPaymentSheet()} width={RFPercentage(17)} loading={loading} />
         <TouchableOpacity
           onPress={async () => {
             if (!userId) return;
@@ -166,7 +167,7 @@ function SubscriptionV2(props) {
           }}
           style={[styles.skip, { borderColor: theme.grey }]}
         >
-          <Text style={{ color: theme.grey, fontFamily: "Poppins_500Medium" }}>{`${t("buttons.skip")}`}</Text>
+          <Text style={{ color: theme.grey, fontFamily: "Poppins_500Medium" , fontSize:RFPercentage(2)}}>{`${t("buttons.skip")}`}</Text>
         </TouchableOpacity>
       </View>
     </Screen>
@@ -187,8 +188,8 @@ const styles = StyleSheet.create({
   },
   vector: {
     marginTop: RFPercentage(3),
-    width: RFPercentage(20),
-    height: RFPercentage(20),
+    width: RFPercentage(18),
+    height: RFPercentage(18),
   },
   premiumInfo: {
     marginTop: RFPercentage(4),
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     width: "90%",
-    height: RFPercentage(32),
+    height: Platform.OS === 'android' ? RFPercentage(32) : RFPercentage(30),
     borderColor: Colors.stroke,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(2),
@@ -269,9 +270,8 @@ const styles = StyleSheet.create({
     bottom: RFPercentage(0.1),
   },
   skip: {
-    height: RFPercentage(6.2),
-    width: RFPercentage(18),
-    marginTop: RFPercentage(7),
+    height: Platform.OS === 'android' ?  RFPercentage(6.2) : RFPercentage(5.5),
+    width: RFPercentage(17),
     borderWidth: 1,
     borderColor: Colors.primary,
     alignItems: "center",

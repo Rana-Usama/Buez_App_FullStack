@@ -411,11 +411,11 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(5),
   },
   signupText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },
   signupLink: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     color: Colors.primary,
     marginLeft: RFPercentage(0.5),
     fontFamily: "Poppins_500Medium",

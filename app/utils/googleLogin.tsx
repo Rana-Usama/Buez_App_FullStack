@@ -11,9 +11,12 @@ import { saveCredentials } from "../services/Auth.service";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
 import { Icons } from "../config/theme";
 import { differenceInDays } from "date-fns";
+import { RFPercentage } from "react-native-responsive-fontsize";
 
 const webClientId = "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
 // const webClientId = "291364316025-00v6oroakujt01a10cht0kjacsbm1drd.apps.googleusercontent.com"
+const iosClientId = "291364316025-4kor9g99j9huha1mlr9jvtbv7k5n4t1k.apps.googleusercontent.com";
+
 
 const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
@@ -23,6 +26,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId,
+      iosClientId
     });
 
     (async () => {
@@ -117,7 +121,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
 
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={handleGoogleLogin}>
-      <Image source={Icons.google} style={{ width: 35, height: 35 }} />
+      <Image source={Icons.google} style={{ width: RFPercentage(4.5), height: RFPercentage(4.5) }} resizeMode="contain" />
     </TouchableOpacity>
   );
 };

@@ -22,7 +22,7 @@ const NotFound: React.FC<NotFoundProps> = ({ title }) => {
 export default NotFound;
 
 const styles = StyleSheet.create({
-  notFoundWrapper: { marginTop: RFPercentage(30), justifyContent: "center", alignItems: "center" },
+  notFoundWrapper: { marginTop: RFPercentage(22), justifyContent: "center", alignItems: "center" },
   notFoundImg: { borderRadius: RFPercentage(1), width: RFPercentage(16), height: RFPercentage(16), marginBottom: RFPercentage(2) },
   notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
 });

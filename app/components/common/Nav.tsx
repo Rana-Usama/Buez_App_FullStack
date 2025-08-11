@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -27,7 +27,7 @@ const Nav: React.FC<NavProps> = ({ dpNull = false, crown = false, marginTop = RF
   const { unreadCount } = useNotifications();
   const {theme} = useAppTheme()
   return (
-    <View style={[styles.container, { marginTop }]}>
+    <View style={[styles.container, { marginTop :Platform.OS === 'ios' ?  RFPercentage(9.5) : RFPercentage(5)}]}>
       {leftLogo ? (
         <TouchableOpacity onPress={() => navigation.navigate("Profile")} activeOpacity={0.8} style={styles.touch}>
           {crown && <Image style={styles.crown} source={Icons.crown} />}

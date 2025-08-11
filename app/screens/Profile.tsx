@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   },
   scroll: { width: "100%" },
   scrollContent: { width: "100%", alignItems: "center" },
-  img: { width: RFPercentage(20), height: RFPercentage(20), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) },
+  img: { width: RFPercentage(18), height: RFPercentage(18), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) },
   edit: { width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(20), position: "absolute", bottom: RFPercentage(-0.3), right: RFPercentage(3) },
   name: { color: "#57534E", fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(2.2) },
   navigationContainer: {

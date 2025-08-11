@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
@@ -76,7 +76,7 @@ function CancelSubscription({ navigation }: any) {
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
       <Image style={styles.logo} source={Icons.logo} />
-      <TouchableOpacity style={{ position: "absolute", left: RFPercentage(2), top: RFPercentage(5) }} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={{ position: "absolute", left: RFPercentage(2), top: Platform.OS === 'ios' ? RFPercentage(9) : RFPercentage(5) }} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={theme.heading} />
       </TouchableOpacity>
       {userData?.subscriptionId ? (
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   logo: {
     width: RFPercentage(6.5),
     height: RFPercentage(9.5),
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(1.5),
   },
   vector: {
     marginTop: RFPercentage(8),

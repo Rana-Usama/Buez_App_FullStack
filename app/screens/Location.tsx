@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View , Platform} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { AntDesign } from "@expo/vector-icons";
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   topRow: {
     position: "absolute",
-    top: RFPercentage(2),
+    top: Platform.OS === 'ios' ? RFPercentage(8): RFPercentage(2),
     flexDirection: "row",
     width: "90%",
     alignSelf: "center",

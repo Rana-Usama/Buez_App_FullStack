@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, StyleSheet, Dimensions } from "react-native";
+import { Text, View, StyleSheet, Dimensions, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useAppTheme } from "../contexts/themeContext";
 import Colors from "../config/Colors";
@@ -13,6 +13,7 @@ const baseToastStyle = {
   borderRadius: RFPercentage(1),
   marginHorizontal: RFPercentage(2),
   width: width * 0.85,
+  marginTop : Platform.OS === 'ios' ? RFPercentage(3) : RFPercentage(1)
 };
 
 const ThemedToast = ({ type, text1, text2 }) => {

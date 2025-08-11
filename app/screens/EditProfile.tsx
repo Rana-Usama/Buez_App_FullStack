@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   keyboard: { flex: 1, justifyContent: "center", alignItems: "center" },
-  image: { width: RFPercentage(20), height: RFPercentage(20), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) },
+  image: { width: RFPercentage(18), height: RFPercentage(18), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.4) },
   edit: { width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(20), position: "absolute", bottom: RFPercentage(-0.3), right: RFPercentage(3) },
   editInfo: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(2.5) },
   infoText: { color: Colors.lightGrey, fontSize: RFPercentage(1.9), fontFamily: "Poppins_400Regular" },

@@ -60,7 +60,6 @@ function Home({ navigation }) {
   useExitAppOnBack();
   const { theme } = useAppTheme();
   const selectedLocation = useSelector((state) => state.location);
-  // console.log("selectedLocation home...........", selectedLocation);
 
   const getCurrentLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -69,6 +68,7 @@ function Home({ navigation }) {
       return null;
     }
     const location = await Location.getCurrentPositionAsync({});
+    console.log("location...",location)
     return {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -249,12 +249,19 @@ function Home({ navigation }) {
   const displayTasks = getDisplayTasks();
 
   useEffect(() => {
-    const initialIndices = {};
-    displayTasks.forEach((_, index) => {
-      initialIndices[index] = 0;
-    });
-    setActiveIndices(initialIndices);
-  }, [displayTasks]);
+  const initialIndices = {};
+  displayTasks.forEach((_, index) => {
+    initialIndices[index] = 0;
+  });
+
+  setActiveIndices(prev => {
+    if (JSON.stringify(prev) === JSON.stringify(initialIndices)) {
+      return prev; // no change → no re-render
+    }
+    return initialIndices;
+  });
+}, [displayTasks]);
+
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
@@ -403,7 +410,7 @@ function Home({ navigation }) {
           )}
 
           {!loading && displayTasks?.length === 0 && (
-            <View style={{ bottom: RFPercentage(12) }}>
+            <View style={{ bottom: RFPercentage(10) }}>
               <NotFound title={`${t("home.txt11")}`} />
             </View>
           )}
