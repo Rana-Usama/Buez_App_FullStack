@@ -14,7 +14,7 @@ export function ExpoStripeProvider(props : any) {
   return (
     <StripeProvider
       publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}
-      merchantIdentifier={merchantId}
+      merchantIdentifier={"merchant.com.buez.stripe"}
       urlScheme={Linking.createURL('/')?.split(':')[0]}
       {...props}
     />

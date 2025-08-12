@@ -201,7 +201,7 @@ export default function Notifications({ navigation }) {
         <View style={styles.footer}>
           <Text style={[styles.time, { color: theme.darkGrey }]}>{postedTime}</Text>
           <TouchableOpacity style={styles.msgBtn} onPress={() => handleStartChat(item.sender)}>
-            <Image source={Icons.messages} resizeMode="contain" style={{ width: RFPercentage(3), height: RFPercentage(3) }} />
+            <Image source={Icons.messages} resizeMode="contain" style={{ width: RFPercentage(2.5), height: RFPercentage(2.5) }} />
             <Text style={styles.msgTxt}>{tr.message || "Message"}</Text>
           </TouchableOpacity>
         </View>
@@ -264,8 +264,8 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
     marginTop: RFPercentage(2),
-    paddingVertical: RFPercentage(2),
-    borderRadius: RFPercentage(1),
+    paddingTop: RFPercentage(2),
+    borderRadius: RFPercentage(1.5),
     backgroundColor: Colors.white,
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
@@ -274,6 +274,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    paddingBottom:RFPercentage(1.5)
   },
   row: {
     flexDirection: "row",
@@ -290,12 +291,12 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.darkGrey2,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
   },
   sub: {
     color: Colors.lightGrey,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(0.5),
   },
@@ -305,16 +306,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: RFPercentage(2),
+    alignItems:"center"
   },
   time: {
     color: Colors.darkGrey,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
   },
   msgBtn: { flexDirection: "row", alignItems: "center" },
   msgTxt: {
     color: Colors.primary,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
     marginLeft: RFPercentage(0.3),
   },

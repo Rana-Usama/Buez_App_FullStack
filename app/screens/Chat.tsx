@@ -192,7 +192,7 @@ const Chat = ({ navigation, route }) => {
       <StatusBar backgroundColor={theme.chat1} barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} />
       <View style={[styles.profileContainer, { borderBottomColor: theme.lightGrey }]}>
         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={20} color={theme.heading} />
+          <Ionicons name="chevron-back" size={RFPercentage(2.7)} color={theme.heading} />
         </TouchableOpacity>
         <View style={{ marginLeft: RFPercentage(2.5) }}>
           {receiver?.profileImage ? (
@@ -231,7 +231,7 @@ const Chat = ({ navigation, route }) => {
           renderInputToolbar={(props) => (
             <InputToolbar
               {...props}
-              containerStyle={[styles.toolbar, { backgroundColor: theme.mode === "dark" ? "transparent" : "rgb(124, 130, 164)", borderColor: theme.mode == "dark" ? Colors.darkGrey : 'rgb(94, 91, 137)' }]}
+              containerStyle={[styles.toolbar, { backgroundColor: theme.mode === "dark" ? "transparent" : "rgb(124, 130, 164)", borderColor: theme.mode == "dark" ? Colors.darkGrey : 'rgb(94, 91, 137)' , borderTopColor:theme.mode == "dark" ? Colors.darkGrey : 'rgb(94, 91, 137)'}]}
               renderComposer={() => <TextInput style={styles.customTextInput} placeholder={`${t("chat.txt2")}`} placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
               renderSend={() => (
                 <TouchableOpacity
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(6),
     justifyContent: "center",
     padding: RFPercentage(1.5),
-    borderTopWidth: 1,
+    borderTopWidth: RFPercentage(0.1),
     alignSelf: "center",
     width: "100%",
     marginBottom: RFPercentage(2.5),
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   },
   noProfileInner: { color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" },
   profile: { width: RFPercentage(7), height: RFPercentage(7), borderRadius: RFPercentage(100), borderWidth: 2, borderColor: Colors.primary },
-  profileContainer: { width: "100%", alignItems: "center", flexDirection: "row", height: RFPercentage(10), borderBottomWidth: 1, borderBottomColor: Colors.lightGrey },
+  profileContainer: { width: "100%", alignItems: "center", flexDirection: "row", height: RFPercentage(10), borderBottomWidth: 1, borderBottomColor: Colors.lightGrey , marginTop:Platform.OS === 'android' ? 0 : RFPercentage(3)},
 });
 
 export default Chat;

@@ -47,7 +47,7 @@ const Nav: React.FC<NavProps> = ({ dpNull = false, crown = false, marginTop = RF
         </TouchableOpacity>
       ) : dpNull ? null : (
         <TouchableOpacity onPress={() => navigation.navigate("Notifications")} activeOpacity={0.8} style={[styles.notify, {backgroundColor:theme.white, borderColor:theme.border}]}>
-          <Image style={{ width: RFPercentage(3.5), height: RFPercentage(3.5) }} source={Icons.notify2} />
+          <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={Icons.notify2} />
           {unreadCount > 0 && <View style={styles.dot} />}
         </TouchableOpacity>
       )}
@@ -98,8 +98,8 @@ const styles = StyleSheet.create({
   notify: {
     position: "absolute",
     right: 0,
-    width: RFPercentage(5.6),
-    height: RFPercentage(5.6),
+    width: RFPercentage(5),
+    height: RFPercentage(5),
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",

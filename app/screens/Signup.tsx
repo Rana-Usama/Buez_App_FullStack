@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Modal, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ScrollView,
+  Modal,
+  StatusBar,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
 import Screen from "../components/Screen";
@@ -53,7 +62,11 @@ function Signup({ navigation }: any) {
 
   const createAccountWithEmail = async (email, password) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        FIREBASE_AUTH,
+        email,
+        password
+      );
       const user = userCredential.user;
       return user;
     } catch (error) {
@@ -74,8 +87,7 @@ function Signup({ navigation }: any) {
           userName: userName,
           email: email,
           isSubscribed: false,
-          // token: expoPushToken,
-          token : "1223suncvc32",
+          token: expoPushToken || null,
           isFreeTrial: false,
         };
         await addUser(user?.uid, userData);
@@ -88,7 +100,7 @@ function Signup({ navigation }: any) {
       });
       navigation.navigate("FreeTrial");
     } catch (error) {
-      console.log("error.......",error)
+      console.log("error.......", error);
       Toast.show({
         type: "error",
         text1: `${t("toast.signup.three")}`,
@@ -100,10 +112,21 @@ function Signup({ navigation }: any) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        <Image style={theme.mode === "dark" ? styles.darkImg : styles.logo} source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo} />
-        <Text style={[styles.welcomeText, { color: theme.heading }]}>{`${t("signup.txt1")}`}</Text>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+      />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <Image
+          style={theme.mode === "dark" ? styles.darkImg : styles.logo}
+          source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo}
+        />
+        <Text style={[styles.welcomeText, { color: theme.heading }]}>{`${t(
+          "signup.txt1"
+        )}`}</Text>
 
         <Formik
           initialValues={{
@@ -115,7 +138,14 @@ function Signup({ navigation }: any) {
           validationSchema={validationSchema}
           onSubmit={(values) => handleSignup(values)}
         >
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+          }) => (
             <>
               <View style={styles.inputContainer}>
                 {/* Name */}
@@ -125,7 +155,8 @@ function Signup({ navigation }: any) {
                   handleBlur={handleBlur("name")}
                   value={values.name}
                   customStyle={{
-                    borderColor: touched.name && errors.name ? Colors.red : theme.border,
+                    borderColor:
+                      touched.name && errors.name ? Colors.red : theme.border,
                   }}
                 />
                 {touched.name && errors.name && (
@@ -143,7 +174,8 @@ function Signup({ navigation }: any) {
                   handleBlur={handleBlur("email")}
                   value={values.email}
                   customStyle={{
-                    borderColor: touched.email && errors.email ? Colors.red : theme.border,
+                    borderColor:
+                      touched.email && errors.email ? Colors.red : theme.border,
                   }}
                 />
                 {touched.email && errors.email && (
@@ -162,7 +194,10 @@ function Signup({ navigation }: any) {
                   handleBlur={handleBlur("password")}
                   value={values.password}
                   customStyle={{
-                    borderColor: touched.password && errors.password ? Colors.red : theme.border,
+                    borderColor:
+                      touched.password && errors.password
+                        ? Colors.red
+                        : theme.border,
                   }}
                 />
                 {touched.password && errors.password && (
@@ -181,19 +216,30 @@ function Signup({ navigation }: any) {
                   handleBlur={handleBlur("confirmPassword")}
                   value={values.confirmPassword}
                   customStyle={{
-                    borderColor: touched.confirmPassword && errors.confirmPassword ? Colors.red : theme.border,
+                    borderColor:
+                      touched.confirmPassword && errors.confirmPassword
+                        ? Colors.red
+                        : theme.border,
                   }}
                 />
                 {touched.confirmPassword && errors.confirmPassword && (
                   <>
                     <View style={styles.errorContainer}>
-                      <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                      <Text style={styles.errorText}>
+                        {errors.confirmPassword}
+                      </Text>
                     </View>
                   </>
                 )}
               </View>
 
-              <MyAppButton title={`${t("buttons.signup")}`} loading={indicator} onPress={() => handleSubmit()} marginTop={RFPercentage(4.5)} disabled={indicator} />
+              <MyAppButton
+                title={`${t("buttons.signup")}`}
+                loading={indicator}
+                onPress={() => handleSubmit()}
+                marginTop={RFPercentage(4.5)}
+                disabled={indicator}
+              />
             </>
           )}
         </Formik>
@@ -201,7 +247,9 @@ function Signup({ navigation }: any) {
         {/* Social Media Login */}
         <View style={styles.socialMediaContainer}>
           <View style={[styles.divider, { backgroundColor: theme.border }]} />
-          <Text style={[styles.socialMediaText, { color: theme.darkGrey }]}>{`${t("signup.txt2")}`}</Text>
+          <Text
+            style={[styles.socialMediaText, { color: theme.darkGrey }]}
+          >{`${t("signup.txt2")}`}</Text>
           <View style={[styles.divider, { backgroundColor: theme.border }]} />
         </View>
 
@@ -209,7 +257,9 @@ function Signup({ navigation }: any) {
         <View style={styles.socialIconsContainer}>
           {/* <FacebookLoginButton navigation={navigation} /> */}
           <View>
-            <TouchableOpacity onPress={() => navigation.navigate("FacebookLoginWebView")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("FacebookLoginWebView")}
+            >
               <Image source={Icons.fb} style={styles.socialIcon} />
             </TouchableOpacity>
           </View>
@@ -222,20 +272,52 @@ function Signup({ navigation }: any) {
         </View>
 
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: theme.darkGrey }]}>{`${t("signup.txt3")}`}</Text>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Login")}>
-            <Text style={[styles.loginText, { color: theme.primary }]}>{`${t("buttons.login")}`}</Text>
+          <Text style={[styles.footerText, { color: theme.darkGrey }]}>{`${t(
+            "signup.txt3"
+          )}`}</Text>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={[styles.loginText, { color: theme.primary }]}>{`${t(
+              "buttons.login"
+            )}`}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      <Modal visible={isModalVisible} animationType="fade" onRequestClose={() => setIsModalVisible(false)}>
-        <BlurView intensity={100} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
-          <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+      <Modal
+        visible={isModalVisible}
+        animationType="fade"
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <BlurView
+          intensity={100}
+          style={[styles.modalBackground, { backgroundColor: theme.modal }]}
+        >
+          <View
+            style={[styles.modalContainer, { backgroundColor: theme.white }]}
+          >
             <Text style={styles.modalText}>Instagram Login Requirements</Text>
-            <Text style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}>i) The user must have an Instagram Business or Creator account</Text>
-            <Text style={{ fontFamily: "Poppins_400Regular", marginTop: RFPercentage(1), color: theme.grey }}>ii) The Instagram account must be linked to a Facebook Page that the user manages.</Text>
-            <MyAppButton title="Login" onPress={() => navigation.navigate("InstagramLoginWebView")} />
+            <Text
+              style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}
+            >
+              i) The user must have an Instagram Business or Creator account
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Poppins_400Regular",
+                marginTop: RFPercentage(1),
+                color: theme.grey,
+              }}
+            >
+              ii) The Instagram account must be linked to a Facebook Page that
+              the user manages.
+            </Text>
+            <MyAppButton
+              title="Login"
+              onPress={() => navigation.navigate("InstagramLoginWebView")}
+            />
           </View>
         </BlurView>
       </Modal>
@@ -282,7 +364,11 @@ const styles = StyleSheet.create({
     height: RFPercentage(9.5),
     marginTop: RFPercentage(3),
   },
-  darkImg: { width: RFPercentage(20), height: RFPercentage(10.6), marginTop: RFPercentage(3) },
+  darkImg: {
+    width: RFPercentage(20),
+    height: RFPercentage(10.6),
+    marginTop: RFPercentage(3),
+  },
 
   welcomeText: {
     color: Colors.heading,

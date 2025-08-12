@@ -290,7 +290,7 @@ function Home({ navigation }) {
                 <InputField
                   placeholder={item.placeholder}
                   placeholderColor={"#6B7280"}
-                  height={RFPercentage(6.4)}
+                  height={Platform.OS === 'android' ? RFPercentage(6.4) : RFPercentage(5.5)}
                   backgroundColor={theme.white}
                   borderWidth={RFPercentage(0.1)}
                   borderColor={theme.border}
@@ -485,11 +485,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: RFPercentage(1),
-    height: RFPercentage(5.2),
+    height: RFPercentage(5),
     marginHorizontal: RFPercentage(1),
   },
   nonGradient: {
-    height: RFPercentage(5.2),
+    height: RFPercentage(5),
     paddingHorizontal: RFPercentage(2),
     alignItems: "center",
     justifyContent: "center",
@@ -500,16 +500,16 @@ const styles = StyleSheet.create({
   },
   filterButtonTextActive: {
     color: Colors.white,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
   },
   filterButtonTextInactive: {
     color: Colors.heading,
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
   },
   recentRequestsContainer: {
-    marginTop: RFPercentage(2.5),
+    marginTop: RFPercentage(3.5),
   },
   cartContainer: {
     width: width * 0.9,

@@ -37,6 +37,11 @@
           {
             "SKAdNetworkIdentifier": "n38lu8286q.skadnetwork"
           }
+        ],
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["buez"]
+          }
         ]
       },
       "bundleIdentifier": "com.adamburg.Buez"

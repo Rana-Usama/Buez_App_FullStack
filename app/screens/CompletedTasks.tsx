@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: RFPercentage(3),
     height: RFPercentage(20),
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(1.6),
     backgroundColor: Colors.white,
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.6),
-    top: RFPercentage(0.4),
+    top: RFPercentage(3.5),
   },
   reviewBtnWrap: {
     position: "absolute",

@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ImageBackground, FlatList, Dimensions, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  ImageBackground,
+  FlatList,
+  Dimensions,
+  Platform,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, updateDoc, doc } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
 // components
 import Nav from "../components/common/Nav";
 // config
@@ -35,14 +52,20 @@ function OfferDetail({ navigation, route }) {
     otherCompensation: "",
   });
   const [loading, setLoading] = useState(false);
-  const visibleReviews = showAll ? translatedReviews : translatedReviews.slice(0, 3);
+  const visibleReviews = showAll
+    ? translatedReviews
+    : translatedReviews.slice(0, 3);
   const hiddenCount = translatedReviews.length - 3;
   const [averageRating, setAverageRating] = useState(null);
   const { theme } = useAppTheme();
 
   useEffect(() => {
     const translateOfferData = async () => {
-      const [translatedTaskType, translatedDescription, translatedCompensation] = await Promise.all([
+      const [
+        translatedTaskType,
+        translatedDescription,
+        translatedCompensation,
+      ] = await Promise.all([
         translateText(postRequest.taskType || ""),
         translateText(postRequest.description || ""),
         translateText(postRequest.otherCompensation || ""),
@@ -69,7 +92,9 @@ function OfferDetail({ navigation, route }) {
         );
         setTranslatedReviews(translated);
         // Calculate average rating
-        const ratings = postRequest.reviews.map((r) => r.rating).filter(Boolean);
+        const ratings = postRequest.reviews
+          .map((r) => r.rating)
+          .filter(Boolean);
         if (ratings.length > 0) {
           const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
           setAverageRating(avg.toFixed(1));
@@ -134,17 +159,20 @@ function OfferDetail({ navigation, route }) {
 
   async function sendPushNotification() {
     try {
-      const response = await fetch("https://buez-server-khaki.vercel.app/api/send-notification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          expoPushToken: postRequest?.user?.token,
-          title: currentUser?.userData?.userName,
-          message: "Accepted your task request.",
-        }),
-      });
+      const response = await fetch(
+        "https://buez-server-khaki.vercel.app/api/send-notification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            expoPushToken: postRequest?.user?.token,
+            title: currentUser?.userData?.userName,
+            message: "Accepted your task request.",
+          }),
+        }
+      );
       const data = await response.text();
       console.log("sendPushNotification:", data);
       return data;
@@ -199,8 +227,19 @@ function OfferDetail({ navigation, route }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("details.txt1")}`} />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <Nav
+          dpNull
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
+          }
+          leftLogo={false}
+          navigation={navigation}
+          title={`${t("details.txt1")}`}
+        />
 
         {/* Image Carousel */}
         <View style={styles.carousal}>
@@ -210,9 +249,20 @@ function OfferDetail({ navigation, route }) {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={(event) => {
-              setActiveIndex(Math.floor(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width));
+              setActiveIndex(
+                Math.floor(
+                  event.nativeEvent.contentOffset.x /
+                    event.nativeEvent.layoutMeasurement.width
+                )
+              );
             }}
-            renderItem={({ item }) => <ImageBackground style={styles.imageBackground} imageStyle={styles.image} source={{ uri: item }} />}
+            renderItem={({ item }) => (
+              <ImageBackground
+                style={styles.imageBackground}
+                imageStyle={styles.image}
+                source={{ uri: item }}
+              />
+            )}
             keyExtractor={(item, index) => index.toString()}
           />
         </View>
@@ -220,49 +270,116 @@ function OfferDetail({ navigation, route }) {
         {/* Dots */}
         <View style={styles.dotsContainer}>
           {postRequest?.imageUrls?.length > 1 &&
-            postRequest.imageUrls.map((_, index) => <View key={index} style={[styles.dot, { backgroundColor: index === activeIndex ? theme.primary : theme.stroke }]} />)}
+            postRequest.imageUrls.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  {
+                    backgroundColor:
+                      index === activeIndex ? theme.primary : theme.stroke,
+                  },
+                ]}
+              />
+            ))}
         </View>
 
         {/* Translated Details */}
         <View style={styles.detailsContainer}>
-          <Text style={[styles.title, { color: theme.heading }]}>Category: {translatedOffer?.taskType}</Text>
+          <Text style={[styles.title, { color: theme.heading }]}>
+            Category: {translatedOffer?.taskType}
+          </Text>
           <Text style={[styles.description, { color: theme.darkGrey }]}>
-            {isExpanded || translatedOffer?.description?.length <= 120 ? translatedOffer?.description : translatedOffer?.description.slice(0, 120) + "... "}
+            {isExpanded || translatedOffer?.description?.length <= 120
+              ? translatedOffer?.description
+              : translatedOffer?.description.slice(0, 120) + "... "}
             {translatedOffer?.description?.length > 120 && (
-              <Text onPress={() => setIsExpanded(!isExpanded)} style={[styles.readMoreText, { color: theme.primary }]}>
-                {isExpanded ? `${t("details.txt2")}` : `${t("details.txt3")}`}
+              <Text
+                onPress={() => setIsExpanded(!isExpanded)}
+                style={[styles.readMoreText, { color: theme.primary }]}
+              >
+                {isExpanded ? ` ${t("details.txt2")}` : `${t("details.txt3")}`}
               </Text>
             )}
           </Text>
         </View>
 
         <View style={styles.infoContainer}>
-          <Image style={styles.icon} source={Icons.location} tintColor={theme.heading} />
-          <Text style={[styles.infoText, { color: theme.heading }]}>{`${t("details.txt4")}`}</Text>
+          <Image
+            style={styles.icon}
+            source={Icons.location}
+            tintColor={theme.heading}
+          />
+          <Text style={[styles.infoText, { color: theme.heading }]}>{`${t(
+            "details.txt4"
+          )}`}</Text>
         </View>
-        <Text style={[{ color: theme.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular", alignSelf: "center", width: "90%", marginTop: RFPercentage(0.5) }]}>
+        <Text
+          style={[
+            {
+              color: theme.darkGrey,
+              fontSize: RFPercentage(1.8),
+              fontFamily: "Poppins_400Regular",
+              alignSelf: "center",
+              width: "90%",
+              marginTop: RFPercentage(0.5),
+            },
+          ]}
+        >
           {postRequest.address.name}
         </Text>
 
         <View style={styles.infoContainer}>
-          <Image style={styles.icon} source={Icons.cal} tintColor={theme.heading} />
-          <Text style={[styles.infoText, { color: theme.heading }]}>{`${t("details.txt5")}`}</Text>
-          <Text style={[styles.infoDetail, { color: theme.darkGrey }]}>{getDateTime(postRequest.createdAt)}</Text>
+          <Image
+            style={styles.icon}
+            source={Icons.cal}
+            tintColor={theme.heading}
+          />
+          <Text style={[styles.infoText, { color: theme.heading }]}>{`${t(
+            "details.txt5"
+          )}`}</Text>
+          <Text style={[styles.infoDetail, { color: theme.darkGrey }]}>
+            {getDateTime(postRequest.createdAt)}
+          </Text>
         </View>
 
         <View style={styles.compensationContainer}>
-          <Text style={[styles.compensationTitle, { color: theme.heading }]}>{`${t("details.txt6")}`}:</Text>
-          <Text style={[styles.description, { color: theme.darkGrey }]}>{postRequest.compensationType === "Monitarely" ? `${postRequest.monitarily}$` : translatedOffer.otherCompensation}</Text>
+          <Text style={[styles.compensationTitle, { color: theme.heading }]}>
+            {`${t("details.txt6")}`}:
+          </Text>
+          <Text style={[styles.description, { color: theme.darkGrey }]}>
+            {postRequest.compensationType === "Monitarely"
+              ? `${postRequest.monitarily}$`
+              : translatedOffer.otherCompensation}
+          </Text>
         </View>
 
         <View style={styles.infoContainer}>
-          <Text style={[styles.compensationTitle, { color: theme.heading }]}>{t("profile.txt3")}</Text>
+          <Text style={[styles.compensationTitle, { color: theme.heading }]}>
+            {t("profile.txt3")}
+          </Text>
         </View>
-        <View style={{ width: "90%", alignSelf: "center" }}>
+        <View
+          style={{
+            width: "90%",
+            alignSelf: "center",
+            marginTop: RFPercentage(1),
+          }}
+        >
           {averageRating && (
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={[styles.rating, { color: theme.heading }]}>{"Rating"}:</Text>
-              <Text style={[styles.ratingText, { color: theme.heading }]}>⭐ {averageRating}</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text style={[styles.rating, { color: theme.heading }]}>
+                {"Rating"}:
+              </Text>
+              <Text style={[styles.ratingText, { color: theme.heading }]}>
+                ⭐ {averageRating}
+              </Text>
             </View>
           )}
 
@@ -274,10 +391,32 @@ function OfferDetail({ navigation, route }) {
                 renderItem={({ item }) => {
                   return (
                     <View style={styles.review}>
-                      <Image source={item?.reviewer?.profileImage ? { uri: item?.reviewer?.profileImage } : Icons.profile} resizeMode="cover" style={styles.reviewPic} />
-                      <View style={{ marginLeft: RFPercentage(1), top: RFPercentage(0.5) }}>
-                        <Text style={[styles.userName, { color: theme.heading }]}>{item?.reviewer?.userName}</Text>
-                        <Text style={[styles.userName, { color: theme.darkGrey }]}>{item?.translatedText}</Text>
+                      <Image
+                        source={
+                          item?.reviewer?.profileImage
+                            ? { uri: item?.reviewer?.profileImage }
+                            : Icons.profile
+                        }
+                        resizeMode="cover"
+                        style={styles.reviewPic}
+                      />
+                      <View
+                        style={{
+                          marginLeft: RFPercentage(1),
+                          top: RFPercentage(0.5),
+                          width: "80%",
+                        }}
+                      >
+                        <Text
+                          style={[styles.userName, { color: theme.heading }]}
+                        >
+                          {item?.reviewer?.userName}
+                        </Text>
+                        <Text
+                          style={[styles.userName, { color: theme.darkGrey }]}
+                        >
+                          {item?.translatedText}
+                        </Text>
                       </View>
                     </View>
                   );
@@ -293,7 +432,9 @@ function OfferDetail({ navigation, route }) {
             </>
           ) : (
             <>
-              <Text style={[styles.detail, { color: theme.heading }]}>{t("details.txt10")}</Text>
+              <Text style={[styles.detail, { color: theme.heading }]}>
+                {t("details.txt10")}
+              </Text>
             </>
           )}
         </View>
@@ -302,14 +443,29 @@ function OfferDetail({ navigation, route }) {
         <View style={styles.buttonWrapper}>
           {postRequest?.acceptedBy ? (
             <>
-              <MyAppButton title={t("details.txt9")} disabled={currentUserId === postRequest.userId} onPress={handleStartChat} />
+              <MyAppButton
+                title={t("details.txt9")}
+                disabled={currentUserId === postRequest.userId}
+                onPress={handleStartChat}
+              />
             </>
           ) : (
             <>
-              <TouchableOpacity style={[styles.chatButton, { borderColor: theme.darkGrey }]} disabled={currentUserId === postRequest.userId} onPress={handleStartChat}>
-                <Text style={[styles.text, { color: theme.darkGrey }]}>{t("details.txt9")}</Text>
+              <TouchableOpacity
+                style={[styles.chatButton, { borderColor: theme.darkGrey }]}
+                disabled={currentUserId === postRequest.userId}
+                onPress={handleStartChat}
+              >
+                <Text style={[styles.text, { color: theme.darkGrey }]}>
+                  {t("details.txt9")}
+                </Text>
               </TouchableOpacity>
-              <MyAppButton title={`Accept Task`} marginTop={RFPercentage(0)} loading={loading} onPress={handleAccept} />
+              <MyAppButton
+                title={`Accept Task`}
+                marginTop={RFPercentage(0)}
+                loading={loading}
+                onPress={handleAccept}
+              />
             </>
           )}
         </View>
@@ -395,17 +551,17 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "flex-start",
     flexDirection: "row",
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(3),
   },
   icon: {
     width: RFPercentage(2),
     height: RFPercentage(2),
   },
   infoText: {
-    top: RFPercentage(-0.2),
+    top: RFPercentage(-0.3),
     marginLeft: RFPercentage(0.6),
     color: Colors.heading,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
     fontFamily: "Poppins_500Medium",
   },
   infoDetail: {
@@ -413,7 +569,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     color: Colors.heading,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
   },
   compensationContainer: {
@@ -428,28 +584,50 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     alignSelf: "flex-start",
   },
-  detail: { color: Colors.heading, fontFamily: "Poppins_400Regular" },
-  reviewPic: { width: RFPercentage(5), height: RFPercentage(5), borderRadius: RFPercentage(100), borderWidth: RFPercentage(0.3), borderColor: Colors.primary },
+  detail: { color: Colors.heading, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.7)},
+  reviewPic: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(100),
+    borderWidth: RFPercentage(0.3),
+    borderColor: Colors.primary,
+  },
   compensationTitle: {
     color: Colors.heading,
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
   },
-  review: { flexDirection: "row", alignItems: "center", marginTop: RFPercentage(2) },
+  review: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical:RFPercentage(1)
+  },
   chatButton: {
     marginRight: RFPercentage(2),
     backgroundColor: "transparent",
-    width: RFPercentage(21),
-    height: RFPercentage(6.2),
+    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
+    width: Platform.OS === "android" ? RFPercentage(21) : RFPercentage(18),
     borderRadius: RFPercentage(100),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.1),
     justifyContent: "center",
     alignItems: "center",
   },
-  rating: { fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", color: Colors.heading },
-  ratingText: { fontSize: RFPercentage(2), fontFamily: "Poppins_600SemiBold", color: Colors.darkGrey },
-  userName: { color: Colors.heading, fontFamily: "Poppins_500Medium" },
+  rating: {
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_500Medium",
+    color: Colors.heading,
+  },
+  ratingText: {
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.darkGrey,
+  },
+  userName: {
+    color: Colors.heading,
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.6),
+  },
   text: {
     color: Colors.primary,
     fontSize: RFPercentage(1.8),

@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   experienceText: {
     color: Colors.darkGrey2,
     fontFamily: "Poppins_500Medium",
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2),
     marginBottom: RFPercentage(2),
     textAlign: "center",
   },
@@ -299,6 +299,7 @@ const styles = StyleSheet.create({
     padding: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     textAlignVertical: "top",
+    fontSize:RFPercentage(1.8)
   },
   charCounterContainer: {
     width: "100%",

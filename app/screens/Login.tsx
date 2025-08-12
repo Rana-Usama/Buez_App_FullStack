@@ -11,6 +11,7 @@ import {
   ScrollView,
   Button,
   Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
@@ -78,17 +79,14 @@ function Login({ navigation }) {
       if (user && pushToken) {
         await updateUserToken(user.uid, pushToken);
       }
-
       Toast.show({
         type: "success",
         text1: t("toast.login.one"),
         text2: t("toast.login.two"),
       });
-
       navigation.navigate("TabNavigator");
     } catch (error) {
       console.log("user...........", error);
-
       Toast.show({
         type: "error",
         text1: t("toast.login.three"),
@@ -249,30 +247,58 @@ function Login({ navigation }) {
         visible={isModalVisible}
         animationType="fade"
         onRequestClose={() => setIsModalVisible(false)}
+        transparent={true}
       >
         <BlurView
-          intensity={100}
+          intensity={5}
           style={[styles.modalBackground, { backgroundColor: theme.modal }]}
         >
-          <View
-            style={[styles.modalContainer, { backgroundColor: theme.white }]}
-          >
-            <Text style={styles.modalText}>Instagram Login Requirements</Text>
-            <Text
-              style={{ fontFamily: "Poppins_400Regular", color: theme.grey }}
-            >{`i) The user must have an Instagram Business or Creator account`}</Text>
-            <Text
-              style={{
-                fontFamily: "Poppins_400Regular",
-                marginTop: RFPercentage(1),
-                color: theme.grey,
-              }}
-            >{`ii) The Instagram account must be linked to a Facebook Page that the user manages.`}</Text>
-            <MyAppButton
-              title="Login"
-              onPress={() => navigation.navigate("InstagramLoginWebView")}
-            />
-          </View>
+          <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
+            <View style={{ flex: 1, width: "100%" }}>
+              <TouchableWithoutFeedback>
+                <View
+                  style={[
+                    styles.modalContainer,
+                    {
+                      backgroundColor: theme.white,
+                      alignSelf: "center",
+                      marginTop: "auto",
+                      marginBottom: "auto",
+                    },
+                  ]}
+                >
+                  <Text style={styles.modalText}>
+                    Instagram Login Requirements
+                  </Text>
+                  <View style={{ marginTop: RFPercentage(1) }}>
+                    <Text
+                      style={{
+                        fontFamily: "Poppins_400Regular",
+                        color: theme.grey,
+                        fontSize: RFPercentage(1.7),
+                      }}
+                    >{`i) The user must have an Instagram Business or Creator account!`}</Text>
+                    <Text
+                      style={{
+                        fontFamily: "Poppins_400Regular",
+                        marginTop: RFPercentage(1.6),
+                        color: theme.grey,
+                        fontSize: RFPercentage(1.7),
+                      }}
+                    >{`ii) The Instagram account must be linked to a Facebook Page that the user manages!`}</Text>
+                  </View>
+
+                  <MyAppButton
+                    title="Login"
+                    onPress={() => {
+                      setIsModalVisible(false);
+                      navigation.navigate("InstagramLoginWebView");
+                    }}
+                  />
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
         </BlurView>
       </Modal>
     </Screen>
@@ -293,7 +319,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: "80%",
-    borderRadius: 14,
+    borderRadius: RFPercentage(2),
     paddingVertical: RFPercentage(5),
     alignItems: "center",
     justifyContent: "center",

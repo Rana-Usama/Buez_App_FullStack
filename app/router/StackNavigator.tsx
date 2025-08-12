@@ -165,11 +165,11 @@ const StackNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      {/* {isLoading || userLoading || !initialRoute ? (
+      {isLoading || userLoading || !initialRoute ? (
         <DeciderScreen />
-      ) : ( */}
+      ) : (
         <Stack.Navigator
-          // initialRouteName={initialRoute}
+          initialRouteName={initialRoute}
           screenOptions={{
             keyboardHandlingEnabled: true,
             headerShown: false,
@@ -220,7 +220,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="CompletedTasks" component={CompletedTasks} />
           <Stack.Screen name="AddReview" component={AddReview} />
         </Stack.Navigator>
-      {/* )}  */}
+       )}
     </NavigationContainer>
   );
 };
