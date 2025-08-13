@@ -166,7 +166,9 @@
     "txt8": "Mes demandes",
     "txt9": "Message",
     "txt10": "Pas encore d'avis !",
-    "txt11" : "plus"
+    "txt11": "plus",
+    "txt12": "Accepter la tâche",
+    "txt13": "Catégorie"
   },
   "myRequests": {
     "txt1": "Mes demandes",
@@ -307,5 +309,9 @@
     "txt3": "Accueil",
     "txt4": "Messages",
     "txt5": "Paramètres"
+  },
+  "location": {
+    "placholder": "Rechercher un lieu",
+    "by": "+ Ajouter un lieu"
   }
 }

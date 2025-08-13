@@ -164,9 +164,11 @@
     "txt6": "Compensation",
     "txt7": "Message Requester",
     "txt8": "My Requests",
-    "txt9" : "Message",
-    "txt10" : "No any reviews yet!",
-    "txt11" : "more"
+    "txt9": "Message",
+    "txt10": "No any reviews yet!",
+    "txt11": "more",
+    "txt12" : "Accept Task",
+    "txt13" : "Category"
   },
   "myRequests": {
     "txt1": "My Requests",
@@ -286,7 +288,7 @@
     "txt1": "Profile",
     "txt2": "Edit Profile",
     "txt3": "Rating & Reviews",
-    "txt4" : "Completed Tasks"
+    "txt4": "Completed Tasks"
   },
   "editProfile": {
     "txt1": "Add your Name",
@@ -306,5 +308,9 @@
     "txt3": "Home",
     "txt4": "Messages",
     "txt5": "Settings"
+  },
+  "location": {
+    "placholder": "Search for a location",
+    "by" : "+ Add Location"
   }
 }

@@ -1,16 +1,13 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 
-/**
- * Converts an email to a safe Firestore document ID
- */
+
 const getEmailDocId = (email) => email.replace(/\./g, "_").toLowerCase();
 
 /**
- * Check if the email is already registered with a different login type.
- * @param {string} email - The user's email.
- * @param {"facebook" | "instagram"} currentType - The login method the user is trying to use.
- * @returns {Promise<string|null>} - Returns the conflicting login type or null if allowed.
+ * @param {string} email 
+ * @param {"facebook" | "instagram"} currentType 
+ * @returns {Promise<string|null>} 
  */
 export const checkExistingEmailLoginType = async (email, currentType) => {
   const emailKey = getEmailDocId(email);
@@ -26,9 +23,9 @@ export const checkExistingEmailLoginType = async (email, currentType) => {
 };
 
 /**
- * Save the login type for a specific email to Firestore.
- * @param {string} email - The user's email.
- * @param {"facebook" | "instagram"} loginType - The login method used.
+
+ * @param {string} email 
+ * @param {"facebook" | "instagram"} loginType 
  */
 export const saveEmailLoginType = async (email, loginType) => {
   const emailKey = getEmailDocId(email);

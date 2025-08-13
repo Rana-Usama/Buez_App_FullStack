@@ -267,7 +267,7 @@ function Login({ navigation }) {
                     },
                   ]}
                 >
-                  <Text style={styles.modalText}>
+                   <Text style={[styles.modalText,{color:theme.black}]}>
                     Instagram Login Requirements
                   </Text>
                   <View style={{ marginTop: RFPercentage(1) }}>

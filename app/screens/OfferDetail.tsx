@@ -228,14 +228,12 @@ function OfferDetail({ navigation, route }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView
+      showsVerticalScrollIndicator={false}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
       >
         <Nav
-          dpNull
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
-          }
+          dpNull   
           leftLogo={false}
           navigation={navigation}
           title={`${t("details.txt1")}`}
@@ -287,7 +285,7 @@ function OfferDetail({ navigation, route }) {
         {/* Translated Details */}
         <View style={styles.detailsContainer}>
           <Text style={[styles.title, { color: theme.heading }]}>
-            Category: {translatedOffer?.taskType}
+            {t("details.txt13")}: {translatedOffer?.taskType}
           </Text>
           <Text style={[styles.description, { color: theme.darkGrey }]}>
             {isExpanded || translatedOffer?.description?.length <= 120
@@ -461,7 +459,7 @@ function OfferDetail({ navigation, route }) {
                 </Text>
               </TouchableOpacity>
               <MyAppButton
-                title={`Accept Task`}
+                title={t("details.txt12")}
                 marginTop={RFPercentage(0)}
                 loading={loading}
                 onPress={handleAccept}
@@ -606,7 +604,7 @@ const styles = StyleSheet.create({
     marginRight: RFPercentage(2),
     backgroundColor: "transparent",
     height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
-    width: Platform.OS === "android" ? RFPercentage(21) : RFPercentage(18),
+    width: Platform.OS === "android" ? RFPercentage(21.5) : RFPercentage(18.5),
     borderRadius: RFPercentage(100),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.1),

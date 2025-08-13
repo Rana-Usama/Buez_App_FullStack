@@ -1,22 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, ActivityIndicator, LogBox, Alert, Platform } from "react-native";
-import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold, Poppins_900Black, useFonts } from "@expo-google-fonts/poppins";
+import { View, ActivityIndicator, LogBox, Alert, Platform , Image} from "react-native";
+import {
+  Poppins_300Light,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  Poppins_800ExtraBold,
+  Poppins_900Black,
+  useFonts,
+} from "@expo-google-fonts/poppins";
 import * as Notifications from "expo-notifications";
 import { registerForPushNotificationsAsync } from "./app/utils/notificationService";
-// Contexts
 import { UserProvider } from "./app/contexts/user.context";
 import { PostProvider } from "./app/contexts/PostContext";
 import ExpoStripeProvider from "./app/contexts/stripe-provider";
 import { NotificationProvider } from "./app/contexts/notification.context";
-// Config
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./app/utils/ToastConfig";
 import StackNavigator from "./app/router/StackNavigator";
 import i18n from "./app/translation/i18n";
-import { ThemeProvider } from "./app/contexts/themeContext";
+import { ThemeProvider, useAppTheme } from "./app/contexts/themeContext";
 import "react-native-get-random-values";
 import { Provider } from "react-redux";
 import store from "./app/redux/store";
+import * as SplashScreen from "expo-splash-screen";
 
 LogBox.ignoreAllLogs();
 
@@ -28,6 +36,42 @@ Notifications.setNotificationHandler({
     shouldSetBadge: false,
   }),
 });
+
+
+
+SplashScreen.preventAutoHideAsync(); 
+
+function MainApp() {
+  const { theme } = useAppTheme()
+  const [appReady, setAppReady] = useState(false);
+
+  const splashImage =
+    theme.mode === "dark"
+      ? require("./assets/Splash-dark.png")
+      : require("./assets/splash.png");
+
+  useEffect(() => {
+    async function prepare() {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setAppReady(true);
+      await SplashScreen.hideAsync();
+    }
+    prepare();
+  }, []);
+
+  if (!appReady) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Image source={splashImage} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+      </View>
+    );
+  }
+
+  return <StackNavigator />;
+}
+
+
+
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -57,21 +101,26 @@ export default function App() {
     });
 
     // Listener for foreground notifications
-    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-      setNotification(notification);
-    });
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
 
     // Listener for user tapping the notification
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {});
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {});
 
-    // Cleanup
     return () => {
-      if (notificationListener.current) Notifications.removeNotificationSubscription(notificationListener.current);
-      if (responseListener.current) Notifications.removeNotificationSubscription(responseListener.current);
+      if (notificationListener.current)
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
+      if (responseListener.current)
+        Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
 
-  if (!fontsLoaded) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+  if (!fontsLoaded) return null;
 
   return (
     <ThemeProvider>
@@ -80,7 +129,7 @@ export default function App() {
           <NotificationProvider>
             <ExpoStripeProvider>
               <Provider store={store}>
-                <StackNavigator />
+                <MainApp />
               </Provider>
               <Toast config={toastConfig} />
             </ExpoStripeProvider>

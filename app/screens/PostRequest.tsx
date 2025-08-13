@@ -417,7 +417,7 @@ function PostRequest({ navigation, route }) {
                 marginTop: RFPercentage(2.5),
               }}
             >
-              <Text style={{ fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular", color: selectedLocation?.name ? Colors.black : theme.inputFieldPlaceholder }}>
+              <Text style={{ fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular", color: selectedLocation?.name ? theme.black : theme.inputFieldPlaceholder }}>
                 {location.name ? location.name : selectedLocation.name ? selectedLocation?.name : `${t("postRequest.txt9")}`}
               </Text>
             </TouchableOpacity>

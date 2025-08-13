@@ -500,6 +500,6 @@ const styles = StyleSheet.create({
   notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
   notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },
   notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
-  cartContainer2: { width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(1.5) },
+  cartContainer2: { width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(2) },
   text3: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.7), textAlign: "center" },
 });

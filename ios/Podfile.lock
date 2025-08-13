@@ -294,6 +294,8 @@ PODS:
     - ExpoModulesCore
   - ExpoSecureStore (14.0.1):
     - ExpoModulesCore
+  - ExpoSplashScreen (0.30.10):
+    - ExpoModulesCore
   - ExpoSystemUI (4.0.9):
     - ExpoModulesCore
   - ExpoWebBrowser (14.0.2):
@@ -2460,6 +2462,7 @@ DEPENDENCIES:
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoRandom (from `../node_modules/expo-random/ios`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
+  - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
@@ -2649,6 +2652,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-random/ios"
   ExpoSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
+  ExpoSplashScreen:
+    :path: "../node_modules/expo-splash-screen/ios"
   ExpoSystemUI:
     :path: "../node_modules/expo-system-ui/ios"
   ExpoWebBrowser:
@@ -2853,6 +2858,7 @@ SPEC CHECKSUMS:
   ExpoModulesCore: c3e810e874b33139221bea656743f106a2826f47
   ExpoRandom: d1444df65007bdd4070009efd5dab18e20bf0f00
   ExpoSecureStore: 9a3665d7161dd1031be386e278bffd623658f316
+  ExpoSplashScreen: 0ad5acac1b5d2953c6e00d4319f16d616f70d4dd
   ExpoSystemUI: b82a45cf0f6a4fa18d07c46deba8725dd27688b4
   ExpoWebBrowser: a212e6b480d8857d3e441fba51e0c968333803b3
   EXUpdatesInterface: 7c977640bdd8b85833c19e3959ba46145c5719db

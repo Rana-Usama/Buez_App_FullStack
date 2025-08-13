@@ -1,7 +1,22 @@
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
-import { sendEmailVerification, signOut, updatePassword as firebaseUpdatePassword, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "firebase/auth";
+import {
+  sendEmailVerification,
+  signOut,
+  updatePassword as firebaseUpdatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { deleteUser } from "firebase/auth";
-import { doc, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  deleteDoc,
+  doc,
+  writeBatch,
+} from "firebase/firestore";
 
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
@@ -49,12 +64,18 @@ export const emailVerification = async (user: any) => {
 };
 
 // Function to update user password
-export const updatePassword = async (currentPassword: any, newPassword: any) => {
+export const updatePassword = async (
+  currentPassword: any,
+  newPassword: any
+) => {
   try {
     const user = FIREBASE_AUTH.currentUser;
     if (user) {
       // Reauthenticate the user first
-      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        currentPassword
+      );
       await reauthenticateWithCredential(user, credential);
       console.log("User re-authenticated");
 
@@ -103,9 +124,30 @@ export const deleteCurrentUser = async () => {
   const user = FIREBASE_AUTH.currentUser;
   if (!user) return;
   try {
+    const userId = user.uid;
+
+    await deleteDoc(doc(FIREBASE_DB, "users", userId));
+
+    const batchDelete = async (colName, field, op, value) => {
+      const q = query(
+        collection(FIREBASE_DB, colName),
+        where(field, op, value)
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const batch = writeBatch(FIREBASE_DB);
+        snapshot.forEach((docSnap) => batch.delete(docSnap.ref));
+        await batch.commit();
+      } else {
+        console.log(`No docs found in '${colName}'`);
+      }
+    };
+
+    await batchDelete("taskRequests", "userId", "==", userId);
+    await batchDelete("chats", "participants", "array-contains", userId);
+    await batchDelete("completedTask", "taskOwnerId", "==", userId);
     await deleteUser(user);
-    console.log("User completely deleted.");
   } catch (error) {
-    console.error("Error deleting user:", error);
+    console.log("Error deleting user and Firestore data:", error);
   }
 };

@@ -166,7 +166,9 @@
     "txt8": "Le mie richieste",
     "txt9": "Messaggio",
     "txt10": "Nessuna recensione ancora!",
-    "txt11" : "di più"
+    "txt11": "di più",
+    "txt12": "Accetta compito",
+    "txt13": "Categoria"
   },
   "myRequests": {
     "txt1": "Le mie richieste",
@@ -306,5 +308,9 @@
     "txt3": "Home",
     "txt4": "Messaggi",
     "txt5": "Impostazioni"
+  },
+  "location": {
+    "placholder": "Cerca una località",
+    "by": "+ Aggiungi posizione"
   }
 }

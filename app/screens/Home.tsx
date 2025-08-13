@@ -322,11 +322,11 @@ function Home({ navigation }) {
               <TouchableOpacity onPress={() => setActiveFilter(item)}>
                 {activeFilter === item ? (
                   <LinearGradient colors={[Colors.primary, "#4557B0"]} style={styles.gradient}>
-                    <Text style={{ fontFamily: "Poppins_400Regular", color: "white" }}>{item}</Text>
+                    <Text style={{ fontFamily: "Poppins_500Medium", color: "white" , fontSize:RFPercentage(1.7)}}>{item}</Text>
                   </LinearGradient>
                 ) : (
                   <View style={[styles.nonGradient, { borderColor: theme.border }]}>
-                    <Text style={{ fontFamily: "Poppins_400Regular", color: Colors.heading }}>{item}</Text>
+                    <Text style={{ fontFamily: "Poppins_400Regular", color: Colors.heading ,  fontSize:RFPercentage(1.7)}}>{item}</Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -337,7 +337,7 @@ function Home({ navigation }) {
             <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t("home.txt9")}`}</Text>
             <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Location", { home: true })}>
               <Text style={[styles.categoriesText, { color: theme.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(1.8) }]}>
-                {selectedLocation.name2 ? (selectedLocation.name2.length > 20 ? `${selectedLocation.name2.slice(0, 20)}...` : selectedLocation.name2) : `By Location`}
+                {selectedLocation.name2 ? (selectedLocation.name2.length > 20 ? `${selectedLocation.name2.slice(0, 20)}...` : selectedLocation.name2) : `${t("location.by")}`}
               </Text>
             </TouchableOpacity>
           </View>

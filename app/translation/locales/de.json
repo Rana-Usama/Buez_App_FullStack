@@ -166,7 +166,9 @@
     "txt8": "Meine Anfragen",
     "txt9": "Nachricht",
     "txt10": "Noch keine Bewertungen!",
-    "txt11" : "mehr"
+    "txt11": "mehr",
+    "txt12": "Aufgabe annehmen",
+    "txt13": "Kategorie"
   },
   "myRequests": {
     "txt1": "Mini Ufträgi",
@@ -305,5 +307,9 @@
     "txt3": "Start",
     "txt4": "Nachrichten",
     "txt5": "Einstellungen"
+  },
+  "location": {
+    "placholder": "Nach einem Ort suchen",
+    "by": "+ Standort hinzufügen"
   }
 }

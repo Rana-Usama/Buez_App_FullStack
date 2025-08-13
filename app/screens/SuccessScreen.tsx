@@ -39,8 +39,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: RFPercentage(20),
   },
-  icon: { fontSize: RFPercentage(14) },
-  txt: { color: Colors.white, fontSize: RFPercentage(2.6), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(3) },
+  icon: { fontSize: RFPercentage(12) },
+  txt: { color: Colors.white, fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(3) , textAlign:"center", marginHorizontal:RFPercentage(5)},
   home: { color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" },
 });
 
