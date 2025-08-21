@@ -15,7 +15,6 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 
 const webClientId =
   "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com";
-// const webClientId = "291364316025-00v6oroakujt01a10cht0kjacsbm1drd.apps.googleusercontent.com"
 const iosClientId =
   "291364316025-4kor9g99j9huha1mlr9jvtbv7k5n4t1k.apps.googleusercontent.com";
 
@@ -43,6 +42,8 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
         showPlayServicesUpdateDialog: true,
       });
       const userInfo = await GoogleSignin.signIn();
+      console.log("userInfo...............", userInfo);
+      
       const { idToken } = userInfo?.data;
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(
@@ -122,7 +123,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
         navigation.navigate("FreeTrial");
       }
     } catch (error) {
-      console.log("Google Sign-In Error:", error);
+      console.log("Google Sign-In Error:", JSON.stringify(error, null, 2));
       Toast.show({
         type: "error",
         text1: `${t("toast.login.three")}`,

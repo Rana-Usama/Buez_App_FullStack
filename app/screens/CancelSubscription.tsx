@@ -116,10 +116,10 @@ function CancelSubscription({ navigation }: any) {
         <>
           <Image style={styles.vector} source={Icons.notActive} resizeMode="contain" />
           <Text style={[styles.notActive, { color: theme.heading }]}>{`${t("cancelSubscription.txt8")}`}</Text>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Subscription")}>
+          {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Subscription")}>
             <Text style={[styles.buttonText, { color: theme.primary }]}>{`${t("cancelSubscription.txt9")}`}</Text>
             <AntDesign name="arrowright" color={theme.primary} size={RFPercentage(3)} style={{ left: RFPercentage(1) }} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </>
       )}
 
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1.5),
   },
   vector: {
-    marginTop: RFPercentage(8),
+    marginTop: RFPercentage(15),
     width: RFPercentage(34),
     height: RFPercentage(34),
   },
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: RFPercentage(2),
   },
-  notActive: { color: Colors.darkGrey, fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(2), paddingHorizontal: RFPercentage(5), textAlign: "center" },
+  notActive: { color: Colors.darkGrey, fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(2), paddingHorizontal: RFPercentage(8), textAlign: "center" },
   button: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingHorizontal: RFPercentage(2), marginTop: RFPercentage(4) },
 
   starIconLeft: {

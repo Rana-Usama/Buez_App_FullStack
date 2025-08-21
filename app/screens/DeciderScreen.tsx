@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Image, View } from "react-native";
+import { StyleSheet, Image, View, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -13,6 +13,10 @@ function DeciderScreen() {
   return (
     <>
       <View style={[styles.container, { backgroundColor: theme.white }]}>
+        <StatusBar
+          barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+          backgroundColor={theme.white}
+        />
         <Image style={styles.img} source={Icons.logo} resizeMode="contain" />
       </View>
     </>
@@ -25,7 +29,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  img: { width: RFPercentage(15), height: RFPercentage(15) },
+  img: { width: RFPercentage(16.9), height: RFPercentage(16.9) },
 });
 
 export default DeciderScreen;

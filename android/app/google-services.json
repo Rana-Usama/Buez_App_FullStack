@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "291364316025-fngt1ic8ojaituaoei31jutk7pnmmclb.apps.googleusercontent.com",
+          "client_id": "291364316025-lti18aabskoga3dmun0mdldu4cfm7674.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.adamburg.Buez",
-            "certificate_hash": "ffd91503ca7b3bb37c036f52b376d4099ab60d13"
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
         {
@@ -39,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "291364316025-ei4kkql4mobs21k17gop81os2lcttjgp.apps.googleusercontent.com",
+              "client_id": "291364316025-4kor9g99j9huha1mlr9jvtbv7k5n4t1k.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.sahil.wildlife"
+                "bundle_id": "com.adamburg.Buez"
               }
             }
           ]

@@ -266,7 +266,6 @@ function Home({ navigation }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ScrollView
           onScroll={(e) => (scrollPosition.current = e.nativeEvent.contentOffset.y)}
           style={styles.scrollView}
@@ -416,7 +415,6 @@ function Home({ navigation }) {
           )}
           <View style={styles.bottomSpacing} />
         </ScrollView>
-      </KeyboardAvoidingView>
     </View>
   );
 }

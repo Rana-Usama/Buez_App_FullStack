@@ -159,17 +159,14 @@ const StackNavigator: React.FC = () => {
   }, [isLoading, userLoading, userData, credentials, loggedOut]);
   const { theme } = useAppTheme();
 
-  console.log("isLoading:", isLoading);
-  console.log("userLoading:", userLoading);
-  console.log("initialRoute:", initialRoute);
 
   return (
     <NavigationContainer>
       {isLoading || userLoading || !initialRoute ? (
         <DeciderScreen />
-      ) : (
+      ) : ( 
         <Stack.Navigator
-          initialRouteName={initialRoute}
+          initialRouteName={initialRoute ?? "OnBoarding"}
           screenOptions={{
             keyboardHandlingEnabled: true,
             headerShown: false,
@@ -193,11 +190,7 @@ const StackNavigator: React.FC = () => {
 
           <Stack.Screen
             name="TabNavigator"
-            children={() => (
-              <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-                <TabNavigator />
-              </KeyboardAvoidingView>
-            )}
+           component={TabNavigator}
           />
 
           <Stack.Screen name="InitialScreen" component={InitialScreen} />
@@ -220,7 +213,7 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="CompletedTasks" component={CompletedTasks} />
           <Stack.Screen name="AddReview" component={AddReview} />
         </Stack.Navigator>
-       )}
+         )}
     </NavigationContainer>
   );
 };
