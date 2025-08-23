@@ -86,9 +86,21 @@ const FacebookLoginWebView = ({ navigation }: any) => {
       const userSnapshot = await getDoc(userRef);
 
       const pushToken = await registerForPushNotificationsAsync();
-      await setDoc(
-        userRef,
-        {
+
+      if (userSnapshot.exists()) {
+        // Existing user → update only these fields
+        await setDoc(
+          userRef,
+          {
+            userName: userDataResponse.name,
+            profileImage: userDataResponse.picture?.data?.url || null,
+            token: pushToken || null,
+            facebookId: userDataResponse.id,
+          },
+          { merge: true }
+        );
+      } else {
+        await setDoc(userRef, {
           userName: userDataResponse.name,
           email: userDataResponse.email,
           facebookId: userDataResponse.id,
@@ -96,10 +108,9 @@ const FacebookLoginWebView = ({ navigation }: any) => {
           token: pushToken || null,
           createdAt: new Date().toISOString(),
           isSubscribed: false,
-          isFreeTrial: true,
-        },
-        { merge: true }
-      );
+          isFreeTrial: false,
+        });
+      }
 
       await saveEmailLoginType(email, currentLoginType);
       Alert.alert("Success", `Welcome, ${userDataResponse.name}!`);

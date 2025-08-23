@@ -27,10 +27,25 @@ export const handleInstagramLogin = async ({
 
     const uid = firebaseUser.uid;
     const userRef = doc(FIREBASE_DB, "users", uid);
+    const userSnapshot = await getDoc(userRef);
 
-    await setDoc(
-      userRef,
-      {
+    if (userSnapshot.exists()) {
+      //  Existing user → update only profile data
+      await setDoc(
+        userRef,
+        {
+          userName: igProfile.username,
+          profileImage: igProfile.profile_picture_url,
+          instagramId: igProfile.id,
+          pageId,
+          pageToken,
+          token: pushToken || null,
+        },
+        { merge: true }
+      );
+    } else {
+      // New user → initialize trial/subscription as false
+      await setDoc(userRef, {
         userName: igProfile.username,
         email: firebaseUser.email || email || null,
         profileImage: igProfile.profile_picture_url,
@@ -41,9 +56,8 @@ export const handleInstagramLogin = async ({
         isSubscribed: false,
         isFreeTrial: false,
         createdAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
+      });
+    }
 
     const password = igProfile.id;
     await saveCredentials(email, password);
@@ -55,7 +69,6 @@ export const handleInstagramLogin = async ({
       text2: t("toast.login.two"),
     });
 
-    const userSnapshot = await getDoc(userRef);
     const userData = userSnapshot.data() || {};
 
     const now = new Date();

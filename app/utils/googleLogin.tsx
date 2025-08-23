@@ -60,19 +60,32 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       }
 
       const userRef = doc(FIREBASE_DB, "users", user.uid);
-      await setDoc(
-        userRef,
-        {
+
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        // Existing user → update only name, image, token
+        await setDoc(
+          userRef,
+          {
+            userName: user.displayName,
+            profileImage: user.photoURL,
+            token: pushToken || null,
+            phoneNumber: user.phoneNumber,
+          },
+          { merge: true }
+        );
+      } else {
+        await setDoc(userRef, {
           userName: user.displayName,
           email: user.email,
-          isSubscribed: false,
           profileImage: user.photoURL,
           phoneNumber: user.phoneNumber,
           token: pushToken || null,
-          isFreeTrial: false,
-        },
-        { merge: true }
-      );
+          isSubscribed: false,
+          isFreeTrial: false, // Only set once at first sign in
+        });
+      }
 
       await saveCredentials(user.email, "123456");
       await SecureStore.setItemAsync("loggedOut", "false");
