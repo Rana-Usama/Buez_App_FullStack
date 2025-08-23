@@ -8,9 +8,9 @@ import { useTranslation } from "react-i18next";
 import * as SecureStore from "expo-secure-store";
 import { checkExistingEmailLoginType, saveEmailLoginType } from "./loginType";
 
-const FB_APP_ID =  "716889610970681";
-const APP_SECRET =  "2fc223957e3ccdcdfceb59311e226adc";
-const REDIRECT_URI = "https://auth.expo.io/@native-team/Buez";
+const FB_APP_ID =  "";
+const APP_SECRET =  "";
+const REDIRECT_URI = "";
 
 const IG_LOGIN_URL = `https://www.facebook.com/v23.0/dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${encodeURIComponent(
   REDIRECT_URI

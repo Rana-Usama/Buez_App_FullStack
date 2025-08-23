@@ -14,7 +14,7 @@ const getTargetLanguage = async () => {
 export const translateText = async (text) => {
   const targetLang = await getTargetLanguage();
   try {
-    const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=AIzaSyBkUKZUKnnMUm4jHEfp4itrNlxrkQfNuHw`, {
+    const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

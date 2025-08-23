@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, ActivityIndicator, LogBox, Alert, Platform , Image} from "react-native";
+import {
+  View,
+  LogBox,
+  Image,
+} from "react-native";
 import {
   Poppins_300Light,
   Poppins_400Regular,
@@ -28,7 +32,10 @@ import * as SplashScreen from "expo-splash-screen";
 
 LogBox.ignoreAllLogs();
 
-/*Foreground notification handler */
+// keep splash screen visible until we hide manually
+SplashScreen.preventAutoHideAsync();
+
+/* Foreground notification handler */
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -37,12 +44,8 @@ Notifications.setNotificationHandler({
   }),
 });
 
-
-
-SplashScreen.preventAutoHideAsync(); 
-
 function MainApp() {
-  const { theme } = useAppTheme()
+  const { theme } = useAppTheme();
   const [appReady, setAppReady] = useState(false);
 
   const splashImage =
@@ -52,9 +55,10 @@ function MainApp() {
 
   useEffect(() => {
     async function prepare() {
+      // small delay (optional)
       await new Promise((resolve) => setTimeout(resolve, 500));
       setAppReady(true);
-      await SplashScreen.hideAsync();
+      await SplashScreen.hideAsync(); // ✅ hide native splash when ready
     }
     prepare();
   }, []);
@@ -62,16 +66,17 @@ function MainApp() {
   if (!appReady) {
     return (
       <View style={{ flex: 1 }}>
-        <Image source={splashImage} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+        <Image
+          source={splashImage}
+          style={{ width: "100%", height: "100%" }}
+          resizeMode="cover"
+        />
       </View>
     );
   }
 
   return <StackNavigator />;
 }
-
-
-
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -120,6 +125,7 @@ export default function App() {
     };
   }, []);
 
+  // wait for fonts before showing anything
   if (!fontsLoaded) return null;
 
   return (

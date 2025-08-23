@@ -1,11 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, ScrollView, Platform, TouchableOpacity, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  Platform,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { getAuth } from "firebase/auth";
-import { collection, addDoc, serverTimestamp, query, updateDoc, getDocs, doc, where } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  updateDoc,
+  getDocs,
+  doc,
+  where,
+} from "firebase/firestore";
 import moment from "moment";
 import Nav from "../components/common/Nav";
 import MyAppButton from "../components/common/MyAppButton";
@@ -59,7 +78,9 @@ function AddReview() {
   };
   const taskId = task?.taskId || task?.id || "";
   const originalDesc = task?.taskDetails?.description ?? "";
-  const completedOn = moment(task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()).format("MMM-D-YYYY");
+  const completedOn = moment(
+    task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()
+  ).format("MMM-D-YYYY");
 
   const [lang, setLang] = useState("en");
   const [tr, setTr] = useState<Partial<Translations>>({});
@@ -86,7 +107,9 @@ function AddReview() {
         error: "Error",
         couldNotSubmit: "Could not submit review.",
       };
-      const vals = await Promise.all(Object.values(phrases).map((txt) => translateText(txt)));
+      const vals = await Promise.all(
+        Object.values(phrases).map((txt) => translateText(txt))
+      );
       const map = Object.keys(phrases).reduce((acc, k, i) => {
         acc[k] = vals[i] || phrases[k];
         return acc;
@@ -135,7 +158,10 @@ function AddReview() {
         createdAt: serverTimestamp(),
         taskOwnerId: task?.taskOwnerId,
       });
-      const q = query(collection(FIREBASE_DB, "completedTask"), where("taskId", "==", taskId));
+      const q = query(
+        collection(FIREBASE_DB, "completedTask"),
+        where("taskId", "==", taskId)
+      );
       const snap = await getDocs(q);
       await Promise.all(
         snap.docs.map((d) =>
@@ -162,70 +188,118 @@ function AddReview() {
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.navContainer}>
-          <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={tr.addReview || "Add Review"} />
-        </View>
-
-        <View style={styles.profileContainer}>
-          <Image source={recipientUser?.profileImage ? { uri: recipientUser?.profileImage } : Icons.dp} resizeMode="cover" style={styles.profileImage} />
-          <View style={styles.nameRow}>
-            <Text style={[styles.nameText, { color: theme.heading }]}>{recipientUser.userName}</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={[styles.screen, { backgroundColor: theme.white }]}>
+          <View style={styles.navContainer}>
+            <Nav
+              dpNull
+              marginTop={
+                Platform.OS === "android"
+                  ? RFPercentage(4.5)
+                  : RFPercentage(7.9)
+              }
+              leftLogo={false}
+              navigation={navigation}
+              title={tr.addReview || "Add Review"}
+            />
           </View>
-          <Text style={[styles.descText, { color: theme.darkGrey }]}>{taskDesc || tr.translating || "Translating..."}</Text>
-          {!!completedOn && <Text style={[styles.completedText, { color: theme.darkGrey }]}>{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>}
-        </View>
 
-        <View style={styles.ratingContainer}>
-          <Text style={[styles.experienceText, { color: theme.heading }]}>{tr.howExperience || "How Was Your Experience?"}</Text>
-          <View style={styles.starRow}>
-            {rating.map((sel, idx) => (
-              <TouchableOpacity key={idx} onPress={() => toggleStar(idx)}>
-                <FontAwesome name="star" size={RFPercentage(2.5)} color={sel ? Colors.star : Colors.stroke} style={styles.starIcon} />
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.reviewContainer}>
-          <TextInput
-            value={reviewText}
-            onChangeText={(txt) => txt.length <= 150 && setReviewText(txt)}
-            placeholder={tr.shareThoughts || "Share your thoughts..."}
-            multiline
-            placeholderTextColor={theme.inputFieldPlaceholder}
-            maxLength={150}
-            style={[styles.reviewInput, { borderColor: theme.border }]}
-          />
-          <View style={styles.charCounterContainer}>
-            <Text
-              style={[
-                styles.charCounterText,
-                {
-                  color: reviewText.length === 150 ? theme.red : theme.lightGrey,
-                },
-              ]}
-            >
-              {reviewText.length} / 150
+          <View style={styles.profileContainer}>
+            <Image
+              source={
+                recipientUser?.profileImage
+                  ? { uri: recipientUser?.profileImage }
+                  : Icons.dp
+              }
+              resizeMode="cover"
+              style={styles.profileImage}
+            />
+            <View style={styles.nameRow}>
+              <Text style={[styles.nameText, { color: theme.heading }]}>
+                {recipientUser.userName}
+              </Text>
+            </View>
+            <Text style={[styles.descText, { color: theme.darkGrey }]}>
+              {taskDesc || tr.translating || "Translating..."}
             </Text>
+            {!!completedOn && (
+              <Text
+                style={[styles.completedText, { color: theme.darkGrey }]}
+              >{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>
+            )}
           </View>
 
-          <MyAppButton title={tr.addReview || "Add Review"} disabled={submitting} loading={submitting} onPress={submitReview} />
+          <View style={styles.ratingContainer}>
+            <Text style={[styles.experienceText, { color: theme.heading }]}>
+              {tr.howExperience || "How Was Your Experience?"}
+            </Text>
+            <View style={styles.starRow}>
+              {rating.map((sel, idx) => (
+                <TouchableOpacity key={idx} onPress={() => toggleStar(idx)}>
+                  <FontAwesome
+                    name="star"
+                    size={RFPercentage(3)}
+                    color={sel ? Colors.star : Colors.stroke}
+                    style={styles.starIcon}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.reviewContainer}>
+            <TextInput
+              value={reviewText}
+              onChangeText={(txt) => txt.length <= 150 && setReviewText(txt)}
+              placeholder={tr.shareThoughts || "Share your thoughts..."}
+              multiline
+              placeholderTextColor={theme.inputFieldPlaceholder}
+              maxLength={150}
+              style={[styles.reviewInput, { borderColor: theme.border }]}
+            />
+            <View style={styles.charCounterContainer}>
+              <Text
+                style={[
+                  styles.charCounterText,
+                  {
+                    color:
+                      reviewText.length === 150 ? theme.red : theme.lightGrey,
+                  },
+                ]}
+              >
+                {reviewText.length} / 150
+              </Text>
+            </View>
+
+            <MyAppButton
+              title={tr.addReview || "Add Review"}
+              disabled={submitting}
+              loading={submitting}
+              onPress={submitReview}
+            />
+          </View>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
-/* ---------- styles ---------- */
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: Colors.white,
   },
   scrollView: { width: "100%" },
-  scrollViewContent: { width: "100%" },
+  scrollViewContent: { width: "100%", paddingBottom:RFPercentage(5) },
   navContainer: {
     marginLeft: RFPercentage(2.5),
   },
@@ -255,7 +329,7 @@ const styles = StyleSheet.create({
   descText: {
     color: Colors.grey,
     fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(1.8),
     marginTop: RFPercentage(1),
   },
   completedText: {
@@ -294,12 +368,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: "100%",
     height: RFPercentage(15),
-    borderRadius: RFPercentage(1.6),
+    borderRadius: RFPercentage(1.3),
     borderColor: "rgba(169,166,166,0.7)",
     padding: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     textAlignVertical: "top",
-    fontSize:RFPercentage(1.8)
+    fontSize: RFPercentage(1.8),
   },
   charCounterContainer: {
     width: "100%",

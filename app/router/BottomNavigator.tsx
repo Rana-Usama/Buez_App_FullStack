@@ -209,6 +209,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
           return (
             <TouchableOpacity
+            activeOpacity={0.8}
               key={index}
               onPress={onPress}
               style={[styles.tabButton, isFocused && styles.activeTab]}
@@ -264,9 +265,9 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               <Text
                 style={{
                   color: isFocused ? theme.primary : theme.detailsText,
-                  fontSize: RFPercentage(1.5),
+                  fontSize: RFPercentage(1.4),
                   top:
-                    route.name === "Home"
+                    route.name === `${t("bottomTab.txt3")}`
                       ? RFPercentage(-2)
                       : RFPercentage(0.5),
                   fontFamily: isFocused
@@ -274,7 +275,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     : "Poppins_500Medium",
                 }}
               >
-                {label}
+                {label.length > 9 ? label.slice(0,9) + `..` : label}
               </Text>
             </TouchableOpacity>
           );
@@ -315,7 +316,7 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     alignItems: "center",
-    width: RFPercentage(8),
+    flex:1
   },
   activeTab: {
     fontWeight: "bold",

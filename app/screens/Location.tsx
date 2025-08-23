@@ -30,7 +30,7 @@ export default function Location({ navigation, route }) {
 
     try {
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinate.latitude},${coordinate.longitude}&key=AIzaSyD6oYSzWEiXZcVyKmeVZkB4ipevidlFDUo`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinate.latitude},${coordinate.longitude}&key=`
       );
       const results = response.data.results;
       const address = results[0]?.formatted_address || "Selected Location";
@@ -105,7 +105,7 @@ export default function Location({ navigation, route }) {
               }
             }}
             query={{
-              key: "AIzaSyD6oYSzWEiXZcVyKmeVZkB4ipevidlFDUo",
+              key: "",
               language: "en",
             }}
             styles={{

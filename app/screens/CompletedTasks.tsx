@@ -117,7 +117,7 @@ export default function CompletedTasks({ navigation }: any) {
     const cached = (cache[item.id] || {}) as { desc?: string; category?: string };
     const desc = cached.desc ?? tr.translating;
     const catName = cached.category ?? tr.translating;
-    const shortDesc = desc && desc.length > 30 ? `${desc.slice(0, 30)}…` : desc || "-";
+    const shortDesc = desc && desc.length > 50 ? `${desc.slice(0, 50)}…` : desc || "-";
 
     return (
       <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
@@ -135,6 +135,7 @@ export default function CompletedTasks({ navigation }: any) {
         </View>
 
         <View style={styles.reviewBtnWrap}>
+          
           {item.reviewed ? (
             <Text style={[styles.reviewed, { color: theme.primary }]}>{tr.reviewed || "Reviewed"}</Text>
           ) : (
@@ -257,7 +258,8 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.6),
-    top: RFPercentage(3.5),
+    bottom: RFPercentage(-3),
+    position:"absolute"
   },
   reviewBtnWrap: {
     position: "absolute",

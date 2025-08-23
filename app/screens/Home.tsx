@@ -270,6 +270,7 @@ function Home({ navigation }) {
           onScroll={(e) => (scrollPosition.current = e.nativeEvent.contentOffset.y)}
           style={styles.scrollView}
           nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollViewContent}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
         >

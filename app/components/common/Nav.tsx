@@ -115,8 +115,8 @@ const styles = StyleSheet.create({
   },
   dot: {
     position: "absolute",
-    top: RFPercentage(1),
-    right: RFPercentage(0.6),
+    top: RFPercentage(0.9),
+    right: RFPercentage(0.4),
     width: RFPercentage(0.9),
     height: RFPercentage(0.9),
     borderRadius: RFPercentage(100),

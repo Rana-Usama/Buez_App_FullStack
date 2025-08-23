@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  img: { width: RFPercentage(16.9), height: RFPercentage(16.9) },
+  img: { width: RFPercentage(17), height: RFPercentage(17) },
 });
 
 export default DeciderScreen;

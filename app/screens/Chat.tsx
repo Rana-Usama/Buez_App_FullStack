@@ -1,7 +1,37 @@
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View, Image, TextInput, StatusBar } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+  TextInput,
+  StatusBar,
+} from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { GiftedChat, InputToolbar, Bubble, Day } from "react-native-gifted-chat";
-import { collection, query, orderBy, limit, onSnapshot, addDoc, getDocs, Timestamp, startAfter, doc, updateDoc, where, writeBatch, getDoc } from "firebase/firestore";
+import {
+  GiftedChat,
+  InputToolbar,
+  Bubble,
+  Day,
+} from "react-native-gifted-chat";
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  onSnapshot,
+  addDoc,
+  getDocs,
+  Timestamp,
+  startAfter,
+  doc,
+  updateDoc,
+  where,
+  writeBatch,
+  getDoc,
+} from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -16,14 +46,26 @@ const Chat = ({ navigation, route }) => {
   const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [lastVisible, setLastVisible] = useState(null);
-  const { chatId, senderId: currentUserId, senderName, receiver } = route.params;
+  const {
+    chatId,
+    senderId: currentUserId,
+    senderName,
+    receiver,
+  } = route.params;
   const [message, setMessage] = useState("");
   const { theme } = useAppTheme();
 
   useEffect(() => {
     const listenForNewMessages = () => {
-      const lastLoadedTimestamp = messages.length > 0 ? Timestamp.fromDate(messages[messages.length - 1].createdAt) : Timestamp.now();
-      const q = query(collection(FIREBASE_DB, `chats/${chatId}/messages`), where("timestamp", ">", lastLoadedTimestamp), orderBy("timestamp", "asc"));
+      const lastLoadedTimestamp =
+        messages.length > 0
+          ? Timestamp.fromDate(messages[messages.length - 1].createdAt)
+          : Timestamp.now();
+      const q = query(
+        collection(FIREBASE_DB, `chats/${chatId}/messages`),
+        where("timestamp", ">", lastLoadedTimestamp),
+        orderBy("timestamp", "asc")
+      );
       const unsubscribe = onSnapshot(q, async (snapshot) => {
         const newMessages = await Promise.all(
           snapshot.docs.map(async (doc) => {
@@ -45,7 +87,10 @@ const Chat = ({ navigation, route }) => {
           const messagesMap = new Map();
           prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
           newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-          const sortedMessages = Array.from(messagesMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          const sortedMessages = Array.from(messagesMap.values()).sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
           return GiftedChat.append([], sortedMessages).filter(Boolean);
         });
       });
@@ -59,7 +104,11 @@ const Chat = ({ navigation, route }) => {
 
   useEffect(() => {
     const fetchInitialMessages = async () => {
-      const q = query(collection(FIREBASE_DB, `chats/${chatId}/messages`), orderBy("timestamp", "desc"), limit(100));
+      const q = query(
+        collection(FIREBASE_DB, `chats/${chatId}/messages`),
+        orderBy("timestamp", "desc"),
+        limit(100)
+      );
       const snapshot = await getDocs(q);
       const initialMessages = await Promise.all(
         snapshot.docs.map(async (doc) => {
@@ -83,7 +132,10 @@ const Chat = ({ navigation, route }) => {
         const messagesMap = new Map();
         prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
         initialMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-        const mergedMessages = Array.from(messagesMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const mergedMessages = Array.from(messagesMap.values()).sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         return GiftedChat.append([], mergedMessages).filter(Boolean);
       });
 
@@ -95,7 +147,12 @@ const Chat = ({ navigation, route }) => {
 
   const fetchMoreMessages = async () => {
     if (!lastVisible) return;
-    const q = query(collection(FIREBASE_DB, `chats/${chatId}/messages`), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(100));
+    const q = query(
+      collection(FIREBASE_DB, `chats/${chatId}/messages`),
+      orderBy("timestamp", "desc"),
+      startAfter(lastVisible),
+      limit(100)
+    );
     const snapshot = await getDocs(q);
     const newMessages = await Promise.all(
       snapshot.docs.map(async (doc) => {
@@ -117,7 +174,10 @@ const Chat = ({ navigation, route }) => {
       const messagesMap = new Map();
       prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
       newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-      const combinedMessages = Array.from(messagesMap.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const combinedMessages = Array.from(messagesMap.values()).sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
       return GiftedChat.append([], combinedMessages).filter(Boolean);
     });
 
@@ -138,7 +198,10 @@ const Chat = ({ navigation, route }) => {
     // Save message to Firestore
     setMessage("");
     try {
-      await addDoc(collection(FIREBASE_DB, `chats/${chatId}/messages`), newMessage);
+      await addDoc(
+        collection(FIREBASE_DB, `chats/${chatId}/messages`),
+        newMessage
+      );
       const chatRef = doc(FIREBASE_DB, "chats", chatId);
       await updateDoc(chatRef, {
         ...message,
@@ -167,17 +230,20 @@ const Chat = ({ navigation, route }) => {
 
   async function sendPushNotification(message) {
     try {
-      const response = await fetch("https://buez-server-khaki.vercel.app/api/send-notification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          expoPushToken: receiver?.token,
-          title: senderName,
-          message: message,
-        }),
-      });
+      const response = await fetch(
+        "https://buez-server-khaki.vercel.app/api/send-notification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            expoPushToken: receiver?.token,
+            title: senderName,
+            message: message,
+          }),
+        }
+      );
       const data = await response.text();
       console.log("sendPushNotification:", data);
       return data;
@@ -188,27 +254,61 @@ const Chat = ({ navigation, route }) => {
   }
 
   return (
-    <LinearGradient colors={[theme.chat1, theme.chat2]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.screen}>
-      <StatusBar backgroundColor={theme.chat1} barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} />
-      <View style={[styles.profileContainer, { borderBottomColor: theme.lightGrey }]}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={RFPercentage(2.7)} color={theme.heading} />
+    <LinearGradient
+      colors={[theme.chat1, theme.chat2]}
+      start={{ x: 1, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={styles.screen}
+    >
+      <StatusBar
+        backgroundColor={theme.chat1}
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+      />
+      <View
+        style={[
+          styles.profileContainer,
+          { borderBottomColor: theme.lightGrey },
+        ]}
+      >
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons
+            name="chevron-back"
+            size={RFPercentage(2.7)}
+            color={theme.heading}
+          />
         </TouchableOpacity>
         <View style={{ marginLeft: RFPercentage(2.5) }}>
           {receiver?.profileImage ? (
             <>
-              <Image source={{ uri: receiver?.profileImage }} resizeMode="cover" style={styles.profile} />
+              <Image
+                source={{ uri: receiver?.profileImage }}
+                resizeMode="cover"
+                style={styles.profile}
+              />
             </>
           ) : (
             <>
               <View style={styles.noProfile}>
-                <Text style={[styles.noProfileInner, { color: theme.primary }]}>{receiver?.userName[0]}</Text>
+                <Text style={[styles.noProfileInner, { color: theme.primary }]}>
+                  {receiver?.userName[0]}
+                </Text>
               </View>
             </>
           )}
         </View>
         <View style={{ marginLeft: RFPercentage(1.5) }}>
-          <Text style={{ color: theme.heading, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" }}>{receiver?.userName}</Text>
+          <Text
+            style={{
+              color: theme.heading,
+              fontSize: RFPercentage(2.2),
+              fontFamily: "Poppins_500Medium",
+            }}
+          >
+            {receiver?.userName}
+          </Text>
         </View>
       </View>
 
@@ -220,21 +320,34 @@ const Chat = ({ navigation, route }) => {
             _id: currentUserId,
             name: senderName,
           }}
-          loadEarlier={!!lastVisible}
-          onLoadEarlier={fetchMoreMessages}
-          // bottomOffset={RFPercentage(2)}
-          renderLoadEarlier={(props) => (
-            <TouchableOpacity style={styles.loadMessages} onPress={props.onLoadEarlier}>
-              <Text style={{ color: Colors.white, fontFamily: "Poppins_400Regular" }}>{`${t("chat.txt1")}`}</Text>
-            </TouchableOpacity>
-          )}
           renderInputToolbar={(props) => (
             <InputToolbar
               {...props}
-              containerStyle={[styles.toolbar, { backgroundColor: theme.mode === "dark" ? "transparent" : "rgb(124, 130, 164)", borderColor: theme.mode == "dark" ? Colors.darkGrey : 'rgb(94, 91, 137)' , borderTopColor:theme.mode == "dark" ? Colors.darkGrey : 'rgb(94, 91, 137)'}]}
-              renderComposer={() => <TextInput style={styles.customTextInput} placeholder={`${t("chat.txt2")}`} placeholderTextColor="#bbb" value={message} onChangeText={setMessage} />}
+              containerStyle={[
+                styles.toolbar,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? "transparent"
+                      : "rgba(67, 76, 124, 1)",
+                  borderColor:
+                    theme.mode == "dark" ? Colors.darkGrey : "rgb(94, 91, 137)",
+                  borderTopColor:
+                    theme.mode == "dark" ? Colors.darkGrey : "rgb(94, 91, 137)",
+                },
+              ]}
+              renderComposer={() => (
+                <TextInput
+                  style={styles.customTextInput}
+                  placeholder={`${t("chat.txt2")}`}
+                  placeholderTextColor="#bbb"
+                  value={message}
+                  onChangeText={setMessage}
+                />
+              )}
               renderSend={() => (
                 <TouchableOpacity
+                  activeOpacity={0.8}
                   style={styles.sendButton}
                   disabled={!message}
                   onPress={() => {
@@ -250,37 +363,49 @@ const Chat = ({ navigation, route }) => {
                     ]);
                   }}
                 >
-                  <Feather name="send" size={RFPercentage(2.3)} color={Colors.white} />
+                  <Feather
+                    name="send"
+                    size={RFPercentage(2.3)}
+                    color={Colors.white}
+                  />
                 </TouchableOpacity>
               )}
             />
           )}
           renderDay={(props) => <Day {...props} textStyle={styles.dateText} />}
-          renderBubble={(props) => (
-            <Bubble
-              {...props}
-              wrapperStyle={{
-                left: {
-                  backgroundColor: Colors.lightWhite,
-                  padding: RFPercentage(0.6),
-                },
-                right: {
-                  backgroundColor: Colors.primary,
-                  padding: RFPercentage(0.6),
-                },
-              }}
-              textStyle={{
-                left: {
-                  color: Colors.black,
-                  fontFamily: "Poppins_400Regular",
-                },
-                right: {
-                  color: Colors.white,
-                  fontFamily: "Poppins_400Regular",
-                },
-              }}
-            />
-          )}
+          renderBubble={(props) => {
+            const isFromSameUser =
+              props.currentMessage?.user?._id ===
+              props.previousMessage?.user?._id;
+
+            return (
+              <Bubble
+                {...props}
+                wrapperStyle={{
+                  left: {
+                    backgroundColor: Colors.lightWhite,
+                    padding: RFPercentage(0.6),
+                    marginTop: isFromSameUser ? RFPercentage(0.3) : RFPercentage(1),
+                  },
+                  right: {
+                    backgroundColor: Colors.primary,
+                    padding: RFPercentage(0.6),
+                    marginTop: isFromSameUser ? RFPercentage(0.3) : RFPercentage(1), 
+                  },
+                }}
+                textStyle={{
+                  left: {
+                    color: Colors.black,
+                    fontFamily: "Poppins_400Regular",
+                  },
+                  right: {
+                    color: Colors.white,
+                    fontFamily: "Poppins_400Regular",
+                  },
+                }}
+              />
+            );
+          }}
         />
       </View>
     </LinearGradient>
@@ -320,10 +445,12 @@ const styles = StyleSheet.create({
   customTextInput: {
     color: Colors.white,
     fontSize: RFPercentage(1.8),
-    borderRadius: RFPercentage(10),
-    width: RFPercentage(38),
     fontFamily: "Poppins_400Regular",
-    // backgroundColor:'red'
+    width: "90%",
+    marginVertical: 0,
+    paddingVertical: 0,
+    justifyContent: "center",
+    height: RFPercentage(3),
   },
   sendButton: {
     justifyContent: "center",
@@ -333,17 +460,12 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     position: "absolute",
     right: 0,
-    // backgroundColor:'red',
     top: RFPercentage(-0.8),
   },
   dateText: {
     color: Colors.white,
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.6),
-    // backgroundColor: Colors.chat,
-    // paddingVertical: RFPercentage(0.8),
-    // borderRadius: RFPercentage(20),
-    // paddingHorizontal: RFPercentage(1.2),
   },
   noProfile: {
     width: RFPercentage(7),
@@ -354,9 +476,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  noProfileInner: { color: Colors.primary, fontSize: RFPercentage(2.2), fontFamily: "Poppins_500Medium" },
-  profile: { width: RFPercentage(7), height: RFPercentage(7), borderRadius: RFPercentage(100), borderWidth: 2, borderColor: Colors.primary },
-  profileContainer: { width: "100%", alignItems: "center", flexDirection: "row", height: RFPercentage(10), borderBottomWidth: 1, borderBottomColor: Colors.lightGrey , marginTop:Platform.OS === 'android' ? 0 : RFPercentage(3)},
+  noProfileInner: {
+    color: Colors.primary,
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_500Medium",
+  },
+  profile: {
+    width: RFPercentage(7),
+    height: RFPercentage(7),
+    borderRadius: RFPercentage(100),
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  profileContainer: {
+    width: "100%",
+    alignItems: "center",
+    flexDirection: "row",
+    height: RFPercentage(8.6),
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGrey,
+    marginTop: Platform.OS === "android" ? 0 : RFPercentage(3),
+  },
 });
 
 export default Chat;
