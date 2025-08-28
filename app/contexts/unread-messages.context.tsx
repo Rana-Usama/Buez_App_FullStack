@@ -11,7 +11,9 @@ const UnreadMessagesContext = createContext<UnreadCtx>({ unreadCount: 0 });
 
 export const useUnreadMessages = () => useContext(UnreadMessagesContext);
 
-export const UnreadMessagesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UnreadMessagesProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -36,12 +38,11 @@ export const UnreadMessagesProvider: React.FC<{ children: React.ReactNode }> = (
 
       snapshot.forEach((doc) => {
         const data: any = doc.data();
-        const msg = data.lastMessage;
 
         if (
-          msg?.unread &&
-          msg?.receiver === userId &&
-          msg?.senderId !== userId
+          data.unread === true &&
+          data.senderId !== userId &&
+          data.participants.includes(userId)
         ) {
           count += 1;
         }

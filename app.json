@@ -8,11 +8,6 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme": "buez",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "notification": {
       "icon": "./assets/notification-icon.png"
     },
@@ -40,11 +35,22 @@
         ],
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["buez"]
+            "CFBundleURLSchemes": [
+              "buez"
+            ]
           }
         ]
       },
-      "bundleIdentifier": "com.adamburg.Buez"
+      "bundleIdentifier": "com.adamburg.Buez",
+      "splash": {
+        "image": "./assets/splash.png",
+        "backgroundColor": "#ffffff",
+        "resizeMode": "cover",
+        "dark": {
+          "image": "./assets/Splash-dark.png",
+          "backgroundColor": "#000000"
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -54,7 +60,18 @@
       "googleServicesFile": "./google-services.json",
       "windowSoftInputMode": "adjustPan",
       "package": "com.adamburg.Buez",
-      "permissions": ["android.permission.INTERNET"]
+      "permissions": [
+        "android.permission.INTERNET"
+      ],
+      "splash": {
+        "image": "./assets/splash.png",
+        "backgroundColor": "#ffffff",
+        "resizeMode": "cover",
+        "dark": {
+          "image": "./assets/Splash-dark.png",
+          "backgroundColor": "#000000"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -106,7 +123,8 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-font"
     ],
     "extra": {
       "facebookAppId": "716889610970681",

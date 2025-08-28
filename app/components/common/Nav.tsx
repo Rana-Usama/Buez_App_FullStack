@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
+    alignSelf:"center"
   },
   touch: {
     position: "absolute",
@@ -80,10 +81,10 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.primary,
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_600SemiBold",
     textAlign:"center",
-    width:RFPercentage(25)
+    // width:RFPercentage(25)
   },
   post: {
     color: Colors.primary,
@@ -115,10 +116,10 @@ const styles = StyleSheet.create({
   },
   dot: {
     position: "absolute",
-    top: RFPercentage(0.9),
-    right: RFPercentage(0.4),
-    width: RFPercentage(0.9),
-    height: RFPercentage(0.9),
+    top: RFPercentage(0.6),
+    right: RFPercentage(0.5),
+    width: RFPercentage(0.8),
+    height: RFPercentage(0.8),
     borderRadius: RFPercentage(100),
     backgroundColor: Colors.primary,
   },

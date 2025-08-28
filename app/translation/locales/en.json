@@ -118,14 +118,14 @@
     "txt2": "Send OTP"
   },
   "freeTrial": {
-    "txt1": "Activate Your 14-day free trial!",
+    "txt1": "Start Your 14-Day Free Trial",
     "txt2": "How the Free Trial Works",
     "txt3": "Today",
-    "txt4": "Unlock full access — enjoy all features of the app, completely free.",
-    "txt5": "In 10 days",
-    "txt6": "We’ll let you know as your trial nears its end — stay informed.",
-    "txt7": "In 14 days",
-    "txt8": "Your subscription begins automatically. Cancel anytime before then to avoid charges.",
+    "txt4": "Get full access to all features — completely free for 14 days.",
+    "txt5": "10 Days Remaining",
+    "txt6": "We’ll notify you as your trial nears its end, so you stay informed.",
+    "txt7": "14 Days Remaining",
+    "txt8": "Your subscription will begin automatically. Cancel anytime before the trial ends to avoid charges.",
     "txt9": "Start Free Trial"
   },
   "subscriptionV2": {
@@ -167,8 +167,9 @@
     "txt9": "Message",
     "txt10": "No any reviews yet!",
     "txt11": "more",
-    "txt12" : "Accept Task",
-    "txt13" : "Category"
+    "txt12": "Accept Task",
+    "txt13": "Category",
+    "txt14": "Rating"
   },
   "myRequests": {
     "txt1": "My Requests",
@@ -219,7 +220,8 @@
     "txt9": "Settings",
     "txt10": "Are you sure you want to delete\nthis account?",
     "txt11": "Are you sure you want to logout\nfrom this account?",
-    "txt12": "Change Language"
+    "txt12": "Change Language",
+    "txt13" : "Dark Theme"
   },
   "cancelSubscription": {
     "txt1": "Cancel Premium Subscription",
@@ -311,6 +313,6 @@
   },
   "location": {
     "placholder": "Search for a location",
-    "by" : "+ Add Location"
+    "by": "+ Add Location"
   }
 }

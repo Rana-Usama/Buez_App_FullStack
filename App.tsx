@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  LogBox,
-  Image,
-} from "react-native";
+import { View, LogBox, Image } from "react-native";
 import {
   Poppins_300Light,
   Poppins_400Regular,
@@ -29,6 +25,7 @@ import "react-native-get-random-values";
 import { Provider } from "react-redux";
 import store from "./app/redux/store";
 import * as SplashScreen from "expo-splash-screen";
+import { UnreadMessagesProvider } from "./app/contexts/unread-messages.context";
 
 LogBox.ignoreAllLogs();
 
@@ -55,10 +52,9 @@ function MainApp() {
 
   useEffect(() => {
     async function prepare() {
-      // small delay (optional)
       await new Promise((resolve) => setTimeout(resolve, 500));
       setAppReady(true);
-      await SplashScreen.hideAsync(); // ✅ hide native splash when ready
+      await SplashScreen.hideAsync(); 
     }
     prepare();
   }, []);
@@ -125,21 +121,24 @@ export default function App() {
     };
   }, []);
 
+  console.log("fontsLoaded..........",fontsLoaded)
   // wait for fonts before showing anything
-  if (!fontsLoaded) return null;
+  // if (!fontsLoaded) return null;
 
   return (
     <ThemeProvider>
       <UserProvider>
         <PostProvider>
-          <NotificationProvider>
-            <ExpoStripeProvider>
-              <Provider store={store}>
-                <MainApp />
-              </Provider>
-              <Toast config={toastConfig} />
-            </ExpoStripeProvider>
-          </NotificationProvider>
+          <UnreadMessagesProvider>
+            <NotificationProvider>
+              <ExpoStripeProvider>
+                <Provider store={store}>
+                  <MainApp />
+                </Provider>
+                <Toast config={toastConfig} />
+              </ExpoStripeProvider>
+            </NotificationProvider>
+          </UnreadMessagesProvider>
         </PostProvider>
       </UserProvider>
     </ThemeProvider>

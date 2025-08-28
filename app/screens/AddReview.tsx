@@ -167,6 +167,8 @@ function AddReview() {
         snap.docs.map((d) =>
           updateDoc(doc(FIREBASE_DB, "completedTask", d.id), {
             reviewed: true,
+            reviewText: reviewText.trim(),
+            rating: stars,
           })
         )
       );
@@ -299,10 +301,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   scrollView: { width: "100%" },
-  scrollViewContent: { width: "100%", paddingBottom:RFPercentage(5) },
-  navContainer: {
-    marginLeft: RFPercentage(2.5),
-  },
+  scrollViewContent: { width: "100%", paddingBottom: RFPercentage(5) },
+  navContainer: {},
   profileContainer: {
     width: "90%",
     alignSelf: "center",

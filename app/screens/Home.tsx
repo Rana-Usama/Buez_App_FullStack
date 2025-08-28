@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -33,7 +33,9 @@ import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
 import haversine from "haversine";
 import * as Location from "expo-location";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { AntDesign } from "@expo/vector-icons";
+import { selectLocation, setLocation } from "../redux/Actions";
 
 type InputFieldType = {
   placeholder: string;
@@ -48,6 +50,7 @@ function Home({ navigation }) {
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
   const [filterMap, setFilterMap] = useState({});
+  const dispatch = useDispatch();
   const [inputField, SetInputField] = useState<InputFieldType[]>([
     {
       placeholder: `${t("home.txt2")}`,
@@ -56,10 +59,19 @@ function Home({ navigation }) {
   ]);
   const [activeFilter, setActiveFilter] = useState("");
   const [filterOptions, setFilterOptions] = useState([]);
-  const originalFilters = ["All", "Cleaning", "Moving", "Gardening", "Gaming", "Other"];
+  const originalFilters = [
+    "All",
+    "Cleaning",
+    "Moving",
+    "Gardening",
+    "Gaming",
+    "Other",
+  ];
   useExitAppOnBack();
   const { theme } = useAppTheme();
   const selectedLocation = useSelector((state) => state.location);
+
+  const [currentLocation, setCurrentLocation] = useState(null);
 
   const getCurrentLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -68,7 +80,7 @@ function Home({ navigation }) {
       return null;
     }
     const location = await Location.getCurrentPositionAsync({});
-    console.log("location...",location)
+    console.log("location...", location);
     return {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -79,18 +91,48 @@ function Home({ navigation }) {
     return haversine(userLocation, taskLocation, { unit: "km" }) <= 100;
   };
 
+  useEffect(() => {
+    getCurrentLocation().then(setCurrentLocation);
+  }, []);
+
+  const translationCache = useRef({}).current;
+
+  const translateWithCache = async (text: string) => {
+    if (!text) return "";
+    if (translationCache[text]) return translationCache[text];
+
+    try {
+      const translated = await translateText(text);
+      translationCache[text] = translated;
+      return translated;
+    } catch (err) {
+      console.log("Translation failed:", err);
+      return text;
+    }
+  };
+
+  const translateTask = async (task: any) => {
+    return {
+      ...task,
+      description: await translateWithCache(task.description || ""),
+      otherCompensation: await translateWithCache(task.otherCompensation || ""),
+      taskType: await translateWithCache(task.taskType || ""),
+    };
+  };
+
   useFocusEffect(
     useCallback(() => {
       const translateFilters = async () => {
-        const translations = await Promise.all(originalFilters.map((item) => translateText(item)));
+        const translations = await Promise.all(
+          originalFilters.map((item) => translateWithCache(item))
+        );
         const map = {};
         originalFilters.forEach((original, i) => {
           map[translations[i]] = original;
         });
         setFilterOptions(translations);
         setFilterMap(map);
-        const translatedAll = translations[0]; // "All"
-        setActiveFilter(translatedAll);
+        setActiveFilter(translations[0]); // "All"
       };
       translateFilters();
     }, [])
@@ -125,9 +167,7 @@ function Home({ navigation }) {
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
     try {
-      const currentLocation = await getCurrentLocation();
       if (!currentLocation) return;
-
       const referenceLocation =
         selectedLocation?.latitude2 && selectedLocation?.longitude2
           ? {
@@ -141,8 +181,12 @@ function Home({ navigation }) {
       if (typeof islastVisiblePost !== "undefined") {
         isLastVisible = islastVisiblePost;
       }
-      const { tasksArray: newRecords, lastVisible } = await getRequestList(filterToUse, "", isLastVisible);
-      // Translate each task before setting
+
+      const { tasksArray: newRecords, lastVisible } = await getRequestList(
+        filterToUse,
+        "",
+        isLastVisible
+      );
       const filteredTasks = newRecords.filter((task) => {
         const loc = task.address;
         if (!loc?.latitude || !loc?.longitude) return false;
@@ -153,19 +197,7 @@ function Home({ navigation }) {
       });
 
       const translatedTasks = await Promise.all(
-        filteredTasks.map(async (task) => {
-          const [translatedDescription, translatedCompensation, translatedTaskType] = await Promise.all([
-            translateText(task.description || ""),
-            translateText(task.otherCompensation || ""),
-            translateText(task.taskType || ""),
-          ]);
-          return {
-            ...task,
-            description: translatedDescription,
-            otherCompensation: translatedCompensation,
-            // taskType2: translatedTaskType,
-          };
-        })
+        filteredTasks.map((task) => translateTask(task, translateWithCache))
       );
 
       setAllTasks(translatedTasks);
@@ -184,22 +216,13 @@ function Home({ navigation }) {
     setLoadingMore(true);
     try {
       const filterToUse = filterMap[activeFilter] || "";
-      const { tasksArray: newRecords, lastVisible } = await getRequestList(filterToUse, searchQuery, lastVisiblePost);
+      const { tasksArray: newRecords, lastVisible } = await getRequestList(
+        filterToUse,
+        searchQuery,
+        lastVisiblePost
+      );
       const translatedNew = await Promise.all(
-        newRecords.map(async (task) => {
-          const [translatedDescription, translatedCompensation, translatedTaskType] = await Promise.all([
-            translateText(task.description || ""),
-            translateText(task.otherCompensation || ""),
-            translateText(task.taskType || ""),
-          ]);
-
-          return {
-            ...task,
-            description: translatedDescription,
-            otherCompensation: translatedCompensation,
-            // taskType: translatedTaskType,
-          };
-        })
+        newRecords.map((task) => translateTask(task, translateWithCache))
       );
       setTaskRecords([...taskRecords, ...translatedNew]);
       setLastVisiblePost(lastVisible);
@@ -233,14 +256,24 @@ function Home({ navigation }) {
   const getDisplayTasks = () => {
     let list = allTasks;
     if (filterMap[activeFilter] !== "All") {
-      list = list.filter((task) => task.taskType?.toLowerCase() === filterMap[activeFilter]?.toLowerCase());
+      list = list.filter(
+        (task) =>
+          task.taskType?.toLowerCase() ===
+          filterMap[activeFilter]?.toLowerCase()
+      );
     }
     if (searchQuery.trim() !== "") {
       list = list.filter(
         (task) =>
-          (task.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (task.user?.userName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (task.taskType || "").toLowerCase().includes(searchQuery.toLowerCase())
+          (task.description || "")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          (task.user?.userName || "")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          (task.taskType || "")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
       );
     }
     return list;
@@ -249,173 +282,331 @@ function Home({ navigation }) {
   const displayTasks = getDisplayTasks();
 
   useEffect(() => {
-  const initialIndices = {};
-  displayTasks.forEach((_, index) => {
-    initialIndices[index] = 0;
-  });
+    const initialIndices = {};
+    displayTasks.forEach((_, index) => {
+      initialIndices[index] = 0;
+    });
 
-  setActiveIndices(prev => {
-    if (JSON.stringify(prev) === JSON.stringify(initialIndices)) {
-      return prev; // no change → no re-render
-    }
-    return initialIndices;
-  });
-}, [displayTasks]);
-
+    setActiveIndices((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(initialIndices)) {
+        return prev; // no change → no re-render
+      }
+      return initialIndices;
+    });
+  }, [displayTasks]);
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
-        <ScrollView
-          onScroll={(e) => (scrollPosition.current = e.nativeEvent.contentOffset.y)}
-          style={styles.scrollView}
-          nestedScrollEnabled={true}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollViewContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[Colors.primary]} tintColor={Colors.primary} />}
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+      />
+      <ScrollView
+        onScroll={(e) =>
+          (scrollPosition.current = e.nativeEvent.contentOffset.y)
+        }
+        style={styles.scrollView}
+        nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refreshRequests}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+          />
+        }
+      >
+        {/* Nav */}
+        <Nav
+          crown={true}
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
+          }
+          profileImage={profileImgUrl}
+          leftLogo={true}
+          navigation={navigation}
+          title={`${t("home.txt1")}`}
+        />
+
+        <View style={styles.inputFieldContainer}>
+          {inputField?.map((item, i) => (
+            <View key={i} style={styles.inputFieldWrapper}>
+              <InputField
+                placeholder={item.placeholder}
+                placeholderColor={"#6B7280"}
+                height={
+                  Platform.OS === "android"
+                    ? RFPercentage(6.4)
+                    : RFPercentage(5.5)
+                }
+                backgroundColor={theme.white}
+                borderWidth={RFPercentage(0.1)}
+                borderColor={theme.border}
+                secure={item.secure}
+                borderRadius={RFPercentage(1.2)}
+                color={theme.black}
+                fontSize={RFPercentage(1.7)}
+                fontFamily={"Poppins_400Regular"}
+                handleFeild={(text) => handleChange(text, i)}
+                value={item.value}
+                width={"97%"}
+              />
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.categoriesContainer}>
+          <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t(
+            "home.txt3"
+          )}`}</Text>
+        </View>
+
+        {/* Filter Buttons */}
+        <FlatList
+          horizontal
+          data={filterOptions}
+          keyExtractor={(item) => item}
+          contentContainerStyle={styles.filterButtonsContainer}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => setActiveFilter(item)}>
+              {activeFilter === item ? (
+                <LinearGradient
+                  colors={[Colors.primary, "#4557B0"]}
+                  style={styles.gradient}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "Poppins_500Medium",
+                      color: "white",
+                      fontSize: RFPercentage(1.7),
+                    }}
+                  >
+                    {item}
+                  </Text>
+                </LinearGradient>
+              ) : (
+                <View
+                  style={[styles.nonGradient, { borderColor: theme.border }]}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "Poppins_400Regular",
+                      color: Colors.heading,
+                      fontSize: RFPercentage(1.7),
+                    }}
+                  >
+                    {item}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+        />
+
+        <View
+          style={[styles.categoriesContainer, styles.recentRequestsContainer]}
         >
-          {/* Nav */}
-          <Nav
-            crown={true}
-            marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)}
-            profileImage={profileImgUrl}
-            leftLogo={true}
-            navigation={navigation}
-            title={`${t("home.txt1")}`}
-          />
+          <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t(
+            "home.txt9"
+          )}`}</Text>
 
-          <View style={styles.inputFieldContainer}>
-            {inputField?.map((item, i) => (
-              <View key={i} style={styles.inputFieldWrapper}>
-                <InputField
-                  placeholder={item.placeholder}
-                  placeholderColor={"#6B7280"}
-                  height={Platform.OS === 'android' ? RFPercentage(6.4) : RFPercentage(5.5)}
-                  backgroundColor={theme.white}
-                  borderWidth={RFPercentage(0.1)}
-                  borderColor={theme.border}
-                  secure={item.secure}
-                  borderRadius={RFPercentage(1.2)}
-                  color={theme.black}
-                  fontSize={RFPercentage(1.7)}
-                  fontFamily={"Poppins_400Regular"}
-                  handleFeild={(text) => handleChange(text, i)}
-                  value={item.value}
-                  width={"97%"}
-                />
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.categoriesContainer}>
-            <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t("home.txt3")}`}</Text>
-          </View>
-
-          {/* Filter Buttons */}
-          <FlatList
-            horizontal
-            data={filterOptions}
-            keyExtractor={(item) => item}
-            contentContainerStyle={styles.filterButtonsContainer}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => setActiveFilter(item)}>
-                {activeFilter === item ? (
-                  <LinearGradient colors={[Colors.primary, "#4557B0"]} style={styles.gradient}>
-                    <Text style={{ fontFamily: "Poppins_500Medium", color: "white" , fontSize:RFPercentage(1.7)}}>{item}</Text>
-                  </LinearGradient>
-                ) : (
-                  <View style={[styles.nonGradient, { borderColor: theme.border }]}>
-                    <Text style={{ fontFamily: "Poppins_400Regular", color: Colors.heading ,  fontSize:RFPercentage(1.7)}}>{item}</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            )}
-          />
-
-          <View style={[styles.categoriesContainer, styles.recentRequestsContainer]}>
-            <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t("home.txt9")}`}</Text>
-            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Location", { home: true })}>
-              <Text style={[styles.categoriesText, { color: theme.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(1.8) }]}>
-                {selectedLocation.name2 ? (selectedLocation.name2.length > 20 ? `${selectedLocation.name2.slice(0, 20)}...` : selectedLocation.name2) : `${t("location.by")}`}
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate("Location", { home: true })}
+            >
+              <Text
+                style={[
+                  styles.categoriesText,
+                  {
+                    color: theme.primary,
+                    fontFamily: "Poppins_600SemiBold",
+                    fontSize: RFPercentage(1.8),
+                  },
+                ]}
+              >
+                {selectedLocation.name2
+                  ? selectedLocation.name2.length > 20
+                    ? `${selectedLocation.name2.slice(0, 20)}...`
+                    : selectedLocation.name2
+                  : `${t("location.by")}`}
               </Text>
             </TouchableOpacity>
+
+            {/* Show cross icon only if location is selected */}
+            {selectedLocation.name2 && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={{
+                  marginLeft: RFPercentage(1),
+                  bottom: RFPercentage(0.3),
+                }}
+                onPress={async () => {
+                  const current = await getCurrentLocation();
+                  if (current) {
+                    dispatch(
+                      selectLocation({
+                        latitude2: current.latitude ?? null,
+                        longitude2: current.longitude ?? null,
+                        name2: "",
+                      })
+                    );
+                  } else {
+                    dispatch(selectLocation(null));
+                  }
+                  fetchRequests(null);
+                }}
+              >
+                <AntDesign
+                  name="closecircle"
+                  size={RFPercentage(2.5)}
+                  color={theme.primary}
+                />
+              </TouchableOpacity>
+            )}
           </View>
+        </View>
 
-          {/* Carts */}
-          {loading ? (
-            <View style={{ marginTop: RFPercentage(20) }}>
-              <ActivityIndicator size="large" color={theme.primary} />
-            </View>
-          ) : (
-            <>
-              <FlatList
-                data={displayTasks}
-                keyExtractor={(item, index) => index.toString()}
-                scrollEventThrottle={16}
-                nestedScrollEnabled={true}
-                renderItem={({ item, index }) => (
-                  <TouchableOpacity onPress={() => navigation.navigate("OfferDetail", { postRequest: item })} activeOpacity={0.8} style={[styles.cartContainer, { borderColor: theme.border }]}>
-                    <FlatList
-                      data={item.imageUrls}
-                      keyExtractor={(_, imgIndex) => imgIndex.toString()}
-                      horizontal
-                      pagingEnabled
-                      showsHorizontalScrollIndicator={false}
-                      scrollEnabled={true}
-                      nestedScrollEnabled={true}
-                      onScroll={(e) => {
-                        const slideIndex = Math.round(e.nativeEvent.contentOffset.x / (width * 0.9));
-                        setActiveIndices((prev) => ({ ...prev, [index]: slideIndex }));
-                      }}
-                      renderItem={({ item: imageUrl }) => <Image resizeMode="cover" source={{ uri: imageUrl }} style={styles.img} />}
-                    />
-
-                    {item?.imageUrls?.length > 1 && (
-                      <View style={styles.dotsContainer}>
-                        {item.imageUrls.map((_, imageIndex) => (
-                          <View key={imageIndex} style={[styles.dot, { backgroundColor: imageIndex === activeIndices[index] ? theme.primary : theme.stroke }]} />
-                        ))}
-                      </View>
+        {/* Carts */}
+        {loading ? (
+          <View style={{ marginTop: RFPercentage(20) }}>
+            <ActivityIndicator size="large" color={theme.primary} />
+          </View>
+        ) : (
+          <>
+            <FlatList
+              data={displayTasks}
+              keyExtractor={(item, index) => index.toString()}
+              scrollEventThrottle={16}
+              nestedScrollEnabled={true}
+              renderItem={({ item, index }) => (
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("OfferDetail", { postRequest: item })
+                  }
+                  activeOpacity={0.8}
+                  style={[styles.cartContainer, { borderColor: theme.border }]}
+                >
+                  <FlatList
+                    data={item.imageUrls}
+                    keyExtractor={(_, imgIndex) => imgIndex.toString()}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    scrollEnabled={true}
+                    nestedScrollEnabled={true}
+                    onScroll={(e) => {
+                      const slideIndex = Math.round(
+                        e.nativeEvent.contentOffset.x / (width * 0.9)
+                      );
+                      setActiveIndices((prev) => ({
+                        ...prev,
+                        [index]: slideIndex,
+                      }));
+                    }}
+                    renderItem={({ item: imageUrl }) => (
+                      <Image
+                        resizeMode="cover"
+                        source={{ uri: imageUrl }}
+                        style={styles.img}
+                      />
                     )}
+                  />
 
-                    <View style={styles.infoWrapper}>
-                      <View style={styles.cartInfoContainer}>
-                        <TouchableOpacity activeOpacity={0.8}>
-                          <Image style={styles.userImage} source={item?.user?.profileImage ? { uri: item?.user?.profileImage } : Icons.dp} />
-                        </TouchableOpacity>
-                        <Text style={[styles.userName, { color: theme.heading }]}>{item?.user?.userName}</Text>
-                        <Text style={[styles.postDate, { color: theme.darkGrey }]}>
-                          {t("myRequests.txt4")} {getFormatedDate(item.createdAt)}
+                  {item?.imageUrls?.length > 1 && (
+                    <View style={styles.dotsContainer}>
+                      {item.imageUrls.map((_, imageIndex) => (
+                        <View
+                          key={imageIndex}
+                          style={[
+                            styles.dot,
+                            {
+                              backgroundColor:
+                                imageIndex === activeIndices[index]
+                                  ? theme.primary
+                                  : theme.stroke,
+                            },
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  )}
+
+                  <View style={styles.infoWrapper}>
+                    <View style={styles.cartInfoContainer}>
+                      <TouchableOpacity activeOpacity={0.8}>
+                        <Image
+                          style={styles.userImage}
+                          source={
+                            item?.user?.profileImage
+                              ? { uri: item?.user?.profileImage }
+                              : Icons.dp
+                          }
+                        />
+                      </TouchableOpacity>
+                      <Text style={[styles.userName, { color: theme.heading }]}>
+                        {item?.user?.userName}
+                      </Text>
+                      <Text
+                        style={[styles.postDate, { color: theme.darkGrey }]}
+                      >
+                        {t("myRequests.txt4")} {getFormatedDate(item.createdAt)}
+                      </Text>
+                    </View>
+
+                    <View style={styles.taskInfoContainer}>
+                      <Text
+                        style={[styles.taskText, { color: theme.darkGrey2 }]}
+                      >
+                        {item.description?.substr(0, 45) +
+                          (item.description?.length > 45 ? "..." : "")}
+                      </Text>
+                      <View style={styles.compensationWrapper}>
+                        <Image
+                          tintColor={theme.darkGrey}
+                          style={styles.compansationIcon}
+                          source={require("../../assets/Images/compensation.png")}
+                        />
+                        <Text
+                          style={[
+                            styles.compensationText,
+                            { color: theme.darkGrey2 },
+                          ]}
+                        >
+                          {`${t("home.txt10")}`}:{" "}
+                          <Text
+                            style={[
+                              styles.compensationAmount,
+                              { color: theme.primary },
+                            ]}
+                          >
+                            {item.compensationType === "Monitarely"
+                              ? `$${item.monitarily}`
+                              : item.otherCompensation?.substr(0, 20) +
+                                (item.otherCompensation?.length > 20
+                                  ? "..."
+                                  : "")}
+                          </Text>
                         </Text>
                       </View>
-
-                      <View style={styles.taskInfoContainer}>
-                        <Text style={[styles.taskText, { color: theme.darkGrey2 }]}>{item.description?.substr(0, 45) + (item.description?.length > 45 ? "..." : "")}</Text>
-                        <View style={styles.compensationWrapper}>
-                          <Image tintColor={theme.darkGrey} style={styles.compansationIcon} source={require("../../assets/Images/compensation.png")} />
-                          <Text style={[styles.compensationText, { color: theme.darkGrey2 }]}>
-                            {`${t("home.txt10")}`}:{" "}
-                            <Text style={[styles.compensationAmount, { color: theme.primary }]}>
-                              {item.compensationType === "Monitarely" ? `$${item.monitarily}` : item.otherCompensation?.substr(0, 20) + (item.otherCompensation?.length > 20 ? "..." : "")}
-                            </Text>
-                          </Text>
-                        </View>
-                      </View>
                     </View>
-                  </TouchableOpacity>
-                )}
-              />
-            </>
-          )}
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </>
+        )}
 
-          {!loading && displayTasks?.length === 0 && (
-            <View style={{ bottom: RFPercentage(10) }}>
-              <NotFound title={`${t("home.txt11")}`} />
-            </View>
-          )}
-          <View style={styles.bottomSpacing} />
-        </ScrollView>
+        {!loading && displayTasks?.length === 0 && (
+          <View style={{ bottom: RFPercentage(10) }}>
+            <NotFound title={`${t("home.txt11")}`} />
+          </View>
+        )}
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
     </View>
   );
 }
@@ -610,7 +801,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     color: Colors.darkGrey2,
-    width:"100%"
+    width: "100%",
   },
   compensationText: {
     fontSize: RFPercentage(1.8),
@@ -626,7 +817,11 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     marginBottom: RFPercentage(6),
   },
-  infoWrapper: { width: "100%", justifyContent: "center", alignItems: "center" },
+  infoWrapper: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   compensationWrapper: {
     marginTop: RFPercentage(1),
     justifyContent: "center",
@@ -634,9 +829,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   compansationIcon: { width: RFPercentage(2.3), height: RFPercentage(2.3) },
-  notFoundWrapper: { marginTop: RFPercentage(16), justifyContent: "center", alignItems: "center" },
-  notFoundImg: { borderRadius: RFPercentage(1), width: RFPercentage(16), height: RFPercentage(16), marginBottom: RFPercentage(2) },
-  notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
+  notFoundWrapper: {
+    marginTop: RFPercentage(16),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notFoundImg: {
+    borderRadius: RFPercentage(1),
+    width: RFPercentage(16),
+    height: RFPercentage(16),
+    marginBottom: RFPercentage(2),
+  },
+  notFoundText: {
+    color: Colors.darkGrey,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+  },
 });
 
 export default Home;

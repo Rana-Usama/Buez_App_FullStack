@@ -59,6 +59,22 @@ function OfferDetail({ navigation, route }) {
   const [averageRating, setAverageRating] = useState(null);
   const { theme } = useAppTheme();
 
+  console.log("current ......", currentUser)
+  const translationCache = React.useRef({}).current;
+
+  const translateWithCache = async (text: string) => {
+    if (!text) return "";
+    if (translationCache[text]) return translationCache[text];
+    try {
+      const translated = await translateText(text);
+      translationCache[text] = translated;
+      return translated;
+    } catch (err) {
+      console.log("Translation failed:", err);
+      return text;
+    }
+  };
+
   useEffect(() => {
     const translateOfferData = async () => {
       const [
@@ -66,9 +82,9 @@ function OfferDetail({ navigation, route }) {
         translatedDescription,
         translatedCompensation,
       ] = await Promise.all([
-        translateText(postRequest.taskType || ""),
-        translateText(postRequest.description || ""),
-        translateText(postRequest.otherCompensation || ""),
+        translateWithCache(postRequest.taskType || ""),
+        translateWithCache(postRequest.description || ""),
+        translateWithCache(postRequest.otherCompensation || ""),
       ]);
       setTranslatedOffer({
         taskType: translatedTaskType,
@@ -87,10 +103,11 @@ function OfferDetail({ navigation, route }) {
         const translated = await Promise.all(
           postRequest.reviews.map(async (review) => ({
             ...review,
-            translatedText: await translateText(review.reviewText || ""),
+            translatedText: await translateWithCache(review.reviewText || ""),
           }))
         );
         setTranslatedReviews(translated);
+
         // Calculate average rating
         const ratings = postRequest.reviews
           .map((r) => r.rating)
@@ -129,7 +146,7 @@ function OfferDetail({ navigation, route }) {
           phone: currentUser?.userData?.phone || null,
         },
         taskDetails: postRequest,
-        reviewd: false,
+        reviewed: false,
         status: "pending",
         acceptedAt: new Date().toISOString(),
       });
@@ -228,12 +245,12 @@ function OfferDetail({ navigation, route }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView
-      showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
       >
         <Nav
-          dpNull   
+          dpNull
           leftLogo={false}
           navigation={navigation}
           title={`${t("details.txt1")}`}
@@ -373,7 +390,7 @@ function OfferDetail({ navigation, route }) {
               }}
             >
               <Text style={[styles.rating, { color: theme.heading }]}>
-                {"Rating"}:
+                {t("details.txt14")}:
               </Text>
               <Text style={[styles.ratingText, { color: theme.heading }]}>
                 ⭐ {averageRating}
@@ -450,6 +467,7 @@ function OfferDetail({ navigation, route }) {
           ) : (
             <>
               <TouchableOpacity
+                activeOpacity={0.8}
                 style={[styles.chatButton, { borderColor: theme.darkGrey }]}
                 disabled={currentUserId === postRequest.userId}
                 onPress={handleStartChat}
@@ -528,7 +546,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.heading,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_600SemiBold",
   },
   description: {
@@ -556,11 +574,11 @@ const styles = StyleSheet.create({
     height: RFPercentage(2),
   },
   infoText: {
-    top: RFPercentage(-0.3),
+    top: RFPercentage(-0.4),
     marginLeft: RFPercentage(0.6),
     color: Colors.heading,
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_600SemiBold",
   },
   infoDetail: {
     top: RFPercentage(-0.2),
@@ -582,7 +600,11 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     alignSelf: "flex-start",
   },
-  detail: { color: Colors.heading, fontFamily: "Poppins_400Regular" , fontSize:RFPercentage(1.7)},
+  detail: {
+    color: Colors.heading,
+    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.7),
+  },
   reviewPic: {
     width: RFPercentage(5),
     height: RFPercentage(5),
@@ -592,13 +614,13 @@ const styles = StyleSheet.create({
   },
   compensationTitle: {
     color: Colors.heading,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_600SemiBold",
   },
   review: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical:RFPercentage(1)
+    paddingVertical: RFPercentage(1),
   },
   chatButton: {
     marginRight: RFPercentage(2),

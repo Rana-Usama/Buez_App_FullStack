@@ -1,18 +1,33 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, StatusBar, Platform } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Alert,
+  StatusBar,
+  Platform,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useStripe } from "@stripe/stripe-react-native";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
 import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
-import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import { saveSubscription } from "../services/User.service";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { scheduleFreeTrialNotification } from "../utils/notificationService";
 
 function SubscriptionV2(props) {
   const { t } = useTranslation();
@@ -44,11 +59,14 @@ function SubscriptionV2(props) {
   // Fetching payment intent
   const fetchSetupIntent = async () => {
     try {
-      const response = await fetch("https://buez-server-khaki.vercel.app/api/payment-sheet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userData?.email }),
-      });
+      const response = await fetch(
+        "https://buez-server-khaki.vercel.app/api/payment-sheet",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: userData?.email }),
+        }
+      );
       const { setupIntentClientSecret, customerId } = await response.json();
 
       if (!setupIntentClientSecret || !customerId) {
@@ -65,21 +83,21 @@ function SubscriptionV2(props) {
   const openPaymentSheet = async () => {
     setLoading(true);
     const setupData = await fetchSetupIntent();
-    console.log("setup data........", setupData);
+    // console.log("setup data........", setupData);
     if (!setupData) return;
     const { setupIntentClientSecret, customerId } = setupData;
     const { error: initError } = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: "BUEZ",
-      returnURL: 'buez://payment-complete'
+      returnURL: "buez://payment-complete",
     });
-    console.log("init error.........", initError);
+    // console.log("init error.........", initError);
     if (initError) {
       setLoading(false);
       return;
     }
     const { error: paymentError } = await presentPaymentSheet();
-    console.log("paymentError............", paymentError);
+    // console.log("paymentError............", paymentError);
     if (paymentError) {
       Toast.show({
         type: "info",
@@ -93,19 +111,26 @@ function SubscriptionV2(props) {
     // Payment
     const setupIntentId = setupIntentClientSecret.split("_secret")[0];
 
-    const res = await fetch("https://buez-server-khaki.vercel.app/api/create-subscription", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ customerId, setupIntentId }),
-    });
+    const res = await fetch(
+      "https://buez-server-khaki.vercel.app/api/create-subscription",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customerId, setupIntentId }),
+      }
+    );
 
-    console.log("res......", res);
+    // console.log("res......", res);
     const result = await res.json();
-    console.log("result...........", result);
+    // console.log("result...........", result);
 
     if (result.success) {
-      await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);
+      await updateSubscriptionStatus(
+        result?.currentPeriodStart,
+        result?.currentPeriodEnd
+      );
       await saveSubscription(userId, result?.subscriptionId);
+      await scheduleFreeTrialNotification(10);
       Toast.show({
         type: "success",
         text1: `${t("toast.subscriptionV2.three")}`,
@@ -119,20 +144,30 @@ function SubscriptionV2(props) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+      />
       <Image style={styles.logo} source={Icons.logo} />
       <Image style={styles.vector} source={Icons.vec} />
 
       <View style={styles.premiumInfo}>
         <Image style={styles.crownIcon} source={Icons.crown} />
-        <Text style={[styles.premiumText, { color: theme.darkGrey }]}>{`${t("subscriptionV2.txt1")}`}</Text>
+        <Text style={[styles.premiumText, { color: theme.darkGrey }]}>{`${t(
+          "subscriptionV2.txt1"
+        )}`}</Text>
       </View>
 
-      <View style={[styles.subscriptionContainer, { borderColor: theme.stroke }]}>
+      <View
+        style={[styles.subscriptionContainer, { borderColor: theme.stroke }]}
+      >
         <View style={styles.priceContainer}>
           <Image style={styles.starIconLeft} source={Icons.stars} />
           <Text style={[styles.priceText, { color: theme.darkGrey }]}>
-            $12<Text style={styles.priceSubText}>{`${t("subscriptionV2.txt2")}`}</Text>
+            $12
+            <Text style={styles.priceSubText}>{`${t(
+              "subscriptionV2.txt2"
+            )}`}</Text>
           </Text>
         </View>
 
@@ -140,10 +175,18 @@ function SubscriptionV2(props) {
 
         {/* Details */}
         <View style={styles.detailsContainer}>
-          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt3")}`}</Text>
-          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt4")}`}</Text>
-          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt5")}`}</Text>
-          <Text style={[styles.detailText, { color: theme.darkGrey }]}>⊙ {`${t("subscriptionV2.txt6")}`}</Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>
+            ⊙ {`${t("subscriptionV2.txt3")}`}
+          </Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>
+            ⊙ {`${t("subscriptionV2.txt4")}`}
+          </Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>
+            ⊙ {`${t("subscriptionV2.txt5")}`}
+          </Text>
+          <Text style={[styles.detailText, { color: theme.darkGrey }]}>
+            ⊙ {`${t("subscriptionV2.txt6")}`}
+          </Text>
         </View>
 
         <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
@@ -151,9 +194,24 @@ function SubscriptionV2(props) {
         </View>
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "80%", marginTop:RFPercentage(4)}}>
-        <MyAppButton title={`${t("subscriptionV2.txt7")}`} marginTop={RFPercentage(0)} onPress={() => openPaymentSheet()} width={RFPercentage(18)} loading={loading} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "80%",
+          marginTop: RFPercentage(4),
+        }}
+      >
+        <MyAppButton
+          title={`${t("subscriptionV2.txt7")}`}
+          marginTop={RFPercentage(0)}
+          onPress={() => openPaymentSheet()}
+          width={RFPercentage(19)}
+          loading={loading}
+        />
         <TouchableOpacity
+          activeOpacity={0.8}
           onPress={async () => {
             if (!userId) return;
             try {
@@ -162,12 +220,19 @@ function SubscriptionV2(props) {
                 isFreeTrial: true,
                 freeTrialStartedAt: serverTimestamp(),
               });
+              await scheduleFreeTrialNotification(10);
               props.navigation.navigate("TabNavigator");
             } catch (error) {}
           }}
           style={[styles.skip, { borderColor: theme.grey }]}
         >
-          <Text style={{ color: theme.grey, fontFamily: "Poppins_500Medium" , fontSize:RFPercentage(2)}}>{`${t("buttons.skip")}`}</Text>
+          <Text
+            style={{
+              color: theme.grey,
+              fontFamily: "Poppins_500Medium",
+              fontSize: RFPercentage(2),
+            }}
+          >{`${t("buttons.skip")}`}</Text>
         </TouchableOpacity>
       </View>
     </Screen>
@@ -211,7 +276,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     width: "90%",
-    height: Platform.OS === 'android' ? RFPercentage(32) : RFPercentage(30),
+    height: Platform.OS === "android" ? RFPercentage(32) : RFPercentage(30),
     borderColor: Colors.stroke,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(2),
@@ -270,8 +335,8 @@ const styles = StyleSheet.create({
     bottom: RFPercentage(0.1),
   },
   skip: {
-    height: Platform.OS === 'android' ?  RFPercentage(6.2) : RFPercentage(5.5),
-    width: RFPercentage(18),
+    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
+    width: RFPercentage(19),
     borderWidth: 1,
     borderColor: Colors.primary,
     alignItems: "center",

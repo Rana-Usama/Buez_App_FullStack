@@ -1,5 +1,15 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, Image, ScrollView, Platform, FlatList, ActivityIndicator, RefreshControl } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  Platform,
+  FlatList,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
@@ -39,7 +49,9 @@ export default function CompletedTasks({ navigation }: any) {
   const [tr, setTr] = useState<Partial<Translations>>({});
   const { t } = useTranslation();
   const [tasks, setTasks] = useState<any[]>([]);
-  const [cache, setCache] = useState<Record<string, { desc: string; category: string }>>({});
+  const [cache, setCache] = useState<
+    Record<string, { desc: string; category: string }>
+  >({});
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const { theme } = useAppTheme();
@@ -57,7 +69,9 @@ export default function CompletedTasks({ navigation }: any) {
         noTasks: "No completed tasks",
         translating: "Translating...",
       };
-      const vals = await Promise.all(Object.values(base).map((txt) => translateText(txt)));
+      const vals = await Promise.all(
+        Object.values(base).map((txt) => translateText(txt))
+      );
       const mapped = Object.keys(base).reduce((obj, k, i) => {
         obj[k] = vals[i] || base[k];
         return obj;
@@ -79,7 +93,10 @@ export default function CompletedTasks({ navigation }: any) {
           const originalDesc = task.taskDetails?.description || "";
           const originalCat = task.taskDetails?.taskType || "";
 
-          const [descTr, catTr] = await Promise.all([originalDesc ? translateText(originalDesc) : "", originalCat ? translateText(originalCat) : ""]);
+          const [descTr, catTr] = await Promise.all([
+            originalDesc ? translateText(originalDesc) : "",
+            originalCat ? translateText(originalCat) : "",
+          ]);
 
           newCache[task.id] = {
             desc: descTr || originalDesc,
@@ -113,35 +130,95 @@ export default function CompletedTasks({ navigation }: any) {
   const renderItem = ({ item }: { item: any }) => {
     const details = item.taskDetails || {};
     const owner = details.user || {};
-    const doneOn = item.completedAt || item.acceptedAt || new Date().toISOString();
-    const cached = (cache[item.id] || {}) as { desc?: string; category?: string };
+    const doneOn =
+      item.completedAt || item.acceptedAt || new Date().toISOString();
+    const cached = (cache[item.id] || {}) as {
+      desc?: string;
+      category?: string;
+    };
     const desc = cached.desc ?? tr.translating;
     const catName = cached.category ?? tr.translating;
-    const shortDesc = desc && desc.length > 50 ? `${desc.slice(0, 50)}…` : desc || "-";
+    const shortDesc =
+      desc && desc.length > 50 ? `${desc.slice(0, 50)}…` : desc || "-";
 
     return (
-      <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: theme.white, borderColor: theme.border },
+        ]}
+      >
         <View style={styles.headerRow}>
           <View style={styles.rowCenter}>
-            <Image style={styles.avatar} source={owner?.profileImage ? { uri: owner?.profileImage } : Icons.dp} />
-            <Text style={[styles.userName, { color: theme.heading }]}>{owner.userName || "User"}</Text>
+            <Image
+              style={styles.avatar}
+              source={
+                owner?.profileImage ? { uri: owner?.profileImage } : Icons.dp
+              }
+            />
+            <Text style={[styles.userName, { color: theme.heading }]}>
+              {owner.userName || "User"}
+            </Text>
           </View>
-          <Text style={[styles.category, { color: theme.darkGrey }]}>{`${tr.category || "Category"}: ${catName}`}</Text>
+          <Text style={[styles.category, { color: theme.darkGrey }]}>{`${
+            tr.category || "Category"
+          }: ${catName}`}</Text>
         </View>
 
         <View style={styles.descWrap}>
-          <Text style={[styles.desc, { color: theme.darkGrey }]}>{shortDesc}</Text>
-          <Text style={[styles.date, { color: theme.darkGrey }]}>{`${tr.completedOn || "Completed on"}: ${getFormatedDate(doneOn)}`}</Text>
+          <Text style={[styles.desc, { color: theme.darkGrey }]}>
+            {shortDesc}
+          </Text>
+          
         </View>
 
-        <View style={styles.reviewBtnWrap}>
+        <View style={{flexDirection:'row', alignItems:'center', justifyContent:"space-between", width:"90%", alignSelf:'center', paddingVertical:RFPercentage(1.5)}}>
+          <Text style={[styles.date, { color: theme.darkGrey }]}>{`${
+            tr.completedOn || "Completed on"
+          }: ${getFormatedDate(doneOn)}`}</Text>
+          <View>
+            {
+              item.reviewed ? 
+              (
+                <Text style={{color:theme.primary, fontFamily:"Poppins_600SemiBold", fontSize:RFPercentage(1.8)}}>Reviewed</Text>
+
+              )
+              :
+              (
+             <MyAppButton
+              title={tr.review || "Review"}
+              height={RFPercentage(4)}
+              width={RFPercentage(12)}
+              marginTop={0}
+              onPress={() => navigation.navigate("AddReview", { task: item })}
+            />
+              )
+            }
           
-          {item.reviewed ? (
-            <Text style={[styles.reviewed, { color: theme.primary }]}>{tr.reviewed || "Reviewed"}</Text>
-          ) : (
-            <MyAppButton title={tr.review || "Review"} height={RFPercentage(4)} width={RFPercentage(12)} onPress={() => navigation.navigate("AddReview", { task: item })} />
-          )}
+          </View>
         </View>
+
+          {item.reviewed && (
+            <View style={styles.reviewBox}>
+              <View style={styles.starRow}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Text
+                    key={i}
+                    style={{
+                      color:
+                        i <= (item.rating || 0) ? Colors.star : Colors.stroke,
+                        fontSize:RFPercentage(2)
+                    }}
+                  >
+                    ★
+                  </Text>
+                ))}
+              </View>
+              <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
+                {item.reviewText || tr.reviewed || "Reviewed"}
+              </Text>
+            </View>
+          ) }
       </View>
     );
   };
@@ -151,19 +228,43 @@ export default function CompletedTasks({ navigation }: any) {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} tintColor={Colors.primary} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+          />
+        }
       >
         {/* Nav */}
         <View style={styles.navContainer}>
-          <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={t("profile.txt4")} />
+          <Nav
+            dpNull
+            marginTop={
+              Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+            }
+            leftLogo={false}
+            navigation={navigation}
+            title={t("profile.txt4")}
+          />
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color={Colors.primary} style={styles.activityIndicator} />
+          <ActivityIndicator
+            size="large"
+            color={Colors.primary}
+            style={styles.activityIndicator}
+          />
         ) : tasks.length === 0 ? (
           <NotFound title={tr.noTasks || "No completed tasks"} />
         ) : (
-          <FlatList data={tasks} keyExtractor={(item) => item.id} renderItem={renderItem} contentContainerStyle={styles.flatListContent} />
+          <FlatList
+            data={tasks}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.flatListContent}
+          />
         )}
       </ScrollView>
     </View>
@@ -179,9 +280,7 @@ const styles = StyleSheet.create({
   scrollView: { width: "100%" },
   scrollViewContent: { flexGrow: 1 },
 
-  navContainer: {
-    marginLeft: RFPercentage(2.5),
-  },
+  navContainer: {},
 
   headerWrap: {
     width: "90%",
@@ -205,7 +304,6 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
     marginTop: RFPercentage(3),
-    height: RFPercentage(20),
     borderRadius: RFPercentage(1.6),
     backgroundColor: Colors.white,
     borderColor: Colors.border,
@@ -258,13 +356,8 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.6),
-    bottom: RFPercentage(-3),
-    position:"absolute"
   },
   reviewBtnWrap: {
-    position: "absolute",
-    right: RFPercentage(1.6),
-    bottom: RFPercentage(2),
   },
   reviewed: {
     fontFamily: "Poppins_500Medium",
@@ -278,5 +371,19 @@ const styles = StyleSheet.create({
   flatListContent: {
     paddingBottom: RFPercentage(5),
     paddingTop: RFPercentage(2),
+  },
+  reviewBox: {
+    width:"90%",
+    alignSelf:"center",
+    paddingBottom:RFPercentage(1.5)
+  },
+  starRow: {
+    flexDirection: "row",
+    marginBottom: RFPercentage(0.5),
+  },
+  reviewText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.7),
+    lineHeight:RFPercentage(2)
   },
 });

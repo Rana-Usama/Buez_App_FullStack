@@ -10,9 +10,9 @@ import { saveCredentials } from "../services/Auth.service";
 import { checkExistingEmailLoginType, saveEmailLoginType } from "./loginType";
 import * as SecureStore from "expo-secure-store";
 
-const FB_APP_ID = "";
-const APP_SECRET = "";
-const REDIRECT_URI = "";
+const FB_APP_ID = process.env.EXPO_PUBLIC_FB_APP_ID;
+const APP_SECRET = process.env.EXPO_PUBLIC_APP_SECRET;
+const REDIRECT_URI = process.env.EXPO_PUBLIC_REDIRECT_URI;
 
 const FB_LOGIN_URL = `https://www.facebook.com/v23.0/dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${encodeURIComponent(
   REDIRECT_URI

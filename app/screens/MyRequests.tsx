@@ -1,5 +1,19 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Image, Platform, FlatList, Dimensions, RefreshControl, ActivityIndicator, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ImageBackground,
+  Image,
+  Platform,
+  FlatList,
+  Dimensions,
+  RefreshControl,
+  ActivityIndicator,
+  StatusBar,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
@@ -17,6 +31,7 @@ import { translateText } from "../translation/googleTranslation";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
 import ConfirmationModal from "../components/common/ConfirmationModal";
+import Feather from '@expo/vector-icons/Feather';
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -38,7 +53,12 @@ function MyRequests({ navigation }) {
   useExitAppOnBack();
   const { theme } = useAppTheme();
 
-  const param = activeFilter === `${t("myRequests.txt2")}` ? REQUEST_STATUS.Active : activeFilter === `${t("myRequests.txt3")}` ? REQUEST_STATUS.Completed : REQUEST_STATUS.Cancelled;
+  const param =
+    activeFilter === `${t("myRequests.txt2")}`
+      ? REQUEST_STATUS.Active
+      : activeFilter === `${t("myRequests.txt3")}`
+      ? REQUEST_STATUS.Completed
+      : REQUEST_STATUS.Cancelled;
 
   useFocusEffect(
     useCallback(() => {
@@ -55,13 +75,20 @@ function MyRequests({ navigation }) {
       if (typeof islastVisiblePost !== "undefined") {
         isLastVisible = islastVisiblePost;
       }
-      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(param, isLastVisible);
+      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(
+        param,
+        isLastVisible
+      );
       const translatedRecords = await Promise.all(
         newRecords.map(async (item) => {
           const translatedTitle = await translateText(item.title || "");
-          const translatedDescription = await translateText(item.description || "");
+          const translatedDescription = await translateText(
+            item.description || ""
+          );
           const translatedTaskType = await translateText(item.taskType || "");
-          const otherCompensation = await translateText(item.otherCompensation || "");
+          const otherCompensation = await translateText(
+            item.otherCompensation || ""
+          );
           return {
             ...item,
             title: translatedTitle,
@@ -86,7 +113,10 @@ function MyRequests({ navigation }) {
     if (!hasMore || loadingMore) return;
     setLoadingMore(true);
     try {
-      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(param, lastVisiblePost);
+      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(
+        param,
+        lastVisiblePost
+      );
       setTaskRecords([...taskRecords, ...newRecords]);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
@@ -145,24 +175,75 @@ function MyRequests({ navigation }) {
     }
   };
 
+
+ const repostRequest = async (index, item) => {
+  setLoader(true);
+  try {
+    const updatedData = {
+      ...item,
+      acceptedBy: null,
+      status: REQUEST_STATUS.Active,
+    };
+
+    await updateReqestStatus(item.id, REQUEST_STATUS.Active, updatedData);
+    setTaskRecords((prev) => {
+      const newRecords = [...prev];
+      newRecords[index] = { ...newRecords[index], ...updatedData };
+      return newRecords;
+    });
+
+    Toast.show({
+      type: "success",
+      text1: t("toast.myRequests.one"),
+      text2: "Request Reposted Successfully",
+    });
+  } catch (e) {
+    Toast.show({
+      type: "error",
+      text1: t("toast.myRequests.five"),
+      text2: t("toast.myRequests.six"),
+    });
+  } finally {
+    setLoader(false);
+  }
+};
+
+
+
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
       activeOpacity={0.8}
-      style={[styles.filterButton, { borderColor: isActive ? "transparent" : theme.border }, isFirst && styles.firstFilterButton]}
+      style={[
+        styles.filterButton,
+        { borderColor: isActive ? "transparent" : theme.border },
+        isFirst && styles.firstFilterButton,
+      ]}
       onPress={() => setActiveFilter(title)}
     >
       {isActive ? (
-        <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={styles.gradient}>
+        <LinearGradient
+          colors={[Colors.primary, "#4557B0"]}
+          start={{ x: 0, y: 1 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.gradient}
+        >
           <Text style={styles.filterButtonTextActive}>{title}</Text>
         </LinearGradient>
       ) : (
-        <Text style={[styles.filterButtonTextInactive, { color: theme.heading }]}>{title}</Text>
+        <Text
+          style={[styles.filterButtonTextInactive, { color: theme.heading }]}
+        >
+          {title}
+        </Text>
       )}
     </TouchableOpacity>
   );
 
   const postEditHandler = (cart) => {
-    navigation.navigate("PostRequest", { title: "Edit Request", postRequest: cart });
+    navigation.navigate("PostRequest", {
+      title: "Edit Request",
+      postRequest: cart,
+    });
   };
 
   const handleImageScroll = (event, cardIndex) => {
@@ -177,25 +258,55 @@ function MyRequests({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+      />
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshRequests} colors={[theme.primary]} tintColor={theme.primary} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refreshRequests}
+            colors={[theme.primary]}
+            tintColor={theme.primary}
+          />
+        }
       >
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo navigation={navigation} title={`${t("myRequests.txt1")}`} />
+        <Nav
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+          }
+          profileImage={profileImgUrl}
+          leftLogo
+          navigation={navigation}
+          title={`${t("myRequests.txt1")}`}
+        />
 
         {/* Updated Filter Tabs: Active, Completed, Cancelled */}
         <View style={styles.filterContainer}>
-          {[`${t("myRequests.txt2")}`, `${t("myRequests.txt3")}`, `${t("myRequests.txt8")}`].map((title, index) => (
-            <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
+          {[
+            `${t("myRequests.txt2")}`,
+            `${t("myRequests.txt3")}`,
+            `${t("myRequests.txt8")}`,
+          ].map((title, index) => (
+            <FilterButton
+              key={title}
+              title={title}
+              isActive={activeFilter === title}
+              isFirst={index === 0}
+            />
           ))}
         </View>
 
         {/* Cards */}
         {taskRecords.map((cart, index) => (
-          <View key={index} style={[styles.cartContainer, { borderColor: theme.border }]}>
+          <View
+            key={index}
+            style={[styles.cartContainer, { borderColor: theme.border }]}
+          >
             <FlatList
               data={cart.imageUrls}
               horizontal
@@ -205,13 +316,21 @@ function MyRequests({ navigation }) {
               scrollEventThrottle={16}
               onEndReached={handleLoadMore}
               renderItem={({ item }) => (
-                <ImageBackground style={styles.cartImageBackground} imageStyle={styles.cartImage} source={{ uri: item }} resizeMode="cover">
+                <ImageBackground
+                  style={styles.cartImageBackground}
+                  imageStyle={styles.cartImage}
+                  source={{ uri: item }}
+                  resizeMode="cover"
+                >
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{cart.taskType}</Text>
                   </View>
                   {cart.status === REQUEST_STATUS.Active && (
                     <View style={styles.cartWrapper}>
-                      <TouchableOpacity activeOpacity={0.8} onPress={() => postEditHandler(cart)}>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => postEditHandler(cart)}
+                      >
                         <Image style={styles.edit} source={Icons.editRequest} />
                       </TouchableOpacity>
                     </View>
@@ -223,50 +342,109 @@ function MyRequests({ navigation }) {
             {cart.imageUrls.length > 1 && (
               <View style={styles.dotsContainer}>
                 {cart.imageUrls.map((_, imageIndex) => (
-                  <View key={imageIndex} style={[styles.dot, { backgroundColor: (activeIndices[index] ?? 0) === imageIndex ? theme.primary : theme.border }]} />
+                  <View
+                    key={imageIndex}
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor:
+                          (activeIndices[index] ?? 0) === imageIndex
+                            ? theme.primary
+                            : theme.border,
+                      },
+                    ]}
+                  />
                 ))}
               </View>
             )}
             {/* User Info */}
             <View style={styles.cartInfoContainer}>
               <TouchableOpacity activeOpacity={0.8}>
-                <Image style={styles.userImage} source={cart?.user?.profileImage ? { uri: cart?.user?.profileImage } : Icons.dp} />
+                <Image
+                  style={styles.userImage}
+                  source={
+                    cart?.user?.profileImage
+                      ? { uri: cart?.user?.profileImage }
+                      : Icons.dp
+                  }
+                />
               </TouchableOpacity>
-              <Text style={[styles.userName, { color: theme.heading }]}>{cart?.user?.userName}</Text>
-              <Text style={[styles.postDate, { color: theme.darkGrey }]}>{`${t("myRequests.txt4")} ${getFormatedDate(cart?.createdAt)}`}</Text>
+              <Text style={[styles.userName, { color: theme.heading }]}>
+                {cart?.user?.userName}
+              </Text>
+              <Text style={[styles.postDate, { color: theme.darkGrey }]}>{`${t(
+                "myRequests.txt4"
+              )} ${getFormatedDate(cart?.createdAt)}`}</Text>
             </View>
 
             {/* Description */}
             <View style={styles.taskInfoContainer}>
-              <Text style={[styles.taskText, { color: theme.darkGrey }]}>{cart?.description?.substr(0, 30) + (cart?.description?.length > 15 ? "..." : "")}</Text>
+              <Text style={[styles.taskText, { color: theme.darkGrey }]}>
+                {cart?.description?.substr(0, 45) +
+                  (cart?.description?.length > 45 ? "..." : "")}
+              </Text>
             </View>
 
             {/* Compensation */}
             <View style={styles.taskInfoContainer}>
               <Text style={[styles.compensation, { color: theme.heading }]}>
                 {`${t("home.txt10")}`}:{" "}
-                <Text style={[styles.compensationAmount, { color: theme.primary }]}>
-                  {cart.compensationType === "Monitarely" ? `${cart.monitarily}$` : cart.otherCompensation?.substr(0, 20) + (cart.otherCompensation?.length > 20 ? "..." : "")}
+                <Text
+                  style={[styles.compensationAmount, { color: theme.primary }]}
+                >
+                  {cart.compensationType === "Monitarely"
+                    ? `${cart.monitarily}$`
+                    : cart.otherCompensation?.substr(0, 20) +
+                      (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
               </Text>
+              <TouchableOpacity onPress={(cart)=>repostRequest(index, cart)} activeOpacity={0.8} style={{position:'absolute', right:0,}}>
+                <Feather name="repeat" size={RFPercentage(2)} color={theme.primary} />
+              </TouchableOpacity>
             </View>
 
             {/* Actions (only for active posts) */}
             {cart?.status === REQUEST_STATUS.Active && (
               <View style={styles.cartContainer2}>
-                <TouchableOpacity disabled={loader} style={styles.markButton} onPress={() => changeReqestStatus(index, REQUEST_STATUS.Completed, cart)}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  disabled={loader}
+                  style={styles.markButton}
+                  onPress={() =>
+                    changeReqestStatus(index, REQUEST_STATUS.Completed, cart)
+                  }
+                >
                   <Text style={styles.text2}>{`${t("myRequests.txt5")}`}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  activeOpacity={0.8}
                   disabled={loader}
                   onPress={() => {
                     setSelectedRequestIndex(index);
                     setSelectedRequestItem(cart);
                     setIsModalVisible(true);
                   }}
-                  style={[styles.cancel, { borderColor: theme.mode === "dark" ? theme.lightGrey : theme.lightGrey }]}
+                  style={[
+                    styles.cancel,
+                    {
+                      borderColor:
+                        theme.mode === "dark"
+                          ? theme.lightGrey
+                          : theme.lightGrey,
+                    },
+                  ]}
                 >
-                  <Text style={[styles.text3, { color: theme.mode === "dark" ? theme.lightGrey : theme.lightGrey }]}>{`${t("myRequests.txt6")}`}</Text>
+                  <Text
+                    style={[
+                      styles.text3,
+                      {
+                        color:
+                          theme.mode === "dark"
+                            ? theme.lightGrey
+                            : theme.lightGrey,
+                      },
+                    ]}
+                  >{`${t("myRequests.txt6")}`}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -279,7 +457,9 @@ function MyRequests({ navigation }) {
           </View>
         )}
 
-        {!loading && taskRecords.length === 0 && <NotFound title={`${t("home.txt11")}`} />}
+        {!loading && taskRecords.length === 0 && (
+          <NotFound title={`${t("home.txt11")}`} />
+        )}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -289,7 +469,11 @@ function MyRequests({ navigation }) {
         onClose={() => setIsModalVisible(false)}
         onConfirm={() => {
           if (selectedRequestIndex !== null && selectedRequestItem) {
-            changeReqestStatus(selectedRequestIndex, REQUEST_STATUS.Cancelled, selectedRequestItem);
+            changeReqestStatus(
+              selectedRequestIndex,
+              REQUEST_STATUS.Cancelled,
+              selectedRequestItem
+            );
             setIsModalVisible(false);
           }
         }}
@@ -318,7 +502,7 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(10),
   },
   filterButton: {
-    width: RFPercentage(12),
+    width: RFPercentage(13),
     height: RFPercentage(4.6),
     borderRadius: RFPercentage(1),
     justifyContent: "center",
@@ -346,12 +530,12 @@ const styles = StyleSheet.create({
   },
   filterButtonTextActive: {
     color: Colors.white,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_500Medium",
   },
   filterButtonTextInactive: {
     color: Colors.heading,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },
   cartContainer: {
@@ -398,7 +582,11 @@ const styles = StyleSheet.create({
     width: RFPercentage(3.7),
     height: RFPercentage(3.7),
   },
-  compensation: { fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(1) },
+  compensation: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_500Medium",
+    marginTop: RFPercentage(1),
+  },
   dot: {
     height: RFPercentage(0.9),
     width: RFPercentage(0.9),
@@ -427,7 +615,12 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
   },
-  text2: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.6), textAlign: "center" },
+  text2: {
+    color: Colors.white,
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.5),
+    textAlign: "center",
+  },
   postDate: {
     fontSize: RFPercentage(1.6),
     position: "absolute",
@@ -483,12 +676,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary,
-    width: RFPercentage(18),
+    width: RFPercentage(18.5),
     paddingVertical: RFPercentage(1),
   },
   cancel: {
     borderRadius: RFPercentage(100),
-    width: RFPercentage(18),
+    width: RFPercentage(18.5),
     height: RFPercentage(5.2),
     borderWidth: 1.5,
     justifyContent: "center",
@@ -497,9 +690,33 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "transparent",
   },
-  notFoundWrapper: { marginTop: RFPercentage(24), justifyContent: "center", alignItems: "center" },
-  notFoundIcon: { borderRadius: RFPercentage(1), width: RFPercentage(20), height: RFPercentage(20), marginBottom: RFPercentage(2) },
-  notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
-  cartContainer2: { width: "92%", flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: RFPercentage(2) },
-  text3: { color: Colors.white, fontFamily: "Poppins_500Medium", fontSize: RFPercentage(1.7), textAlign: "center" },
+  notFoundWrapper: {
+    marginTop: RFPercentage(24),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notFoundIcon: {
+    borderRadius: RFPercentage(1),
+    width: RFPercentage(20),
+    height: RFPercentage(20),
+    marginBottom: RFPercentage(2),
+  },
+  notFoundText: {
+    color: Colors.darkGrey,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+  },
+  cartContainer2: {
+    width: "92%",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    marginTop: RFPercentage(2),
+  },
+  text3: {
+    color: Colors.white,
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.6),
+    textAlign: "center",
+  },
 });

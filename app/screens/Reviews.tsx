@@ -173,7 +173,7 @@ export default function Reviews({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <View style={{ width: "90%", alignSelf: "center" }}>
+      <View style={{ width: "100%", alignSelf: "center" }}>
         <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("profile.txt3")}`} />
       </View>
       {averageRating && (
@@ -189,7 +189,7 @@ export default function Reviews({ navigation }) {
       ) : sections.length === 0 ? (
         <NotFound title={labels.noReviews} />
       ) : (
-        <View>
+        <View style={{ marginTop:RFPercentage(-1)}}>
           <SectionList
             sections={sections}
             keyExtractor={(item) => item.id}
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     color: Colors.heading,
   },
   separator: { width: "60%", height: RFPercentage(0.1), marginTop: RFPercentage(0.5), left: RFPercentage(2.3) },
-  sectionHeader: { width: "90%", alignSelf: "center", color: Colors.grey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" },
+  sectionHeader: { width: "90%", alignSelf: "center", color: Colors.grey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" , marginTop:RFPercentage(2)},
   card: {
     width: "90%",
     alignSelf: "center",

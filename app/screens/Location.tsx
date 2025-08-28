@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity, View, Platform } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Platform, Text } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { AntDesign } from "@expo/vector-icons";
@@ -14,9 +14,12 @@ export default function Location({ navigation, route }) {
   const { home } = route.params;
   const mapRef = useRef(null);
   const [marker, setMarker] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null); // NEW state
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { theme } = useAppTheme();
+
+  const key = process.env.EXPO_PUBLIC_LOCATION_NAME;
 
   const handleMapPress = async (event) => {
     const coordinate = event.nativeEvent.coordinate;
@@ -30,42 +33,40 @@ export default function Location({ navigation, route }) {
 
     try {
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinate.latitude},${coordinate.longitude}&key=`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinate.latitude},${coordinate.longitude}&key=${key}`
       );
       const results = response.data.results;
       const address = results[0]?.formatted_address || "Selected Location";
 
-      if (home) {
-        dispatch(
-          selectLocation({
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude,
-            name: address,
-          })
-        );
-      } else {
-        dispatch(
-          setLocation({
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude,
-            name: address,
-          })
-        );
-      }
+      // only store locally, don’t dispatch yet
+      setSelectedLocation({
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        name: address,
+      });
     } catch (error) {
       console.log("Reverse geocoding failed:", error);
-      dispatch(
-        setLocation({
-          latitude: coordinate.latitude,
-          longitude: coordinate.longitude,
-          name: "Unknown Location",
-        })
-      );
+      setSelectedLocation({
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        name: "Unknown Location",
+      });
     }
+  };
+
+  const handleApplyFilter = () => {
+    if (!selectedLocation) return;
+    if (home) {
+      dispatch(selectLocation(selectedLocation));
+    } else {
+      dispatch(setLocation(selectedLocation));
+    }
+    navigation.goBack(); // go back after applying
   };
 
   return (
     <View style={styles.container}>
+      {/* Top Row */}
       <View style={styles.topRow}>
         <TouchableOpacity
           activeOpacity={0.8}
@@ -98,21 +99,14 @@ export default function Location({ navigation, route }) {
               });
 
               setMarker(coordinate);
-              if (home) {
-                dispatch(selectLocation(coordinate));
-              } else {
-                dispatch(setLocation(coordinate));
-              }
+              setSelectedLocation(coordinate); // only save, don’t dispatch
             }}
             query={{
-              key: "",
+              key: key,
               language: "en",
             }}
             styles={{
-              poweredContainer: {
-                backgroundColor: theme.white,
-              },
-
+              poweredContainer: { backgroundColor: theme.white },
               textInput: {
                 height: RFPercentage(6),
                 fontSize: RFPercentage(1.8),
@@ -120,18 +114,10 @@ export default function Location({ navigation, route }) {
                 backgroundColor: theme.white,
                 color: theme.black,
               },
-              listView: {
-                backgroundColor: theme.white,
-              },
-              row: {
-                backgroundColor: theme.white,
-              },
-              description: {
-                color: theme.black,
-              },
-              container: {
-                flex: 1,
-              },
+              listView: { backgroundColor: theme.white },
+              row: { backgroundColor: theme.white },
+              description: { color: theme.black },
+              container: { flex: 1 },
             }}
             textInputProps={{
               placeholderTextColor: theme.grey,
@@ -140,6 +126,7 @@ export default function Location({ navigation, route }) {
         </View>
       </View>
 
+      {/* Map */}
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -153,17 +140,26 @@ export default function Location({ navigation, route }) {
       >
         {marker && <Marker coordinate={marker} title="Selected Location" />}
       </MapView>
+
+      {/* Apply Filter Button */}
+      {selectedLocation && (
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleApplyFilter}
+            style={[styles.applyButton, { backgroundColor: theme.primary }]}
+          >
+            <Text style={styles.applyButtonText}>{t("location.by") || "Apply Filter"}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  container: { flex: 1 },
+  map: { ...StyleSheet.absoluteFillObject },
   topRow: {
     position: "absolute",
     top: Platform.OS === "ios" ? RFPercentage(8) : RFPercentage(2),
@@ -175,14 +171,28 @@ const styles = StyleSheet.create({
   backButton: {
     width: RFPercentage(5.3),
     height: RFPercentage(5.3),
-    backgroundColor: "white",
     borderRadius: RFPercentage(100),
     alignItems: "center",
     justifyContent: "center",
     marginRight: RFPercentage(1),
     top: RFPercentage(0.3),
   },
-  searchContainer: {
-    flex: 1,
+  searchContainer: { flex: 1 },
+  buttonWrapper: {
+    position: "absolute",
+    bottom: RFPercentage(5),
+    alignSelf: "center",
+  },
+  applyButton: {
+    paddingHorizontal: RFPercentage(2.3),
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: RFPercentage(10),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  applyButtonText: {
+    color: "white",
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_500Medium",
   },
 });

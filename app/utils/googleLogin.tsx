@@ -13,10 +13,8 @@ import { Icons } from "../config/theme";
 import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
-const webClientId =
-  "";
-const iosClientId =
-  "";
+const webClientId = process.env.EXPO_PUBLIC_WEB_CLIENT_ID;
+const iosClientId =process.env.EXPO_PUBLIC_IOS_CLIENT_ID;
 
 const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);

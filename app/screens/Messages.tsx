@@ -232,7 +232,7 @@ function Messages({ navigation }) {
         ) : (
           <>
             <FlatList
-              style={{ width: "100%" }}
+              style={{ width: "100%" , marginTop:RFPercentage(2)}}
               data={filteredChats}
               renderItem={renderItem}
               keyExtractor={(item) => item.id}
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     width: "90%",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: RFPercentage(5),
+    marginTop: RFPercentage(3),
   },
   messageImage: {
     width: RFPercentage(5.8),

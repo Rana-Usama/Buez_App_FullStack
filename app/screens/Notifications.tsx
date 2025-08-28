@@ -218,7 +218,7 @@ export default function Notifications({ navigation }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={{ marginLeft: RFPercentage(2.5) }}>
+        <View>
           <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={tr.notifications || "Notifications"} />
         </View>
 

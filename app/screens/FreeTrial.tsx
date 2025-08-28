@@ -49,7 +49,7 @@ const FreeTrial = ({ navigation }: any) => {
             <View style={[styles.iconCircle,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]}>
               <Image source={Icons.star} resizeMode="contain" style={styles.iconImage} />
             </View>
-            <View style={styles.stepTextContainer}>
+            <View style={[styles.stepTextContainer,{top:RFPercentage(3)}]}>
               <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t("freeTrial.txt7")}`}</Text>
               <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt8")}`}</Text>
             </View>
@@ -127,12 +127,12 @@ const styles = StyleSheet.create({
   },
   stepTextContainer: {
     marginLeft: RFPercentage(2),
-    width: RFPercentage(30),
-    top: RFPercentage(3),
+    width: RFPercentage(35),
+    top: RFPercentage(2),
   },
   stepTextContainerSecond: {
     marginLeft: RFPercentage(2),
-    width: RFPercentage(30),
+    width: RFPercentage(35),
     top: RFPercentage(1.5),
   },
   stepTitle: {
@@ -142,8 +142,9 @@ const styles = StyleSheet.create({
   },
   stepDescription: {
     color: Colors.heading,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
+    marginTop:RFPercentage(0.4)
   },
   connectorLine1: {
     width: RFPercentage(0.8),

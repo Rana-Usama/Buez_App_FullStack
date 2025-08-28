@@ -160,6 +160,12 @@ const StackNavigator: React.FC = () => {
   const { theme } = useAppTheme();
 
 
+  console.log('isLoading..', isLoading)
+  console.log('isLoading..', credentials)
+  console.log('isLoading..', initialRoute)
+  console.log("userData.......",userData)
+
+
   return (
     <NavigationContainer>
       {isLoading || userLoading || !initialRoute ? (

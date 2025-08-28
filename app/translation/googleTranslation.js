@@ -11,10 +11,12 @@ const getTargetLanguage = async () => {
   }
 };
 
+const key = process.env.EXPO_PUBLIC_TRANSLATION_KEY
+
 export const translateText = async (text) => {
   const targetLang = await getTargetLanguage();
   try {
-    const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=`, {
+    const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${key}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

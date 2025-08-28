@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Animated, Platform, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Animated,
+  Platform,
+  StatusBar,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from "expo-secure-store";
@@ -129,32 +138,85 @@ function Onboarding(props) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
-      <Image style={theme.mode === "dark" ? styles.darkImg : styles.img} source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo} />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+      />
+      <Image
+        style={theme.mode === "dark" ? styles.darkImg : styles.img}
+        source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo}
+      />
 
       {/* Body */}
-      <View style={{ width: "90%", alignItems: "center", justifyContent: "center",}}>
-        <LottieView source={lottie} autoPlay loop style={{ width: RFPercentage(40), height: activeIndex === 2 ? RFPercentage(34) : RFPercentage(40) }} />
-      </View>
-      <View style={{  alignItems: "center", justifyContent: "center" }}>
-        <View style={styles.wrapper}>
-          <Text style={[styles.title, { color: theme.heading }]}>{title}</Text>
-        </View>
+      {/* Body */}
+      <Animated.View
+        style={{
+          width: "90%",
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: fadeAnim,
+          transform: [
+            {
+              scale: fadeAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.95, 1], // slight zoom in effect
+              }),
+            },
+          ],
+        }}
+      >
+        <LottieView
+          source={lottie}
+          autoPlay
+          loop
+          style={{
+            width: RFPercentage(40),
+            height: activeIndex === 2 ? RFPercentage(34) : RFPercentage(40),
+          }}
+        />
 
-        <View style={styles.wrapper2}>
-          <Text style={[styles.desc, { color: theme.desc }]}>{description}</Text>
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <View style={styles.wrapper}>
+            <Text style={[styles.title, { color: theme.heading }]}>
+              {title}
+            </Text>
+          </View>
+
+          <View style={styles.wrapper2}>
+            <Text style={[styles.desc, { color: theme.desc }]}>
+              {description}
+            </Text>
+          </View>
+
+          <View style={styles.dot}>{renderDots()}</View>
         </View>
-        <View style={styles.dot}>{renderDots()}</View>
-      </View>
+      </Animated.View>
 
       {/* Buttons */}
       <View style={styles.buttonWrapper}>
-        <TouchableOpacity activeOpacity={0.8} style={styles.skip} onPress={() => props.navigation.navigate("Login")}>
-          <Text style={[styles.skipText, { color: theme.skip }]}>{`${t("buttons.skip")}`}</Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.skip}
+          onPress={() => props.navigation.navigate("Login")}
+        >
+          <Text style={[styles.skipText, { color: theme.skip }]}>{`${t(
+            "buttons.skip"
+          )}`}</Text>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8} onPress={handleNext} style={styles.nextContainer}>
-          <LinearGradient colors={[Colors.primary, "#4557B0"]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={styles.gradient}>
-            <Text style={[styles.gradientText, { color: theme.pureWhite }]}>{renderNextButtonText()}</Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={handleNext}
+          style={styles.nextContainer}
+        >
+          <LinearGradient
+            colors={[Colors.primary, "#4557B0"]}
+            start={{ x: 0, y: 1 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradient}
+          >
+            <Text style={[styles.gradientText, { color: theme.pureWhite }]}>
+              {renderNextButtonText()}
+            </Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -179,23 +241,69 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
   },
-  darkImg: { width: RFPercentage(20), height: RFPercentage(10.6), marginTop: RFPercentage(3) },
-  img: { width: RFPercentage(6.5), height: RFPercentage(9.5), marginTop: RFPercentage(3) },
+  darkImg: {
+    width: RFPercentage(20),
+    height: RFPercentage(10.6),
+    marginTop: RFPercentage(3),
+  },
+  img: {
+    width: RFPercentage(6.5),
+    height: RFPercentage(9.5),
+    marginTop: RFPercentage(3),
+  },
   wrapper: { width: "90%", justifyContent: "center", alignItems: "center" },
-  title: { textAlign: "center", marginTop: RFPercentage(2), color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_600SemiBold" },
-  wrapper2: { width: "75%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(0.5) },
-  desc: { lineHeight: RFPercentage(2.7), textAlign: "center", color: "#64748B", fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular" },
-  dot: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(2) },
-  buttonWrapper: { position: "absolute", bottom: RFPercentage(10), width: "90%", justifyContent: "center", alignItems: "center", alignSelf: "center", flexDirection: "row" },
+  title: {
+    textAlign: "center",
+    marginTop: RFPercentage(2),
+    color: Colors.heading,
+    fontSize: RFPercentage(2.4),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  wrapper2: {
+    width: "75%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: RFPercentage(0.5),
+  },
+  desc: {
+    lineHeight: RFPercentage(2.7),
+    textAlign: "center",
+    color: "#64748B",
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_400Regular",
+  },
+  dot: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: RFPercentage(2),
+  },
+  buttonWrapper: {
+    position: "absolute",
+    bottom: RFPercentage(10),
+    width: "90%",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    flexDirection: "row",
+  },
   skip: { position: "absolute", left: RFPercentage(1) },
-  skipText: { color: "#475569", fontSize: RFPercentage(2.1), fontFamily: "Poppins_500Medium" },
+  skipText: {
+    color: "#475569",
+    fontSize: RFPercentage(2.1),
+    fontFamily: "Poppins_500Medium",
+  },
   gradient: {
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
     height: "100%",
   },
-  gradientText: { color: Colors.white, fontSize: RFPercentage(1.9), fontFamily: "Poppins_500Medium" },
+  gradientText: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_500Medium",
+  },
   body: {
     width: "100%",
     justifyContent: "center",

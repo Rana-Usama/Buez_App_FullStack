@@ -29,3 +29,18 @@ export async function registerForPushNotificationsAsync() {
   }
   return token;
 }
+
+
+export async function scheduleFreeTrialNotification(daysAfter = 10) {
+  const triggerDate = new Date();
+  triggerDate.setDate(triggerDate.getDate() + daysAfter);
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "⏰ Free Trial Ending Soon",
+      body: "Your free trial is ending in 4 days. Please review your subscription options to maintain access.",
+      sound: true,
+    },
+    trigger: triggerDate,
+  });
+}

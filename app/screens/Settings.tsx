@@ -79,7 +79,7 @@ function Settings({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Nav */}
         <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("settings.txt9")}`} />
 
@@ -100,7 +100,7 @@ function Settings({ navigation }) {
         >
           <View style={styles.content2}>
             <Image style={styles.img} source={Icons.language} tintColor={theme.heading} />
-            <Text style={[styles.title, { color: theme.heading }]}>{`Change Theme`}</Text>
+            <Text style={[styles.title, { color: theme.heading }]}>{t("settings.txt13")}</Text>
             <View style={{ position: "absolute", right: 0 }}>
               <ToggleSwitch isOn={theme.mode === "dark"} onColor={Colors.primary} offColor={"rgb(224, 224, 227)"} size="small" onToggle={toggleTheme} />
             </View>

@@ -168,7 +168,8 @@
     "txt10": "Nessuna recensione ancora!",
     "txt11": "di più",
     "txt12": "Accetta compito",
-    "txt13": "Categoria"
+    "txt13": "Categoria",
+    "txt14": "Valutazione"
   },
   "myRequests": {
     "txt1": "Le mie richieste",
@@ -219,7 +220,8 @@
     "txt9": "Impostazioni",
     "txt10": "Sei sicuro di voler eliminare\nquesto account?",
     "txt11": "Sei sicuro di voler uscire\nda questo account?",
-    "txt12": "Cambia lingua"
+    "txt12": "Cambia lingua",
+    "txt13" : "Tema Scuro"
   },
   "cancelSubscription": {
     "txt1": "Annulla abbonamento Premium",

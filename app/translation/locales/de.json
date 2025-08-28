@@ -168,7 +168,8 @@
     "txt10": "Noch keine Bewertungen!",
     "txt11": "mehr",
     "txt12": "Aufgabe annehmen",
-    "txt13": "Kategorie"
+    "txt13": "Kategorie",
+    "txt14" : "Bewertung"
   },
   "myRequests": {
     "txt1": "Mini Ufträgi",
@@ -218,7 +219,8 @@
     "txt9": "Einstellige",
     "txt10": "Bisch sicher, dass du die Konto wotsch lösche?",
     "txt11": "Bisch sicher, dass du dich uslogge wotsch us däm Konto?",
-    "txt12": "Sprache ändern"
+    "txt12": "Sprache ändern",
+    "txt13" : "Dunkles Thema"
   },
   "cancelSubscription": {
     "txt1": "Premium-Abo kündige",

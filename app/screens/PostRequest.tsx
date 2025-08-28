@@ -16,6 +16,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as Notifications from "expo-notifications";
+import RNFS from "react-native-fs";
 
 // components
 import Nav from "../components/common/Nav";
@@ -174,7 +175,7 @@ function PostRequest({ navigation, route }) {
         selectedImage.uri,
         [],
         {
-          compress: 0.5,
+          compress: 0.2,
           format: ImageManipulator.SaveFormat.JPEG,
         }
       );
@@ -297,7 +298,11 @@ function PostRequest({ navigation, route }) {
         compensationType: originalCompensationType,
         description: description,
         descriptionKeywords: keywords,
-        address: selectedLocation,
+        address: {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+          name: selectedLocation.name,
+        },
         otherCompensation: compensation,
         monitarily: budget.replace(/^\$/, ""),
         status: REQUEST_STATUS.Active,
@@ -306,9 +311,21 @@ function PostRequest({ navigation, route }) {
       };
       const imgs = imageUris?.filter((img) => Boolean(img));
       if (imgs?.length === 0) {
-        // Pick a random image from the selected task type
-        const defaultImageForTask = getRandomImage(originalTaskType);
-        imgs.push(defaultImageForTask);
+        const defaultImageUrl = getRandomImage(originalTaskType);
+        if (defaultImageUrl) {
+          const localFile = `${RNFS.CachesDirectoryPath}/default.jpg`;
+          await RNFS.downloadFile({
+            fromUrl: defaultImageUrl,
+            toFile: localFile,
+          }).promise;
+
+          const compressed = await ImageManipulator.manipulateAsync(
+            localFile,
+            [],
+            { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          imgs.push(compressed.uri);
+        }
       }
       if (!isEditing) {
         const savedPost = await savePost(data, imgs);
@@ -334,72 +351,144 @@ function PostRequest({ navigation, route }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollViewContent}
-        >
-          {/* Nav */}
-          <Nav
-            marginTop={
-              Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-            }
-            leftLogo={true}
-            profileImage={profileImgUrl}
-            navigation={navigation}
-            title={
-              title === `${t("postRequest.txt2")}`
-                ? `${t("postRequest.txt2")}`
-                : `${t("postRequest.txt1")}`
-            }
-          />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        {/* Nav */}
+        <Nav
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+          }
+          leftLogo={true}
+          profileImage={profileImgUrl}
+          navigation={navigation}
+          title={
+            title === `${t("postRequest.txt2")}`
+              ? `${t("postRequest.txt2")}`
+              : `${t("postRequest.txt1")}`
+          }
+        />
 
-          {/* Task Type Dropdown */}
-          <TouchableOpacity
+        {/* Task Type Dropdown */}
+        <TouchableOpacity
+          style={[
+            styles.dropdownHeader,
+            {
+              marginTop: RFPercentage(4),
+              borderBottomLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
+              borderBottomRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
+              backgroundColor: theme.white,
+              borderColor: theme.border,
+            },
+          ]}
+          onPress={() => toggleDropdown("task")}
+        >
+          <Text
             style={[
-              styles.dropdownHeader,
+              styles.dropdownHeaderText,
               {
-                marginTop: RFPercentage(4),
-                borderBottomLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
-                borderBottomRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                color: selectedTask ? theme.black : theme.heading,
+              },
+            ]}
+          >
+            {selectedTask || `${t("postRequest.txt3")}`}
+          </Text>
+          <MaterialIcons
+            name={
+              showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"
+            }
+            style={styles.dropdownIcon}
+            color={theme.inputFieldPlaceholder}
+          />
+        </TouchableOpacity>
+
+        {showTaskDropdown && (
+          <FlatList
+            data={translatedTaskOptions}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
+            keyExtractor={(item) => item.id.toString()}
+            style={[
+              styles.dropdown,
+              {
+                maxHeight: RFPercentage(24),
+                borderTopLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                borderTopRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                paddingVertical: RFPercentage(1),
                 backgroundColor: theme.white,
                 borderColor: theme.border,
               },
             ]}
-            onPress={() => toggleDropdown("task")}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => selectTask(item)}
+                style={styles.dropdownItem}
+              >
+                <Text
+                  style={[styles.dropdownItemText, { color: theme.darkGrey }]}
+                >
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+
+        <View style={styles.typeWrapper}>
+          <TouchableOpacity
+            style={[
+              styles.dropdownHeader,
+              {
+                marginTop: RFPercentage(2.2),
+                borderBottomLeftRadius: showCompensationDropdown
+                  ? 0
+                  : RFPercentage(1),
+                borderBottomRightRadius: showCompensationDropdown
+                  ? 0
+                  : RFPercentage(1),
+                backgroundColor: theme.white,
+                borderColor: theme.border,
+              },
+            ]}
+            onPress={() => toggleDropdown("compensation")}
           >
             <Text
               style={[
                 styles.dropdownHeaderText,
                 {
-                  color: selectedTask
-                    ? theme.black
-                    : theme.heading,
+                  color: selectedCompensation ? theme.black : theme.heading,
                 },
               ]}
             >
-              {selectedTask || `${t("postRequest.txt3")}`}
+              {selectedCompensation || `${t("postRequest.txt7")}`}
             </Text>
             <MaterialIcons
               name={
-                showTaskDropdown ? "keyboard-arrow-up" : "keyboard-arrow-down"
+                showCompensationDropdown
+                  ? "keyboard-arrow-up"
+                  : "keyboard-arrow-down"
               }
               style={styles.dropdownIcon}
               color={theme.inputFieldPlaceholder}
             />
           </TouchableOpacity>
 
-          {showTaskDropdown && (
+          {showCompensationDropdown && (
             <FlatList
-              data={translatedTaskOptions}
+              data={translatedCompensationOptions}
               showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
               keyExtractor={(item) => item.id.toString()}
               style={[
                 styles.dropdown,
                 {
-                  maxHeight: RFPercentage(24),
-                  borderTopLeftRadius: showTaskDropdown ? 0 : RFPercentage(1),
-                  borderTopRightRadius: showTaskDropdown ? 0 : RFPercentage(1),
+                  maxHeight: RFPercentage(20),
+                  borderTopLeftRadius: showCompensationDropdown
+                    ? 0
+                    : RFPercentage(1),
+                  borderTopRightRadius: showCompensationDropdown
+                    ? 0
+                    : RFPercentage(1),
                   paddingVertical: RFPercentage(1),
                   backgroundColor: theme.white,
                   borderColor: theme.border,
@@ -407,247 +496,166 @@ function PostRequest({ navigation, route }) {
               ]}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  onPress={() => selectTask(item)}
+                  onPress={() => selectCompensation(item)}
                   style={styles.dropdownItem}
                 >
                   <Text
                     style={[styles.dropdownItemText, { color: theme.darkGrey }]}
                   >
-                    {item.name}
+                    {item.type}
                   </Text>
                 </TouchableOpacity>
               )}
             />
           )}
+        </View>
 
-          <View style={styles.typeWrapper}>
-            <TouchableOpacity
-              style={[
-                styles.dropdownHeader,
-                {
-                  marginTop: RFPercentage(2.2),
-                  borderBottomLeftRadius: showCompensationDropdown
-                    ? 0
-                    : RFPercentage(1),
-                  borderBottomRightRadius: showCompensationDropdown
-                    ? 0
-                    : RFPercentage(1),
-                  backgroundColor: theme.white,
-                  borderColor: theme.border,
-                },
-              ]}
-              onPress={() => toggleDropdown("compensation")}
-            >
-              <Text
-                style={[
-                  styles.dropdownHeaderText,
-                  {
-                    color: selectedCompensation
-                      ? theme.black
-                      : theme.heading,
-                  },
-                ]}
-              >
-                {selectedCompensation || `${t("postRequest.txt7")}`}
-              </Text>
-              <MaterialIcons
-                name={
-                  showCompensationDropdown
-                    ? "keyboard-arrow-up"
-                    : "keyboard-arrow-down"
-                }
-                style={styles.dropdownIcon}
-                color={theme.inputFieldPlaceholder}
-              />
-            </TouchableOpacity>
+        {/* decsription */}
+        <View
+          style={[styles.descriptionContainer, { borderColor: theme.border }]}
+        >
+          <TextInput
+            placeholder={`${t("postRequest.txt8")}`}
+            placeholderTextColor={theme.heading}
+            value={description}
+            multiline
+            onChangeText={(e) => setDescription(e)}
+            maxLength={250}
+            style={[styles.desc, { color: theme.black }]}
+          />
+          <Text style={[styles.charCount, { color: theme.darkGrey }]}>
+            {description.length}/250
+          </Text>
+        </View>
 
-            {showCompensationDropdown && (
-              <FlatList
-                data={translatedCompensationOptions}
-                showsVerticalScrollIndicator={false}
-                keyExtractor={(item) => item.id.toString()}
-                style={[
-                  styles.dropdown,
-                  {
-                    maxHeight: RFPercentage(20),
-                    borderTopLeftRadius: showCompensationDropdown
-                      ? 0
-                      : RFPercentage(1),
-                    borderTopRightRadius: showCompensationDropdown
-                      ? 0
-                      : RFPercentage(1),
-                    paddingVertical: RFPercentage(1),
-                    backgroundColor: theme.white,
-                    borderColor: theme.border,
-                  },
-                ]}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() => selectCompensation(item)}
-                    style={styles.dropdownItem}
-                  >
-                    <Text
-                      style={[
-                        styles.dropdownItemText,
-                        { color: theme.darkGrey },
-                      ]}
-                    >
-                      {item.type}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            )}
-          </View>
-
-          {/* decsription */}
-          <View
-            style={[styles.descriptionContainer, { borderColor: theme.border }]}
+        {/* Input field */}
+        <View style={styles.typeWrapper}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Location", { home: false })}
+            activeOpacity={0.8}
+            style={{
+              width: "90%",
+              borderRadius: RFPercentage(0.9),
+              backgroundColor: theme.white,
+              borderColor: theme.border,
+              alignSelf: "center",
+              height: RFPercentage(6.6),
+              borderWidth: 1,
+              paddingHorizontal: RFPercentage(2),
+              justifyContent: "center",
+              marginTop: RFPercentage(2.5),
+            }}
           >
-            <TextInput
-              placeholder={`${t("postRequest.txt8")}`}
-              placeholderTextColor={theme.heading}
-              value={description}
-              multiline
-              onChangeText={(e) => setDescription(e)}
-              maxLength={250}
-              style={[styles.desc, { color: theme.black }]}
-            />
-            <Text style={[styles.charCount, { color: theme.darkGrey }]}>
-              {description.length}/250
-            </Text>
-          </View>
-
-          {/* Input field */}
-          <View style={styles.typeWrapper}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Location", { home: false })}
-              activeOpacity={0.8}
+            <Text
               style={{
-                width: "90%",
-                borderRadius: RFPercentage(0.9),
-                backgroundColor: theme.white,
-                borderColor: theme.border,
-                alignSelf: "center",
-                height: RFPercentage(6.6),
-                borderWidth: 1,
-                paddingHorizontal: RFPercentage(2),
-                justifyContent: "center",
-                marginTop: RFPercentage(2.5),
+                fontSize: RFPercentage(1.7),
+                fontFamily: "Poppins_400Regular",
+                color: selectedLocation?.name ? theme.black : theme.heading,
               }}
             >
-              <Text
-                style={{
-                  fontSize: RFPercentage(1.7),
-                  fontFamily: "Poppins_400Regular",
-                  color: selectedLocation?.name
-                    ? theme.black
-                    : theme.heading,
+              {location.name
+                ? location.name
+                : selectedLocation.name
+                ? selectedLocation?.name
+                : `${t("postRequest.txt9")}`}
+            </Text>
+          </TouchableOpacity>
+
+          {originalCompensationType === `Other` ? (
+            <>
+              <InputFieldNew
+                placeholder={`${t("postRequest.txt10")}`}
+                value={compensation}
+                onChangeText={setCompensation}
+                customStyle={{
+                  width: "90%",
+                  borderRadius: RFPercentage(1),
+                  backgroundColor: theme.white,
+                  borderColor: theme.border,
                 }}
+              />
+            </>
+          ) : (
+            <>
+              <InputFieldNew
+                placeholder={`e.g; 90$`}
+                value={budget}
+                onChangeText={(text) => {
+                  const numeric = text.replace(/[^0-9]/g, "");
+                  setBudget(numeric ? `$${numeric}` : "");
+                }}
+                customStyle={{
+                  width: "90%",
+                  borderRadius: RFPercentage(1),
+                  backgroundColor: theme.white,
+                  borderColor: theme.border,
+                }}
+                keyboardType="numeric"
+              />
+            </>
+          )}
+        </View>
+
+        {/* Image Picker */}
+        <View style={styles.imageWrapper}>
+          <Text style={[styles.imgText, { color: theme.darkGrey }]}>{`${t(
+            "postRequest.txt12"
+          )}`}</Text>
+          <View style={styles.imgContainer}>
+            {[0, 1, 2].map((index) => (
+              <TouchableOpacity
+                key={index}
+                activeOpacity={0.8}
+                onPress={() => pickImage(index)}
+                style={[
+                  styles.imgPick,
+                  {
+                    backgroundColor: theme.white,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  },
+                ]}
               >
-                {location.name
-                  ? location.name
-                  : selectedLocation.name
-                  ? selectedLocation?.name
-                  : `${t("postRequest.txt9")}`}
-              </Text>
-            </TouchableOpacity>
-
-            {originalCompensationType === `Other` ? (
-              <>
-                <InputFieldNew
-                  placeholder={`${t("postRequest.txt10")}`}
-                  value={compensation}
-                  onChangeText={setCompensation}
-                  customStyle={{
-                    width: "90%",
-                    borderRadius: RFPercentage(1),
-                    backgroundColor: theme.white,
-                    borderColor: theme.border,
-                  }}
-                />
-              </>
-            ) : (
-              <>
-                <InputFieldNew
-                  placeholder={`e.g; 90$`}
-                  value={budget}
-                  onChangeText={(text) => {
-                    const numeric = text.replace(/[^0-9]/g, "");
-                    setBudget(numeric ? `$${numeric}` : "");
-                  }}
-                  customStyle={{
-                    width: "90%",
-                    borderRadius: RFPercentage(1),
-                    backgroundColor: theme.white,
-                    borderColor: theme.border,
-                  }}
-                  keyboardType="numeric"
-                />
-              </>
-            )}
-          </View>
-
-          {/* Image Picker */}
-          <View style={styles.imageWrapper}>
-            <Text style={[styles.imgText, { color: theme.darkGrey }]}>{`${t(
-              "postRequest.txt12"
-            )}`}</Text>
-            <View style={styles.imgContainer}>
-              {[0, 1, 2].map((index) => (
-                <TouchableOpacity
-                  key={index}
-                  activeOpacity={0.8}
-                  onPress={() => pickImage(index)}
-                  style={[
-                    styles.imgPick,
-                    {
-                      backgroundColor: theme.white,
-                      borderWidth: 1,
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
-                  {imageUris[index] ? (
-                    <>
-                      <Image
-                        style={styles.img2}
-                        source={{ uri: imageUris[index] }}
-                      />
-                      <TouchableOpacity
-                        onPress={() => [deleteImage(index), pickImage(index)]}
-                        style={{ position: "absolute", top: 5, right: 5 }}
-                      >
-                        <Image style={styles.img3} source={Icons.edit} />
-                      </TouchableOpacity>
-                    </>
-                  ) : (
+                {imageUris[index] ? (
+                  <>
                     <Image
-                      style={styles.img3}
-                      source={Icons.gal}
-                      tintColor={theme.darkGrey}
+                      style={styles.img2}
+                      source={{ uri: imageUris[index] }}
                     />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
+                    <TouchableOpacity
+                      onPress={() => [deleteImage(index), pickImage(index)]}
+                      style={{ position: "absolute", top: 5, right: 5 }}
+                    >
+                      <Image style={styles.img3} source={Icons.edit} />
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <Image
+                    style={styles.img3}
+                    source={Icons.gal}
+                    tintColor={theme.darkGrey}
+                  />
+                )}
+              </TouchableOpacity>
+            ))}
           </View>
+        </View>
 
-          {/*Login Button */}
-          <MyAppButton
-            disabled={indicator}
-            loading={indicator}
-            title={
-              isEditing
-                ? `${t("postRequest.txt13")}`
-                : `${t("postRequest.txt14")}`
-            }
-            marginTop={RFPercentage(6)}
-            onPress={() => submitPostData()}
-          />
+        {/*Login Button */}
+        <MyAppButton
+          disabled={indicator}
+          loading={indicator}
+          title={
+            isEditing
+              ? `${t("postRequest.txt13")}`
+              : `${t("postRequest.txt14")}`
+          }
+          marginTop={RFPercentage(6)}
+          onPress={() => submitPostData()}
+        />
 
-          <View style={styles.space} />
-        </ScrollView>
+        <View style={styles.space} />
+      </ScrollView>
     </View>
   );
 }

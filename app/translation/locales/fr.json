@@ -168,7 +168,8 @@
     "txt10": "Pas encore d'avis !",
     "txt11": "plus",
     "txt12": "Accepter la tâche",
-    "txt13": "Catégorie"
+    "txt13": "Catégorie",
+    "txt14": "Évaluation"
   },
   "myRequests": {
     "txt1": "Mes demandes",
@@ -219,7 +220,8 @@
     "txt9": "Paramètres",
     "txt10": "Êtes‑vous sûr de vouloir supprimer\nce compte ?",
     "txt11": "Êtes‑vous sûr de vouloir vous déconnecter ?",
-    "txt12": "Changer de langue"
+    "txt12": "Changer de langue",
+    "txt13" : "Thème Sombre"
   },
   "cancelSubscription": {
     "txt1": "Annuler l’abonnement premium",
