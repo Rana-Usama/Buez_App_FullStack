@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, Platform } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -23,31 +30,77 @@ interface NavProps {
   profileImage?: string | null;
 }
 
-const Nav: React.FC<NavProps> = ({ dpNull = false, crown = false, marginTop = RFPercentage(6), title, navigation, leftLogo = false, post = false, profileImage }) => {
+const Nav: React.FC<NavProps> = ({
+  dpNull = false,
+  crown = false,
+  marginTop = RFPercentage(6),
+  title,
+  navigation,
+  leftLogo = false,
+  post = false,
+  profileImage,
+}) => {
   const { unreadCount } = useNotifications();
-  const {theme} = useAppTheme()
+  const { theme } = useAppTheme();
   return (
-    <View style={[styles.container, { marginTop :Platform.OS === 'ios' ?  RFPercentage(9.5) : RFPercentage(5)}]}>
+    <View
+      style={[
+        styles.container,
+        {
+          marginTop:
+            Platform.OS === "ios" ? RFPercentage(9.5) : RFPercentage(5),
+        },
+      ]}
+    >
       {leftLogo ? (
-        <TouchableOpacity onPress={() => navigation.navigate("Profile")} activeOpacity={0.8} style={styles.touch}>
-          {crown && <Image style={styles.crown} source={Icons.crown} />}
-          <Image style={styles.profile} source={profileImage ? { uri: profileImage } : Icons.dp} />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Profile")}
+          activeOpacity={0.8}
+          style={styles.touch}
+        >
+          <Image style={styles.crown} source={Icons.crown} />
+          <Image
+            style={styles.profile}
+            source={profileImage ? { uri: profileImage } : Icons.dp}
+          />
         </TouchableOpacity>
       ) : (
-        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()} style={{ position: "absolute", left: 0 }}>
-          <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.8) }} color={theme.heading} />
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.goBack()}
+          style={{ position: "absolute", left: 0 }}
+        >
+          <Ionicons
+            name="chevron-back"
+            style={{ fontSize: RFPercentage(2.8) }}
+            color={theme.heading}
+          />
         </TouchableOpacity>
       )}
 
-      <Text style={[styles.title, {color:theme.heading}]}>{title}</Text>
+      <Text style={[styles.title, { color: theme.heading }]}>{title}</Text>
 
       {post ? (
-        <TouchableOpacity onPress={() => navigation.navigate("Post")} activeOpacity={0.8} style={{ position: "absolute", right: 0 }}>
-          <Text style={[styles.post,{color:theme.primary}]}>Post</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Post")}
+          activeOpacity={0.8}
+          style={{ position: "absolute", right: 0 }}
+        >
+          <Text style={[styles.post, { color: theme.primary }]}>Post</Text>
         </TouchableOpacity>
       ) : dpNull ? null : (
-        <TouchableOpacity onPress={() => navigation.navigate("Notifications")} activeOpacity={0.8} style={[styles.notify, {backgroundColor:theme.white, borderColor:theme.border}]}>
-          <Image style={{ width: RFPercentage(3), height: RFPercentage(3) }} source={Icons.notify2} />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Notifications")}
+          activeOpacity={0.8}
+          style={[
+            styles.notify,
+            { backgroundColor: theme.white, borderColor: theme.border },
+          ]}
+        >
+          <Image
+            style={{ width: RFPercentage(3), height: RFPercentage(3) }}
+            source={Icons.notify2}
+          />
           {unreadCount > 0 && <View style={styles.dot} />}
         </TouchableOpacity>
       )}
@@ -61,7 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
-    alignSelf:"center"
+    alignSelf: "center",
   },
   touch: {
     position: "absolute",
@@ -83,7 +136,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_600SemiBold",
-    textAlign:"center",
+    textAlign: "center",
     // width:RFPercentage(25)
   },
   post: {
@@ -112,7 +165,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    borderWidth:1
+    borderWidth: 1,
   },
   dot: {
     position: "absolute",

@@ -51,7 +51,7 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          opacity: disabled ? 0.5 : 1,
+          
         }}
       >
         {loading ? (

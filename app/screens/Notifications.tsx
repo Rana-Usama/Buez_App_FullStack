@@ -188,11 +188,11 @@ export default function Notifications({ navigation }) {
     });
     
     return (
-      <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
+      <View style={[styles.card, { backgroundColor: theme.white, borderColor: "rgba(234, 234, 234, 1)" }]}>
         {/* main row */}
         <View style={styles.row}>
           <Image source={profileImage ? { uri: profileImage } : Icons.dp} style={styles.avatar} />
-          <View style={{ marginLeft: RFPercentage(1.5), width: RFPercentage(35) }}>
+          <View style={{ marginLeft: RFPercentage(0.5), width: "80%" }}>
             <Text style={[styles.title, { color: theme.heading }]}>{`${senderName} ${tr.accepted || "accepted your task!"}`}</Text>
             {!!shortDesc && <Text style={styles.sub}>{shortDesc}</Text>}
           </View>
@@ -250,75 +250,88 @@ const styles = StyleSheet.create({
     color: Colors.lightGrey,
     fontFamily: "Poppins_500Medium",
   },
-  sectionHeader: {
-    width: "50%",
+ sectionHeader: {
     alignSelf: "flex-start",
-    marginTop: RFPercentage(3.5),
-    color: Colors.grey,
-    fontSize: RFPercentage(1.9),
+    marginTop: RFPercentage(3),
+    marginLeft: RFPercentage(3),
+    backgroundColor: Colors.lightGrey + "30", // light tint
+    paddingHorizontal: RFPercentage(2.5),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(2),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_500Medium",
-    borderBottomWidth: RFPercentage(0.1),
-    paddingBottom: RFPercentage(0.5),
-    left: RFPercentage(3),
   },
+
   card: {
-    width: "90%",
+    width: "92%",
     alignSelf: "center",
     marginTop: RFPercentage(2),
-    paddingTop: RFPercentage(2),
-    borderRadius: RFPercentage(1.5),
+    paddingVertical: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+    borderRadius: RFPercentage(2),
     backgroundColor: Colors.white,
-    borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
-    elevation: 5,
-    shadowColor: "rgb(96, 94, 94)",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    paddingBottom:RFPercentage(1.5)
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 1,
   },
+
   row: {
     flexDirection: "row",
     alignItems: "center",
-    width: "90%",
-    alignSelf: "center",
   },
+
   avatar: {
-    width: RFPercentage(5.5),
-    height: RFPercentage(5.5),
+    width: RFPercentage(6.5),
+    height: RFPercentage(6.5),
     borderRadius: RFPercentage(100),
+    marginRight: RFPercentage(1.5),
     borderColor: Colors.primary,
-    borderWidth: RFPercentage(0.1),
+    borderWidth: 1,
   },
+
   title: {
-    color: Colors.darkGrey2,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.heading,
   },
+
   sub: {
-    color: Colors.lightGrey,
+    color: Colors.grey,
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
-    marginTop: RFPercentage(0.5),
+    marginTop: RFPercentage(0.6),
   },
+
   footer: {
-    width: "90%",
-    alignSelf: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: RFPercentage(2),
-    alignItems:"center"
+    alignItems: "center",
+    marginTop: RFPercentage(1.8),
   },
+
   time: {
     color: Colors.darkGrey,
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_500Medium",
+    top:RFPercentage(0.5)
   },
-  msgBtn: { flexDirection: "row", alignItems: "center" },
+
+  msgBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primary + "15", // soft tint background
+    paddingHorizontal: RFPercentage(1.6),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: RFPercentage(2),
+  },
+
   msgTxt: {
     color: Colors.primary,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
-    marginLeft: RFPercentage(0.3),
+    marginLeft: RFPercentage(0.5),
   },
 });

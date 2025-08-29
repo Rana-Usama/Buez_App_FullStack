@@ -146,7 +146,7 @@ export default function CompletedTasks({ navigation }: any) {
       <View
         style={[
           styles.card,
-          { backgroundColor: theme.white, borderColor: theme.border },
+          { backgroundColor: theme.white, borderColor: "rgba(234, 234, 234, 1)"  },
         ]}
       >
         <View style={styles.headerRow}>
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
-    elevation: 10,
+    elevation: 2,
     shadowColor: "#fff",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,

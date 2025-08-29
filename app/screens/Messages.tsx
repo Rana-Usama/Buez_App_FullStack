@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(6),
   },
   unreadMessage: {
-    backgroundColor: Colors.lightGrey,
+    // backgroundColor: Colors.lightGrey,
   },
   unreadText: {
     fontFamily: "Poppins_500Medium",

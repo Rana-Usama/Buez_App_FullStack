@@ -271,6 +271,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(1),
     color: Colors.darkGrey,
     fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_600SemiBold",
   },
   subscriptionContainer: {
     justifyContent: "flex-start",
@@ -318,8 +319,9 @@ const styles = StyleSheet.create({
   },
   detailText: {
     color: Colors.darkGrey,
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.7),
     marginTop: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
   },
   starContainer: {
     width: "90%",

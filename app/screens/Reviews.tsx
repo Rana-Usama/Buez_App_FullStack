@@ -1,5 +1,14 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { View, Text, StyleSheet, Image, Platform, ActivityIndicator, RefreshControl, SectionList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Platform,
+  ActivityIndicator,
+  RefreshControl,
+  SectionList,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
 import moment from "moment";
@@ -15,7 +24,10 @@ import { useAppTheme } from "../contexts/themeContext";
 import { useTranslation } from "react-i18next";
 import { cachedTranslate } from "../utils/cachedTranslations";
 
-const sameDay = (d1, d2) => d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
+const sameDay = (d1, d2) =>
+  d1.getDate() === d2.getDate() &&
+  d1.getMonth() === d2.getMonth() &&
+  d1.getFullYear() === d2.getFullYear();
 
 const getTargetLanguage = async () => {
   const stored = await SecureStore.getItemAsync("appLanguage");
@@ -28,7 +40,11 @@ const getSectionTitle = (date, lang) => {
   yesterday.setDate(today.getDate() - 1);
   if (sameDay(date, today)) return "Today";
   if (sameDay(date, yesterday)) return "Yesterday";
-  return date.toLocaleDateString(lang, { day: "numeric", month: "long", year: "numeric" });
+  return date.toLocaleDateString(lang, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 };
 
 type Labels = {
@@ -79,7 +95,9 @@ export default function Reviews({ navigation }) {
       const userLang = await getTargetLanguage();
       setLang(userLang);
       const keys = Object.keys(labels);
-      const translated = await Promise.all(keys.map((k) => cachedTranslate(labels[k])));
+      const translated = await Promise.all(
+        keys.map((k) => cachedTranslate(labels[k]))
+      );
       const newLabels = keys.reduce((obj, key, index) => {
         obj[key as keyof Labels] = translated[index] || labels[key];
         return obj;
@@ -95,10 +113,14 @@ export default function Reviews({ navigation }) {
       const translationMap = { ...translations };
       const grouped = new Map();
       for (const review of data) {
-        const createdAt = review.createdAt?.toDate?.() ?? review.createdAt ?? new Date();
+        const createdAt =
+          review.createdAt?.toDate?.() ?? review.createdAt ?? new Date();
         const title = getSectionTitle(new Date(createdAt), lang);
         if (!translationMap[review.id]) {
-          const translatedText = await cachedTranslate(review.reviewText || "", lang);
+          const translatedText = await cachedTranslate(
+            review.reviewText || "",
+            lang
+          );
           translationMap[review.id] = translatedText;
         }
         const arr = grouped.get(title) || [];
@@ -106,12 +128,22 @@ export default function Reviews({ navigation }) {
         grouped.set(title, arr);
       }
       const finalSections = Array.from(grouped.entries())
-        .map(([title, data]) => ({ title, data: data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) }))
+        .map(([title, data]) => ({
+          title,
+          data: data.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          ),
+        }))
         .sort((a, b) => {
-          const getPriority = (t: string) => (t === labels.today ? 0 : t === labels.yesterday ? 1 : 2);
+          const getPriority = (t: string) =>
+            t === labels.today ? 0 : t === labels.yesterday ? 1 : 2;
           const pA = getPriority(a.title);
           const pB = getPriority(b.title);
-          return pA - pB || new Date(b.data[0].createdAt).getTime() - new Date(a.data[0].createdAt).getTime();
+          return (
+            pA - pB ||
+            new Date(b.data[0].createdAt).getTime() -
+              new Date(a.data[0].createdAt).getTime()
+          );
         });
 
       const ratings = data.map((r) => r.rating).filter(Boolean);
@@ -144,11 +176,19 @@ export default function Reviews({ navigation }) {
 
   const renderItem = ({ item }) => {
     const created = moment(item.createdAt).format("MMM-D-YYYY");
-    const translatedReview = translations[item.id] || labels.translating || "Translating...";
+    const translatedReview =
+      translations[item.id] || labels.translating || "Translating...";
     return (
-      <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.border }]}>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: theme.white, borderColor: theme.border },
+        ]}
+      >
         <View style={styles.textWrap}>
-          <Text style={[styles.reviewText, { color: theme.heading }]}>{translatedReview}</Text>
+          <Text style={[styles.reviewText, { color: theme.heading }]}>
+            {translatedReview}
+          </Text>
         </View>
         <View style={styles.footer}>
           <Text style={[styles.reviewDate, { color: theme.darkGrey }]}>
@@ -156,9 +196,19 @@ export default function Reviews({ navigation }) {
           </Text>
           <View style={styles.authorWrap}>
             <Text style={[styles.authorText, { color: theme.darkGrey }]}>
-              {labels.by}: {item.reviewer?.userName || "-"}
+              {labels.by}:{" "}
+              {item.reviewer?.userName.length > 10
+                ? item.reviewer?.userName.substring(0, 10) + "..."
+                : item.reviewer?.userName}
             </Text>
-            <Image style={styles.avatar} source={item?.reviewer?.profileImage ? { uri: item?.reviewer?.profileImage } : Icons.dp} />
+            <Image
+              style={styles.avatar}
+              source={
+                item?.reviewer?.profileImage
+                  ? { uri: item?.reviewer?.profileImage }
+                  : Icons.dp
+              }
+            />
           </View>
         </View>
       </View>
@@ -167,36 +217,60 @@ export default function Reviews({ navigation }) {
 
   const renderHeader = ({ section: { title } }) => (
     <View>
-      <Text style={[styles.sectionHeader, { color: theme.heading }]}>{title}</Text>
-      <View style={[styles.separator, { backgroundColor: theme.border }]} />
+      <Text style={[styles.sectionHeader, { color: theme.heading }]}>
+        {title}
+      </Text>
     </View>
   );
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <View style={{ width: "100%", alignSelf: "center" }}>
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("profile.txt3")}`} />
+        <Nav
+          dpNull
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+          }
+          leftLogo={false}
+          navigation={navigation}
+          title={`${t("profile.txt3")}`}
+        />
       </View>
       {averageRating && (
         <>
           <View style={styles.ratingBox}>
-            <Text style={[styles.ratingLabel, { color: theme.heading }]}>Ratings</Text>
-            <Text style={[styles.ratingValue, { color: theme.heading }]}>⭐ {averageRating}</Text>
+            <Text style={[styles.ratingLabel, { color: theme.heading }]}>
+              Ratings
+            </Text>
+            <Text style={[styles.ratingValue, { color: theme.heading }]}>
+              ⭐ {averageRating}
+            </Text>
           </View>
         </>
       )}
       {loading ? (
-        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: RFPercentage(8) }} />
+        <ActivityIndicator
+          size="large"
+          color={Colors.primary}
+          style={{ marginTop: RFPercentage(8) }}
+        />
       ) : sections.length === 0 ? (
         <NotFound title={labels.noReviews} />
       ) : (
-        <View style={{ marginTop:RFPercentage(-1)}}>
+        <View style={{ marginTop: RFPercentage(-1) }}>
           <SectionList
             sections={sections}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             renderSectionHeader={renderHeader}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} tintColor={Colors.primary} />}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[Colors.primary]}
+                tintColor={Colors.primary}
+              />
+            }
             contentContainerStyle={{ paddingBottom: RFPercentage(6) }}
             stickySectionHeadersEnabled={false}
           />
@@ -228,8 +302,23 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
     color: Colors.heading,
   },
-  separator: { width: "60%", height: RFPercentage(0.1), marginTop: RFPercentage(0.5), left: RFPercentage(2.3) },
-  sectionHeader: { width: "90%", alignSelf: "center", color: Colors.grey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" , marginTop:RFPercentage(2)},
+  separator: {
+    width: "60%",
+    height: RFPercentage(0.1),
+    marginTop: RFPercentage(0.5),
+    left: RFPercentage(2.3),
+  },
+  sectionHeader: {
+    alignSelf: "flex-start",
+    marginTop: RFPercentage(3),
+    marginLeft: RFPercentage(3),
+    backgroundColor: Colors.lightGrey + "30", // light tint
+    paddingHorizontal: RFPercentage(2.5),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(2),
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_500Medium",
+  },
   card: {
     width: "90%",
     alignSelf: "center",
@@ -247,10 +336,41 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   textWrap: { width: "90%", alignSelf: "center", marginTop: RFPercentage(1.6) },
-  reviewText: { color: Colors.darkGrey2, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
-  footer: { width: "90%", alignSelf: "center", position: "absolute", bottom: RFPercentage(2), alignItems: "center", flexDirection: "row" },
-  reviewDate: { color: Colors.darkGrey, fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular" },
-  authorWrap: { position: "absolute", right: 0, flexDirection: "row", alignItems: "center" },
-  authorText: { color: Colors.darkGrey, fontSize: RFPercentage(1.7), fontFamily: "Poppins_400Regular" },
-  avatar: { marginLeft: RFPercentage(1), width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.1) },
+  reviewText: {
+    color: Colors.darkGrey2,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+  },
+  footer: {
+    width: "90%",
+    alignSelf: "center",
+    position: "absolute",
+    bottom: RFPercentage(2),
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  reviewDate: {
+    color: Colors.darkGrey,
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_400Regular",
+  },
+  authorWrap: {
+    position: "absolute",
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  authorText: {
+    color: Colors.darkGrey,
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_400Regular",
+  },
+  avatar: {
+    marginLeft: RFPercentage(1),
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(100),
+    borderColor: Colors.primary,
+    borderWidth: RFPercentage(0.1),
+  },
 });

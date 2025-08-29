@@ -8,6 +8,8 @@ import {
   Image,
   TextInput,
   StatusBar,
+  ImageBackground,
+  Modal,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -31,6 +33,7 @@ import {
   where,
   writeBatch,
   getDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -42,6 +45,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import { Icons } from "../config/theme";
+import Entypo from "@expo/vector-icons/Entypo";
 
 const Chat = ({ navigation, route }) => {
   const { t } = useTranslation();
@@ -55,6 +60,8 @@ const Chat = ({ navigation, route }) => {
   } = route.params;
   const [message, setMessage] = useState("");
   const { theme } = useAppTheme();
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedMessageId, setSelectedMessageId] = useState(null);
 
   useEffect(() => {
     const listenForNewMessages = () => {
@@ -254,21 +261,82 @@ const Chat = ({ navigation, route }) => {
     }
   }
 
+  const deleteMessage = async (messageId) => {
+    try {
+      // 1. Delete the message
+      const messageRef = doc(
+        FIREBASE_DB,
+        `chats/${chatId}/messages`,
+        messageId
+      );
+      await deleteDoc(messageRef);
+
+      // 2. Optimistically update local state
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg._id !== messageId)
+      );
+
+      // 3. Find latest message (after deletion)
+      const q = query(
+        collection(FIREBASE_DB, `chats/${chatId}/messages`),
+        orderBy("timestamp", "desc"),
+        limit(1)
+      );
+      const snapshot = await getDocs(q);
+
+      const chatRef = doc(FIREBASE_DB, "chats", chatId);
+
+      if (!snapshot.empty) {
+        // Chat still has messages → update lastMessage
+        const latestDoc = snapshot.docs[0];
+        const latestMsg = latestDoc.data();
+
+        await updateDoc(chatRef, {
+          lastMessage: {
+            text: latestMsg.text,
+            createdAt: latestMsg.timestamp,
+            senderId: latestMsg.senderId,
+            senderName: latestMsg.senderName,
+            unread: latestMsg.unread ?? false,
+          },
+          lastMessageTimestamp: latestMsg.timestamp,
+        });
+      } else {
+        // No messages left → clear lastMessage
+        await updateDoc(chatRef, {
+          lastMessage: null,
+          lastMessageTimestamp: null,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    }
+  };
+
+  const handleDeletePress = (messageId) => {
+    setSelectedMessageId(messageId);
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    if (selectedMessageId) {
+      await deleteMessage(selectedMessageId);
+      setSelectedMessageId(null);
+    }
+    setDeleteModalVisible(false);
+  };
+
+  const cancelDelete = () => {
+    setSelectedMessageId(null);
+    setDeleteModalVisible(false);
+  };
+
   return (
-    <LinearGradient
-      colors={[theme.chat1, theme.chat2]}
-      start={{ x: 1, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={styles.screen}
-    >
-      <StatusBar
-        backgroundColor={theme.chat1}
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-      />
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <View
         style={[
           styles.profileContainer,
-          { borderBottomColor: theme.lightGrey },
+          { borderBottomColor: "rgba(218, 218, 218, 1)" },
         ]}
       >
         <TouchableOpacity
@@ -314,106 +382,204 @@ const Chat = ({ navigation, route }) => {
       </View>
 
       <View style={styles.messageContainer}>
-        <GiftedChat
-          messages={messages}
-          onSend={(messages) => onSend(messages)}
-          user={{
-            _id: currentUserId,
-            name: senderName,
-          }}
-          renderInputToolbar={(props) => (
-            <InputToolbar
-              {...props}
-              containerStyle={[
-                styles.toolbar,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? "transparent"
-                      : "rgba(67, 76, 124, 1)",
-                  borderColor:
-                    theme.mode == "dark" ? Colors.darkGrey : "rgb(94, 91, 137)",
-                  borderTopColor:
-                    theme.mode == "dark" ? Colors.darkGrey : "rgb(94, 91, 137)",
-                },
-              ]}
-              renderComposer={() => (
-                <TextInput
-                  style={styles.customTextInput}
-                  placeholder={`${t("chat.txt2")}`}
-                  placeholderTextColor="#bbb"
-                  value={message}
-                  onChangeText={setMessage}
+        <ImageBackground
+          source={theme.mode === "dark" ? Icons.dark : Icons.light}
+          resizeMode="cover"
+          style={{ flex: 1 }}
+        >
+          <GiftedChat
+            messages={messages}
+            onSend={(messages) => onSend(messages)}
+            user={{
+              _id: currentUserId,
+              name: senderName,
+            }}
+            renderInputToolbar={(props) => (
+              <View
+                style={{
+                  backgroundColor: theme.white,
+                  minHeight: RFPercentage(10),
+                  justifyContent: "center",
+                  paddingVertical: RFPercentage(2),
+                }}
+              >
+                <InputToolbar
+                  {...props}
+                  containerStyle={[
+                    styles.toolbar,
+                    {
+                      backgroundColor:
+                        theme.mode === "dark"
+                          ? "transparent"
+                          : "rgba(241, 241, 241, 1)",
+                      borderColor:
+                        theme.mode == "dark"
+                          ? Colors.darkGrey
+                          : "rgba(234, 233, 233, 1)",
+                      borderTopColor:
+                        theme.mode == "dark"
+                          ? Colors.darkGrey
+                          : "rgba(234, 233, 233, 1)",
+                    },
+                  ]}
+                  renderComposer={() => (
+                    <TextInput
+                      style={[styles.customTextInput, { color: theme.black }]}
+                      placeholder={`${t("chat.txt2")}`}
+                      placeholderTextColor={"rgba(145, 144, 144, 1)"}
+                      value={message}
+                      onChangeText={setMessage}
+                      multiline={true}
+                      scrollEnabled={true}
+                      textAlignVertical="top"
+                    />
+                  )}
+                  renderSend={() => (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={styles.sendButton}
+                      disabled={!message}
+                      onPress={() => {
+                        onSend([
+                          {
+                            text: message,
+                            user: {
+                              _id: currentUserId,
+                              name: senderName,
+                            },
+                            createdAt: new Date(),
+                          },
+                        ]);
+                      }}
+                    >
+                      <Feather
+                        name="send"
+                        size={RFPercentage(2.6)}
+                        color={
+                          theme.mode === "dark" ? Colors.white : Colors.primary
+                        }
+                      />
+                    </TouchableOpacity>
+                  )}
                 />
-              )}
-              renderSend={() => (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={styles.sendButton}
-                  disabled={!message}
-                  onPress={() => {
-                    onSend([
-                      {
-                        text: message,
-                        user: {
-                          _id: currentUserId,
-                          name: senderName,
-                        },
-                        createdAt: new Date(),
-                      },
-                    ]);
+              </View>
+            )}
+            renderDay={(props) => (
+              <Day {...props} textStyle={styles.dateText} />
+            )}
+            renderBubble={(props) => {
+              const isFromCurrentUser =
+                props.currentMessage?.user?._id === currentUserId;
+              const isFromSameUser =
+                props.currentMessage?.user?._id ===
+                props.previousMessage?.user?._id;
+
+              // Only show the bubble if the message exists
+              if (!props.currentMessage) return null;
+
+              return (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    marginVertical: isFromSameUser
+                      ? RFPercentage(0.3)
+                      : RFPercentage(1),
                   }}
                 >
-                  <Feather
-                    name="send"
-                    size={RFPercentage(2.3)}
-                    color={Colors.white}
+                  <Bubble
+                    {...props}
+                    wrapperStyle={{
+                      left: {
+                        backgroundColor: Colors.lightWhite,
+                        padding: RFPercentage(0.6),
+                        marginLeft: 0, // Ensure no left margin
+                      },
+                      right: {
+                        backgroundColor: Colors.primary,
+                        padding: RFPercentage(0.6),
+                        marginRight: 0, // Ensure no right margin
+                      },
+                    }}
+                    textStyle={{
+                      left: {
+                        color: Colors.black,
+                        fontFamily: "Poppins_400Regular",
+                      },
+                      right: {
+                        color: Colors.white,
+                        fontFamily: "Poppins_400Regular",
+                      },
+                    }}
                   />
-                </TouchableOpacity>
-              )}
-            />
-          )}
-          renderDay={(props) => <Day {...props} textStyle={styles.dateText} />}
-          renderBubble={(props) => {
-            const isFromSameUser =
-              props.currentMessage?.user?._id ===
-              props.previousMessage?.user?._id;
-
-            return (
-              <Bubble
-                {...props}
-                wrapperStyle={{
-                  left: {
-                    backgroundColor: Colors.lightWhite,
-                    padding: RFPercentage(0.6),
-                    marginTop: isFromSameUser
-                      ? RFPercentage(0.3)
-                      : RFPercentage(1),
-                  },
-                  right: {
-                    backgroundColor: Colors.primary,
-                    padding: RFPercentage(0.6),
-                    marginTop: isFromSameUser
-                      ? RFPercentage(0.3)
-                      : RFPercentage(1),
-                  },
-                }}
-                textStyle={{
-                  left: {
-                    color: Colors.black,
-                    fontFamily: "Poppins_400Regular",
-                  },
-                  right: {
-                    color: Colors.white,
-                    fontFamily: "Poppins_400Regular",
-                  },
-                }}
-              />
-            );
-          }}
-        />
+                  {isFromCurrentUser && (
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleDeletePress(props.currentMessage._id)
+                      }
+                      style={{ top: RFPercentage(0.4) }}
+                    >
+                      <Entypo
+                        name="dots-three-vertical"
+                        size={RFPercentage(2.2)}
+                        color={theme.darkGrey}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              );
+            }}
+          />
+        </ImageBackground>
       </View>
-    </LinearGradient>
+      {isDeleteModalVisible && (
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContainer,{backgroundColor:theme.white}]}>
+            <Text style={[styles.modalTitle, {color:theme.heading}]}>Delete Message</Text>
+            <Text style={[styles.modalText, {color : theme.darkGrey}]}>
+              Are you sure you want to delete this message?
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={[
+                  styles.cancel,
+                  {
+                    borderColor:
+                      theme.mode === "dark" ? theme.lightGrey : theme.lightGrey,
+                  },
+                ]}
+                onPress={cancelDelete}
+              >
+                <Text
+                  style={{
+                    color: theme.heading,
+                    fontFamily: "Poppins_500Medium",
+                    fontSize: RFPercentage(1.7),
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.markButton}
+                onPress={confirmDelete}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontFamily: "Poppins_500Medium",
+                    fontSize: RFPercentage(1.7),
+                  }}
+                >
+                  Delete
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+    </View>
   );
 };
 
@@ -421,7 +587,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     alignItems: "center",
-    paddingHorizontal: RFPercentage(1),
     paddingTop: RFPercentage(2),
   },
   messageContainer: {
@@ -437,15 +602,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2.6),
   },
   toolbar: {
-    borderWidth: 1.5,
-    borderRadius: RFPercentage(6),
-    height: RFPercentage(6),
+    borderWidth: RFPercentage(0.1),
+    borderRadius: RFPercentage(4),
+    minHeight: RFPercentage(6),
+    maxHeight: RFPercentage(18),
     justifyContent: "center",
-    padding: RFPercentage(1.5),
+    padding: RFPercentage(1.8),
     borderTopWidth: RFPercentage(0.1),
     alignSelf: "center",
-    width: "100%",
-    marginBottom: RFPercentage(2.5),
+    width: "90%",
   },
   customTextInput: {
     color: Colors.white,
@@ -455,7 +620,7 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     paddingVertical: 0,
     justifyContent: "center",
-    height: RFPercentage(3),
+    textAlignVertical: "top",
   },
   sendButton: {
     justifyContent: "center",
@@ -470,7 +635,7 @@ const styles = StyleSheet.create({
   dateText: {
     color: Colors.white,
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.4),
   },
   noProfile: {
     width: RFPercentage(7),
@@ -501,6 +666,67 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.lightGrey,
     marginTop: Platform.OS === "android" ? 0 : RFPercentage(3),
+    paddingHorizontal: RFPercentage(2),
+  },
+  modalOverlay: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999, 
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+  },
+
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2),
+    alignItems: "center",
+    paddingVertical: RFPercentage(3),
+  },
+  modalTitle: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(1),
+  },
+  modalText: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    marginBottom: RFPercentage(2),
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  modalButton: {
+    flex: 1,
+    padding: RFPercentage(1.5),
+    borderRadius: RFPercentage(1),
+    marginHorizontal: RFPercentage(0.5),
+    alignItems: "center",
+  },
+  cancel: {
+    borderRadius: RFPercentage(100),
+    width: RFPercentage(17),
+    height: RFPercentage(5.2),
+    borderWidth: RFPercentage(0.2),
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  markButton: {
+    borderRadius: RFPercentage(100),
+    height: RFPercentage(5.2),
+    borderColor: Colors.primary,
+    borderWidth: RFPercentage(0.1),
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.primary,
+    width: RFPercentage(17.5),
   },
 });
 

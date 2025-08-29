@@ -1,23 +1,32 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  StatusBar,
+  Modal,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { FIREBASE_AUTH } from "../../firebaseConfig";
 import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
 import InputFieldNew from "../components/common/NewField";
 import Colors from "../config/Colors";
 import * as yup from "yup";
 import { Formik } from "formik";
-import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { BlurView } from "expo-blur";
 
 function ForgotPassword(props: any) {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
-  let validationSchema = yup.object({
+
+  const validationSchema = yup.object({
     email: yup
       .string()
       .email(`${t("validations.inValid")}`)
@@ -25,24 +34,30 @@ function ForgotPassword(props: any) {
   });
 
   const [loader, setLoader] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [email2, setEmail2] = useState("");
 
   const handleNext = async (values: any) => {
+    setEmail2(values.email);
     setLoader(true);
+    setErrorMessage("");
     try {
+      const q = query(
+        collection(FIREBASE_DB, "users"),
+        where("email", "==", values.email)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        setErrorMessage("No account is associated with this email address.");
+        return;
+      }
       await sendPasswordResetEmail(FIREBASE_AUTH, values.email);
-      props.navigation.navigate("Login");
-      Toast.show({
-        type: "success",
-        text1: `${t("toast.forgetPassword.one")}`,
-        text2: `${t("toast.forgetPassword.two")}`,
-      });
-    } catch (error) {
-      console.log("Error sending reset link:", error.message);
-      Toast.show({
-        type: "error",
-        text1: `${t("toast.forgetPassword.three")}`,
-        text2: `${t("toast.forgetPassword.four")}`,
-      });
+      setModalVisible(true);
+    } catch (error: any) {
+      console.log("Error:", error.message);
+      setErrorMessage(t("validations.somethingWentWrong"));
     } finally {
       setLoader(false);
     }
@@ -50,23 +65,41 @@ function ForgotPassword(props: any) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+      />
       <View style={styles.container}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={{ position: "absolute", left: 0 }}>
-          <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.5) }} color={theme.heading} />
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => props.navigation.goBack()}
+          style={{ position: "absolute", left: 0 }}
+        >
+          <Ionicons
+            name="chevron-back"
+            style={{ fontSize: RFPercentage(2.5) }}
+            color={theme.heading}
+          />
         </TouchableOpacity>
-        <Text style={[styles.heading, { color: theme.heading }]}>{`${t("forgetPassword.txt1")}`}</Text>
+        <Text style={[styles.heading, { color: theme.heading }]}>
+          {`${t("forgetPassword.txt1")}`}
+        </Text>
       </View>
 
       {/* Input field */}
       <Formik
-        initialValues={{
-          email: "",
-        }}
+        initialValues={{ email: "" }}
         validationSchema={validationSchema}
         onSubmit={(values) => handleNext(values)}
       >
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+        }) => (
           <>
             <View style={styles.fieldWrapper}>
               <InputFieldNew
@@ -75,48 +108,117 @@ function ForgotPassword(props: any) {
                 handleBlur={handleBlur("email")}
                 value={values.email}
                 customStyle={{
-                  borderColor: touched.email && errors.email ? Colors.red : theme.border,
+                  borderColor:
+                    touched.email && (errors.email || errorMessage)
+                      ? Colors.red
+                      : theme.border,
                 }}
               />
-              {touched.email && errors.email && (
-                <>
-                  <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{errors.email}</Text>
-                  </View>
-                </>
-              )}
+              {(touched.email && errors.email) || errorMessage ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>
+                    {errors.email || errorMessage}
+                  </Text>
+                </View>
+              ) : null}
             </View>
 
-            {/*Login Button */}
-            <MyAppButton title={`${t("forgetPassword.txt2")}`} marginTop={RFPercentage(5.2)} onPress={() => handleSubmit()} loading={loader} disabled={loader} />
+            {/* Reset Button */}
+            <MyAppButton
+              title={`${t("forgetPassword.txt2")}`}
+              marginTop={RFPercentage(5.2)}
+              onPress={() => handleSubmit()}
+              loading={loader}
+              disabled={loader}
+            />
           </>
         )}
       </Formik>
+
+      {/* Success Modal */}
+      <Modal transparent={true} visible={modalVisible} animationType="fade">
+        <BlurView
+          intensity={5}
+          style={[styles.modalOverlay, { backgroundColor: theme.modal }]}
+        >
+          <View
+            style={[styles.modalContainer, { backgroundColor: theme.white }]}
+          >
+            <Text style={[styles.modalText, { color: theme.heading }]}>
+              Reset Password link is sent to your email
+            </Text>
+            <Text style={[styles.modalText, { color: theme.heading }]}>
+              {email2}
+            </Text>
+            <Text
+              style={[
+                styles.modalText,
+                {
+                  color: theme.heading,
+                  marginTop: RFPercentage(2.5),
+                  fontFamily: "Poppins_500Medium",
+                  fontSize: RFPercentage(1.7),
+                },
+              ]}
+            >
+              Please check your Spam folder if you don’t see the reset email.
+            </Text>
+
+            <MyAppButton
+              title="OK"
+              marginTop={RFPercentage(3)}
+              width={RFPercentage(18)}
+              onPress={() => {
+                setModalVisible(false);
+                props.navigation.navigate("Login");
+              }}
+            />
+          </View>
+        </BlurView>
+      </Modal>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    justifyContent: "flex-start",
+  screen: { flex: 1, justifyContent: "flex-start", alignItems: "center" },
+  container: {
+    width: "90%",
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.white,
+    marginTop: RFPercentage(3),
   },
-  container: { width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(3) },
-  heading: { color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium" },
-  fieldWrapper: { justifyContent: "center", alignItems: "center", width: "88%" },
-  errorContainer: {
-    width: "100%",
-    height: RFPercentage(2),
-    top: RFPercentage(0.2),
+  heading: {
+    fontSize: RFPercentage(2.4),
+    fontFamily: "Poppins_500Medium",
   },
-
+  fieldWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "88%",
+  },
+  errorContainer: { width: "100%", marginTop: RFPercentage(0.5) },
   errorText: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     color: Colors.red,
-    left: RFPercentage(0.3),
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    borderRadius: 10,
+    padding: RFPercentage(3),
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+    textAlign: "center",
+    marginTop: RFPercentage(1),
   },
 });
 

@@ -568,6 +568,7 @@ function PostRequest({ navigation, route }) {
                 placeholder={`${t("postRequest.txt10")}`}
                 value={compensation}
                 onChangeText={setCompensation}
+                maxLength={50}
                 customStyle={{
                   width: "90%",
                   borderRadius: RFPercentage(1),
@@ -727,7 +728,7 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     width: "90%",
-    height: RFPercentage(20),
+    height: RFPercentage(20.5),
     borderRadius: RFPercentage(1.2),
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
@@ -740,7 +741,7 @@ const styles = StyleSheet.create({
     color: Colors.black,
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.8),
-    top: RFPercentage(1.5),
+    top: RFPercentage(1),
     left: RFPercentage(1.5),
   },
   imageWrapper: {

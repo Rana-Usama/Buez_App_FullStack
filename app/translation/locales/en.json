@@ -118,15 +118,15 @@
     "txt2": "Send OTP"
   },
   "freeTrial": {
-    "txt1": "Start Your 14-Day Free Trial",
-    "txt2": "How the Free Trial Works",
+    "txt1": "Begin Your 14-Day Free Trial",
+    "txt2": "How Your Free Trial Works",
     "txt3": "Today",
-    "txt4": "Get full access to all features — completely free for 14 days.",
-    "txt5": "10 Days Remaining",
-    "txt6": "We’ll notify you as your trial nears its end, so you stay informed.",
-    "txt7": "14 Days Remaining",
-    "txt8": "Your subscription will begin automatically. Cancel anytime before the trial ends to avoid charges.",
-    "txt9": "Start Free Trial"
+    "txt4": "Enjoy unlimited access to all our premium features for 14 days, completely free.",
+    "txt5": "Atfer 10 Days",
+    "txt6": "We'll send you a friendly reminder as your trial period ends in 4 days.",
+    "txt7": "Continue after trial",
+    "txt8": "Your subscription will continue automatically after 14 days. You can cancel anytime.",
+    "txt9": "Start My Free Trial"
   },
   "subscriptionV2": {
     "txt1": "Buy our premium to access full services",
@@ -151,7 +151,7 @@
     "txt6": "Moving",
     "txt7": "Gardening",
     "txt8": "Others",
-    "txt9": "Recent Requests",
+    "txt9": "Nearby Requests",
     "txt10": "Compensation",
     "txt11": "No Record Found!"
   },
@@ -169,7 +169,7 @@
     "txt11": "more",
     "txt12": "Accept Task",
     "txt13": "Category",
-    "txt14": "Rating"
+    "txt14": "Avg Rating"
   },
   "myRequests": {
     "txt1": "My Requests",
@@ -221,7 +221,7 @@
     "txt10": "Are you sure you want to delete\nthis account?",
     "txt11": "Are you sure you want to logout\nfrom this account?",
     "txt12": "Change Language",
-    "txt13" : "Dark Theme"
+    "txt13": "Dark Theme"
   },
   "cancelSubscription": {
     "txt1": "Cancel Premium Subscription",
@@ -314,6 +314,6 @@
   "location": {
     "placholder": "Search for a location",
     "by": "+ Add Location",
-    "apply" : "Apply Location"
+    "apply": "Apply Location"
   }
 }

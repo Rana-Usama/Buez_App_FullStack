@@ -256,8 +256,7 @@ function Signup({ navigation }: any) {
 
         {/* Social Media Icons */}
         <View style={styles.socialIconsContainer}>
-          {/* <FacebookLoginButton navigation={navigation} /> */}
-          <View>
+          {/* <View>
             <TouchableOpacity
               onPress={() => navigation.navigate("FacebookLoginWebView")}
             >
@@ -268,7 +267,7 @@ function Signup({ navigation }: any) {
             <TouchableOpacity onPress={() => setIsModalVisible(true)}>
               <Image source={Icons.instagram} style={styles.socialIcon} />
             </TouchableOpacity>
-          </View>
+          </View> */}
           <GoogleLoginButton navigation={navigation} />
         </View>
 

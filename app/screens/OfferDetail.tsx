@@ -33,6 +33,7 @@ import { useTranslation } from "react-i18next";
 import { translateText } from "../translation/googleTranslation";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { useAppTheme } from "../contexts/themeContext";
+import { LinearGradient } from "expo-linear-gradient";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -59,7 +60,6 @@ function OfferDetail({ navigation, route }) {
   const [averageRating, setAverageRating] = useState(null);
   const { theme } = useAppTheme();
 
-  console.log("current ......", currentUser)
   const translationCache = React.useRef({}).current;
 
   const translateWithCache = async (text: string) => {
@@ -187,9 +187,9 @@ function OfferDetail({ navigation, route }) {
             expoPushToken: postRequest?.user?.token,
             title: currentUser?.userData?.userName,
             message: "Accepted your task request.",
-            data : {
-              screen : "Notifications"
-            }
+            data: {
+              screen: "Notifications",
+            },
           }),
         }
       );
@@ -286,9 +286,9 @@ function OfferDetail({ navigation, route }) {
         </View>
 
         {/* Dots */}
-        <View style={styles.dotsContainer}>
-          {postRequest?.imageUrls?.length > 1 &&
-            postRequest.imageUrls.map((_, index) => (
+        {postRequest?.imageUrls?.length > 1 && (
+          <View style={styles.dotsContainer}>
+            {postRequest.imageUrls.map((_, index) => (
               <View
                 key={index}
                 style={[
@@ -300,13 +300,40 @@ function OfferDetail({ navigation, route }) {
                 ]}
               />
             ))}
-        </View>
+          </View>
+        )}
 
         {/* Translated Details */}
         <View style={styles.detailsContainer}>
-          <Text style={[styles.title, { color: theme.heading }]}>
-            {t("details.txt13")}: {translatedOffer?.taskType}
-          </Text>
+          <LinearGradient
+            colors={[Colors.primary, "#4557B0"]}
+            start={{ x: 0, y: 1 }}
+            end={{ x: 1, y: 0 }}
+            style={{
+              height: RFPercentage(4.5),
+              justifyContent: "center",
+              alignItems: "center",
+              paddingHorizontal: RFPercentage(4),
+              borderTopRightRadius: RFPercentage(2),
+              borderBottomLeftRadius: RFPercentage(2),
+            }}
+          >
+            <Text style={[styles.title, { color: theme.white }]}>
+              {translatedOffer?.taskType}
+            </Text>
+          </LinearGradient>
+          <View
+            style={[styles.infoContainer, { marginTop: RFPercentage(2.5) }]}
+          >
+            <Image
+              style={styles.icon}
+              source={Icons.bars}
+              tintColor={theme.heading}
+              resizeMode="contain"
+            />
+            <Text style={[styles.infoText]}>Description</Text>
+          </View>
+
           <Text style={[styles.description, { color: theme.darkGrey }]}>
             {isExpanded || translatedOffer?.description?.length <= 120
               ? translatedOffer?.description
@@ -327,6 +354,7 @@ function OfferDetail({ navigation, route }) {
             style={styles.icon}
             source={Icons.location}
             tintColor={theme.heading}
+            resizeMode="contain"
           />
           <Text style={[styles.infoText, { color: theme.heading }]}>{`${t(
             "details.txt4"
@@ -352,6 +380,7 @@ function OfferDetail({ navigation, route }) {
             style={styles.icon}
             source={Icons.cal}
             tintColor={theme.heading}
+            resizeMode="contain"
           />
           <Text style={[styles.infoText, { color: theme.heading }]}>{`${t(
             "details.txt5"
@@ -362,9 +391,17 @@ function OfferDetail({ navigation, route }) {
         </View>
 
         <View style={styles.compensationContainer}>
-          <Text style={[styles.compensationTitle, { color: theme.heading }]}>
+          <Image
+            tintColor={theme.heading}
+            style={styles.icon}
+            source={require("../../assets/Images/compensation.png")}
+            resizeMode="contain"
+          />
+          <Text style={[styles.infoText, { color: theme.heading }]}>
             {`${t("details.txt6")}`}:
           </Text>
+        </View>
+        <View style={{ width: "90%", alignSelf: "center" }}>
           <Text style={[styles.description, { color: theme.darkGrey }]}>
             {postRequest.compensationType === "Monitarely"
               ? `${postRequest.monitarily}$`
@@ -372,18 +409,18 @@ function OfferDetail({ navigation, route }) {
           </Text>
         </View>
 
-        <View style={styles.infoContainer}>
-          <Text style={[styles.compensationTitle, { color: theme.heading }]}>
-            {t("profile.txt3")}
-          </Text>
-        </View>
         <View
           style={{
             width: "90%",
             alignSelf: "center",
-            marginTop: RFPercentage(1),
+            marginTop: RFPercentage(1.9),
+            flexDirection: "row",
+            justifyContent: "space-between",
           }}
         >
+          <Text style={[styles.compensationTitle, { color: theme.heading }]}>
+            {t("profile.txt3")}
+          </Text>
           {averageRating && (
             <View
               style={{
@@ -400,15 +437,17 @@ function OfferDetail({ navigation, route }) {
               </Text>
             </View>
           )}
-
+        </View>
+        <View style={{ width: "90%" }}>
           {visibleReviews.length > 0 ? (
             <>
               <FlatList
                 data={visibleReviews}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => {
+                renderItem={({ item, index }) => {
+                  const isLastItem = index === visibleReviews.length - 1;
                   return (
-                    <View style={styles.review}>
+                    <View style={[styles.review]}>
                       <Image
                         source={
                           item?.reviewer?.profileImage
@@ -421,25 +460,95 @@ function OfferDetail({ navigation, route }) {
                       <View
                         style={{
                           marginLeft: RFPercentage(1),
-                          top: RFPercentage(0.5),
-                          width: "80%",
+                          width: "85%",
                         }}
                       >
+                        {/* Reviewer Name + Rating */}
+                        <View>
+                          <Text
+                            style={[
+                              styles.userName,
+                              {
+                                color: theme.heading,
+                                fontSize: RFPercentage(1.7),
+                                fontFamily: "Poppins_600SemiBold",
+                              },
+                            ]}
+                          >
+                            {item?.reviewer?.userName}
+                          </Text>
+                          {item?.rating && (
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                marginTop: RFPercentage(-0.5),
+                              }}
+                            >
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <Text
+                                  key={i}
+                                  style={{
+                                    color:
+                                      i <= (item.rating || 0)
+                                        ? Colors.star
+                                        : Colors.stroke,
+                                    fontSize: RFPercentage(2),
+                                    marginRight: 1,
+                                  }}
+                                >
+                                  ★
+                                </Text>
+                              ))}
+                            </View>
+                          )}
+                        </View>
+
+                        {/* Review Text */}
                         <Text
-                          style={[styles.userName, { color: theme.heading }]}
-                        >
-                          {item?.reviewer?.userName}
-                        </Text>
-                        <Text
-                          style={[styles.userName, { color: theme.darkGrey }]}
+                          style={[
+                            styles.userName,
+                            {
+                              color: theme.darkGrey,
+                              marginTop: RFPercentage(0.4),
+                              fontFamily: "Poppins_400Regular",
+                              fontSize: RFPercentage(1.6),
+                            },
+                          ]}
                         >
                           {item?.translatedText}
                         </Text>
+
+                        {/* Date & Time */}
+                        {item?.createdAt && (
+                          <Text
+                            style={{
+                              fontSize: RFPercentage(1.4),
+                              color: theme.darkGrey,
+                              marginTop: RFPercentage(0.5),
+                              fontFamily: "Poppins_400Regular",
+                              alignSelf: "flex-end",
+                            }}
+                          >
+                            {getDateTime(item.createdAt)}
+                          </Text>
+                        )}
                       </View>
+                      {!isLastItem && (
+                        <View
+                          style={{
+                            height: RFPercentage(0.1),
+                            width: "80%",
+                            backgroundColor: theme.stroke || "#E0E0E0",
+                            marginTop: RFPercentage(1.5),
+                            alignSelf: "flex-end",
+                          }}
+                        />
+                      )}
                     </View>
                   );
                 }}
               />
+
               {!showAll && hiddenCount > 0 && (
                 <TouchableOpacity onPress={() => setShowAll(true)}>
                   <Text style={[styles.reviewCount, { color: theme.primary }]}>
@@ -515,10 +624,10 @@ const styles = StyleSheet.create({
   },
   imageBackground: {
     width: screenWidth * 0.9,
-    height: RFPercentage(24),
+    height: RFPercentage(26),
     borderRadius: RFPercentage(2),
     overflow: "hidden",
-    marginTop: RFPercentage(2.8),
+    marginTop: RFPercentage(2),
   },
   image: {
     borderRadius: RFPercentage(2),
@@ -543,22 +652,22 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     width: "90%",
-    marginTop: RFPercentage(2.2),
     justifyContent: "flex-start",
     alignItems: "flex-start",
+    marginTop: RFPercentage(2),
   },
   title: {
     color: Colors.heading,
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
   },
   description: {
     textAlign: "justify",
-    marginTop: RFPercentage(0.8),
     color: Colors.heading,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     width: "100%",
+    marginTop: RFPercentage(0.5),
   },
   readMoreText: {
     color: Colors.primary,
@@ -567,24 +676,22 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     width: "90%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
+    alignItems: "center",
     flexDirection: "row",
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(1.9),
   },
   icon: {
     width: RFPercentage(2),
     height: RFPercentage(2),
   },
   infoText: {
-    top: RFPercentage(-0.4),
     marginLeft: RFPercentage(0.6),
     color: Colors.heading,
     fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_600SemiBold",
+    top: RFPercentage(0.2),
   },
   infoDetail: {
-    top: RFPercentage(-0.2),
     position: "absolute",
     right: 0,
     color: Colors.heading,
@@ -593,9 +700,9 @@ const styles = StyleSheet.create({
   },
   compensationContainer: {
     width: "90%",
-    marginTop: RFPercentage(2.1),
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
+    marginTop: RFPercentage(1.9),
+    alignItems: "center",
+    flexDirection: "row",
   },
   reviewCount: {
     color: Colors.primary,
@@ -609,8 +716,8 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
   },
   reviewPic: {
-    width: RFPercentage(5),
-    height: RFPercentage(5),
+    width: RFPercentage(5.9),
+    height: RFPercentage(5.9),
     borderRadius: RFPercentage(100),
     borderWidth: RFPercentage(0.3),
     borderColor: Colors.primary,
@@ -622,8 +729,8 @@ const styles = StyleSheet.create({
   },
   review: {
     flexDirection: "row",
-    alignItems: "center",
     paddingVertical: RFPercentage(1),
+    marginTop:RFPercentage(1)
   },
   chatButton: {
     marginRight: RFPercentage(2),
@@ -637,8 +744,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   rating: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_600SemiBold",
     color: Colors.heading,
   },
   ratingText: {
@@ -663,7 +770,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
-    marginTop: RFPercentage(5),
+    marginTop: RFPercentage(3),
   },
 });
 

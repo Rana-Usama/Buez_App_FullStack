@@ -216,8 +216,7 @@ function Login({ navigation }) {
       </View>
 
       <View style={styles.socialIconsContainer}>
-        {/* <FacebookLoginButton navigation={navigation} /> */}
-        <View>
+        {/* <View>
           <TouchableOpacity
             onPress={() => navigation.navigate("FacebookLoginWebView")}
           >
@@ -228,7 +227,7 @@ function Login({ navigation }) {
           <TouchableOpacity onPress={() => setIsModalVisible(true)}>
             <Image source={Icons.instagram} style={styles.socialIcon} />
           </TouchableOpacity>
-        </View>
+        </View> */}
         <GoogleLoginButton navigation={navigation} />
       </View>
 
@@ -434,7 +433,7 @@ const styles = StyleSheet.create({
   },
   signupContainer: {
     flexDirection: "row",
-    marginTop: RFPercentage(5),
+    marginTop: RFPercentage(3),
   },
   signupText: {
     fontSize: RFPercentage(1.7),

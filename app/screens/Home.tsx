@@ -501,12 +501,18 @@ function Home({ navigation }) {
                         />
                       </TouchableOpacity>
                       <Text style={[styles.userName, { color: theme.heading }]}>
-                        {item?.user?.userName}
+                        {item?.user?.userName?.length > 10
+                          ? `${item?.user?.userName.substring(0, 10)}...`
+                          : item?.user?.userName}
                       </Text>
                       <Text
                         style={[styles.postDate, { color: theme.darkGrey }]}
                       >
-                        {t("myRequests.txt4")} {getFormatedDate(item.createdAt)}
+                        {t("myRequests.txt4")}{" "}
+                        <Text style={{ fontFamily: "Poppins_400Regular" }}>
+                          {" "}
+                          {getFormatedDate(item.createdAt)}
+                        </Text>
                       </Text>
                     </View>
 
@@ -656,7 +662,6 @@ const styles = StyleSheet.create({
   },
   cartContainer: {
     width: width * 0.9,
-    height: RFPercentage(42),
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(1),
@@ -665,14 +670,14 @@ const styles = StyleSheet.create({
   },
   img: {
     width: width * 0.895,
-    height: RFPercentage(37),
+    height: RFPercentage(25),
     borderTopLeftRadius: RFPercentage(1),
     borderTopRightRadius: RFPercentage(1),
   },
   cartImageBackground: {
     width: "100%",
-    height: RFPercentage(26.5),
-    // backgroundColor:'yellow'
+    height: RFPercentage(28.5),
+    backgroundColor: "yellow",
   },
   cartImage: {
     borderTopLeftRadius: RFPercentage(2),
@@ -728,22 +733,22 @@ const styles = StyleSheet.create({
     marginVertical: RFPercentage(2),
   },
   userImage: {
-    width: RFPercentage(5.2),
-    height: RFPercentage(5.2),
+    width: RFPercentage(6.2),
+    height: RFPercentage(6.2),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(100),
   },
   userName: {
     marginLeft: RFPercentage(1.4),
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_600SemiBold",
   },
   postDate: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.5),
     position: "absolute",
     right: 0,
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "Poppins_600SemiBold",
   },
   taskInfoContainer: {
     width: "92%",

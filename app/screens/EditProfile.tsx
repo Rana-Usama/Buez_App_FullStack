@@ -42,7 +42,6 @@ function EditProfile({ navigation }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [originalData, setOriginalData] = useState({
     name: "",
-    phone: "",
     imageUri: null,
   });
 
@@ -52,12 +51,6 @@ function EditProfile({ navigation }) {
       title: `${t("common.name")}`,
       value: "",
       type: "default",
-    },
-    {
-      placeholder: `${t("editProfile.txt2")}`,
-      title: `${t("editProfile.txt5")}`,
-      value: "",
-      type: "phone-pad",
     },
   ]);
 
@@ -97,13 +90,11 @@ function EditProfile({ navigation }) {
     try {
       if (user) {
         const name = user?.userName || "";
-        const phone = user?.phoneNumber || "";
         const image = user?.profileImage || null;
         const tempFields = [...inputField];
         tempFields[0].value = name;
-        tempFields[1].value = phone;
         SetInputField(tempFields);
-        setOriginalData({ name, phone, imageUri: image });
+        setOriginalData({ name, imageUri: image });
         setImageUri(image);
       }
     } catch (error) {
@@ -113,10 +104,8 @@ function EditProfile({ navigation }) {
 
   const updateProfileData = async () => {
     const userName = inputField[0].value.trim();
-    const phoneNumber = inputField[1].value.trim();
     const userData = {
       userName,
-      phoneNumber,
     };
     setIsUpdating(true);
     try {
@@ -140,7 +129,6 @@ function EditProfile({ navigation }) {
 
   const isChanged =
     inputField[0].value.trim() !== originalData.name.trim() ||
-    inputField[1].value.trim() !== originalData.phone.trim() ||
     imageUri !== originalData.imageUri;
 
   return (
@@ -215,7 +203,6 @@ function EditProfile({ navigation }) {
                   onChangeText={(text) => handleChange(text, i)}
                   value={item.value}
                   width={"97%"}
-                  keyboardType={item.type}
                 />
               </View>
             ))}
@@ -293,7 +280,7 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     justifyContent: "center",
     alignItems: "center",
-    marginTop: RFPercentage(12),
+    marginTop: RFPercentage(6),
   },
 });
 
