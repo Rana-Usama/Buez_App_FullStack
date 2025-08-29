@@ -313,6 +313,7 @@
   },
   "location": {
     "placholder": "Cerca una località",
-    "by": "+ Aggiungi posizione"
+    "by": "+ Aggiungi posizione",
+     "apply": "Applica posizione" 
   }
 }

@@ -24,6 +24,7 @@ import { fetchCompletedTasksFromFirebase } from "../services/Review.service";
 import { translateText } from "../translation/googleTranslation";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 type Translations = {
   completedTasks: string;
@@ -70,7 +71,7 @@ export default function CompletedTasks({ navigation }: any) {
         translating: "Translating...",
       };
       const vals = await Promise.all(
-        Object.values(base).map((txt) => translateText(txt))
+        Object.values(base).map((txt) => cachedTranslate(txt))
       );
       const mapped = Object.keys(base).reduce((obj, k, i) => {
         obj[k] = vals[i] || base[k];
@@ -94,8 +95,8 @@ export default function CompletedTasks({ navigation }: any) {
           const originalCat = task.taskDetails?.taskType || "";
 
           const [descTr, catTr] = await Promise.all([
-            originalDesc ? translateText(originalDesc) : "",
-            originalCat ? translateText(originalCat) : "",
+            originalDesc ? cachedTranslate(originalDesc) : "",
+            originalCat ? cachedTranslate(originalCat) : "",
           ]);
 
           newCache[task.id] = {
@@ -139,7 +140,7 @@ export default function CompletedTasks({ navigation }: any) {
     const desc = cached.desc ?? tr.translating;
     const catName = cached.category ?? tr.translating;
     const shortDesc =
-      desc && desc.length > 50 ? `${desc.slice(0, 50)}…` : desc || "-";
+      desc && desc.length > 70 ? `${desc.slice(0, 70)}…` : desc || "-";
 
     return (
       <View
@@ -169,56 +170,65 @@ export default function CompletedTasks({ navigation }: any) {
           <Text style={[styles.desc, { color: theme.darkGrey }]}>
             {shortDesc}
           </Text>
-          
         </View>
 
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:"space-between", width:"90%", alignSelf:'center', paddingVertical:RFPercentage(1.5)}}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "90%",
+            alignSelf: "center",
+            paddingVertical: RFPercentage(1.5),
+          }}
+        >
           <Text style={[styles.date, { color: theme.darkGrey }]}>{`${
             tr.completedOn || "Completed on"
           }: ${getFormatedDate(doneOn)}`}</Text>
           <View>
-            {
-              item.reviewed ? 
-              (
-                <Text style={{color:theme.primary, fontFamily:"Poppins_600SemiBold", fontSize:RFPercentage(1.8)}}>Reviewed</Text>
-
-              )
-              :
-              (
-             <MyAppButton
-              title={tr.review || "Review"}
-              height={RFPercentage(4)}
-              width={RFPercentage(12)}
-              marginTop={0}
-              onPress={() => navigation.navigate("AddReview", { task: item })}
-            />
-              )
-            }
-          
+            {item.reviewed ? (
+              <Text
+                style={{
+                  color: theme.primary,
+                  fontFamily: "Poppins_600SemiBold",
+                  fontSize: RFPercentage(1.8),
+                }}
+              >
+                Reviewed
+              </Text>
+            ) : (
+              <MyAppButton
+                title={tr.review || "Review"}
+                height={RFPercentage(4)}
+                width={RFPercentage(12)}
+                marginTop={0}
+                onPress={() => navigation.navigate("AddReview", { task: item })}
+              />
+            )}
           </View>
         </View>
 
-          {item.reviewed && (
-            <View style={styles.reviewBox}>
-              <View style={styles.starRow}>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Text
-                    key={i}
-                    style={{
-                      color:
-                        i <= (item.rating || 0) ? Colors.star : Colors.stroke,
-                        fontSize:RFPercentage(2)
-                    }}
-                  >
-                    ★
-                  </Text>
-                ))}
-              </View>
-              <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
-                {item.reviewText || tr.reviewed || "Reviewed"}
-              </Text>
+        {item.reviewed && (
+          <View style={styles.reviewBox}>
+            <View style={styles.starRow}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Text
+                  key={i}
+                  style={{
+                    color:
+                      i <= (item.rating || 0) ? Colors.star : Colors.stroke,
+                    fontSize: RFPercentage(2),
+                  }}
+                >
+                  ★
+                </Text>
+              ))}
             </View>
-          ) }
+            <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
+              {item.reviewText || tr.reviewed || "Reviewed"}
+            </Text>
+          </View>
+        )}
       </View>
     );
   };
@@ -357,8 +367,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.6),
   },
-  reviewBtnWrap: {
-  },
+  reviewBtnWrap: {},
   reviewed: {
     fontFamily: "Poppins_500Medium",
     right: RFPercentage(1),
@@ -373,9 +382,9 @@ const styles = StyleSheet.create({
     paddingTop: RFPercentage(2),
   },
   reviewBox: {
-    width:"90%",
-    alignSelf:"center",
-    paddingBottom:RFPercentage(1.5)
+    width: "90%",
+    alignSelf: "center",
+    paddingBottom: RFPercentage(1.5),
   },
   starRow: {
     flexDirection: "row",
@@ -384,6 +393,6 @@ const styles = StyleSheet.create({
   reviewText: {
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.7),
-    lineHeight:RFPercentage(2)
+    lineHeight: RFPercentage(2),
   },
 });

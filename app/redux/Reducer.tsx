@@ -20,12 +20,21 @@ const locationReducer = (state = initialState, action) => {
       };
 
     case SELECT_LOCATION:
+      if (!action.payload) {
+        return {
+          ...state,
+          latitude2: null,
+          longitude2: null,
+          name2: "",
+        };
+      }
       return {
         ...state,
         latitude2: action.payload.latitude,
         longitude2: action.payload.longitude,
         name2: action.payload.name,
       };
+
     default:
       return state;
   }

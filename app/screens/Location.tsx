@@ -9,6 +9,7 @@ import { selectLocation, setLocation } from "../redux/Actions";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import Colors from "../config/Colors";
 
 export default function Location({ navigation, route }) {
   const { home } = route.params;
@@ -147,9 +148,9 @@ export default function Location({ navigation, route }) {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={handleApplyFilter}
-            style={[styles.applyButton, { backgroundColor: theme.primary }]}
+            style={[styles.applyButton, { backgroundColor: Colors.primary }]}
           >
-            <Text style={styles.applyButtonText}>{t("location.by") || "Apply Filter"}</Text>
+            <Text style={styles.applyButtonText}>{t("location.apply")}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   applyButton: {
-    paddingHorizontal: RFPercentage(2.3),
+    paddingHorizontal: RFPercentage(2.4),
     paddingVertical: RFPercentage(1.5),
     borderRadius: RFPercentage(10),
     justifyContent: "center",

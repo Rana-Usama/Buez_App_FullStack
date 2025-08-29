@@ -32,11 +32,10 @@ import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import InputFieldNew from "../components/common/NewField";
 import { useTranslation } from "react-i18next";
-import { translateText } from "../translation/googleTranslation";
 import { useSelector } from "react-redux";
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
-import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
@@ -100,7 +99,7 @@ function PostRequest({ navigation, route }) {
         const translatedTasks = await Promise.all(
           taskOptions.map(async (option) => ({
             ...option,
-            name: await translateText(option.name),
+            name: await cachedTranslate(option.name),
           }))
         );
         setTranslatedTaskOptions(translatedTasks);
@@ -108,20 +107,20 @@ function PostRequest({ navigation, route }) {
         const translatedCompensations = await Promise.all(
           compensationOptions.map(async (option) => ({
             ...option,
-            type: await translateText(option.type),
+            type: await cachedTranslate(option.type),
           }))
         );
         setTranslatedCompensationOptions(translatedCompensations);
         if (currentPostRequest) {
           setOriginalTaskType(currentPostRequest.taskType);
-          setSelectedTask(await translateText(currentPostRequest.taskType));
+          setSelectedTask(await cachedTranslate(currentPostRequest.taskType));
           setOriginalCompensationType(currentPostRequest.compensationType);
           setSelectedCompensation(
-            await translateText(currentPostRequest.compensationType)
+            await cachedTranslate(currentPostRequest.compensationType)
           );
           setLocation(currentPostRequest.address);
           setCompensation(
-            await translateText(currentPostRequest.otherCompensation)
+            await cachedTranslate(currentPostRequest.otherCompensation)
           );
           setBudget(`$${currentPostRequest.monitarily}`);
           const temp = [...imageUris];
@@ -129,7 +128,7 @@ function PostRequest({ navigation, route }) {
             temp[i] = imgUrl;
           });
           setImageUris(temp);
-          setDescription(await translateText(currentPostRequest.description));
+          setDescription(await cachedTranslate(currentPostRequest.description));
         }
       };
       translateAndSet();
@@ -360,8 +359,10 @@ function PostRequest({ navigation, route }) {
           marginTop={
             Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
           }
-          leftLogo={true}
+          leftLogo={isEditing ? false : true}
           profileImage={profileImgUrl}
+          dpNull={isEditing}
+
           navigation={navigation}
           title={
             title === `${t("postRequest.txt2")}`

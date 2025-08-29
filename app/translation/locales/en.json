@@ -313,6 +313,7 @@
   },
   "location": {
     "placholder": "Search for a location",
-    "by": "+ Add Location"
+    "by": "+ Add Location",
+    "apply" : "Apply Location"
   }
 }

@@ -14,6 +14,8 @@ import { useTranslation } from "react-i18next";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
 import { formatChatTimestamp } from "../services/Shared.service";
+import { cachedTranslate } from "../utils/cachedTranslations";
+
 
 function Messages({ navigation }) {
   const { t } = useTranslation();
@@ -84,13 +86,13 @@ function Messages({ navigation }) {
     const userData = userDoc.exists() ? userDoc.data() : null;
     let translatedText = chatData.lastMessage?.text || "";
 
-    if (translatedText) {
-      try {
-        translatedText = await translateText(translatedText);
-      } catch (e) {
-        console.log("Translation error:", e);
-      }
+  if (translatedText) {
+    try {
+      translatedText = await cachedTranslate(translatedText);
+    } catch (e) {
+      console.log("Translation error:", e);
     }
+  }
 
      const createdAt =
     chatData?.lastMessage?.createdAt?.toDate?.() ?? 

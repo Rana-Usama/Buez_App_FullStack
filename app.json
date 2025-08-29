@@ -5,11 +5,19 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme": "buez",
     "notification": {
       "icon": "./assets/notification-icon.png"
+    },
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "image": "./assets/Splash-dark.png",
+        "backgroundColor": "#000000"
+      }
     },
     "ios": {
       "supportsTablet": true,
@@ -35,22 +43,11 @@
         ],
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": [
-              "buez"
-            ]
+            "CFBundleURLSchemes": ["buez"]
           }
         ]
       },
-      "bundleIdentifier": "com.adamburg.Buez",
-      "splash": {
-        "image": "./assets/splash.png",
-        "backgroundColor": "#ffffff",
-        "resizeMode": "cover",
-        "dark": {
-          "image": "./assets/Splash-dark.png",
-          "backgroundColor": "#000000"
-        }
-      }
+      "bundleIdentifier": "com.adamburg.Buez"
     },
     "android": {
       "adaptiveIcon": {
@@ -58,20 +55,8 @@
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
-      "windowSoftInputMode": "adjustPan",
       "package": "com.adamburg.Buez",
-      "permissions": [
-        "android.permission.INTERNET"
-      ],
-      "splash": {
-        "image": "./assets/splash.png",
-        "backgroundColor": "#ffffff",
-        "resizeMode": "cover",
-        "dark": {
-          "image": "./assets/Splash-dark.png",
-          "backgroundColor": "#000000"
-        }
-      }
+      "permissions": ["android.permission.INTERNET"]
     },
     "web": {
       "favicon": "./assets/favicon.png"

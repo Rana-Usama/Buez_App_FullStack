@@ -91,7 +91,7 @@ export default function App() {
   const responseListener = useRef();
 
   useEffect(() => {
-    console.log("i18n is initialized:", i18n.isInitialized);
+    console.log(i18n.isInitialized);
   }, []);
 
   useEffect(() => {
@@ -122,7 +122,6 @@ export default function App() {
   }, []);
 
   console.log("fontsLoaded..........",fontsLoaded)
-  // wait for fonts before showing anything
   // if (!fontsLoaded) return null;
 
   return (
@@ -144,3 +143,14 @@ export default function App() {
     </ThemeProvider>
   );
 }
+
+
+//  "splash": {
+//       "image": "./assets/splash.png",
+//       "resizeMode": "cover",
+//       "backgroundColor": "#ffffff",
+//       "dark": {
+//         "image": "./assets/Splash-dark.png",
+//         "backgroundColor": "#000000"
+//       }
+//     },

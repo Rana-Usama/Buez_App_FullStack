@@ -2,6 +2,7 @@ import { StyleSheet, KeyboardAvoidingView, Platform, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
+import { navigationRef } from "../utils/navigationRef";
 
 // Screens
 import Onboarding from "../screens/Onboarding";
@@ -167,7 +168,7 @@ const StackNavigator: React.FC = () => {
 
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       {isLoading || userLoading || !initialRoute ? (
         <DeciderScreen />
       ) : ( 

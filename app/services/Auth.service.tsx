@@ -151,3 +151,22 @@ export const deleteCurrentUser = async () => {
     console.log("Error deleting user and Firestore data:", error);
   }
 };
+
+
+export const saveLocationToSecureStore = async (location) => {
+  try {
+    await SecureStore.setItemAsync("user_location", JSON.stringify(location));
+  } catch (e) {
+    console.log("Error saving location:", e);
+  }
+};
+
+export const getLocationFromSecureStore = async () => {
+  try {
+    const data = await SecureStore.getItemAsync("user_location");
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    console.log("Error reading location:", e);
+    return null;
+  }
+};

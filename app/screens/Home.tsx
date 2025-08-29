@@ -5,10 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  ImageBackground,
   Image,
   FlatList,
-  KeyboardAvoidingView,
   RefreshControl,
   ActivityIndicator,
   Platform,
@@ -28,14 +26,14 @@ import { usePostContext } from "../contexts/PostContext";
 import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 import { useTranslation } from "react-i18next";
-import { translateText } from "../translation/googleTranslation";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
 import haversine from "haversine";
-import * as Location from "expo-location";
 import { useDispatch, useSelector } from "react-redux";
 import { AntDesign } from "@expo/vector-icons";
-import { selectLocation, setLocation } from "../redux/Actions";
+import { selectLocation } from "../redux/Actions";
+import { cachedTranslate } from "../utils/cachedTranslations";
+import { useLocation } from "../utils/useLocation";
 
 type InputFieldType = {
   placeholder: string;
@@ -68,55 +66,20 @@ function Home({ navigation }) {
     "Other",
   ];
   useExitAppOnBack();
+  const { location: currentLocation, getCurrentLocation } = useLocation();
   const { theme } = useAppTheme();
   const selectedLocation = useSelector((state) => state.location);
-
-  const [currentLocation, setCurrentLocation] = useState(null);
-
-  const getCurrentLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Location permission denied");
-      return null;
-    }
-    const location = await Location.getCurrentPositionAsync({});
-    console.log("location...", location);
-    return {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    };
-  };
 
   const isWithin100km = (userLocation, taskLocation) => {
     return haversine(userLocation, taskLocation, { unit: "km" }) <= 100;
   };
 
-  useEffect(() => {
-    getCurrentLocation().then(setCurrentLocation);
-  }, []);
-
-  const translationCache = useRef({}).current;
-
-  const translateWithCache = async (text: string) => {
-    if (!text) return "";
-    if (translationCache[text]) return translationCache[text];
-
-    try {
-      const translated = await translateText(text);
-      translationCache[text] = translated;
-      return translated;
-    } catch (err) {
-      console.log("Translation failed:", err);
-      return text;
-    }
-  };
-
   const translateTask = async (task: any) => {
     return {
       ...task,
-      description: await translateWithCache(task.description || ""),
-      otherCompensation: await translateWithCache(task.otherCompensation || ""),
-      taskType: await translateWithCache(task.taskType || ""),
+      description: await cachedTranslate(task.description || ""),
+      otherCompensation: await cachedTranslate(task.otherCompensation || ""),
+      taskType: await cachedTranslate(task.taskType || ""),
     };
   };
 
@@ -124,7 +87,7 @@ function Home({ navigation }) {
     useCallback(() => {
       const translateFilters = async () => {
         const translations = await Promise.all(
-          originalFilters.map((item) => translateWithCache(item))
+          originalFilters.map((item) => cachedTranslate(item))
         );
         const map = {};
         originalFilters.forEach((original, i) => {
@@ -160,7 +123,7 @@ function Home({ navigation }) {
   useEffect(() => {
     fetchRequests(null);
     return () => {};
-  }, [activeFilter, selectedLocation]);
+  }, [activeFilter, selectedLocation, currentLocation]);
 
   const [activeIndices, setActiveIndices] = useState({});
 
@@ -188,7 +151,7 @@ function Home({ navigation }) {
         isLastVisible
       );
       const filteredTasks = newRecords.filter((task) => {
-        const loc = task.address;
+        const loc = task?.address;
         if (!loc?.latitude || !loc?.longitude) return false;
         return isWithin100km(referenceLocation, {
           latitude: loc.latitude,
@@ -197,7 +160,7 @@ function Home({ navigation }) {
       });
 
       const translatedTasks = await Promise.all(
-        filteredTasks.map((task) => translateTask(task, translateWithCache))
+        filteredTasks.map((task) => translateTask(task))
       );
 
       setAllTasks(translatedTasks);
@@ -222,7 +185,7 @@ function Home({ navigation }) {
         lastVisiblePost
       );
       const translatedNew = await Promise.all(
-        newRecords.map((task) => translateTask(task, translateWithCache))
+        newRecords.map((task) => translateTask(task))
       );
       setTaskRecords([...taskRecords, ...translatedNew]);
       setLastVisiblePost(lastVisible);
@@ -289,7 +252,7 @@ function Home({ navigation }) {
 
     setActiveIndices((prev) => {
       if (JSON.stringify(prev) === JSON.stringify(initialIndices)) {
-        return prev; // no change → no re-render
+        return prev;
       }
       return initialIndices;
     });
@@ -445,19 +408,9 @@ function Home({ navigation }) {
                   bottom: RFPercentage(0.3),
                 }}
                 onPress={async () => {
-                  const current = await getCurrentLocation();
-                  if (current) {
-                    dispatch(
-                      selectLocation({
-                        latitude2: current.latitude ?? null,
-                        longitude2: current.longitude ?? null,
-                        name2: "",
-                      })
-                    );
-                  } else {
-                    dispatch(selectLocation(null));
-                  }
-                  fetchRequests(null);
+                  dispatch(selectLocation(null)); // clears redux
+                  await getCurrentLocation(); // refresh GPS
+                  fetchRequests(null); // refetch tasks
                 }}
               >
                 <AntDesign
@@ -561,8 +514,8 @@ function Home({ navigation }) {
                       <Text
                         style={[styles.taskText, { color: theme.darkGrey2 }]}
                       >
-                        {item.description?.substr(0, 45) +
-                          (item.description?.length > 45 ? "..." : "")}
+                        {item.description?.substr(0, 90) +
+                          (item.description?.length > 90 ? "..." : "")}
                       </Text>
                       <View style={styles.compensationWrapper}>
                         <Image

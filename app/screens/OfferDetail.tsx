@@ -187,6 +187,9 @@ function OfferDetail({ navigation, route }) {
             expoPushToken: postRequest?.user?.token,
             title: currentUser?.userData?.userName,
             message: "Accepted your task request.",
+            data : {
+              screen : "Notifications"
+            }
           }),
         }
       );

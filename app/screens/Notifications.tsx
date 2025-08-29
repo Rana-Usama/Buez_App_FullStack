@@ -15,6 +15,7 @@ import * as Localization from "expo-localization";
 import { translateText } from "../translation/googleTranslation";
 import NotFound from "../components/common/NotFound";
 import { useAppTheme } from "../contexts/themeContext";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 const getTargetLanguage = async () => {
   try {
@@ -83,7 +84,7 @@ export default function Notifications({ navigation }) {
         notifications: "Notifications",
         translating: "Translating...",
       };
-      const translatedVals = await Promise.all(Object.values(phrases).map((txt) => translateText(txt)));
+      const translatedVals = await Promise.all(Object.values(phrases).map((txt) => cachedTranslate(txt)));
       const mapped: Translations = Object.keys(phrases).reduce((acc, key, idx) => {
         acc[key as keyof Translations] = translatedVals[idx] || phrases[key];
         return acc;
@@ -145,7 +146,7 @@ export default function Notifications({ navigation }) {
             return;
           }
           try {
-            newCache[item.id] = await translateText(original);
+            newCache[item.id] = await cachedTranslate(original);
           } catch {
             newCache[item.id] = original;
           }
@@ -200,7 +201,7 @@ export default function Notifications({ navigation }) {
         {/* footer */}
         <View style={styles.footer}>
           <Text style={[styles.time, { color: theme.darkGrey }]}>{postedTime}</Text>
-          <TouchableOpacity style={styles.msgBtn} onPress={() => handleStartChat(item.sender)}>
+          <TouchableOpacity activeOpacity={0.8} style={styles.msgBtn} onPress={() => handleStartChat(item.sender)}>
             <Image source={Icons.messages} resizeMode="contain" style={{ width: RFPercentage(2.5), height: RFPercentage(2.5) }} />
             <Text style={styles.msgTxt}>{tr.message || "Message"}</Text>
           </TouchableOpacity>

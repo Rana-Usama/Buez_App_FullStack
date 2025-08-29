@@ -41,6 +41,7 @@ import { FIREBASE_DB } from "../../firebaseConfig";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 const Chat = ({ navigation, route }) => {
   const { t } = useTranslation();
@@ -70,7 +71,7 @@ const Chat = ({ navigation, route }) => {
         const newMessages = await Promise.all(
           snapshot.docs.map(async (doc) => {
             const firebaseMessage = doc.data();
-            const translatedText = await translateText(firebaseMessage?.text);
+            const translatedText = await cachedTranslate(firebaseMessage?.text);
             return {
               _id: doc.id,
               text: translatedText,
@@ -113,7 +114,7 @@ const Chat = ({ navigation, route }) => {
       const initialMessages = await Promise.all(
         snapshot.docs.map(async (doc) => {
           const firebaseMessage = doc.data();
-          const translatedText = await translateText(firebaseMessage?.text);
+          const translatedText = await cachedTranslate(firebaseMessage?.text);
           return {
             _id: doc.id,
             text: translatedText,
@@ -157,7 +158,7 @@ const Chat = ({ navigation, route }) => {
     const newMessages = await Promise.all(
       snapshot.docs.map(async (doc) => {
         const firebaseMessage = doc.data();
-        const translatedText = await translateText(firebaseMessage?.text);
+        const translatedText = await cachedTranslate(firebaseMessage?.text);
         return {
           _id: doc.id,
           text: translatedText,
@@ -385,12 +386,16 @@ const Chat = ({ navigation, route }) => {
                   left: {
                     backgroundColor: Colors.lightWhite,
                     padding: RFPercentage(0.6),
-                    marginTop: isFromSameUser ? RFPercentage(0.3) : RFPercentage(1),
+                    marginTop: isFromSameUser
+                      ? RFPercentage(0.3)
+                      : RFPercentage(1),
                   },
                   right: {
                     backgroundColor: Colors.primary,
                     padding: RFPercentage(0.6),
-                    marginTop: isFromSameUser ? RFPercentage(0.3) : RFPercentage(1), 
+                    marginTop: isFromSameUser
+                      ? RFPercentage(0.3)
+                      : RFPercentage(1),
                   },
                 }}
                 textStyle={{

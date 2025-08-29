@@ -31,7 +31,7 @@ import { translateText } from "../translation/googleTranslation";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
 import ConfirmationModal from "../components/common/ConfirmationModal";
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -59,14 +59,30 @@ function MyRequests({ navigation }) {
       : activeFilter === `${t("myRequests.txt3")}`
       ? REQUEST_STATUS.Completed
       : REQUEST_STATUS.Cancelled;
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      setTaskRecords([]);
-      setLastVisiblePost(null);
-      fetchRequests(null);
-    }, [param])
-  );
+  // translationCache.js
+  const translationCache = {};
+
+  const cachedTranslate = async (text) => {
+    if (!text) return "";
+    if (translationCache[text]) {
+      return translationCache[text]; // return cached
+    }
+    const translated = await translateText(text);
+    translationCache[text] = translated;
+    return translated;
+  };
+
+useFocusEffect(
+  useCallback(() => {
+    setInitialLoadDone(false); // reset when param changes
+    setTaskRecords([]);
+    setLastVisiblePost(null);
+    fetchRequests(null).then(() => setInitialLoadDone(true));
+  }, [param])
+);
+
 
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
@@ -80,23 +96,15 @@ function MyRequests({ navigation }) {
         isLastVisible
       );
       const translatedRecords = await Promise.all(
-        newRecords.map(async (item) => {
-          const translatedTitle = await translateText(item.title || "");
-          const translatedDescription = await translateText(
-            item.description || ""
-          );
-          const translatedTaskType = await translateText(item.taskType || "");
-          const otherCompensation = await translateText(
+        newRecords.map(async (item) => ({
+          ...item,
+          title: await cachedTranslate(item.title || ""),
+          description: await cachedTranslate(item.description || ""),
+          taskType: await cachedTranslate(item.taskType || ""),
+          otherCompensation: await cachedTranslate(
             item.otherCompensation || ""
-          );
-          return {
-            ...item,
-            title: translatedTitle,
-            description: translatedDescription,
-            taskType: translatedTaskType,
-            otherCompensation,
-          };
-        })
+          ),
+        }))
       );
 
       setTaskRecords(translatedRecords);
@@ -117,7 +125,20 @@ function MyRequests({ navigation }) {
         param,
         lastVisiblePost
       );
-      setTaskRecords([...taskRecords, ...newRecords]);
+
+      const translatedRecords = await Promise.all(
+        newRecords.map(async (item) => ({
+          ...item,
+          title: await cachedTranslate(item.title || ""),
+          description: await cachedTranslate(item.description || ""),
+          taskType: await cachedTranslate(item.taskType || ""),
+          otherCompensation: await cachedTranslate(
+            item.otherCompensation || ""
+          ),
+        }))
+      );
+
+      setTaskRecords([...taskRecords, ...translatedRecords]);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
     } catch (error) {
@@ -175,40 +196,38 @@ function MyRequests({ navigation }) {
     }
   };
 
+  const repostRequest = async (index, item) => {
+    setLoader(true);
+    try {
+      const updatedData = {
+        ...item,
+        acceptedBy: null,
+        status: REQUEST_STATUS.Active,
+      };
 
- const repostRequest = async (index, item) => {
-  setLoader(true);
-  try {
-    const updatedData = {
-      ...item,
-      acceptedBy: null,
-      status: REQUEST_STATUS.Active,
-    };
+      await updateReqestStatus(item.id, REQUEST_STATUS.Active, updatedData);
+      setTaskRecords((prev) => {
+        const newRecords = [...prev];
+        newRecords[index] = { ...newRecords[index], ...updatedData };
+        return newRecords;
+      });
 
-    await updateReqestStatus(item.id, REQUEST_STATUS.Active, updatedData);
-    setTaskRecords((prev) => {
-      const newRecords = [...prev];
-      newRecords[index] = { ...newRecords[index], ...updatedData };
-      return newRecords;
-    });
-
-    Toast.show({
-      type: "success",
-      text1: t("toast.myRequests.one"),
-      text2: "Request Reposted Successfully",
-    });
-  } catch (e) {
-    Toast.show({
-      type: "error",
-      text1: t("toast.myRequests.five"),
-      text2: t("toast.myRequests.six"),
-    });
-  } finally {
-    setLoader(false);
-  }
-};
-
-
+      Toast.show({
+        type: "success",
+        text1: t("toast.myRequests.one"),
+        text2: "Request Reposted Successfully",
+      });
+    } catch (e) {
+      console.log("e.........", e);
+      Toast.show({
+        type: "error",
+        text1: t("toast.myRequests.five"),
+        text2: t("toast.myRequests.six"),
+      });
+    } finally {
+      setLoader(false);
+    }
+  };
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -398,8 +417,16 @@ function MyRequests({ navigation }) {
                       (cart.otherCompensation?.length > 20 ? "..." : "")}
                 </Text>
               </Text>
-              <TouchableOpacity onPress={(cart)=>repostRequest(index, cart)} activeOpacity={0.8} style={{position:'absolute', right:0,}}>
-                <Feather name="repeat" size={RFPercentage(2)} color={theme.primary} />
+              <TouchableOpacity
+                onPress={() => repostRequest(index, cart)}
+                activeOpacity={0.8}
+                style={{ position: "absolute", right: 0 }}
+              >
+                <Feather
+                  name="repeat"
+                  size={RFPercentage(2)}
+                  color={theme.primary}
+                />
               </TouchableOpacity>
             </View>
 

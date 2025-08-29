@@ -13,6 +13,7 @@ import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { translateText } from "../translation/googleTranslation";
 import { useAppTheme } from "../contexts/themeContext";
 import { useTranslation } from "react-i18next";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 const sameDay = (d1, d2) => d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
 
@@ -78,7 +79,7 @@ export default function Reviews({ navigation }) {
       const userLang = await getTargetLanguage();
       setLang(userLang);
       const keys = Object.keys(labels);
-      const translated = await Promise.all(keys.map((k) => translateText(labels[k])));
+      const translated = await Promise.all(keys.map((k) => cachedTranslate(labels[k])));
       const newLabels = keys.reduce((obj, key, index) => {
         obj[key as keyof Labels] = translated[index] || labels[key];
         return obj;
@@ -97,7 +98,7 @@ export default function Reviews({ navigation }) {
         const createdAt = review.createdAt?.toDate?.() ?? review.createdAt ?? new Date();
         const title = getSectionTitle(new Date(createdAt), lang);
         if (!translationMap[review.id]) {
-          const translatedText = await translateText(review.reviewText || "", lang);
+          const translatedText = await cachedTranslate(review.reviewText || "", lang);
           translationMap[review.id] = translatedText;
         }
         const arr = grouped.get(title) || [];
