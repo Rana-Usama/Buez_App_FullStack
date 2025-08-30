@@ -568,7 +568,6 @@ function PostRequest({ navigation, route }) {
                 placeholder={`${t("postRequest.txt10")}`}
                 value={compensation}
                 onChangeText={setCompensation}
-                maxLength={50}
                 customStyle={{
                   width: "90%",
                   borderRadius: RFPercentage(1),

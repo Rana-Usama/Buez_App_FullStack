@@ -266,7 +266,7 @@ function AddReview() {
               multiline
               placeholderTextColor={theme.inputFieldPlaceholder}
               maxLength={150}
-              style={[styles.reviewInput, { borderColor: theme.border }]}
+              style={[styles.reviewInput, { borderColor: theme.border , color:theme.heading}]}
             />
             <View style={styles.charCounterContainer}>
               <Text

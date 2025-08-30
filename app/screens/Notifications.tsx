@@ -188,7 +188,7 @@ export default function Notifications({ navigation }) {
     });
     
     return (
-      <View style={[styles.card, { backgroundColor: theme.white, borderColor: "rgba(234, 234, 234, 1)" }]}>
+      <View style={[styles.card, { backgroundColor: theme.white, borderColor: "rgba(167, 167, 167, 1)" }]}>
         {/* main row */}
         <View style={styles.row}>
           <Image source={profileImage ? { uri: profileImage } : Icons.dp} style={styles.avatar} />

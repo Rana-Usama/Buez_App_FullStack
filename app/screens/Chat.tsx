@@ -10,6 +10,7 @@ import {
   StatusBar,
   ImageBackground,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -62,6 +63,7 @@ const Chat = ({ navigation, route }) => {
   const { theme } = useAppTheme();
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
+  const [loader, setLoader] = useState(false);
 
   useEffect(() => {
     const listenForNewMessages = () => {
@@ -110,49 +112,68 @@ const Chat = ({ navigation, route }) => {
     }
   }, []);
 
+  const markMessagesAsRead = async () => {
+    if (!chatId || !currentUserId) return;
+    try {
+      // Get unread messages sent by the other user
+      const docRef = doc(FIREBASE_DB, "chats", chatId);
+      await updateDoc(docRef, { unread: false });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchInitialMessages = async () => {
-      const q = query(
-        collection(FIREBASE_DB, `chats/${chatId}/messages`),
-        orderBy("timestamp", "desc"),
-        limit(100)
-      );
-      const snapshot = await getDocs(q);
-      const initialMessages = await Promise.all(
-        snapshot.docs.map(async (doc) => {
-          const firebaseMessage = doc.data();
-          const translatedText = await cachedTranslate(firebaseMessage?.text);
-          return {
-            _id: doc.id,
-            text: translatedText,
-            createdAt: firebaseMessage.timestamp.toDate(),
-            user: {
-              _id: firebaseMessage.senderId,
-              name: firebaseMessage.senderName,
-            },
-          };
-        })
-      );
+      try {
+        setLoader(true);
 
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-
-      setMessages((prevMessages) => {
-        const messagesMap = new Map();
-        prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-        initialMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-        const mergedMessages = Array.from(messagesMap.values()).sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        const q = query(
+          collection(FIREBASE_DB, `chats/${chatId}/messages`),
+          orderBy("timestamp", "desc"),
+          limit(100)
         );
-        return GiftedChat.append([], mergedMessages).filter(Boolean);
-      });
+        const snapshot = await getDocs(q);
 
-      markMessagesAsRead();
+        const initialMessages = await Promise.all(
+          snapshot.docs.map(async (doc) => {
+            const firebaseMessage = doc.data();
+            const translatedText = await cachedTranslate(firebaseMessage?.text);
+            return {
+              _id: doc.id,
+              text: translatedText,
+              createdAt: firebaseMessage.timestamp.toDate(),
+              user: {
+                _id: firebaseMessage.senderId,
+                name: firebaseMessage.senderName,
+              },
+            };
+          })
+        );
+
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+
+        setMessages((prevMessages) => {
+          const messagesMap = new Map();
+          prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
+          initialMessages.forEach((msg) => messagesMap.set(msg._id, msg));
+          const mergedMessages = Array.from(messagesMap.values()).sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          return GiftedChat.append([], mergedMessages).filter(Boolean);
+        });
+
+        markMessagesAsRead();
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      } finally {
+        setLoader(false); // stop loader
+      }
     };
 
     fetchInitialMessages();
   }, [chatId]);
-
   const fetchMoreMessages = async () => {
     if (!lastVisible) return;
     const q = query(
@@ -224,17 +245,6 @@ const Chat = ({ navigation, route }) => {
       console.log(e);
     }
   }, []);
-
-  const markMessagesAsRead = async () => {
-    if (!chatId || !currentUserId) return;
-    try {
-      // Get unread messages sent by the other user
-      const docRef = doc(FIREBASE_DB, "chats", chatId);
-      await updateDoc(docRef, { unread: false });
-    } catch (error) {
-      console.error("Error marking messages as read:", error);
-    }
-  };
 
   async function sendPushNotification(message) {
     try {
@@ -467,6 +477,47 @@ const Chat = ({ navigation, route }) => {
             renderDay={(props) => (
               <Day {...props} textStyle={styles.dateText} />
             )}
+            renderAvatar={(props) => {
+              const isReceiver =
+                props.currentMessage.user._id !== currentUserId;
+              if (!isReceiver) return null; // Don't show avatar for current user
+
+              return receiver?.profileImage ? (
+                <Image
+                  source={{ uri: receiver.profileImage }}
+                  style={{
+                    width: RFPercentage(5),
+                    height: RFPercentage(5),
+                    borderRadius: RFPercentage(50),
+                    borderWidth: 1,
+                    borderColor: Colors.primary,
+                    bottom: RFPercentage(0.3),
+                  }}
+                />
+              ) : (
+                <View
+                  style={{
+                    width: RFPercentage(5),
+                    height: RFPercentage(5),
+                    borderRadius: RFPercentage(50),
+                    backgroundColor: theme.lightGrey,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bottom: RFPercentage(0.3),
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: theme.primary,
+                      fontSize: RFPercentage(1.8),
+                      fontFamily: "Poppins_600SemiBold",
+                    }}
+                  >
+                    {receiver?.userName?.[0] || "?"}
+                  </Text>
+                </View>
+              );
+            }}
             renderBubble={(props) => {
               const isFromCurrentUser =
                 props.currentMessage?.user?._id === currentUserId;
@@ -488,30 +539,40 @@ const Chat = ({ navigation, route }) => {
                 >
                   <Bubble
                     {...props}
+                    onLongPress={() => {
+                      if (props.currentMessage?.user?._id === currentUserId) {
+                        handleDeletePress(props.currentMessage._id);
+                      }
+                    }}
                     wrapperStyle={{
                       left: {
-                        backgroundColor: Colors.lightWhite,
+                        backgroundColor: theme.white,
                         padding: RFPercentage(0.6),
                         marginLeft: 0, // Ensure no left margin
                       },
                       right: {
-                        backgroundColor: Colors.primary,
+                        backgroundColor:
+                          theme.mode === "dark"
+                            ? Colors.darkGrey
+                            : Colors.primary,
                         padding: RFPercentage(0.6),
                         marginRight: 0, // Ensure no right margin
                       },
                     }}
                     textStyle={{
                       left: {
-                        color: Colors.black,
+                        color: theme.black,
                         fontFamily: "Poppins_400Regular",
+                        fontSize: RFPercentage(1.8),
                       },
                       right: {
                         color: Colors.white,
                         fontFamily: "Poppins_400Regular",
+                        fontSize: RFPercentage(1.8),
                       },
                     }}
                   />
-                  {isFromCurrentUser && (
+                  {/* {isFromCurrentUser && (
                     <TouchableOpacity
                       onPress={() =>
                         handleDeletePress(props.currentMessage._id)
@@ -524,19 +585,39 @@ const Chat = ({ navigation, route }) => {
                         color={theme.darkGrey}
                       />
                     </TouchableOpacity>
-                  )}
+                  )} */}
                 </View>
               );
             }}
           />
+          {loader && (
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: RFPercentage(10),
+                left: 0,
+                right: 0,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: theme.mode === "dark" ?  "rgba(4, 4, 4, 0.6)" :  "rgba(255,255,255,0.6)",
+              }}
+            >
+              <ActivityIndicator size="large" color={theme.mode === "dark" ? Colors.white : Colors.primary} />
+            </View>
+          )}
         </ImageBackground>
       </View>
       {isDeleteModalVisible && (
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer,{backgroundColor:theme.white}]}>
-            <Text style={[styles.modalTitle, {color:theme.heading}]}>Delete Message</Text>
-            <Text style={[styles.modalText, {color : theme.darkGrey}]}>
-              Are you sure you want to delete this message?
+          <View
+            style={[styles.modalContainer, { backgroundColor: theme.white }]}
+          >
+            <Text style={[styles.modalTitle, { color: theme.heading }]}>
+              {t("chat.txt3")}
+            </Text>
+            <Text style={[styles.modalText, { color: theme.darkGrey }]}>
+              {t("chat.txt4")}
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -557,7 +638,7 @@ const Chat = ({ navigation, route }) => {
                     fontSize: RFPercentage(1.7),
                   }}
                 >
-                  Cancel
+                  {t("buttons.cancel")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -572,7 +653,7 @@ const Chat = ({ navigation, route }) => {
                     fontSize: RFPercentage(1.7),
                   }}
                 >
-                  Delete
+                  {t("chat.txt5")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -604,7 +685,7 @@ const styles = StyleSheet.create({
   toolbar: {
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(4),
-    minHeight: RFPercentage(6),
+    // minHeight: RFPercentage(5.5),
     maxHeight: RFPercentage(18),
     justifyContent: "center",
     padding: RFPercentage(1.8),
@@ -672,7 +753,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 9999, 
+    zIndex: 9999,
     position: "absolute",
     width: "100%",
     height: "100%",

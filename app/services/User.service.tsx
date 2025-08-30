@@ -18,6 +18,7 @@ export const addUser = async (id: any, { userName, email, phoneNumber = "", prof
       isSubscribed,
       token,
       isFreeTrial,
+      userId : id
     };
 
     await setDoc(doc(db, "users", id), user);

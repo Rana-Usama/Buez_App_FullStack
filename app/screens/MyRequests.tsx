@@ -74,15 +74,14 @@ function MyRequests({ navigation }) {
     return translated;
   };
 
-useFocusEffect(
-  useCallback(() => {
-    setInitialLoadDone(false); // reset when param changes
-    setTaskRecords([]);
-    setLastVisiblePost(null);
-    fetchRequests(null).then(() => setInitialLoadDone(true));
-  }, [param])
-);
-
+  useFocusEffect(
+    useCallback(() => {
+      setInitialLoadDone(false); // reset when param changes
+      setTaskRecords([]);
+      setLastVisiblePost(null);
+      fetchRequests(null).then(() => setInitialLoadDone(true));
+    }, [param])
+  );
 
   const fetchRequests = async (islastVisiblePost = undefined) => {
     setLoading(true);
@@ -211,11 +210,12 @@ useFocusEffect(
         newRecords[index] = { ...newRecords[index], ...updatedData };
         return newRecords;
       });
+      setActiveFilter(t("myRequests.txt2"));
 
       Toast.show({
         type: "success",
         text1: t("toast.myRequests.one"),
-        text2: "Request Reposted Successfully",
+        text2: t("toast.myRequests.seven"),
       });
     } catch (e) {
       console.log("e.........", e);
@@ -405,6 +405,7 @@ useFocusEffect(
             </View>
 
             {/* Compensation */}
+            {/* Compensation + Repost */}
             <View style={styles.taskInfoContainer}>
               <Text style={[styles.compensation, { color: theme.heading }]}>
                 {`${t("home.txt10")}`}:{" "}
@@ -413,21 +414,42 @@ useFocusEffect(
                 >
                   {cart.compensationType === "Monitarely"
                     ? `${cart.monitarily}$`
-                    : cart.otherCompensation?.substr(0, 20) +
-                      (cart.otherCompensation?.length > 20 ? "..." : "")}
+                    : cart.otherCompensation?.substr(0, 18) +
+                      (cart.otherCompensation?.length > 18 ? "..." : "")}
                 </Text>
               </Text>
-              <TouchableOpacity
-                onPress={() => repostRequest(index, cart)}
-                activeOpacity={0.8}
-                style={{ position: "absolute", right: 0 }}
-              >
-                <Feather
-                  name="repeat"
-                  size={RFPercentage(2)}
-                  color={theme.primary}
-                />
-              </TouchableOpacity>
+
+              {/* Repost only for Completed or Cancelled requests */}
+              {(cart.status === REQUEST_STATUS.Completed ||
+                cart.status === REQUEST_STATUS.Cancelled) && (
+                <TouchableOpacity
+                  onPress={() => repostRequest(index, cart)}
+                  activeOpacity={0.8}
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    flexDirection: "row",
+                    bottom: 0,
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: Colors.primary,
+                      fontFamily: "Poppins_600SemiBold",
+                      fontSize: RFPercentage(1.6),
+                      marginRight: RFPercentage(0.5),
+                    }}
+                  >
+                    Repost
+                  </Text>
+                  <Feather
+                    name="repeat"
+                    size={RFPercentage(1.8)}
+                    color={theme.primary}
+                  />
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Actions (only for active posts) */}

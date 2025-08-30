@@ -58,7 +58,8 @@
       "three": "Als abgschlosse markiere",
       "four": "Abbroche",
       "five": "Öppis isch schief gloffe!",
-      "six": "Status vom Uftrag cha nöd aktualisiert wärde."
+      "six": "Status vom Uftrag cha nöd aktualisiert wärde.",
+      "seven": "Anfrage erfolgreich erneut veröffentlicht"
     },
     "cancelSubscription": {
       "one": "Kei aktivs Abo",
@@ -114,8 +115,12 @@
     "txt3": "Hesch scho es Konto?"
   },
   "forgetPassword": {
-    "txt1": "Passwort zruggsetze?",
-    "txt2": "OTP schickä"
+    "txt1": "Passwort zurücksetzen?",
+    "txt2": "Link senden",
+    "txt3": "Der Link zum Zurücksetzen des Passworts wurde an Ihre E-Mail gesendet",
+    "txt4": "Bitte überprüfen Sie Ihren Spam-Ordner, falls Sie die E-Mail zum Zurücksetzen nicht sehen.",
+    "txt5": "Ok",
+    "txt6": "Kein Konto ist mit dieser E-Mail-Adresse verknüpft."
   },
   "freeTrial": {
     "txt1": "Aktivier dini 14-tägigi gratis Testzit!",
@@ -169,7 +174,7 @@
     "txt11": "mehr",
     "txt12": "Aufgabe annehmen",
     "txt13": "Kategorie",
-    "txt14" : "Bewertung"
+    "txt14": "Bewertung"
   },
   "myRequests": {
     "txt1": "Mini Ufträgi",
@@ -205,7 +210,10 @@
   },
   "chat": {
     "txt1": "Früehere Nachrichte lade",
-    "txt2": "Nachricht schriebe"
+    "txt2": "Nachricht schriebe",
+    "txt3": "Nachricht löschen",
+    "txt4": "Möchten Sie diese Nachricht löschen?",
+    "txt5": "Löschen"
   },
   "settings": {
     "txt1": "Abo abstelle",
@@ -220,7 +228,7 @@
     "txt10": "Bisch sicher, dass du die Konto wotsch lösche?",
     "txt11": "Bisch sicher, dass du dich uslogge wotsch us däm Konto?",
     "txt12": "Sprache ändern",
-    "txt13" : "Dunkles Thema"
+    "txt13": "Dunkles Thema"
   },
   "cancelSubscription": {
     "txt1": "Premium-Abo kündige",

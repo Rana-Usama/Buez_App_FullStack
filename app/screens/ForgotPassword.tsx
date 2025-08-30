@@ -50,7 +50,7 @@ function ForgotPassword(props: any) {
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        setErrorMessage("No account is associated with this email address.");
+        setErrorMessage(t("forgetPassword.txt6"));
         return;
       }
       await sendPasswordResetEmail(FIREBASE_AUTH, values.email);
@@ -145,7 +145,7 @@ function ForgotPassword(props: any) {
             style={[styles.modalContainer, { backgroundColor: theme.white }]}
           >
             <Text style={[styles.modalText, { color: theme.heading }]}>
-              Reset Password link is sent to your email
+              {t("forgetPassword.txt3")}
             </Text>
             <Text style={[styles.modalText, { color: theme.heading }]}>
               {email2}
@@ -161,11 +161,11 @@ function ForgotPassword(props: any) {
                 },
               ]}
             >
-              Please check your Spam folder if you don’t see the reset email.
+              {t("forgetPassword.txt4")}
             </Text>
 
             <MyAppButton
-              title="OK"
+              title={t("forgetPassword.txt5")}
               marginTop={RFPercentage(3)}
               width={RFPercentage(18)}
               onPress={() => {

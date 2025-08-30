@@ -146,7 +146,10 @@ export default function CompletedTasks({ navigation }: any) {
       <View
         style={[
           styles.card,
-          { backgroundColor: theme.white, borderColor: "rgba(234, 234, 234, 1)"  },
+          {
+            backgroundColor: theme.white,
+            borderColor: "rgba(234, 234, 234, 1)",
+          },
         ]}
       >
         <View style={styles.headerRow}>
@@ -357,6 +360,7 @@ const styles = StyleSheet.create({
   descWrap: {
     marginLeft: RFPercentage(2.6),
     marginTop: RFPercentage(1.5),
+    width: "90%",
   },
   desc: {
     color: Colors.darkGrey,

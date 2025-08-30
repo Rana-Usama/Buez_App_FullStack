@@ -58,7 +58,8 @@
       "three": "segna come completata",
       "four": "annullata",
       "five": "Qualcosa è andato storto!",
-      "six": "Impossibile aggiornare lo stato della richiesta."
+      "six": "Impossibile aggiornare lo stato della richiesta.",
+      "seven": "Richiesta ripubblicata con successo"
     },
     "cancelSubscription": {
       "one": "Nessun abbonamento attivo",
@@ -114,8 +115,12 @@
     "txt3": "Hai già un account?"
   },
   "forgetPassword": {
-    "txt1": "Reimposta password?",
-    "txt2": "Invia codice OTP"
+    "txt1": "Reimpostare la password?",
+    "txt2": "Invia link",
+    "txt3": "Il link per reimpostare la password è stato inviato alla tua email",
+    "txt4": "Controlla la cartella Spam se non vedi l'email di reimpostazione.",
+    "txt5": "Ok",
+    "txt6": "Nessun account è associato a questo indirizzo email."
   },
   "freeTrial": {
     "txt1": "Attiva la tua prova gratuita di 14 giorni!",
@@ -206,7 +211,10 @@
   },
   "chat": {
     "txt1": "Carica messaggi precedenti",
-    "txt2": "Scrivi un messaggio"
+    "txt2": "Scrivi un messaggio",
+    "txt3": "Elimina messaggio",
+    "txt4": "Vuoi eliminare questo messaggio?",
+    "txt5": "Elimina"
   },
   "settings": {
     "txt1": "Annulla abbonamento",
@@ -221,7 +229,7 @@
     "txt10": "Sei sicuro di voler eliminare\nquesto account?",
     "txt11": "Sei sicuro di voler uscire\nda questo account?",
     "txt12": "Cambia lingua",
-    "txt13" : "Tema Scuro"
+    "txt13": "Tema Scuro"
   },
   "cancelSubscription": {
     "txt1": "Annulla abbonamento Premium",
@@ -314,6 +322,6 @@
   "location": {
     "placholder": "Cerca una località",
     "by": "+ Aggiungi posizione",
-     "apply": "Applica posizione" 
+    "apply": "Applica posizione"
   }
 }

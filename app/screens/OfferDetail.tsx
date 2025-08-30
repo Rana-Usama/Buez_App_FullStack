@@ -30,10 +30,10 @@ import { createNewChat } from "../services/Chat.service";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
-import { translateText } from "../translation/googleTranslation";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { useAppTheme } from "../contexts/themeContext";
 import { LinearGradient } from "expo-linear-gradient";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -66,7 +66,7 @@ function OfferDetail({ navigation, route }) {
     if (!text) return "";
     if (translationCache[text]) return translationCache[text];
     try {
-      const translated = await translateText(text);
+      const translated = await cachedTranslate(text);
       translationCache[text] = translated;
       return translated;
     } catch (err) {
@@ -318,7 +318,7 @@ function OfferDetail({ navigation, route }) {
               borderBottomLeftRadius: RFPercentage(2),
             }}
           >
-            <Text style={[styles.title, { color: theme.white }]}>
+            <Text style={[styles.title, { color: "white" }]}>
               {translatedOffer?.taskType}
             </Text>
           </LinearGradient>
@@ -331,7 +331,9 @@ function OfferDetail({ navigation, route }) {
               tintColor={theme.heading}
               resizeMode="contain"
             />
-            <Text style={[styles.infoText]}>Description</Text>
+            <Text style={[styles.infoText, { color: theme.heading }]}>
+              {t("postRequest.txt8")}
+            </Text>
           </View>
 
           <Text style={[styles.description, { color: theme.darkGrey }]}>
@@ -398,7 +400,7 @@ function OfferDetail({ navigation, route }) {
             resizeMode="contain"
           />
           <Text style={[styles.infoText, { color: theme.heading }]}>
-            {`${t("details.txt6")}`}:
+            {`${t("details.txt6")}`}
           </Text>
         </View>
         <View style={{ width: "90%", alignSelf: "center" }}>
@@ -413,7 +415,7 @@ function OfferDetail({ navigation, route }) {
           style={{
             width: "90%",
             alignSelf: "center",
-            marginTop: RFPercentage(1.9),
+            marginTop: RFPercentage(2.1),
             flexDirection: "row",
             justifyContent: "space-between",
           }}
@@ -447,102 +449,96 @@ function OfferDetail({ navigation, route }) {
                 renderItem={({ item, index }) => {
                   const isLastItem = index === visibleReviews.length - 1;
                   return (
-                    <View style={[styles.review]}>
-                      <Image
-                        source={
-                          item?.reviewer?.profileImage
-                            ? { uri: item?.reviewer?.profileImage }
-                            : Icons.profile
-                        }
-                        resizeMode="cover"
-                        style={styles.reviewPic}
-                      />
-                      <View
-                        style={{
-                          marginLeft: RFPercentage(1),
-                          width: "85%",
-                        }}
-                      >
-                        {/* Reviewer Name + Rating */}
-                        <View>
+                    <View>
+                      <View style={[styles.review]}>
+                        <Image
+                          source={
+                            item?.reviewer?.profileImage
+                              ? { uri: item?.reviewer?.profileImage }
+                              : Icons.dp
+                          }
+                          resizeMode="cover"
+                          style={styles.reviewPic}
+                        />
+                        <View
+                          style={{
+                            marginLeft: RFPercentage(1),
+                            width: "85%",
+                          }}
+                        >
+                          {/* Reviewer Name + Rating */}
+                          <View>
+                            <Text
+                              style={[
+                                styles.userName,
+                                {
+                                  color: theme.heading,
+                                  fontSize: RFPercentage(1.7),
+                                  fontFamily: "Poppins_600SemiBold",
+                                },
+                              ]}
+                            >
+                              {item?.reviewer?.userName}
+                            </Text>
+                            {item?.rating && (
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  marginTop: RFPercentage(-0.5),
+                                }}
+                              >
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                  <Text
+                                    key={i}
+                                    style={{
+                                      color:
+                                        i <= (item.rating || 0)
+                                          ? Colors.star
+                                          : Colors.stroke,
+                                      fontSize: RFPercentage(2),
+                                      marginRight: 1,
+                                    }}
+                                  >
+                                    ★
+                                  </Text>
+                                ))}
+                              </View>
+                            )}
+                          </View>
+
+                          {/* Review Text */}
                           <Text
                             style={[
                               styles.userName,
                               {
-                                color: theme.heading,
-                                fontSize: RFPercentage(1.7),
-                                fontFamily: "Poppins_600SemiBold",
+                                color: theme.darkGrey,
+                                marginTop: RFPercentage(0.4),
+                                fontFamily: "Poppins_400Regular",
+                                fontSize: RFPercentage(1.6),
                               },
                             ]}
                           >
-                            {item?.reviewer?.userName}
+                            {item?.translatedText}
                           </Text>
-                          {item?.rating && (
-                            <View
+
+                          {/* Date & Time */}
+                          {item?.createdAt && (
+                            <Text
                               style={{
-                                flexDirection: "row",
-                                marginTop: RFPercentage(-0.5),
+                                fontSize: RFPercentage(1.4),
+                                color: theme.darkGrey,
+                                marginTop: RFPercentage(0.5),
+                                fontFamily: "Poppins_400Regular",
+                                alignSelf: "flex-end",
                               }}
                             >
-                              {[1, 2, 3, 4, 5].map((i) => (
-                                <Text
-                                  key={i}
-                                  style={{
-                                    color:
-                                      i <= (item.rating || 0)
-                                        ? Colors.star
-                                        : Colors.stroke,
-                                    fontSize: RFPercentage(2),
-                                    marginRight: 1,
-                                  }}
-                                >
-                                  ★
-                                </Text>
-                              ))}
-                            </View>
+                              {getDateTime(item.createdAt)}
+                            </Text>
                           )}
                         </View>
-
-                        {/* Review Text */}
-                        <Text
-                          style={[
-                            styles.userName,
-                            {
-                              color: theme.darkGrey,
-                              marginTop: RFPercentage(0.4),
-                              fontFamily: "Poppins_400Regular",
-                              fontSize: RFPercentage(1.6),
-                            },
-                          ]}
-                        >
-                          {item?.translatedText}
-                        </Text>
-
-                        {/* Date & Time */}
-                        {item?.createdAt && (
-                          <Text
-                            style={{
-                              fontSize: RFPercentage(1.4),
-                              color: theme.darkGrey,
-                              marginTop: RFPercentage(0.5),
-                              fontFamily: "Poppins_400Regular",
-                              alignSelf: "flex-end",
-                            }}
-                          >
-                            {getDateTime(item.createdAt)}
-                          </Text>
-                        )}
                       </View>
                       {!isLastItem && (
-                        <View
-                          style={{
-                            height: RFPercentage(0.1),
-                            width: "80%",
-                            backgroundColor: theme.stroke || "#E0E0E0",
-                            marginTop: RFPercentage(1.5),
-                            alignSelf: "flex-end",
-                          }}
-                        />
+                        <View style={{width:"60%", height:RFPercentage(0.1),backgroundColor:"rgba(226, 226, 226, 0.4)", marginTop:RFPercentage(1)}} />
                       )}
                     </View>
                   );
@@ -678,7 +674,7 @@ const styles = StyleSheet.create({
     width: "90%",
     alignItems: "center",
     flexDirection: "row",
-    marginTop: RFPercentage(1.9),
+    marginTop: RFPercentage(2.1),
   },
   icon: {
     width: RFPercentage(2),
@@ -700,7 +696,7 @@ const styles = StyleSheet.create({
   },
   compensationContainer: {
     width: "90%",
-    marginTop: RFPercentage(1.9),
+    marginTop: RFPercentage(2.1),
     alignItems: "center",
     flexDirection: "row",
   },
@@ -730,7 +726,7 @@ const styles = StyleSheet.create({
   review: {
     flexDirection: "row",
     paddingVertical: RFPercentage(1),
-    marginTop:RFPercentage(1)
+    marginTop: RFPercentage(1),
   },
   chatButton: {
     marginRight: RFPercentage(2),
@@ -770,7 +766,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(4),
   },
 });
 

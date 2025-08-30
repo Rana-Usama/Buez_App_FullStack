@@ -58,7 +58,8 @@
       "three": "mark as completed",
       "four": "cancelled",
       "five": "Something went wrong!",
-      "six": "Unable to update request status."
+      "six": "Unable to update request status.",
+      "seven": "Request Reposted Successfully"
     },
     "cancelSubscription": {
       "one": "No Active Subscription",
@@ -115,7 +116,11 @@
   },
   "forgetPassword": {
     "txt1": "Reset Password?",
-    "txt2": "Send OTP"
+    "txt2": "Send Link",
+    "txt3": "Reset Password link is sent to your email",
+    "txt4": " Please check your Spam folder if you don’t see the reset email.",
+    "txt5" : "Ok",
+    "txt6" : "No account is associated with this email address."
   },
   "freeTrial": {
     "txt1": "Begin Your 14-Day Free Trial",
@@ -206,7 +211,10 @@
   },
   "chat": {
     "txt1": "Load earlier messages",
-    "txt2": "Type a message"
+    "txt2": "Type a message",
+    "txt3": " Delete Message",
+    "txt4": "Do you want to delete this message?",
+    "txt5": "Delete"
   },
   "settings": {
     "txt1": "Cancel Subscription",

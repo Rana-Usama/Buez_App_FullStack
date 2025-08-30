@@ -14,50 +14,152 @@ const FreeTrial = ({ navigation }: any) => {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={theme.mode === "dark" ? "light-content" : "dark-content"} backgroundColor={theme.white} />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+      />
       <Image style={styles.logo} source={Icons.logo} />
       <View style={styles.headerContainer}>
-        <Text style={[styles.headerText, { color: theme.primary }]}>{`${t("freeTrial.txt1")}`}</Text>
-        <Text style={[styles.subHeaderText, { color: theme.darkGrey }]}>🎁 {`${t("freeTrial.txt2")}`}</Text>
+        <Text style={[styles.headerText, { color: theme.primary }]}>{`${t(
+          "freeTrial.txt1"
+        )}`}</Text>
+        <Text style={[styles.subHeaderText, { color: theme.darkGrey }]}>
+          🎁 {`${t("freeTrial.txt2")}`}
+        </Text>
         <View style={styles.stepsWrapper}>
           {/* Step 1 */}
           <View style={styles.stepRow}>
-            <View style={[styles.iconCircle, { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]}>
-              <Image source={Icons.key} resizeMode="contain" style={styles.iconImage} />
+            <View style={{}}>
+              <View
+                style={[
+                  styles.iconCircle,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? theme.lightGrey
+                        : "rgb(233, 233, 233)",
+                  },
+                ]}
+              >
+                <Image
+                  source={Icons.key}
+                  resizeMode="contain"
+                  style={styles.iconImage}
+                />
+              </View>
+              <View
+                style={[
+                  styles.connectorLine1,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? theme.lightGrey
+                        : "rgb(233, 233, 233)",
+                  },
+                ]}
+              />
             </View>
+
             <View style={styles.stepTextContainer}>
-              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t("freeTrial.txt3")}`}</Text>
-              <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt4")}`}</Text>
+              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t(
+                "freeTrial.txt3"
+              )}`}</Text>
+              <Text
+                style={[styles.stepDescription, { color: theme.heading }]}
+              >{`${t("freeTrial.txt4")}`}</Text>
             </View>
           </View>
-          <View style={[styles.connectorLine1,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]} />
 
           {/* Step 2 */}
           <View style={styles.stepRowSecond}>
-            <View style={[styles.iconCircle, { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]}>
-              <Image source={Icons.notify} resizeMode="contain" style={styles.iconImage} />
+            <View>
+              <View
+                style={[
+                  styles.iconCircle,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? theme.lightGrey
+                        : "rgb(233, 233, 233)",
+                  },
+                ]}
+              >
+                <Image
+                  source={Icons.notify}
+                  resizeMode="contain"
+                  style={styles.iconImage}
+                />
+              </View>
+              <View
+                style={[
+                  styles.connectorLine2,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? theme.lightGrey
+                        : "rgb(233, 233, 233)",
+                  },
+                ]}
+              />
             </View>
             <View style={styles.stepTextContainerSecond}>
-              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t("freeTrial.txt5")}`}</Text>
-              <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt6")}`}</Text>
+              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t(
+                "freeTrial.txt5"
+              )}`}</Text>
+              <Text
+                style={[styles.stepDescription, { color: theme.heading }]}
+              >{`${t("freeTrial.txt6")}`}</Text>
             </View>
           </View>
-          <View style={[styles.connectorLine2,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]} />
 
           {/* Step 3 */}
           <View style={styles.stepRowThird}>
-            <View style={[styles.iconCircle,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]}>
-              <Image source={Icons.star} resizeMode="contain" style={styles.iconImage} />
+            <View>
+              <View
+                style={[
+                  styles.iconCircle,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? theme.lightGrey
+                        : "rgb(233, 233, 233)",
+                  },
+                ]}
+              >
+                <Image
+                  source={Icons.star}
+                  resizeMode="contain"
+                  style={styles.iconImage}
+                />
+              </View>
+              <View
+                style={[
+                  styles.connectorLine3,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? theme.lightGrey
+                        : "rgb(233, 233, 233)",
+                  },
+                ]}
+              />
             </View>
-            <View style={[styles.stepTextContainer,{top:RFPercentage(3)}]}>
-              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t("freeTrial.txt7")}`}</Text>
-              <Text style={[styles.stepDescription, {color:theme.heading}]}>{`${t("freeTrial.txt8")}`}</Text>
+
+            <View style={[styles.stepTextContainer]}>
+              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t(
+                "freeTrial.txt7"
+              )}`}</Text>
+              <Text
+                style={[styles.stepDescription, { color: theme.heading }]}
+              >{`${t("freeTrial.txt8")}`}</Text>
             </View>
           </View>
-          <View style={[styles.connectorLine3,  { backgroundColor:theme.mode === 'dark' ?  theme.lightGrey : "rgb(233, 233, 233)" }]} />
         </View>
       </View>
-      <MyAppButton title={`${t("freeTrial.txt9")}`} marginTop={RFPercentage(-10)} onPress={() => navigation.navigate("SubscriptionV2")} />
+      <MyAppButton
+        title={`${t("freeTrial.txt9")}`}
+        onPress={() => navigation.navigate("SubscriptionV2")}
+      />
     </Screen>
   );
 };
@@ -94,24 +196,19 @@ const styles = StyleSheet.create({
     top: RFPercentage(2),
   },
   stepsWrapper: {
-    marginTop: RFPercentage(4),
+    marginTop: RFPercentage(7),
     width: "90%",
     alignSelf: "center",
     marginLeft: RFPercentage(3),
   },
   stepRow: {
     flexDirection: "row",
-    alignItems: "center",
   },
   stepRowSecond: {
     flexDirection: "row",
-    alignItems: "center",
-    bottom: RFPercentage(6),
   },
   stepRowThird: {
     flexDirection: "row",
-    alignItems: "center",
-    bottom: RFPercentage(14),
   },
   iconCircle: {
     width: RFPercentage(6),
@@ -128,12 +225,10 @@ const styles = StyleSheet.create({
   stepTextContainer: {
     marginLeft: RFPercentage(2),
     width: RFPercentage(35),
-    top: RFPercentage(2),
   },
   stepTextContainerSecond: {
     marginLeft: RFPercentage(2),
     width: RFPercentage(35),
-    top: RFPercentage(1.5),
   },
   stepTitle: {
     color: Colors.primary,
@@ -144,27 +239,24 @@ const styles = StyleSheet.create({
     color: Colors.heading,
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
-    marginTop:RFPercentage(0.4)
+    marginTop: RFPercentage(0.4),
   },
   connectorLine1: {
     width: RFPercentage(0.8),
-    height: RFPercentage(12),
+    height: RFPercentage(10),
     backgroundColor: "#F3F4F6",
-    bottom: RFPercentage(2.8),
     left: RFPercentage(2.4),
   },
   connectorLine2: {
     width: RFPercentage(0.8),
-    height: RFPercentage(12),
+    height: RFPercentage(10),
     backgroundColor: "#F3F4F6",
-    bottom: RFPercentage(8.9),
     left: RFPercentage(2.4),
   },
   connectorLine3: {
     width: RFPercentage(0.8),
-    height: RFPercentage(12),
+    height: RFPercentage(10),
     backgroundColor: "#F3F4F6",
-    bottom: RFPercentage(18.2),
     left: RFPercentage(2.4),
   },
 });

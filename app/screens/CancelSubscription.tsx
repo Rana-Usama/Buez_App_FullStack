@@ -108,7 +108,7 @@ function CancelSubscription({ navigation }: any) {
         <>
           <Image
             style={{width:RFPercentage(50), height:RFPercentage(22), marginTop:RFPercentage(3)}}
-            source={Icons.cancel22}
+            source={Icons.notActive}
             resizeMode="contain"
           />
 

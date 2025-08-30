@@ -79,6 +79,8 @@ export default function Reviews({ navigation }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [averageRating, setAverageRating] = useState<string | null>(null);
+  const [totalReviews, setTotalReviews] = useState<number>(0);
+
   const [labels, setLabels] = useState<Labels>({
     today: "Today",
     yesterday: "Yesterday",
@@ -147,12 +149,14 @@ export default function Reviews({ navigation }) {
         });
 
       const ratings = data.map((r) => r.rating).filter(Boolean);
+      const totalReviews = ratings.length;
       if (ratings.length > 0) {
         const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
         setAverageRating(avg.toFixed(1));
       } else {
         setAverageRating(null);
       }
+      setTotalReviews(totalReviews);
       setTranslations(translationMap);
       setSections(finalSections);
     } catch (err) {
@@ -173,6 +177,23 @@ export default function Reviews({ navigation }) {
       fetchMyReviews();
     }, [lang])
   );
+  const StarRating = ({ rating }) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Text
+          key={i}
+          style={{
+            color: i <= rating ? "#FFD700" : "#E0E0E0",
+            fontSize: RFPercentage(2),
+          }}
+        >
+          ★
+        </Text>
+      );
+    }
+    return <View style={{ flexDirection: "row" }}>{stars}</View>;
+  };
 
   const renderItem = ({ item }) => {
     const created = moment(item.createdAt).format("MMM-D-YYYY");
@@ -182,14 +203,19 @@ export default function Reviews({ navigation }) {
       <View
         style={[
           styles.card,
-          { backgroundColor: theme.white, borderColor: theme.border },
+          {
+            backgroundColor: theme.white,
+            borderColor: "rgba(211, 211, 211, 0.3)",
+          },
         ]}
       >
         <View style={styles.textWrap}>
           <Text style={[styles.reviewText, { color: theme.heading }]}>
             {translatedReview}
           </Text>
+          <StarRating rating={item.rating || 0} />
         </View>
+
         <View style={styles.footer}>
           <Text style={[styles.reviewDate, { color: theme.darkGrey }]}>
             {labels.dated}: {created}
@@ -240,10 +266,10 @@ export default function Reviews({ navigation }) {
         <>
           <View style={styles.ratingBox}>
             <Text style={[styles.ratingLabel, { color: theme.heading }]}>
-              Ratings
+              {t("detail.txt14")} :
             </Text>
             <Text style={[styles.ratingValue, { color: theme.heading }]}>
-              ⭐ {averageRating}
+              ⭐ {averageRating} ({totalReviews})
             </Text>
           </View>
         </>
@@ -257,7 +283,7 @@ export default function Reviews({ navigation }) {
       ) : sections.length === 0 ? (
         <NotFound title={labels.noReviews} />
       ) : (
-        <View style={{ marginTop: RFPercentage(-1) }}>
+        <View style={{ marginTop: RFPercentage(-2) }}>
           <SectionList
             sections={sections}
             keyExtractor={(item) => item.id}
@@ -289,7 +315,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
     padding: RFPercentage(2),
     flexDirection: "row",
-    justifyContent: "space-between",
+
     alignItems: "center",
   },
   ratingLabel: {
@@ -301,6 +327,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
     color: Colors.heading,
+    marginLeft: RFPercentage(1.4),
   },
   separator: {
     width: "60%",
@@ -310,7 +337,7 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     alignSelf: "flex-start",
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(2),
     marginLeft: RFPercentage(3),
     backgroundColor: Colors.lightGrey + "30", // light tint
     paddingHorizontal: RFPercentage(2.5),
@@ -327,9 +354,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
     paddingBottom: RFPercentage(2),
-    height: RFPercentage(16),
+    // height: RFPercentage(16),
     backgroundColor: Colors.white,
-    elevation: 5,
+    elevation: 2,
     shadowColor: "rgb(176,174,174)",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -344,8 +371,7 @@ const styles = StyleSheet.create({
   footer: {
     width: "90%",
     alignSelf: "center",
-    position: "absolute",
-    bottom: RFPercentage(2),
+    marginTop: RFPercentage(2),
     alignItems: "center",
     flexDirection: "row",
   },

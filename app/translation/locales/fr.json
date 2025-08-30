@@ -58,7 +58,8 @@
       "three": "marquer comme terminée",
       "four": "annulée",
       "five": "Une erreur est survenue !",
-      "six": "Impossible de mettre à jour le statut."
+      "six": "Impossible de mettre à jour le statut.",
+      "seven": "Demande republiée avec succès"
     },
     "cancelSubscription": {
       "one": "Aucun abonnement actif",
@@ -114,8 +115,12 @@
     "txt3": "Vous avez déjà un compte ?"
   },
   "forgetPassword": {
-    "txt1": "Réinitialiser le mot de passe ?",
-    "txt2": "Envoyer le code OTP"
+    "txt1": "Réinitialiser le mot de passe ?",
+    "txt2": "Envoyer le lien",
+    "txt3": "Le lien de réinitialisation du mot de passe a été envoyé à votre e-mail",
+    "txt4": "Veuillez vérifier votre dossier Spam si vous ne voyez pas l'e-mail de réinitialisation.",
+    "txt5": "Ok",
+    "txt6": "Aucun compte n'est associé à cette adresse e-mail."
   },
   "freeTrial": {
     "txt1": "Activez votre essai gratuit de 14 jours !",
@@ -206,7 +211,10 @@
   },
   "chat": {
     "txt1": "Charger les messages précédents",
-    "txt2": "Tapez un message"
+    "txt2": "Tapez un message",
+    "txt3": "Supprimer le message",
+    "txt4": "Voulez-vous supprimer ce message ?",
+    "txt5": "Supprimer"
   },
   "settings": {
     "txt1": "Annuler l’abonnement",
@@ -221,7 +229,7 @@
     "txt10": "Êtes‑vous sûr de vouloir supprimer\nce compte ?",
     "txt11": "Êtes‑vous sûr de vouloir vous déconnecter ?",
     "txt12": "Changer de langue",
-    "txt13" : "Thème Sombre"
+    "txt13": "Thème Sombre"
   },
   "cancelSubscription": {
     "txt1": "Annuler l’abonnement premium",
@@ -315,7 +323,6 @@
   "location": {
     "placholder": "Rechercher un lieu",
     "by": "+ Ajouter un lieu",
-      "apply": "Appliquer"
-
+    "apply": "Appliquer"
   }
 }
