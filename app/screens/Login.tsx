@@ -70,6 +70,7 @@ function Login({ navigation }) {
       const user = await signInWithEmail(email, password);
       console.log("user...........", user);
       await SecureStore.setItemAsync("loggedOut", "false");
+      await SecureStore.setItemAsync("password2", password);
 
       if (remember) {
         await saveCredentials(email, password);

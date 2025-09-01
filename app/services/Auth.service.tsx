@@ -6,6 +6,7 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   sendPasswordResetEmail,
+  GoogleAuthProvider,
 } from "firebase/auth";
 import { deleteUser } from "firebase/auth";
 import {
@@ -17,6 +18,7 @@ import {
   doc,
   writeBatch,
 } from "firebase/firestore";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
@@ -120,12 +122,21 @@ export async function removeCredentials() {
   await SecureStore.deleteItemAsync("password");
 }
 
-export const deleteCurrentUser = async () => {
+export const deleteCurrentUser = async (currentPassword) => {
   const user = FIREBASE_AUTH.currentUser;
   if (!user) return;
   try {
+    // 🔑 Step 1: Re-authenticate the user
+    const credential = EmailAuthProvider.credential(
+      user.email,
+      currentPassword
+    );
+    await reauthenticateWithCredential(user, credential);
+    console.log("User re-authenticated for deletion");
+
     const userId = user.uid;
 
+    // 🔥 Step 2: Delete Firestore data
     await deleteDoc(doc(FIREBASE_DB, "users", userId));
 
     const batchDelete = async (colName, field, op, value) => {
@@ -138,20 +149,20 @@ export const deleteCurrentUser = async () => {
         const batch = writeBatch(FIREBASE_DB);
         snapshot.forEach((docSnap) => batch.delete(docSnap.ref));
         await batch.commit();
-      } else {
-        console.log(`No docs found in '${colName}'`);
       }
     };
 
     await batchDelete("taskRequests", "userId", "==", userId);
     await batchDelete("chats", "participants", "array-contains", userId);
     await batchDelete("completedTask", "taskOwnerId", "==", userId);
+
+    // 🚀 Step 3: Delete the user
     await deleteUser(user);
+    console.log("User account deleted successfully");
   } catch (error) {
     console.log("Error deleting user and Firestore data:", error);
   }
 };
-
 
 export const saveLocationToSecureStore = async (location) => {
   try {
@@ -170,3 +181,37 @@ export const getLocationFromSecureStore = async () => {
     return null;
   }
 };
+
+export async function deleteGoogleAccount() {
+  try {
+    const user = FIREBASE_AUTH.currentUser;
+    if (!user) throw new Error("No user signed in");
+    const userInfo = await GoogleSignin.signIn();
+    const { idToken } = userInfo?.data;
+    const googleCredential = GoogleAuthProvider.credential(idToken);
+    await reauthenticateWithCredential(user, googleCredential);
+    const userId = user.uid;
+
+    await deleteDoc(doc(FIREBASE_DB, "users", userId));
+    const batchDelete = async (colName, field, op, value) => {
+      const q = query(
+        collection(FIREBASE_DB, colName),
+        where(field, op, value)
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const batch = writeBatch(FIREBASE_DB);
+        snapshot.forEach((docSnap) => batch.delete(docSnap.ref));
+        await batch.commit();
+      }
+    };
+
+    await batchDelete("taskRequests", "userId", "==", userId);
+    await batchDelete("chats", "participants", "array-contains", userId);
+    await batchDelete("completedTask", "taskOwnerId", "==", userId);
+    await deleteUser(user);
+    console.log("Google account deleted ✅");
+  } catch (error) {
+    console.log("Error deleting Google user:", error.message);
+  }
+}

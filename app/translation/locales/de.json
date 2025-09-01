@@ -322,5 +322,9 @@
     "placholder": "Nach einem Ort suchen",
     "by": "+ Standort hinzufügen",
     "apply": "Standort anwenden"
+  },
+  "password": {
+    "txt1": "Sie haben sich mit Google angemeldet. Um Ihr Passwort zu ändern, verwalten Sie bitte Ihr Google-Konto.",
+    "txt2": "Google-Konto"
   }
 }

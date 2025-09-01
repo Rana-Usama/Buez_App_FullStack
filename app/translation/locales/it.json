@@ -323,5 +323,9 @@
     "placholder": "Cerca una località",
     "by": "+ Aggiungi posizione",
     "apply": "Applica posizione"
+  },
+  "password": {
+    "txt1": "Hai effettuato l'accesso con Google. Per modificare la tua password, gestisci il tuo account Google.",
+    "txt2": "Account Google"
   }
 }

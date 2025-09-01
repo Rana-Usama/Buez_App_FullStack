@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Platform, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import ToggleSwitch from "toggle-switch-react-native";
 import i18n from "../translation/i18n";
@@ -8,6 +15,10 @@ import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import {
+  setCurrentLanguage,
+  cachedTranslate,
+} from "../utils/cachedTranslations";
 
 const languages = ["German", "French", "Italian", "English"];
 const languageMap = {
@@ -20,13 +31,15 @@ const languageMap = {
 function Language({ navigation }) {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const { t } = useTranslation();
-  const {theme} = useAppTheme()
+  const { theme } = useAppTheme();
 
   useEffect(() => {
     const getStoredLanguage = async () => {
       const code = await SecureStore.getItemAsync("appLanguage");
       if (code) {
-        const lang = Object.keys(languageMap).find((key) => languageMap[key] === code);
+        const lang = Object.keys(languageMap).find(
+          (key) => languageMap[key] === code
+        );
         if (lang) {
           setSelectedLanguage(lang);
           i18n.changeLanguage(code);
@@ -46,18 +59,46 @@ function Language({ navigation }) {
     setSelectedLanguage(lang);
     const code = languageMap[lang];
     i18n.changeLanguage(code);
+    setCurrentLanguage(code); // update cachedTranslate's current language
     await SecureStore.setItemAsync("appLanguage", code);
   };
 
   return (
-    <View style={[styles.screen,{backgroundColor:theme.white}]}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} leftLogo={false} navigation={navigation} title={`${t("settings.txt12")}`} />
+        <Nav
+          dpNull
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
+          }
+          leftLogo={false}
+          navigation={navigation}
+          title={`${t("settings.txt12")}`}
+        />
         <View style={styles.container}>
           {languages.map((lang) => (
-            <TouchableOpacity key={lang} style={[styles.languageCard,{borderColor:theme.border},]} activeOpacity={0.8} onPress={() => changeLanguage(lang)}>
-              <Text style={[styles.languageText, selectedLanguage === lang && styles.languageTextSelected,{color:theme.heading}]}>{lang}</Text>
-              <ToggleSwitch isOn={selectedLanguage === lang} onColor={Colors.primary} offColor={Colors.switch} size="small" onToggle={() => changeLanguage(lang)} />
+            <TouchableOpacity
+              key={lang}
+              style={[styles.languageCard, { borderColor: theme.border }]}
+              activeOpacity={0.8}
+              onPress={() => changeLanguage(lang)}
+            >
+              <Text
+                style={[
+                  styles.languageText,
+                  selectedLanguage === lang && styles.languageTextSelected,
+                  { color: theme.heading },
+                ]}
+              >
+                {lang}
+              </Text>
+              <ToggleSwitch
+                isOn={selectedLanguage === lang}
+                onColor={Colors.primary}
+                offColor={Colors.switch}
+                size="small"
+                onToggle={() => changeLanguage(lang)}
+              />
             </TouchableOpacity>
           ))}
         </View>

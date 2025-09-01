@@ -55,7 +55,7 @@
     "myRequests": {
       "one": "Request Status",
       "two": "Request",
-      "three": "mark as completed",
+      "three": "marked as completed",
       "four": "cancelled",
       "five": "Something went wrong!",
       "six": "Unable to update request status.",
@@ -323,5 +323,9 @@
     "placholder": "Search for a location",
     "by": "+ Add Location",
     "apply": "Apply Location"
+  },
+  "password" : {
+    "txt1" : "You signed in with Google. To change your password, please manage your Google Account.",
+    "txt2" : "Google Account"
   }
 }

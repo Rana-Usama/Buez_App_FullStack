@@ -324,5 +324,9 @@
     "placholder": "Rechercher un lieu",
     "by": "+ Ajouter un lieu",
     "apply": "Appliquer"
+  },
+  "password": {
+    "txt1": "Vous vous êtes connecté avec Google. Pour modifier votre mot de passe, veuillez gérer votre compte Google.",
+    "txt2": "Compte Google"
   }
 }

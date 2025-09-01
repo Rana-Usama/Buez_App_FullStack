@@ -1,5 +1,12 @@
-import React, { useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity, View, Platform, Text } from "react-native";
+import React, { useRef, useState, useEffect } from "react";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Platform,
+  Text,
+  Alert,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { AntDesign } from "@expo/vector-icons";
@@ -10,17 +17,61 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import Colors from "../config/Colors";
+import { useLocation } from "../utils/useLocation";
 
 export default function Location({ navigation, route }) {
   const { home } = route.params;
   const mapRef = useRef(null);
   const [marker, setMarker] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState(null); // NEW state
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { theme } = useAppTheme();
 
+  const { location: currentLocation, getCurrentLocation } = useLocation();
   const key = process.env.EXPO_PUBLIC_LOCATION_NAME;
+
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      const loc = await getCurrentLocation();
+      console.log("location..........", loc);
+      if (loc) {
+        try {
+          // Reverse geocode current location to get a name
+          const response = await axios.get(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${loc.latitude},${loc.longitude}&key=${key}`
+          );
+          const results = response.data.results;
+          const address = results[0]?.formatted_address || "Current Location";
+
+          setMarker(loc);
+          setSelectedLocation({
+            ...loc,
+            name: address, // set the actual location name
+          });
+
+          mapRef.current?.animateToRegion({
+            ...loc,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          });
+        } catch (error) {
+          console.log("Reverse geocoding failed:", error);
+          setMarker(loc);
+          setSelectedLocation({
+            ...loc,
+            name: "Current Location",
+          });
+        }
+      } else {
+        Alert.alert(
+          "Location Permission",
+          "We need location access to show your current position. You can still search or pick manually."
+        );
+      }
+    };
+    fetchUserLocation();
+  }, []);
 
   const handleMapPress = async (event) => {
     const coordinate = event.nativeEvent.coordinate;
@@ -39,7 +90,6 @@ export default function Location({ navigation, route }) {
       const results = response.data.results;
       const address = results[0]?.formatted_address || "Selected Location";
 
-      // only store locally, don’t dispatch yet
       setSelectedLocation({
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
@@ -62,7 +112,7 @@ export default function Location({ navigation, route }) {
     } else {
       dispatch(setLocation(selectedLocation));
     }
-    navigation.goBack(); // go back after applying
+    navigation.goBack();
   };
 
   return (
@@ -100,7 +150,7 @@ export default function Location({ navigation, route }) {
               });
 
               setMarker(coordinate);
-              setSelectedLocation(coordinate); // only save, don’t dispatch
+              setSelectedLocation(coordinate);
             }}
             query={{
               key: key,
@@ -139,10 +189,15 @@ export default function Location({ navigation, route }) {
         }}
         onPress={handleMapPress}
       >
-        {marker && <Marker coordinate={marker} title="Selected Location" />}
+        {marker && (
+          <Marker
+            coordinate={marker}
+            title={selectedLocation?.name || "Selected Location"}
+          />
+        )}
       </MapView>
 
-      {/* Apply Filter Button */}
+      {/* Apply Button */}
       {selectedLocation && (
         <View style={styles.buttonWrapper}>
           <TouchableOpacity

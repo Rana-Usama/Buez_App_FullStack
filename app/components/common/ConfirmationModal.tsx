@@ -4,7 +4,7 @@ import { BlurView } from "expo-blur";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "./MyAppButton";
 
-const ConfirmationModal = ({ isVisible, onClose, onConfirm, title, theme, t,}) => {
+const ConfirmationModal = ({ isVisible, onClose, onConfirm, title, theme, t,loading}) => {
   return (
     <Modal animationType="fade" transparent visible={isVisible} onRequestClose={onClose}>
       <BlurView intensity={5} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
@@ -15,7 +15,7 @@ const ConfirmationModal = ({ isVisible, onClose, onConfirm, title, theme, t,}) =
               <Text style={[styles.cancelButtonText, { color: theme.lightGrey }]}>{t("buttons.cancel")}</Text>
             </Pressable>
 
-            <MyAppButton title={t("buttons.yes")} marginTop={RFPercentage(0)} height={Platform.OS === 'android' ? RFPercentage(5.8) : RFPercentage(5)} width={Platform.OS === 'android' ? RFPercentage(17) : RFPercentage(15)} onPress={onConfirm} />
+            <MyAppButton title={t("buttons.yes")} marginTop={RFPercentage(0)} height={Platform.OS === 'android' ? RFPercentage(5.8) : RFPercentage(5)} width={Platform.OS === 'android' ? RFPercentage(17) : RFPercentage(15)} onPress={onConfirm} loading={loading} />
           </View>
         </View>
       </BlurView>

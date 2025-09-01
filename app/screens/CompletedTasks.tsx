@@ -148,7 +148,11 @@ export default function CompletedTasks({ navigation }: any) {
           styles.card,
           {
             backgroundColor: theme.white,
-            borderColor: "rgba(234, 234, 234, 1)",
+            borderColor:
+              theme.mode === "dark"
+                ? "rgba(117, 117, 117, 1)"
+                : "rgba(244, 244, 244, 1)",
+            borderBottomWidth: RFPercentage(0.4),
           },
         ]}
       >

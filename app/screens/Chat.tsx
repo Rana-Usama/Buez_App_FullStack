@@ -64,6 +64,7 @@ const Chat = ({ navigation, route }) => {
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
   const [loader, setLoader] = useState(false);
+  
 
   useEffect(() => {
     const listenForNewMessages = () => {
@@ -563,12 +564,12 @@ const Chat = ({ navigation, route }) => {
                       left: {
                         color: theme.black,
                         fontFamily: "Poppins_400Regular",
-                        fontSize: RFPercentage(1.8),
+                        fontSize: RFPercentage(1.9),
                       },
                       right: {
                         color: Colors.white,
                         fontFamily: "Poppins_400Regular",
-                        fontSize: RFPercentage(1.8),
+                        fontSize: RFPercentage(1.9),
                       },
                     }}
                   />
@@ -688,7 +689,7 @@ const styles = StyleSheet.create({
     // minHeight: RFPercentage(5.5),
     maxHeight: RFPercentage(18),
     justifyContent: "center",
-    padding: RFPercentage(1.8),
+    padding: RFPercentage(1.7),
     borderTopWidth: RFPercentage(0.1),
     alignSelf: "center",
     width: "90%",

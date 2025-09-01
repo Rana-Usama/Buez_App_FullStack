@@ -42,6 +42,10 @@ function OfferDetail({ navigation, route }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
+
+  const currentUserId2 = getAuth().currentUser;
+  console.log("currentUserId2........",currentUserId2.email)
+
   const postRequest = route.params?.postRequest;
   const [showAll, setShowAll] = useState(false);
   const db = FIREBASE_DB;
@@ -52,6 +56,8 @@ function OfferDetail({ navigation, route }) {
     description: "",
     otherCompensation: "",
   });
+  const [isAccepted, setIsAccepted] = useState(!!postRequest?.acceptedBy);
+
   const [loading, setLoading] = useState(false);
   const visibleReviews = showAll
     ? translatedReviews
@@ -141,7 +147,7 @@ function OfferDetail({ navigation, route }) {
         acceptedBy: {
           userId: currentUserId,
           name: currentUser?.userData?.userName,
-          email: currentUser?.userData?.email,
+          email: currentUserId2.email,
           image: currentUser?.userData?.profileImage || null,
           phone: currentUser?.userData?.phone || null,
         },
@@ -163,7 +169,7 @@ function OfferDetail({ navigation, route }) {
         acceptedBy: {
           userId: currentUserId,
           name: currentUser?.userData?.userName,
-          email: currentUser?.userData?.email,
+          email: currentUserId2.email,
           profileImage: currentUser?.userData?.profileImage || null,
           phone: currentUser?.userData?.phone || null,
         },
@@ -187,9 +193,6 @@ function OfferDetail({ navigation, route }) {
             expoPushToken: postRequest?.user?.token,
             title: currentUser?.userData?.userName,
             message: "Accepted your task request.",
-            data: {
-              screen: "Notifications",
-            },
           }),
         }
       );
@@ -208,7 +211,7 @@ function OfferDetail({ navigation, route }) {
         sender: {
           userId: currentUserId,
           userName: currentUser?.userData?.userName,
-          email: currentUser?.userData?.email,
+          email: currentUserId2.email,
           profileImage: currentUser?.userData?.profileImage || null,
           token: currentUser?.userData?.token,
         },
@@ -230,6 +233,8 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
+  console.log("current user", currentUser);
+
   const handleAccept = async () => {
     setLoading(true); // show spinner
     try {
@@ -237,7 +242,8 @@ function OfferDetail({ navigation, route }) {
       await storeAcceptedTask();
       await updateRequestAcceptedBy();
       await saveNotification();
-      navigation.goBack();
+      setIsAccepted(true);
+      // navigation.goBack();
     } catch (error) {
       console.log("Error accepting task:", error);
     } finally {
@@ -538,7 +544,14 @@ function OfferDetail({ navigation, route }) {
                         </View>
                       </View>
                       {!isLastItem && (
-                        <View style={{width:"60%", height:RFPercentage(0.1),backgroundColor:"rgba(226, 226, 226, 0.4)", marginTop:RFPercentage(1)}} />
+                        <View
+                          style={{
+                            width: "60%",
+                            height: RFPercentage(0.1),
+                            backgroundColor: "rgba(226, 226, 226, 0.4)",
+                            marginTop: RFPercentage(1),
+                          }}
+                        />
                       )}
                     </View>
                   );
@@ -564,14 +577,12 @@ function OfferDetail({ navigation, route }) {
 
         {/* Buttons */}
         <View style={styles.buttonWrapper}>
-          {postRequest?.acceptedBy ? (
-            <>
-              <MyAppButton
-                title={t("details.txt9")}
-                disabled={currentUserId === postRequest.userId}
-                onPress={handleStartChat}
-              />
-            </>
+          {isAccepted ? (
+            <MyAppButton
+              title={t("details.txt9")}
+              disabled={currentUserId === postRequest.userId}
+              onPress={handleStartChat}
+            />
           ) : (
             <>
               <TouchableOpacity

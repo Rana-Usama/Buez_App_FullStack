@@ -14,7 +14,7 @@ import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 const webClientId = process.env.EXPO_PUBLIC_WEB_CLIENT_ID;
-const iosClientId =process.env.EXPO_PUBLIC_IOS_CLIENT_ID;
+const iosClientId = process.env.EXPO_PUBLIC_IOS_CLIENT_ID;
 
 const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
@@ -40,8 +40,6 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
         showPlayServicesUpdateDialog: true,
       });
       const userInfo = await GoogleSignin.signIn();
-      console.log("userInfo...............", userInfo);
-      
       const { idToken } = userInfo?.data;
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(
@@ -70,6 +68,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
             profileImage: user.photoURL,
             token: pushToken || null,
             phoneNumber: user.phoneNumber,
+            email: user.email,
           },
           { merge: true }
         );

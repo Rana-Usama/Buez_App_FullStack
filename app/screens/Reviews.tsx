@@ -205,7 +205,11 @@ export default function Reviews({ navigation }) {
           styles.card,
           {
             backgroundColor: theme.white,
-            borderColor: "rgba(211, 211, 211, 0.3)",
+            borderColor:
+              theme.mode === "dark"
+                ? "rgba(117, 117, 117, 1)"
+                : "rgba(244, 244, 244, 1)",
+            borderBottomWidth: RFPercentage(0.4),
           },
         ]}
       >
@@ -266,7 +270,7 @@ export default function Reviews({ navigation }) {
         <>
           <View style={styles.ratingBox}>
             <Text style={[styles.ratingLabel, { color: theme.heading }]}>
-              {t("detail.txt14")} :
+              {t("details.txt14")} :
             </Text>
             <Text style={[styles.ratingValue, { color: theme.heading }]}>
               ⭐ {averageRating} ({totalReviews})

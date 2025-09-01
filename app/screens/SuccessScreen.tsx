@@ -1,23 +1,71 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  StatusBar,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import { Octicons } from "@expo/vector-icons";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function SuccessScreen({ navigation }) {
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
 
   return (
-    <LinearGradient colors={[Colors.primary, Colors.success2]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
-      <StatusBar backgroundColor={"transparent"} />
-      <Octicons name={"check-circle"} style={styles.icon} color={Colors.white} />
+    <LinearGradient
+      colors={
+        theme.mode === "dark"
+          ? ["#000000", "#1a1a1a"]
+          : [Colors.primary, Colors.success2]
+      }
+      start={{ x: 1, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={styles.container}
+    >
+      <StatusBar
+        backgroundColor={theme.white}
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+      />
+      <Octicons
+        name={"check-circle"}
+        style={styles.icon}
+        color={theme.mode === "dark" ? Colors.primary : Colors.white}
+      />
 
       {/* Icon */}
-      <Text style={styles.txt}>{t("successScreen.txt1")}</Text>
-      <TouchableOpacity style={styles.buttonContainer} activeOpacity={0.8} onPress={() => navigation.navigate("TabNavigator")}>
-        <Text style={styles.home}>{t("successScreen.txt2")}</Text>
+      <Text
+        style={[
+          styles.txt,
+          { color: theme.mode === "dark" ? Colors.primary : Colors.white },
+        ]}
+      >
+        {t("successScreen.txt1")}
+      </Text>
+      <TouchableOpacity
+        style={[
+          styles.buttonContainer,
+          {
+            backgroundColor:
+              theme.mode === "dark" ? Colors.primary : Colors.white,
+          },
+        ]}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate("TabNavigator")}
+      >
+        <Text
+          style={[
+            styles.home,
+            { color: theme.mode === "dark" ? Colors.white : Colors.primary },
+          ]}
+        >
+          {t("successScreen.txt2")}
+        </Text>
       </TouchableOpacity>
     </LinearGradient>
   );
@@ -40,8 +88,19 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(20),
   },
   icon: { fontSize: RFPercentage(12) },
-  txt: { color: Colors.white, fontSize: RFPercentage(2), fontFamily: "Poppins_500Medium", marginTop: RFPercentage(3) , textAlign:"center", marginHorizontal:RFPercentage(5)},
-  home: { color: Colors.primary, fontSize: RFPercentage(1.8), fontFamily: "Poppins_500Medium" },
+  txt: {
+    color: Colors.white,
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_500Medium",
+    marginTop: RFPercentage(3),
+    textAlign: "center",
+    marginHorizontal: RFPercentage(5),
+  },
+  home: {
+    color: Colors.primary,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+  },
 });
 
 export default SuccessScreen;

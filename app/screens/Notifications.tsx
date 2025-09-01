@@ -188,7 +188,7 @@ export default function Notifications({ navigation }) {
     });
     
     return (
-      <View style={[styles.card, { backgroundColor: theme.white, borderColor: "rgba(167, 167, 167, 1)" }]}>
+      <View style={[styles.card, { backgroundColor: theme.white, borderColor: theme.mode === "dark" ?  "rgba(117, 117, 117, 1)" : "rgba(244, 244, 244, 1)" , borderBottomWidth:RFPercentage(0.5)}]}>
         {/* main row */}
         <View style={styles.row}>
           <Image source={profileImage ? { uri: profileImage } : Icons.dp} style={styles.avatar} />
@@ -201,7 +201,7 @@ export default function Notifications({ navigation }) {
         {/* footer */}
         <View style={styles.footer}>
           <Text style={[styles.time, { color: theme.darkGrey }]}>{postedTime}</Text>
-          <TouchableOpacity activeOpacity={0.8} style={styles.msgBtn} onPress={() => handleStartChat(item.sender)}>
+          <TouchableOpacity activeOpacity={0.8} style={[styles.msgBtn,{backgroundColor:theme.mode === "dark" ?  Colors.primary + "40" : Colors.primary + "15"}]} onPress={() => handleStartChat(item.sender)}>
             <Image source={Icons.messages} resizeMode="contain" style={{ width: RFPercentage(2.5), height: RFPercentage(2.5) }} />
             <Text style={styles.msgTxt}>{tr.message || "Message"}</Text>
           </TouchableOpacity>
@@ -271,11 +271,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2),
     backgroundColor: Colors.white,
     borderWidth: RFPercentage(0.1),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 1,
+   
   },
 
   row: {
@@ -322,7 +318,7 @@ const styles = StyleSheet.create({
   msgBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.primary + "15", // soft tint background
+    backgroundColor: Colors.primary + "40", // soft tint background
     paddingHorizontal: RFPercentage(1.6),
     paddingVertical: RFPercentage(0.8),
     borderRadius: RFPercentage(2),

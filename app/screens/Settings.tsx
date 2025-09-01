@@ -1,8 +1,22 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Platform, Modal, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Switch,
+  Platform,
+  Modal,
+  Pressable,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
-import { removeCredentials } from "../services/Auth.service";
+import {
+  deleteGoogleAccount,
+  removeCredentials,
+} from "../services/Auth.service";
 import { deleteCurrentUser } from "../services/Auth.service";
 import * as SecureStore from "expo-secure-store";
 import Nav from "../components/common/Nav";
@@ -18,6 +32,7 @@ import Toast from "react-native-toast-message";
 import { updateDoc, doc, deleteField } from "firebase/firestore";
 import ConfirmationModal from "../components/common/ConfirmationModal";
 import Feather from "@expo/vector-icons/Feather";
+import { getCredentials } from "../services/Auth.service";
 
 function Settings({ navigation }) {
   const { userData: user } = useUser();
@@ -26,7 +41,21 @@ function Settings({ navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   useExitAppOnBack();
+  const [loading, setLoading] = useState(false);
+
   const { theme, toggleTheme } = useAppTheme();
+  const [credentials, setCredentials] = useState({
+    email: null,
+    password: null,
+  });
+
+  useEffect(() => {
+    const fetchCredentials = async () => {
+      const savedCredentials = await getCredentials();
+      setCredentials(savedCredentials);
+    };
+    fetchCredentials();
+  }, []);
 
   const navigationsList = [
     {
@@ -79,12 +108,26 @@ function Settings({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Nav */}
-        <Nav marginTop={Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)} profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={`${t("settings.txt9")}`} />
+        <Nav
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+          }
+          profileImage={profileImgUrl}
+          leftLogo={true}
+          navigation={navigation}
+          title={`${t("settings.txt9")}`}
+        />
 
         <View style={styles.content}>
-          <Text style={[styles.txt, { color: theme.lightGrey }]}>{`${t("settings.txt8")}`}</Text>
+          <Text style={[styles.txt, { color: theme.lightGrey }]}>{`${t(
+            "settings.txt8"
+          )}`}</Text>
           <View style={[styles.wrap, { backgroundColor: theme.border }]} />
         </View>
 
@@ -99,10 +142,22 @@ function Settings({ navigation }) {
           ]}
         >
           <View style={styles.content2}>
-            <Image style={styles.img} source={Icons.language} tintColor={theme.heading} />
-            <Text style={[styles.title, { color: theme.heading }]}>{t("settings.txt13")}</Text>
+            <Image
+              style={styles.img}
+              source={Icons.language}
+              tintColor={theme.heading}
+            />
+            <Text style={[styles.title, { color: theme.heading }]}>
+              {t("settings.txt13")}
+            </Text>
             <View style={{ position: "absolute", right: 0 }}>
-              <ToggleSwitch isOn={theme.mode === "dark"} onColor={Colors.primary} offColor={"rgb(224, 224, 227)"} size="small" onToggle={toggleTheme} />
+              <ToggleSwitch
+                isOn={theme.mode === "dark"}
+                onColor={Colors.primary}
+                offColor={"rgb(224, 224, 227)"}
+                size="small"
+                onToggle={toggleTheme}
+              />
             </View>
           </View>
         </TouchableOpacity>
@@ -128,11 +183,29 @@ function Settings({ navigation }) {
                 </>
               ) : (
                 <>
-                  <Image style={styles.img} source={item.iconSource} tintColor={item.redColor ? Colors.red : theme.heading} />
+                  <Image
+                    style={styles.img}
+                    source={item.iconSource}
+                    tintColor={item.redColor ? Colors.red : theme.heading}
+                  />
                 </>
               )}
-              <Text style={[styles.title, { color: item.redColor ? Colors.red : theme.heading }]}>{item.title}</Text>
-              <MaterialIcons name="arrow-forward-ios" style={[styles.icon, { color: item.redColor ? Colors.red : theme.heading }]} color={Colors.heading} />
+              <Text
+                style={[
+                  styles.title,
+                  { color: item.redColor ? Colors.red : theme.heading },
+                ]}
+              >
+                {item.title}
+              </Text>
+              <MaterialIcons
+                name="arrow-forward-ios"
+                style={[
+                  styles.icon,
+                  { color: item.redColor ? Colors.red : theme.heading },
+                ]}
+                color={Colors.heading}
+              />
             </View>
           </TouchableOpacity>
         ))}
@@ -140,13 +213,32 @@ function Settings({ navigation }) {
 
       <ConfirmationModal
         isVisible={isModalVisible}
+        loading={loading} // pass loading to modal
         onClose={() => setIsModalVisible(false)}
         onConfirm={async () => {
-          deleteCurrentUser();
-          setIsModalVisible(false);
-          removeCredentials();
-          await SecureStore.deleteItemAsync("appLanguage");
-          navigation.navigate("OnBoarding");
+          try {
+            setLoading(true); // show loader
+            const password2 = await SecureStore.getItemAsync("password2");
+            if (password2) {
+              await deleteCurrentUser(password2);
+            } else {
+              await deleteGoogleAccount();
+            }
+            await removeCredentials();
+            await SecureStore.deleteItemAsync("appLanguage");
+            await SecureStore.deleteItemAsync("password2");
+            navigation.navigate("OnBoarding");
+            setIsModalVisible(false);
+          } catch (error) {
+            console.log("Error deleting account:", error.message || error);
+            Toast.show({
+              type: "error",
+              text1: "Delete Failed",
+              text2: "Please try again.",
+            });
+          } finally {
+            setLoading(false); // hide loader
+          }
         }}
         title={t("settings.txt10")}
         theme={theme}
@@ -155,9 +247,11 @@ function Settings({ navigation }) {
 
       <ConfirmationModal
         isVisible={isModalVisible2}
+        loading={loading} // pass loading to modal
         onClose={() => setIsModalVisible2(false)}
         onConfirm={async () => {
           try {
+            setLoading(true); // show loader
             const currentUser = FIREBASE_AUTH.currentUser;
             if (currentUser) {
               await updateDoc(doc(FIREBASE_DB, "users", currentUser.uid), {
@@ -178,6 +272,8 @@ function Settings({ navigation }) {
               text1: "Logout failed",
               text2: "Please try again.",
             });
+          } finally {
+            setLoading(false); // hide loader
           }
         }}
         title={t("settings.txt11")}
@@ -196,10 +292,28 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   scroll: { width: "100%" },
-  scrollContent: { width: "100%", alignItems: "center", paddingBottom: RFPercentage(15) },
-  content: { width: "90%", justifyContent: "flex-start", alignItems: "flex-start", marginTop: RFPercentage(3.5) },
-  txt: { color: Colors.lightGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
-  wrap: { width: "75%", height: RFPercentage(0.1), backgroundColor: "#F3F4F6", marginTop: RFPercentage(1.6) },
+  scrollContent: {
+    width: "100%",
+    alignItems: "center",
+    paddingBottom: RFPercentage(15),
+  },
+  content: {
+    width: "90%",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    marginTop: RFPercentage(3.5),
+  },
+  txt: {
+    color: Colors.lightGrey,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+  },
+  wrap: {
+    width: "75%",
+    height: RFPercentage(0.1),
+    backgroundColor: "#F3F4F6",
+    marginTop: RFPercentage(1.6),
+  },
   navigationWrap: {
     height: RFPercentage(6.5),
     borderRadius: RFPercentage(1),
@@ -209,9 +323,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "90%",
   },
-  content2: { width: "90%", justifyContent: "flex-start", alignItems: "center", flexDirection: "row" },
+  content2: {
+    width: "90%",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    flexDirection: "row",
+  },
   img: { width: RFPercentage(2.8), height: RFPercentage(2.8) },
-  title: { fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular", marginLeft: RFPercentage(1.6) },
+  title: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+    marginLeft: RFPercentage(1.6),
+  },
   icon: { position: "absolute", right: 0, fontSize: RFPercentage(1.7) },
 });
 
