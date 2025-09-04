@@ -184,7 +184,8 @@
     "txt5": "Mark as Done",
     "txt6": "Cancel",
     "txt7": "Are you sure you want to delete\nthis request?",
-    "txt8": "Cancelled"
+    "txt8": "Cancelled",
+    "txt9" : "Repost"
   },
   "postRequest": {
     "txt1": "Post Request",

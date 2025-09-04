@@ -184,7 +184,8 @@
     "txt5": "Marquer comme terminée",
     "txt6": "Annuler",
     "txt7": "Êtes‑vous sûr de vouloir supprimer\ncette demande ?",
-    "txt8": "Annulé"
+    "txt8": "Annulé",
+    "txt9" : "Reposter" 
   },
   "postRequest": {
     "txt1": "Publier une demande",

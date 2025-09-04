@@ -183,7 +183,9 @@
     "txt4": "Gpostet am:",
     "txt5": "Als erledigt markiere",
     "txt6": "Abbräche",
-    "txt7": "Bisch sicher, dass du dä Uftrag wotsch lösche?"
+    "txt7": "Bisch sicher, dass du dä Uftrag wotsch lösche?",
+    "txt8": "Abgebrochen",
+    "txt9": "Repost"
   },
   "postRequest": {
     "txt1": "Uftrag poste",

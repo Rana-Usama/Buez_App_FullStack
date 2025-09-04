@@ -12,8 +12,6 @@ import {
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
-import * as SecureStore from "expo-secure-store";
-import * as Localization from "expo-localization";
 import Nav from "../components/common/Nav";
 import MyAppButton from "../components/common/MyAppButton";
 import NotFound from "../components/common/NotFound";
@@ -21,7 +19,6 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { getFormatedDate } from "../services/Shared.service";
 import { fetchCompletedTasksFromFirebase } from "../services/Review.service";
-import { translateText } from "../translation/googleTranslation";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
@@ -36,17 +33,7 @@ type Translations = {
   translating: string;
 };
 
-const getTargetLanguage = async (): Promise<string> => {
-  try {
-    const stored = await SecureStore.getItemAsync("appLanguage");
-    return stored || Localization.locale.split("-")[0] || "en";
-  } catch {
-    return "en";
-  }
-};
-
 export default function CompletedTasks({ navigation }: any) {
-  const [lang, setLang] = useState<string>("en");
   const [tr, setTr] = useState<Partial<Translations>>({});
   const { t } = useTranslation();
   const [tasks, setTasks] = useState<any[]>([]);
@@ -59,8 +46,6 @@ export default function CompletedTasks({ navigation }: any) {
 
   useEffect(() => {
     (async () => {
-      const l = await getTargetLanguage();
-      setLang(l);
       const base: Translations = {
         completedTasks: "Completed Tasks",
         category: "Category",
@@ -369,6 +354,7 @@ const styles = StyleSheet.create({
   desc: {
     color: Colors.darkGrey,
     fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.6),
   },
   date: {
     color: Colors.darkGrey,

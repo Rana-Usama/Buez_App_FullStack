@@ -39,15 +39,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { translateText } from "../translation/googleTranslation";
 import Colors from "../config/Colors";
 import { FIREBASE_DB } from "../../firebaseConfig";
-import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { Icons } from "../config/theme";
-import Entypo from "@expo/vector-icons/Entypo";
 
 const Chat = ({ navigation, route }) => {
   const { t } = useTranslation();

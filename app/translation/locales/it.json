@@ -184,7 +184,8 @@
     "txt5": "Segna come svolta",
     "txt6": "Annulla",
     "txt7": "Sei sicuro di voler eliminare\nquesta richiesta?",
-    "txt8": "Annullato"
+    "txt8": "Annullato",
+    "txt9" : "Ripubblica" 
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",

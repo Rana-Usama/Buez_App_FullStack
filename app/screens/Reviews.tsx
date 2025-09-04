@@ -19,7 +19,6 @@ import NotFound from "../components/common/NotFound";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
-import { translateText } from "../translation/googleTranslation";
 import { useAppTheme } from "../contexts/themeContext";
 import { useTranslation } from "react-i18next";
 import { cachedTranslate } from "../utils/cachedTranslations";
@@ -70,6 +69,7 @@ type Section = {
   title: string;
   data: Review[];
 };
+
 
 export default function Reviews({ navigation }) {
   const { t } = useTranslation();
@@ -186,6 +186,7 @@ export default function Reviews({ navigation }) {
           style={{
             color: i <= rating ? "#FFD700" : "#E0E0E0",
             fontSize: RFPercentage(2),
+            top:RFPercentage(1)
           }}
         >
           ★
@@ -272,8 +273,9 @@ export default function Reviews({ navigation }) {
             <Text style={[styles.ratingLabel, { color: theme.heading }]}>
               {t("details.txt14")} :
             </Text>
+            <Text style={{fontSize:RFPercentage(2.6), color:"#FFD700", marginLeft:RFPercentage(1.5)}}>★</Text>
             <Text style={[styles.ratingValue, { color: theme.heading }]}>
-              ⭐ {averageRating} ({totalReviews})
+               {averageRating} ({totalReviews})
             </Text>
           </View>
         </>
@@ -301,7 +303,7 @@ export default function Reviews({ navigation }) {
                 tintColor={Colors.primary}
               />
             }
-            contentContainerStyle={{ paddingBottom: RFPercentage(6) }}
+            contentContainerStyle={{ paddingBottom: RFPercentage(24) }}
             stickySectionHeadersEnabled={false}
           />
         </View>
@@ -331,7 +333,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
     color: Colors.heading,
-    marginLeft: RFPercentage(1.4),
+    
   },
   separator: {
     width: "60%",

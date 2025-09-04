@@ -34,6 +34,7 @@ import { FIREBASE_DB } from "../../firebaseConfig";
 import { useAppTheme } from "../contexts/themeContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import { onSnapshot } from "firebase/firestore";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -42,10 +43,7 @@ function OfferDetail({ navigation, route }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
-
   const currentUserId2 = getAuth().currentUser;
-  console.log("currentUserId2........",currentUserId2.email)
-
   const postRequest = route.params?.postRequest;
   const [showAll, setShowAll] = useState(false);
   const db = FIREBASE_DB;
@@ -57,6 +55,25 @@ function OfferDetail({ navigation, route }) {
     otherCompensation: "",
   });
   const [isAccepted, setIsAccepted] = useState(!!postRequest?.acceptedBy);
+
+  useEffect(() => {
+    if (!postRequest?.id) return;
+
+    const taskDocRef = doc(db, "taskRequests", postRequest.id);
+
+    const unsubscribe = onSnapshot(taskDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const updatedData = docSnap.data();
+        if (updatedData?.acceptedBy) {
+          setIsAccepted(true);
+        } else {
+          setIsAccepted(false);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [postRequest?.id]);
 
   const [loading, setLoading] = useState(false);
   const visibleReviews = showAll

@@ -44,6 +44,8 @@ const InputFieldNew = (props: Props) => {
         onBlur={props.handleBlur}
         maxLength={props.maxLength}
         editable={props.editable}
+        selectionColor={theme.black}
+        cursorColor={theme.black}
         
       />
       {props.password && (

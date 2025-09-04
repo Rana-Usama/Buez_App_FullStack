@@ -27,11 +27,11 @@ import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
-import { translateText } from "../translation/googleTranslation";
 import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
 import ConfirmationModal from "../components/common/ConfirmationModal";
 import Feather from "@expo/vector-icons/Feather";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -61,19 +61,6 @@ function MyRequests({ navigation }) {
       : REQUEST_STATUS.Cancelled;
   const [initialLoadDone, setInitialLoadDone] = useState(false);
 
-  // translationCache.js
-  const translationCache = {};
-
-  const cachedTranslate = async (text) => {
-    if (!text) return "";
-    if (translationCache[text]) {
-      return translationCache[text]; // return cached
-    }
-    const translated = await translateText(text);
-    translationCache[text] = translated;
-    return translated;
-  };
-
   useFocusEffect(
     useCallback(() => {
       setInitialLoadDone(false); // reset when param changes
@@ -97,11 +84,11 @@ function MyRequests({ navigation }) {
       const translatedRecords = await Promise.all(
         newRecords.map(async (item) => ({
           ...item,
-          title: await cachedTranslate(item.title || ""),
-          description: await cachedTranslate(item.description || ""),
-          taskType: await cachedTranslate(item.taskType || ""),
+          title: await cachedTranslate(item?.title || ""),
+          description: await cachedTranslate(item?.description || ""),
+          taskType: await cachedTranslate(item?.taskType || ""),
           otherCompensation: await cachedTranslate(
-            item.otherCompensation || ""
+            item?.otherCompensation || ""
           ),
         }))
       );
@@ -128,11 +115,11 @@ function MyRequests({ navigation }) {
       const translatedRecords = await Promise.all(
         newRecords.map(async (item) => ({
           ...item,
-          title: await cachedTranslate(item.title || ""),
-          description: await cachedTranslate(item.description || ""),
-          taskType: await cachedTranslate(item.taskType || ""),
+          title: await cachedTranslate(item?.title || ""),
+          description: await cachedTranslate(item?.description || ""),
+          taskType: await cachedTranslate(item?.taskType || ""),
           otherCompensation: await cachedTranslate(
-            item.otherCompensation || ""
+            item?.otherCompensation || ""
           ),
         }))
       );
@@ -414,8 +401,8 @@ function MyRequests({ navigation }) {
                 >
                   {cart.compensationType === "Monitarely"
                     ? `${cart.monitarily}$`
-                    : cart.otherCompensation?.substr(0, 18) +
-                      (cart.otherCompensation?.length > 18 ? "..." : "")}
+                    : cart.otherCompensation?.substr(0, 12) +
+                      (cart.otherCompensation?.length > 12 ? "..." : "")}
                 </Text>
               </Text>
 
@@ -429,7 +416,7 @@ function MyRequests({ navigation }) {
                     position: "absolute",
                     right: 0,
                     flexDirection: "row",
-                    bottom: 0,
+                    bottom: 2,
                     alignItems: "center",
                   }}
                 >
@@ -441,7 +428,7 @@ function MyRequests({ navigation }) {
                       marginRight: RFPercentage(0.5),
                     }}
                   >
-                    Repost
+                    {t("myRequests.txt9")}
                   </Text>
                   <Feather
                     name="repeat"
@@ -725,12 +712,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary,
-    width: RFPercentage(18.5),
+    width: "45%",
     paddingVertical: RFPercentage(1),
   },
   cancel: {
     borderRadius: RFPercentage(100),
-    width: RFPercentage(18.5),
+    width: "45%",
     height: RFPercentage(5.2),
     borderWidth: 1.5,
     justifyContent: "center",

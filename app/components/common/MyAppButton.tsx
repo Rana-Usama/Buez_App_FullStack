@@ -12,7 +12,7 @@ interface MyAppButtonProps {
   loading?: boolean;
   disabled?: boolean;
   height?: number;
-  width?: number;
+  width?: any;
   marginTop?: number;
   title?: string;
   onPress?: (event: GestureResponderEvent) => void;
@@ -60,7 +60,7 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
           <Text
             style={{
               color: Colors.white,
-              fontSize: RFPercentage(1.8),
+              fontSize: RFPercentage(1.7),
               fontFamily: "Poppins_600SemiBold",
               textAlign: "center",
               marginHorizontal:5

@@ -392,8 +392,8 @@ function Home({ navigation }) {
                 ]}
               >
                 {selectedLocation.name2
-                  ? selectedLocation.name2.length > 20
-                    ? `${selectedLocation.name2.slice(0, 20)}...`
+                  ? selectedLocation.name2.length > 15
+                    ? `${selectedLocation.name2.slice(0, 15)}...`
                     : selectedLocation.name2
                   : `${t("location.by")}`}
               </Text>
@@ -469,7 +469,7 @@ function Home({ navigation }) {
                     )}
                   />
 
-                  {item?.imageUrls?.length > 1 && (
+                  {/* {item?.imageUrls?.length > 1 && (
                     <View style={styles.dotsContainer}>
                       {item.imageUrls.map((_, imageIndex) => (
                         <View
@@ -486,7 +486,7 @@ function Home({ navigation }) {
                         />
                       ))}
                     </View>
-                  )}
+                  )} */}
 
                   <View style={styles.infoWrapper}>
                     <View style={styles.cartInfoContainer}>

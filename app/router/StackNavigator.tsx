@@ -1,7 +1,11 @@
-import { StyleSheet, KeyboardAvoidingView, Platform, View } from "react-native";
+import { StyleSheet, KeyboardAvoidingView, Text, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from "@react-navigation/stack";
+import NetInfo from "@react-native-community/netinfo";
 
 // Screens
 import Onboarding from "../screens/Onboarding";
@@ -30,7 +34,7 @@ import FreeTrial from "../screens/FreeTrial";
 import SubscriptionV2 from "../screens/SubscriptionV2";
 import CancelSubscription from "../screens/CancelSubscription";
 import Location from "../screens/Location";
-
+import Feather from '@expo/vector-icons/Feather';
 // Utils
 import { getCredentials } from "../services/Auth.service";
 import * as SecureStore from "expo-secure-store";
@@ -43,6 +47,7 @@ import AddReview from "../screens/AddReview";
 import { useAppTheme } from "../contexts/themeContext";
 import InstagramBusinessLoginWebView from "../utils/InstagramLogin";
 import FacebookLoginWebView from "../utils/facebookLogin";
+import { RFPercentage } from "react-native-responsive-fontsize";
 
 export type RootStackParamList = {
   OnBoarding: undefined;
@@ -89,18 +94,35 @@ export type RootStackParamList = {
   AddReview: undefined;
   InstagramLoginWebView: undefined;
   FacebookLoginWebView: undefined;
-  Location : undefined;
+  Location: undefined;
 };
+
+const NetworkError = () => (
+  <View style={styles.networkContainer}>
+    <Feather name="wifi-off" size={RFPercentage(6)} color={"rgba(186, 186, 186, 1)"} />
+    <Text style={styles.networkText}>No Internet Connection</Text>
+  </View>
+);
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const StackNavigator: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [credentials, setCredentials] = useState({ email: null, password: null });
+  const [credentials, setCredentials] = useState({
+    email: null,
+    password: null,
+  });
   const [loggedOut, setLoggedOut] = useState<string | null>(null);
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const { userData, loading: userLoading, error: userError } = useUser();
+  const [isConnected, setIsConnected] = useState(true);
 
-  const { userData, loading: userLoading } = useUser();
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsConnected(state.isConnected ?? false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,11 +137,10 @@ const StackNavigator: React.FC = () => {
 
   useEffect(() => {
     const { email, password } = credentials;
-    // console.log("credentials....", credentials);
-    const isUserDataReady = userData && typeof userData?.isSubscribed === "boolean" && typeof userData?.isFreeTrial === "boolean";
-    // console.log("isUserDataReady....", isUserDataReady);
-    // console.log("userData....", userData);
-
+    const isUserDataReady =
+      userData &&
+      typeof userData?.isSubscribed === "boolean" &&
+      typeof userData?.isFreeTrial === "boolean";
     if (!isLoading && !userLoading) {
       if (loggedOut === "true") {
         setInitialRoute("Login");
@@ -134,20 +155,32 @@ const StackNavigator: React.FC = () => {
         let isTrialValid = false;
 
         if (isFreeTrial && userData?.freeTrialStartedAt?.seconds) {
-          const trialStartDate = new Date(userData.freeTrialStartedAt.seconds * 1000);
+          const trialStartDate = new Date(
+            userData.freeTrialStartedAt.seconds * 1000
+          );
           trialDays = differenceInDays(now, trialStartDate);
           isTrialValid = trialDays >= 0 && trialDays <= 14;
         }
-        const subStartDate = subscriptionStart ? new Date(subscriptionStart) : null;
+        const subStartDate = subscriptionStart
+          ? new Date(subscriptionStart)
+          : null;
         const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
 
-        const isWithinPaidPeriod = subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
+        const isWithinPaidPeriod =
+          subStartDate &&
+          subEndDate &&
+          now >= subStartDate &&
+          now <= subEndDate;
 
         if (isSubscribed || isWithinPaidPeriod) {
           setInitialRoute("TabNavigator");
         } else if (isTrialValid) {
           setInitialRoute("TabNavigator");
-        } else if (isFreeTrial && trialDays !== null && (trialDays < 0 || trialDays > 14)) {
+        } else if (
+          isFreeTrial &&
+          trialDays !== null &&
+          (trialDays < 0 || trialDays > 14)
+        ) {
           setInitialRoute("Subscription");
         } else {
           setInitialRoute("FreeTrial");
@@ -159,18 +192,15 @@ const StackNavigator: React.FC = () => {
   }, [isLoading, userLoading, userData, credentials, loggedOut]);
   const { theme } = useAppTheme();
 
-
-  console.log('isLoading..', isLoading)
-  console.log('isLoading..', credentials)
-  console.log('isLoading..', initialRoute)
-  console.log("userData.......",userData)
-
+  if (!isConnected) {
+    return <NetworkError />;
+  }
 
   return (
     <NavigationContainer>
       {isLoading || userLoading || !initialRoute ? (
         <DeciderScreen />
-      ) : ( 
+      ) : (
         <Stack.Navigator
           initialRouteName={initialRoute ?? "OnBoarding"}
           screenOptions={{
@@ -179,7 +209,9 @@ const StackNavigator: React.FC = () => {
             cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
             cardStyle: { backgroundColor: theme.white, flex: 1 },
             presentation: "modal",
-            cardOverlay: () => <View style={{ backgroundColor: theme.white }} />,
+            cardOverlay: () => (
+              <View style={{ backgroundColor: theme.white }} />
+            ),
           }}
         >
           <Stack.Screen name="OnBoarding" component={Onboarding} />
@@ -190,14 +222,17 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="OTPInput" component={OTPInput} />
           <Stack.Screen name="FreeTrial" component={FreeTrial} />
           <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
-          <Stack.Screen name="InstagramLoginWebView" component={InstagramBusinessLoginWebView} />
-          <Stack.Screen name="FacebookLoginWebView" component={FacebookLoginWebView} />
+          <Stack.Screen
+            name="InstagramLoginWebView"
+            component={InstagramBusinessLoginWebView}
+          />
+          <Stack.Screen
+            name="FacebookLoginWebView"
+            component={FacebookLoginWebView}
+          />
           <Stack.Screen name="Location" component={Location} />
 
-          <Stack.Screen
-            name="TabNavigator"
-           component={TabNavigator}
-          />
+          <Stack.Screen name="TabNavigator" component={TabNavigator} />
 
           <Stack.Screen name="InitialScreen" component={InitialScreen} />
           <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
@@ -207,23 +242,42 @@ const StackNavigator: React.FC = () => {
           <Stack.Screen name="EditProfile" component={EditProfile} />
           <Stack.Screen name="FAQ" component={FAQ} />
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-          <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
+          <Stack.Screen
+            name="TermsAndConditions"
+            component={TermsAndConditions}
+          />
           <Stack.Screen name="Reviews" component={Reviews} />
           <Stack.Screen name="Subscription" component={Subscription} />
           <Stack.Screen name="Chat" component={Chat} />
           <Stack.Screen name="Messages" component={Messages} />
           <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="CancelSubscription" component={CancelSubscription} />
+          <Stack.Screen
+            name="CancelSubscription"
+            component={CancelSubscription}
+          />
           <Stack.Screen name="PostRequest" component={PostRequest} />
           <Stack.Screen name="Notifications" component={Notifications} />
           <Stack.Screen name="CompletedTasks" component={CompletedTasks} />
           <Stack.Screen name="AddReview" component={AddReview} />
         </Stack.Navigator>
-         )}
+      )}
     </NavigationContainer>
   );
 };
 
 export default StackNavigator;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  networkContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffffff",
+  },
+  networkText: {
+    fontSize: RFPercentage(1.8),
+    color: "rgba(186, 186, 186, 1)",
+    fontFamily:"Poppins_600SemiBold",
+    marginTop:RFPercentage(1)
+  },
+});

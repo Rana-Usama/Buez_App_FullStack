@@ -199,7 +199,7 @@ function SubscriptionV2(props) {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          width: "80%",
+          width: "90%",
           marginTop: RFPercentage(4),
         }}
       >
@@ -207,7 +207,7 @@ function SubscriptionV2(props) {
           title={`${t("subscriptionV2.txt7")}`}
           marginTop={RFPercentage(0)}
           onPress={() => openPaymentSheet()}
-          width={RFPercentage(19)}
+          width={"47%"}
           loading={loading}
         />
         <TouchableOpacity
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   },
   skip: {
     height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
-    width: RFPercentage(19),
+    width: "47%",
     borderWidth: 1,
     borderColor: Colors.primary,
     alignItems: "center",

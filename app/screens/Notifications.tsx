@@ -12,7 +12,6 @@ import { useUser } from "../contexts/user.context";
 import { useNotifications } from "../contexts/notification.context";
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
-import { translateText } from "../translation/googleTranslation";
 import NotFound from "../components/common/NotFound";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
