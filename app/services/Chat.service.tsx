@@ -15,7 +15,6 @@ export const createNewChat = async (userId1 : any, userId2 : any) => {
     });
 
     if (existingChat) {
-      console.log('Chat already exists with ID:', existingChat.id);
       return existingChat.id;
     }
 
@@ -28,8 +27,6 @@ export const createNewChat = async (userId1 : any, userId2 : any) => {
     };
 
     const chatDoc = await addDoc(collection(FIREBASE_DB, 'chats'), chatData);
-
-    console.log('New chat created with ID:', chatDoc.id);
     return chatDoc.id;
   } catch (error) {
     console.error('Error creating chat:', error);

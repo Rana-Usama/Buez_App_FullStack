@@ -261,7 +261,6 @@ const Chat = ({ navigation, route }) => {
         }
       );
       const data = await response.text();
-      console.log("sendPushNotification:", data);
       return data;
     } catch (error) {
       console.error("sendPushNotification error:", error);

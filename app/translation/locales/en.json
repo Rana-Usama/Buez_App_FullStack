@@ -119,8 +119,8 @@
     "txt2": "Send Link",
     "txt3": "Reset Password link is sent to your email",
     "txt4": " Please check your Spam folder if you don’t see the reset email.",
-    "txt5" : "Ok",
-    "txt6" : "No account is associated with this email address."
+    "txt5": "Ok",
+    "txt6": "No account is associated with this email address."
   },
   "freeTrial": {
     "txt1": "Begin Your 14-Day Free Trial",
@@ -165,7 +165,7 @@
     "txt2": "Read less",
     "txt3": "Read more",
     "txt4": "Location",
-    "txt5": "Date/Time",
+    "txt5": "Request Date & Time",
     "txt6": "Compensation",
     "txt7": "Message Requester",
     "txt8": "My Requests",
@@ -185,7 +185,10 @@
     "txt6": "Cancel",
     "txt7": "Are you sure you want to delete\nthis request?",
     "txt8": "Cancelled",
-    "txt9" : "Repost"
+    "txt9": "Repost",
+    "txt10": "Accepted",
+    "txt11": "Accepted By:",
+    "txt12": "Accepted request cancelled successfully."
   },
   "postRequest": {
     "txt1": "Post Request",
@@ -236,10 +239,10 @@
     "txt1": "Cancel Premium Subscription",
     "txt2": "Current Plan",
     "txt3": ".99/month",
-    "txt4": "Your services will no longer be visible to others",
-    "txt5": "You won't receive daily requests anymore",
-    "txt6": "You won’t be able to earn from daily chores",
-    "txt7": "You will lose access to flexible cancellations",
+    "txt4": "Your services will no longer be visible to other users",
+    "txt5": "You will no longer receive daily requests",
+    "txt6": "You will not be able to earn from daily tasks",
+    "txt7": "You will no longer have special cancellation options",
     "txt8": "You are not subscribed to any active plan.",
     "txt9": "Activate Subscription",
     "txt10": "Are you sure you want to cancel\nyour monthly subscription?"
@@ -311,7 +314,8 @@
   "reviews": {
     "txt1": "My Reviews",
     "txt2": "Dated:",
-    "txt3": "By:"
+    "txt3": "By:",
+    "txt4" : "Reviewed"
   },
   "bottomTab": {
     "txt1": "My Req",
@@ -325,8 +329,8 @@
     "by": "+ Add Location",
     "apply": "Apply Location"
   },
-  "password" : {
-    "txt1" : "You signed in with Google. To change your password, please manage your Google Account.",
-    "txt2" : "Google Account"
+  "password": {
+    "txt1": "You signed in with Google. To change your password, please manage your Google Account.",
+    "txt2": "Google Account"
   }
 }

@@ -34,7 +34,7 @@ import FreeTrial from "../screens/FreeTrial";
 import SubscriptionV2 from "../screens/SubscriptionV2";
 import CancelSubscription from "../screens/CancelSubscription";
 import Location from "../screens/Location";
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 // Utils
 import { getCredentials } from "../services/Auth.service";
 import * as SecureStore from "expo-secure-store";
@@ -48,6 +48,7 @@ import { useAppTheme } from "../contexts/themeContext";
 import InstagramBusinessLoginWebView from "../utils/InstagramLogin";
 import FacebookLoginWebView from "../utils/facebookLogin";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import NetworkError from "../screens/NetworkError";
 
 export type RootStackParamList = {
   OnBoarding: undefined;
@@ -96,13 +97,6 @@ export type RootStackParamList = {
   FacebookLoginWebView: undefined;
   Location: undefined;
 };
-
-const NetworkError = () => (
-  <View style={styles.networkContainer}>
-    <Feather name="wifi-off" size={RFPercentage(6)} color={"rgba(186, 186, 186, 1)"} />
-    <Text style={styles.networkText}>No Internet Connection</Text>
-  </View>
-);
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -266,18 +260,3 @@ const StackNavigator: React.FC = () => {
 };
 
 export default StackNavigator;
-
-const styles = StyleSheet.create({
-  networkContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffffff",
-  },
-  networkText: {
-    fontSize: RFPercentage(1.8),
-    color: "rgba(186, 186, 186, 1)",
-    fontFamily:"Poppins_600SemiBold",
-    marginTop:RFPercentage(1)
-  },
-});

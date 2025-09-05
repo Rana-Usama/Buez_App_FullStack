@@ -165,7 +165,7 @@
     "txt2": "Leggi meno",
     "txt3": "Leggi di più",
     "txt4": "Posizione",
-    "txt5": "Data/Ora",
+    "txt5": "Data e ora della richiesta",
     "txt6": "Compenso",
     "txt7": "Messaggio al richiedente",
     "txt8": "Le mie richieste",
@@ -185,7 +185,10 @@
     "txt6": "Annulla",
     "txt7": "Sei sicuro di voler eliminare\nquesta richiesta?",
     "txt8": "Annullato",
-    "txt9" : "Ripubblica" 
+    "txt9": "Ripubblica",
+    "txt10": "Accettato",
+    "txt11": "Accettato da:",
+    "txt12": "Richiesta accettata annullata con successo."
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",
@@ -310,8 +313,9 @@
   },
   "reviews": {
     "txt1": "Le mie recensioni",
-    "txt2": "Data:",
-    "txt3": "Di:"
+    "txt2": "Datato:",
+    "txt3": "Da:",
+    "txt4": "Recensito"
   },
   "bottomTab": {
     "txt1": "Mie Rich.",

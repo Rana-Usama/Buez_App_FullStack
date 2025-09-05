@@ -34,7 +34,6 @@ export default function Location({ navigation, route }) {
   useEffect(() => {
     const fetchUserLocation = async () => {
       const loc = await getCurrentLocation();
-      console.log("location..........", loc);
       if (loc) {
         try {
           // Reverse geocode current location to get a name

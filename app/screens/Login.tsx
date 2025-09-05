@@ -55,7 +55,6 @@ function Login({ navigation }) {
         email,
         password
       );
-      console.log("userCredential...........", userCredential);
       return userCredential.user;
     } catch (error) {
       console.log("user...........", error);
@@ -68,7 +67,6 @@ function Login({ navigation }) {
     try {
       const { email, password } = values;
       const user = await signInWithEmail(email, password);
-      console.log("user...........", user);
       await SecureStore.setItemAsync("loggedOut", "false");
       await SecureStore.setItemAsync("password2", password);
 
@@ -87,7 +85,6 @@ function Login({ navigation }) {
       });
       navigation.navigate("TabNavigator");
     } catch (error) {
-      console.log("user...........", error);
       Toast.show({
         type: "error",
         text1: t("toast.login.three"),

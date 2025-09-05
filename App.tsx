@@ -104,13 +104,12 @@ export default function App() {
     // Listener for foreground notifications
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
-        console.log("notification.........",notification)
         setNotification(notification);
       });
 
     // Listener for user tapping the notification
     responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {console.log("response.........",response)});
+      Notifications.addNotificationResponseReceivedListener((response) => {});
   
     return () => {
       if (notificationListener.current)

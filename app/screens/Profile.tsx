@@ -15,7 +15,6 @@ function Profile({ navigation }) {
   const { theme } = useAppTheme();
   const profileImgUrl = user?.profileImage || "";
   const userName = user?.userName || "";
-  console.log(user);
   const navigationsList = [
     {
       iconSource: Icons.editP,

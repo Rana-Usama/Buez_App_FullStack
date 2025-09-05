@@ -50,9 +50,7 @@ function SubscriptionV2(props) {
         subscriptionStart: start,
         subscriptionEnd: end,
       });
-      console.log("User subscription status updated in Firestore");
     } catch (error) {
-      console.log("Failed to update subscription status:", error);
     }
   };
 

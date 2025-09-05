@@ -34,7 +34,6 @@ function Subscription(props) {
         subscriptionStart: start,
         subscriptionEnd: end,
       });
-      console.log("User subscription status updated in Firestore");
     } catch (error) {
       console.error("Failed to update subscription status:", error);
     }
@@ -77,7 +76,6 @@ function Subscription(props) {
       return;
     }
     const { error: paymentError } = await presentPaymentSheet();
-    console.log("paymentError............", paymentError);
     if (paymentError) {
       Toast.show({
         type: "info",
@@ -96,10 +94,7 @@ function Subscription(props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ customerId, setupIntentId }),
     });
-    console.log("res......", res);
     const result = await res.json();
-    console.log("result...........", result);
-
     if (result.success) {
       await updateSubscriptionStatus(result?.currentPeriodStart, result?.currentPeriodEnd);
       await saveSubscription(userId, result?.subscriptionId);

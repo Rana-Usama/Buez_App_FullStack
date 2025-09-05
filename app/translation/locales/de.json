@@ -165,7 +165,7 @@
     "txt2": "Weniger lesen",
     "txt3": "Mehr lesen",
     "txt4": "Standort",
-    "txt5": "Datum/Uhrzeit",
+    "txt5": "Fecha y hora de la solicitud",
     "txt6": "Vergütung",
     "txt7": "Nachricht an Anfragenden",
     "txt8": "Meine Anfragen",
@@ -185,7 +185,10 @@
     "txt6": "Abbräche",
     "txt7": "Bisch sicher, dass du dä Uftrag wotsch lösche?",
     "txt8": "Abgebrochen",
-    "txt9": "Repost"
+    "txt9": "Repost",
+    "txt10": "Akzeptiert",
+    "txt11": "Akzeptiert von:",
+    "txt12": "Akzeptierte Anfrage erfolgreich storniert."
   },
   "postRequest": {
     "txt1": "Uftrag poste",
@@ -309,9 +312,10 @@
     "txt5": "Telefonnummer"
   },
   "reviews": {
-    "txt1": "Mini Bewertige",
-    "txt2": "Datum:",
-    "txt3": "Vo:"
+    "txt1": "Meine Bewertungen",
+    "txt2": "Datiert:",
+    "txt3": "Von:",
+    "txt4": "Bewertet"
   },
   "bottomTab": {
     "txt1": "Meine Anf.",

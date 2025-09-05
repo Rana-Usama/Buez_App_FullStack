@@ -35,7 +35,7 @@ import { useAppTheme } from "../contexts/themeContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { onSnapshot } from "firebase/firestore";
-
+import AntDesign from "@expo/vector-icons/AntDesign";
 const screenWidth = Dimensions.get("window").width;
 
 function OfferDetail({ navigation, route }) {
@@ -189,6 +189,7 @@ function OfferDetail({ navigation, route }) {
           email: currentUserId2.email,
           profileImage: currentUser?.userData?.profileImage || null,
           phone: currentUser?.userData?.phone || null,
+          token: currentUser?.userData?.token,
         },
       });
       console.log("Request updated with acceptedBy field.");
@@ -214,7 +215,6 @@ function OfferDetail({ navigation, route }) {
         }
       );
       const data = await response.text();
-      console.log("sendPushNotification:", data);
       return data;
     } catch (error) {
       console.log("sendPushNotification error:", error);
@@ -348,12 +348,27 @@ function OfferDetail({ navigation, route }) {
           <View
             style={[styles.infoContainer, { marginTop: RFPercentage(2.5) }]}
           >
-            <Image
-              style={styles.icon}
-              source={Icons.bars}
-              tintColor={theme.heading}
-              resizeMode="contain"
-            />
+            <View
+              style={{
+                width: RFPercentage(3),
+                height: RFPercentage(3),
+                borderRadius: RFPercentage(100),
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? Colors.primary + "40"
+                    : Colors.primary + "15",
+              }}
+            >
+              <Image
+                style={styles.icon}
+                source={Icons.bars}
+                tintColor={Colors.primary}
+                resizeMode="contain"
+              />
+            </View>
+
             <Text style={[styles.infoText, { color: theme.heading }]}>
               {t("postRequest.txt8")}
             </Text>
@@ -375,12 +390,27 @@ function OfferDetail({ navigation, route }) {
         </View>
 
         <View style={styles.infoContainer}>
-          <Image
-            style={styles.icon}
-            source={Icons.location}
-            tintColor={theme.heading}
-            resizeMode="contain"
-          />
+          <View
+            style={{
+              width: RFPercentage(3),
+              height: RFPercentage(3),
+              borderRadius: RFPercentage(100),
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor:
+                theme.mode === "dark"
+                  ? Colors.primary + "40"
+                  : Colors.primary + "15",
+            }}
+          >
+            <Image
+              style={styles.icon}
+              source={Icons.location}
+              tintColor={Colors.primary}
+              resizeMode="contain"
+            />
+          </View>
+
           <Text style={[styles.infoText, { color: theme.heading }]}>{`${t(
             "details.txt4"
           )}`}</Text>
@@ -401,27 +431,74 @@ function OfferDetail({ navigation, route }) {
         </Text>
 
         <View style={styles.infoContainer}>
-          <Image
-            style={styles.icon}
-            source={Icons.cal}
-            tintColor={theme.heading}
-            resizeMode="contain"
-          />
+          <View
+            style={{
+              width: RFPercentage(3),
+              height: RFPercentage(3),
+              borderRadius: RFPercentage(100),
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor:
+                theme.mode === "dark"
+                  ? Colors.primary + "40"
+                  : Colors.primary + "15",
+            }}
+          >
+            <Image
+              style={styles.icon}
+              source={Icons.cal}
+              tintColor={Colors.primary}
+              resizeMode="contain"
+            />
+          </View>
+
           <Text style={[styles.infoText, { color: theme.heading }]}>{`${t(
             "details.txt5"
           )}`}</Text>
-          <Text style={[styles.infoDetail, { color: theme.darkGrey }]}>
+        </View>
+        <View
+          style={{
+            width: "90%",
+            alignSelf: "center",
+          }}
+        >
+          <Text
+            style={[
+              {
+                color: theme.darkGrey,
+                fontSize: RFPercentage(1.8),
+                fontFamily: "Poppins_400Regular",
+                width: "100%",
+                marginTop: RFPercentage(0.5),
+              },
+            ]}
+          >
             {getDateTime(postRequest.createdAt)}
           </Text>
         </View>
 
         <View style={styles.compensationContainer}>
-          <Image
-            tintColor={theme.heading}
-            style={styles.icon}
-            source={require("../../assets/Images/compensation.png")}
-            resizeMode="contain"
-          />
+          <View
+            style={{
+              width: RFPercentage(3),
+              height: RFPercentage(3),
+              borderRadius: RFPercentage(100),
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor:
+                theme.mode === "dark"
+                  ? Colors.primary + "40"
+                  : Colors.primary + "15",
+            }}
+          >
+            <Image
+              style={styles.icon}
+              source={require("../../assets/Images/compensation.png")}
+              tintColor={Colors.primary}
+              resizeMode="contain"
+            />
+          </View>
+
           <Text style={[styles.infoText, { color: theme.heading }]}>
             {`${t("details.txt6")}`}
           </Text>
@@ -443,9 +520,35 @@ function OfferDetail({ navigation, route }) {
             justifyContent: "space-between",
           }}
         >
-          <Text style={[styles.compensationTitle, { color: theme.heading }]}>
-            {t("profile.txt3")}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                width: RFPercentage(3),
+                height: RFPercentage(3),
+                borderRadius: RFPercentage(100),
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? Colors.primary + "40"
+                    : Colors.primary + "15",
+              }}
+            >
+              <AntDesign
+                name="barschart"
+                size={RFPercentage(1.8)}
+                color={Colors.primary}
+              />
+            </View>
+            <Text
+              style={[
+                styles.compensationTitle,
+                { color: theme.heading, marginLeft: RFPercentage(1) },
+              ]}
+            >
+              {t("profile.txt3")}
+            </Text>
+          </View>
           {averageRating && (
             <View
               style={{
@@ -687,7 +790,6 @@ const styles = StyleSheet.create({
   },
   description: {
     textAlign: "justify",
-    color: Colors.heading,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     width: "100%",
@@ -705,19 +807,17 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2.1),
   },
   icon: {
-    width: RFPercentage(2),
-    height: RFPercentage(2),
+    width: RFPercentage(1.8),
+    height: RFPercentage(1.8),
   },
   infoText: {
-    marginLeft: RFPercentage(0.6),
+    marginLeft: RFPercentage(1),
     color: Colors.heading,
     fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_600SemiBold",
     top: RFPercentage(0.2),
   },
   infoDetail: {
-    position: "absolute",
-    right: 0,
     color: Colors.heading,
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
@@ -735,9 +835,12 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   detail: {
+    textAlign: "justify",
     color: Colors.heading,
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.7),
+    width: "100%",
+    marginTop: RFPercentage(0.5),
   },
   reviewPic: {
     width: RFPercentage(5.9),

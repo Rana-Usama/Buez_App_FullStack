@@ -58,7 +58,6 @@ const FacebookLoginWebView = ({ navigation }: any) => {
         `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${longLivedToken}`
       );
       const userDataResponse = await userRes.json();
-      console.log("userDataResponse.....", userDataResponse);
       const email = userDataResponse.email;
       const currentLoginType = "facebook";
 

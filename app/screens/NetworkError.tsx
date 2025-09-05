@@ -1,23 +1,32 @@
 import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import Feather from "@expo/vector-icons/Feather";
+import { RFPercentage } from "react-native-responsive-fontsize";
+import { useAppTheme } from "../contexts/themeContext";
 
-const NetworkErrorScreen = () => {
+const NetworkError: React.FC = () => {
+  const {theme} = useAppTheme()
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Network Problem</Text>
-      <Text style={styles.subtitle}>
-        We couldn’t fetch data from Firebase. Please check your internet
-        connection and try again.
-      </Text>
-      <Button title="Retry" onPress={() => { /* reload logic */ }} />
+    <View style={[styles.networkContainer, {backgroundColor:theme.white}]}>
+      <Feather name="wifi-off" size={RFPercentage(6)} color={theme.darkGrey} />
+      <Text style={[styles.networkText,{color:theme.darkGrey}]}>No Internet Connection</Text>
     </View>
   );
 };
 
-export default NetworkErrorScreen;
+export default NetworkError;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
-  subtitle: { fontSize: 14, color: "gray", textAlign: "center", marginBottom: 20 },
+  networkContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffffff",
+  },
+  networkText: {
+    fontSize: RFPercentage(1.8),
+    color: "rgba(186, 186, 186, 1)",
+    fontFamily: "Poppins_600SemiBold",
+    marginTop: RFPercentage(1),
+  },
 });

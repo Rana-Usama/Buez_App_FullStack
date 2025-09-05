@@ -30,7 +30,7 @@ function Onboarding(props) {
   const { theme } = useAppTheme();
 
   useEffect(() => {
-    console.log("i18n is initialized:", i18n.isInitialized);
+    console.log(i18n.isInitialized);
   }, []);
 
   const onboardingData = [

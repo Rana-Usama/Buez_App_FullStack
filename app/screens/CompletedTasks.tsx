@@ -171,7 +171,7 @@ export default function CompletedTasks({ navigation }: any) {
             justifyContent: "space-between",
             width: "90%",
             alignSelf: "center",
-            paddingVertical: RFPercentage(1.5),
+            paddingVertical: RFPercentage(1.2),
           }}
         >
           <Text style={[styles.date, { color: theme.darkGrey }]}>{`${
@@ -186,7 +186,7 @@ export default function CompletedTasks({ navigation }: any) {
                   fontSize: RFPercentage(1.8),
                 }}
               >
-                Reviewed
+                {t("reviews.txt4")}
               </Text>
             ) : (
               <MyAppButton
@@ -202,6 +202,7 @@ export default function CompletedTasks({ navigation }: any) {
 
         {item.reviewed && (
           <View style={styles.reviewBox}>
+          
             <View style={styles.starRow}>
               {[1, 2, 3, 4, 5].map((i) => (
                 <Text

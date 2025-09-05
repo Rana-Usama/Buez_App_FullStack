@@ -30,7 +30,6 @@ export const getFormatedDate = (date: Timestamp | null | undefined): string => {
   if (!date) {
     return "";
   }
-  console.log(date);
   const postDate = new Date(date.seconds * 1000);
   try {
     return format(postDate, "MMM-d-yyyy");

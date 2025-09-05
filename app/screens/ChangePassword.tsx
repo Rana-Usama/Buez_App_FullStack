@@ -38,8 +38,6 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
     }
   }, []);
 
-  console.log("provider........", provider);
-
   let validationSchema = yup.object({
     oldPassword: yup.string().required(`${t("validations.passwordReq")}`),
     password: yup

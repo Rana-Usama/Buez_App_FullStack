@@ -32,8 +32,9 @@ import { useAppTheme } from "../contexts/themeContext";
 import ConfirmationModal from "../components/common/ConfirmationModal";
 import Feather from "@expo/vector-icons/Feather";
 import { cachedTranslate } from "../utils/cachedTranslations";
-
+import { createNewChat } from "../services/Chat.service";
 const { width: screenWidth } = Dimensions.get("window");
+import { getAuth } from "firebase/auth";
 
 function MyRequests({ navigation }) {
   const { t } = useTranslation();
@@ -58,7 +59,10 @@ function MyRequests({ navigation }) {
       ? REQUEST_STATUS.Active
       : activeFilter === `${t("myRequests.txt3")}`
       ? REQUEST_STATUS.Completed
-      : REQUEST_STATUS.Cancelled;
+      : activeFilter === `${t("myRequests.txt8")}`
+      ? REQUEST_STATUS.Cancelled
+      : null; // 👈 Accepted will be handled separately
+
   const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   useFocusEffect(
@@ -70,17 +74,32 @@ function MyRequests({ navigation }) {
     }, [param])
   );
 
-  const fetchRequests = async (islastVisiblePost = undefined) => {
+  const fetchRequests = async (islastVisiblePost = null) => {
     setLoading(true);
     try {
-      let isLastVisible = lastVisiblePost;
-      if (typeof islastVisiblePost !== "undefined") {
-        isLastVisible = islastVisiblePost;
+      let newRecords = [];
+      let lastVisible;
+
+      if (activeFilter === "Accepted") {
+        // fetch all (or query acceptedBy if indexed)
+        const { tasksArray, lastVisible: lv } = await getMyReuqests(
+          REQUEST_STATUS.Active, // or fetch all statuses depending on your case
+          islastVisiblePost
+        );
+        // filter only tasks accepted by the current user
+        newRecords = tasksArray.filter(
+          (task) => task?.acceptedBy?.userId === user?.userId
+        );
+        lastVisible = lv;
+      } else {
+        const { tasksArray, lastVisible: lv } = await getMyReuqests(
+          param,
+          islastVisiblePost
+        );
+        newRecords = tasksArray;
+        lastVisible = lv;
       }
-      const { tasksArray: newRecords, lastVisible } = await getMyReuqests(
-        param,
-        isLastVisible
-      );
+
       const translatedRecords = await Promise.all(
         newRecords.map(async (item) => ({
           ...item,
@@ -93,7 +112,12 @@ function MyRequests({ navigation }) {
         }))
       );
 
-      setTaskRecords(translatedRecords);
+      if (islastVisiblePost) {
+        setTaskRecords((prev) => [...prev, ...translatedRecords]);
+      } else {
+        setTaskRecords(translatedRecords);
+      }
+
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
     } catch (error) {
@@ -101,6 +125,14 @@ function MyRequests({ navigation }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const refreshRequests = async () => {
+    setRefreshing(true);
+    setLastVisiblePost(null); // reset cursor
+    setTaskRecords([]); // clear old data
+    await fetchRequests(null); // explicitly fetch from start
+    setRefreshing(false);
   };
 
   const fetchMorePosts = async () => {
@@ -137,12 +169,6 @@ function MyRequests({ navigation }) {
     if (!loadingMore && hasMore) {
       fetchMorePosts();
     }
-  };
-
-  const refreshRequests = async () => {
-    setRefreshing(true);
-    await fetchRequests();
-    setRefreshing(false);
   };
 
   const [loader, setLoader] = useState(false);
@@ -262,6 +288,56 @@ function MyRequests({ navigation }) {
     }));
   };
 
+  const cancelAcceptedRequest = async (i, item) => {
+    setLoader(true);
+    try {
+      const updatedData = {
+        ...item,
+        acceptedBy: null,
+      };
+      await updateReqestStatus(item.id, item.status, updatedData);
+      setTaskRecords((prev) => {
+        const newRecords = [...prev];
+        newRecords.splice(i, 1);
+        return newRecords;
+      });
+
+      Toast.show({
+        type: "success",
+        text1: t("toast.myRequests.one"),
+        text2: t("myRequests.txt12"),
+      });
+    } catch (e) {
+      Toast.show({
+        type: "error",
+        text1: t("toast.myRequests.five"),
+        text2: t("toast.myRequests.six"),
+      });
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  const currentUserId = getAuth().currentUser?.uid;
+  const currentUser = useUser();
+
+  const handleStartChat = useCallback(
+    async (receiverUser) => {
+      try {
+        const chatId = await createNewChat(currentUserId, receiverUser.userId);
+        navigation.navigate("Chat", {
+          chatId,
+          senderId: currentUserId,
+          senderName: currentUser?.userData?.userName,
+          receiver: receiverUser,
+        });
+      } catch (err) {
+        console.log("Chat start error:", err);
+      }
+    },
+    [currentUserId, currentUser?.userData?.userName]
+  );
+
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -291,12 +367,16 @@ function MyRequests({ navigation }) {
           title={`${t("myRequests.txt1")}`}
         />
 
-        {/* Updated Filter Tabs: Active, Completed, Cancelled */}
-        <View style={styles.filterContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScrollContainer}
+        >
           {[
             `${t("myRequests.txt2")}`,
             `${t("myRequests.txt3")}`,
             `${t("myRequests.txt8")}`,
+            `${t("myRequests.txt10")}`,
           ].map((title, index) => (
             <FilterButton
               key={title}
@@ -305,7 +385,7 @@ function MyRequests({ navigation }) {
               isFirst={index === 0}
             />
           ))}
-        </View>
+        </ScrollView>
 
         {/* Cards */}
         {taskRecords.map((cart, index) => (
@@ -406,9 +486,9 @@ function MyRequests({ navigation }) {
                 </Text>
               </Text>
 
-              {/* Repost only for Completed or Cancelled requests */}
-              {(cart.status === REQUEST_STATUS.Completed ||
-                cart.status === REQUEST_STATUS.Cancelled) && (
+              {/* Repost only for Completed or Cancelled filter */}
+              {(activeFilter === `${t("myRequests.txt3")}` ||
+                activeFilter === `${t("myRequests.txt8")}`) && (
                 <TouchableOpacity
                   onPress={() => repostRequest(index, cart)}
                   activeOpacity={0.8}
@@ -418,13 +498,17 @@ function MyRequests({ navigation }) {
                     flexDirection: "row",
                     bottom: 2,
                     alignItems: "center",
+                    backgroundColor: Colors.primary,
+                    borderRadius: RFPercentage(100),
+                    paddingHorizontal: RFPercentage(1),
+                    height: RFPercentage(2.8),
                   }}
                 >
                   <Text
                     style={{
-                      color: Colors.primary,
+                      color: Colors.white,
                       fontFamily: "Poppins_600SemiBold",
-                      fontSize: RFPercentage(1.6),
+                      fontSize: RFPercentage(1.4),
                       marginRight: RFPercentage(0.5),
                     }}
                   >
@@ -432,55 +516,138 @@ function MyRequests({ navigation }) {
                   </Text>
                   <Feather
                     name="repeat"
-                    size={RFPercentage(1.8)}
-                    color={theme.primary}
+                    size={RFPercentage(1.3)}
+                    color={Colors.white}
                   />
                 </TouchableOpacity>
               )}
             </View>
-
-            {/* Actions (only for active posts) */}
-            {cart?.status === REQUEST_STATUS.Active && (
-              <View style={styles.cartContainer2}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  disabled={loader}
-                  style={styles.markButton}
-                  onPress={() =>
-                    changeReqestStatus(index, REQUEST_STATUS.Completed, cart)
-                  }
-                >
-                  <Text style={styles.text2}>{`${t("myRequests.txt5")}`}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  disabled={loader}
-                  onPress={() => {
-                    setSelectedRequestIndex(index);
-                    setSelectedRequestItem(cart);
-                    setIsModalVisible(true);
-                  }}
+            {activeFilter !== "Accepted" && cart?.acceptedBy && (
+              <View
+                style={{
+                  marginTop: RFPercentage(0.6),
+                  width: "92%",
+                  alignSelf: "center",
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <Text
                   style={[
-                    styles.cancel,
-                    {
-                      borderColor:
-                        theme.mode === "dark"
-                          ? theme.lightGrey
-                          : theme.lightGrey,
-                    },
+                    styles.compensation,
+                    { color: theme.heading, marginTop: 0 },
                   ]}
                 >
+                  {t("myRequests.txt11")}
+                </Text>
+                <Text
+                  style={[
+                    styles.taskText,
+                    { color: theme.darkGrey, marginLeft: RFPercentage(0.6) },
+                  ]}
+                >
+                  {cart?.acceptedBy?.name.substr(0, 12) +
+                    (cart?.acceptedBy?.name?.length > 12 ? "..." : "")}
+                </Text>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => handleStartChat(cart?.acceptedBy)}
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Image
+                    source={Icons.messages}
+                    resizeMode="contain"
+                    style={{
+                      width: RFPercentage(2.3),
+                      height: RFPercentage(2.3),
+                    }}
+                  />
                   <Text
+                    style={{
+                      color: Colors.primary,
+                      fontFamily: "Poppins_500Medium",
+                      fontSize: RFPercentage(1.5),
+                      marginLeft: RFPercentage(0.4),
+                    }}
+                  >
+                    {t("details.txt9")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Actions (only when Active filter is selected) */}
+            {activeFilter === `${t("myRequests.txt2")}` &&
+              cart?.status === REQUEST_STATUS.Active && (
+                <View style={styles.cartContainer2}>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    disabled={loader}
+                    style={styles.markButton}
+                    onPress={() =>
+                      changeReqestStatus(index, REQUEST_STATUS.Completed, cart)
+                    }
+                  >
+                    <Text style={styles.text2}>{`${t(
+                      "myRequests.txt5"
+                    )}`}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    disabled={loader}
+                    onPress={() => {
+                      setSelectedRequestIndex(index);
+                      setSelectedRequestItem(cart);
+                      setIsModalVisible(true);
+                    }}
                     style={[
-                      styles.text3,
+                      styles.cancel,
                       {
-                        color:
+                        borderColor:
                           theme.mode === "dark"
                             ? theme.lightGrey
                             : theme.lightGrey,
                       },
                     ]}
-                  >{`${t("myRequests.txt6")}`}</Text>
+                  >
+                    <Text
+                      style={[
+                        styles.text3,
+                        {
+                          color:
+                            theme.mode === "dark"
+                              ? theme.lightGrey
+                              : theme.lightGrey,
+                        },
+                      ]}
+                    >
+                      {`${t("myRequests.txt6")}`}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+            {activeFilter === "Accepted" && (
+              <View
+                style={{
+                  width: "92%",
+                  alignItems: "center",
+                  marginTop: RFPercentage(2),
+                }}
+              >
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  disabled={loader}
+                  onPress={() => cancelAcceptedRequest(index, cart)}
+                  style={styles.acceptedCancelButton}
+                >
+                  <Text style={styles.text2}>{t("myRequests.txt6")}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -614,6 +781,12 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     // top: RFPercentage(-9),
   },
+  filterScrollContainer: {
+    paddingHorizontal: RFPercentage(2),
+    alignItems: "center",
+    marginTop: RFPercentage(5),
+  },
+
   edit: {
     width: RFPercentage(3.7),
     height: RFPercentage(3.7),
@@ -621,7 +794,7 @@ const styles = StyleSheet.create({
   compensation: {
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(0.7),
   },
   dot: {
     height: RFPercentage(0.9),
@@ -754,5 +927,14 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     fontSize: RFPercentage(1.6),
     textAlign: "center",
+  },
+  acceptedCancelButton: {
+    borderRadius: RFPercentage(100),
+    height: RFPercentage(5.2),
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.primary,
+    width: "45%",
+    alignSelf: "center",
   },
 });

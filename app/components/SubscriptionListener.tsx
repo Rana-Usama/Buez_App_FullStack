@@ -18,7 +18,6 @@ const SubscriptionListener = ({ userId }) => {
 
     if (trialStartDate) {
       const trialAge = differenceInDays(new Date(), trialStartDate);
-      // console.log("Trial Age:", trialAge);
       if (isFreeTrial && trialAge >= 0 && trialAge <= 14) {
         navigation.navigate("Home");
       } else if ((isFreeTrial && trialAge < 0) || (trialAge > 14 && !isSubscribed)) {

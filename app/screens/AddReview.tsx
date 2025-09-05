@@ -34,8 +34,8 @@ import { FIREBASE_DB } from "../../firebaseConfig";
 import { useUser } from "../contexts/user.context";
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
-import { translateText } from "../translation/googleTranslation";
 import { useAppTheme } from "../contexts/themeContext";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 const getTargetLanguage = async () => {
   try {
@@ -63,7 +63,6 @@ type Translations = {
 interface ParamsType {
   task?: any;
 }
-
 function AddReview() {
   const navigation = useNavigation();
   const { params } = useRoute();
@@ -108,7 +107,7 @@ function AddReview() {
         couldNotSubmit: "Could not submit review.",
       };
       const vals = await Promise.all(
-        Object.values(phrases).map((txt) => translateText(txt))
+        Object.values(phrases).map((txt) => cachedTranslate(txt))
       );
       const map = Object.keys(phrases).reduce((acc, k, i) => {
         acc[k] = vals[i] || phrases[k];
@@ -122,7 +121,7 @@ function AddReview() {
     if (!originalDesc) return;
     (async () => {
       try {
-        const translated = await translateText(originalDesc);
+        const translated = await cachedTranslate(originalDesc);
         setTaskDesc(translated || originalDesc);
       } catch {
         setTaskDesc(originalDesc);
@@ -226,16 +225,41 @@ function AddReview() {
               style={styles.profileImage}
             />
             <View style={styles.nameRow}>
-              <Text style={[styles.nameText, { color: theme.heading }]}>
+              <Text
+                style={[
+                  styles.nameText,
+                  { color: theme.heading, fontFamily: "Poppins_500Medium" },
+                ]}
+              >
                 {recipientUser.userName}
               </Text>
             </View>
+            <View style={{ flexDirection: "row", alignItems: "center" , marginTop:RFPercentage(1)}}>
+              <Image
+                source={Icons.location}
+                resizeMode="contain"
+                style={{ width: RFPercentage(1.8), height: RFPercentage(1.8) }}
+                tintColor={theme.darkGrey}
+              />
+              <Text
+                style={[
+                  styles.descText,
+                  { color: theme.darkGrey, fontFamily: "Poppins_500Medium", marginTop:2, marginLeft:RFPercentage(0.4) },
+                ]}
+              >
+                {task?.taskDetails?.address?.name}
+              </Text>
+            </View>
+
             <Text style={[styles.descText, { color: theme.darkGrey }]}>
               {taskDesc || tr.translating || "Translating..."}
             </Text>
             {!!completedOn && (
               <Text
-                style={[styles.completedText, { color: theme.darkGrey }]}
+                style={[
+                  styles.completedText,
+                  { color: theme.darkGrey, fontFamily: "Poppins_500Medium" },
+                ]}
               >{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>
             )}
           </View>
@@ -266,7 +290,10 @@ function AddReview() {
               multiline
               placeholderTextColor={theme.inputFieldPlaceholder}
               maxLength={150}
-              style={[styles.reviewInput, { borderColor: theme.border , color:theme.heading}]}
+              style={[
+                styles.reviewInput,
+                { borderColor: theme.border, color: theme.heading },
+              ]}
             />
             <View style={styles.charCounterContainer}>
               <Text

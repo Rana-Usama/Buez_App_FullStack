@@ -7,6 +7,7 @@ import {
   Image,
   StatusBar,
   Platform,
+  ScrollView
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
@@ -63,7 +64,6 @@ function CancelSubscription({ navigation }: any) {
                 isSubscribed: false,
                 subscriptionId: null,
               });
-              // console.log("User subscription status updated in Firestore");
             } catch (error) {
               console.log("Failed to update subscription status:", error);
             }
@@ -89,112 +89,113 @@ function CancelSubscription({ navigation }: any) {
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
       />
-      <Image style={styles.logo} source={Icons.logo} />
-      <TouchableOpacity
-        style={{
-          position: "absolute",
-          left: RFPercentage(2),
-          top: Platform.OS === "ios" ? RFPercentage(9) : RFPercentage(5),
-        }}
-        onPress={() => navigation.goBack()}
-      >
-        <Ionicons
-          name="chevron-back"
-          style={{ fontSize: RFPercentage(2.8) }}
-          color={theme.heading}
-        />
-      </TouchableOpacity>
-      {userData?.subscriptionId ? (
-        <>
-          <Image
-            style={{width:RFPercentage(50), height:RFPercentage(22), marginTop:RFPercentage(3)}}
-            source={Icons.notActive}
-            resizeMode="contain"
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom:RFPercentage(3), alignItems:"center"}} style={{}}>
+        <Image style={styles.logo} source={Icons.logo} />
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            left: RFPercentage(0),
+            top: Platform.OS === "ios" ? RFPercentage(9) : RFPercentage(5),
+          }}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons
+            name="chevron-back"
+            style={{ fontSize: RFPercentage(2.8) }}
+            color={theme.heading}
           />
-
-          <View style={styles.premiumInfo}>
-            <Text style={[styles.premiumText, { color: theme.heading }]}>{`${t(
-              "cancelSubscription.txt1"
-            )}`}</Text>
-          </View>
-
-          <View
-            style={[
-              styles.subscriptionContainer,
-              { borderColor: theme.stroke },
-            ]}
-          >
-            <View style={styles.priceContainer}>
-              <Image style={styles.starIconLeft} source={Icons.stars} />
-              <Text
-                style={{
-                  fontFamily: "Poppins_600SemiBold",
-                  color: theme.darkGrey,
-                }}
-              >{`${t("cancelSubscription.txt2")}`}</Text>
-              <Text style={[styles.priceText, { color: theme.darkGrey }]}>
-                $12
-                <Text style={styles.priceSubText}>{`${t(
-                  "cancelSubscription.txt3"
-                )}`}</Text>
-              </Text>
-            </View>
-
-            <View style={[styles.divider, { borderColor: theme.stroke }]} />
-
-            {/* Details */}
-            <View style={styles.detailsContainer}>
-              <Text style={[styles.detailText, { color: theme.darkGrey }]}>
-                ⊙ {`${t("cancelSubscription.txt4")}`}
-              </Text>
-              <Text style={[styles.detailText, { color: theme.darkGrey }]}>
-                ⊙ {`${t("cancelSubscription.txt5")}`}
-              </Text>
-              <Text style={[styles.detailText, { color: theme.darkGrey }]}>
-                ⊙ {`${t("cancelSubscription.txt6")}`}
-              </Text>
-              <Text style={[styles.detailText, { color: theme.darkGrey }]}>
-                ⊙ {`${t("cancelSubscription.txt7")}`}
-              </Text>
-            </View>
-
-            <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
-              <Image style={styles.starIconRight} source={Icons.stars} />
-            </View>
-          </View>
-          <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              width: "80%",
-            }}
-          >
-            <MyAppButton
-              title={`${t("buttons.cancel")}`}
-              marginTop={RFPercentage(7)}
-              onPress={() => setModalVisible2(true)}
-              width={RFPercentage(20)}
-              loading={isloading}
+        </TouchableOpacity>
+        {userData?.subscriptionId ? (
+          <>
+            <Image
+              style={{
+                width: RFPercentage(50),
+                height: RFPercentage(22),
+                marginTop: RFPercentage(3),
+              }}
+              source={Icons.notActive}
+              resizeMode="contain"
             />
-          </View>
-        </>
-      ) : (
-        <>
-          <Image
-            style={styles.vector}
-            source={Icons.notActive}
-            resizeMode="contain"
-          />
-          <Text style={[styles.notActive, { color: theme.heading }]}>{`${t(
-            "cancelSubscription.txt8"
-          )}`}</Text>
-          {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Subscription")}>
-            <Text style={[styles.buttonText, { color: theme.primary }]}>{`${t("cancelSubscription.txt9")}`}</Text>
-            <AntDesign name="arrowright" color={theme.primary} size={RFPercentage(3)} style={{ left: RFPercentage(1) }} />
-          </TouchableOpacity> */}
-        </>
-      )}
 
+            <View style={styles.premiumInfo}>
+              <Text
+                style={[styles.premiumText, { color: theme.heading }]}
+              >{`${t("cancelSubscription.txt1")}`}</Text>
+            </View>
+
+            <View
+              style={[
+                styles.subscriptionContainer,
+                { borderColor: theme.stroke },
+              ]}
+            >
+              <View style={styles.priceContainer}>
+                <Image style={styles.starIconLeft} source={Icons.stars} />
+                <Text
+                  style={{
+                    fontFamily: "Poppins_600SemiBold",
+                    color: theme.darkGrey,
+                  }}
+                >{`${t("cancelSubscription.txt2")}`}</Text>
+                <Text style={[styles.priceText, { color: theme.darkGrey }]}>
+                  $12
+                  <Text style={styles.priceSubText}>{`${t(
+                    "cancelSubscription.txt3"
+                  )}`}</Text>
+                </Text>
+              </View>
+
+              <View style={[styles.divider, { borderColor: theme.stroke }]} />
+
+              {/* Details */}
+              <View style={styles.detailsContainer}>
+                <Text style={[styles.detailText, { color: theme.darkGrey }]}>
+                  ⊙ {`${t("cancelSubscription.txt4")}`}
+                </Text>
+                <Text style={[styles.detailText, { color: theme.darkGrey }]}>
+                  ⊙ {`${t("cancelSubscription.txt5")}`}
+                </Text>
+                <Text style={[styles.detailText, { color: theme.darkGrey }]}>
+                  ⊙ {`${t("cancelSubscription.txt6")}`}
+                </Text>
+                <Text style={[styles.detailText, { color: theme.darkGrey }]}>
+                  ⊙ {`${t("cancelSubscription.txt7")}`}
+                </Text>
+              </View>
+
+              <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
+                <Image style={styles.starIconRight} source={Icons.stars} />
+              </View>
+            </View>
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                width: "80%",
+              }}
+            >
+              <MyAppButton
+                title={`${t("buttons.cancel")}`}
+                marginTop={RFPercentage(5)}
+                onPress={() => setModalVisible2(true)}
+                width={RFPercentage(20)}
+                loading={isloading}
+              />
+            </View>
+          </>
+        ) : (
+          <>
+            <Image
+              style={styles.vector}
+              source={Icons.notActive}
+              resizeMode="contain"
+            />
+            <Text style={[styles.notActive, { color: theme.heading }]}>{`${t(
+              "cancelSubscription.txt8"
+            )}`}</Text>
+          </>
+        )}
+      </ScrollView>
       <ConfirmationModal
         isVisible={modalVisible2}
         onClose={() => setModalVisible2(false)}

@@ -165,7 +165,7 @@
     "txt2": "Lire moins",
     "txt3": "Lire plus",
     "txt4": "Emplacement",
-    "txt5": "Date/Heure",
+    "txt5": "Date et heure de la demande",
     "txt6": "Rémunération",
     "txt7": "Message au demandeur",
     "txt8": "Mes demandes",
@@ -185,7 +185,10 @@
     "txt6": "Annuler",
     "txt7": "Êtes‑vous sûr de vouloir supprimer\ncette demande ?",
     "txt8": "Annulé",
-    "txt9" : "Reposter" 
+    "txt9": "Reposter",
+    "txt10": "Accepté",
+    "txt11": "Accepté par :",
+    "txt12": "Demande acceptée annulée avec succès."
   },
   "postRequest": {
     "txt1": "Publier une demande",
@@ -311,9 +314,11 @@
   },
   "reviews": {
     "txt1": "Mes avis",
-    "txt2": "Daté :",
-    "txt3": "Par :"
+    "txt2": "Daté :",
+    "txt3": "Par :",
+    "txt4": "Évalué"
   },
+
   "bottomTab": {
     "txt1": "Mes Dem.",
     "txt2": "Publier",

@@ -26,7 +26,6 @@ import Toast from "react-native-toast-message";
 export const resetPassword = async (email: any) => {
   try {
     await sendPasswordResetEmail(FIREBASE_AUTH, email);
-    console.log("Password reset email sent successfully!");
     return true;
   } catch (error) {
     console.error("Error sending password reset email:", error.message);
@@ -79,11 +78,7 @@ export const updatePassword = async (
         currentPassword
       );
       await reauthenticateWithCredential(user, credential);
-      console.log("User re-authenticated");
-
-      // Update the password
       await firebaseUpdatePassword(user, newPassword);
-      console.log("Password updated successfully");
     } else {
       console.log("No user is logged in to update password");
     }
@@ -132,11 +127,7 @@ export const deleteCurrentUser = async (currentPassword) => {
       currentPassword
     );
     await reauthenticateWithCredential(user, credential);
-    console.log("User re-authenticated for deletion");
-
     const userId = user.uid;
-
-    // 🔥 Step 2: Delete Firestore data
     await deleteDoc(doc(FIREBASE_DB, "users", userId));
 
     const batchDelete = async (colName, field, op, value) => {

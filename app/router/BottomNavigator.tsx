@@ -42,10 +42,6 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const { theme } = useAppTheme();
   const { unreadCount } = useUnreadMessages();
 
-
-  console.log("unreadCount......",unreadCount)
-
-
   useEffect(() => {
     const backAction = () => {
       if (screenFocused) {
