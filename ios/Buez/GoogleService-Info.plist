@@ -2,24 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CLIENT_ID</key>
-	<string>291364316025-4kor9g99j9huha1mlr9jvtbv7k5n4t1k.apps.googleusercontent.com</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.291364316025-4kor9g99j9huha1mlr9jvtbv7k5n4t1k</string>
-	<key>ANDROID_CLIENT_ID</key>
-	<string>291364316025-baf68r6qls0q419j58jtbn8liin8r6si.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBrRxAxSNO7oz1lmRDy-E5gOTsszxxJeLI</string>
+	<string>AIzaSyCeCkgdYEVdi1fiP3IeYizQpPfXjihKPZg</string>
 	<key>GCM_SENDER_ID</key>
-	<string>291364316025</string>
+	<string>211367941601</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.adamburg.Buez</string>
 	<key>PROJECT_ID</key>
-	<string>socially-1720865151833</string>
+	<string>buez-b73cc</string>
 	<key>STORAGE_BUCKET</key>
-	<string>socially-1720865151833.appspot.com</string>
+	<string>buez-b73cc.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:291364316025:ios:b47e8ea12cba6ff44285a8</string>
+	<string>1:211367941601:ios:15ada527eb95338c51aea0</string>
 </dict>
 </plist>

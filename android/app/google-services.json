@@ -1,51 +1,26 @@
 {
   "project_info": {
-    "project_number": "291364316025",
-    "project_id": "socially-1720865151833",
-    "storage_bucket": "socially-1720865151833.appspot.com"
+    "project_number": "211367941601",
+    "project_id": "buez-b73cc",
+    "storage_bucket": "buez-b73cc.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:291364316025:android:c64083404511ef294285a8",
+        "mobilesdk_app_id": "1:211367941601:android:a42474a129db983351aea0",
         "android_client_info": {
           "package_name": "com.adamburg.Buez"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "291364316025-lti18aabskoga3dmun0mdldu4cfm7674.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.adamburg.Buez",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
-          }
-        },
-        {
-          "client_id": "291364316025-qk5k8ptkmnqu2uadk7dmnn6vmkujiu3c.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBMSZToKjYzVkyVUGTdmcw5ivtpQUTKKmc"
+          "current_key": "AIzaSyDK-GhcOpyG88MUAMeuhPJXHkOFbMRNCBg"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "291364316025-00v6oroakujt01a10cht0kjacsbm1drd.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "291364316025-4kor9g99j9huha1mlr9jvtbv7k5n4t1k.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.adamburg.Buez"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

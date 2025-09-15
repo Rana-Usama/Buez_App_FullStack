@@ -4,54 +4,79 @@
 #import <GoogleMaps/GoogleMaps.h>
 #endif
 // @generated end react-native-maps-import
-
 #import <Firebase/Firebase.h>
+
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
-#import <GoogleSignIn/GoogleSignIn.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+// @generated begin react-native-maps-init - expo prebuild (DO NOT MODIFY) sync-095d48a2717d217b92fec64a8581d2bcf927a1a1
 #if __has_include(<GoogleMaps/GoogleMaps.h>)
   [GMSServices provideAPIKey:@"AIzaSyBSq361kA1Z14M0ymJ_u6UlKn4ulBLLrKQ"];
 #endif
-
-  [FIRApp configure];
-  
+// @generated end react-native-maps-init
+// @generated begin @react-native-firebase/app-didFinishLaunchingWithOptions - expo prebuild (DO NOT MODIFY) sync-ecd111c37e49fdd1ed6354203cd6b1e2a38cccda
+[FIRApp configure];
+// @generated end @react-native-firebase/app-didFinishLaunchingWithOptions
   self.moduleName = @"main";
+
+  // You can add your custom initial props in the dictionary below.
+  // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-// Unified openURL method for Firebase Auth, Google Sign-In, and React Native Linking
-- (BOOL)application:(UIApplication *)application
-            openURL:(NSURL *)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
-  // Firebase Auth
+  return [self bundleURL];
+}
+
+- (NSURL *)bundleURL
+{
+#if DEBUG
+  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@".expo/.virtual-metro-entry"];
+#else
+  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+#endif
+}
+
+// Linking API
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
+// @generated begin @react-native-firebase/auth-openURL - expo prebuild (DO NOT MODIFY) sync-11c57ab508c3e776ab45ad4f3c3cb28310f617ea
   if (url.host && [url.host caseInsensitiveCompare:@"firebaseauth"] == NSOrderedSame) {
-    return NO; // Let Firebase handle internally
+    // invocations for Firebase Auth are handled elsewhere and should not be forwarded to Expo Router
+    return NO;
   }
-
-  // Google Sign-In
-  if ([[GIDSignIn sharedInstance] handleURL:url]) {
-    return YES;
-  }
-
-  // React Native Linking
-  return [RCTLinkingManager application:application openURL:url options:options];
+// @generated end @react-native-firebase/auth-openURL
+  return [super application:application openURL:url options:options] || [RCTLinkingManager application:application openURL:url options:options];
 }
 
 // Universal Links
-- (BOOL)application:(UIApplication *)application
-continueUserActivity:(nonnull NSUserActivity *)userActivity
-restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler
-{
+- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
   BOOL result = [RCTLinkingManager application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
   return [super application:application continueUserActivity:userActivity restorationHandler:restorationHandler] || result;
+}
+
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+  return [super application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+}
+
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+  return [super application:application didFailToRegisterForRemoteNotificationsWithError:error];
+}
+
+// Explicitly define remote notification delegates to ensure compatibility with some third-party libraries
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+  return [super application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
 }
 
 @end

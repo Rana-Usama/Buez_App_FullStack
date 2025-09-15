@@ -2,7 +2,6 @@
   <string name="app_name">Buez</string>
   <string name="expo_splash_screen_resize_mode" translatable="false">cover</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
-  <string name="expo_system_ui_user_interface_style" translatable="false">light</string>
   <string name="facebook_app_id">716889610970681</string>
   <string name="facebook_client_token">c8a58652897a506d888c812044c4f7ab</string>
   <string name="fb_login_protocol_scheme">fb716889610970681</string>

@@ -307,21 +307,21 @@ PODS:
   - EXUpdatesInterface (1.0.0):
     - ExpoModulesCore
   - fast_float (6.1.4)
-  - FBAEMKit (18.0.0):
-    - FBSDKCoreKit_Basics (= 18.0.0)
+  - FBAEMKit (18.0.1):
+    - FBSDKCoreKit_Basics (= 18.0.1)
   - FBLazyVector (0.76.9)
-  - FBSDKCoreKit (18.0.0):
-    - FBAEMKit (= 18.0.0)
-    - FBSDKCoreKit_Basics (= 18.0.0)
-  - FBSDKCoreKit_Basics (18.0.0)
-  - FBSDKGamingServicesKit (18.0.0):
-    - FBSDKCoreKit (= 18.0.0)
-    - FBSDKCoreKit_Basics (= 18.0.0)
-    - FBSDKShareKit (= 18.0.0)
-  - FBSDKLoginKit (18.0.0):
-    - FBSDKCoreKit (= 18.0.0)
-  - FBSDKShareKit (18.0.0):
-    - FBSDKCoreKit (= 18.0.0)
+  - FBSDKCoreKit (18.0.1):
+    - FBAEMKit (= 18.0.1)
+    - FBSDKCoreKit_Basics (= 18.0.1)
+  - FBSDKCoreKit_Basics (18.0.1)
+  - FBSDKGamingServicesKit (18.0.1):
+    - FBSDKCoreKit (= 18.0.1)
+    - FBSDKCoreKit_Basics (= 18.0.1)
+    - FBSDKShareKit (= 18.0.1)
+  - FBSDKLoginKit (18.0.1):
+    - FBSDKCoreKit (= 18.0.1)
+  - FBSDKShareKit (18.0.1):
+    - FBSDKCoreKit (= 18.0.1)
   - Firebase/Auth (11.15.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 11.15.0)
@@ -2439,7 +2439,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - SDWebImage/Core (5.21.1)
+  - SDWebImage/Core (5.21.2)
   - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
@@ -2928,13 +2928,13 @@ SPEC CHECKSUMS:
   ExpoWebBrowser: a212e6b480d8857d3e441fba51e0c968333803b3
   EXUpdatesInterface: 7c977640bdd8b85833c19e3959ba46145c5719db
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
-  FBAEMKit: e34530df538b8eb8aeb53c35867715ba6c63ef0c
+  FBAEMKit: b2ed182002dbcb65d5a60059c9693d322186cd00
   FBLazyVector: 7605ea4810e0e10ae4815292433c09bf4324ba45
-  FBSDKCoreKit: d3f479a69127acebb1c6aad91c1a33907bcf6c2f
-  FBSDKCoreKit_Basics: 017b6dc2a1862024815a8229e75661e627ac1e29
-  FBSDKGamingServicesKit: cdb625419879a651d07906d8f874fc76291be660
-  FBSDKLoginKit: 5875762d1fe09ddcb05d03365d4f5dc34413843d
-  FBSDKShareKit: 082d1b087d6481af36f8d8433542f25f2fc2c8dd
+  FBSDKCoreKit: 7f96852f2539bdb88ba8d47e5ab4ae70a6f8d691
+  FBSDKCoreKit_Basics: 22d4c1a509ded4e45116f3bb167a14907550f62e
+  FBSDKGamingServicesKit: acde62310212678446f81b0a14da88231b918feb
+  FBSDKLoginKit: f48c06446995cd209332831f692cea28b26e51da
+  FBSDKShareKit: d3fef7f6690e173369134beb5f43983d7338e933
   Firebase: d99ac19b909cd2c548339c2241ecd0d1599ab02e
   FirebaseAppCheckInterop: 06fe5a3799278ae4667e6c432edd86b1030fa3df
   FirebaseAuth: a6575e5fbf46b046c58dc211a28a5fbdd8d4c83b
@@ -3032,7 +3032,7 @@ SPEC CHECKSUMS:
   RNReanimated: 758e433dea58eb219208bd209ef91a6f8ee096fb
   RNScreens: 2fe3d999c2dee6ef1d5e863fec0fb6f7de60c45a
   RNVectorIcons: 3502c62481383b3d51cf6193ccd0567b7f5f2634
-  SDWebImage: f29024626962457f3470184232766516dee8dfea
+  SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Stripe: cdf416cf2efe286f532a6306de0fcaa0ecc8c71a
