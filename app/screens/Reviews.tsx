@@ -70,7 +70,6 @@ type Section = {
   data: Review[];
 };
 
-
 export default function Reviews({ navigation }) {
   const { t } = useTranslation();
   const [sections, setSections] = useState<Section[]>([]);
@@ -186,7 +185,7 @@ export default function Reviews({ navigation }) {
           style={{
             color: i <= rating ? "#FFD700" : "#E0E0E0",
             fontSize: RFPercentage(2),
-            top:RFPercentage(1)
+            top: RFPercentage(1),
           }}
         >
           ★
@@ -273,9 +272,18 @@ export default function Reviews({ navigation }) {
             <Text style={[styles.ratingLabel, { color: theme.heading }]}>
               {t("details.txt14")} :
             </Text>
-            <Text style={{fontSize:RFPercentage(2.6), color:"#FFD700", marginLeft:RFPercentage(1.5)}}>★</Text>
+            <Text
+              style={{
+                fontSize: RFPercentage(2.6),
+                color: "#FFD700",
+                marginLeft: RFPercentage(1.5),
+                bottom: 4,
+              }}
+            >
+              ★
+            </Text>
             <Text style={[styles.ratingValue, { color: theme.heading }]}>
-               {averageRating} ({totalReviews})
+              {averageRating} ({totalReviews})
             </Text>
           </View>
         </>
@@ -331,9 +339,9 @@ const styles = StyleSheet.create({
   },
   ratingValue: {
     fontSize: RFPercentage(2),
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "Poppins_500Medium",
     color: Colors.heading,
-    
+    marginLeft: 3,
   },
   separator: {
     width: "60%",
@@ -371,7 +379,7 @@ const styles = StyleSheet.create({
   textWrap: { width: "90%", alignSelf: "center", marginTop: RFPercentage(1.6) },
   reviewText: {
     color: Colors.darkGrey2,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },
   footer: {

@@ -98,6 +98,8 @@ export type RootStackParamList = {
   Location: undefined;
 };
 
+
+
 const Stack = createStackNavigator<RootStackParamList>();
 
 const StackNavigator: React.FC = () => {
@@ -121,6 +123,7 @@ const StackNavigator: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const creds = await getCredentials();
+      console.log("creds......", creds);
       const status = await SecureStore.getItemAsync("loggedOut");
       setCredentials(creds);
       setLoggedOut(status);
@@ -189,6 +192,10 @@ const StackNavigator: React.FC = () => {
   if (!isConnected) {
     return <NetworkError />;
   }
+  console.log("isLoading", isLoading);
+  console.log("userLoading", userLoading);
+  console.log("initialRoute", initialRoute);
+  console.log("userData >>>", userData);
 
   return (
     <NavigationContainer>
@@ -260,3 +267,18 @@ const StackNavigator: React.FC = () => {
 };
 
 export default StackNavigator;
+
+const styles = StyleSheet.create({
+  networkContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffffff",
+  },
+  networkText: {
+    fontSize: RFPercentage(1.8),
+    color: "rgba(186, 186, 186, 1)",
+    fontFamily: "Poppins_600SemiBold",
+    marginTop: RFPercentage(1),
+  },
+});

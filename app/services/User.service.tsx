@@ -28,32 +28,54 @@ export const addUser = async (id: any, { userName, email, phoneNumber = "", prof
   }
 };
 
+// export const subscribeToUserData = (userId: any, callback: any) => {
+//   if (userId) {
+//     const docRef = doc(db, "users", userId);
+
+//     const unsubscribe = onSnapshot(docRef, async (docSnap) => {
+//       if (docSnap.exists()) {
+//         console.log("User data updated:", docSnap.data());
+//         callback({ ...docSnap.data(), id: userId });
+//       } else {
+//         console.log("No such document, creating a new one...");
+//         const defaultUserData = {
+//           userName: "",
+//           bio: "",
+//           phoneNumber: "",
+//           profileTier: "Basic",
+//           profileImage: "",
+//         };
+//         try {
+//           // Create a new document with default empty values
+//           await setDoc(docRef, defaultUserData);
+//           console.log("New user document created with default data.");
+//           callback(defaultUserData);
+//         } catch (error) {
+//           console.error("Error creating user document:", error);
+//           callback(null); // You might want to return an error or handle it
+//         }
+//       }
+//     });
+
+//     return unsubscribe;
+//   } else {
+//     console.log("No user ID provided");
+//     callback(null);
+//   }
+// };
+
+
 export const subscribeToUserData = (userId: any, callback: any) => {
   if (userId) {
     const docRef = doc(db, "users", userId);
 
-    const unsubscribe = onSnapshot(docRef, async (docSnap) => {
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         console.log("User data updated:", docSnap.data());
         callback({ ...docSnap.data(), id: userId });
       } else {
-        console.log("No such document, creating a new one...");
-        const defaultUserData = {
-          userName: "",
-          bio: "",
-          phoneNumber: "",
-          profileTier: "Basic",
-          profileImage: "",
-        };
-        try {
-          // Create a new document with default empty values
-          await setDoc(docRef, defaultUserData);
-          console.log("New user document created with default data.");
-          callback(defaultUserData);
-        } catch (error) {
-          console.error("Error creating user document:", error);
-          callback(null); // You might want to return an error or handle it
-        }
+        console.log("No such document for this user.");
+        callback(null); // don’t auto-create user
       }
     });
 
@@ -63,6 +85,9 @@ export const subscribeToUserData = (userId: any, callback: any) => {
     callback(null);
   }
 };
+
+
+
 
 export const getLoggedInUser = async () => {
   try {

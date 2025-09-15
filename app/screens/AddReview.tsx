@@ -74,8 +74,10 @@ function AddReview() {
     userId: "",
     userName: "User",
     profileImage: null,
+    token: null,
+    email: null,
   };
-  const taskId = task?.taskId || task?.id || "";
+  const taskId = task?.taskId || "";
   const originalDesc = task?.taskDetails?.description ?? "";
   const completedOn = moment(
     task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()
@@ -88,6 +90,68 @@ function AddReview() {
   const [rating, setRating] = useState([false, false, false, false, false]);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Save notification in Firestore
+  const saveReviewNotification = async () => {
+    try {
+      await addDoc(collection(FIREBASE_DB, "notifications"), {
+        sender: {
+          userId: userData?.userId,
+          userName: userData?.userName,
+          email: userData?.email || null,
+          profileImage: userData?.profileImage || null,
+          token: userData?.token || null,
+        },
+        receiver: {
+          userId: recipientUser?.userId,
+          name: recipientUser?.userName,
+          email: recipientUser?.email || null,
+          profileImage: recipientUser?.profileImage || null,
+          token: recipientUser?.token || null,
+        },
+        task: {
+          taskId,
+          description: originalDesc,
+        },
+        review: {
+          text: reviewText,
+          rating: rating.filter(Boolean).length, // stars
+        },
+        type: "review_added",
+        timestamp: new Date().toISOString(),
+        isRead: false,
+      });
+    } catch (err) {
+      console.log("Error saving review notification:", err);
+    }
+  };
+
+  // Send push notification to the user
+  const sendReviewPushNotification = async () => {
+    if (!recipientUser?.token) return; // no token, skip
+    try {
+      const previewText =
+        reviewText.length > 50
+          ? reviewText.substring(0, 50) + "..."
+          : reviewText;
+      const response = await fetch(
+        "https://buez-server-khaki.vercel.app/api/send-notification",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            expoPushToken: recipientUser?.token,
+            title: userData?.userName || "New Review",
+            message: `${previewText}`,
+          }),
+        }
+      );
+      const data = await response.text();
+      console.log("Push notification sent:", data);
+    } catch (error) {
+      console.log("sendReviewPushNotification error:", error);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -171,6 +235,8 @@ function AddReview() {
           })
         )
       );
+      await sendReviewPushNotification();
+      await saveReviewNotification();
       Toast.show({
         type: "success",
         text1: tr.success || "Success",
@@ -234,7 +300,13 @@ function AddReview() {
                 {recipientUser.userName}
               </Text>
             </View>
-            <View style={{ flexDirection: "row", alignItems: "center" , marginTop:RFPercentage(1)}}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: RFPercentage(1),
+              }}
+            >
               <Image
                 source={Icons.location}
                 resizeMode="contain"
@@ -244,7 +316,12 @@ function AddReview() {
               <Text
                 style={[
                   styles.descText,
-                  { color: theme.darkGrey, fontFamily: "Poppins_500Medium", marginTop:2, marginLeft:RFPercentage(0.4) },
+                  {
+                    color: theme.darkGrey,
+                    fontFamily: "Poppins_500Medium",
+                    marginTop: 2,
+                    marginLeft: RFPercentage(0.4),
+                  },
                 ]}
               >
                 {task?.taskDetails?.address?.name}
@@ -270,7 +347,11 @@ function AddReview() {
             </Text>
             <View style={styles.starRow}>
               {rating.map((sel, idx) => (
-                <TouchableOpacity key={idx} onPress={() => toggleStar(idx)}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  key={idx}
+                  onPress={() => toggleStar(idx)}
+                >
                   <FontAwesome
                     name="star"
                     size={RFPercentage(3)}

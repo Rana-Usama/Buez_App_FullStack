@@ -9,6 +9,9 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  LayoutAnimation,
+  UIManager,
+  TouchableOpacity,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
@@ -43,6 +46,14 @@ export default function CompletedTasks({ navigation }: any) {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const { theme } = useAppTheme();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  if (
+    Platform.OS === "android" &&
+    UIManager.setLayoutAnimationEnabledExperimental
+  ) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
 
   useEffect(() => {
     (async () => {
@@ -112,117 +123,117 @@ export default function CompletedTasks({ navigation }: any) {
     }, [])
   );
 
-  /* ---------- list item ---------- */
   const renderItem = ({ item }: { item: any }) => {
     const details = item.taskDetails || {};
     const owner = details.user || {};
     const doneOn =
       item.completedAt || item.acceptedAt || new Date().toISOString();
-    const cached = (cache[item.id] || {}) as {
-      desc?: string;
-      category?: string;
+    const cached = cache[item.id] || {};
+    const desc = cached?.desc ?? tr.translating;
+    const catName = cached?.category ?? tr.translating;
+    const shortDesc = desc.length > 70 ? `${desc.slice(0, 70)}…` : desc;
+
+    const isExpanded = expandedId === item.id;
+
+    const toggleExpand = () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setExpandedId(isExpanded ? null : item.id);
     };
-    const desc = cached.desc ?? tr.translating;
-    const catName = cached.category ?? tr.translating;
-    const shortDesc =
-      desc && desc.length > 70 ? `${desc.slice(0, 70)}…` : desc || "-";
 
     return (
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: theme.white,
-            borderColor:
-              theme.mode === "dark"
-                ? "rgba(117, 117, 117, 1)"
-                : "rgba(244, 244, 244, 1)",
-            borderBottomWidth: RFPercentage(0.4),
-          },
-        ]}
-      >
-        <View style={styles.headerRow}>
-          <View style={styles.rowCenter}>
-            <Image
-              style={styles.avatar}
-              source={
-                owner?.profileImage ? { uri: owner?.profileImage } : Icons.dp
-              }
-            />
-            <Text style={[styles.userName, { color: theme.heading }]}>
-              {owner.userName || "User"}
+      <TouchableOpacity activeOpacity={0.9} onPress={toggleExpand}>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.white,
+              borderColor:
+                theme.mode === "dark"
+                  ? "rgba(117, 117, 117, 1)"
+                  : "rgba(244, 244, 244, 1)",
+              borderBottomWidth: RFPercentage(0.4),
+            },
+          ]}
+        >
+          {/* Header */}
+          <View style={styles.headerRow}>
+            <View style={styles.rowCenter}>
+              <Image
+                style={styles.avatar}
+                source={
+                  owner?.profileImage ? { uri: owner?.profileImage } : Icons.dp
+                }
+              />
+              <Text style={[styles.userName, { color: theme.heading }]}>
+                {owner.userName || "User"}
+              </Text>
+            </View>
+            <Text style={[styles.category, { color: theme.darkGrey }]}>{`${
+              tr.category || "Category"
+            }: ${catName}`}</Text>
+          </View>
+
+          {/* Short Description */}
+          <View style={styles.descWrap}>
+            <Text style={[styles.desc, { color: theme.darkGrey }]}>
+              {shortDesc}
             </Text>
           </View>
-          <Text style={[styles.category, { color: theme.darkGrey }]}>{`${
-            tr.category || "Category"
-          }: ${catName}`}</Text>
-        </View>
 
-        <View style={styles.descWrap}>
-          <Text style={[styles.desc, { color: theme.darkGrey }]}>
-            {shortDesc}
-          </Text>
-        </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "90%",
-            alignSelf: "center",
-            paddingVertical: RFPercentage(1.2),
-          }}
-        >
-          <Text style={[styles.date, { color: theme.darkGrey }]}>{`${
-            tr.completedOn || "Completed on"
-          }: ${getFormatedDate(doneOn)}`}</Text>
-          <View>
-            {item.reviewed ? (
-              <Text
-                style={{
-                  color: theme.primary,
-                  fontFamily: "Poppins_600SemiBold",
-                  fontSize: RFPercentage(1.8),
-                }}
-              >
-                {t("reviews.txt4")}
-              </Text>
-            ) : (
-              <MyAppButton
-                title={tr.review || "Review"}
-                height={RFPercentage(4)}
-                width={RFPercentage(12)}
-                marginTop={0}
-                onPress={() => navigation.navigate("AddReview", { task: item })}
-              />
-            )}
-          </View>
-        </View>
-
-        {item.reviewed && (
-          <View style={styles.reviewBox}>
-          
-            <View style={styles.starRow}>
-              {[1, 2, 3, 4, 5].map((i) => (
+          {/* Footer */}
+          <View style={styles.footerRow}>
+            <Text style={[styles.date, { color: theme.darkGrey }]}>{`${
+              tr.completedOn || "Completed on"
+            }: ${getFormatedDate(doneOn)}`}</Text>
+            <View>
+              {item.reviewed ? (
                 <Text
-                  key={i}
                   style={{
-                    color:
-                      i <= (item.rating || 0) ? Colors.star : Colors.stroke,
-                    fontSize: RFPercentage(2),
+                    color: theme.primary,
+                    fontFamily: "Poppins_600SemiBold",
+                    fontSize: RFPercentage(1.8),
                   }}
                 >
-                  ★
+                  {t("reviews.txt4")}
                 </Text>
-              ))}
+              ) : (
+                <MyAppButton
+                  title={tr.review || "Review"}
+                  height={RFPercentage(4)}
+                  width={RFPercentage(12)}
+                  marginTop={0}
+                  onPress={() =>
+                    navigation.navigate("AddReview", { task: item })
+                  }
+                />
+              )}
             </View>
-            <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
-              {item.reviewText || tr.reviewed || "Reviewed"}
-            </Text>
           </View>
-        )}
-      </View>
+
+          {/* Expanded Review Content */}
+          {isExpanded && item.reviewed && (
+            <View style={styles.reviewBox}>
+              <View style={styles.starRow}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Text
+                    key={i}
+                    style={{
+                      color:
+                        i <= (item.rating || 0) ? Colors.star : Colors.stroke,
+                      fontSize: RFPercentage(2),
+                    }}
+                  >
+                    ★
+                  </Text>
+                ))}
+              </View>
+              <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
+                {item.reviewText || tr.reviewed || "Reviewed"}
+              </Text>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
     );
   };
 
@@ -389,5 +400,13 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.7),
     lineHeight: RFPercentage(2),
+  },
+  footerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "90%",
+    alignSelf: "center",
+    paddingVertical: RFPercentage(1.2),
   },
 });

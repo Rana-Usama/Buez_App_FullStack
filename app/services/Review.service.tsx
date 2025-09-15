@@ -21,8 +21,6 @@ export const fetchMyReviewsFromFirebase = async () => {
   }
 };
 
-
-
 export const fetchCompletedTasksFromFirebase = async () => {
   const currentUserId = getAuth().currentUser?.uid;
   if (!currentUserId) return [];
@@ -38,6 +36,25 @@ export const fetchCompletedTasksFromFirebase = async () => {
     return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (err) {
     console.error("Error fetching completed tasks:", err);
+    return [];
+  }
+};
+
+export const fetchActiveTasksFromFirebase = async () => {
+  const currentUserId = getAuth().currentUser?.uid;
+  if (!currentUserId) return [];
+
+  try {
+    const q = query(
+      collection(FIREBASE_DB, "requests"),
+      where("acceptedBy.userId", "==", currentUserId),
+      where("status", "==", "Active")
+    );
+
+    const snap = await getDocs(q);
+    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (err) {
+    console.error("Error fetching active tasks:", err);
     return [];
   }
 };

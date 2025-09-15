@@ -94,7 +94,7 @@ function CancelSubscription({ navigation }: any) {
         <TouchableOpacity
           style={{
             position: "absolute",
-            left: RFPercentage(0),
+            left: RFPercentage(2),
             top: Platform.OS === "ios" ? RFPercentage(9) : RFPercentage(5),
           }}
           onPress={() => navigation.goBack()}
@@ -176,7 +176,7 @@ function CancelSubscription({ navigation }: any) {
             >
               <MyAppButton
                 title={`${t("buttons.cancel")}`}
-                marginTop={RFPercentage(5)}
+                marginTop={RFPercentage(3)}
                 onPress={() => setModalVisible2(true)}
                 width={RFPercentage(20)}
                 loading={isloading}
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(34),
   },
   premiumInfo: {
-    marginTop: RFPercentage(5),
+    marginTop: RFPercentage(1),
     width: "90%",
     justifyContent: "center",
     alignItems: "center",

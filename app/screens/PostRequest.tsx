@@ -261,16 +261,19 @@ function PostRequest({ navigation, route }) {
   }
 
   async function scheduleTaskReminder(postId, userToken) {
-    const now = new Date();
-    const twoDaysLater = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
-
+    const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
+    const triggerDate = new Date(Date.now() + twoDaysInMs);
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Task Reminder",
-        body: "You posted a task 2 days ago. Did you complete it?",
+        title: "Task Follow-up",
+        body: "This is a reminder about your recent task posting. Please review your progress and update the status if completed.",
         data: { postId, userToken },
       },
-      trigger: twoDaysLater,
+      trigger: {
+        date: triggerDate,
+        repeats: false,
+        type: "date",
+      },
     });
   }
 
@@ -362,7 +365,6 @@ function PostRequest({ navigation, route }) {
           leftLogo={isEditing ? false : true}
           profileImage={profileImgUrl}
           dpNull={isEditing}
-
           navigation={navigation}
           title={
             title === `${t("postRequest.txt2")}`

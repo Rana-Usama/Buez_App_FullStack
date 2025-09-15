@@ -685,10 +685,11 @@ const styles = StyleSheet.create({
     // minHeight: RFPercentage(5.5),
     maxHeight: RFPercentage(18),
     justifyContent: "center",
-    padding: RFPercentage(1.7),
+    paddingHorizontal: RFPercentage(1.7),
     borderTopWidth: RFPercentage(0.1),
     alignSelf: "center",
     width: "90%",
+    paddingVertical:RFPercentage(1)
   },
   customTextInput: {
     color: Colors.white,
@@ -699,6 +700,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     justifyContent: "center",
     textAlignVertical: "top",
+    top:2
   },
   sendButton: {
     justifyContent: "center",
@@ -708,7 +710,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     position: "absolute",
     right: 0,
-    top: RFPercentage(-0.8),
+    top: RFPercentage(-0.4),
   },
   dateText: {
     color: Colors.white,

@@ -60,7 +60,6 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       const userSnap = await getDoc(userRef);
 
       if (userSnap.exists()) {
-        // Existing user → update only name, image, token
         await setDoc(
           userRef,
           {
@@ -69,6 +68,9 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
             token: pushToken || null,
             phoneNumber: user.phoneNumber,
             email: user.email,
+            userId: userSnap.data()?.userId || user.uid,
+            isSubscribed: userSnap.data()?.isSubscribed ?? false, // ✅ ensure it exists
+            isFreeTrial: userSnap.data()?.isFreeTrial ?? false, // optional safeguard
           },
           { merge: true }
         );
@@ -80,7 +82,8 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
           phoneNumber: user.phoneNumber,
           token: pushToken || null,
           isSubscribed: false,
-          isFreeTrial: false, // Only set once at first sign in
+          isFreeTrial: false,
+          userId: user.uid,
         });
       }
 
