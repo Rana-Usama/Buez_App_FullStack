@@ -13,7 +13,7 @@ import { Icons } from "../config/theme";
 import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
-const webClientId = process.env.EXPO_PUBLIC_WEB_CLIENT_ID;
+const webClientId ="211367941601-i7pb5oak2cqq5vcvtvfv0sqsl4t6mgma.apps.googleusercontent.com";
 const iosClientId = process.env.EXPO_PUBLIC_IOS_CLIENT_ID;
 
 const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
@@ -24,7 +24,8 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId,
-      iosClientId,
+      offlineAccess: true,
+      // iosClientId,
     });
 
     (async () => {
@@ -36,10 +37,12 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await GoogleSignin.hasPlayServices({
+      const res = await GoogleSignin.hasPlayServices({
         showPlayServicesUpdateDialog: true,
       });
+      console.log("hasPlayServices.......", res);
       const userInfo = await GoogleSignin.signIn();
+      console.log("userInfo.......", userInfo);
       const { idToken } = userInfo?.data;
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(
