@@ -8,54 +8,89 @@ import { useAppTheme } from "../contexts/themeContext";
 
 function PrivacyPolicy({ navigation }) {
   const { t } = useTranslation();
-  const {theme} = useAppTheme()
-
+  const { theme } = useAppTheme();
 
   return (
-    <View style={[styles.screen, {backgroundColor:theme.white}]}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title={`${t("settings.txt4")}`} />
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <Nav
+        dpNull
+        marginTop={
+          Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
+        }
+        navigation={navigation}
+        title={`${t("settings.txt4")}`}
+      />
 
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Introduction */}
         <View style={styles.section}>
-          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("privacyPolicy.txt1")}`}</Text>
+          <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
+            "privacyPolicy.txt1"
+          )}`}</Text>
         </View>
 
         {/* Information We Collect */}
         <View style={styles.section}>
-          <Text style={[styles.heading,{color:theme.heading}]}>{`${t("privacyPolicy.txt2")}`}</Text>
-          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("privacyPolicy.txt3")}`}</Text>
+          <Text style={[styles.heading, { color: theme.heading }]}>{`${t(
+            "privacyPolicy.txt2"
+          )}`}</Text>
+          <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
+            "privacyPolicy.txt3"
+          )}`}</Text>
         </View>
 
         {/* How We Use Your Information */}
         <View style={styles.section}>
-          <Text style={[styles.heading,{color:theme.heading}]}>{`${t("privacyPolicy.txt4")}`}</Text>
-          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("privacyPolicy.txt5")}`}</Text>
+          <Text style={[styles.heading, { color: theme.heading }]}>{`${t(
+            "privacyPolicy.txt4"
+          )}`}</Text>
+          <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
+            "privacyPolicy.txt5"
+          )}`}</Text>
         </View>
 
         {/* Data Sharing and Security */}
         <View style={styles.section}>
-          <Text style={[styles.heading,{color:theme.heading}]}>{`${t("privacyPolicy.txt6")}`}</Text>
-          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("privacyPolicy.txt7")}`}</Text>
+          <Text style={[styles.heading, { color: theme.heading }]}>{`${t(
+            "privacyPolicy.txt6"
+          )}`}</Text>
+          <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
+            "privacyPolicy.txt7"
+          )}`}</Text>
         </View>
 
         {/* Your Rights */}
         <View style={styles.section}>
-          <Text style={[styles.heading,{color:theme.heading}]}>{`${t("privacyPolicy.txt8")}`}</Text>
-          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("privacyPolicy.txt9")}`}</Text>
+          <Text style={[styles.heading, { color: theme.heading }]}>{`${t(
+            "privacyPolicy.txt8"
+          )}`}</Text>
+          <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
+            "privacyPolicy.txt9"
+          )}`}</Text>
         </View>
 
         {/* Changes to This Policy */}
         <View style={styles.section}>
-          <Text style={[styles.heading,{color:theme.heading}]}>{`${t("privacyPolicy.txt10")}`}</Text>
-          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("privacyPolicy.txt11")}`}</Text>
+          <Text style={[styles.heading, { color: theme.heading }]}>{`${t(
+            "privacyPolicy.txt10"
+          )}`}</Text>
+          <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
+            "privacyPolicy.txt11"
+          )}`}</Text>
         </View>
 
         {/* Contact Us */}
         <View style={styles.section}>
-          <Text style={[styles.heading,{color:theme.heading}]}>{`${t("privacyPolicy.txt12")}`}</Text>
-          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("privacyPolicy.txt13")}`}</Text>
+          <Text style={[styles.heading, { color: theme.heading }]}>{`${t(
+            "privacyPolicy.txt12"
+          )}`}</Text>
+          <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
+            "privacyPolicy.txt13"
+          )}`}</Text>
         </View>
 
         <View style={styles.space} />

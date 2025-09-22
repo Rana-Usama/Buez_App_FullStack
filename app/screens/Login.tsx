@@ -12,6 +12,9 @@ import {
   Button,
   Modal,
   TouchableWithoutFeedback,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
@@ -39,6 +42,7 @@ function Login({ navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { t } = useTranslation();
   const { theme } = useAppTheme();
+  const scrollViewRef = useRef();
 
   const validationSchema = yup.object({
     email: yup
@@ -98,216 +102,235 @@ function Login({ navigation }) {
     setRemember(!remember);
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
-      />
-      <Image
-        style={theme.mode === "dark" ? styles.darkImg : styles.logo}
-        source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo}
-      />
-      <Image style={styles.crown} source={Icons.crown} />
-      <Text style={[styles.welcomeText, { color: theme.heading }]}>
-        {t("login.txt1")}
-      </Text>
-
-      <Formik
-        initialValues={{ email: "", password: "" }}
-        validationSchema={validationSchema}
-        onSubmit={handleLogin}
-      >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-        }) => (
-          <>
-            <View style={styles.inputContainer}>
-              <InputFieldNew
-                placeholder={t("common.email")}
-                onChangeText={handleChange("email")}
-                handleBlur={handleBlur("email")}
-                value={values.email}
-                customStyle={{
-                  borderColor:
-                    touched.email && errors.email ? Colors.red : theme.border,
-                }}
-              />
-              {touched.email && errors.email && (
-                <View style={styles.errorContainer}>
-                  <Text style={styles.errorText}>{errors?.email}</Text>
-                </View>
-              )}
-
-              <InputFieldNew
-                placeholder={t("common.password")}
-                password
-                onChangeText={handleChange("password")}
-                handleBlur={handleBlur("password")}
-                value={values.password}
-                customStyle={{
-                  borderColor:
-                    touched.password && errors.password
-                      ? Colors.red
-                      : theme.border,
-                }}
-              />
-              {touched.password && errors.password && (
-                <View style={styles.errorContainer}>
-                  <Text style={styles.errorText}>{errors?.password}</Text>
-                </View>
-              )}
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={toggleRemember}
-              style={styles.rememberContainer}
-            >
-              <View style={styles.rememberWrapper}>
-                <View style={styles.rememberBox}>
-                  <View
-                    style={[
-                      styles.rememberIndicator,
-                      { backgroundColor: remember ? theme.primary : null },
-                    ]}
-                  />
-                </View>
-                <Text style={[styles.rememberText, { color: theme.darkGrey }]}>
-                  {t("login.txt2")}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => navigation.navigate("ForgotPassword")}
-                style={styles.forgotPassword}
-              >
-                <Text
-                  style={[styles.forgotPasswordText, { color: theme.darkGrey }]}
-                >
-                  {t("login.txt3")}
-                </Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
-
-            <MyAppButton
-              title={t("buttons.login")}
-              loading={indicator}
-              marginTop={RFPercentage(7)}
-              onPress={handleSubmit}
-              disabled={indicator}
-            />
-          </>
-        )}
-      </Formik>
-
-      <View style={styles.socialLoginContainer}>
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
-        <Text style={[styles.orText, { color: theme.darkGrey }]}>
-          {t("login.txt4")}
-        </Text>
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
-      </View>
-
-      <View style={styles.socialIconsContainer}>
-        {/* <View>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("FacebookLoginWebView")}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
+        <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+          <StatusBar
+            barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+            backgroundColor={theme.white}
+          />
+          
+          <ScrollView 
+            ref={scrollViewRef}
+            contentContainerStyle={styles.scrollContainer}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <Image source={Icons.fb} style={styles.socialIcon} />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.socialIconMargin}>
-          <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-            <Image source={Icons.instagram} style={styles.socialIcon} />
-          </TouchableOpacity>
-        </View> */}
-        <GoogleLoginButton navigation={navigation} />
-      </View>
+            <Image
+              style={theme.mode === "dark" ? styles.darkImg : styles.logo}
+              source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo}
+            />
+            <Image style={styles.crown} source={Icons.crown} />
+            <Text style={[styles.welcomeText, { color: theme.heading }]}>
+              {t("login.txt1")}
+            </Text>
 
-      <View style={styles.signupContainer}>
-        <Text style={[styles.signupText, { color: theme.darkGrey }]}>
-          {t("login.txt5")}
-        </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={[styles.signupLink, { color: theme.primary }]}>
-            {t("buttons.signup")}
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Formik
+              initialValues={{ email: "", password: "" }}
+              validationSchema={validationSchema}
+              onSubmit={handleLogin}
+            >
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                errors,
+                touched,
+              }) => (
+                <>
+                  <View style={styles.inputContainer}>
+                    <InputFieldNew
+                      placeholder={t("common.email")}
+                      onChangeText={handleChange("email")}
+                      handleBlur={handleBlur("email")}
+                      value={values.email}
+                      customStyle={{
+                        borderColor:
+                          touched.email && errors.email ? Colors.red : theme.border,
+                      }}
+                      onSubmitEditing={() => {
+                        // Focus next input or dismiss keyboard
+                        dismissKeyboard();
+                      }}
+                    />
+                    {touched.email && errors.email && (
+                      <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{errors?.email}</Text>
+                      </View>
+                    )}
 
-      <Modal
-        visible={isModalVisible}
-        animationType="fade"
-        onRequestClose={() => setIsModalVisible(false)}
-        transparent={true}
-      >
-        <BlurView
-          intensity={5}
-          style={[styles.modalBackground, { backgroundColor: theme.modal }]}
-        >
-          <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
-            <View style={{ flex: 1, width: "100%" }}>
-              <TouchableWithoutFeedback>
-                <View
-                  style={[
-                    styles.modalContainer,
-                    {
-                      backgroundColor: theme.white,
-                      alignSelf: "center",
-                      marginTop: "auto",
-                      marginBottom: "auto",
-                    },
-                  ]}
-                >
-                   <Text style={[styles.modalText,{color:theme.black}]}>
-                    Instagram Login Requirements
-                  </Text>
-                  <View style={{ marginTop: RFPercentage(1) }}>
-                    <Text
-                      style={{
-                        fontFamily: "Poppins_400Regular",
-                        color: theme.grey,
-                        fontSize: RFPercentage(1.7),
+                    <InputFieldNew
+                      placeholder={t("common.password")}
+                      password
+                      onChangeText={handleChange("password")}
+                      handleBlur={handleBlur("password")}
+                      value={values.password}
+                      customStyle={{
+                        borderColor:
+                          touched.password && errors.password
+                            ? Colors.red
+                            : theme.border,
                       }}
-                    >{`i) The user must have an Instagram Business or Creator account!`}</Text>
-                    <Text
-                      style={{
-                        fontFamily: "Poppins_400Regular",
-                        marginTop: RFPercentage(1.6),
-                        color: theme.grey,
-                        fontSize: RFPercentage(1.7),
-                      }}
-                    >{`ii) The Instagram account must be linked to a Facebook Page that the user manages!`}</Text>
+                      onSubmitEditing={dismissKeyboard}
+                    />
+                    {touched.password && errors.password && (
+                      <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{errors?.password}</Text>
+                      </View>
+                    )}
                   </View>
 
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={toggleRemember}
+                    style={styles.rememberContainer}
+                  >
+                    <View style={styles.rememberWrapper}>
+                      <View style={styles.rememberBox}>
+                        <View
+                          style={[
+                            styles.rememberIndicator,
+                            { backgroundColor: remember ? theme.primary : null },
+                          ]}
+                        />
+                      </View>
+                      <Text
+                        style={[styles.rememberText, { color: theme.darkGrey }]}
+                      >
+                        {t("login.txt2")}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("ForgotPassword")}
+                      style={styles.forgotPassword}
+                    >
+                      <Text
+                        style={[
+                          styles.forgotPasswordText,
+                          { color: theme.darkGrey },
+                        ]}
+                      >
+                        {t("login.txt3")}
+                      </Text>
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+
                   <MyAppButton
-                    title="Login"
-                    onPress={() => {
-                      setIsModalVisible(false);
-                      navigation.navigate("InstagramLoginWebView");
-                    }}
+                    title={t("buttons.login")}
+                    loading={indicator}
+                    marginTop={RFPercentage(7)}
+                    onPress={handleSubmit}
+                    disabled={indicator}
                   />
-                </View>
-              </TouchableWithoutFeedback>
+                </>
+              )}
+            </Formik>
+
+            <View style={styles.socialLoginContainer}>
+              <View style={[styles.divider, { backgroundColor: theme.border }]} />
+              <Text style={[styles.orText, { color: theme.darkGrey }]}>
+                {t("login.txt4")}
+              </Text>
+              <View style={[styles.divider, { backgroundColor: theme.border }]} />
             </View>
-          </TouchableWithoutFeedback>
-        </BlurView>
-      </Modal>
-    </Screen>
+
+            <View style={styles.socialIconsContainer}>
+              <GoogleLoginButton navigation={navigation} />
+            </View>
+
+            <View style={styles.signupContainer}>
+              <Text style={[styles.signupText, { color: theme.darkGrey }]}>
+                {t("login.txt5")}
+              </Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                <Text style={[styles.signupLink, { color: theme.primary }]}>
+                  {t("buttons.signup")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+
+          <Modal
+            visible={isModalVisible}
+            animationType="fade"
+            onRequestClose={() => setIsModalVisible(false)}
+            transparent={true}
+          >
+            <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
+              <BlurView
+                intensity={5}
+                style={[styles.modalBackground, { backgroundColor: theme.modal }]}
+              >
+                <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+                  <View
+                    style={[
+                      styles.modalContainer,
+                      {
+                        backgroundColor: theme.white,
+                        alignSelf: "center",
+                        marginTop: "auto",
+                        marginBottom: "auto",
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.modalText, { color: theme.black }]}>
+                      Instagram Login Requirements
+                    </Text>
+                    <View style={{ marginTop: RFPercentage(1) }}>
+                      <Text
+                        style={{
+                          fontFamily: "Poppins_400Regular",
+                          color: theme.grey,
+                          fontSize: RFPercentage(1.7),
+                        }}
+                      >{`i) The user must have an Instagram Business or Creator account!`}</Text>
+                      <Text
+                        style={{
+                          fontFamily: "Poppins_400Regular",
+                          marginTop: RFPercentage(1.6),
+                          color: theme.grey,
+                          fontSize: RFPercentage(1.7),
+                        }}
+                      >{`ii) The Instagram account must be linked to a Facebook Page that the user manages!`}</Text>
+                    </View>
+
+                    <MyAppButton
+                      title="Login"
+                      onPress={() => {
+                        setIsModalVisible(false);
+                        navigation.navigate("InstagramLoginWebView");
+                      }}
+                    />
+                  </View>
+                </TouchableWithoutFeedback>
+              </BlurView>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </Screen>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: Colors.white,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    backgroundColor: Colors.white,
+    paddingBottom: RFPercentage(3),
   },
   modalBackground: {
     flex: 1,

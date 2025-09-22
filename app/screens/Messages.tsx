@@ -334,6 +334,16 @@ function Messages({ navigation }) {
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
       />
+      {/* Nav */}
+      <Nav
+        marginTop={
+          Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+        }
+        profileImage={profileImgUrl}
+        leftLogo={true}
+        navigation={navigation}
+        title={`${t("messages.txt1")}`}
+      />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
@@ -346,17 +356,6 @@ function Messages({ navigation }) {
           />
         }
       >
-        {/* Nav */}
-        <Nav
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-          }
-          profileImage={profileImgUrl}
-          leftLogo={true}
-          navigation={navigation}
-          title={`${t("messages.txt1")}`}
-        />
-
         {/* Filter Buttons */}
         <View style={styles.filterContainer}>
           {filters.map((title, index) => (
@@ -435,7 +434,7 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(10),
   },
   filterContainer: {
-    marginTop: RFPercentage(5),
+    marginTop: RFPercentage(3),
     flexDirection: "row",
     width: "90%",
     marginBottom: RFPercentage(1),

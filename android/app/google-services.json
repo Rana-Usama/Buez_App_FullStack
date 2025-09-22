@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "211367941601-nndlk3cqrvphep05a303i1kqaobqa2t8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adamburg.Buez",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
           "client_id": "211367941601-i7pb5oak2cqq5vcvtvfv0sqsl4t6mgma.apps.googleusercontent.com",
           "client_type": 3
         }

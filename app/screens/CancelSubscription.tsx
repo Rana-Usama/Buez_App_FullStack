@@ -92,9 +92,10 @@ function CancelSubscription({ navigation }: any) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom:RFPercentage(3), alignItems:"center"}} style={{}}>
         <Image style={styles.logo} source={Icons.logo} />
         <TouchableOpacity
+        activeOpacity={0.8}
           style={{
             position: "absolute",
-            left: RFPercentage(2),
+            left: RFPercentage(0),
             top: Platform.OS === "ios" ? RFPercentage(9) : RFPercentage(5),
           }}
           onPress={() => navigation.goBack()}
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
   logo: {
     width: RFPercentage(6.5),
     height: RFPercentage(9.5),
-    marginTop: RFPercentage(1.5),
+    marginTop: RFPercentage(2),
   },
   vector: {
     marginTop: RFPercentage(15),

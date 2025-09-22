@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   ratingBox: {
     width: "97%",
     alignSelf: "center",
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(0),
     marginBottom: RFPercentage(1),
     padding: RFPercentage(2),
     flexDirection: "row",

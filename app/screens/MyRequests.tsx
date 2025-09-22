@@ -347,10 +347,16 @@ function MyRequests({ navigation }) {
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
       />
-
+      <Nav
+        profileImage={profileImgUrl}
+        leftLogo
+        navigation={navigation}
+        title={`${t("myRequests.txt1")}`}
+      />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -360,16 +366,6 @@ function MyRequests({ navigation }) {
           />
         }
       >
-        <Nav
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-          }
-          profileImage={profileImgUrl}
-          leftLogo
-          navigation={navigation}
-          title={`${t("myRequests.txt1")}`}
-        />
-
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -819,7 +815,7 @@ const styles = StyleSheet.create({
   filterScrollContainer: {
     paddingHorizontal: RFPercentage(2),
     alignItems: "center",
-    marginTop: RFPercentage(5),
+    marginTop: RFPercentage(3),
   },
 
   edit: {

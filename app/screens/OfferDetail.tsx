@@ -270,18 +270,50 @@ function OfferDetail({ navigation, route }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <Nav
+        dpNull
+        leftLogo={false}
+        navigation={navigation}
+        title={`${t("details.txt1")}`}
+      />
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
       >
-        <Nav
-          dpNull
-          leftLogo={false}
-          navigation={navigation}
-          title={`${t("details.txt1")}`}
-        />
-
+        <View style={{ width: "90%", alignSelf: "center" }}>
+          <View style={{ flexDirection: "row", marginTop: RFPercentage(1) }}>
+            <LinearGradient
+              colors={[Colors.primary, "#4557B0"]}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 1, y: 0 }}
+              style={{
+                paddingHorizontal: RFPercentage(4),
+                paddingVertical: 4,
+                justifyContent: "center",
+                alignItems: "center",
+                borderTopRightRadius: RFPercentage(3),
+                borderBottomLeftRadius: RFPercentage(3),
+                alignSelf: "flex-start",
+              }}
+            >
+              <Text style={[styles.title, { color: "white" }]}>
+                {translatedOffer?.taskType}
+              </Text>
+            </LinearGradient>
+            <Image
+              source={Icons.bar}
+              resizeMode="contain"
+              tintColor={Colors.primary}
+              style={{
+                width: RFPercentage(3.5),
+                height: RFPercentage(3.5),
+                bottom: RFPercentage(1),
+                right: RFPercentage(0.5),
+              }}
+            />
+          </View>
+        </View>
         {/* Image Carousel */}
         <View style={styles.carousal}>
           <FlatList
@@ -326,25 +358,41 @@ function OfferDetail({ navigation, route }) {
           </View>
         )}
 
+        <View
+          style={{
+            width: "90%",
+            alignSelf: "center",
+            marginTop: RFPercentage(2.5),
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View>
+              <Image
+                style={styles.userImage}
+                source={
+                  postRequest?.user?.profileImage
+                    ? { uri: postRequest?.user?.profileImage }
+                    : Icons.dp
+                }
+              />
+            </View>
+            <Text
+              style={[
+                {
+                  color: theme.heading,
+                  fontFamily: "Poppins_600SemiBold",
+                  fontSize: RFPercentage(1.8),
+                  marginLeft: RFPercentage(0.6),
+                },
+              ]}
+            >
+              {postRequest?.user?.userName}
+            </Text>
+          </View>
+        </View>
+
         {/* Translated Details */}
         <View style={styles.detailsContainer}>
-          <LinearGradient
-            colors={[Colors.primary, "#4557B0"]}
-            start={{ x: 0, y: 1 }}
-            end={{ x: 1, y: 0 }}
-            style={{
-              height: RFPercentage(4.5),
-              justifyContent: "center",
-              alignItems: "center",
-              paddingHorizontal: RFPercentage(4),
-              borderTopRightRadius: RFPercentage(2),
-              borderBottomLeftRadius: RFPercentage(2),
-            }}
-          >
-            <Text style={[styles.title, { color: "white" }]}>
-              {translatedOffer?.taskType}
-            </Text>
-          </LinearGradient>
           <View
             style={[styles.infoContainer, { marginTop: RFPercentage(2.5) }]}
           >
@@ -516,7 +564,7 @@ function OfferDetail({ navigation, route }) {
             width: "90%",
             alignSelf: "center",
             marginTop: RFPercentage(2.1),
-            flexDirection: "row",
+            // flexDirection: "row",
             justifyContent: "space-between",
           }}
         >
@@ -553,15 +601,16 @@ function OfferDetail({ navigation, route }) {
             <View
               style={{
                 flexDirection: "row",
-                justifyContent: "space-between",
+                // justifyContent: "space-between",
                 alignItems: "center",
+                marginTop:RFPercentage(1)
               }}
             >
               <Text style={[styles.rating, { color: theme.heading }]}>
                 {t("details.txt14")}:
               </Text>
-              <Text style={[styles.ratingText, { color: theme.heading }]}>
-                ⭐ {averageRating}
+              <Text style={[styles.ratingText, { color: theme.heading, marginLeft:RFPercentage(0.5) }]}>
+                {averageRating} ⭐
               </Text>
             </View>
           )}
@@ -759,6 +808,13 @@ const styles = StyleSheet.create({
   image: {
     borderRadius: RFPercentage(2),
   },
+  userImage: {
+    width: RFPercentage(6.2),
+    height: RFPercentage(6.2),
+    borderColor: Colors.primary,
+    borderWidth: RFPercentage(0.1),
+    borderRadius: RFPercentage(100),
+  },
   dotsContainer: {
     flexDirection: "row",
     alignSelf: "center",
@@ -781,7 +837,7 @@ const styles = StyleSheet.create({
     width: "90%",
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(0.5),
   },
   title: {
     color: Colors.heading,

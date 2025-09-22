@@ -12,6 +12,8 @@ import {
   Platform,
   Dimensions,
   StatusBar,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -35,74 +37,25 @@ import { selectLocation } from "../redux/Actions";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { useLocation } from "../utils/useLocation";
 
-type InputFieldType = {
-  placeholder: string;
-  value: string;
-  secure?: boolean;
-};
-
 const { width } = Dimensions.get("window");
 
 function Home({ navigation }) {
   const { t } = useTranslation();
   const { userData: user } = useUser();
   const profileImgUrl = user?.profileImage || "";
-  const [filterMap, setFilterMap] = useState({});
   const dispatch = useDispatch();
-  const [inputField, SetInputField] = useState<InputFieldType[]>([
-    {
-      placeholder: `${t("home.txt2")}`,
-      value: "",
-    },
-  ]);
-  const [activeFilter, setActiveFilter] = useState("");
-  const [filterOptions, setFilterOptions] = useState([]);
-  const originalFilters = [
-    "All",
-    "Cleaning",
-    "Moving",
-    "Gardening",
-    "Gaming",
-    "Other",
-  ];
-  useExitAppOnBack();
   const { location: currentLocation, getCurrentLocation } = useLocation();
   const { theme } = useAppTheme();
   const selectedLocation = useSelector((state) => state.location);
-
-  const isWithin100km = (userLocation, taskLocation) => {
-    return haversine(userLocation, taskLocation, { unit: "km" }) <= 100;
-  };
-
-  const translateTask = async (task: any) => {
-    return {
-      ...task,
-      description: await cachedTranslate(task.description || ""),
-      otherCompensation: await cachedTranslate(task.otherCompensation || ""),
-      taskType: await cachedTranslate(task.taskType || ""),
-    };
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      const translateFilters = async () => {
-        const translations = await Promise.all(
-          originalFilters.map((item) => cachedTranslate(item))
-        );
-        const map = {};
-        originalFilters.forEach((original, i) => {
-          map[translations[i]] = original;
-        });
-        setFilterOptions(translations);
-        setFilterMap(map);
-        setActiveFilter(translations[0]); // "All"
-      };
-      translateFilters();
-    }, [])
-  );
-
+  useExitAppOnBack();
+  const [filterOptions, setFilterOptions] = useState([]);
+  const [filterMap, setFilterMap] = useState({});
+  const [activeFilter, setActiveFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [allTasks, setAllTasks] = useState([]);
+  const [inputField, SetInputField] = useState([
+    { placeholder: t("home.txt2"), value: "" },
+  ]);
+
   const {
     taskRecords,
     setTaskRecords,
@@ -114,173 +67,137 @@ function Home({ navigation }) {
     setLoading,
     refreshing,
     setRefreshing,
-    loadingMore,
-    setLoadingMore,
     scrollPosition,
-    unsubscribeRef,
   } = usePostContext();
 
-  useEffect(() => {
-    fetchRequests(null);
-    return () => {};
-  }, [activeFilter, selectedLocation, currentLocation]);
-
+  const [allTasks, setAllTasks] = useState([]);
   const [activeIndices, setActiveIndices] = useState({});
+  const unsubscribeRef = useRef(null);
 
-  const fetchRequests = async (islastVisiblePost = undefined) => {
+  const isWithin100km = (userLoc, taskLoc) =>
+    haversine(userLoc, taskLoc, { unit: "km" }) <= 100;
+
+  const translateTask = async (task) => ({
+    ...task,
+    description: await cachedTranslate(task.description || ""),
+    otherCompensation: await cachedTranslate(task.otherCompensation || ""),
+    taskType: await cachedTranslate(task.taskType || ""),
+  });
+
+  // Translate filter buttons once
+  useFocusEffect(
+    useCallback(() => {
+      const originalFilters = [
+        "All",
+        "Cleaning",
+        "Moving",
+        "Gardening",
+        "Gaming",
+        "Other",
+      ];
+      const loadFilters = async () => {
+        const tr = await Promise.all(originalFilters.map(cachedTranslate));
+        const map = {};
+        originalFilters.forEach((o, i) => (map[tr[i]] = o));
+        setFilterOptions(tr);
+        setFilterMap(map);
+        setActiveFilter(tr[0]);
+      };
+      loadFilters();
+    }, [])
+  );
+
+  // Listen real-time for tasks
+  useEffect(() => {
+    if (!currentLocation) return;
     setLoading(true);
-    try {
-      if (!currentLocation) return;
-      const referenceLocation =
-        selectedLocation?.latitude2 && selectedLocation?.longitude2
-          ? {
-              latitude: selectedLocation.latitude2,
-              longitude: selectedLocation.longitude2,
-            }
-          : currentLocation;
 
-      const filterToUse = filterMap[activeFilter] || "";
-      let isLastVisible = lastVisiblePost;
-      if (typeof islastVisiblePost !== "undefined") {
-        isLastVisible = islastVisiblePost;
-      }
+    const refLoc =
+      selectedLocation?.latitude2 && selectedLocation?.longitude2
+        ? {
+            latitude: selectedLocation.latitude2,
+            longitude: selectedLocation.longitude2,
+          }
+        : currentLocation;
 
-      const { tasksArray: newRecords, lastVisible } = await getRequestList(
-        filterToUse,
-        "",
-        isLastVisible
-      );
-      const filteredTasks = newRecords.filter((task) => {
-        const loc = task?.address;
-        if (!loc?.latitude || !loc?.longitude) return false;
-        return isWithin100km(referenceLocation, {
-          latitude: loc.latitude,
-          longitude: loc.longitude,
+    if (unsubscribeRef.current) unsubscribeRef.current();
+
+    unsubscribeRef.current = getRequestList(
+      filterMap[activeFilter] || "", // taskType (string)
+      searchQuery, // searchQuery (string)
+      null, // lastVisiblePost
+      async ({ tasksArray, lastVisible }) => {
+        // callback
+        const filtered = tasksArray.filter((task) => {
+          const loc = task?.address;
+          if (!loc?.latitude || !loc?.longitude) return false;
+          return isWithin100km(refLoc, {
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+          });
         });
-      });
 
-      const translatedTasks = await Promise.all(
-        filteredTasks.map((task) => translateTask(task))
-      );
+        const translated = await Promise.all(filtered.map(translateTask));
 
-      setAllTasks(translatedTasks);
-      setTaskRecords(translatedTasks);
-      setLastVisiblePost(lastVisible);
-      setHasMore(translatedTasks.length > 0);
-    } catch (error) {
-      console.log("Error loading posts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setAllTasks(translated);
+        setTaskRecords(translated);
+        setLastVisiblePost(lastVisible);
+        setHasMore(translated.length > 0);
+        setLoading(false);
+      },
+      (err) => console.log("GET_POSTS_LIST Error:", err)
+    );
 
-  const fetchMorePosts = async () => {
-    if (!hasMore || loadingMore) return;
-    setLoadingMore(true);
-    try {
-      const filterToUse = filterMap[activeFilter] || "";
-      const { tasksArray: newRecords, lastVisible } = await getRequestList(
-        filterToUse,
-        searchQuery,
-        lastVisiblePost
-      );
-      const translatedNew = await Promise.all(
-        newRecords.map((task) => translateTask(task))
-      );
-      setTaskRecords([...taskRecords, ...translatedNew]);
-      setLastVisiblePost(lastVisible);
-      setHasMore(translatedNew.length > 0);
-    } catch (error) {
-      console.log("Error loading more posts:", error);
-    }
-    setLoadingMore(false);
-  };
-
-  const handleLoadMore = () => {
-    if (!loadingMore && hasMore) {
-      fetchMorePosts();
-    }
-  };
+    return () => {
+      if (unsubscribeRef.current) unsubscribeRef.current();
+    };
+  }, [activeFilter, searchQuery, selectedLocation, currentLocation]);
 
   const refreshRequests = async () => {
     setRefreshing(true);
-    await fetchRequests(null);
-    handleLoadMore();
+    // just restart listener
+    if (unsubscribeRef.current) unsubscribeRef.current();
     setRefreshing(false);
   };
 
   const handleChange = (text, i) => {
-    let tempFields = [...inputField];
-    tempFields[i].value = text;
-    SetInputField(tempFields);
+    const tmp = [...inputField];
+    tmp[i].value = text;
+    SetInputField(tmp);
     setSearchQuery(text);
   };
 
-  const getDisplayTasks = () => {
-    let list = allTasks;
+  const displayTasks = allTasks.filter((task) => {
     if (filterMap[activeFilter] !== "All") {
-      list = list.filter(
-        (task) =>
-          task.taskType?.toLowerCase() ===
-          filterMap[activeFilter]?.toLowerCase()
+      if (
+        task.taskType?.toLowerCase() !== filterMap[activeFilter]?.toLowerCase()
+      )
+        return false;
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        (task.description || "").toLowerCase().includes(q) ||
+        (task.user?.userName || "").toLowerCase().includes(q) ||
+        (task.taskType || "").toLowerCase().includes(q)
       );
     }
-    if (searchQuery.trim() !== "") {
-      list = list.filter(
-        (task) =>
-          (task.description || "")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          (task.user?.userName || "")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          (task.taskType || "")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-      );
-    }
-    return list;
-  };
-
-  const displayTasks = getDisplayTasks();
+    return true;
+  });
 
   useEffect(() => {
-    const initialIndices = {};
-    displayTasks.forEach((_, index) => {
-      initialIndices[index] = 0;
-    });
-
-    setActiveIndices((prev) => {
-      if (JSON.stringify(prev) === JSON.stringify(initialIndices)) {
-        return prev;
-      }
-      return initialIndices;
-    });
+    const idx = {};
+    displayTasks.forEach((_, i) => (idx[i] = 0));
+    setActiveIndices(idx);
   }, [displayTasks]);
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
-      />
-      <ScrollView
-        onScroll={(e) =>
-          (scrollPosition.current = e.nativeEvent.contentOffset.y)
-        }
-        style={styles.scrollView}
-        nestedScrollEnabled={true}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollViewContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refreshRequests}
-            colors={[Colors.primary]}
-            tintColor={Colors.primary}
-          />
-        }
-      >
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={[styles.screen, { backgroundColor: theme.white }]}>
+        <StatusBar
+          barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+          backgroundColor={theme.white}
+        />
         {/* Nav */}
         <Nav
           crown={true}
@@ -293,183 +210,216 @@ function Home({ navigation }) {
           title={`${t("home.txt1")}`}
         />
 
-        <View style={styles.inputFieldContainer}>
-          {inputField?.map((item, i) => (
-            <View key={i} style={styles.inputFieldWrapper}>
-              <InputField
-                placeholder={item.placeholder}
-                placeholderColor={"#6B7280"}
-                height={
-                  Platform.OS === "android"
-                    ? RFPercentage(6.4)
-                    : RFPercentage(5.5)
-                }
-                backgroundColor={theme.white}
-                borderWidth={RFPercentage(0.1)}
-                borderColor={theme.border}
-                secure={item.secure}
-                borderRadius={RFPercentage(1.2)}
-                color={theme.black}
-                fontSize={RFPercentage(1.7)}
-                fontFamily={"Poppins_400Regular"}
-                handleFeild={(text) => handleChange(text, i)}
-                value={item.value}
-                width={"97%"}
-              />
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.categoriesContainer}>
-          <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t(
-            "home.txt3"
-          )}`}</Text>
-        </View>
-
-        {/* Filter Buttons */}
-        <FlatList
-          horizontal
-          data={filterOptions}
-          keyExtractor={(item) => item}
-          contentContainerStyle={styles.filterButtonsContainer}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => setActiveFilter(item)}>
-              {activeFilter === item ? (
-                <LinearGradient
-                  colors={[Colors.primary, "#4557B0"]}
-                  style={styles.gradient}
-                >
-                  <Text
-                    style={{
-                      fontFamily: "Poppins_500Medium",
-                      color: "white",
-                      fontSize: RFPercentage(1.7),
-                    }}
-                  >
-                    {item}
-                  </Text>
-                </LinearGradient>
-              ) : (
-                <View
-                  style={[styles.nonGradient, { borderColor: theme.border }]}
-                >
-                  <Text
-                    style={{
-                      fontFamily: "Poppins_400Regular",
-                      color: Colors.heading,
-                      fontSize: RFPercentage(1.7),
-                    }}
-                  >
-                    {item}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          )}
-        />
-
-        <View
-          style={[styles.categoriesContainer, styles.recentRequestsContainer]}
+        <ScrollView
+          onScroll={(e) =>
+            (scrollPosition.current = e.nativeEvent.contentOffset.y)
+          }
+          style={styles.scrollView}
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="always"
+          contentContainerStyle={styles.scrollViewContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refreshRequests}
+              colors={[Colors.primary]}
+              tintColor={Colors.primary}
+            />
+          }
         >
-          <Text style={[styles.categoriesText, { color: theme.heading }]}>{`${t(
-            "home.txt9"
-          )}`}</Text>
-
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate("Location", { home: true })}
-            >
-              <Text
-                style={[
-                  styles.categoriesText,
-                  {
-                    color: theme.primary,
-                    fontFamily: "Poppins_600SemiBold",
-                    fontSize: RFPercentage(1.8),
-                  },
-                ]}
-              >
-                {selectedLocation.name2
-                  ? selectedLocation.name2.length > 15
-                    ? `${selectedLocation.name2.slice(0, 15)}...`
-                    : selectedLocation.name2
-                  : `${t("location.by")}`}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Show cross icon only if location is selected */}
-            {selectedLocation.name2 && (
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={{
-                  marginLeft: RFPercentage(1),
-                  bottom: RFPercentage(0.3),
-                }}
-                onPress={async () => {
-                  dispatch(selectLocation(null)); // clears redux
-                  await getCurrentLocation(); // refresh GPS
-                  fetchRequests(null); // refetch tasks
-                }}
-              >
-                <AntDesign
-                  name="closecircle"
-                  size={RFPercentage(2.5)}
-                  color={theme.primary}
+          {/* <ImageBackground
+            source={Icons.backgorund}
+            resizeMode="cover"
+            style={{ width: "100%", height: RFPercentage(13) }}
+          > */}
+          {/* <LinearGradient
+            colors={["rgba(238, 236, 252, 0.4)", "rgba(255, 255, 255,0.8)"]}
+            style={{ width: "100%", height: RFPercentage(10) }}
+          > */}
+          <View style={styles.inputFieldContainer}>
+            {inputField?.map((item, i) => (
+              <View key={i} style={styles.inputFieldWrapper}>
+                <InputField
+                  placeholder={item.placeholder}
+                  placeholderColor={"#6B7280"}
+                  height={
+                    Platform.OS === "android"
+                      ? RFPercentage(6.4)
+                      : RFPercentage(5.5)
+                  }
+                  backgroundColor={theme.white}
+                  borderWidth={RFPercentage(0.1)}
+                  borderColor={theme.border}
+                  secure={item.secure}
+                  borderRadius={RFPercentage(1.2)}
+                  color={theme.black}
+                  fontSize={RFPercentage(1.7)}
+                  fontFamily={"Poppins_400Regular"}
+                  handleFeild={(text) => handleChange(text, i)}
+                  value={item.value}
+                  width={"97%"}
                 />
+              </View>
+            ))}
+          </View>
+          {/* </LinearGradient> */}
+          {/* </ImageBackground> */}
+
+          <View style={styles.categoriesContainer}>
+            <Text
+              style={[styles.categoriesText, { color: theme.heading }]}
+            >{`${t("home.txt3")}`}</Text>
+          </View>
+
+          {/* Filter Buttons */}
+          <FlatList
+            horizontal
+            data={filterOptions}
+            keyExtractor={(item) => item}
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={styles.filterButtonsContainer}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => setActiveFilter(item)}>
+                {activeFilter === item ? (
+                  <LinearGradient
+                    colors={[Colors.primary, "#4557B0"]}
+                    style={styles.gradient}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Poppins_500Medium",
+                        color: "white",
+                        fontSize: RFPercentage(1.7),
+                      }}
+                    >
+                      {item}
+                    </Text>
+                  </LinearGradient>
+                ) : (
+                  <View
+                    style={[styles.nonGradient, { borderColor: theme.border }]}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Poppins_400Regular",
+                        color: Colors.heading,
+                        fontSize: RFPercentage(1.7),
+                      }}
+                    >
+                      {item}
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
             )}
-          </View>
-        </View>
+          />
 
-        {/* Carts */}
-        {loading ? (
-          <View style={{ marginTop: RFPercentage(20) }}>
-            <ActivityIndicator size="large" color={theme.primary} />
-          </View>
-        ) : (
-          <>
-            <FlatList
-              data={displayTasks}
-              keyExtractor={(item, index) => index.toString()}
-              scrollEventThrottle={16}
-              nestedScrollEnabled={true}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("OfferDetail", { postRequest: item })
-                  }
-                  activeOpacity={0.8}
-                  style={[styles.cartContainer, { borderColor: theme.border }]}
+          <View
+            style={[styles.categoriesContainer, styles.recentRequestsContainer]}
+          >
+            <Text
+              style={[styles.categoriesText, { color: theme.heading }]}
+            >{`${t("home.txt9")}`}</Text>
+
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate("Location", { home: true })}
+              >
+                <Text
+                  style={[
+                    styles.categoriesText,
+                    {
+                      color: theme.primary,
+                      fontFamily: "Poppins_600SemiBold",
+                      fontSize: RFPercentage(1.8),
+                    },
+                  ]}
                 >
-                  <FlatList
-                    data={item.imageUrls}
-                    keyExtractor={(_, imgIndex) => imgIndex.toString()}
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    scrollEnabled={true}
-                    nestedScrollEnabled={true}
-                    onScroll={(e) => {
-                      const slideIndex = Math.round(
-                        e.nativeEvent.contentOffset.x / (width * 0.9)
-                      );
-                      setActiveIndices((prev) => ({
-                        ...prev,
-                        [index]: slideIndex,
-                      }));
-                    }}
-                    renderItem={({ item: imageUrl }) => (
-                      <Image
-                        resizeMode="cover"
-                        source={{ uri: imageUrl }}
-                        style={styles.img}
-                      />
-                    )}
-                  />
+                  {selectedLocation.name2
+                    ? selectedLocation.name2.length > 15
+                      ? `${selectedLocation.name2.slice(0, 15)}...`
+                      : selectedLocation.name2
+                    : `${t("location.by")}`}
+                </Text>
+              </TouchableOpacity>
 
-                  {/* {item?.imageUrls?.length > 1 && (
+              {/* Show cross icon only if location is selected */}
+              {selectedLocation.name2 && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={{
+                    marginLeft: RFPercentage(1),
+                    bottom: RFPercentage(0.3),
+                  }}
+                  onPress={async () => {
+                    dispatch(selectLocation(null)); // clears redux
+                    await getCurrentLocation(); // refresh GPS
+                    // fetchRequests(null); // refetch tasks
+                  }}
+                >
+                  <AntDesign
+                    name="closecircle"
+                    size={RFPercentage(2.5)}
+                    color={theme.primary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
+          {/* Carts */}
+          {loading ? (
+            <View style={{ marginTop: RFPercentage(20) }}>
+              <ActivityIndicator size="large" color={theme.primary} />
+            </View>
+          ) : (
+            <>
+              <FlatList
+                data={displayTasks}
+                keyExtractor={(item, index) => index.toString()}
+                scrollEventThrottle={16}
+                nestedScrollEnabled={true}
+                renderItem={({ item, index }) => (
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("OfferDetail", { postRequest: item })
+                    }
+                    activeOpacity={0.8}
+                    style={[
+                      styles.cartContainer,
+                      { borderColor: theme.border },
+                    ]}
+                  >
+                    <FlatList
+                      data={item.imageUrls}
+                      keyExtractor={(_, imgIndex) => imgIndex.toString()}
+                      horizontal
+                      pagingEnabled
+                      showsHorizontalScrollIndicator={false}
+                      scrollEnabled={true}
+                      nestedScrollEnabled={true}
+                      onScroll={(e) => {
+                        const slideIndex = Math.round(
+                          e.nativeEvent.contentOffset.x / (width * 0.9)
+                        );
+                        setActiveIndices((prev) => ({
+                          ...prev,
+                          [index]: slideIndex,
+                        }));
+                      }}
+                      renderItem={({ item: imageUrl }) => (
+                        <Image
+                          resizeMode="cover"
+                          source={{ uri: imageUrl }}
+                          style={styles.img}
+                        />
+                      )}
+                    />
+
+                    {/* {item?.imageUrls?.length > 1 && (
                     <View style={styles.dotsContainer}>
                       {item.imageUrls.map((_, imageIndex) => (
                         <View
@@ -488,85 +438,88 @@ function Home({ navigation }) {
                     </View>
                   )} */}
 
-                  <View style={styles.infoWrapper}>
-                    <View style={styles.cartInfoContainer}>
-                      <TouchableOpacity activeOpacity={0.8}>
-                        <Image
-                          style={styles.userImage}
-                          source={
-                            item?.user?.profileImage
-                              ? { uri: item?.user?.profileImage }
-                              : Icons.dp
-                          }
-                        />
-                      </TouchableOpacity>
-                      <Text style={[styles.userName, { color: theme.heading }]}>
-                        {item?.user?.userName?.length > 10
-                          ? `${item?.user?.userName.substring(0, 10)}...`
-                          : item?.user?.userName}
-                      </Text>
-                      <Text
-                        style={[styles.postDate, { color: theme.darkGrey }]}
-                      >
-                        {t("myRequests.txt4")}{" "}
-                        <Text style={{ fontFamily: "Poppins_400Regular" }}>
-                          {" "}
-                          {getFormatedDate(item.createdAt)}
-                        </Text>
-                      </Text>
-                    </View>
-
-                    <View style={styles.taskInfoContainer}>
-                      <Text
-                        style={[styles.taskText, { color: theme.darkGrey2 }]}
-                      >
-                        {item.description?.substr(0, 90) +
-                          (item.description?.length > 90 ? "..." : "")}
-                      </Text>
-                      <View style={styles.compensationWrapper}>
-                        <Image
-                          tintColor={theme.darkGrey}
-                          style={styles.compansationIcon}
-                          source={require("../../assets/Images/compensation.png")}
-                        />
+                    <View style={styles.infoWrapper}>
+                      <View style={styles.cartInfoContainer}>
+                        <View>
+                          <Image
+                            style={styles.userImage}
+                            source={
+                              item?.user?.profileImage
+                                ? { uri: item?.user?.profileImage }
+                                : Icons.dp
+                            }
+                          />
+                        </View>
                         <Text
-                          style={[
-                            styles.compensationText,
-                            { color: theme.darkGrey2 },
-                          ]}
+                          style={[styles.userName, { color: theme.heading }]}
                         >
-                          {`${t("home.txt10")}`}:{" "}
-                          <Text
-                            style={[
-                              styles.compensationAmount,
-                              { color: theme.primary },
-                            ]}
-                          >
-                            {item.compensationType === "Monitarely"
-                              ? `$${item.monitarily}`
-                              : item.otherCompensation?.substr(0, 20) +
-                                (item.otherCompensation?.length > 20
-                                  ? "..."
-                                  : "")}
+                          {item?.user?.userName?.length > 8
+                            ? `${item?.user?.userName.substring(0, 8)}...`
+                            : item?.user?.userName}
+                        </Text>
+                        <Text
+                          style={[styles.postDate, { color: theme.darkGrey }]}
+                        >
+                          {t("myRequests.txt4")}{" "}
+                          <Text style={{ fontFamily: "Poppins_400Regular" }}>
+                            {" "}
+                            {getFormatedDate(item.createdAt)}
                           </Text>
                         </Text>
                       </View>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
-          </>
-        )}
 
-        {!loading && displayTasks?.length === 0 && (
-          <View style={{ bottom: RFPercentage(10) }}>
-            <NotFound title={`${t("home.txt11")}`} />
-          </View>
-        )}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </View>
+                      <View style={styles.taskInfoContainer}>
+                        <Text
+                          style={[styles.taskText, { color: theme.darkGrey2 }]}
+                        >
+                          {item.description?.substr(0, 90) +
+                            (item.description?.length > 90 ? "..." : "")}
+                        </Text>
+                        <View style={styles.compensationWrapper}>
+                          <Image
+                            tintColor={theme.darkGrey}
+                            style={styles.compansationIcon}
+                            source={require("../../assets/Images/compensation.png")}
+                          />
+                          <Text
+                            style={[
+                              styles.compensationText,
+                              { color: theme.darkGrey2 },
+                            ]}
+                          >
+                            {`${t("home.txt10")}`}:{" "}
+                            <Text
+                              style={[
+                                styles.compensationAmount,
+                                { color: theme.primary },
+                              ]}
+                            >
+                              {item.compensationType === "Monitarely"
+                                ? `$${item.monitarily}`
+                                : item.otherCompensation?.substr(0, 20) +
+                                  (item.otherCompensation?.length > 20
+                                    ? "..."
+                                    : "")}
+                            </Text>
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+            </>
+          )}
+
+          {!loading && displayTasks?.length === 0 && (
+            <View style={{ bottom: RFPercentage(10) }}>
+              <NotFound title={`${t("home.txt11")}`} />
+            </View>
+          )}
+          <View style={styles.bottomSpacing} />
+        </ScrollView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -590,7 +543,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   inputFieldWrapper: {
-    marginTop: RFPercentage(3.6),
+    marginTop: RFPercentage(2),
   },
   categoriesContainer: {
     width: "90%",

@@ -8,7 +8,7 @@ import { useAppTheme } from "../contexts/themeContext";
 
 function TermsAndConditions({ navigation }) {
   const { t } = useTranslation();
-  const {theme} = useAppTheme()
+  const { theme } = useAppTheme();
 
   const sections = [
     {
@@ -39,20 +39,38 @@ function TermsAndConditions({ navigation }) {
   ];
 
   return (
-    <View style={[styles.screen,{backgroundColor:theme.white}]}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <Nav
+        dpNull
+        marginTop={
+          Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
+        }
+        navigation={navigation}
+        title={`${t("settings.txt3")}`}
+      />
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title={`${t("settings.txt3")}`} />
 
         <View style={styles.content}>
-          <Text style={[styles.text,{color:theme.darkGrey}]}>{`${t("terms.txt1")}`}</Text>
+          <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
+            "terms.txt1"
+          )}`}</Text>
         </View>
 
         {/* Sections */}
         {sections.map((section, index) => (
           <View key={index} style={styles.section}>
-            <Text style={[styles.sectionTitle, {color:theme.heading}]}>{section.title}</Text>
-            <Text style={[styles.text, {color:theme.darkGrey}]}>{section.content}</Text>
+            <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+              {section.title}
+            </Text>
+            <Text style={[styles.text, { color: theme.darkGrey }]}>
+              {section.content}
+            </Text>
           </View>
         ))}
 
@@ -88,7 +106,12 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },
-  content: { width: "90%", marginTop: RFPercentage(3), justifyContent: "center", alignItems: "center" },
+  content: {
+    width: "90%",
+    marginTop: RFPercentage(3),
+    justifyContent: "center",
+    alignItems: "center",
+  },
   scroll: { width: "100%" },
   scrollContent: { width: "100%", alignItems: "center" },
 });

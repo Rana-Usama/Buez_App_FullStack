@@ -157,7 +157,6 @@ function EditProfile({ navigation }) {
             onPress={pickImage}
             style={{
               marginTop: RFPercentage(5.5),
-              opacity: imageUri ? 1 : 0.8,
             }}
           >
             <Image

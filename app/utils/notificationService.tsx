@@ -48,3 +48,52 @@ export async function scheduleFreeTrialNotification(daysAfter = 10) {
     },
   });
 }
+
+
+
+// import messaging from "@react-native-firebase/messaging";
+// import { Platform, Alert } from "react-native";
+
+// export async function registerForPushNotificationsAsync() {
+//   let token;
+
+//   const authStatus = await messaging().requestPermission();
+//   const enabled =
+//     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+//     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+//   if (!enabled) {
+//     Alert.alert("Failed to get push token for push notification!");
+//     return null;
+//   }
+
+//   token = await messaging().getToken();
+//   console.log("FCM Token:", token);
+
+//   if (Platform.OS === "android") {
+//     await messaging().setAutoInitEnabled(true);
+//   }
+//   return token;
+// }
+
+// import notifee from "@notifee/react-native";
+
+// export async function scheduleFreeTrialNotification(daysAfter = 10) {
+//   const triggerDate = new Date();
+//   triggerDate.setDate(triggerDate.getDate() + daysAfter);
+
+//   await notifee.displayNotification({
+//     title: "⏰ Free Trial Ending Soon",
+//     body: "Your free trial ends in 4 days. Upgrade now to keep full access to all features.",
+//     android: {
+//       channelId: "default", 
+//     },
+//     ios: {
+//       sound: "default",
+//     },
+//     schedule: {
+//       type: "time",
+//       timestamp: triggerDate.getTime(),
+//     },
+//   });
+// }

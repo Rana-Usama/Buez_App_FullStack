@@ -108,22 +108,21 @@ function Settings({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      {/* Nav */}
+      <Nav
+        marginTop={
+          Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+        }
+        profileImage={profileImgUrl}
+        leftLogo={true}
+        navigation={navigation}
+        title={`${t("settings.txt9")}`}
+      />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Nav */}
-        <Nav
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-          }
-          profileImage={profileImgUrl}
-          leftLogo={true}
-          navigation={navigation}
-          title={`${t("settings.txt9")}`}
-        />
-
         <View style={styles.content}>
           <Text style={[styles.txt, { color: theme.lightGrey }]}>{`${t(
             "settings.txt8"

@@ -47,7 +47,7 @@ export const savePost = async (data: any, imageUris: any) => {
       imageUrls,
       createdAt: Timestamp.now(),
       userId: userId,
-      user: { ...userData }
+      user: { ...userData },
     });
 
     return true;
@@ -56,8 +56,6 @@ export const savePost = async (data: any, imageUris: any) => {
     throw error;
   }
 };
-
-
 
 export const getPostById = async (id: any) => {
   try {
@@ -95,8 +93,6 @@ export const updatePost = async (id: any, data: any, imageUris: any) => {
     throw error;
   }
 };
-
-
 
 export const getMyReuqests = async (
   postStatus,
@@ -147,14 +143,68 @@ export const getMyReuqests = async (
   }
 };
 
+// export const getRequestList = async (
+//   taskType = "",
+//   searchQuery = "",
+//   lastVisiblePost = null,
+//   pageSize = PAGE_SIZE
+// ) => {
+//   try {
+//     const userId = getAuth().currentUser?.uid;
+//     if (!userId) throw new Error("User is not logged in");
 
+//     let q = query(
+//       collection(FIREBASE_DB, "taskRequests"),
+//       where("status", "==", "Active"),
+//       where("userId", "!=", userId),
+//       where("acceptedBy", "==", null),
+//       orderBy("createdAt", "desc"),
+//       limit(pageSize)
+//     );
 
+//     if (lastVisiblePost) {
+//       q = query(q, startAfter(lastVisiblePost));
+//     }
 
-export const getRequestList = async (
+//     if (taskType && taskType !== "All") {
+//       q = query(q, where("taskType", "==", taskType));
+//     }
+
+//     if (searchQuery) {
+//       const keywords = searchQuery
+//         .trim()
+//         .split(" ")
+//         .map((k) => k.toLowerCase());
+//       q = query(
+//         q,
+//         where("descriptionKeywords", "array-contains-any", keywords)
+//       );
+//     }
+
+//     const snapshot = await getDocs(q);
+
+//     const tasksArray = snapshot.docs.map((docSnapshot) => ({
+//       id: docSnapshot.id,
+//       ...docSnapshot.data(),
+//     }));
+
+//     const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+//     return { tasksArray, lastVisible };
+
+//   } catch (error) {
+//     console.log("GET_POSTS_LIST: ", error);
+//     throw error;
+//   }
+// };
+
+// real-time version of getRequestList
+
+export const getRequestList = (
   taskType = "",
   searchQuery = "",
   lastVisiblePost = null,
-  pageSize = PAGE_SIZE
+  callback,
+  errorCallback
 ) => {
   try {
     const userId = getAuth().currentUser?.uid;
@@ -165,50 +215,53 @@ export const getRequestList = async (
       where("status", "==", "Active"),
       where("userId", "!=", userId),
       where("acceptedBy", "==", null),
-      orderBy("createdAt", "desc"),
-      limit(pageSize)
+      orderBy("createdAt", "desc")
     );
 
-    if (lastVisiblePost) {
-      q = query(q, startAfter(lastVisiblePost));
-    }
-
-    if (taskType && taskType !== "All") {
+    if (lastVisiblePost) q = query(q, startAfter(lastVisiblePost));
+    if (taskType && taskType !== "All")
       q = query(q, where("taskType", "==", taskType));
-    }
 
-    if (searchQuery) {
-      const keywords = searchQuery
-        .trim()
-        .split(" ")
-        .map((k) => k.toLowerCase());
-      q = query(
-        q,
-        where("descriptionKeywords", "array-contains-any", keywords)
-      );
-    }
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        let tasksArray = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-    const snapshot = await getDocs(q);
+        if (searchQuery.trim()) {
+          const qLower = searchQuery.toLowerCase();
+          tasksArray = tasksArray.filter(
+            (task) =>
+              (task?.description || "").toLowerCase().includes(qLower) ||
+              (task?.user?.userName || "").toLowerCase().includes(qLower) ||
+              (task?.taskType || "").toLowerCase().includes(qLower)
+          );
+        }
 
-    const tasksArray = snapshot.docs.map((docSnapshot) => ({
-      id: docSnapshot.id,
-      ...docSnapshot.data(),
-    }));
+        const lastVisible =
+          snapshot.docs.length > 0
+            ? snapshot.docs[snapshot.docs.length - 1]
+            : null;
+        callback && callback({ tasksArray, lastVisible });
+      },
+      (err) => {
+        console.log("GET_POSTS_LIST (onSnapshot):", err);
+        errorCallback && errorCallback(err);
+      }
+    );
 
-    const lastVisible = snapshot.docs[snapshot.docs.length - 1];
-    return { tasksArray, lastVisible };
-  } catch (error) {
-    console.log("GET_POSTS_LIST: ", error);
-    throw error;
+    return unsubscribe;
+  } catch (err) {
+    console.log("GET_POSTS_LIST:", err);
+    errorCallback && errorCallback(err);
+    return () => {};
   }
 };
 
-
-
-
 export const updateReqestStatus = async (id: any, status: any, data: any) => {
   try {
-    
     const userRef = doc(db, "taskRequests", id);
     await updateDoc(userRef, {
       ...data,

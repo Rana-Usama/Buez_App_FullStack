@@ -52,6 +52,7 @@ function FAQ({ navigation }) {
           {faqs.map((item, index) => (
             <View key={index}>
               <TouchableOpacity
+              activeOpacity={0.8}
                 onPress={() => toggleFAQ(index)}
                 style={[
                   styles.toggleFAQ,

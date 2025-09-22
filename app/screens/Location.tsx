@@ -31,22 +31,14 @@ export default function Location({ navigation, route }) {
   const { location: currentLocation, getCurrentLocation } = useLocation();
   const key = process.env.EXPO_PUBLIC_LOCATION_NAME;
 
-  console.log("🔑 API Key Loaded:", key);
-
   useEffect(() => {
     const fetchUserLocation = async () => {
-      console.log("📍 Fetching user location...");
       const loc = await getCurrentLocation();
-      console.log("📍 Current Location:", loc);
-
       if (loc) {
         try {
-          console.log("🌍 Calling Google Reverse Geocode API...");
           const response = await axios.get(
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${loc.latitude},${loc.longitude}&key=${key}`
           );
-          console.log("✅ Geocode Response:", response.data);
-
           const results = response.data.results;
           const address = results[0]?.formatted_address || "Current Location";
 
@@ -62,7 +54,6 @@ export default function Location({ navigation, route }) {
             longitudeDelta: 0.01,
           });
         } catch (error) {
-          console.log("❌ Reverse geocoding failed:", error);
           setMarker(loc);
           setSelectedLocation({
             ...loc,
@@ -70,7 +61,6 @@ export default function Location({ navigation, route }) {
           });
         }
       } else {
-        console.log("⚠️ Location permission not granted");
         Alert.alert(
           "Location Permission",
           "We need location access to show your current position. You can still search or pick manually."
@@ -93,12 +83,9 @@ export default function Location({ navigation, route }) {
     });
 
     try {
-      console.log("🌍 Calling Google Reverse Geocode API for pressed location...");
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinate.latitude},${coordinate.longitude}&key=${key}`
       );
-      console.log("✅ Geocode Response (Pressed Location):", response.data);
-
       const results = response.data.results;
       const address = results[0]?.formatted_address || "Selected Location";
 
@@ -114,7 +101,6 @@ export default function Location({ navigation, route }) {
         name: address,
       });
     } catch (error) {
-      console.log("❌ Reverse geocoding failed (Pressed Location):", error);
       setSelectedLocation({
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
@@ -125,17 +111,12 @@ export default function Location({ navigation, route }) {
 
   const handleApplyFilter = () => {
     if (!selectedLocation) {
-      console.log("⚠️ No location selected, cannot apply.");
       return;
     }
-    console.log("✅ Applying selected location:", selectedLocation);
-
     if (home) {
       dispatch(selectLocation(selectedLocation));
-      console.log("📤 Dispatched selectLocation");
     } else {
       dispatch(setLocation(selectedLocation));
-      console.log("📤 Dispatched setLocation");
     }
     navigation.goBack();
   };
@@ -164,9 +145,6 @@ export default function Location({ navigation, route }) {
             placeholder={t("location.placholder")}
             fetchDetails={true}
             onPress={(data, details = null) => {
-              console.log("🔍 Place selected:", data);
-              console.log("📍 Place details:", details);
-
               const location = details.geometry.location;
               const coordinate = {
                 latitude: location.lat,
@@ -182,8 +160,6 @@ export default function Location({ navigation, route }) {
 
               setMarker(coordinate);
               setSelectedLocation(coordinate);
-
-              console.log("✅ Location set from search:", coordinate);
             }}
             query={{
               key: key,
@@ -206,7 +182,6 @@ export default function Location({ navigation, route }) {
             textInputProps={{
               placeholderTextColor: theme.grey,
               onChangeText: (text) => {
-                console.log("⌨️ Search input:", text);
               },
             }}
           />

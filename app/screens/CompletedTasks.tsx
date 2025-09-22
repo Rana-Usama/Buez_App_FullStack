@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  LayoutAnimation,
-  UIManager,
   TouchableOpacity,
+  Animated,
+  Easing,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
@@ -48,12 +48,10 @@ export default function CompletedTasks({ navigation }: any) {
   const { theme } = useAppTheme();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  if (
-    Platform.OS === "android" &&
-    UIManager.setLayoutAnimationEnabledExperimental
-  ) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
+  // Create a ref to store animation values for each task
+  const animationValues = useRef({});
+  // Create a ref to store content heights for each task
+  const contentHeights = useRef({});
 
   useEffect(() => {
     (async () => {
@@ -123,6 +121,85 @@ export default function CompletedTasks({ navigation }: any) {
     }, [])
   );
 
+  const getAnimationValue = (id) => {
+    if (!animationValues.current[id]) {
+      animationValues.current[id] = {
+        height: new Animated.Value(0),
+        opacity: new Animated.Value(0),
+        expanded: false,
+      };
+    }
+    return animationValues.current[id];
+  };
+
+  const handleToggleExpand = (item) => {
+    const isExpanded = expandedId === item.id;
+    const nextExpanded = isExpanded ? null : item.id;
+    const animation = getAnimationValue(item.id);
+
+    // If we don't know the content height yet, we can't animate properly
+    if (nextExpanded === item.id && !contentHeights.current[item.id]) {
+      setExpandedId(nextExpanded);
+      return;
+    }
+
+    if (nextExpanded === item.id) {
+      // Expand animation
+      Animated.parallel([
+        Animated.timing(animation.height, {
+          toValue: contentHeights.current[item.id] || 100,
+          duration: 300,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }),
+        Animated.timing(animation.opacity, {
+          toValue: 1,
+          duration: 200,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }),
+      ]).start();
+      animation.expanded = true;
+    } else {
+      // Collapse animation
+      Animated.parallel([
+        Animated.timing(animation.height, {
+          toValue: 0,
+          duration: 250,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }),
+        Animated.timing(animation.opacity, {
+          toValue: 0,
+          duration: 150,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }),
+      ]).start();
+      animation.expanded = false;
+    }
+
+    setExpandedId(nextExpanded);
+  };
+
+  const measureContentHeight = (event, id) => {
+    const { height } = event.nativeEvent.layout;
+    if (height > 0 && !contentHeights.current[id]) {
+      contentHeights.current[id] = height;
+
+      // If this is the currently expanded item, animate to the measured height
+      if (expandedId === id) {
+        const animation = getAnimationValue(id);
+        Animated.timing(animation.height, {
+          toValue: height,
+          duration: 300,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }).start();
+      }
+    }
+  };
+
   const renderItem = ({ item }: { item: any }) => {
     const details = item.taskDetails || {};
     const owner = details.user || {};
@@ -134,14 +211,13 @@ export default function CompletedTasks({ navigation }: any) {
     const shortDesc = desc.length > 70 ? `${desc.slice(0, 70)}…` : desc;
 
     const isExpanded = expandedId === item.id;
-
-    const toggleExpand = () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setExpandedId(isExpanded ? null : item.id);
-    };
+    const animation = getAnimationValue(item.id);
 
     return (
-      <TouchableOpacity activeOpacity={0.9} onPress={toggleExpand}>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => handleToggleExpand(item)}
+      >
         <View
           style={[
             styles.card,
@@ -210,28 +286,43 @@ export default function CompletedTasks({ navigation }: any) {
             </View>
           </View>
 
-          {/* Expanded Review Content */}
-          {isExpanded && item.reviewed && (
-            <View style={styles.reviewBox}>
-              <View style={styles.starRow}>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Text
-                    key={i}
-                    style={{
-                      color:
-                        i <= (item.rating || 0) ? Colors.star : Colors.stroke,
-                      fontSize: RFPercentage(2),
-                    }}
-                  >
-                    ★
+          {/* Animated Expanded Review Content */}
+          <Animated.View
+            style={{
+              height: animation.height,
+              opacity: animation.opacity,
+              overflow: "hidden",
+            }}
+          >
+            <View
+              onLayout={(event) => measureContentHeight(event, item.id)}
+              style={{ position: "absolute", width: "100%" }}
+            >
+              {item.reviewed && (
+                <View style={styles.reviewBox}>
+                  <View style={styles.starRow}>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Text
+                        key={i}
+                        style={{
+                          color:
+                            i <= (item.rating || 0)
+                              ? Colors.star
+                              : Colors.stroke,
+                          fontSize: RFPercentage(2),
+                        }}
+                      >
+                        ★
+                      </Text>
+                    ))}
+                  </View>
+                  <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
+                    {item.reviewText || tr.reviewed || "Reviewed"}
                   </Text>
-                ))}
-              </View>
-              <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
-                {item.reviewText || tr.reviewed || "Reviewed"}
-              </Text>
+                </View>
+              )}
             </View>
-          )}
+          </Animated.View>
         </View>
       </TouchableOpacity>
     );
@@ -239,6 +330,18 @@ export default function CompletedTasks({ navigation }: any) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      {/* Nav */}
+      <View style={styles.navContainer}>
+        <Nav
+          dpNull
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+          }
+          leftLogo={false}
+          navigation={navigation}
+          title={t("profile.txt4")}
+        />
+      </View>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
@@ -251,19 +354,6 @@ export default function CompletedTasks({ navigation }: any) {
           />
         }
       >
-        {/* Nav */}
-        <View style={styles.navContainer}>
-          <Nav
-            dpNull
-            marginTop={
-              Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-            }
-            leftLogo={false}
-            navigation={navigation}
-            title={t("profile.txt4")}
-          />
-        </View>
-
         {loading ? (
           <ActivityIndicator
             size="large"
@@ -394,12 +484,13 @@ const styles = StyleSheet.create({
   },
   starRow: {
     flexDirection: "row",
-    marginBottom: RFPercentage(0.5),
+    marginBottom: RFPercentage(0.8),
   },
   reviewText: {
     fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
     lineHeight: RFPercentage(2),
+    // marginVertical: 5,
   },
   footerRow: {
     flexDirection: "row",

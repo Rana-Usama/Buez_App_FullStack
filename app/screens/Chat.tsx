@@ -45,23 +45,23 @@ import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { Icons } from "../config/theme";
+import { chatCache } from "../contexts/chatCache";
 
 const Chat = ({ navigation, route }) => {
   const { t } = useTranslation();
-  const [messages, setMessages] = useState([]);
-  const [lastVisible, setLastVisible] = useState(null);
+
   const {
     chatId,
     senderId: currentUserId,
     senderName,
     receiver,
   } = route.params;
+  const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const { theme } = useAppTheme();
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
   const [loader, setLoader] = useState(false);
-  
 
   useEffect(() => {
     const listenForNewMessages = () => {
@@ -123,6 +123,7 @@ const Chat = ({ navigation, route }) => {
 
   useEffect(() => {
     const fetchInitialMessages = async () => {
+      // if (chatCache.data[chatId]) return;
       try {
         setLoader(true);
 
@@ -149,7 +150,7 @@ const Chat = ({ navigation, route }) => {
           })
         );
 
-        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        // setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
 
         setMessages((prevMessages) => {
           const messagesMap = new Map();
@@ -159,9 +160,9 @@ const Chat = ({ navigation, route }) => {
             (a, b) =>
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
+          // chatCache.data[chatId] = mergedMessages;
           return GiftedChat.append([], mergedMessages).filter(Boolean);
         });
-
         markMessagesAsRead();
       } catch (error) {
         console.error("Error fetching messages:", error);
@@ -172,45 +173,46 @@ const Chat = ({ navigation, route }) => {
 
     fetchInitialMessages();
   }, [chatId]);
-  const fetchMoreMessages = async () => {
-    if (!lastVisible) return;
-    const q = query(
-      collection(FIREBASE_DB, `chats/${chatId}/messages`),
-      orderBy("timestamp", "desc"),
-      startAfter(lastVisible),
-      limit(100)
-    );
-    const snapshot = await getDocs(q);
-    const newMessages = await Promise.all(
-      snapshot.docs.map(async (doc) => {
-        const firebaseMessage = doc.data();
-        const translatedText = await cachedTranslate(firebaseMessage?.text);
-        return {
-          _id: doc.id,
-          text: translatedText,
-          createdAt: firebaseMessage.timestamp.toDate(),
-          user: {
-            _id: firebaseMessage.senderId,
-            name: firebaseMessage.senderName,
-          },
-        };
-      })
-    );
 
-    setMessages((prevMessages) => {
-      const messagesMap = new Map();
-      prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-      newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-      const combinedMessages = Array.from(messagesMap.values()).sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      return GiftedChat.append([], combinedMessages).filter(Boolean);
-    });
+  // const fetchMoreMessages = async () => {
+  //   if (!lastVisible) return;
+  //   const q = query(
+  //     collection(FIREBASE_DB, `chats/${chatId}/messages`),
+  //     orderBy("timestamp", "desc"),
+  //     startAfter(lastVisible),
+  //     limit(100)
+  //   );
+  //   const snapshot = await getDocs(q);
+  //   const newMessages = await Promise.all(
+  //     snapshot.docs.map(async (doc) => {
+  //       const firebaseMessage = doc.data();
+  //       const translatedText = await cachedTranslate(firebaseMessage?.text);
+  //       return {
+  //         _id: doc.id,
+  //         text: translatedText,
+  //         createdAt: firebaseMessage.timestamp.toDate(),
+  //         user: {
+  //           _id: firebaseMessage.senderId,
+  //           name: firebaseMessage.senderName,
+  //         },
+  //       };
+  //     })
+  //   );
 
-    markMessagesAsRead();
-    setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-  };
+  //   setMessages((prevMessages) => {
+  //     const messagesMap = new Map();
+  //     prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
+  //     newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
+  //     const combinedMessages = Array.from(messagesMap.values()).sort(
+  //       (a, b) =>
+  //         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  //     );
+  //     return GiftedChat.append([], combinedMessages).filter(Boolean);
+  //   });
+
+  //   markMessagesAsRead();
+  //   setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+  // };
 
   const onSend = useCallback(async (messages = []) => {
     const message = messages[0];
@@ -261,9 +263,10 @@ const Chat = ({ navigation, route }) => {
         }
       );
       const data = await response.text();
+      console.log("data........",data)
       return data;
     } catch (error) {
-      console.error("sendPushNotification error:", error);
+      console.log("sendPushNotification error:", error);
       throw error;
     }
   }
@@ -401,6 +404,15 @@ const Chat = ({ navigation, route }) => {
               _id: currentUserId,
               name: senderName,
             }}
+            listViewProps={{
+              removeClippedSubviews: false,
+              keyboardShouldPersistTaps: "handled",
+              showsVerticalScrollIndicator: true,
+              maintainVisibleContentPosition: {
+                minIndexForVisible: 0,
+                autoscrollToTopThreshold: 10,
+              },
+            }}
             renderInputToolbar={(props) => (
               <View
                 style={{
@@ -497,10 +509,12 @@ const Chat = ({ navigation, route }) => {
                     width: RFPercentage(5),
                     height: RFPercentage(5),
                     borderRadius: RFPercentage(50),
-                    backgroundColor: theme.lightGrey,
+                    backgroundColor: theme.white,
                     alignItems: "center",
                     justifyContent: "center",
                     bottom: RFPercentage(0.3),
+                    borderWidth: 1,
+                    borderColor: Colors.primary,
                   }}
                 >
                   <Text
@@ -508,6 +522,7 @@ const Chat = ({ navigation, route }) => {
                       color: theme.primary,
                       fontSize: RFPercentage(1.8),
                       fontFamily: "Poppins_600SemiBold",
+                      top: 2,
                     }}
                   >
                     {receiver?.userName?.[0] || "?"}
@@ -597,10 +612,16 @@ const Chat = ({ navigation, route }) => {
                 right: 0,
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: theme.mode === "dark" ?  "rgba(4, 4, 4, 0.6)" :  "rgba(255,255,255,0.6)",
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? "rgba(4, 4, 4, 0.6)"
+                    : "rgba(255,255,255,0.6)",
               }}
             >
-              <ActivityIndicator size="large" color={theme.mode === "dark" ? Colors.white : Colors.primary} />
+              <ActivityIndicator
+                size="large"
+                color={theme.mode === "dark" ? Colors.white : Colors.primary}
+              />
             </View>
           )}
         </ImageBackground>
@@ -689,7 +710,7 @@ const styles = StyleSheet.create({
     borderTopWidth: RFPercentage(0.1),
     alignSelf: "center",
     width: "90%",
-    paddingVertical:RFPercentage(1)
+    paddingVertical: RFPercentage(1.5),
   },
   customTextInput: {
     color: Colors.white,
@@ -700,7 +721,8 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     justifyContent: "center",
     textAlignVertical: "top",
-    top:2
+    top: 0,
+    // backgroundColor:"red"
   },
   sendButton: {
     justifyContent: "center",
@@ -710,7 +732,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     position: "absolute",
     right: 0,
-    top: RFPercentage(-0.4),
+    top: RFPercentage(-0.8),
   },
   dateText: {
     color: Colors.white,
@@ -730,6 +752,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_500Medium",
+    top: 2,
   },
   profile: {
     width: RFPercentage(7),

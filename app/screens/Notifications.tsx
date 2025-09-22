@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,8 @@ import {
   SectionList,
   TouchableOpacity,
   ActivityIndicator,
-  LayoutAnimation,
-  UIManager,
+  Animated,
+  Easing,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
@@ -104,6 +104,11 @@ export default function Notifications({ navigation }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const { notifications, markAsRead } = useNotifications();
 
+  // Create a ref to store animation values for each notification
+  const animationValues = useRef({});
+  // Create a ref to store content heights for each notification
+  const contentHeights = useRef({});
+
   useEffect(() => {
     (async () => {
       const l = await getTargetLanguage();
@@ -116,7 +121,7 @@ export default function Notifications({ navigation }) {
         noNotifications: "No notifications yet.",
         notifications: "Notifications",
         translating: "Translating...",
-        leftReview: "added a review",
+        leftReview: "left a review on your task!",
         noReviewText: "No review text",
         sentNotification: "sent you a notification",
         view: "View",
@@ -177,33 +182,41 @@ export default function Notifications({ navigation }) {
 
   useEffect(() => {
     if (!raw.length) return;
+
     (async () => {
       const newCache = { ...descCache };
+
       await Promise.all(
         raw.map(async (item) => {
+          // if we already have this item in cache, skip
           if (newCache[item.id] !== undefined) return;
-          const original = item.task?.postRequest?.description || "";
-          if (!original) {
-            newCache[item.id] = "";
-            return;
-          }
-          try {
-            newCache[item.id] = await cachedTranslate(original);
-          } catch {
-            newCache[item.id] = original;
+
+          if (item.type === "review_added") {
+            const reviewText = item.review?.text || "";
+            const translatedReview = reviewText
+              ? await cachedTranslate(reviewText)
+              : tr.noReviewText;
+
+            newCache[item.id] = {
+              kind: "review",
+              text: translatedReview,
+              rating: item.review?.rating ?? 0,
+            };
+          } else {
+            const original = item.task?.postRequest?.description || "";
+            const translatedDesc = original
+              ? await cachedTranslate(original)
+              : "";
+            newCache[item.id] = {
+              kind: "task",
+              text: translatedDesc,
+            };
           }
         })
       );
       setDescCache(newCache);
     })();
   }, [raw, lang]);
-
-  if (
-    Platform.OS === "android" &&
-    UIManager.setLayoutAnimationEnabledExperimental
-  ) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
 
   const handleStartChat = useCallback(
     async (receiverUser) => {
@@ -222,8 +235,98 @@ export default function Notifications({ navigation }) {
     [currentUserId, currentUser?.userData?.userName]
   );
 
+  const getAnimationValue = (id) => {
+    if (!animationValues.current[id]) {
+      animationValues.current[id] = {
+        height: new Animated.Value(0),
+        opacity: new Animated.Value(0),
+        expanded: false,
+      };
+    }
+    return animationValues.current[id];
+  };
+
+  const handleToggleExpand = (item) => {
+    const isExpanded = expandedId === item.id;
+    const nextExpanded = isExpanded ? null : item.id;
+    const animation = getAnimationValue(item.id);
+
+    // If we don't know the content height yet, we can't animate properly
+    if (nextExpanded === item.id && !contentHeights.current[item.id]) {
+      setExpandedId(nextExpanded);
+      if (!isExpanded && !item.isRead) {
+        markAsRead(item.id);
+        setRaw((prev) =>
+          prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
+        );
+      }
+      return;
+    }
+
+    if (nextExpanded === item.id) {
+      // Expand animation
+      Animated.parallel([
+        Animated.timing(animation.height, {
+          toValue: contentHeights.current[item.id] || 100,
+          duration: 300,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }),
+        Animated.timing(animation.opacity, {
+          toValue: 1,
+          duration: 200,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }),
+      ]).start();
+      animation.expanded = true;
+    } else {
+      // Collapse animation
+      Animated.parallel([
+        Animated.timing(animation.height, {
+          toValue: 0,
+          duration: 250,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }),
+        Animated.timing(animation.opacity, {
+          toValue: 0,
+          duration: 150,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }),
+      ]).start();
+      animation.expanded = false;
+    }
+
+    setExpandedId(nextExpanded);
+    if (!isExpanded && !item.isRead) {
+      markAsRead(item.id);
+      setRaw((prev) =>
+        prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
+      );
+    }
+  };
+
+  const measureContentHeight = (event, id) => {
+    const { height } = event.nativeEvent.layout;
+    if (height > 0 && !contentHeights.current[id]) {
+      contentHeights.current[id] = height;
+      if (expandedId === id) {
+        const animation = getAnimationValue(id);
+        Animated.timing(animation.height, {
+          toValue: height,
+          duration: 300,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false,
+        }).start();
+      }
+    }
+  };
+
   const renderItem = ({ item }) => {
     const isExpanded = expandedId === item.id;
+    const animation = getAnimationValue(item.id);
     const senderName = item.sender?.userName || "Someone";
     const profileImage = item.sender?.profileImage || null;
     const translatedDesc = descCache[item.id];
@@ -240,38 +343,34 @@ export default function Notifications({ navigation }) {
       hour12: true,
     });
 
+    const cacheEntry = descCache[item.id];
+    const translatedText =
+      cacheEntry && "text" in cacheEntry ? cacheEntry.text : tr.translating;
+
+    const shortText =
+      translatedText.length > 30
+        ? `${translatedText.substring(0, 30)}…`
+        : translatedText;
+
     let mainText = "";
     let previewText = "";
 
     if (item.type === "task_acceptance") {
       mainText = `${senderName} ${tr.accepted}`;
-      previewText = shortDesc;
+      previewText = shortText;
     } else if (item.type === "review_added") {
-      const reviewText = item.review?.text || tr.noReviewText;
-      const shortReview =
-        reviewText.length > 30 ? `${reviewText.substring(0, 30)}…` : reviewText;
-
       mainText = `${senderName} ${tr.leftReview}`;
-      previewText = `${shortReview}`;
+      previewText = shortText;
     } else {
       mainText = `${senderName} ${tr.sentNotification}`;
-      previewText = shortDesc;
+      previewText = shortText;
     }
 
-    const handleToggleExpand = () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      const nextExpanded = isExpanded ? null : item.id;
-      setExpandedId(nextExpanded);
-      if (!isExpanded && !item.isRead) {
-        markAsRead(item.id);
-        setRaw((prev) =>
-          prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
-        );
-      }
-    };
-
     return (
-      <TouchableOpacity activeOpacity={0.9} onPress={handleToggleExpand}>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => handleToggleExpand(item)}
+      >
         <View
           style={[
             styles.card,
@@ -332,81 +431,92 @@ export default function Notifications({ navigation }) {
                 {postedTime}
               </Text>
             </View>
-
-            {/* unread dot */}
           </View>
 
-          {/* expanded content */}
-          {isExpanded && (
-            <View style={{ marginTop: RFPercentage(1.5) }}>
-              {item.type === "review_added" ? (
-                <>
-                  <Text style={styles.sub}>
-                    {item.review?.text || tr.noReviewText}
-                  </Text>
-                  <Text style={styles.sub}>
-                    ⭐ {item.review?.rating || 0}/5
-                  </Text>
-                </>
-              ) : (
-                <Text style={styles.sub}>{taskDescription}</Text>
-              )}
-
-              {/* footer */}
-              <View style={styles.footer}>
-                <Text style={[styles.time, { color: theme.darkGrey }]}>
-                  {postedTime}
-                </Text>
+          {/* animated expanded content */}
+          <Animated.View
+            style={{
+              height: animation.height,
+              opacity: animation.opacity,
+              overflow: "hidden",
+            }}
+          >
+            <View
+              onLayout={(event) => measureContentHeight(event, item.id)}
+              style={{ position: "absolute", width: "100%" }}
+            >
+              <View style={{ marginTop: RFPercentage(1.5) }}>
                 {item.type === "review_added" ? (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={[
-                      styles.msgBtn,
-                      {
-                        backgroundColor:
-                          theme.mode === "dark"
-                            ? Colors.primary + "40"
-                            : Colors.primary + "15",
-                      },
-                    ]}
-                    onPress={() => navigation.navigate("Reviews")}
-                  >
-                    <AntDesign
-                      name="eye"
-                      size={RFPercentage(2)}
-                      color={Colors.primary}
-                    />
-
-                    <Text style={styles.msgTxt}>{tr.view || "View"}</Text>
-                  </TouchableOpacity>
+                  <>
+                    <Text style={styles.sub}>
+                      {translatedText || tr.noReviewText}
+                    </Text>
+                    <Text style={styles.sub}>
+                      ⭐ {item.review?.rating ?? 0}/5
+                    </Text>
+                  </>
                 ) : (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={[
-                      styles.msgBtn,
-                      {
-                        backgroundColor:
-                          theme.mode === "dark"
-                            ? Colors.primary + "40"
-                            : Colors.primary + "15",
-                      },
-                    ]}
-                    onPress={() => handleStartChat(item.sender)}
-                  >
-                    <Image
-                      source={Icons.messages}
-                      resizeMode="contain"
-                      style={{
-                        width: RFPercentage(2.5),
-                        height: RFPercentage(2.5),
-                      }}
-                    />
-                    <Text style={styles.msgTxt}>{tr.message || "Message"}</Text>
-                  </TouchableOpacity>
+                  <Text style={styles.sub}>{translatedText}</Text>
                 )}
+
+                {/* footer */}
+                <View style={styles.footer}>
+                  <Text style={[styles.time, { color: theme.darkGrey }]}>
+                    {postedTime}
+                  </Text>
+                  {item.type === "review_added" ? (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={[
+                        styles.msgBtn,
+                        {
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? Colors.primary + "40"
+                              : Colors.primary + "15",
+                        },
+                      ]}
+                      onPress={() => navigation.navigate("Reviews")}
+                    >
+                      <AntDesign
+                        name="eye"
+                        size={RFPercentage(2)}
+                        color={Colors.primary}
+                      />
+
+                      <Text style={styles.msgTxt}>{tr.view || "View"}</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={[
+                        styles.msgBtn,
+                        {
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? Colors.primary + "40"
+                              : Colors.primary + "15",
+                        },
+                      ]}
+                      onPress={() => handleStartChat(item.sender)}
+                    >
+                      <Image
+                        source={Icons.messages}
+                        resizeMode="contain"
+                        style={{
+                          width: RFPercentage(2.5),
+                          height: RFPercentage(2.5),
+                        }}
+                      />
+                      <Text style={styles.msgTxt}>
+                        {tr.message || "Message"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
             </View>
-          )}
+          </Animated.View>
         </View>
       </TouchableOpacity>
     );
@@ -434,19 +544,19 @@ export default function Notifications({ navigation }) {
   /* ---------- ui ---------- */
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View>
-          <Nav
-            dpNull
-            marginTop={
-              Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-            }
-            leftLogo={false}
-            navigation={navigation}
-            title={tr.notifications || "Notifications"}
-          />
-        </View>
+      <View>
+        <Nav
+          dpNull
+          marginTop={
+            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
+          }
+          leftLogo={false}
+          navigation={navigation}
+          title={tr.notifications || "Notifications"}
+        />
+      </View>
 
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {busy ? (
           <ActivityIndicator
             size="large"
