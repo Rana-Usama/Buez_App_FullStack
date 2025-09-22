@@ -98,8 +98,6 @@ export type RootStackParamList = {
   Location: undefined;
 };
 
-
-
 const Stack = createStackNavigator<RootStackParamList>();
 
 const StackNavigator: React.FC = () => {
@@ -169,14 +167,14 @@ const StackNavigator: React.FC = () => {
           now >= subStartDate &&
           now <= subEndDate;
 
-        if (isSubscribed || isWithinPaidPeriod) {
+        if (isSubscribed && isWithinPaidPeriod) {
           setInitialRoute("TabNavigator");
-        } else if (isTrialValid) {
+        } else if (isTrialValid && isWithinPaidPeriod) {
           setInitialRoute("TabNavigator");
         } else if (
           isFreeTrial &&
           trialDays !== null &&
-          (trialDays < 0 || trialDays > 14)
+          (trialDays < 0 || trialDays > 14 || trialDays === 0)
         ) {
           setInitialRoute("Subscription");
         } else {
@@ -192,10 +190,11 @@ const StackNavigator: React.FC = () => {
   if (!isConnected) {
     return <NetworkError />;
   }
-  console.log("isLoading", isLoading);
-  console.log("userLoading", userLoading);
-  console.log("initialRoute", initialRoute);
-  console.log("userData >>>", userData);
+  
+  // console.log("isLoading", isLoading);
+  // console.log("userLoading", userLoading);
+  // console.log("initialRoute", initialRoute);
+  // console.log("userData >>>", userData);
 
   return (
     <NavigationContainer>

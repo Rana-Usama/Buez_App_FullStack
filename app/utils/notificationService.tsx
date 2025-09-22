@@ -1,36 +1,63 @@
 import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import { Platform } from "react-native";
+import { Platform, PermissionsAndroid, Alert } from "react-native";
+import messaging from "@react-native-firebase/messaging";
 
 export async function registerForPushNotificationsAsync() {
-  let token;
-  if (Device.isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
+  try {
+    let granted = false;
+
+    if (Platform.OS === "ios") {
       const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
+      granted = status === "granted";
+    } else if (Platform.OS === "android") {
+      if (Platform.Version >= 33) {
+        const res = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+        granted = res === PermissionsAndroid.RESULTS.GRANTED;
+      } else {
+        granted = true; // Android ≤12 doesn’t need prompt
+      }
     }
-    if (finalStatus !== "granted") {
-      alert("Failed to get push token for push notification!");
-      return;
+
+    if (!granted) {
+      Alert.alert("Push notifications not allowed");
+      return null;
     }
-    token = (await Notifications.getExpoPushTokenAsync()).data;
-  } else {
-    alert("Must use physical device for Push Notifications");
+
+    // ----- 2️⃣ Ask FCM for authorization (iOS only, but safe to call everywhere) -----
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (!enabled) {
+      Alert.alert("FCM permission not granted");
+      return null;
+    }
+
+    // ----- 3️⃣ Get the FCM token -----
+    const fcmToken = await messaging().getToken();
+    console.log("✅ FCM Token:", fcmToken);
+
+    // ----- 4️⃣ Android channel (optional but recommended) -----
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
+    return fcmToken;
+  } catch (e) {
+    console.error("Error getting FCM token", e);
+    return null;
   }
-  if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-    });
-  }
-  return token;
 }
 
+// Example local notification
 export async function scheduleFreeTrialNotification(daysAfter = 10) {
   const triggerDate = new Date();
   triggerDate.setDate(triggerDate.getDate() + daysAfter);
@@ -38,62 +65,9 @@ export async function scheduleFreeTrialNotification(daysAfter = 10) {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "⏰ Free Trial Ending Soon",
-      body: "Your free trial ends in 4 days. Upgrade now to keep full access to all features.",
+      body: "Your free trial ends in 4 days. Upgrade now to keep full access.",
       sound: true,
     },
-    trigger: {
-      date: triggerDate,
-      repeats: false,
-      type: "date",
-    },
+    trigger: triggerDate,
   });
 }
-
-
-
-// import messaging from "@react-native-firebase/messaging";
-// import { Platform, Alert } from "react-native";
-
-// export async function registerForPushNotificationsAsync() {
-//   let token;
-
-//   const authStatus = await messaging().requestPermission();
-//   const enabled =
-//     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-//     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-//   if (!enabled) {
-//     Alert.alert("Failed to get push token for push notification!");
-//     return null;
-//   }
-
-//   token = await messaging().getToken();
-//   console.log("FCM Token:", token);
-
-//   if (Platform.OS === "android") {
-//     await messaging().setAutoInitEnabled(true);
-//   }
-//   return token;
-// }
-
-// import notifee from "@notifee/react-native";
-
-// export async function scheduleFreeTrialNotification(daysAfter = 10) {
-//   const triggerDate = new Date();
-//   triggerDate.setDate(triggerDate.getDate() + daysAfter);
-
-//   await notifee.displayNotification({
-//     title: "⏰ Free Trial Ending Soon",
-//     body: "Your free trial ends in 4 days. Upgrade now to keep full access to all features.",
-//     android: {
-//       channelId: "default", 
-//     },
-//     ios: {
-//       sound: "default",
-//     },
-//     schedule: {
-//       type: "time",
-//       timestamp: triggerDate.getTime(),
-//     },
-//   });
-// }

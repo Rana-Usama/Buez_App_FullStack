@@ -42,16 +42,17 @@ export const fetchCompletedTasksFromFirebase = async () => {
 
 export const fetchActiveTasksFromFirebase = async () => {
   const currentUserId = getAuth().currentUser?.uid;
+  console.log("currentUserId..",currentUserId)
   if (!currentUserId) return [];
-
   try {
     const q = query(
-      collection(FIREBASE_DB, "requests"),
+      collection(FIREBASE_DB, "completedTask"),
       where("acceptedBy.userId", "==", currentUserId),
-      where("status", "==", "Active")
+      where("status", "==", "pending")
     );
-
     const snap = await getDocs(q);
+      console.log("snap..",snap)
+
     return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (err) {
     console.error("Error fetching active tasks:", err);

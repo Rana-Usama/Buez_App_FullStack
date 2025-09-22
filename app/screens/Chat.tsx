@@ -256,9 +256,9 @@ const Chat = ({ navigation, route }) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            expoPushToken: receiver?.token,
+            fcmToken: receiver?.token,
             title: senderName,
-            message: message,
+            body: message,
           }),
         }
       );

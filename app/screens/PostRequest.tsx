@@ -9,7 +9,7 @@ import {
   TextInput,
   Image,
   Platform,
-  KeyboardAvoidingView,
+  Pressable,
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
@@ -57,6 +57,7 @@ function PostRequest({ navigation, route }) {
   const [reviews, setReviews] = useState([]);
   const { theme } = useAppTheme();
   const selectedLocation = useSelector((state) => state.location);
+  const inputRef = useRef(null);
 
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
@@ -531,22 +532,24 @@ function PostRequest({ navigation, route }) {
           </View>
 
           {/* decsription */}
-          <View
+          <Pressable
+            onPress={() => inputRef.current?.focus()}
             style={[styles.descriptionContainer, { borderColor: theme.border }]}
           >
             <TextInput
-              placeholder={`${t("postRequest.txt8")}`}
+              ref={inputRef}
+              placeholder={t("postRequest.txt8")}
               placeholderTextColor={theme.heading}
               value={description}
               multiline
-              onChangeText={(e) => setDescription(e)}
+              onChangeText={setDescription}
               maxLength={250}
               style={[styles.desc, { color: theme.black }]}
             />
             <Text style={[styles.charCount, { color: theme.darkGrey }]}>
               {description.length}/250
             </Text>
-          </View>
+          </Pressable>
 
           {/* Input field */}
           <View style={styles.typeWrapper}>

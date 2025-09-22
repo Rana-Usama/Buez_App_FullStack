@@ -208,9 +208,9 @@ function OfferDetail({ navigation, route }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            expoPushToken: postRequest?.user?.token,
+            fcmToken: postRequest?.user?.token,
             title: currentUser?.userData?.userName,
-            message: "Accepted your task request.",
+            body: "Accepted your task request.",
           }),
         }
       );

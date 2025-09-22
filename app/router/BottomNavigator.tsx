@@ -35,7 +35,6 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const screenFocused = useIsFocused();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
@@ -56,27 +55,6 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
     );
     return () => backHandler.remove();
   }, [screenFocused, navigation]);
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        setKeyboardVisible(true);
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        setKeyboardVisible(false);
-      }
-    );
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-
-  if (isKeyboardVisible) return null;
 
   return (
     <View

@@ -140,9 +140,9 @@ function AddReview() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            expoPushToken: recipientUser?.token,
-            title: userData?.userName || "New Review",
-            message: `${previewText}`,
+            fcmToken: recipientUser?.token,
+            title: `${userData?.userName} left you a review on your task`,
+            body: `${previewText}`,
           }),
         }
       );

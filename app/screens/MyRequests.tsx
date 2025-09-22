@@ -80,21 +80,25 @@ function MyRequests({ navigation }) {
 
   const fetchRequests = async (islastVisiblePost = null) => {
     setLoading(true);
+
     try {
       let newRecords = [];
       let lastVisible;
 
+      // ✅ Completed requests (example: your "Completed" filter)
       if (activeFilter === `${t("myRequests.txt10")}`) {
-        // ✅ Completed tasks (from Firebase)
         newRecords = await fetchActiveTasksFromFirebase();
+        console.log("newRecords.........", newRecords);
         newRecords = newRecords.map((item) => ({
-          ...item.taskDetails, // flatten task details
+          ...item.taskDetails,
           acceptedBy: item.acceptedBy,
           status: item.status,
-          completedTaskId: item.id, // keep reference
+          completedTaskId: item.id,
         }));
-      } else {
-        // ✅ My own requests
+      }
+
+      // ✅ All other filters (My own tasks: Active, Cancelled, etc.)
+      else {
         const { tasksArray, lastVisible: lv } = await getMyReuqests(
           param,
           islastVisiblePost
@@ -103,7 +107,7 @@ function MyRequests({ navigation }) {
         lastVisible = lv;
       }
 
-      // translate texts
+      // 🔹 Translate fields
       const translatedRecords = await Promise.all(
         newRecords.map(async (item) => ({
           ...item,
@@ -116,6 +120,7 @@ function MyRequests({ navigation }) {
         }))
       );
 
+      // 🔹 Append or replace list
       if (islastVisiblePost) {
         setTaskRecords((prev) => [...prev, ...translatedRecords]);
       } else {
@@ -125,7 +130,7 @@ function MyRequests({ navigation }) {
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
     } catch (error) {
-      console.log("Error loading posts:", error);
+      console.error("Error loading posts:", error);
     } finally {
       setLoading(false);
     }
@@ -341,6 +346,8 @@ function MyRequests({ navigation }) {
     [currentUserId, currentUser?.userData?.userName]
   );
 
+  console.log("task......", taskRecords);
+
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -375,6 +382,7 @@ function MyRequests({ navigation }) {
             `${t("myRequests.txt2")}`,
             `${t("myRequests.txt3")}`,
             `${t("myRequests.txt8")}`,
+            `${t("myRequests.txt10")}`,
           ].map((title, index) => (
             <FilterButton
               key={title}
@@ -537,7 +545,8 @@ function MyRequests({ navigation }) {
                   </TouchableOpacity>
                 ))}
             </View>
-            {activeFilter !== `${t("myRequests.txt10")}` &&
+            {
+              // activeFilter !== `${t("myRequests.txt10")}` &&
               cart?.acceptedBy && (
                 <View
                   style={{
@@ -568,7 +577,13 @@ function MyRequests({ navigation }) {
 
                   <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => handleStartChat(cart?.acceptedBy)}
+                    onPress={() => {
+                      if (activeFilter === `${t("myRequests.txt10")}`) {
+                        handleStartChat(cart?.user);
+                      } else {
+                        handleStartChat(cart?.acceptedBy);
+                      }
+                    }}
                     style={{
                       position: "absolute",
                       right: 0,
@@ -596,7 +611,8 @@ function MyRequests({ navigation }) {
                     </Text>
                   </TouchableOpacity>
                 </View>
-              )}
+              )
+            }
 
             {/* Actions (only when Active filter is selected) */}
             {activeFilter === `${t("myRequests.txt2")}` &&
@@ -663,25 +679,6 @@ function MyRequests({ navigation }) {
                   </TouchableOpacity>
                 </View>
               )}
-
-            {activeFilter === "Accepted" && (
-              <View
-                style={{
-                  width: "92%",
-                  alignItems: "center",
-                  marginTop: RFPercentage(2),
-                }}
-              >
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  disabled={loader}
-                  onPress={() => cancelAcceptedRequest(index, cart)}
-                  style={styles.acceptedCancelButton}
-                >
-                  <Text style={styles.text2}>{t("myRequests.txt6")}</Text>
-                </TouchableOpacity>
-              </View>
-            )}
           </View>
         ))}
 

@@ -21,6 +21,7 @@ import {
   where,
   writeBatch,
   doc,
+  orderBy,
 } from "firebase/firestore";
 import { createNewChat } from "../services/Chat.service";
 import Nav from "../components/common/Nav";
@@ -149,6 +150,7 @@ export default function Notifications({ navigation }) {
         const q = query(
           collection(FIREBASE_DB, "notifications"),
           where("receiver.userId", "==", currentUserId)
+          // orderBy("createdAt", "desc") // 👈 newest first
         );
         const snap = await getDocs(q);
         const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -633,6 +635,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
     color: Colors.heading,
+    width:"90%"
   },
 
   sub: {

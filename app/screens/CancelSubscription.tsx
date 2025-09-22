@@ -72,6 +72,7 @@ function CancelSubscription({ navigation }: any) {
             type: "success",
             text1: `${t("toast.cancelSubscription.three")}`,
             text2: `${t("toast.cancelSubscription.four")}`,
+            visibilityTime: 5000,
           });
         } else {
         }
@@ -95,7 +96,7 @@ function CancelSubscription({ navigation }: any) {
         activeOpacity={0.8}
           style={{
             position: "absolute",
-            left: RFPercentage(0),
+            left: RFPercentage(2),
             top: Platform.OS === "ios" ? RFPercentage(9) : RFPercentage(5),
           }}
           onPress={() => navigation.goBack()}
