@@ -133,6 +133,7 @@ function SubscriptionV2(props) {
         type: "success",
         text1: `${t("toast.subscriptionV2.three")}`,
         text2: `${t("toast.subscriptionV2.four")}`,
+        visibilityTime: 5000
       });
       props.navigation.navigate("TabNavigator");
     } else {
