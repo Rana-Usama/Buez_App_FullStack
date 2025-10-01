@@ -68,9 +68,7 @@ function Language({ navigation }) {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Nav
           dpNull
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
-          }
+          marginTop={RFPercentage(5)}
           leftLogo={false}
           navigation={navigation}
           title={`${t("settings.txt12")}`}

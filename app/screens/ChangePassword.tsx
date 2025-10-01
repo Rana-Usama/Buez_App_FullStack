@@ -81,9 +81,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
         {/* Nav */}
         <Nav
           dpNull
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
-          }
+          marginTop={RFPercentage(5)}
           leftLogo={false}
           navigation={navigation}
           title={`${t("settings.txt2")}`}
@@ -102,14 +100,11 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                 },
               ]}
             >
-              🔑{" "}
-              {t(
-                "password.txt1"
-              )}{" "}
+              🔑 {t("password.txt1")}{" "}
             </Text>
 
             <MyAppButton
-              title={t( "password.txt2")}
+              title={t("password.txt2")}
               marginTop={RFPercentage(5)}
               onPress={() =>
                 Linking.openURL("https://myaccount.google.com/security")

@@ -42,9 +42,7 @@ function TermsAndConditions({ navigation }) {
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <Nav
         dpNull
-        marginTop={
-          Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
-        }
+        marginTop={RFPercentage(5)}
         navigation={navigation}
         title={`${t("settings.txt3")}`}
       />

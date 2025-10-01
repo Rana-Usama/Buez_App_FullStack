@@ -334,9 +334,7 @@ export default function CompletedTasks({ navigation }: any) {
       <View style={styles.navContainer}>
         <Nav
           dpNull
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-          }
+          marginTop={RFPercentage(5)}
           leftLogo={false}
           navigation={navigation}
           title={t("profile.txt4")}

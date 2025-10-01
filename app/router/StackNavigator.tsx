@@ -191,10 +191,6 @@ const StackNavigator: React.FC = () => {
     return <NetworkError />;
   }
   
-  // console.log("isLoading", isLoading);
-  // console.log("userLoading", userLoading);
-  // console.log("initialRoute", initialRoute);
-  // console.log("userData >>>", userData);
 
   return (
     <NavigationContainer>

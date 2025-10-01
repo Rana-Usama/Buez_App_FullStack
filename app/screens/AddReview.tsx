@@ -265,21 +265,16 @@ function AddReview() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        <View style={styles.navContainer}>
+          <Nav
+            dpNull
+            marginTop={RFPercentage(5)}
+            leftLogo={false}
+            navigation={navigation}
+            title={tr.addReview || "Add Review"}
+          />
+        </View>
         <View style={[styles.screen, { backgroundColor: theme.white }]}>
-          <View style={styles.navContainer}>
-            <Nav
-              dpNull
-              marginTop={
-                Platform.OS === "android"
-                  ? RFPercentage(4.5)
-                  : RFPercentage(7.9)
-              }
-              leftLogo={false}
-              navigation={navigation}
-              title={tr.addReview || "Add Review"}
-            />
-          </View>
-
           <View style={styles.profileContainer}>
             <Image
               source={

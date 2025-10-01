@@ -48,6 +48,7 @@ const Nav: React.FC<NavProps> = ({
         styles.container,
         {
           backgroundColor: theme.white,
+          marginTop: Platform.OS === "android" ? 0 : marginTop,
           borderBottomColor:
             theme.mode === "dark" ? theme.border : "rgba(224, 227, 232, 0.5)",
         },

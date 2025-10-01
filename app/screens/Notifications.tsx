@@ -549,9 +549,7 @@ export default function Notifications({ navigation }) {
       <View>
         <Nav
           dpNull
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-          }
+          marginTop={RFPercentage(5)}
           leftLogo={false}
           navigation={navigation}
           title={tr.notifications || "Notifications"}
@@ -635,7 +633,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
     color: Colors.heading,
-    width:"90%"
+    width: "90%",
   },
 
   sub: {

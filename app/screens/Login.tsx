@@ -117,8 +117,8 @@ function Login({ navigation }) {
             barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
             backgroundColor={theme.white}
           />
-          
-          <ScrollView 
+
+          <ScrollView
             ref={scrollViewRef}
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled"
@@ -155,7 +155,9 @@ function Login({ navigation }) {
                       value={values.email}
                       customStyle={{
                         borderColor:
-                          touched.email && errors.email ? Colors.red : theme.border,
+                          touched.email && errors.email
+                            ? Colors.red
+                            : theme.border,
                       }}
                       onSubmitEditing={() => {
                         // Focus next input or dismiss keyboard
@@ -199,7 +201,9 @@ function Login({ navigation }) {
                         <View
                           style={[
                             styles.rememberIndicator,
-                            { backgroundColor: remember ? theme.primary : null },
+                            {
+                              backgroundColor: remember ? theme.primary : null,
+                            },
                           ]}
                         />
                       </View>
@@ -210,6 +214,7 @@ function Login({ navigation }) {
                       </Text>
                     </View>
                     <TouchableOpacity
+                      activeOpacity={0.8}
                       onPress={() => navigation.navigate("ForgotPassword")}
                       style={styles.forgotPassword}
                     >
@@ -236,11 +241,15 @@ function Login({ navigation }) {
             </Formik>
 
             <View style={styles.socialLoginContainer}>
-              <View style={[styles.divider, { backgroundColor: theme.border }]} />
+              <View
+                style={[styles.divider, { backgroundColor: theme.border }]}
+              />
               <Text style={[styles.orText, { color: theme.darkGrey }]}>
                 {t("login.txt4")}
               </Text>
-              <View style={[styles.divider, { backgroundColor: theme.border }]} />
+              <View
+                style={[styles.divider, { backgroundColor: theme.border }]}
+              />
             </View>
 
             <View style={styles.socialIconsContainer}>
@@ -268,7 +277,10 @@ function Login({ navigation }) {
             <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
               <BlurView
                 intensity={5}
-                style={[styles.modalBackground, { backgroundColor: theme.modal }]}
+                style={[
+                  styles.modalBackground,
+                  { backgroundColor: theme.modal },
+                ]}
               >
                 <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
                   <View

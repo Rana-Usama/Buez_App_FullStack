@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, LayoutAnimation, Platform, UIManager, TouchableOpacity, ScrollView, Switch } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  TouchableOpacity,
+  ScrollView,
+  Switch,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import Nav from "../components/common/Nav";
@@ -43,32 +54,54 @@ function FAQ({ navigation }) {
   }, []);
 
   return (
-    <View style={[styles.screen, {backgroundColor:theme.white}]}>
-      <ScrollView style={{ width: "100%" }} contentContainerStyle={{ width: "100%", alignItems: "center" }}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <ScrollView
+        style={{ width: "100%" }}
+        contentContainerStyle={{ width: "100%", alignItems: "center" }}
+      >
         {/* Nav */}
-        <Nav dpNull marginTop={Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)} navigation={navigation} title={`${t("settings.txt5")}`} />
+        <Nav
+          dpNull
+          marginTop={RFPercentage(5)}
+          navigation={navigation}
+          title={`${t("settings.txt5")}`}
+        />
 
         <View style={{ marginTop: RFPercentage(3.2), width: "90%" }}>
           {faqs.map((item, index) => (
             <View key={index}>
               <TouchableOpacity
-              activeOpacity={0.8}
+                activeOpacity={0.8}
                 onPress={() => toggleFAQ(index)}
                 style={[
                   styles.toggleFAQ,
                   {
                     marginTop: index !== 0 ? RFPercentage(2.5) : 0,
-                    borderBottomColor:theme.stroke
+                    borderBottomColor: theme.stroke,
                   },
                 ]}
               >
                 <View style={{ width: "95%" }}>
-                  <Text style={[styles.q,{color:theme.heading}]}>{item.question}</Text>
+                  <Text style={[styles.q, { color: theme.heading }]}>
+                    {item.question}
+                  </Text>
                 </View>
 
-                <MaterialIcons name={expandedIndex === index ? "keyboard-arrow-up" : "keyboard-arrow-down"} style={styles.icon} color={theme.stroke} />
+                <MaterialIcons
+                  name={
+                    expandedIndex === index
+                      ? "keyboard-arrow-up"
+                      : "keyboard-arrow-down"
+                  }
+                  style={styles.icon}
+                  color={theme.stroke}
+                />
               </TouchableOpacity>
-              {expandedIndex === index && <Text style={[styles.ans, {color:theme.darkGrey}]}>{item.answer}</Text>}
+              {expandedIndex === index && (
+                <Text style={[styles.ans, { color: theme.darkGrey }]}>
+                  {item.answer}
+                </Text>
+              )}
             </View>
           ))}
         </View>

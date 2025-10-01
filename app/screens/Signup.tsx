@@ -120,6 +120,7 @@ function Signup({ navigation }: any) {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
       >
         <Image
           style={theme.mode === "dark" ? styles.darkImg : styles.logo}

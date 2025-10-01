@@ -365,9 +365,6 @@ function PostRequest({ navigation, route }) {
       <View style={[styles.screen, { backgroundColor: theme.white }]}>
         {/* Nav */}
         <Nav
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-          }
           leftLogo={isEditing ? false : true}
           profileImage={profileImgUrl}
           dpNull={isEditing}

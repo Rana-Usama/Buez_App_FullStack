@@ -191,6 +191,8 @@ function Home({ navigation }) {
     setActiveIndices(idx);
   }, [displayTasks]);
 
+  
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={[styles.screen, { backgroundColor: theme.white }]}>
@@ -201,9 +203,7 @@ function Home({ navigation }) {
         {/* Nav */}
         <Nav
           crown={true}
-          marginTop={
-            Platform.OS === "android" ? RFPercentage(4) : RFPercentage(7.9)
-          }
+          marginTop={RFPercentage(6)}
           profileImage={profileImgUrl}
           leftLogo={true}
           navigation={navigation}
@@ -228,15 +228,6 @@ function Home({ navigation }) {
             />
           }
         >
-          {/* <ImageBackground
-            source={Icons.backgorund}
-            resizeMode="cover"
-            style={{ width: "100%", height: RFPercentage(13) }}
-          > */}
-          {/* <LinearGradient
-            colors={["rgba(238, 236, 252, 0.4)", "rgba(255, 255, 255,0.8)"]}
-            style={{ width: "100%", height: RFPercentage(10) }}
-          > */}
           <View style={styles.inputFieldContainer}>
             {inputField?.map((item, i) => (
               <View key={i} style={styles.inputFieldWrapper}>
@@ -263,8 +254,6 @@ function Home({ navigation }) {
               </View>
             ))}
           </View>
-          {/* </LinearGradient> */}
-          {/* </ImageBackground> */}
 
           <View style={styles.categoriesContainer}>
             <Text
@@ -357,7 +346,6 @@ function Home({ navigation }) {
                   onPress={async () => {
                     dispatch(selectLocation(null)); // clears redux
                     await getCurrentLocation(); // refresh GPS
-                    // fetchRequests(null); // refetch tasks
                   }}
                 >
                   <AntDesign

@@ -336,9 +336,6 @@ function Messages({ navigation }) {
       />
       {/* Nav */}
       <Nav
-        marginTop={
-          Platform.OS === "android" ? RFPercentage(4.5) : RFPercentage(7.9)
-        }
         profileImage={profileImgUrl}
         leftLogo={true}
         navigation={navigation}

@@ -149,6 +149,7 @@ function EditProfile({ navigation }) {
             leftLogo={false}
             navigation={navigation}
             title={`${t("profile.txt2")}`}
+            marginTop={RFPercentage(5)}
           />
 
           {/* Profile Image */}
