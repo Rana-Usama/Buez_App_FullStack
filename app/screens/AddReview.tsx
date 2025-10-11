@@ -37,6 +37,7 @@ import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import { useTranslation } from "react-i18next";
 
 const getTargetLanguage = async () => {
   try {
@@ -87,6 +88,7 @@ function AddReview() {
   const completedOn = moment(
     task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()
   ).format("MMM D, YYYY");
+  const { t } = useTranslation();
 
   const [lang, setLang] = useState("en");
   const [tr, setTr] = useState<Partial<Translations>>({});
@@ -153,10 +155,14 @@ function AddReview() {
   const sendReviewPushNotification = async () => {
     if (!recipientUser?.token) return;
     try {
+      const translatedReview = reviewText
+        ? await cachedTranslate(reviewText)
+        : await cachedTranslate("No review text");
+
       const previewText =
-        reviewText.length > 50
-          ? reviewText.substring(0, 50) + "..."
-          : reviewText;
+        translatedReview.length > 50
+          ? translatedReview.substring(0, 50) + "..."
+          : translatedReview;
       const response = await fetch(
         "https://buez-server-khaki.vercel.app/api/send-notification",
         {
@@ -164,7 +170,7 @@ function AddReview() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             fcmToken: recipientUser?.token,
-            title: `${userData?.userName} left you a review on your task`,
+            title: `${userData?.userName} ${t("pushNotifications.txt1")}`,
             body: `${previewText}`,
           }),
         }

@@ -222,7 +222,7 @@ function OfferDetail({ navigation, route }) {
           body: JSON.stringify({
             fcmToken: postRequest?.user?.token,
             title: currentUser?.userData?.userName,
-            body: "Accepted your task request.",
+            body: t("pushNotifications.txt1"),
           }),
         }
       );
@@ -261,8 +261,6 @@ function OfferDetail({ navigation, route }) {
       console.log("Error saving notification:", error);
     }
   };
-
-  console.log("current user", currentUser);
 
   const handleAccept = async () => {
     setLoading(true); // show spinner
@@ -660,7 +658,7 @@ function OfferDetail({ navigation, route }) {
                           }}
                         >
                           {/* Reviewer Name + Rating */}
-                          <View style={{marginTop:RFPercentage(0.7)}}>
+                          <View style={{ marginTop: RFPercentage(0.7) }}>
                             <Text
                               style={[
                                 styles.userName,
@@ -723,7 +721,7 @@ function OfferDetail({ navigation, route }) {
                             marginTop: RFPercentage(0.6),
                             fontFamily: "Poppins_400Regular_Italic",
                             fontSize: RFPercentage(1.6),
-                            fontStyle:"italic"
+                            fontStyle: "italic",
                           },
                         ]}
                       >

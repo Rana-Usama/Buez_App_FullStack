@@ -161,7 +161,7 @@
     "txt9": "Richieste recenti",
     "txt10": "Compenso",
     "txt11": "Nessun record trovato!",
-    "txt12" : "Caricamento richieste..."
+    "txt12": "Caricamento richieste..."
   },
   "details": {
     "txt1": "Dettagli",
@@ -216,7 +216,7 @@
     "txt3": "Non letti",
     "txt4": "Nessun messaggio non letto",
     "txt5": "Ancora nessun messaggio",
-    "txt6" : "Saluta"
+    "txt6": "Saluta"
   },
   "chat": {
     "txt1": "Carica messaggi precedenti",
@@ -365,5 +365,16 @@
     "txt5": " Recensito",
     "txt6": "In attesa di recensione",
     "txt7": "Caricamento delle tue attività completate..."
+  },
+  "pushNotifications": {
+    "txt1": "Ha accettato la tua richiesta di attività.",
+    "txt2": "ti ha lasciato una recensione sulla tua attività!",
+    "txt3": "Attività completata!",
+    "txt4": "La tua attività accettata",
+    "txt5": "è stata segnata come completata da",
+    "txt6": "Follow-up dell'attività!",
+    "txt7": "Questo è un promemoria sulla tua recente pubblicazione di attività. Controlla i tuoi progressi e aggiorna lo stato se completato.",
+    "txt8": "⏰ Prova gratuita in scadenza",
+    "txt9": "La tua prova gratuita termina tra 4 giorni. Resta abbonato per mantenere l'accesso completo."
   }
 }

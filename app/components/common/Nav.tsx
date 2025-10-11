@@ -21,6 +21,7 @@ interface NavProps {
   crown?: boolean;
   marginTop?: number;
   title: string;
+  onPress ?  : () => void;
   navigation: {
     goBack: () => void;
     navigate: (screen: string) => void;
@@ -39,6 +40,7 @@ const Nav: React.FC<NavProps> = ({
   leftLogo = false,
   post = false,
   profileImage,
+  onPress,
 }) => {
   const { unreadCount } = useNotifications();
   const { theme } = useAppTheme();
@@ -76,7 +78,7 @@ const Nav: React.FC<NavProps> = ({
         ) : (
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => navigation.goBack()}
+            onPress={() => onPress ? onPress() : navigation.goBack()}
             style={{ flexDirection: "row", alignItems: "center" }}
           >
             <MaterialCommunityIcons

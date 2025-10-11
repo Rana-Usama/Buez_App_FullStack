@@ -334,8 +334,8 @@ function MyRequests({ navigation }) {
           },
           body: JSON.stringify({
             fcmToken: task.acceptedBy?.token,
-            title: "Task Completed!",
-            body: `Your accepted task type "${task.taskType}" has been marked as completed by ${task.user?.userName}`,
+            title: t("pushNotifications.txt3"),
+            body: `${t("pushNotifications.txt4")} "${task.taskType}" ${t("pushNotifications.txt5")} ${task.user?.userName}`,
           }),
         }
       );
@@ -771,6 +771,7 @@ function MyRequests({ navigation }) {
         title={t("myRequests.txt7")}
         theme={theme}
         t={t}
+        loading={loader}
       />
     </View>
   );

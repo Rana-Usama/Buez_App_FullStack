@@ -8,6 +8,7 @@ import {
   Alert,
   StatusBar,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -38,6 +39,7 @@ function SubscriptionV2(props) {
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const { theme } = useAppTheme();
+  const [loader, setLoader] = useState(false);
 
   const updateSubscriptionStatus = async (start, end) => {
     if (!userId) return;
@@ -50,8 +52,7 @@ function SubscriptionV2(props) {
         subscriptionStart: start,
         subscriptionEnd: end,
       });
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   // Fetching payment intent
@@ -133,7 +134,7 @@ function SubscriptionV2(props) {
         type: "success",
         text1: `${t("toast.subscriptionV2.three")}`,
         text2: `${t("toast.subscriptionV2.four")}`,
-        visibilityTime: 5000
+        visibilityTime: 5000,
       });
       props.navigation.navigate("TabNavigator");
     } else {
@@ -214,6 +215,7 @@ function SubscriptionV2(props) {
           onPress={async () => {
             if (!userId) return;
             try {
+              setLoader(true);
               const userRef = doc(firestore, "users", userId);
               await updateDoc(userRef, {
                 isFreeTrial: true,
@@ -221,17 +223,24 @@ function SubscriptionV2(props) {
               });
               await scheduleFreeTrialNotification(10);
               props.navigation.navigate("TabNavigator");
-            } catch (error) {}
+            } catch (error) {
+            } finally {
+              setLoader(false);
+            }
           }}
           style={[styles.skip, { borderColor: theme.grey }]}
         >
-          <Text
-            style={{
-              color: theme.grey,
-              fontFamily: "Poppins_500Medium",
-              fontSize: RFPercentage(2),
-            }}
-          >{`${t("buttons.skip")}`}</Text>
+          {loader ? (
+            <ActivityIndicator size={"small"} color={theme.grey} />
+          ) : (
+            <Text
+              style={{
+                color: theme.grey,
+                fontFamily: "Poppins_500Medium",
+                fontSize: RFPercentage(2),
+              }}
+            >{`${t("buttons.skip")}`}</Text>
+          )}
         </TouchableOpacity>
       </View>
     </Screen>

@@ -72,6 +72,7 @@ function Language({ navigation }) {
           leftLogo={false}
           navigation={navigation}
           title={`${t("settings.txt12")}`}
+          onPress={()=> navigation.navigate("TabNavigator")}
         />
         <View style={styles.container}>
           {languages.map((lang) => (

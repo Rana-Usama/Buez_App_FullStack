@@ -65,7 +65,7 @@ export async function scheduleFreeTrialNotification(daysAfter = 10) {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "⏰ Free Trial Ending Soon",
-      body: "Your free trial ends in 4 days. Upgrade now to keep full access.",
+      body: "Your free trial ends in 4 days. Stay subscribed to maintain full access.",
       sound: true,
     },
     trigger: triggerDate,

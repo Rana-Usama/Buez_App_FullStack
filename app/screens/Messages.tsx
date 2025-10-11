@@ -217,7 +217,9 @@ function Messages({ navigation }) {
           <Text style={styles.filterButtonTextActive}>{title}</Text>
         </LinearGradient>
       ) : (
-        <Text style={[styles.filterButtonTextInactive, { color: theme.heading }]}>
+        <Text
+          style={[styles.filterButtonTextInactive, { color: theme.heading }]}
+        >
           {title}
         </Text>
       )}
@@ -248,7 +250,9 @@ function Messages({ navigation }) {
       >
         <Image
           style={styles.messageImage}
-          source={item.user?.profileImage ? { uri: item.user.profileImage } : Icons.dp}
+          source={
+            item.user?.profileImage ? { uri: item.user.profileImage } : Icons.dp
+          }
         />
         <View style={styles.messageTextContainer}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -264,7 +268,9 @@ function Messages({ navigation }) {
               {item.user?.userName}
             </Text>
             {item.unread && item.senderId !== userId && (
-              <View style={[styles.unreadDot, { backgroundColor: theme.primary }]} />
+              <View
+                style={[styles.unreadDot, { backgroundColor: theme.primary }]}
+              />
             )}
           </View>
           <Text
@@ -273,12 +279,18 @@ function Messages({ navigation }) {
               item.lastMessage?.unread &&
                 item.lastMessage?.senderId !== userId &&
                 styles.unreadText,
-              { color: item.lastMessage?.text ? theme.darkGrey : theme.lightGrey },
+              {
+                color: item.lastMessage?.text
+                  ? theme.darkGrey
+                  : theme.lightGrey,
+              },
             ]}
           >
             {item.lastMessage?.text
               ? item.lastMessage.text.replace(/\s+/g, " ").trim().slice(0, 30) +
-                (item.lastMessage.text.replace(/\s+/g, " ").trim().length > 30 ? "..." : "")
+                (item.lastMessage.text.replace(/\s+/g, " ").trim().length > 30
+                  ? "..."
+                  : "")
               : `${t("messages.txt6")} ${item.user?.userName}!`}
           </Text>
         </View>
@@ -291,11 +303,23 @@ function Messages({ navigation }) {
   );
 
   const filteredChats = useMemo(() => {
+    // Only keep chats where lastMessage exists and has text
+    let validChats = chats.filter(
+      (chat) =>
+        chat.lastMessage &&
+        chat.lastMessage.text &&
+        chat.lastMessage.text.trim() !== ""
+    );
+
     if (activeFilter === t("messages.txt3")) {
-      return chats.filter((chat) => chat?.unread && chat.senderId !== userId);
+      return validChats.filter(
+        (chat) => chat?.unread && chat.senderId !== userId
+      );
     }
-    return chats;
+
+    return validChats;
   }, [chats, activeFilter, userId]);
+
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
@@ -303,12 +327,22 @@ function Messages({ navigation }) {
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
       />
-      <Nav profileImage={profileImgUrl} leftLogo={true} navigation={navigation} title={t("messages.txt1")} />
+      <Nav
+        profileImage={profileImgUrl}
+        leftLogo={true}
+        navigation={navigation}
+        title={t("messages.txt1")}
+      />
 
       {/* Filter Buttons */}
       <View style={styles.filterContainer}>
         {filters.map((title, index) => (
-          <FilterButton key={title} title={title} isActive={activeFilter === title} isFirst={index === 0} />
+          <FilterButton
+            key={title}
+            title={title}
+            isActive={activeFilter === title}
+            isFirst={index === 0}
+          />
         ))}
       </View>
 
@@ -337,10 +371,17 @@ function Messages({ navigation }) {
           ListEmptyComponent={() => (
             <View style={styles.emptyContainer}>
               {filteredChats.length === 0 && (
-                <View style={{ justifyContent: "center", alignItems: "center" }}>
-                  <Image style={styles.noMessageIcon} source={Icons.noMessage} />
+                <View
+                  style={{ justifyContent: "center", alignItems: "center" }}
+                >
+                  <Image
+                    style={styles.noMessageIcon}
+                    source={Icons.noMessage}
+                  />
                   <Text style={[styles.emptyText, { color: theme.darkGrey }]}>
-                    {activeFilter === t("messages.txt3") ? t("messages.txt4") : t("messages.txt5")}
+                    {activeFilter === t("messages.txt3")
+                      ? t("messages.txt4")
+                      : t("messages.txt5")}
                   </Text>
                 </View>
               )}
@@ -354,27 +395,116 @@ function Messages({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, justifyContent: "flex-start", alignItems: "center", backgroundColor: Colors.white },
-  filterContainer: { marginTop: RFPercentage(3), flexDirection: "row", width: "90%", marginBottom: RFPercentage(1) },
-  filterButton: { width: RFPercentage(13), height: RFPercentage(4.8), borderRadius: RFPercentage(1), justifyContent: "center", alignItems: "center", marginLeft: RFPercentage(2), alignSelf: "flex-start", borderWidth: 1 },
+  screen: {
+    flex: 1,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    backgroundColor: Colors.white,
+  },
+  filterContainer: {
+    marginTop: RFPercentage(3),
+    flexDirection: "row",
+    width: "90%",
+    marginBottom: RFPercentage(1),
+  },
+  filterButton: {
+    width: RFPercentage(13),
+    height: RFPercentage(4.8),
+    borderRadius: RFPercentage(1),
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: RFPercentage(2),
+    alignSelf: "flex-start",
+    borderWidth: 1,
+  },
   firstFilterButton: { marginLeft: 0 },
-  gradient: { justifyContent: "center", alignItems: "center", width: "100%", height: "100%", borderRadius: RFPercentage(1) },
-  filterButtonTextActive: { color: Colors.white, fontSize: RFPercentage(1.7), fontFamily: "Poppins_500Medium" },
-  filterButtonTextInactive: { color: Colors.heading, fontSize: RFPercentage(1.7), fontFamily: "Poppins_500Medium" },
-  messageContainer: { width: "90%", flexDirection: "row", alignItems: "center", marginTop: RFPercentage(3) },
-  messageImage: { width: RFPercentage(5.8), height: RFPercentage(5.8), borderRadius: RFPercentage(100), borderColor: Colors.primary, borderWidth: RFPercentage(0.1) },
-  messageTextContainer: { marginLeft: RFPercentage(1.5), justifyContent: "flex-start" },
-  messageUserName: { color: Colors.darkGrey2, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
-  messageText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
-  messageTime: { position: "absolute", right: 0, top: 0, color: Colors.darkGrey, fontSize: RFPercentage(1.6), fontFamily: "Poppins_400Regular" },
-  separator: { width: "90%", height: RFPercentage(0.1), backgroundColor: Colors.border, marginTop: RFPercentage(2) },
+  gradient: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "100%",
+    borderRadius: RFPercentage(1),
+  },
+  filterButtonTextActive: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_500Medium",
+  },
+  filterButtonTextInactive: {
+    color: Colors.heading,
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_500Medium",
+  },
+  messageContainer: {
+    width: "90%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: RFPercentage(3),
+  },
+  messageImage: {
+    width: RFPercentage(5.8),
+    height: RFPercentage(5.8),
+    borderRadius: RFPercentage(100),
+    borderColor: Colors.primary,
+    borderWidth: RFPercentage(0.1),
+  },
+  messageTextContainer: {
+    marginLeft: RFPercentage(1.5),
+    justifyContent: "flex-start",
+  },
+  messageUserName: {
+    color: Colors.darkGrey2,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+  },
+  messageText: {
+    color: Colors.darkGrey,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+  },
+  messageTime: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    color: Colors.darkGrey,
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+  },
+  separator: {
+    width: "90%",
+    height: RFPercentage(0.1),
+    backgroundColor: Colors.border,
+    marginTop: RFPercentage(2),
+  },
   bottomSpacing: { marginBottom: RFPercentage(6) },
   unreadMessage: {},
   unreadText: { fontFamily: "Poppins_500Medium" },
-  unreadDot: { width: RFPercentage(1), height: RFPercentage(1), borderRadius: RFPercentage(0.5), backgroundColor: Colors.primary, marginLeft: RFPercentage(1), top: RFPercentage(-0.1) },
-  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center", marginTop: RFPercentage(20) },
-  emptyText: { fontFamily: "Poppins_400Regular", fontSize: RFPercentage(2), color: Colors.darkGrey, textAlign: "center" },
-  noMessageIcon: { borderRadius: RFPercentage(1), width: RFPercentage(26), height: RFPercentage(18), marginBottom: RFPercentage(2) },
+  unreadDot: {
+    width: RFPercentage(1),
+    height: RFPercentage(1),
+    borderRadius: RFPercentage(0.5),
+    backgroundColor: Colors.primary,
+    marginLeft: RFPercentage(1),
+    top: RFPercentage(-0.1),
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: RFPercentage(20),
+  },
+  emptyText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(2),
+    color: Colors.darkGrey,
+    textAlign: "center",
+  },
+  noMessageIcon: {
+    borderRadius: RFPercentage(1),
+    width: RFPercentage(26),
+    height: RFPercentage(18),
+    marginBottom: RFPercentage(2),
+  },
 });
 
 export default Messages;

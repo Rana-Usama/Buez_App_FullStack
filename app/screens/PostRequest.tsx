@@ -269,8 +269,8 @@ function PostRequest({ navigation, route }) {
     const triggerDate = new Date(Date.now() + twoDaysInMs);
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Task Follow-up",
-        body: "This is a reminder about your recent task posting. Please review your progress and update the status if completed.",
+        title: t("pushNotifications.txt6"),
+        body: t("pushNotifications.txt7"),
         data: { postId, userToken },
       },
       trigger: {

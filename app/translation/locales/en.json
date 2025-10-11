@@ -365,5 +365,16 @@
     "txt5": " Reviewed",
     "txt6": "Pending Review",
     "txt7": "Loading your completed tasks..."
-  }
+  },
+  "pushNotifications" : {
+    "txt1" : "Accepted your task request.",
+    "txt2" : "left you a review on your task!",
+    "txt3" : "Task Completed!",
+    "txt4" : "Your accepted task",
+    "txt5" : "has been marked as completed by",
+    "txt6" : "Task Follow-up!",
+    "txt7" : "This is a reminder about your recent task posting. Please review your progress and update the status if completed.",
+    "txt8" : "⏰ Free Trial Ending Soon",
+    "txt9" : "Your free trial ends in 4 days. Stay subscribed to maintain full access."
+   }
 }

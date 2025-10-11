@@ -25,7 +25,12 @@ import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
-import { MaterialIcons, Feather, Ionicons } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  Feather,
+  Ionicons,
+  FontAwesome5,
+} from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 const getTargetLanguage = async () => {
@@ -112,9 +117,14 @@ export default function Notifications({ navigation }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    (async () => {
+    const init = async () => {
+      setBusy(true); // busy starts true
+
+      // 1️⃣ Get language
       const l = await getTargetLanguage();
       setLang(l);
+
+      // 2️⃣ Translation
       const phrases = {
         today: "Today",
         yesterday: "Yesterday",
@@ -129,8 +139,8 @@ export default function Notifications({ navigation }) {
         view: "View",
         markAllRead: "Mark All Read",
         pullToRefresh: "Pull to refresh",
-        taskCompleted: "marked your accepted task as completed!", // Add this
-        viewTask: "View Task", // Add this
+        taskCompleted: "marked your accepted task as completed!",
+        viewTask: "View Task",
       };
 
       const translatedVals = await Promise.all(
@@ -144,8 +154,15 @@ export default function Notifications({ navigation }) {
         {} as Translations
       );
       setTr(mapped);
-    })();
-  }, []);
+
+      // 3️⃣ Fetch notifications
+      await fetchNotifications();
+
+      setBusy(false); // busy ends only after both translation and notifications are done
+    };
+
+    init();
+  }, [currentUserId]);
 
   const fetchNotifications = async () => {
     if (!currentUserId) return;
@@ -175,12 +192,7 @@ export default function Notifications({ navigation }) {
   };
 
   useEffect(() => {
-    fetchNotifications();
-  }, [lang, currentUserId]);
-
-  useEffect(() => {
     if (!raw.length) return setSections([]);
-
     const grouped = new Map();
     raw.forEach((item) => {
       const title = getSectionTitle(new Date(item.timestamp), lang);
@@ -467,7 +479,12 @@ export default function Notifications({ navigation }) {
                   source={profileImage ? { uri: profileImage } : Icons.dp}
                   style={styles.avatar}
                 />
-                <View style={styles.notificationIcon}>
+                <View
+                  style={[
+                    styles.notificationIcon,
+                    { backgroundColor: theme.white },
+                  ]}
+                >
                   {getNotificationIcon(item.type, item.isRead)}
                 </View>
               </View>
@@ -477,7 +494,7 @@ export default function Notifications({ navigation }) {
                   style={[
                     styles.title,
                     {
-                      color: !item.isRead ? Colors.primary : theme.heading,
+                      color: !item.isRead ? theme.primary : theme.heading,
                       fontFamily: !item.isRead
                         ? "Poppins_600SemiBold"
                         : "Poppins_500Medium",
@@ -489,7 +506,7 @@ export default function Notifications({ navigation }) {
                 </Text>
 
                 {!isExpanded && !!previewText && (
-                  <Text style={[styles.sub, { marginTop: RFPercentage(0.3) }]}>
+                  <Text style={[styles.sub, { marginTop: RFPercentage(0.3), color:theme.grey }]}>
                     {previewText}
                   </Text>
                 )}
@@ -642,11 +659,16 @@ export default function Notifications({ navigation }) {
             },
           ]}
         >
-          <MaterialIcons
+          <FontAwesome5
+            name="calendar-day"
+            size={RFPercentage(1.8)}
+            color={theme.primary}
+          />
+          {/* <MaterialIcons
             name="tips-and-updates"
             size={RFPercentage(2)}
             color={theme.primary}
-          />
+          /> */}
 
           <Text style={[styles.sectionHeaderText, { color: theme.primary }]}>
             {show}
@@ -772,7 +794,7 @@ const styles = StyleSheet.create({
   sectionHeaderText: {
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_600SemiBold",
-    marginLeft: RFPercentage(0.3),
+    marginLeft: RFPercentage(0.5),
   },
   touchableCard: {
     marginHorizontal: RFPercentage(2),
@@ -802,7 +824,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: -RFPercentage(0.5),
     right: -RFPercentage(0.5),
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.primary,
     borderRadius: RFPercentage(1),
     padding: RFPercentage(0.3),
   },

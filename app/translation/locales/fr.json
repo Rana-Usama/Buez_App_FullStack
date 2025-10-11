@@ -161,7 +161,7 @@
     "txt9": "Demandes récentes",
     "txt10": "Rémunération",
     "txt11": "Aucun enregistrement trouvé !",
-    "txt12" : "Chargement des demandes..."
+    "txt12": "Chargement des demandes..."
   },
   "details": {
     "txt1": "Détails",
@@ -216,7 +216,7 @@
     "txt3": "Non lus",
     "txt4": "Aucun message non lu",
     "txt5": "Pas encore de message",
-    "txt6" : "Dis bonjour à"
+    "txt6": "Dis bonjour à"
   },
   "chat": {
     "txt1": "Charger les messages précédents",
@@ -366,5 +366,16 @@
     "txt5": " Évalué",
     "txt6": "En attente d’évaluation",
     "txt7": "Chargement de vos tâches terminées..."
+  },
+  "pushNotifications": {
+    "txt1": "A accepté votre demande de tâche.",
+    "txt2": "vous a laissé un avis sur votre tâche !",
+    "txt3": "Tâche terminée !",
+    "txt4": "Votre tâche acceptée",
+    "txt5": "a été marquée comme terminée par",
+    "txt6": "Suivi de tâche !",
+    "txt7": "Ceci est un rappel concernant votre récente publication de tâche. Veuillez vérifier vos progrès et mettre à jour le statut si terminé.",
+    "txt8": "⏰ Essai gratuit bientôt terminé",
+    "txt9": "Votre période d'essai se termine dans 4 jours. Restez abonné pour conserver un accès complet."
   }
 }

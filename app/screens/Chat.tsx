@@ -280,12 +280,10 @@ const Chat = ({ navigation, route }) => {
         messageId
       );
       await deleteDoc(messageRef);
-
       // 2. Optimistically update local state
       setMessages((prevMessages) =>
         prevMessages.filter((msg) => msg._id !== messageId)
       );
-
       // 3. Find latest message (after deletion)
       const q = query(
         collection(FIREBASE_DB, `chats/${chatId}/messages`),
@@ -293,9 +291,7 @@ const Chat = ({ navigation, route }) => {
         limit(1)
       );
       const snapshot = await getDocs(q);
-
       const chatRef = doc(FIREBASE_DB, "chats", chatId);
-
       if (!snapshot.empty) {
         // Chat still has messages → update lastMessage
         const latestDoc = snapshot.docs[0];
@@ -522,7 +518,7 @@ const Chat = ({ navigation, route }) => {
                       color: theme.primary,
                       fontSize: RFPercentage(1.8),
                       fontFamily: "Poppins_600SemiBold",
-                      top: 2,
+                      lineHeight:RFPercentage(1.8)
                     }}
                   >
                     {receiver?.userName?.[0] || "?"}
@@ -558,7 +554,7 @@ const Chat = ({ navigation, route }) => {
                     }}
                     wrapperStyle={{
                       left: {
-                        backgroundColor: theme.white,
+                        backgroundColor: theme.mode === 'dark' ? "rgba(25, 25, 25, 1)" : "rgba(239, 239, 239, 1)",
                         padding: RFPercentage(0.6),
                         marginLeft: 0, // Ensure no left margin
                       },
@@ -750,9 +746,9 @@ const styles = StyleSheet.create({
   },
   noProfileInner: {
     color: Colors.primary,
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(2.5),
     fontFamily: "Poppins_500Medium",
-    top: 2,
+    lineHeight:RFPercentage(2.5)
   },
   profile: {
     width: RFPercentage(7),

@@ -365,5 +365,16 @@
     "txt5": " Bewertet",
     "txt6": "Ausstehende Bewertung",
     "txt7": "Deine abgeschlossenen Aufgaben werden geladen..."
+  },
+  "pushNotifications": {
+    "txt1": "Hat deine Aufgabenanfrage akzeptiert.",
+    "txt2": "hat dir eine Bewertung zu deiner Aufgabe hinterlassen!",
+    "txt3": "Aufgabe abgeschlossen!",
+    "txt4": "Deine akzeptierte Aufgabe",
+    "txt5": "wurde von markiert als abgeschlossen von",
+    "txt6": "Aufgaben-Nachverfolgung!",
+    "txt7": "Dies ist eine Erinnerung an deine letzte Aufgabenveröffentlichung. Bitte überprüfe deinen Fortschritt und aktualisiere den Status, falls abgeschlossen.",
+    "txt8": "⏰ Kostenloses Probeabo endet bald",
+    "txt9": "Dein kostenloses Probeabo endet in 4 Tagen. Bleibe abonnierter Nutzer, um vollen Zugriff zu behalten."
   }
 }
