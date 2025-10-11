@@ -12,7 +12,9 @@
     "email": "Email",
     "password": "Password",
     "name": "Name",
-    "confirm": "Confirm Password"
+    "confirm": "Confirm Password",
+    "currency": "e.g; 90$",
+    "sign": "$"
   },
   "validations": {
     "inValid": "Invalid email",
@@ -158,7 +160,8 @@
     "txt8": "Others",
     "txt9": "Nearby Requests",
     "txt10": "Compensation",
-    "txt11": "No Record Found!"
+    "txt11": "No Record Found!",
+    "txt12" : "Loading Requests..."
   },
   "details": {
     "txt1": "Task Details",
@@ -180,7 +183,7 @@
     "txt1": "My Requests",
     "txt2": "Active",
     "txt3": "Completed",
-    "txt4": "Posted on:",
+    "txt4": "Posted:",
     "txt5": "Mark as Done",
     "txt6": "Cancel",
     "txt7": "Are you sure you want to delete\nthis request?",
@@ -188,7 +191,8 @@
     "txt9": "Repost",
     "txt10": "Accepted",
     "txt11": "Accepted By:",
-    "txt12": "Accepted request cancelled successfully."
+    "txt12": "Accepted request cancelled successfully.",
+    "txt13": "Loading Your Requests..."
   },
   "postRequest": {
     "txt1": "Post Request",
@@ -211,7 +215,8 @@
     "txt2": "All",
     "txt3": "Unread",
     "txt4": "No Unread Messages",
-    "txt5": "No Messages Yet"
+    "txt5": "No Messages Yet",
+    "txt6" : "Say hi to"
   },
   "chat": {
     "txt1": "Load earlier messages",
@@ -296,7 +301,17 @@
   },
   "successScreen": {
     "txt1": "Request Posted Successfully",
-    "txt2": "Home"
+    "txt2": "Home",
+    "txt3": "Your task has been posted successfully!",
+    "txt4": "Task Visibility",
+    "txt5": "Your task is now visible to potential helpers and will be automatically hidden once someone accepts it.",
+    "txt6": "First Acceptance Rule",
+    "txt7": "The first person to accept your task gets exclusive rights. Other users won't see it while you're negotiating.",
+    "txt8": "No Deal? Repost Easily",
+    "txt9": "If no agreement is reached, you can repost your task from 'My Req' tab under 'Active' filter.",
+    "txt10": "Stay Updated",
+    "txt11": "You'll receive notifications when someone shows interest in your task or sends you an offer.",
+    "txt12": "View My Requests"
   },
   "profile": {
     "txt1": "Profile",
@@ -315,7 +330,11 @@
     "txt1": "My Reviews",
     "txt2": "Dated:",
     "txt3": "By:",
-    "txt4" : "Reviewed"
+    "txt4": "Reviewed",
+    "txt5": "Average Rating",
+    "txt6": "Based on",
+    "txt7": "review",
+    "txt8": "reviews"
   },
   "bottomTab": {
     "txt1": "My Req",
@@ -332,5 +351,19 @@
   "password": {
     "txt1": "You signed in with Google. To change your password, please manage your Google Account.",
     "txt2": "Google Account"
+  },
+  "notifications": {
+    "txt1": "Loading notifications...",
+    "txt2": "When you get notifications, they'll appear here",
+    "txt3": "Rating:"
+  },
+  "completed": {
+    "txt1": "REVIEWED",
+    "txt2": "COMPLETED",
+    "txt3": "Your Review",
+    "txt4": "Completed Tasks",
+    "txt5": " Reviewed",
+    "txt6": "Pending Review",
+    "txt7": "Loading your completed tasks..."
   }
 }

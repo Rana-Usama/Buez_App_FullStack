@@ -4,14 +4,9 @@ import {
   Text,
   StyleSheet,
   Image,
-  ScrollView,
-  Platform,
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  TouchableOpacity,
-  Animated,
-  Easing,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
@@ -46,12 +41,6 @@ export default function CompletedTasks({ navigation }: any) {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const { theme } = useAppTheme();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  // Create a ref to store animation values for each task
-  const animationValues = useRef({});
-  // Create a ref to store content heights for each task
-  const contentHeights = useRef({});
 
   useEffect(() => {
     (async () => {
@@ -59,7 +48,7 @@ export default function CompletedTasks({ navigation }: any) {
         completedTasks: "Completed Tasks",
         category: "Category",
         completedOn: "Completed on",
-        review: "Review",
+        review: "Add Review",
         reviewed: "Reviewed",
         noTasks: "No completed tasks",
         translating: "Translating...",
@@ -68,7 +57,7 @@ export default function CompletedTasks({ navigation }: any) {
         Object.values(base).map((txt) => cachedTranslate(txt))
       );
       const mapped = Object.keys(base).reduce((obj, k, i) => {
-        obj[k] = vals[i] || base[k];
+        obj[k as keyof Translations] = vals[i] || base[k as keyof Translations];
         return obj;
       }, {} as Translations);
 
@@ -121,86 +110,24 @@ export default function CompletedTasks({ navigation }: any) {
     }, [])
   );
 
-  const getAnimationValue = (id) => {
-    if (!animationValues.current[id]) {
-      animationValues.current[id] = {
-        height: new Animated.Value(0),
-        opacity: new Animated.Value(0),
-        expanded: false,
-      };
-    }
-    return animationValues.current[id];
+  const StarRating = ({ rating }: { rating: number }) => {
+    return (
+      <View style={styles.starRow}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Text
+            style={{
+              color: i <= rating ? Colors.star : Colors.stroke,
+              fontSize: RFPercentage(1.8),
+            }}
+          >
+            ★
+          </Text>
+        ))}
+      </View>
+    );
   };
 
-  const handleToggleExpand = (item) => {
-    const isExpanded = expandedId === item.id;
-    const nextExpanded = isExpanded ? null : item.id;
-    const animation = getAnimationValue(item.id);
-
-    // If we don't know the content height yet, we can't animate properly
-    if (nextExpanded === item.id && !contentHeights.current[item.id]) {
-      setExpandedId(nextExpanded);
-      return;
-    }
-
-    if (nextExpanded === item.id) {
-      // Expand animation
-      Animated.parallel([
-        Animated.timing(animation.height, {
-          toValue: contentHeights.current[item.id] || 100,
-          duration: 300,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: false,
-        }),
-        Animated.timing(animation.opacity, {
-          toValue: 1,
-          duration: 200,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: false,
-        }),
-      ]).start();
-      animation.expanded = true;
-    } else {
-      // Collapse animation
-      Animated.parallel([
-        Animated.timing(animation.height, {
-          toValue: 0,
-          duration: 250,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: false,
-        }),
-        Animated.timing(animation.opacity, {
-          toValue: 0,
-          duration: 150,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: false,
-        }),
-      ]).start();
-      animation.expanded = false;
-    }
-
-    setExpandedId(nextExpanded);
-  };
-
-  const measureContentHeight = (event, id) => {
-    const { height } = event.nativeEvent.layout;
-    if (height > 0 && !contentHeights.current[id]) {
-      contentHeights.current[id] = height;
-
-      // If this is the currently expanded item, animate to the measured height
-      if (expandedId === id) {
-        const animation = getAnimationValue(id);
-        Animated.timing(animation.height, {
-          toValue: height,
-          duration: 300,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: false,
-        }).start();
-      }
-    }
-  };
-
-  const renderItem = ({ item }: { item: any }) => {
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
     const details = item.taskDetails || {};
     const owner = details.user || {};
     const doneOn =
@@ -208,130 +135,156 @@ export default function CompletedTasks({ navigation }: any) {
     const cached = cache[item.id] || {};
     const desc = cached?.desc ?? tr.translating;
     const catName = cached?.category ?? tr.translating;
-    const shortDesc = desc.length > 70 ? `${desc.slice(0, 70)}…` : desc;
-
-    const isExpanded = expandedId === item.id;
-    const animation = getAnimationValue(item.id);
 
     return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => handleToggleExpand(item)}
+      <View
+        style={[
+          styles.taskCard,
+          {
+            backgroundColor: theme.white,
+            borderColor:
+              theme.mode === "dark" ? theme.border : "rgba(236, 238, 251, 1)",
+          },
+        ]}
       >
+        {/* Header Section */}
+        <View style={styles.header}>
+          <View style={styles.userInfo}>
+            <Image
+              style={styles.avatar}
+              source={
+                owner?.profileImage ? { uri: owner?.profileImage } : Icons.dp
+              }
+            />
+            <View style={styles.userDetails}>
+              <Text style={[styles.userName, { color: theme.darkGrey }]}>
+                {owner.userName || "User"}
+              </Text>
+              <View
+                style={[
+                  styles.categoryBadge,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? Colors.success2 + "30"
+                        : Colors.success2 + "20",
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    {
+                      color: item.reviewed ? Colors.success2 : Colors.success2,
+                    },
+                  ]}
+                >
+                  {catName}
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View
+            style={[
+              styles.statusIndicator,
+              {
+                backgroundColor: item.reviewed
+                  ? Colors.success2
+                  : Colors.primary,
+              },
+            ]}
+          >
+            <Text style={styles.statusText}>
+              {item.reviewed
+                ? `${t("completed.txt1")}`
+                : `${t("completed.txt2")}`}
+            </Text>
+          </View>
+        </View>
+
+        {/* Task Description */}
+        <View style={styles.descriptionContainer}>
+          <Text style={[styles.description, { color: theme.heading }]}>
+            {desc}
+          </Text>
+        </View>
+
+        {/* Date Section */}
         <View
           style={[
-            styles.card,
+            styles.dateContainer,
             {
-              backgroundColor: theme.white,
-              borderColor:
+              backgroundColor:
                 theme.mode === "dark"
-                  ? "rgba(117, 117, 117, 1)"
-                  : "rgba(244, 244, 244, 1)",
-              borderBottomWidth: RFPercentage(0.4),
+                  ? Colors.primary + "30"
+                  : Colors.primary + "10",
             },
           ]}
         >
-          {/* Header */}
-          <View style={styles.headerRow}>
-            <View style={styles.rowCenter}>
-              <Image
-                style={styles.avatar}
-                source={
-                  owner?.profileImage ? { uri: owner?.profileImage } : Icons.dp
-                }
-              />
-              <Text style={[styles.userName, { color: theme.heading }]}>
-                {owner.userName || "User"}
-              </Text>
-            </View>
-            <Text style={[styles.category, { color: theme.darkGrey }]}>{`${
-              tr.category || "Category"
-            }: ${catName}`}</Text>
-          </View>
+          <Text style={styles.dateLabel}>
+            {tr.completedOn || "Completed on"}
+          </Text>
+          <Text style={[styles.date, { color: theme.darkGrey }]}>
+            {getFormatedDate(doneOn)}
+          </Text>
+        </View>
 
-          {/* Short Description */}
-          <View style={styles.descWrap}>
-            <Text style={[styles.desc, { color: theme.darkGrey }]}>
-              {shortDesc}
-            </Text>
-          </View>
-
-          {/* Footer */}
-          <View style={styles.footerRow}>
-            <Text style={[styles.date, { color: theme.darkGrey }]}>{`${
-              tr.completedOn || "Completed on"
-            }: ${getFormatedDate(doneOn)}`}</Text>
-            <View>
-              {item.reviewed ? (
-                <Text
-                  style={{
-                    color: theme.primary,
-                    fontFamily: "Poppins_600SemiBold",
-                    fontSize: RFPercentage(1.8),
-                  }}
+        {/* Action Section */}
+        <View
+          style={[
+            styles.actionContainer,
+            {
+              borderTopColor:
+                theme.mode === "dark" ? theme.border : "rgba(236, 238, 251, 1)",
+            },
+          ]}
+        >
+          {item.reviewed ? (
+            <View style={styles.reviewSection}>
+              <View style={styles.reviewHeader}>
+                <Text style={styles.reviewTitle}>{`${t(
+                  "completed.txt3"
+                )}`}</Text>
+                <StarRating rating={item.rating || 0} />
+              </View>
+              {item.reviewText && (
+                <View
+                  style={[
+                    styles.reviewTextContainer,
+                    {
+                      backgroundColor:
+                        theme.mode === "dark"
+                          ? "rgba(24, 26, 40, 1)"
+                          : Colors.lightWhite,
+                    },
+                  ]}
                 >
-                  {t("reviews.txt4")}
-                </Text>
-              ) : (
-                <MyAppButton
-                  title={tr.review || "Review"}
-                  height={RFPercentage(4)}
-                  width={RFPercentage(12)}
-                  marginTop={0}
-                  onPress={() =>
-                    navigation.navigate("AddReview", { task: item })
-                  }
-                />
-              )}
-            </View>
-          </View>
-
-          {/* Animated Expanded Review Content */}
-          <Animated.View
-            style={{
-              height: animation.height,
-              opacity: animation.opacity,
-              overflow: "hidden",
-            }}
-          >
-            <View
-              onLayout={(event) => measureContentHeight(event, item.id)}
-              style={{ position: "absolute", width: "100%" }}
-            >
-              {item.reviewed && (
-                <View style={styles.reviewBox}>
-                  <View style={styles.starRow}>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Text
-                        key={i}
-                        style={{
-                          color:
-                            i <= (item.rating || 0)
-                              ? Colors.star
-                              : Colors.stroke,
-                          fontSize: RFPercentage(2),
-                        }}
-                      >
-                        ★
-                      </Text>
-                    ))}
-                  </View>
                   <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
-                    {item.reviewText || tr.reviewed || "Reviewed"}
+                    "{item.reviewText}"
                   </Text>
                 </View>
               )}
             </View>
-          </Animated.View>
+          ) : (
+            <View style={styles.reviewButtonContainer}>
+              <MyAppButton
+                title={tr.review || "Add Review"}
+                height={RFPercentage(5)}
+                width={RFPercentage(20)}
+                marginTop={0}
+                onPress={() => navigation.navigate("AddReview", { task: item })}
+              />
+            </View>
+          )}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      {/* Nav */}
-      <View style={styles.navContainer}>
+    <View style={[styles.container, { backgroundColor: theme.white }]}>
+      {/* Header */}
+      <View style={styles.headerContainer}>
         <Nav
           dpNull
           marginTop={RFPercentage(5)}
@@ -340,162 +293,271 @@ export default function CompletedTasks({ navigation }: any) {
           title={t("profile.txt4")}
         />
       </View>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[Colors.primary]}
-            tintColor={Colors.primary}
-          />
-        }
-      >
+
+      {/* Stats Overview */}
+      {!loading && tasks.length > 0 && (
+        <View
+          style={[
+            styles.statsContainer,
+            {
+              backgroundColor:
+                theme.mode === "dark" ? Colors.primary + "30" : Colors.white,
+            },
+          ]}
+        >
+          <View style={[styles.statItem]}>
+            <Text style={styles.statNumber}>{tasks.length}</Text>
+            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
+              {`${t("completed.txt4")}`}
+            </Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>
+              {tasks.filter((task) => task.reviewed).length}
+            </Text>
+            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
+              {`${t("completed.txt5")}`}
+            </Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>
+              {tasks.filter((task) => !task.reviewed).length}
+            </Text>
+            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
+              {`${t("completed.txt6")}`}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Content */}
+      <View style={styles.content}>
         {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={Colors.primary}
-            style={styles.activityIndicator}
-          />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>{`${t("completed.txt7")}`}</Text>
+          </View>
         ) : tasks.length === 0 ? (
-          <NotFound title={tr.noTasks || "No completed tasks"} />
+          <NotFound title={tr.noTasks || "No completed tasks yet"} />
         ) : (
           <FlatList
             data={tasks}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
-            contentContainerStyle={styles.flatListContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[Colors.primary, Colors.secondary]}
+                tintColor={Colors.primary}
+              />
+            }
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
           />
         )}
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
-/* ---------- styles ---------- */
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
+  },
+  headerContainer: {
     backgroundColor: Colors.white,
-  },
-  scrollView: { width: "100%" },
-  scrollViewContent: { flexGrow: 1 },
-
-  navContainer: {},
-
-  headerWrap: {
-    width: "90%",
-    alignSelf: "center",
-    marginTop: RFPercentage(3.5),
-  },
-  headerText: {
-    color: Colors.grey,
-    fontSize: RFPercentage(1.9),
-    fontFamily: "Poppins_400Regular",
-  },
-  separator: {
-    width: "75%",
-    height: RFPercentage(0.1),
-    backgroundColor: "rgb(211,211,211)",
-    marginTop: RFPercentage(1),
-  },
-
-  /* card */
-  card: {
-    width: "90%",
-    alignSelf: "center",
-    marginTop: RFPercentage(3),
-    borderRadius: RFPercentage(1.6),
-    backgroundColor: Colors.white,
-    borderColor: Colors.border,
-    borderWidth: RFPercentage(0.1),
-    elevation: 2,
-    shadowColor: "#fff",
+    shadowColor: Colors.primary + "20",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  headerRow: {
-    width: "90%",
-    alignSelf: "center",
-    marginTop: RFPercentage(1.8),
+  statsContainer: {
+    flexDirection: "row",
+    margin: RFPercentage(2),
+    padding: RFPercentage(2),
+    borderRadius: RFPercentage(2),
+    shadowColor: Colors.primary + "30",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statNumber: {
+    fontSize: RFPercentage(3),
+    fontFamily: "Poppins_700Bold",
+    color: Colors.primary,
+    marginBottom: RFPercentage(0.5),
+  },
+  statLabel: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_500Medium",
+    color: Colors.darkGrey,
+    textAlign: "center",
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: Colors.border,
+    marginHorizontal: RFPercentage(1),
+  },
+  content: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_500Medium",
+    color: Colors.darkGrey,
+    marginTop: RFPercentage(2),
+  },
+  listContent: {
+    padding: RFPercentage(2),
+    paddingTop: RFPercentage(1),
+  },
+  taskCard: {
+    backgroundColor: Colors.white,
+    borderRadius: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    padding: RFPercentage(2.5),
+    shadowColor: Colors.primary + "40",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+    borderWidth: 1,
+  },
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    marginBottom: RFPercentage(1.5),
   },
-  rowCenter: {
+  userInfo: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
   avatar: {
     width: RFPercentage(5.5),
     height: RFPercentage(5.5),
-    borderRadius: RFPercentage(100),
+    borderRadius: RFPercentage(3),
+    borderWidth: 2,
     borderColor: Colors.primary,
-    borderWidth: RFPercentage(0.1),
+  },
+  userDetails: {
+    marginLeft: RFPercentage(1.5),
+    flex: 1,
   },
   userName: {
-    color: Colors.darkGrey2,
-    fontSize: RFPercentage(1.9),
-    fontFamily: "Poppins_500Medium",
-    marginLeft: RFPercentage(0.9),
-  },
-  category: {
-    color: Colors.darkGrey2,
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_500Medium",
-  },
-  descWrap: {
-    marginLeft: RFPercentage(2.6),
-    marginTop: RFPercentage(1.5),
-    width: "90%",
-  },
-  desc: {
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_600SemiBold",
     color: Colors.darkGrey,
+    marginBottom: RFPercentage(0.5),
+  },
+  categoryBadge: {
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: RFPercentage(1),
+    alignSelf: "flex-start",
+  },
+  categoryText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_500Medium",
+  },
+  statusIndicator: {
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(1),
+  },
+  statusText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.white,
+  },
+  descriptionContainer: {
+    marginBottom: RFPercentage(1.5),
+  },
+  description: {
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
+    color: Colors.heading,
+    lineHeight: RFPercentage(2.2),
+  },
+  dateContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(2),
+    padding: RFPercentage(1.2),
+    backgroundColor: Colors.lightPrimary,
+    borderRadius: RFPercentage(1),
+  },
+  dateLabel: {
     fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.primary,
+    marginRight: RFPercentage(0.5),
   },
   date: {
-    color: Colors.darkGrey,
-    fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.6),
-  },
-  reviewBtnWrap: {},
-  reviewed: {
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
-    right: RFPercentage(1),
+    color: Colors.darkGrey,
   },
-
-  /* loaders & lists */
-  activityIndicator: {
-    marginTop: RFPercentage(8),
+  actionContainer: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingTop: RFPercentage(1.5),
   },
-  flatListContent: {
-    paddingBottom: RFPercentage(5),
-    paddingTop: RFPercentage(2),
+  reviewSection: {
+    // Review content styles
   },
-  reviewBox: {
-    width: "90%",
-    alignSelf: "center",
-    paddingBottom: RFPercentage(1.5),
+  reviewHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: RFPercentage(1),
+  },
+  reviewTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.primary,
+  },
+  reviewTextContainer: {
+    backgroundColor: Colors.lightWhite,
+    padding: RFPercentage(1.5),
+    borderRadius: RFPercentage(1),
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.star,
+  },
+  reviewText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    color: Colors.darkGrey,
+    fontStyle: "italic",
+    lineHeight: RFPercentage(2),
+  },
+  reviewButtonContainer: {
+    alignItems: "flex-end",
   },
   starRow: {
     flexDirection: "row",
-    marginBottom: RFPercentage(0.8),
   },
-  reviewText: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.6),
-    lineHeight: RFPercentage(2),
-    // marginVertical: 5,
-  },
-  footerRow: {
-    flexDirection: "row",
+  star: {
+    width: RFPercentage(2.2),
+    height: RFPercentage(2.2),
+    borderRadius: RFPercentage(0.5),
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "space-between",
-    width: "90%",
-    alignSelf: "center",
-    paddingVertical: RFPercentage(1.2),
+    marginHorizontal: RFPercentage(0.2),
   },
 });

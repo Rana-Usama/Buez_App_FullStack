@@ -36,6 +36,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { selectLocation } from "../redux/Actions";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { useLocation } from "../utils/useLocation";
+import { formatCurrency } from "../utils/currencyChange";
 
 const { width } = Dimensions.get("window");
 
@@ -190,8 +191,6 @@ function Home({ navigation }) {
     displayTasks.forEach((_, i) => (idx[i] = 0));
     setActiveIndices(idx);
   }, [displayTasks]);
-
-  
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -362,6 +361,16 @@ function Home({ navigation }) {
           {loading ? (
             <View style={{ marginTop: RFPercentage(20) }}>
               <ActivityIndicator size="large" color={theme.primary} />
+              <Text
+                style={{
+                  color: Colors.primary,
+                  fontSize: RFPercentage(1.8),
+                  fontFamily: "Poppins_500Medium",
+                  marginTop: RFPercentage(0.5),
+                }}
+              >
+                {t("home.txt12")}
+              </Text>
             </View>
           ) : (
             <>
@@ -441,8 +450,8 @@ function Home({ navigation }) {
                         <Text
                           style={[styles.userName, { color: theme.heading }]}
                         >
-                          {item?.user?.userName?.length > 8
-                            ? `${item?.user?.userName.substring(0, 8)}...`
+                          {item?.user?.userName?.length > 12
+                            ? `${item?.user?.userName.substring(0, 12)}...`
                             : item?.user?.userName}
                         </Text>
                         <Text
@@ -483,7 +492,7 @@ function Home({ navigation }) {
                               ]}
                             >
                               {item.compensationType === "Monitarely"
-                                ? `$${item.monitarily}`
+                                ? `${formatCurrency(item.monitarily)}`
                                 : item.otherCompensation?.substr(0, 20) +
                                   (item.otherCompensation?.length > 20
                                     ? "..."

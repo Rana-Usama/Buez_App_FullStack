@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TextInput,
   KeyboardAvoidingView,
+  Animated,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -58,11 +59,15 @@ type Translations = {
   reviewSubmitted: string;
   error: string;
   couldNotSubmit: string;
+  taskCompleted: string;
+  writeReview: string;
+  characters: string;
 };
 
 interface ParamsType {
   task?: any;
 }
+
 function AddReview() {
   const navigation = useNavigation();
   const { params } = useRoute();
@@ -81,7 +86,7 @@ function AddReview() {
   const originalDesc = task?.taskDetails?.description ?? "";
   const completedOn = moment(
     task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()
-  ).format("MMM-D-YYYY");
+  ).format("MMM D, YYYY");
 
   const [lang, setLang] = useState("en");
   const [tr, setTr] = useState<Partial<Translations>>({});
@@ -90,8 +95,27 @@ function AddReview() {
   const [rating, setRating] = useState([false, false, false, false, false]);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [starAnimations] = useState(
+    Array(5)
+      .fill(null)
+      .map(() => new Animated.Value(1))
+  );
 
-  // Save notification in Firestore
+  const animateStar = (index: number) => {
+    Animated.sequence([
+      Animated.timing(starAnimations[index], {
+        toValue: 1.3,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(starAnimations[index], {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
   const saveReviewNotification = async () => {
     try {
       await addDoc(collection(FIREBASE_DB, "notifications"), {
@@ -115,7 +139,7 @@ function AddReview() {
         },
         review: {
           text: reviewText,
-          rating: rating.filter(Boolean).length, // stars
+          rating: rating.filter(Boolean).length,
         },
         type: "review_added",
         timestamp: new Date().toISOString(),
@@ -126,9 +150,8 @@ function AddReview() {
     }
   };
 
-  // Send push notification to the user
   const sendReviewPushNotification = async () => {
-    if (!recipientUser?.token) return; // no token, skip
+    if (!recipientUser?.token) return;
     try {
       const previewText =
         reviewText.length > 50
@@ -169,14 +192,18 @@ function AddReview() {
         reviewSubmitted: "Review submitted!",
         error: "Error",
         couldNotSubmit: "Could not submit review.",
+        taskCompleted: "Task Completed",
+        writeReview: "Write your review",
+        characters: "characters",
       };
       const vals = await Promise.all(
         Object.values(phrases).map((txt) => cachedTranslate(txt))
       );
       const map = Object.keys(phrases).reduce((acc, k, i) => {
-        acc[k] = vals[i] || phrases[k];
+        acc[k as keyof Translations] =
+          vals[i] || phrases[k as keyof Translations];
         return acc;
-      }, {});
+      }, {} as Translations);
       setTr(map);
     })();
   }, []);
@@ -193,7 +220,17 @@ function AddReview() {
     })();
   }, [originalDesc, lang]);
 
-  const toggleStar = (idx) => setRating(rating.map((_, i) => i <= idx));
+  const toggleStar = (idx: number) => {
+    const newRating = rating.map((_, i) => i <= idx);
+    setRating(newRating);
+
+    // Animate all stars up to the selected one
+    newRating.forEach((selected, index) => {
+      if (selected && index <= idx) {
+        animateStar(index);
+      }
+    });
+  };
 
   const submitReview = async () => {
     const stars = rating.filter(Boolean).length;
@@ -254,9 +291,17 @@ function AddReview() {
     }
   };
 
+  const getStarColor = (selected: boolean) => {
+    return selected
+      ? Colors.star
+      : theme.mode === "dark"
+      ? Colors.darkGrey
+      : Colors.stroke;
+  };
+
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={[styles.container, { backgroundColor: theme.white }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
@@ -265,7 +310,8 @@ function AddReview() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.navContainer}>
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: theme.white }]}>
           <Nav
             dpNull
             marginTop={RFPercentage(5)}
@@ -274,123 +320,171 @@ function AddReview() {
             title={tr.addReview || "Add Review"}
           />
         </View>
-        <View style={[styles.screen, { backgroundColor: theme.white }]}>
-          <View style={styles.profileContainer}>
-            <Image
-              source={
-                recipientUser?.profileImage
-                  ? { uri: recipientUser?.profileImage }
-                  : Icons.dp
-              }
-              resizeMode="cover"
-              style={styles.profileImage}
-            />
-            <View style={styles.nameRow}>
-              <Text
-                style={[
-                  styles.nameText,
-                  { color: theme.heading, fontFamily: "Poppins_500Medium" },
-                ]}
-              >
-                {recipientUser.userName}
-              </Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: RFPercentage(1),
-              }}
-            >
+
+        {/* Main Content */}
+        <View style={styles.content}>
+          {/* User Card */}
+          <View
+            style={[
+              styles.userCard,
+              {
+                backgroundColor: theme.white,
+                borderColor:
+                  theme.mode === "dark"
+                    ? theme.border
+                    : "rgba(236, 238, 251, 1)",
+              },
+            ]}
+          >
+            <View style={styles.userHeader}>
               <Image
-                source={Icons.location}
-                resizeMode="contain"
-                style={{ width: RFPercentage(1.8), height: RFPercentage(1.8) }}
-                tintColor={theme.darkGrey}
+                source={
+                  recipientUser?.profileImage
+                    ? { uri: recipientUser?.profileImage }
+                    : Icons.dp
+                }
+                resizeMode="cover"
+                style={styles.profileImage}
               />
-              <Text
+              <View style={styles.userInfo}>
+                <Text style={[styles.userName, { color: theme.heading }]}>
+                  {recipientUser.userName}
+                </Text>
+                <View style={styles.locationRow}>
+                  <FontAwesome
+                    name="map-marker"
+                    size={RFPercentage(1.8)}
+                    color={theme.darkGrey}
+                  />
+                  <Text
+                    style={[styles.locationText, { color: theme.darkGrey }]}
+                  >
+                    {task?.taskDetails?.address?.name ||
+                      "Location not specified"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.taskSection}>
+              <Text style={[styles.taskLabel, { color: theme.primary }]}>
+                {tr.taskCompleted || "Task Completed"}
+              </Text>
+              <Text style={[styles.taskDescription, { color: theme.heading }]}>
+                {taskDesc || tr.translating || "Translating..."}
+              </Text>
+              <View
                 style={[
-                  styles.descText,
+                  styles.dateContainer,
                   {
-                    color: theme.darkGrey,
-                    fontFamily: "Poppins_500Medium",
-                    marginTop: 2,
-                    marginLeft: RFPercentage(0.4),
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? Colors.primary + "20"
+                        : Colors.primary + "10",
                   },
                 ]}
               >
-                {task?.taskDetails?.address?.name}
-              </Text>
+                <FontAwesome
+                  name="calendar"
+                  size={RFPercentage(1.6)}
+                  color={Colors.primary}
+                />
+                <Text style={[styles.dateText, { color: Colors.primary }]}>
+                  {completedOn}
+                </Text>
+              </View>
             </View>
-
-            <Text style={[styles.descText, { color: theme.darkGrey }]}>
-              {taskDesc || tr.translating || "Translating..."}
-            </Text>
-            {!!completedOn && (
-              <Text
-                style={[
-                  styles.completedText,
-                  { color: theme.darkGrey, fontFamily: "Poppins_500Medium" },
-                ]}
-              >{`${tr.completedOn || "Completed on"}: ${completedOn}`}</Text>
-            )}
           </View>
 
-          <View style={styles.ratingContainer}>
-            <Text style={[styles.experienceText, { color: theme.heading }]}>
+          {/* Rating Section */}
+          <View
+            style={[
+              styles.ratingCard,
+              {
+                backgroundColor: theme.white,
+                borderColor:
+                  theme.mode === "dark"
+                    ? theme.border
+                    : "rgba(236, 238, 251, 1)",
+              },
+            ]}
+          >
+            <Text style={[styles.ratingTitle, { color: theme.heading }]}>
               {tr.howExperience || "How Was Your Experience?"}
             </Text>
-            <View style={styles.starRow}>
-              {rating.map((sel, idx) => (
+            <View style={styles.starsContainer}>
+              {rating.map((selected, index) => (
                 <TouchableOpacity
+                  key={index}
                   activeOpacity={0.8}
-                  key={idx}
-                  onPress={() => toggleStar(idx)}
+                  onPress={() => toggleStar(index)}
                 >
-                  <FontAwesome
-                    name="star"
-                    size={RFPercentage(3)}
-                    color={sel ? Colors.star : Colors.stroke}
-                    style={styles.starIcon}
-                  />
+                  <Animated.View
+                    style={{ transform: [{ scale: starAnimations[index] }] }}
+                  >
+                    <FontAwesome
+                      name="star"
+                      size={RFPercentage(4)}
+                      color={getStarColor(selected)}
+                      style={{ margin: 2 }}
+                    />
+                  </Animated.View>
                 </TouchableOpacity>
               ))}
             </View>
+            <Text style={[styles.ratingHint, { color: theme.lightGrey }]}>
+              Tap to rate {rating.filter(Boolean).length}/5
+            </Text>
           </View>
 
-          <View style={styles.reviewContainer}>
-            <TextInput
-              value={reviewText}
-              onChangeText={(txt) => txt.length <= 150 && setReviewText(txt)}
-              placeholder={tr.shareThoughts || "Share your thoughts..."}
-              multiline
-              placeholderTextColor={theme.inputFieldPlaceholder}
-              maxLength={150}
+          {/* Review Input Section */}
+          <View style={[styles.reviewCard, { backgroundColor: theme.white }]}>
+            <Text style={[styles.reviewTitle, { color: theme.heading }]}>
+              {tr.writeReview || "Write your review"}
+            </Text>
+            <View
               style={[
-                styles.reviewInput,
-                { borderColor: theme.border, color: theme.heading },
+                styles.inputContainer,
+                {
+                  backgroundColor: theme.white,
+                  borderColor: theme.border,
+                },
               ]}
-            />
-            <View style={styles.charCounterContainer}>
-              <Text
-                style={[
-                  styles.charCounterText,
-                  {
-                    color:
-                      reviewText.length === 150 ? theme.red : theme.lightGrey,
-                  },
-                ]}
-              >
-                {reviewText.length} / 150
-              </Text>
+            >
+              <TextInput
+                value={reviewText}
+                onChangeText={(txt) => txt.length <= 150 && setReviewText(txt)}
+                placeholder={tr.shareThoughts || "Share your thoughts..."}
+                placeholderTextColor={theme.inputFieldPlaceholder}
+                multiline
+                maxLength={150}
+                style={[styles.reviewInput, { color: theme.heading }]}
+              />
+              <View style={styles.counterContainer}>
+                <Text
+                  style={[
+                    styles.counterText,
+                    {
+                      color:
+                        reviewText.length === 150
+                          ? Colors.red
+                          : theme.lightGrey,
+                    },
+                  ]}
+                >
+                  {reviewText.length}/150 {tr.characters || "characters"}
+                </Text>
+              </View>
             </View>
-
-            <MyAppButton
-              title={tr.addReview || "Add Review"}
-              disabled={submitting}
-              loading={submitting}
-              onPress={submitReview}
-            />
+            <View style={{ alignSelf: "center" }}>
+              <MyAppButton
+                title={tr.addReview || "Add Review"}
+                disabled={submitting || reviewText.trim().length === 0}
+                loading={submitting}
+                onPress={submitReview}
+                marginTop={RFPercentage(1)}
+              />
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -399,95 +493,158 @@ function AddReview() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
-    backgroundColor: Colors.white,
   },
-  scrollView: { width: "100%" },
-  scrollViewContent: { width: "100%", paddingBottom: RFPercentage(5) },
-  navContainer: {},
-  profileContainer: {
-    width: "90%",
-    alignSelf: "center",
-    marginTop: RFPercentage(4),
+  scrollView: {
+    flex: 1,
   },
-  profileImage: {
-    width: RFPercentage(14),
-    height: RFPercentage(14),
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    borderRadius: RFPercentage(100),
+  scrollViewContent: {
+    flexGrow: 1,
   },
-  nameRow: {
+  header: {
+    shadowColor: Colors.primary + "20",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  content: {
+    flex: 1,
+    padding: RFPercentage(2),
+  },
+  userCard: {
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2.5),
+    marginBottom: RFPercentage(2),
+    shadowColor: Colors.primary + "30",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 6,
+    borderWidth: 1,
+  },
+  userHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: RFPercentage(2),
+    marginBottom: RFPercentage(2),
   },
-  nameText: {
-    color: Colors.darkGrey2,
-    fontFamily: "Poppins_500Medium",
-    fontSize: RFPercentage(2.3),
+  profileImage: {
+    width: RFPercentage(8),
+    height: RFPercentage(8),
+    borderRadius: RFPercentage(4),
+    borderWidth: 2,
+    borderColor: Colors.primary,
   },
-  descText: {
-    color: Colors.grey,
+  userInfo: {
+    marginLeft: RFPercentage(2),
+    flex: 1,
+  },
+  userName: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(0.5),
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  locationText: {
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.8),
+    marginLeft: RFPercentage(0.5),
+  },
+  taskSection: {
     marginTop: RFPercentage(1),
   },
-  completedText: {
-    color: Colors.grey,
-    fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.7),
-    marginTop: RFPercentage(0.5),
-  },
-  ratingContainer: {
-    width: "90%",
-    alignSelf: "center",
-    alignItems: "center",
-    marginTop: RFPercentage(6),
-  },
-  experienceText: {
-    color: Colors.darkGrey2,
+  taskLabel: {
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
+    marginBottom: RFPercentage(0.5),
+  },
+  taskDescription: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2.2),
+    marginBottom: RFPercentage(1.5),
+  },
+  dateContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: RFPercentage(1.2),
+    borderRadius: RFPercentage(1),
+    alignSelf: "flex-start",
+  },
+  dateText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_600SemiBold",
+    marginLeft: RFPercentage(0.5),
+  },
+  ratingCard: {
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2.5),
+    marginBottom: RFPercentage(2),
+    alignItems: "center",
+    shadowColor: Colors.primary + "30",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 6,
+    borderWidth: 1,
+  },
+  ratingTitle: {
     fontSize: RFPercentage(2),
+    fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(2),
     textAlign: "center",
   },
-  starRow: {
+  starsContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: RFPercentage(1),
   },
-  starIcon: {
-    marginHorizontal: 5,
+  ratingHint: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
   },
-  reviewContainer: {
-    width: "90%",
-    alignItems: "center",
-    alignSelf: "center",
-    marginTop: RFPercentage(4),
+  reviewCard: {
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2.5),
+    shadowColor: Colors.primary + "30",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  reviewTitle: {
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(1.5),
+  },
+  inputContainer: {
+    borderRadius: RFPercentage(1.5),
+    borderWidth: 1,
+    marginBottom: RFPercentage(1),
+    overflow: "hidden",
   },
   reviewInput: {
-    borderWidth: 1,
-    width: "100%",
-    height: RFPercentage(15),
-    borderRadius: RFPercentage(1.3),
-    borderColor: "rgba(169,166,166,0.7)",
-    padding: RFPercentage(1.4),
+    minHeight: RFPercentage(15),
+    padding: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     textAlignVertical: "top",
-    fontSize: RFPercentage(1.8),
   },
-  charCounterContainer: {
-    width: "100%",
+  counterContainer: {
+    paddingHorizontal: RFPercentage(2),
+    paddingBottom: RFPercentage(1),
     alignItems: "flex-end",
-    marginTop: RFPercentage(0.8),
-    bottom: RFPercentage(3.5),
-    right: RFPercentage(1),
   },
-  charCounterText: {
-    fontSize: RFPercentage(1.7),
+  counterText: {
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
+  },
+  submitButton: {
+    marginTop: RFPercentage(1),
   },
 });
 

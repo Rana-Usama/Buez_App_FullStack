@@ -12,7 +12,9 @@
     "email": "Email",
     "password": "Mot de passe",
     "name": "Nom",
-    "confirm": "Confirmer le mot de passe"
+    "confirm": "Confirmer le mot de passe",
+    "currency": "ex. 90€",
+    "sign": "€"
   },
   "validations": {
     "inValid": "Email invalide",
@@ -158,7 +160,8 @@
     "txt8": "Autre",
     "txt9": "Demandes récentes",
     "txt10": "Rémunération",
-    "txt11": "Aucun enregistrement trouvé !"
+    "txt11": "Aucun enregistrement trouvé !",
+    "txt12" : "Chargement des demandes..."
   },
   "details": {
     "txt1": "Détails",
@@ -180,7 +183,7 @@
     "txt1": "Mes demandes",
     "txt2": "Actives",
     "txt3": "Terminées",
-    "txt4": "Publié le :",
+    "txt4": "Publié:",
     "txt5": "Marquer comme terminée",
     "txt6": "Annuler",
     "txt7": "Êtes‑vous sûr de vouloir supprimer\ncette demande ?",
@@ -188,7 +191,8 @@
     "txt9": "Reposter",
     "txt10": "Accepté",
     "txt11": "Accepté par :",
-    "txt12": "Demande acceptée annulée avec succès."
+    "txt12": "Demande acceptée annulée avec succès.",
+    "txt13": "Chargement de vos demandes..."
   },
   "postRequest": {
     "txt1": "Publier une demande",
@@ -199,7 +203,7 @@
     "txt6": "Autre",
     "txt7": "Mode de rémunération",
     "txt8": "Description",
-   "txt9": "Emplacement (Visible par les utilisateurs dans un rayon de 100 km)",
+    "txt9": "Emplacement (Visible par les utilisateurs dans un rayon de 100 km)",
     "txt10": "Détails de la rémunération, ex. deux billets de cinéma",
     "txt11": "ex. 100 CHF",
     "txt12": "Télécharger des photos depuis la galerie",
@@ -211,7 +215,8 @@
     "txt2": "Tous",
     "txt3": "Non lus",
     "txt4": "Aucun message non lu",
-    "txt5": "Pas encore de message"
+    "txt5": "Pas encore de message",
+    "txt6" : "Dis bonjour à"
   },
   "chat": {
     "txt1": "Charger les messages précédents",
@@ -296,7 +301,17 @@
   },
   "successScreen": {
     "txt1": "Demande publiée avec succès",
-    "txt2": "Accueil"
+    "txt2": "Accueil",
+    "txt3": "Votre tâche a été publiée avec succès !",
+    "txt4": "Visibilité de la tâche",
+    "txt5": "Votre tâche est maintenant visible pour les aides potentielles et sera automatiquement masquée une fois qu'elle sera acceptée.",
+    "txt6": "Règle du premier accepté",
+    "txt7": "La première personne qui accepte votre tâche obtient des droits exclusifs. Les autres utilisateurs ne la verront pas pendant la négociation.",
+    "txt8": "Pas d'accord ? Republiez facilement",
+    "txt9": "Si aucun accord n'est trouvé, vous pouvez republier votre tâche depuis l'onglet 'Mes demandes' sous le filtre 'Actif'.",
+    "txt10": "Restez informé",
+    "txt11": "Vous recevrez des notifications lorsque quelqu’un s’intéresse à votre tâche ou vous envoie une offre.",
+    "txt12": "Voir mes demandes"
   },
   "profile": {
     "txt1": "Profil",
@@ -316,9 +331,12 @@
     "txt1": "Mes avis",
     "txt2": "Daté :",
     "txt3": "Par :",
-    "txt4": "Évalué"
+    "txt4": "Évalué",
+    "txt5": "Note moyenne",
+    "txt6": "Basé sur",
+    "txt7": "avis",
+    "txt8": "avis"
   },
-
   "bottomTab": {
     "txt1": "Mes Dem.",
     "txt2": "Publier",
@@ -334,5 +352,19 @@
   "password": {
     "txt1": "Vous vous êtes connecté avec Google. Pour modifier votre mot de passe, veuillez gérer votre compte Google.",
     "txt2": "Compte Google"
+  },
+  "notifications": {
+    "txt1": "Chargement des notifications...",
+    "txt2": "Lorsque vous recevrez des notifications, elles apparaîtront ici",
+    "txt3": "Évaluation:"
+  },
+  "completed": {
+    "txt1": "ÉVALUÉ",
+    "txt2": "TERMINÉ",
+    "txt3": "Votre avis",
+    "txt4": "Tâches terminées",
+    "txt5": " Évalué",
+    "txt6": "En attente d’évaluation",
+    "txt7": "Chargement de vos tâches terminées..."
   }
 }

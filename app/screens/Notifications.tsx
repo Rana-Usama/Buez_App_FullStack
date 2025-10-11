@@ -4,25 +4,16 @@ import {
   Text,
   StyleSheet,
   Image,
-  ScrollView,
-  Platform,
   SectionList,
   TouchableOpacity,
   ActivityIndicator,
   Animated,
   Easing,
+  RefreshControl,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  writeBatch,
-  doc,
-  orderBy,
-} from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { createNewChat } from "../services/Chat.service";
 import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
@@ -32,11 +23,10 @@ import { useUser } from "../contexts/user.context";
 import { useNotifications } from "../contexts/notification.context";
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
-import NotFound from "../components/common/NotFound";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
-import { updateDoc } from "firebase/firestore";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { MaterialIcons, Feather, Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 const getTargetLanguage = async () => {
   try {
@@ -51,6 +41,7 @@ const sameDay = (a, b) =>
   a.getDate() === b.getDate() &&
   a.getMonth() === b.getMonth() &&
   a.getFullYear() === b.getFullYear();
+
 const getSectionTitle = (dateObj, lang) => {
   const today = new Date();
   const yesterday = new Date();
@@ -77,6 +68,10 @@ interface Translations {
   noReviewText: string;
   sentNotification: string;
   view: string;
+  markAllRead: string;
+  pullToRefresh: string;
+  taskCompleted: string;
+  viewTask: string;
 }
 
 export default function Notifications({ navigation }) {
@@ -93,8 +88,13 @@ export default function Notifications({ navigation }) {
     noReviewText: "",
     sentNotification: "",
     view: "",
+    markAllRead: "",
+    pullToRefresh: "",
+    taskCompleted: "",
+    viewTask: "",
   });
-  const [busy, setBusy] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [raw, setRaw] = useState([]);
   const [sections, setSections] = useState([]);
   const [descCache, setDescCache] = useState({});
@@ -104,11 +104,12 @@ export default function Notifications({ navigation }) {
   const { theme } = useAppTheme();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const { notifications, markAsRead } = useNotifications();
+  const { t } = useTranslation();
 
-  // Create a ref to store animation values for each notification
+  // Animation refs
   const animationValues = useRef({});
-  // Create a ref to store content heights for each notification
   const contentHeights = useRef({});
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     (async () => {
@@ -126,6 +127,10 @@ export default function Notifications({ navigation }) {
         noReviewText: "No review text",
         sentNotification: "sent you a notification",
         view: "View",
+        markAllRead: "Mark All Read",
+        pullToRefresh: "Pull to refresh",
+        taskCompleted: "marked your accepted task as completed!", // Add this
+        viewTask: "View Task", // Add this
       };
 
       const translatedVals = await Promise.all(
@@ -142,29 +147,40 @@ export default function Notifications({ navigation }) {
     })();
   }, []);
 
+  const fetchNotifications = async () => {
+    if (!currentUserId) return;
+    setBusy(true);
+    try {
+      const q = query(
+        collection(FIREBASE_DB, "notifications"),
+        where("receiver.userId", "==", currentUserId),
+        orderBy("timestamp", "desc")
+      );
+      const snap = await getDocs(q);
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setRaw(docs);
+
+      // Fade in animation
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+    } catch (e) {
+      console.log("Notification fetch error:", e);
+    } finally {
+      setBusy(false);
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    if (!lang || !currentUserId) return;
-    (async () => {
-      setBusy(true);
-      try {
-        const q = query(
-          collection(FIREBASE_DB, "notifications"),
-          where("receiver.userId", "==", currentUserId)
-          // orderBy("createdAt", "desc") // 👈 newest first
-        );
-        const snap = await getDocs(q);
-        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        setRaw(docs);
-      } catch (e) {
-        console.log("Notification fetch error:", e);
-      } finally {
-        setBusy(false);
-      }
-    })();
+    fetchNotifications();
   }, [lang, currentUserId]);
 
   useEffect(() => {
     if (!raw.length) return setSections([]);
+
     const grouped = new Map();
     raw.forEach((item) => {
       const title = getSectionTitle(new Date(item.timestamp), lang);
@@ -172,6 +188,7 @@ export default function Notifications({ navigation }) {
       arr.push(item);
       grouped.set(title, arr);
     });
+
     const built = Array.from(grouped.entries())
       .map(([title, data]) => ({ title, data }))
       .sort((a, b) => {
@@ -190,7 +207,6 @@ export default function Notifications({ navigation }) {
 
       await Promise.all(
         raw.map(async (item) => {
-          // if we already have this item in cache, skip
           if (newCache[item.id] !== undefined) return;
 
           if (item.type === "review_added") {
@@ -220,6 +236,11 @@ export default function Notifications({ navigation }) {
     })();
   }, [raw, lang]);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchNotifications();
+  }, []);
+
   const handleStartChat = useCallback(
     async (receiverUser) => {
       try {
@@ -237,6 +258,41 @@ export default function Notifications({ navigation }) {
     [currentUserId, currentUser?.userData?.userName]
   );
 
+  const getNotificationIcon = (type, isRead) => {
+    const iconColor = isRead ? theme.primary : Colors.primary;
+
+    switch (type) {
+      case "task_acceptance":
+        return (
+          <Ionicons
+            name="checkmark-circle"
+            size={RFPercentage(2.2)}
+            color={iconColor}
+          />
+        );
+      case "review_added":
+        return (
+          <Ionicons name="star" size={RFPercentage(2.2)} color={iconColor} />
+        );
+      case "task_completion": // Add this case
+        return (
+          <Ionicons
+            name="checkmark-done-circle"
+            size={RFPercentage(2.2)}
+            color={iconColor}
+          />
+        );
+      default:
+        return (
+          <Ionicons
+            name="notifications"
+            size={RFPercentage(2.2)}
+            color={iconColor}
+          />
+        );
+    }
+  };
+
   const getAnimationValue = (id) => {
     if (!animationValues.current[id]) {
       animationValues.current[id] = {
@@ -253,7 +309,6 @@ export default function Notifications({ navigation }) {
     const nextExpanded = isExpanded ? null : item.id;
     const animation = getAnimationValue(item.id);
 
-    // If we don't know the content height yet, we can't animate properly
     if (nextExpanded === item.id && !contentHeights.current[item.id]) {
       setExpandedId(nextExpanded);
       if (!isExpanded && !item.isRead) {
@@ -266,7 +321,6 @@ export default function Notifications({ navigation }) {
     }
 
     if (nextExpanded === item.id) {
-      // Expand animation
       Animated.parallel([
         Animated.timing(animation.height, {
           toValue: contentHeights.current[item.id] || 100,
@@ -283,7 +337,6 @@ export default function Notifications({ navigation }) {
       ]).start();
       animation.expanded = true;
     } else {
-      // Collapse animation
       Animated.parallel([
         Animated.timing(animation.height, {
           toValue: 0,
@@ -326,25 +379,11 @@ export default function Notifications({ navigation }) {
     }
   };
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item, index }) => {
     const isExpanded = expandedId === item.id;
     const animation = getAnimationValue(item.id);
     const senderName = item.sender?.userName || "Someone";
     const profileImage = item.sender?.profileImage || null;
-    const translatedDesc = descCache[item.id];
-    const taskDescription = translatedDesc ?? tr.translating;
-
-    const shortDesc =
-      taskDescription.length > 30
-        ? `${taskDescription.substring(0, 30)}…`
-        : taskDescription;
-
-    const postedTime = new Date(item.timestamp).toLocaleTimeString(lang, {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    });
-
     const cacheEntry = descCache[item.id];
     const translatedText =
       cacheEntry && "text" in cacheEntry ? cacheEntry.text : tr.translating;
@@ -363,164 +402,223 @@ export default function Notifications({ navigation }) {
     } else if (item.type === "review_added") {
       mainText = `${senderName} ${tr.leftReview}`;
       previewText = shortText;
+    } else if (item.type === "task_completion") {
+      // Add this case
+      mainText = `${senderName} ${tr.taskCompleted}`;
+      previewText = shortText;
     } else {
       mainText = `${senderName} ${tr.sentNotification}`;
       previewText = shortText;
     }
 
+    const postedTime = new Date(item.timestamp).toLocaleTimeString(lang, {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
     return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => handleToggleExpand(item)}
-      >
-        <View
-          style={[
-            styles.card,
+      <Animated.View
+        style={{
+          opacity: fadeAnim,
+          transform: [
             {
-              backgroundColor: theme.white,
-              borderColor:
-                theme.mode === "dark"
-                  ? "rgba(117, 117, 117, 1)"
-                  : "rgba(244, 244, 244, 1)",
-              borderBottomWidth: RFPercentage(0.5),
+              translateY: fadeAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [20, 0],
+              }),
             },
-          ]}
+          ],
+        }}
+      >
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => handleToggleExpand(item)}
+          style={styles.touchableCard}
         >
-          {/* main row */}
-          <View style={styles.row}>
-            <Image
-              source={profileImage ? { uri: profileImage } : Icons.dp}
-              style={styles.avatar}
-            />
-            <View style={{ marginLeft: RFPercentage(0.5), width: "80%" }}>
-              <Text
-                style={[
-                  styles.title,
-                  { color: !item.isRead ? Colors.primary : theme.heading },
-                ]}
-              >
-                {mainText}
-              </Text>
-              {!item.isRead && (
-                <View
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 5,
-                    backgroundColor: Colors.primary,
-                    alignSelf: "center",
-                    position: "absolute",
-                    right: 0,
-                    top: RFPercentage(0.6),
-                  }}
-                />
-              )}
-              {!isExpanded && !!previewText && (
-                <Text style={styles.sub}>{previewText || "....."}</Text>
-              )}
-              <Text
-                style={[
-                  styles.time,
-                  {
-                    color: !item.isRead ? Colors.primary : Colors.grey,
-                    position: "absolute",
-                    right: 0,
-                    bottom: 0,
-                    top: RFPercentage(3.2),
-                  },
-                ]}
-              >
-                {postedTime}
-              </Text>
-            </View>
-          </View>
-
-          {/* animated expanded content */}
-          <Animated.View
-            style={{
-              height: animation.height,
-              opacity: animation.opacity,
-              overflow: "hidden",
-            }}
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor: theme.white,
+                borderLeftWidth: !item.isRead ? RFPercentage(0.5) : 1,
+                borderWidth: 1,
+                borderColor: !item.isRead
+                  ? Colors.primary
+                  : "rgba(224, 223, 232, 0.6)",
+                borderLeftColor: !item.isRead
+                  ? Colors.primary
+                  : "rgba(224, 223, 232, 1)",
+                shadowColor:
+                  theme.mode === "dark" ? "#000" : "#rgba(0,0,0,0.1)",
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+                elevation: 3,
+              },
+            ]}
           >
-            <View
-              onLayout={(event) => measureContentHeight(event, item.id)}
-              style={{ position: "absolute", width: "100%" }}
-            >
-              <View style={{ marginTop: RFPercentage(1.5) }}>
-                {item.type === "review_added" ? (
-                  <>
-                    <Text style={styles.sub}>
-                      {translatedText || tr.noReviewText}
-                    </Text>
-                    <Text style={styles.sub}>
-                      ⭐ {item.review?.rating ?? 0}/5
-                    </Text>
-                  </>
-                ) : (
-                  <Text style={styles.sub}>{translatedText}</Text>
-                )}
-
-                {/* footer */}
-                <View style={styles.footer}>
-                  <Text style={[styles.time, { color: theme.darkGrey }]}>
-                    {postedTime}
-                  </Text>
-                  {item.type === "review_added" ? (
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      style={[
-                        styles.msgBtn,
-                        {
-                          backgroundColor:
-                            theme.mode === "dark"
-                              ? Colors.primary + "40"
-                              : Colors.primary + "15",
-                        },
-                      ]}
-                      onPress={() => navigation.navigate("Reviews")}
-                    >
-                      <AntDesign
-                        name="eye"
-                        size={RFPercentage(2)}
-                        color={Colors.primary}
-                      />
-
-                      <Text style={styles.msgTxt}>{tr.view || "View"}</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      style={[
-                        styles.msgBtn,
-                        {
-                          backgroundColor:
-                            theme.mode === "dark"
-                              ? Colors.primary + "40"
-                              : Colors.primary + "15",
-                        },
-                      ]}
-                      onPress={() => handleStartChat(item.sender)}
-                    >
-                      <Image
-                        source={Icons.messages}
-                        resizeMode="contain"
-                        style={{
-                          width: RFPercentage(2.5),
-                          height: RFPercentage(2.5),
-                        }}
-                      />
-                      <Text style={styles.msgTxt}>
-                        {tr.message || "Message"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+            <View style={styles.cardHeader}>
+              <View style={styles.headerLeft}>
+                <Image
+                  source={profileImage ? { uri: profileImage } : Icons.dp}
+                  style={styles.avatar}
+                />
+                <View style={styles.notificationIcon}>
+                  {getNotificationIcon(item.type, item.isRead)}
                 </View>
               </View>
+
+              <View style={styles.headerContent}>
+                <Text
+                  style={[
+                    styles.title,
+                    {
+                      color: !item.isRead ? Colors.primary : theme.heading,
+                      fontFamily: !item.isRead
+                        ? "Poppins_600SemiBold"
+                        : "Poppins_500Medium",
+                    },
+                  ]}
+                  numberOfLines={2}
+                >
+                  {mainText}
+                </Text>
+
+                {!isExpanded && !!previewText && (
+                  <Text style={[styles.sub, { marginTop: RFPercentage(0.3) }]}>
+                    {previewText}
+                  </Text>
+                )}
+              </View>
+
+              <View style={styles.timeContainer}>
+                <Text style={[styles.time, { color: theme.darkGrey }]}>
+                  {postedTime}
+                </Text>
+                {!item.isRead && <View style={styles.unreadDot} />}
+              </View>
             </View>
-          </Animated.View>
-        </View>
-      </TouchableOpacity>
+
+            <Animated.View
+              style={{
+                height: animation.height,
+                opacity: animation.opacity,
+                overflow: "hidden",
+              }}
+            >
+              <View
+                onLayout={(event) => measureContentHeight(event, item.id)}
+                style={styles.expandedContent}
+              >
+                <View style={styles.contentBody}>
+                  {item.type === "review_added" ? (
+                    <View style={styles.reviewContent}>
+                      <View style={styles.ratingContainer}>
+                        <Text style={styles.ratingLabel}>
+                          {t("notifications.txt3")}
+                        </Text>
+                        <View style={styles.stars}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Ionicons
+                              key={star}
+                              name={
+                                star <= (item.review?.rating || 0)
+                                  ? "star"
+                                  : "star-outline"
+                              }
+                              size={RFPercentage(2)}
+                              color={Colors.star}
+                              style={styles.star}
+                            />
+                          ))}
+                        </View>
+                        <Text style={styles.ratingText}>
+                          {item.review?.rating || 0}/5
+                        </Text>
+                      </View>
+                      <Text
+                        style={[styles.reviewText, { color: theme.darkGrey }]}
+                      >
+                        {translatedText || tr.noReviewText}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text
+                      style={[styles.description, { color: theme.darkGrey }]}
+                    >
+                      {translatedText}
+                    </Text>
+                  )}
+
+                  <View style={styles.footer}>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={[
+                        styles.actionButton,
+                        {
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? Colors.primary + "40"
+                              : Colors.primary + "15",
+                        },
+                      ]}
+                      onPress={() => {
+                        if (item.type === "review_added") {
+                          navigation.navigate("Reviews");
+                        } else if (item.type === "task_completion") {
+                          // Navigate to completed tasks or task details
+                          navigation.navigate("CompletedTasks");
+                        } else {
+                          handleStartChat(item.sender);
+                        }
+                      }}
+                    >
+                      {item.type === "review_added" ? (
+                        <>
+                          <Feather
+                            name="eye"
+                            size={RFPercentage(1.8)}
+                            color={Colors.primary}
+                          />
+                          <Text style={styles.actionButtonText}>
+                            {tr.view || "View"}
+                          </Text>
+                        </>
+                      ) : item.type === "task_completion" ? (
+                        <>
+                          <Feather
+                            name="check-circle"
+                            size={RFPercentage(1.8)}
+                            color={Colors.primary}
+                          />
+                          <Text style={styles.actionButtonText}>
+                            {tr.viewTask || "View Task"}
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          <Feather
+                            name="message-circle"
+                            size={RFPercentage(1.8)}
+                            color={Colors.primary}
+                          />
+                          <Text style={styles.actionButtonText}>
+                            {tr.message || "Message"}
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Animated.View>
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
     );
   };
 
@@ -532,37 +630,50 @@ export default function Notifications({ navigation }) {
         ? tr.yesterday || title
         : title;
     return (
-      <Text
-        style={[
-          styles.sectionHeader,
-          { color: theme.heading, borderColor: theme.border },
-        ]}
-      >
-        {show}
-      </Text>
+      <View style={styles.sectionHeaderContainer}>
+        <View
+          style={[
+            styles.sectionHeader,
+            {
+              backgroundColor:
+                theme.mode === "dark"
+                  ? "rgba(241, 244, 254, 0.05)"
+                  : "rgba(250, 250, 255, 1)",
+            },
+          ]}
+        >
+          <MaterialIcons
+            name="tips-and-updates"
+            size={RFPercentage(2)}
+            color={theme.primary}
+          />
+
+          <Text style={[styles.sectionHeaderText, { color: theme.primary }]}>
+            {show}
+          </Text>
+        </View>
+      </View>
     );
   };
 
-  /* ---------- ui ---------- */
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <View>
-        <Nav
-          dpNull
-          marginTop={RFPercentage(5)}
-          leftLogo={false}
-          navigation={navigation}
-          title={tr.notifications || "Notifications"}
-        />
-      </View>
+      <Nav
+        marginTop={RFPercentage(5)}
+        leftLogo={false}
+        navigation={navigation}
+        title={tr.notifications || "Notifications"}
+        dpNull
+      />
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <Animated.View style={[styles.container]}>
         {busy ? (
-          <ActivityIndicator
-            size="large"
-            color={Colors.primary}
-            style={{ marginTop: RFPercentage(5) }}
-          />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
+              {t("notifications.txt1")}
+            </Text>
+          </View>
         ) : (
           <SectionList
             sections={sections}
@@ -570,106 +681,229 @@ export default function Notifications({ navigation }) {
             renderItem={renderItem}
             renderSectionHeader={renderHeader}
             ListEmptyComponent={
-              <NotFound
-                title={tr?.noNotifications || "No notifications yet."}
+              <View style={styles.emptyContainer}>
+                <Ionicons
+                  name="notifications-off-outline"
+                  size={RFPercentage(8)}
+                  color={theme.darkGrey}
+                />
+                <Text style={[styles.emptyText, { color: theme.darkGrey }]}>
+                  {tr?.noNotifications || "No notifications yet."}
+                </Text>
+                <Text style={[styles.emptySubtext, { color: theme.grey }]}>
+                  {t("notifications.txt2")}
+                </Text>
+              </View>
+            }
+            contentContainerStyle={styles.listContent}
+            stickySectionHeadersEnabled={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[Colors.primary]}
+                tintColor={Colors.primary}
+                title={tr.pullToRefresh || "Pull to refresh"}
               />
             }
-            contentContainerStyle={{ paddingBottom: RFPercentage(5) }}
-            stickySectionHeadersEnabled={false}
+            showsVerticalScrollIndicator={false}
           />
         )}
-      </ScrollView>
+      </Animated.View>
     </View>
   );
 }
 
-/* ---------- styles ---------- */
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: Colors.white },
-  empty: {
-    textAlign: "center",
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+  },
+  listContent: {
+    flexGrow: 1,
+    paddingBottom: RFPercentage(5),
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(5),
     marginTop: RFPercentage(5),
-    color: Colors.lightGrey,
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: RFPercentage(2),
+    fontSize: RFPercentage(2),
     fontFamily: "Poppins_500Medium",
+  },
+  emptySubtext: {
+    textAlign: "center",
+    marginTop: RFPercentage(1),
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2.2),
+  },
+  sectionHeaderContainer: {
+    paddingHorizontal: RFPercentage(2),
+    marginVertical: RFPercentage(2),
   },
   sectionHeader: {
     alignSelf: "flex-start",
-    marginTop: RFPercentage(3),
-    marginLeft: RFPercentage(3),
-    backgroundColor: Colors.lightGrey + "30", // light tint
-    paddingHorizontal: RFPercentage(2.5),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(1),
+    borderRadius: RFPercentage(100),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionHeaderText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
+    marginLeft: RFPercentage(0.3),
+  },
+  touchableCard: {
+    marginHorizontal: RFPercentage(2),
+    marginBottom: RFPercentage(1),
+  },
+  card: {
+    borderRadius: RFPercentage(1.5),
+    padding: RFPercentage(2),
+    backgroundColor: Colors.white,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  headerLeft: {
+    position: "relative",
+    marginRight: RFPercentage(1.5),
+  },
+  avatar: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(2.5),
+    borderWidth: 1,
+    borderColor: Colors.primary + "40",
+  },
+  notificationIcon: {
+    position: "absolute",
+    bottom: -RFPercentage(0.5),
+    right: -RFPercentage(0.5),
+    backgroundColor: Colors.white,
+    borderRadius: RFPercentage(1),
+    padding: RFPercentage(0.3),
+  },
+  headerContent: {
+    flex: 1,
+    marginRight: RFPercentage(1),
+  },
+  title: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_500Medium",
+    lineHeight: RFPercentage(2.2),
   },
-
-  card: {
-    width: "92%",
-    alignSelf: "center",
-    marginTop: RFPercentage(2),
-    paddingVertical: RFPercentage(2),
-    paddingHorizontal: RFPercentage(2),
-    borderRadius: RFPercentage(2),
-    backgroundColor: Colors.white,
-    borderWidth: RFPercentage(0.1),
-  },
-
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  avatar: {
-    width: RFPercentage(6.5),
-    height: RFPercentage(6.5),
-    borderRadius: RFPercentage(100),
-    marginRight: RFPercentage(1.5),
-    borderColor: Colors.primary,
-    borderWidth: 1,
-  },
-
-  title: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_500Medium",
-    color: Colors.heading,
-    width: "90%",
-  },
-
   sub: {
     color: Colors.grey,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    marginTop: RFPercentage(0.1),
+    lineHeight: RFPercentage(2),
   },
-
+  timeContainer: {
+    alignItems: "flex-end",
+  },
+  time: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+  },
+  unreadDot: {
+    width: RFPercentage(1),
+    height: RFPercentage(1),
+    borderRadius: RFPercentage(0.5),
+    backgroundColor: Colors.primary,
+    marginTop: RFPercentage(0.5),
+  },
+  expandedContent: {
+    position: "absolute",
+    width: "100%",
+  },
+  contentBody: {
+    marginTop: RFPercentage(1.5),
+  },
+  reviewContent: {
+    marginBottom: RFPercentage(1),
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(1),
+  },
+  ratingLabel: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_500Medium",
+    marginRight: RFPercentage(1),
+    color: Colors.grey,
+  },
+  stars: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: RFPercentage(1),
+  },
+  star: {
+    marginRight: RFPercentage(0.3),
+  },
+  ratingText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_500Medium",
+    color: Colors.grey,
+  },
+  reviewText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2),
+    fontStyle: "italic",
+  },
+  description: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2),
+    marginBottom: RFPercentage(1),
+  },
   footer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: RFPercentage(1.8),
+    justifyContent: "flex-end",
   },
-
-  time: {
-    color: Colors.darkGrey,
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_500Medium",
-    top: RFPercentage(0.5),
-  },
-
-  msgBtn: {
+  actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.primary + "40", // soft tint background
-    paddingHorizontal: RFPercentage(1.6),
+    paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.8),
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(1),
   },
-
-  msgTxt: {
+  actionButtonText: {
     color: Colors.primary,
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_500Medium",
     marginLeft: RFPercentage(0.5),
+  },
+  markAllButton: {
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.5),
+  },
+  markAllText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_500Medium",
   },
 });

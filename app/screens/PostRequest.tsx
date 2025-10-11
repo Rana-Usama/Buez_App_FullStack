@@ -38,6 +38,7 @@ import { useSelector } from "react-redux";
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import { formatCurrency } from "../utils/currencyChange";
 
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
@@ -56,7 +57,7 @@ function PostRequest({ navigation, route }) {
   const [compensation, setCompensation] = useState("");
   const [reviews, setReviews] = useState([]);
   const { theme } = useAppTheme();
-  const selectedLocation = useSelector((state) => state.location);
+  const selectedLocation = useSelector((state: any) => state.location);
   const inputRef = useRef(null);
 
   const title = route.params?.title;
@@ -125,7 +126,7 @@ function PostRequest({ navigation, route }) {
           setCompensation(
             await cachedTranslate(currentPostRequest.otherCompensation)
           );
-          setBudget(`$${currentPostRequest.monitarily}`);
+          setBudget(`${formatCurrency(currentPostRequest.monitarily)}`);
           const temp = [...imageUris];
           currentPostRequest.imageUrls.forEach((imgUrl, i) => {
             temp[i] = imgUrl;
@@ -309,7 +310,7 @@ function PostRequest({ navigation, route }) {
           name: selectedLocation.name,
         },
         otherCompensation: compensation,
-        monitarily: budget.replace(/^\$/, ""),
+        monitarily: budget,
         status: REQUEST_STATUS.Active,
         acceptedBy: null,
         reviews: reviews || null,
@@ -598,11 +599,11 @@ function PostRequest({ navigation, route }) {
             ) : (
               <>
                 <InputFieldNew
-                  placeholder={`e.g; 90$`}
+                  placeholder={t("common.currency")}
                   value={budget}
                   onChangeText={(text) => {
                     const numeric = text.replace(/[^0-9]/g, "");
-                    setBudget(numeric ? `$${numeric}` : "");
+                    setBudget(numeric ? `${t("common.sign")}${numeric}` : "");
                   }}
                   customStyle={{
                     width: "90%",

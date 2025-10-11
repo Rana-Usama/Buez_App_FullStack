@@ -12,7 +12,9 @@
     "email": "Email",
     "password": "Password",
     "name": "Nome",
-    "confirm": "Conferma password"
+    "confirm": "Conferma password",
+    "currency": "es. 90€",
+    "sign": "€"
   },
   "validations": {
     "inValid": "Email non valida",
@@ -158,7 +160,8 @@
     "txt8": "Altro",
     "txt9": "Richieste recenti",
     "txt10": "Compenso",
-    "txt11": "Nessun record trovato!"
+    "txt11": "Nessun record trovato!",
+    "txt12" : "Caricamento richieste..."
   },
   "details": {
     "txt1": "Dettagli",
@@ -180,7 +183,7 @@
     "txt1": "Le mie richieste",
     "txt2": "Attive",
     "txt3": "Completate",
-    "txt4": "Pubblicato il:",
+    "txt4": "Pub:",
     "txt5": "Segna come svolta",
     "txt6": "Annulla",
     "txt7": "Sei sicuro di voler eliminare\nquesta richiesta?",
@@ -188,7 +191,8 @@
     "txt9": "Ripubblica",
     "txt10": "Accettato",
     "txt11": "Accettato da:",
-    "txt12": "Richiesta accettata annullata con successo."
+    "txt12": "Richiesta accettata annullata con successo.",
+    "txt13": "Caricamento delle tue richieste..."
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",
@@ -199,7 +203,7 @@
     "txt6": "Altro",
     "txt7": "Tipo di compenso",
     "txt8": "Descrizione",
-   "txt9": "Posizione (Visibile agli utenti entro 100 km)",
+    "txt9": "Posizione (Visibile agli utenti entro 100 km)",
     "txt10": "Dettagli del compenso, es. due biglietti per il cinema",
     "txt11": "es. 100 CHF",
     "txt12": "Carica foto dalla galleria",
@@ -211,7 +215,8 @@
     "txt2": "Tutti",
     "txt3": "Non letti",
     "txt4": "Nessun messaggio non letto",
-    "txt5": "Ancora nessun messaggio"
+    "txt5": "Ancora nessun messaggio",
+    "txt6" : "Saluta"
   },
   "chat": {
     "txt1": "Carica messaggi precedenti",
@@ -296,7 +301,17 @@
   },
   "successScreen": {
     "txt1": "Richiesta pubblicata con successo",
-    "txt2": "Home"
+    "txt2": "Home",
+    "txt3": "Il tuo compito è stato pubblicato con successo!",
+    "txt4": "Visibilità del compito",
+    "txt5": "Il tuo compito è ora visibile ai potenziali aiutanti e verrà automaticamente nascosto una volta accettato.",
+    "txt6": "Regola del primo accettante",
+    "txt7": "La prima persona che accetta il tuo compito ottiene i diritti esclusivi. Gli altri utenti non lo vedranno durante la trattativa.",
+    "txt8": "Nessun accordo? Ripubblica facilmente",
+    "txt9": "Se non si raggiunge un accordo, puoi ripubblicare il tuo compito dalla scheda 'Le mie richieste' sotto il filtro 'Attivo'.",
+    "txt10": "Rimani aggiornato",
+    "txt11": "Riceverai notifiche quando qualcuno mostra interesse per il tuo compito o ti invia un'offerta.",
+    "txt12": "Visualizza le mie richieste"
   },
   "profile": {
     "txt1": "Profilo",
@@ -315,7 +330,11 @@
     "txt1": "Le mie recensioni",
     "txt2": "Datato:",
     "txt3": "Da:",
-    "txt4": "Recensito"
+    "txt4": "Recensito",
+    "txt5": "Valutazione media",
+    "txt6": "Basato su",
+    "txt7": "recensione",
+    "txt8": "recensioni"
   },
   "bottomTab": {
     "txt1": "Mie Rich.",
@@ -332,5 +351,19 @@
   "password": {
     "txt1": "Hai effettuato l'accesso con Google. Per modificare la tua password, gestisci il tuo account Google.",
     "txt2": "Account Google"
+  },
+  "notifications": {
+    "txt1": "Caricamento delle notifiche...",
+    "txt2": "Quando riceverai delle notifiche, appariranno qui",
+    "txt3": "Valutazione:"
+  },
+  "completed": {
+    "txt1": "RECENSITO",
+    "txt2": "COMPLETATO",
+    "txt3": "La tua recensione",
+    "txt4": "Attività completate",
+    "txt5": " Recensito",
+    "txt6": "In attesa di recensione",
+    "txt7": "Caricamento delle tue attività completate..."
   }
 }

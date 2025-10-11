@@ -36,6 +36,8 @@ import { createNewChat } from "../services/Chat.service";
 const { width: screenWidth } = Dimensions.get("window");
 import { getAuth } from "firebase/auth";
 import { fetchActiveTasksFromFirebase } from "../services/Review.service";
+import { formatCurrency } from "../utils/currencyChange";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 
 function MyRequests({ navigation }) {
   const { t } = useTranslation();
@@ -195,6 +197,9 @@ function MyRequests({ navigation }) {
       let action;
       if (status === REQUEST_STATUS.Completed) {
         action = `${t("toast.myRequests.three")}`;
+        if (item.acceptedBy) {
+          await sendTaskCompletionNotification(item);
+        }
       } else if (status === REQUEST_STATUS.Cancelled) {
         action = `${t("toast.myRequests.four")}`;
       } else {
@@ -297,35 +302,6 @@ function MyRequests({ navigation }) {
     }));
   };
 
-  const cancelAcceptedRequest = async (i, item) => {
-    setLoader(true);
-    try {
-      const updatedData = {
-        ...item,
-        acceptedBy: null,
-      };
-      await updateReqestStatus(item.id, item.status, updatedData);
-      setTaskRecords((prev) => {
-        const newRecords = [...prev];
-        newRecords.splice(i, 1);
-        return newRecords;
-      });
-      Toast.show({
-        type: "success",
-        text1: t("toast.myRequests.one"),
-        text2: t("myRequests.txt12"),
-      });
-    } catch (e) {
-      Toast.show({
-        type: "error",
-        text1: t("toast.myRequests.five"),
-        text2: t("toast.myRequests.six"),
-      });
-    } finally {
-      setLoader(false);
-    }
-  };
-
   const currentUserId = getAuth().currentUser?.uid;
   const currentUser = useUser();
 
@@ -346,7 +322,80 @@ function MyRequests({ navigation }) {
     [currentUserId, currentUser?.userData?.userName]
   );
 
-  console.log("task......", taskRecords);
+  // Function to send push notification to task accepter
+  async function sendTaskCompletionPushNotification(task) {
+    try {
+      const response = await fetch(
+        "https://buez-server-khaki.vercel.app/api/send-notification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fcmToken: task.acceptedBy?.token,
+            title: "Task Completed!",
+            body: `Your accepted task type "${task.taskType}" has been marked as completed by ${task.user?.userName}`,
+          }),
+        }
+      );
+      const data = await response.text();
+      return data;
+    } catch (error) {
+      console.log("sendTaskCompletionPushNotification error:", error);
+      throw error;
+    }
+  }
+
+  // Function to save notification to Firestore
+  const saveTaskCompletionNotification = async (task) => {
+    try {
+      const db = getFirestore();
+      await addDoc(collection(db, "notifications"), {
+        sender: {
+          userId: task.userId,
+          userName: task.user?.userName,
+          email: task.user?.email,
+          profileImage: task.user?.profileImage || null,
+          token: task.user?.token,
+        },
+        receiver: {
+          userId: task.acceptedBy?.userId,
+          name: task.acceptedBy?.name,
+          email: task.acceptedBy?.email,
+          token: task.acceptedBy?.token,
+        },
+        task: {
+          taskId: task.id,
+          taskType: task.taskType,
+          description: task.description,
+        },
+        type: "task_completion",
+        title: "Task Completed",
+        message: `Your task "${task.taskType}" has been marked as completed`,
+        timestamp: new Date().toISOString(),
+        isRead: false,
+      });
+      console.log("Task completion notification saved successfully.");
+    } catch (error) {
+      console.log("Error saving task completion notification:", error);
+    }
+  };
+
+  // Main function to handle task completion notifications
+  const sendTaskCompletionNotification = async (task) => {
+    try {
+      // Send push notification
+      await sendTaskCompletionPushNotification(task);
+      // Save notification to database
+      await saveTaskCompletionNotification(task);
+      console.log(
+        "Task completion notification process completed successfully."
+      );
+    } catch (error) {
+      console.log("Error in task completion notification process:", error);
+    }
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
@@ -380,9 +429,9 @@ function MyRequests({ navigation }) {
         >
           {[
             `${t("myRequests.txt2")}`,
+            `${t("myRequests.txt10")}`,
             `${t("myRequests.txt3")}`,
             `${t("myRequests.txt8")}`,
-            `${t("myRequests.txt10")}`,
           ].map((title, index) => (
             <FilterButton
               key={title}
@@ -477,7 +526,6 @@ function MyRequests({ navigation }) {
               </Text>
             </View>
 
-            {/* Compensation */}
             {/* Compensation + Repost */}
             <View style={styles.taskInfoContainer}>
               <Text style={[styles.compensation, { color: theme.heading }]}>
@@ -486,7 +534,7 @@ function MyRequests({ navigation }) {
                   style={[styles.compensationAmount, { color: theme.primary }]}
                 >
                   {cart.compensationType === "Monitarely"
-                    ? `${cart.monitarily}$`
+                    ? `${formatCurrency(cart.monitarily)}`
                     : cart.otherCompensation?.substr(0, 12) +
                       (cart.otherCompensation?.length > 12 ? "..." : "")}
                 </Text>
@@ -494,7 +542,9 @@ function MyRequests({ navigation }) {
 
               {/* Repost only for Completed or Cancelled filter */}
               {(activeFilter === `${t("myRequests.txt3")}` ||
-                activeFilter === `${t("myRequests.txt8")}`) &&
+                activeFilter === `${t("myRequests.txt8")}` ||
+                (activeFilter === `${t("myRequests.txt2")}` &&
+                  cart?.acceptedBy)) &&
                 (repostingIndex === index ? (
                   <View
                     style={{
@@ -685,6 +735,16 @@ function MyRequests({ navigation }) {
         {(loading || loadingMore) && (
           <View style={{ marginTop: RFPercentage(34) }}>
             <ActivityIndicator size="large" color={Colors.primary} />
+            <Text
+              style={{
+                color: Colors.primary,
+                fontSize: RFPercentage(1.8),
+                fontFamily: "Poppins_500Medium",
+                marginTop: RFPercentage(0.5),
+              }}
+            >
+              {t("myRequests.txt13")}
+            </Text>
           </View>
         )}
 

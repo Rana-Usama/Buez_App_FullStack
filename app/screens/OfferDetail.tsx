@@ -36,6 +36,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { onSnapshot } from "firebase/firestore";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { formatCurrency } from "../utils/currencyChange";
+import AcceptanceSuccessModal from "../components/common/AcceptanceSuccessModal";
+
 const screenWidth = Dimensions.get("window").width;
 
 function OfferDetail({ navigation, route }) {
@@ -55,12 +58,21 @@ function OfferDetail({ navigation, route }) {
     otherCompensation: "",
   });
   const [isAccepted, setIsAccepted] = useState(!!postRequest?.acceptedBy);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    navigation.navigate("TabNavigator");
+  };
+
+  const handleViewRequests = () => {
+    setShowSuccessModal(false);
+    navigation.navigate("TabNavigator", { screen: t("bottomTab.txt1") });
+  };
 
   useEffect(() => {
     if (!postRequest?.id) return;
-
     const taskDocRef = doc(db, "taskRequests", postRequest.id);
-
     const unsubscribe = onSnapshot(taskDocRef, (docSnap) => {
       if (docSnap.exists()) {
         const updatedData = docSnap.data();
@@ -260,6 +272,7 @@ function OfferDetail({ navigation, route }) {
       await updateRequestAcceptedBy();
       await saveNotification();
       setIsAccepted(true);
+      setShowSuccessModal(true);
       // navigation.goBack();
     } catch (error) {
       console.log("Error accepting task:", error);
@@ -554,7 +567,7 @@ function OfferDetail({ navigation, route }) {
         <View style={{ width: "90%", alignSelf: "center" }}>
           <Text style={[styles.description, { color: theme.darkGrey }]}>
             {postRequest.compensationType === "Monitarely"
-              ? `${postRequest.monitarily}$`
+              ? `${formatCurrency(postRequest.monitarily)}`
               : translatedOffer.otherCompensation}
           </Text>
         </View>
@@ -603,20 +616,25 @@ function OfferDetail({ navigation, route }) {
                 flexDirection: "row",
                 // justifyContent: "space-between",
                 alignItems: "center",
-                marginTop:RFPercentage(1)
+                marginTop: RFPercentage(1),
               }}
             >
               <Text style={[styles.rating, { color: theme.heading }]}>
                 {t("details.txt14")}:
               </Text>
-              <Text style={[styles.ratingText, { color: theme.heading, marginLeft:RFPercentage(0.5) }]}>
+              <Text
+                style={[
+                  styles.ratingText,
+                  { color: theme.heading, marginLeft: RFPercentage(0.5) },
+                ]}
+              >
                 {averageRating} ⭐
               </Text>
             </View>
           )}
         </View>
         <View style={{ width: "90%" }}>
-          {visibleReviews.length > 0 ? (
+          {visibleReviews?.length > 0 ? (
             <>
               <FlatList
                 data={visibleReviews}
@@ -642,7 +660,7 @@ function OfferDetail({ navigation, route }) {
                           }}
                         >
                           {/* Reviewer Name + Rating */}
-                          <View>
+                          <View style={{marginTop:RFPercentage(0.7)}}>
                             <Text
                               style={[
                                 styles.userName,
@@ -655,63 +673,63 @@ function OfferDetail({ navigation, route }) {
                             >
                               {item?.reviewer?.userName}
                             </Text>
-                            {item?.rating && (
-                              <View
+
+                            {item?.createdAt && (
+                              <Text
                                 style={{
-                                  flexDirection: "row",
-                                  marginTop: RFPercentage(-0.5),
+                                  fontSize: RFPercentage(1.4),
+                                  color: theme.darkGrey,
+                                  fontFamily: "Poppins_400Regular",
+                                  alignSelf: "flex-start",
                                 }}
                               >
-                                {[1, 2, 3, 4, 5].map((i) => (
-                                  <Text
-                                    key={i}
-                                    style={{
-                                      color:
-                                        i <= (item.rating || 0)
-                                          ? Colors.star
-                                          : Colors.stroke,
-                                      fontSize: RFPercentage(2),
-                                      marginRight: 1,
-                                    }}
-                                  >
-                                    ★
-                                  </Text>
-                                ))}
-                              </View>
+                                {getDateTime(item.createdAt)}
+                              </Text>
                             )}
                           </View>
-
-                          {/* Review Text */}
-                          <Text
-                            style={[
-                              styles.userName,
-                              {
-                                color: theme.darkGrey,
-                                marginTop: RFPercentage(0.4),
-                                fontFamily: "Poppins_400Regular",
-                                fontSize: RFPercentage(1.6),
-                              },
-                            ]}
-                          >
-                            {item?.translatedText}
-                          </Text>
-
-                          {/* Date & Time */}
-                          {item?.createdAt && (
-                            <Text
-                              style={{
-                                fontSize: RFPercentage(1.4),
-                                color: theme.darkGrey,
-                                marginTop: RFPercentage(0.5),
-                                fontFamily: "Poppins_400Regular",
-                                alignSelf: "flex-end",
-                              }}
-                            >
-                              {getDateTime(item.createdAt)}
-                            </Text>
-                          )}
                         </View>
                       </View>
+                      {item?.rating && (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            marginTop: RFPercentage(0.5),
+                          }}
+                        >
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <Text
+                              key={i}
+                              style={{
+                                color:
+                                  i <= (item.rating || 0)
+                                    ? Colors.star
+                                    : Colors.stroke,
+                                fontSize: RFPercentage(2),
+                                marginRight: 1,
+                              }}
+                            >
+                              ★
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+
+                      {/* Review Text */}
+                      <Text
+                        style={[
+                          styles.userName,
+                          {
+                            color: theme.darkGrey,
+                            marginTop: RFPercentage(0.6),
+                            fontFamily: "Poppins_400Regular_Italic",
+                            fontSize: RFPercentage(1.6),
+                            fontStyle:"italic"
+                          },
+                        ]}
+                      >
+                        {item?.translatedText}
+                      </Text>
+
                       {!isLastItem && (
                         <View
                           style={{
@@ -751,6 +769,7 @@ function OfferDetail({ navigation, route }) {
               title={t("details.txt9")}
               disabled={currentUserId === postRequest.userId}
               onPress={handleStartChat}
+              marginTop={RFPercentage(0)}
             />
           ) : (
             <>
@@ -774,6 +793,13 @@ function OfferDetail({ navigation, route }) {
           )}
         </View>
       </ScrollView>
+
+      <AcceptanceSuccessModal
+        visible={showSuccessModal}
+        onClose={handleModalClose}
+        onViewRequests={handleViewRequests}
+        theme={theme}
+      />
     </View>
   );
 }

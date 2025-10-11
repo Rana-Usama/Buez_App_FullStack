@@ -8,6 +8,7 @@ import {
   Poppins_700Bold,
   Poppins_800ExtraBold,
   Poppins_900Black,
+  Poppins_400Regular_Italic,
   useFonts,
 } from "@expo-google-fonts/poppins";
 import * as Notifications from "expo-notifications";
@@ -102,6 +103,7 @@ export default function App() {
     Poppins_700Bold,
     Poppins_800ExtraBold,
     Poppins_900Black,
+    Poppins_400Regular_Italic,
   });
 
   useEffect(() => {

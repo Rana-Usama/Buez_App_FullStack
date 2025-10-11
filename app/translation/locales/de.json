@@ -12,7 +12,9 @@
     "email": "E-Mail",
     "password": "Passwort",
     "name": "Name",
-    "confirm": "Passwort bestätige"
+    "confirm": "Passwort bestätige",
+    "currency": "z.B. 90€",
+    "sign": "€"
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -158,7 +160,8 @@
     "txt8": "Anderi",
     "txt9": "Neui Ufträgi",
     "txt10": "Entlöhnig",
-    "txt11": "Kei Eintrag gfunde!"
+    "txt11": "Kei Eintrag gfunde!",
+    "txt12": "Anfragen werden geladen..."
   },
   "details": {
     "txt1": "Einzelheiten",
@@ -180,7 +183,7 @@
     "txt1": "Mini Ufträgi",
     "txt2": "Aktiv",
     "txt3": "Abgschlosse",
-    "txt4": "Gpostet am:",
+    "txt4": "Gpostet:",
     "txt5": "Als erledigt markiere",
     "txt6": "Abbräche",
     "txt7": "Bisch sicher, dass du dä Uftrag wotsch lösche?",
@@ -188,7 +191,8 @@
     "txt9": "Repost",
     "txt10": "Akzeptiert",
     "txt11": "Akzeptiert von:",
-    "txt12": "Akzeptierte Anfrage erfolgreich storniert."
+    "txt12": "Akzeptierte Anfrage erfolgreich storniert.",
+    "txt13": "Deine Anfragen werden geladen..."
   },
   "postRequest": {
     "txt1": "Uftrag poste",
@@ -211,7 +215,8 @@
     "txt2": "Alli",
     "txt3": "Ungelesen",
     "txt4": "Kei ungleseni Nachrichte",
-    "txt5": "No kei Nachrichte"
+    "txt5": "No kei Nachrichte",
+    "txt6": "Sag Hallo zu"
   },
   "chat": {
     "txt1": "Früehere Nachrichte lade",
@@ -295,8 +300,18 @@
     "txt15": "Für Froge oder Support: Bitte kontaktier üs unter info@buez.com"
   },
   "successScreen": {
-    "txt1": "Aafrog erfolgrich gpostet",
-    "txt2": "Start"
+    "txt1": "Anfrage erfolgreich veröffentlicht",
+    "txt2": "Startseite",
+    "txt3": "Deine Aufgabe wurde erfolgreich veröffentlicht!",
+    "txt4": "Sichtbarkeit der Aufgabe",
+    "txt5": "Deine Aufgabe ist nun für potenzielle Helfer sichtbar und wird automatisch ausgeblendet, sobald jemand sie annimmt.",
+    "txt6": "Regel des Ersten",
+    "txt7": "Die erste Person, die deine Aufgabe annimmt, erhält exklusive Rechte. Andere Benutzer sehen sie während der Verhandlung nicht.",
+    "txt8": "Kein Deal? Einfach erneut posten",
+    "txt9": "Wenn keine Einigung erzielt wird, kannst du deine Aufgabe im Tab 'Meine Anfragen' unter dem Filter 'Aktiv' erneut posten.",
+    "txt10": "Bleib auf dem Laufenden",
+    "txt11": "Du erhältst Benachrichtigungen, wenn sich jemand für deine Aufgabe interessiert oder dir ein Angebot sendet.",
+    "txt12": "Meine Anfragen ansehen"
   },
   "profile": {
     "txt1": "Profil",
@@ -315,7 +330,11 @@
     "txt1": "Meine Bewertungen",
     "txt2": "Datiert:",
     "txt3": "Von:",
-    "txt4": "Bewertet"
+    "txt4": "Bewertet",
+    "txt5": "Durchschnittliche Bewertung",
+    "txt6": "Basierend auf",
+    "txt7": "Bewertung",
+    "txt8": "Bewertungen"
   },
   "bottomTab": {
     "txt1": "Meine Anf.",
@@ -332,5 +351,19 @@
   "password": {
     "txt1": "Sie haben sich mit Google angemeldet. Um Ihr Passwort zu ändern, verwalten Sie bitte Ihr Google-Konto.",
     "txt2": "Google-Konto"
+  },
+  "notifications": {
+    "txt1": "Benachrichtigungen werden geladen...",
+    "txt2": "Wenn du Benachrichtigungen erhältst, werden sie hier angezeigt",
+    "txt3": "Bewertung:"
+  },
+  "completed": {
+    "txt1": "BEWERTET",
+    "txt2": "ABGESCHLOSSEN",
+    "txt3": "Deine Bewertung",
+    "txt4": "Abgeschlossene Aufgaben",
+    "txt5": " Bewertet",
+    "txt6": "Ausstehende Bewertung",
+    "txt7": "Deine abgeschlossenen Aufgaben werden geladen..."
   }
 }

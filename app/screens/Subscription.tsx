@@ -115,7 +115,7 @@ function Subscription(props) {
       <Image style={styles.logo} source={Icons.logo} />
       <Image style={styles.vector} source={Icons.vec} />
 
-      <Text style={{ top: RFPercentage(4), color: theme.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(2) }}>{`${t("subscription.txt1")}`}</Text>
+      <Text style={{ top: RFPercentage(4), color: theme.primary, fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(2), textAlign:"center" }}>{`${t("subscription.txt1")}`}</Text>
       <View style={styles.premiumInfo}>
         <Image style={styles.crownIcon} source={Icons.crown} />
         <Text style={[styles.premiumText, { color: theme.darkGrey }]}>{`${t("subscription.txt2")}`}</Text>
@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(1),
     color: Colors.darkGrey,
     fontSize: RFPercentage(1.9),
+    textAlign:"center"
   },
   subscriptionContainer: {
     justifyContent: "flex-start",
