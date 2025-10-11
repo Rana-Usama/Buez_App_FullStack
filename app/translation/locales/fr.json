@@ -14,7 +14,8 @@
     "name": "Nom",
     "confirm": "Confirmer le mot de passe",
     "currency": "ex. 90€",
-    "sign": "€"
+    "sign": "€",
+    "gotIt": "Compris"
   },
   "validations": {
     "inValid": "Email invalide",
@@ -192,7 +193,9 @@
     "txt10": "Accepté",
     "txt11": "Accepté par :",
     "txt12": "Demande acceptée annulée avec succès.",
-    "txt13": "Chargement de vos demandes..."
+    "txt13": "Chargement de vos demandes...",
+    "repostSuccess": "Demande republiée !",
+    "repostAvailable": "Votre demande a été republiée et est maintenant disponible pour que d'autres utilisateurs puissent l'accepter."
   },
   "postRequest": {
     "txt1": "Publier une demande",

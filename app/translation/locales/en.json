@@ -14,7 +14,8 @@
     "name": "Name",
     "confirm": "Confirm Password",
     "currency": "e.g; 90$",
-    "sign": "$"
+    "sign": "$",
+    "gotIt": "Got It"
   },
   "validations": {
     "inValid": "Invalid email",
@@ -161,7 +162,7 @@
     "txt9": "Nearby Requests",
     "txt10": "Compensation",
     "txt11": "No Record Found!",
-    "txt12" : "Loading Requests..."
+    "txt12": "Loading Requests..."
   },
   "details": {
     "txt1": "Task Details",
@@ -192,7 +193,9 @@
     "txt10": "Accepted",
     "txt11": "Accepted By:",
     "txt12": "Accepted request cancelled successfully.",
-    "txt13": "Loading Your Requests..."
+    "txt13": "Loading Your Requests...",
+    "repostSuccess": "Request Reposted!",
+    "repostAvailable": "Your request has been reposted and is now available for other users to accept."
   },
   "postRequest": {
     "txt1": "Post Request",
@@ -216,7 +219,7 @@
     "txt3": "Unread",
     "txt4": "No Unread Messages",
     "txt5": "No Messages Yet",
-    "txt6" : "Say hi to"
+    "txt6": "Say hi to"
   },
   "chat": {
     "txt1": "Load earlier messages",
@@ -366,15 +369,15 @@
     "txt6": "Pending Review",
     "txt7": "Loading your completed tasks..."
   },
-  "pushNotifications" : {
-    "txt1" : "Accepted your task request.",
-    "txt2" : "left you a review on your task!",
-    "txt3" : "Task Completed!",
-    "txt4" : "Your accepted task",
-    "txt5" : "has been marked as completed by",
-    "txt6" : "Task Follow-up!",
-    "txt7" : "This is a reminder about your recent task posting. Please review your progress and update the status if completed.",
-    "txt8" : "⏰ Free Trial Ending Soon",
-    "txt9" : "Your free trial ends in 4 days. Stay subscribed to maintain full access."
-   }
+  "pushNotifications": {
+    "txt1": "Accepted your task request.",
+    "txt2": "left you a review on your task!",
+    "txt3": "Task Completed!",
+    "txt4": "Your accepted task",
+    "txt5": "has been marked as completed by",
+    "txt6": "Task Follow-up!",
+    "txt7": "This is a reminder about your recent task posting. Please review your progress and update the status if completed.",
+    "txt8": "⏰ Free Trial Ending Soon",
+    "txt9": "Your free trial ends in 4 days. Stay subscribed to maintain full access."
+  }
 }

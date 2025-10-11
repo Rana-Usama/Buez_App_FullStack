@@ -14,7 +14,8 @@
     "name": "Name",
     "confirm": "Passwort bestätige",
     "currency": "z.B. 90€",
-    "sign": "€"
+    "sign": "€",
+    "gotIt": "Verstanden"
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -192,7 +193,9 @@
     "txt10": "Akzeptiert",
     "txt11": "Akzeptiert von:",
     "txt12": "Akzeptierte Anfrage erfolgreich storniert.",
-    "txt13": "Deine Anfragen werden geladen..."
+    "txt13": "Deine Anfragen werden geladen...",
+    "repostSuccess": "Anfrage erneut gepostet!",
+    "repostAvailable": "Ihre Anfrage wurde erneut gepostet und steht nun anderen Nutzern zur Annahme zur Verfügung."
   },
   "postRequest": {
     "txt1": "Uftrag poste",

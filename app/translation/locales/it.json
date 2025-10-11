@@ -14,7 +14,8 @@
     "name": "Nome",
     "confirm": "Conferma password",
     "currency": "es. 90€",
-    "sign": "€"
+    "sign": "€",
+    "gotIt": "Capito"
   },
   "validations": {
     "inValid": "Email non valida",
@@ -192,7 +193,9 @@
     "txt10": "Accettato",
     "txt11": "Accettato da:",
     "txt12": "Richiesta accettata annullata con successo.",
-    "txt13": "Caricamento delle tue richieste..."
+    "txt13": "Caricamento delle tue richieste...",
+    "repostSuccess": "Richiesta ripubblicata!",
+    "repostAvailable": "La tua richiesta è stata ripubblicata ed è ora disponibile per essere accettata da altri utenti."
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",

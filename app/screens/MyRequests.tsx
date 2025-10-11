@@ -38,6 +38,7 @@ import { getAuth } from "firebase/auth";
 import { fetchActiveTasksFromFirebase } from "../services/Review.service";
 import { formatCurrency } from "../utils/currencyChange";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
+import RepostSuccessModal from "../components/common/RepostModal";
 
 function MyRequests({ navigation }) {
   const { t } = useTranslation();
@@ -70,6 +71,7 @@ function MyRequests({ navigation }) {
 
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [repostingIndex, setRepostingIndex] = useState(null);
+  const [repostModalVisible, setRepostModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -238,12 +240,7 @@ function MyRequests({ navigation }) {
         return newRecords;
       });
       setActiveFilter(t("myRequests.txt2"));
-
-      Toast.show({
-        type: "success",
-        text1: t("toast.myRequests.one"),
-        text2: t("toast.myRequests.seven"),
-      });
+      setRepostModalVisible(true);
     } catch (e) {
       console.log("e.........", e);
       Toast.show({
@@ -335,7 +332,9 @@ function MyRequests({ navigation }) {
           body: JSON.stringify({
             fcmToken: task.acceptedBy?.token,
             title: t("pushNotifications.txt3"),
-            body: `${t("pushNotifications.txt4")} "${task.taskType}" ${t("pushNotifications.txt5")} ${task.user?.userName}`,
+            body: `${t("pushNotifications.txt4")} "${task.taskType}" ${t(
+              "pushNotifications.txt5"
+            )} ${task.user?.userName}`,
           }),
         }
       );
@@ -572,10 +571,11 @@ function MyRequests({ navigation }) {
                       alignItems: "center",
                       backgroundColor: Colors.primary,
                       borderRadius: RFPercentage(100),
-                      paddingHorizontal: RFPercentage(1),
+                      paddingHorizontal: RFPercentage(1.5),
                       height: RFPercentage(2.8),
                       justifyContent: "center",
                     }}
+                    disabled={markLoaderIndex === index}
                   >
                     <Text
                       style={{
@@ -595,74 +595,74 @@ function MyRequests({ navigation }) {
                   </TouchableOpacity>
                 ))}
             </View>
-            {
-              // activeFilter !== `${t("myRequests.txt10")}` &&
-              cart?.acceptedBy && (
-                <View
+            {cart?.acceptedBy && (
+              <View
+                style={{
+                  marginTop: RFPercentage(0.6),
+                  width: "92%",
+                  alignSelf: "center",
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={[
+                    styles.compensation,
+                    { color: theme.heading, marginTop: 0 },
+                  ]}
+                >
+                  {t("myRequests.txt11")}
+                </Text>
+                <Text
+                  style={[
+                    styles.taskText,
+                    { color: theme.darkGrey, marginLeft: RFPercentage(0.6) },
+                  ]}
+                >
+                  {cart?.acceptedBy?.name.substr(0, 12) +
+                    (cart?.acceptedBy?.name?.length > 12 ? "..." : "")}
+                </Text>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  disabled={
+                    markLoaderIndex === index || repostingIndex === index
+                  }
+                  onPress={() => {
+                    if (activeFilter === `${t("myRequests.txt10")}`) {
+                      handleStartChat(cart?.user);
+                    } else {
+                      handleStartChat(cart?.acceptedBy);
+                    }
+                  }}
                   style={{
-                    marginTop: RFPercentage(0.6),
-                    width: "92%",
-                    alignSelf: "center",
+                    position: "absolute",
+                    right: 0,
                     flexDirection: "row",
                     alignItems: "center",
                   }}
                 >
-                  <Text
-                    style={[
-                      styles.compensation,
-                      { color: theme.heading, marginTop: 0 },
-                    ]}
-                  >
-                    {t("myRequests.txt11")}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.taskText,
-                      { color: theme.darkGrey, marginLeft: RFPercentage(0.6) },
-                    ]}
-                  >
-                    {cart?.acceptedBy?.name.substr(0, 12) +
-                      (cart?.acceptedBy?.name?.length > 12 ? "..." : "")}
-                  </Text>
-
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      if (activeFilter === `${t("myRequests.txt10")}`) {
-                        handleStartChat(cart?.user);
-                      } else {
-                        handleStartChat(cart?.acceptedBy);
-                      }
-                    }}
+                  <Image
+                    source={Icons.messages}
+                    resizeMode="contain"
                     style={{
-                      position: "absolute",
-                      right: 0,
-                      flexDirection: "row",
-                      alignItems: "center",
+                      width: RFPercentage(2.3),
+                      height: RFPercentage(2.3),
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: Colors.primary,
+                      fontFamily: "Poppins_500Medium",
+                      fontSize: RFPercentage(1.5),
+                      marginLeft: RFPercentage(0.4),
                     }}
                   >
-                    <Image
-                      source={Icons.messages}
-                      resizeMode="contain"
-                      style={{
-                        width: RFPercentage(2.3),
-                        height: RFPercentage(2.3),
-                      }}
-                    />
-                    <Text
-                      style={{
-                        color: Colors.primary,
-                        fontFamily: "Poppins_500Medium",
-                        fontSize: RFPercentage(1.5),
-                        marginLeft: RFPercentage(0.4),
-                      }}
-                    >
-                      {t("details.txt9")}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )
-            }
+                    {t("details.txt9")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
 
             {/* Actions (only when Active filter is selected) */}
             {activeFilter === `${t("myRequests.txt2")}` &&
@@ -670,8 +670,18 @@ function MyRequests({ navigation }) {
                 <View style={styles.cartContainer2}>
                   <TouchableOpacity
                     activeOpacity={0.8}
-                    disabled={markLoaderIndex === index}
-                    style={styles.markButton}
+                    disabled={
+                      markLoaderIndex === index || repostingIndex === index
+                    }
+                    style={[
+                      styles.markButton,
+                      {
+                        opacity:
+                          markLoaderIndex === index || repostingIndex === index
+                            ? 0.5
+                            : 1,
+                      },
+                    ]}
                     onPress={async () => {
                       setMarkLoaderIndex(index);
                       await changeReqestStatus(
@@ -691,7 +701,9 @@ function MyRequests({ navigation }) {
 
                   <TouchableOpacity
                     activeOpacity={0.8}
-                    disabled={cancelLoaderIndex === index}
+                    disabled={
+                      cancelLoaderIndex === index || repostingIndex === index
+                    }
                     onPress={async () => {
                       setCancelLoaderIndex(index); // start loader for this button
                       setSelectedRequestIndex(index);
@@ -772,6 +784,13 @@ function MyRequests({ navigation }) {
         theme={theme}
         t={t}
         loading={loader}
+      />
+
+      <RepostSuccessModal
+        isVisible={repostModalVisible}
+        onClose={() => setRepostModalVisible(false)}
+        theme={theme}
+        t={t}
       />
     </View>
   );
