@@ -379,5 +379,18 @@
     "txt7": "This is a reminder about your recent task posting. Please review your progress and update the status if completed.",
     "txt8": "⏰ Free Trial Ending Soon",
     "txt9": "Your free trial ends in 4 days. Stay subscribed to maintain full access."
+  },
+  "modal" : {
+    "txt1" : "Task Accepted Successfully!",
+    "txt2" : "Start Communicating",
+    "txt3" : "You can now message the requester to discuss task details and arrangements.",
+    "txt4" : "Find in My Requests",
+    "txt5" : "This task will appear in 'My Requests' tab under 'Accepted' filter for easy access.",
+    "txt6" : "Stay Updated",
+    "txt7" : "You'll receive notifications about any updates or messages from the requester.",
+    "txt8" : "Next Steps",
+    "txt9" : "Coordinate with the requester to schedule and complete the task successfully.",
+    "txt10" : "Got It!",
+    "txt11" : "View My Requests"
   }
 }

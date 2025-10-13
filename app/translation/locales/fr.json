@@ -380,5 +380,19 @@
     "txt7": "Ceci est un rappel concernant votre récente publication de tâche. Veuillez vérifier vos progrès et mettre à jour le statut si terminé.",
     "txt8": "⏰ Essai gratuit bientôt terminé",
     "txt9": "Votre période d'essai se termine dans 4 jours. Restez abonné pour conserver un accès complet."
-  }
+  },
+  "modal": {
+  "txt1": "Tâche acceptée avec succès !",
+  "txt2": "Commencez à communiquer",
+  "txt3": "Vous pouvez maintenant envoyer un message au demandeur pour discuter des détails et des modalités de la tâche.",
+  "txt4": "Trouver dans Mes demandes",
+  "txt5": "Cette tâche apparaîtra dans l’onglet 'Mes demandes' sous le filtre 'Acceptées' pour un accès facile.",
+  "txt6": "Restez informé",
+  "txt7": "Vous recevrez des notifications concernant toute mise à jour ou tout message du demandeur.",
+  "txt8": "Prochaines étapes",
+  "txt9": "Coordonnez-vous avec le demandeur pour planifier et terminer la tâche avec succès.",
+  "txt10": "J’ai compris !",
+  "txt11": "Voir mes demandes"
+}
+
 }

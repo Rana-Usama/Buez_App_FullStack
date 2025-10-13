@@ -108,51 +108,73 @@ function Home({ navigation }) {
     }, [])
   );
 
-  // Listen real-time for tasks
   useEffect(() => {
     if (!currentLocation) return;
-    setLoading(true);
 
-    const refLoc =
-      selectedLocation?.latitude2 && selectedLocation?.longitude2
-        ? {
-            latitude: selectedLocation.latitude2,
-            longitude: selectedLocation.longitude2,
-          }
-        : currentLocation;
+    let unsubscribe;
+    let mounted = true;
 
-    if (unsubscribeRef.current) unsubscribeRef.current();
+    const startListening = async () => {
+      setLoading(true);
 
-    unsubscribeRef.current = getRequestList(
-      filterMap[activeFilter] || "", // taskType (string)
-      searchQuery, // searchQuery (string)
-      null, // lastVisiblePost
-      async ({ tasksArray, lastVisible }) => {
-        // callback
-        const filtered = tasksArray.filter((task) => {
-          const loc = task?.address;
-          if (!loc?.latitude || !loc?.longitude) return false;
-          return isWithin100km(refLoc, {
-            latitude: loc.latitude,
-            longitude: loc.longitude,
+      const refLoc =
+        selectedLocation?.latitude2 && selectedLocation?.longitude2
+          ? {
+              latitude: selectedLocation.latitude2,
+              longitude: selectedLocation.longitude2,
+            }
+          : currentLocation;
+
+      if (unsubscribeRef.current) unsubscribeRef.current();
+
+      unsubscribe = getRequestList(
+        filterMap[activeFilter] || "",
+        searchQuery,
+        null,
+        async ({ tasksArray, lastVisible }) => {
+          if (!mounted) return;
+
+          const filtered = tasksArray.filter((task) => {
+            const loc = task?.address;
+            if (!loc?.latitude || !loc?.longitude) return false;
+            return (
+              haversine(
+                refLoc,
+                { latitude: loc.latitude, longitude: loc.longitude },
+                { unit: "km" }
+              ) <= 100
+            );
           });
-        });
 
-        const translated = await Promise.all(filtered.map(translateTask));
+          const translated = await Promise.all(filtered.map(translateTask));
 
-        setAllTasks(translated);
-        setTaskRecords(translated);
-        setLastVisiblePost(lastVisible);
-        setHasMore(translated.length > 0);
-        setLoading(false);
-      },
-      (err) => console.log("GET_POSTS_LIST Error:", err)
-    );
+          // Only update if changed
+          setAllTasks((prev) => {
+            const prevIds = prev.map((t) => t.id).join(",");
+            const newIds = translated.map((t) => t.id).join(",");
+            if (prevIds !== newIds) {
+              setTaskRecords(translated);
+              setLastVisiblePost(lastVisible);
+              setHasMore(translated.length > 0);
+            }
+            return translated;
+          });
+
+          setLoading(false);
+        },
+        (err) => console.log("GET_POSTS_LIST Error:", err)
+      );
+
+      unsubscribeRef.current = unsubscribe;
+    };
+
+    startListening();
 
     return () => {
+      mounted = false;
       if (unsubscribeRef.current) unsubscribeRef.current();
     };
-  }, [activeFilter, searchQuery, selectedLocation, currentLocation]);
+  }, [activeFilter, searchQuery, selectedLocation, filterMap, currentLocation]);
 
   const refreshRequests = async () => {
     setRefreshing(true);
@@ -187,10 +209,14 @@ function Home({ navigation }) {
   });
 
   useEffect(() => {
+    if (displayTasks.length === Object.keys(activeIndices).length) return;
     const idx = {};
     displayTasks.forEach((_, i) => (idx[i] = 0));
     setActiveIndices(idx);
-  }, [displayTasks]);
+  }, [displayTasks.length]);
+
+  console.log("Home render");
+  
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -359,7 +385,7 @@ function Home({ navigation }) {
 
           {/* Carts */}
           {loading ? (
-            <View style={{ marginTop: RFPercentage(20) }}>
+            <View style={{ marginTop: RFPercentage(18) }}>
               <ActivityIndicator size="large" color={theme.primary} />
               <Text
                 style={{

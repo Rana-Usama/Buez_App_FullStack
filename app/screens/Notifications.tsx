@@ -763,7 +763,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: RFPercentage(5),
-    marginTop: RFPercentage(5),
+    marginTop: RFPercentage(-2),
   },
   emptyText: {
     textAlign: "center",

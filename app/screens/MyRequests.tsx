@@ -745,7 +745,7 @@ function MyRequests({ navigation }) {
         ))}
 
         {(loading || loadingMore) && (
-          <View style={{ marginTop: RFPercentage(34) }}>
+          <View style={{ marginTop: RFPercentage(28) }}>
             <ActivityIndicator size="large" color={Colors.primary} />
             <Text
               style={{

@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     alignItems: "center",
-    paddingTop: RFPercentage(2),
+    paddingTop: Platform.OS === 'android' ?  RFPercentage(2) : RFPercentage(4),
   },
   messageContainer: {
     flex: 1,
@@ -718,6 +718,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     textAlignVertical: "top",
     top: 0,
+    lineHeight:RFPercentage(2.7)
     // backgroundColor:"red"
   },
   sendButton: {

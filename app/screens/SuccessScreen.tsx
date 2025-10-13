@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StatusBar,
   ScrollView,
+  Platform,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     alignItems: "center",
-    marginTop: RFPercentage(5),
+    marginTop: Platform.OS === "android" ? RFPercentage(5) : RFPercentage(9),
     marginBottom: RFPercentage(2),
   },
   icon: {

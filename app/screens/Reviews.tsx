@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   loader: {
-    marginTop: RFPercentage(8),
+    marginTop: RFPercentage(28),
   },
   listContainer: {
     flex: 1,

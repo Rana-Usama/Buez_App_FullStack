@@ -286,6 +286,7 @@ function OfferDetail({ navigation, route }) {
         leftLogo={false}
         navigation={navigation}
         title={`${t("details.txt1")}`}
+        marginTop={RFPercentage(5)}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}

@@ -170,7 +170,7 @@ function AddReview() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             fcmToken: recipientUser?.token,
-            title: `${userData?.userName} ${t("pushNotifications.txt1")}`,
+            title: `${userData?.userName} ${t("pushNotifications.txt2")}`,
             body: `${previewText}`,
           }),
         }
@@ -310,23 +310,22 @@ function AddReview() {
       style={[styles.container, { backgroundColor: theme.white }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: theme.white }]}>
+        <Nav
+          dpNull
+          marginTop={RFPercentage(5)}
+          leftLogo={false}
+          navigation={navigation}
+          title={tr.addReview || "Add Review"}
+        />
+      </View>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
-        <View style={[styles.header, { backgroundColor: theme.white }]}>
-          <Nav
-            dpNull
-            marginTop={RFPercentage(5)}
-            leftLogo={false}
-            navigation={navigation}
-            title={tr.addReview || "Add Review"}
-          />
-        </View>
-
         {/* Main Content */}
         <View style={styles.content}>
           {/* User Card */}

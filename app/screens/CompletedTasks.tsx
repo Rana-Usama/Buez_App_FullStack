@@ -284,7 +284,7 @@ export default function CompletedTasks({ navigation }: any) {
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       {/* Header */}
-      <View style={styles.headerContainer}>
+      <View style={[styles.headerContainer,{backgroundColor:theme.white}]}>
         <Nav
           dpNull
           marginTop={RFPercentage(5)}

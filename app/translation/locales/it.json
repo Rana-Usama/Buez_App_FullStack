@@ -379,5 +379,18 @@
     "txt7": "Questo è un promemoria sulla tua recente pubblicazione di attività. Controlla i tuoi progressi e aggiorna lo stato se completato.",
     "txt8": "⏰ Prova gratuita in scadenza",
     "txt9": "La tua prova gratuita termina tra 4 giorni. Resta abbonato per mantenere l'accesso completo."
+  },
+  "modal": {
+    "txt1": "Attività accettata con successo!",
+    "txt2": "Inizia a comunicare",
+    "txt3": "Ora puoi inviare un messaggio al richiedente per discutere i dettagli e l’organizzazione dell’attività.",
+    "txt4": "Trova in Le mie richieste",
+    "txt5": "Questa attività apparirà nella scheda 'Le mie richieste' sotto il filtro 'Accettate' per un facile accesso.",
+    "txt6": "Rimani aggiornato",
+    "txt7": "Riceverai notifiche su eventuali aggiornamenti o messaggi dal richiedente.",
+    "txt8": "Prossimi passi",
+    "txt9": "Coordinati con il richiedente per pianificare e completare con successo l’attività.",
+    "txt10": "Capito!",
+    "txt11": "Visualizza le mie richieste"
   }
 }

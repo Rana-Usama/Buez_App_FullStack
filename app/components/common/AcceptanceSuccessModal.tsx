@@ -11,6 +11,8 @@ import {
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Octicons, MaterialIcons } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
+import { useTranslation } from "react-i18next";
+
 
 const AcceptanceSuccessModal = ({
   visible,
@@ -20,6 +22,7 @@ const AcceptanceSuccessModal = ({
 }) => {
   const [fadeAnim] = React.useState(new Animated.Value(0));
   const [slideAnim] = React.useState(new Animated.Value(300));
+  const {t} = useTranslation()
 
   useEffect(() => {
     if (visible) {
@@ -117,7 +120,7 @@ const AcceptanceSuccessModal = ({
 
           {/* Title */}
           <Text style={[styles.modalTitle, { color: theme.heading }]}>
-            Task Accepted Successfully!
+            {t("modal.txt1")}
           </Text>
 
           {/* Information Cards */}
@@ -127,26 +130,26 @@ const AcceptanceSuccessModal = ({
           >
             <InfoRow
               icon="message"
-              title="Start Communicating"
-              description="You can now message the requester to discuss task details and arrangements."
+              title= {t("modal.txt2")}
+              description= {t("modal.txt3")}
             />
 
             <InfoRow
               icon="folder-special"
-              title="Find in My Requests"
-              description="This task will appear in 'My Requests' tab under 'Accepted' filter for easy access."
+              title= {t("modal.txt4")}
+              description= {t("modal.txt5")}
             />
 
             <InfoRow
               icon="notifications"
-              title="Stay Updated"
-              description="You'll receive notifications about any updates or messages from the requester."
+              title= {t("modal.txt6")}
+              description= {t("modal.txt7")}
             />
 
             <InfoRow
               icon="schedule"
-              title="Next Steps"
-              description="Coordinate with the requester to schedule and complete the task successfully."
+              title= {t("modal.txt8")}
+              description= {t("modal.txt9")}
             />
           </ScrollView>
 
@@ -160,7 +163,7 @@ const AcceptanceSuccessModal = ({
               ]}
               onPress={onClose}
             >
-              <Text style={styles.primaryModalButtonText}>Got It!</Text>
+              <Text style={styles.primaryModalButtonText}> {t("modal.txt10")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -177,7 +180,7 @@ const AcceptanceSuccessModal = ({
                   { color: theme.primary },
                 ]}
               >
-                View My Requests
+                 {t("modal.txt11")}
               </Text>
             </TouchableOpacity>
           </View>

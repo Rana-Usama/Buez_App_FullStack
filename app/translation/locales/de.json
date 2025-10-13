@@ -379,5 +379,19 @@
     "txt7": "Dies ist eine Erinnerung an deine letzte Aufgabenveröffentlichung. Bitte überprüfe deinen Fortschritt und aktualisiere den Status, falls abgeschlossen.",
     "txt8": "⏰ Kostenloses Probeabo endet bald",
     "txt9": "Dein kostenloses Probeabo endet in 4 Tagen. Bleibe abonnierter Nutzer, um vollen Zugriff zu behalten."
-  }
+  },
+  "modal": {
+  "txt1": "Aufgabe erfolgreich akzeptiert!",
+  "txt2": "Beginne zu kommunizieren",
+  "txt3": "Du kannst nun den Auftraggeber kontaktieren, um Details und Vereinbarungen zur Aufgabe zu besprechen.",
+  "txt4": "In Meine Anfragen finden",
+  "txt5": "Diese Aufgabe erscheint im Tab 'Meine Anfragen' unter dem Filter 'Akzeptiert' für einen einfachen Zugriff.",
+  "txt6": "Bleib auf dem Laufenden",
+  "txt7": "Du erhältst Benachrichtigungen über alle Updates oder Nachrichten vom Auftraggeber.",
+  "txt8": "Nächste Schritte",
+  "txt9": "Koordiniere dich mit dem Auftraggeber, um die Aufgabe erfolgreich zu planen und abzuschließen.",
+  "txt10": "Verstanden!",
+  "txt11": "Meine Anfragen ansehen"
+}
+
 }
