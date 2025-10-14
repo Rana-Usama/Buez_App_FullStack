@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2),
   },
   vector: {
-    marginTop: RFPercentage(15),
+    marginTop: RFPercentage(12),
     width: RFPercentage(34),
     height: RFPercentage(34),
   },

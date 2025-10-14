@@ -1,7 +1,13 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { subscribeToUserData } from '../services/User.service';
-import { FIREBASE_AUTH } from '../../firebaseConfig';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { subscribeToUserData } from "../services/User.service";
+import { FIREBASE_AUTH } from "../../firebaseConfig";
 
 interface UserData {
   uid: string;
@@ -34,6 +40,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const unsubscribeAuth = onAuthStateChanged(FIREBASE_AUTH, (user) => {
       try {
         if (user) {
+          console.log("🔥 User data from Firestore:", user);
           setAuthUser(user);
         } else {
           setAuthUser(null);
@@ -41,6 +48,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
       } catch (err) {
         setError((err as Error).message);
+        console.log("🔥 User data from Firestore:", err);
       } finally {
         setLoading(false);
       }
@@ -70,7 +78,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const isAuthenticated = !!authUser;
 
   return (
-    <UserContext.Provider value={{ userData, authUser, loading, error, isAuthenticated }}>
+    <UserContext.Provider
+      value={{ userData, authUser, loading, error, isAuthenticated }}
+    >
       {children}
     </UserContext.Provider>
   );
@@ -79,7 +89,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };

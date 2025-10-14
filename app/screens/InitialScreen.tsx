@@ -4,13 +4,11 @@ import SubscriptionListener from '../components/SubscriptionListener'
 import { getAuth } from 'firebase/auth'
 import { useUser } from '../contexts/user.context'
 
-const InitialScreen = ({navigation}) => {
-  const userId = getAuth()?.currentUser?.uid;
-  const { userData, loading, error, isAuthenticated } = useUser();
+const InitialScreen = () => {
   return (
     <View>
       <Text>Checking for subscription</Text>
-      {loading && <Text>Loading...</Text>}
+      <Text>Loading...</Text>
       {/* {userId && <SubscriptionListener navigation={navigation} userId={userId} />} */}
     </View>
   )

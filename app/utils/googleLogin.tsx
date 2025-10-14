@@ -14,7 +14,7 @@ import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 const webClientId ="211367941601-i7pb5oak2cqq5vcvtvfv0sqsl4t6mgma.apps.googleusercontent.com";
-const iosClientId = process.env.EXPO_PUBLIC_IOS_CLIENT_ID;
+const iosClientId = "211367941601-en9daed1ci5shk3kemibpao7lcg7622v.apps.googleusercontent.com";
 
 const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
     GoogleSignin.configure({
       webClientId,
       offlineAccess: true,
-      // iosClientId,
+      iosClientId,
     });
 
     (async () => {

@@ -1,11 +1,18 @@
-import { StyleSheet, KeyboardAvoidingView, Text, View } from "react-native";
-import React, { useState, useEffect } from "react";
+// navigation/StackNavigator.js
+import React, { useEffect, useState } from "react";
+import { View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import {
   createStackNavigator,
   CardStyleInterpolators,
 } from "@react-navigation/stack";
 import NetInfo from "@react-native-community/netinfo";
+import { RFPercentage } from "react-native-responsive-fontsize";
+
+// Contexts & Hooks
+import { useUser } from "../contexts/user.context";
+import { useAppTheme } from "../contexts/themeContext";
+import { useInitialRoute } from "./InitialRoute";
 
 // Screens
 import Onboarding from "../screens/Onboarding";
@@ -34,246 +41,104 @@ import FreeTrial from "../screens/FreeTrial";
 import SubscriptionV2 from "../screens/SubscriptionV2";
 import CancelSubscription from "../screens/CancelSubscription";
 import Location from "../screens/Location";
-import Feather from "@expo/vector-icons/Feather";
-// Utils
-import { getCredentials } from "../services/Auth.service";
-import * as SecureStore from "expo-secure-store";
-import { useUser } from "../contexts/user.context";
-import { differenceInDays } from "date-fns";
 import Language from "../screens/Language";
 import Notifications from "../screens/Notifications";
 import CompletedTasks from "../screens/CompletedTasks";
 import AddReview from "../screens/AddReview";
-import { useAppTheme } from "../contexts/themeContext";
 import InstagramBusinessLoginWebView from "../utils/InstagramLogin";
 import FacebookLoginWebView from "../utils/facebookLogin";
-import { RFPercentage } from "react-native-responsive-fontsize";
 import NetworkError from "../screens/NetworkError";
 
-export type RootStackParamList = {
-  OnBoarding: undefined;
-  Login: undefined;
-  Signup: undefined;
-  ForgotPassword: undefined;
-  SetNewPassword: undefined;
-  OTPInput: undefined;
-  SuccessScreen: undefined;
-  OfferDetail: undefined;
-  CitySelection: undefined;
-  TabNavigator: undefined;
-  InitialScreen: undefined;
-  FreeTrial: undefined;
-  ProfileDetails: {
-    user: any;
-    currentUserInterests?: string[];
-  };
-  SubscriptionV2: undefined;
-  EditProfile: undefined;
-  FAQ: undefined;
-  PrivacyPolicy: undefined;
-  TermsAndConditions: undefined;
-  ChangePassword: undefined;
-  Reviews: undefined;
-  Subscription: undefined;
-  Chat: {
-    chatId: string;
-    senderId?: string;
-    senderName: any;
-    receiver: any;
-    receiverName: any;
-    receiverProfile: any;
-    senderProfile: any;
-    fcmToken: any;
-  };
-  Messages: undefined;
-  Profile: undefined;
-  CancelSubscription: undefined;
-  Language: undefined;
-  PostRequest: undefined;
-  Notifications: undefined;
-  CompletedTasks: undefined;
-  AddReview: undefined;
-  InstagramLoginWebView: undefined;
-  FacebookLoginWebView: undefined;
-  Location: undefined;
-};
+const Stack = createStackNavigator();
 
-const Stack = createStackNavigator<RootStackParamList>();
-
-const StackNavigator: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [credentials, setCredentials] = useState({
-    email: null,
-    password: null,
-  });
-  const [loggedOut, setLoggedOut] = useState<string | null>(null);
-  const [initialRoute, setInitialRoute] = useState<string | null>(null);
-  const { userData, loading: userLoading, error: userError } = useUser();
+const StackNavigator = () => {
+  const { userData, loading: userLoading } = useUser();
+  const { initialRoute, isLoading } = useInitialRoute(userData, userLoading);
+  const { theme } = useAppTheme();
   const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsConnected(state.isConnected ?? false);
     });
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const creds = await getCredentials();
-      console.log("creds......", creds);
-      const status = await SecureStore.getItemAsync("loggedOut");
-      setCredentials(creds);
-      setLoggedOut(status);
-      setIsLoading(false);
-    };
-    fetchData();
-  }, []);
+  // Network error handling
+  if (!isConnected) return <NetworkError />;
 
-  useEffect(() => {
-    const { email, password } = credentials;
-    const isUserDataReady =
-      userData &&
-      typeof userData?.isSubscribed === "boolean" &&
-      typeof userData?.isFreeTrial === "boolean";
-    if (!isLoading && !userLoading) {
-      if (loggedOut === "true") {
-        setInitialRoute("Login");
-      } else if (email && password && isUserDataReady) {
-        const isFreeTrial = userData.isFreeTrial;
-        const isSubscribed = userData.isSubscribed;
-        const subscriptionStart = userData?.subscriptionStart;
-        const subscriptionEnd = userData?.subscriptionEnd;
-        const now = new Date();
-
-        let trialDays = null;
-        let isTrialValid = false;
-
-        if (isFreeTrial && userData?.freeTrialStartedAt?.seconds) {
-          const trialStartDate = new Date(
-            userData.freeTrialStartedAt.seconds * 1000
-          );
-          trialDays = differenceInDays(now, trialStartDate);
-          isTrialValid = trialDays >= 0 && trialDays <= 14;
-        }
-        const subStartDate = subscriptionStart
-          ? new Date(subscriptionStart)
-          : null;
-        const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
-
-        const isWithinPaidPeriod =
-          subStartDate &&
-          subEndDate &&
-          now >= subStartDate &&
-          now <= subEndDate;
-
-        if (isSubscribed && isWithinPaidPeriod) {
-          setInitialRoute("TabNavigator");
-        } else if (isTrialValid && isWithinPaidPeriod) {
-          setInitialRoute("TabNavigator");
-        } else if (
-          isFreeTrial &&
-          trialDays !== null &&
-          (trialDays < 0 || trialDays > 14 || trialDays === 0)
-        ) {
-          setInitialRoute("Subscription");
-        } else {
-          setInitialRoute("FreeTrial");
-        }
-      } else if (!email && !password) {
-        setInitialRoute("OnBoarding");
-      }
-    }
-  }, [isLoading, userLoading, userData, credentials, loggedOut]);
-  const { theme } = useAppTheme();
-
-  if (!isConnected) {
-    return <NetworkError />;
+  // Loading screen while initial route resolves
+  if (isLoading || userLoading || !initialRoute) {
+    <InitialScreen />;
   }
-  
+
+  console.log("📍 userData:", userData);
+  console.log("🚀 Decided route:", initialRoute);
+  console.log("📍 userLoading:", userLoading);
 
   return (
     <NavigationContainer>
-      {isLoading || userLoading || !initialRoute ? (
-        <DeciderScreen />
-      ) : (
-        <Stack.Navigator
-          initialRouteName={initialRoute ?? "OnBoarding"}
-          screenOptions={{
-            keyboardHandlingEnabled: true,
-            headerShown: false,
-            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-            cardStyle: { backgroundColor: theme.white, flex: 1 },
-            presentation: "modal",
-            cardOverlay: () => (
-              <View style={{ backgroundColor: theme.white }} />
-            ),
-          }}
-        >
-          <Stack.Screen name="OnBoarding" component={Onboarding} />
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Signup" component={Signup} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-          <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
-          <Stack.Screen name="OTPInput" component={OTPInput} />
-          <Stack.Screen name="FreeTrial" component={FreeTrial} />
-          <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
-          <Stack.Screen
-            name="InstagramLoginWebView"
-            component={InstagramBusinessLoginWebView}
-          />
-          <Stack.Screen
-            name="FacebookLoginWebView"
-            component={FacebookLoginWebView}
-          />
-          <Stack.Screen name="Location" component={Location} />
+      <Stack.Navigator
+      id={undefined}
+        initialRouteName={"Decider"}
+        screenOptions={{
+          headerShown: false,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          cardStyle: { backgroundColor: theme.white, flex: 1 },
+          presentation: "modal",
+          cardOverlay: () => <View style={{ backgroundColor: theme.white }} />,
+        }}
+      >
+        {/* Auth + Onboarding */}
+        <Stack.Screen name="Decider" component={DeciderScreen} />
 
-          <Stack.Screen name="TabNavigator" component={TabNavigator} />
+        <Stack.Screen name="OnBoarding" component={Onboarding} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Signup" component={Signup} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+        <Stack.Screen name="OTPInput" component={OTPInput} />
+        <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
+        <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
 
-          <Stack.Screen name="InitialScreen" component={InitialScreen} />
-          <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
-          <Stack.Screen name="Language" component={Language} />
-          <Stack.Screen name="OfferDetail" component={OfferDetail} />
-          <Stack.Screen name="ChangePassword" component={ChangePassword} />
-          <Stack.Screen name="EditProfile" component={EditProfile} />
-          <Stack.Screen name="FAQ" component={FAQ} />
-          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-          <Stack.Screen
-            name="TermsAndConditions"
-            component={TermsAndConditions}
-          />
-          <Stack.Screen name="Reviews" component={Reviews} />
-          <Stack.Screen name="Subscription" component={Subscription} />
-          <Stack.Screen name="Chat" component={Chat} />
-          <Stack.Screen name="Messages" component={Messages} />
-          <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen
-            name="CancelSubscription"
-            component={CancelSubscription}
-          />
-          <Stack.Screen name="PostRequest" component={PostRequest} />
-          <Stack.Screen name="Notifications" component={Notifications} />
-          <Stack.Screen name="CompletedTasks" component={CompletedTasks} />
-          <Stack.Screen name="AddReview" component={AddReview} />
-        </Stack.Navigator>
-      )}
+        {/* App flow */}
+        <Stack.Screen name="TabNavigator" component={TabNavigator} />
+        <Stack.Screen name="FreeTrial" component={FreeTrial} />
+        <Stack.Screen name="Subscription" component={Subscription} />
+        <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
+        <Stack.Screen
+          name="CancelSubscription"
+          component={CancelSubscription}
+        />
+        <Stack.Screen name="OfferDetail" component={OfferDetail} />
+        <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="EditProfile" component={EditProfile} />
+        <Stack.Screen name="ChangePassword" component={ChangePassword} />
+        <Stack.Screen name="Reviews" component={Reviews} />
+        <Stack.Screen name="Messages" component={Messages} />
+        <Stack.Screen name="Chat" component={Chat} />
+        <Stack.Screen name="PostRequest" component={PostRequest} />
+        <Stack.Screen name="Language" component={Language} />
+        <Stack.Screen name="Notifications" component={Notifications} />
+        <Stack.Screen name="CompletedTasks" component={CompletedTasks} />
+        <Stack.Screen name="AddReview" component={AddReview} />
+        <Stack.Screen
+          name="TermsAndConditions"
+          component={TermsAndConditions}
+        />
+        <Stack.Screen name="FAQ" component={FAQ} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+        <Stack.Screen name="Location" component={Location} />
+        <Stack.Screen
+          name="InstagramLoginWebView"
+          component={InstagramBusinessLoginWebView}
+        />
+        <Stack.Screen
+          name="FacebookLoginWebView"
+          component={FacebookLoginWebView}
+        />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
 export default StackNavigator;
-
-const styles = StyleSheet.create({
-  networkContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffffff",
-  },
-  networkText: {
-    fontSize: RFPercentage(1.8),
-    color: "rgba(186, 186, 186, 1)",
-    fontFamily: "Poppins_600SemiBold",
-    marginTop: RFPercentage(1),
-  },
-});

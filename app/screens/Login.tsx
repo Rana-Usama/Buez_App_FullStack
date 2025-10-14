@@ -35,6 +35,9 @@ import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../utils/googleLogin";
 import { useAppTheme } from "../contexts/themeContext";
 import { BlurView } from "expo-blur";
+import { decideUserRoute } from "../utils/decideLoginRoute";
+import { doc, getDoc } from "firebase/firestore";
+import { FIREBASE_DB } from "../../firebaseConfig"; // adjust path
 
 function Login({ navigation }) {
   const [indicator, showIndicator] = useState(false);
@@ -82,12 +85,21 @@ function Login({ navigation }) {
       if (user && pushToken) {
         await updateUserToken(user.uid, pushToken);
       }
+
+      const userRef = doc(FIREBASE_DB, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.exists() ? userSnap.data() : null;
+      const nextRoute = decideUserRoute(userData);
+
       Toast.show({
         type: "success",
         text1: t("toast.login.one"),
         text2: t("toast.login.two"),
       });
-      navigation.navigate("TabNavigator");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: nextRoute }],
+      });
     } catch (error) {
       Toast.show({
         type: "error",
