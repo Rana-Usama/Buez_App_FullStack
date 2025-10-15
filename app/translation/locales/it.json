@@ -305,16 +305,16 @@
   "successScreen": {
     "txt1": "Richiesta pubblicata con successo",
     "txt2": "Home",
-    "txt3": "Il tuo compito è stato pubblicato con successo!",
-    "txt4": "Visibilità del compito",
-    "txt5": "Il tuo compito è ora visibile ai potenziali aiutanti e verrà automaticamente nascosto una volta accettato.",
-    "txt6": "Regola del primo accettante",
-    "txt7": "La prima persona che accetta il tuo compito ottiene i diritti esclusivi. Gli altri utenti non lo vedranno durante la trattativa.",
+    "txt3": "La tua attività è stata pubblicata con successo!",
+    "txt4": "Visibilità dell’attività",
+    "txt5": "La tua attività è visibile agli aiutanti finché non viene accettata.",
+    "txt6": "Regola della prima accettazione",
+    "txt7": "Una volta accettata, solo quell’aiutante può visualizzarla fino alla fine dell’accordo.",
     "txt8": "Nessun accordo? Ripubblica facilmente",
-    "txt9": "Se non si raggiunge un accordo, puoi ripubblicare il tuo compito dalla scheda 'Le mie richieste' sotto il filtro 'Attivo'.",
+    "txt9": "Se non si raggiunge un accordo, ripubblicala da 'Le mie richieste' sotto 'Attive'.",
     "txt10": "Rimani aggiornato",
-    "txt11": "Riceverai notifiche quando qualcuno mostra interesse per il tuo compito o ti invia un'offerta.",
-    "txt12": "Visualizza le mie richieste"
+    "txt11": "Riceverai notifiche quando qualcuno è interessato o invia un’offerta.",
+    "txt12": "Vedi Le mie richieste"
   },
   "profile": {
     "txt1": "Profilo",
@@ -383,14 +383,14 @@
   "modal": {
     "txt1": "Attività accettata con successo!",
     "txt2": "Inizia a comunicare",
-    "txt3": "Ora puoi inviare un messaggio al richiedente per discutere i dettagli e l’organizzazione dell’attività.",
+    "txt3": "Ora puoi chattare con il richiedente sui dettagli dell’attività.",
     "txt4": "Trova in Le mie richieste",
-    "txt5": "Questa attività apparirà nella scheda 'Le mie richieste' sotto il filtro 'Accettate' per un facile accesso.",
+    "txt5": "Questa attività è elencata sotto 'Accettate' in Le mie richieste.",
     "txt6": "Rimani aggiornato",
-    "txt7": "Riceverai notifiche su eventuali aggiornamenti o messaggi dal richiedente.",
+    "txt7": "Riceverai notifiche per aggiornamenti o messaggi.",
     "txt8": "Prossimi passi",
-    "txt9": "Coordinati con il richiedente per pianificare e completare con successo l’attività.",
+    "txt9": "Coordina con il richiedente per completare l’attività.",
     "txt10": "Capito!",
-    "txt11": "Visualizza le mie richieste"
+    "txt11": "Vedi Le mie richieste"
   }
 }

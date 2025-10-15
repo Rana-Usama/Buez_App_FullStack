@@ -307,14 +307,14 @@
     "txt2": "Accueil",
     "txt3": "Votre tâche a été publiée avec succès !",
     "txt4": "Visibilité de la tâche",
-    "txt5": "Votre tâche est maintenant visible pour les aides potentielles et sera automatiquement masquée une fois qu'elle sera acceptée.",
+    "txt5": "Votre tâche est visible pour les aidants jusqu’à ce qu’elle soit acceptée.",
     "txt6": "Règle du premier accepté",
-    "txt7": "La première personne qui accepte votre tâche obtient des droits exclusifs. Les autres utilisateurs ne la verront pas pendant la négociation.",
-    "txt8": "Pas d'accord ? Republiez facilement",
-    "txt9": "Si aucun accord n'est trouvé, vous pouvez republier votre tâche depuis l'onglet 'Mes demandes' sous le filtre 'Actif'.",
+    "txt7": "Une fois acceptée, seul cet aidant peut la voir jusqu’à la fin de l’accord.",
+    "txt8": "Pas d’accord ? Republiez facilement",
+    "txt9": "Si aucun accord n’est conclu, republiez-la depuis 'Mes Demandes' sous 'Actives'.",
     "txt10": "Restez informé",
-    "txt11": "Vous recevrez des notifications lorsque quelqu’un s’intéresse à votre tâche ou vous envoie une offre.",
-    "txt12": "Voir mes demandes"
+    "txt11": "Vous recevrez des notifications lorsqu’un utilisateur est intéressé ou envoie une offre.",
+    "txt12": "Voir Mes Demandes"
   },
   "profile": {
     "txt1": "Profil",
@@ -382,17 +382,16 @@
     "txt9": "Votre période d'essai se termine dans 4 jours. Restez abonné pour conserver un accès complet."
   },
   "modal": {
-  "txt1": "Tâche acceptée avec succès !",
-  "txt2": "Commencez à communiquer",
-  "txt3": "Vous pouvez maintenant envoyer un message au demandeur pour discuter des détails et des modalités de la tâche.",
-  "txt4": "Trouver dans Mes demandes",
-  "txt5": "Cette tâche apparaîtra dans l’onglet 'Mes demandes' sous le filtre 'Acceptées' pour un accès facile.",
-  "txt6": "Restez informé",
-  "txt7": "Vous recevrez des notifications concernant toute mise à jour ou tout message du demandeur.",
-  "txt8": "Prochaines étapes",
-  "txt9": "Coordonnez-vous avec le demandeur pour planifier et terminer la tâche avec succès.",
-  "txt10": "J’ai compris !",
-  "txt11": "Voir mes demandes"
-}
-
+    "txt1": "Tâche acceptée avec succès !",
+    "txt2": "Commencer à communiquer",
+    "txt3": "Vous pouvez maintenant discuter avec le demandeur des détails de la tâche.",
+    "txt4": "Voir dans Mes demandes",
+    "txt5": "Cette tâche est répertoriée sous 'Acceptées' dans Mes demandes.",
+    "txt6": "Restez informé",
+    "txt7": "Vous recevrez des notifications pour les mises à jour ou les messages.",
+    "txt8": "Prochaines étapes",
+    "txt9": "Coordonnez-vous avec le demandeur pour terminer la tâche.",
+    "txt10": "Compris !",
+    "txt11": "Voir Mes demandes"
+  }
 }

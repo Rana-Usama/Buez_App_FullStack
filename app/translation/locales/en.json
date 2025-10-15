@@ -307,13 +307,13 @@
     "txt2": "Home",
     "txt3": "Your task has been posted successfully!",
     "txt4": "Task Visibility",
-    "txt5": "Your task is now visible to potential helpers and will be automatically hidden once someone accepts it.",
+    "txt5": "Your task is now visible to helpers until it's accepted.",
     "txt6": "First Acceptance Rule",
-    "txt7": "The first person to accept your task gets exclusive rights. Other users won't see it while you're negotiating.",
+    "txt7": "Once accepted, only that helper can view it until the deal’s done.",
     "txt8": "No Deal? Repost Easily",
-    "txt9": "If no agreement is reached, you can repost your task from 'My Req' tab under 'Active' filter.",
+    "txt9": "If no deal is made, repost it from 'My Req' under 'Active'.",
     "txt10": "Stay Updated",
-    "txt11": "You'll receive notifications when someone shows interest in your task or sends you an offer.",
+    "txt11": "You'll get notifications when someone’s interested or sends an offer.",
     "txt12": "View My Requests"
   },
   "profile": {
@@ -380,17 +380,17 @@
     "txt8": "⏰ Free Trial Ending Soon",
     "txt9": "Your free trial ends in 4 days. Stay subscribed to maintain full access."
   },
-  "modal" : {
-    "txt1" : "Task Accepted Successfully!",
-    "txt2" : "Start Communicating",
-    "txt3" : "You can now message the requester to discuss task details and arrangements.",
-    "txt4" : "Find in My Requests",
-    "txt5" : "This task will appear in 'My Requests' tab under 'Accepted' filter for easy access.",
-    "txt6" : "Stay Updated",
-    "txt7" : "You'll receive notifications about any updates or messages from the requester.",
-    "txt8" : "Next Steps",
-    "txt9" : "Coordinate with the requester to schedule and complete the task successfully.",
-    "txt10" : "Got It!",
-    "txt11" : "View My Requests"
+  "modal": {
+    "txt1": "Task Accepted Successfully!",
+    "txt2": "Start Communicating",
+    "txt3": "You can now chat with the requester about task details.",
+    "txt4": "Find in My Requests",
+    "txt5": "This task is listed under 'Accepted' in My Requests.",
+    "txt6": "Stay Updated",
+    "txt7": "You'll get notifications for updates or messages.",
+    "txt8": "Next Steps",
+    "txt9": "Coordinate with the requester to finish the task.",
+    "txt10": "Got It!",
+    "txt11": "View My Requests"
   }
 }

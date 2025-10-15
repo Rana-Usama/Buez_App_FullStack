@@ -263,7 +263,7 @@ const Chat = ({ navigation, route }) => {
         }
       );
       const data = await response.text();
-      console.log("data........",data)
+      console.log("data........", data);
       return data;
     } catch (error) {
       console.log("sendPushNotification error:", error);
@@ -347,7 +347,9 @@ const Chat = ({ navigation, route }) => {
       >
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => navigation.goBack()}
+          onPress={() =>
+            navigation.navigate("TabNavigator", { screen: t("bottomTab.txt4") })
+          }
         >
           <Ionicons
             name="chevron-back"
@@ -518,7 +520,7 @@ const Chat = ({ navigation, route }) => {
                       color: theme.primary,
                       fontSize: RFPercentage(1.8),
                       fontFamily: "Poppins_600SemiBold",
-                      lineHeight:RFPercentage(1.8)
+                      lineHeight: RFPercentage(2),
                     }}
                   >
                     {receiver?.userName?.[0] || "?"}
@@ -554,7 +556,10 @@ const Chat = ({ navigation, route }) => {
                     }}
                     wrapperStyle={{
                       left: {
-                        backgroundColor: theme.mode === 'dark' ? "rgba(25, 25, 25, 1)" : "rgba(239, 239, 239, 1)",
+                        backgroundColor:
+                          theme.mode === "dark"
+                            ? "rgba(25, 25, 25, 1)"
+                            : "rgba(239, 239, 239, 1)",
                         padding: RFPercentage(0.6),
                         marginLeft: 0, // Ensure no left margin
                       },
@@ -682,7 +687,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     alignItems: "center",
-    paddingTop: Platform.OS === 'android' ?  RFPercentage(2) : RFPercentage(4),
+    paddingTop: Platform.OS === "android" ? RFPercentage(2) : RFPercentage(4),
   },
   messageContainer: {
     flex: 1,
@@ -718,7 +723,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     textAlignVertical: "top",
     top: 0,
-    lineHeight:RFPercentage(2.7)
+    lineHeight: RFPercentage(2.7),
     // backgroundColor:"red"
   },
   sendButton: {
@@ -749,7 +754,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: RFPercentage(2.5),
     fontFamily: "Poppins_500Medium",
-    lineHeight:RFPercentage(2.5)
+    lineHeight: RFPercentage(2.8),
   },
   profile: {
     width: RFPercentage(7),

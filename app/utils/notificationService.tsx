@@ -20,10 +20,10 @@ export async function registerForPushNotificationsAsync() {
       }
     }
 
-    if (!granted) {
-      Alert.alert("Push notifications not allowed");
-      return null;
-    }
+    // if (!granted) {
+    //   Alert.alert("Push notifications not allowed");
+    //   return null;
+    // }
 
     // ----- 2️⃣ Ask FCM for authorization (iOS only, but safe to call everywhere) -----
     const authStatus = await messaging().requestPermission();

@@ -170,7 +170,7 @@ function AddReview() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             fcmToken: recipientUser?.token,
-            title: `${userData?.userName} ${t("pushNotifications.txt2")}`,
+            title: `${userData?.userName} left you a review on your task!`,
             body: `${previewText}`,
           }),
         }

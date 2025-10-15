@@ -305,15 +305,15 @@
   "successScreen": {
     "txt1": "Anfrage erfolgreich veröffentlicht",
     "txt2": "Startseite",
-    "txt3": "Deine Aufgabe wurde erfolgreich veröffentlicht!",
-    "txt4": "Sichtbarkeit der Aufgabe",
-    "txt5": "Deine Aufgabe ist nun für potenzielle Helfer sichtbar und wird automatisch ausgeblendet, sobald jemand sie annimmt.",
-    "txt6": "Regel des Ersten",
-    "txt7": "Die erste Person, die deine Aufgabe annimmt, erhält exklusive Rechte. Andere Benutzer sehen sie während der Verhandlung nicht.",
+    "txt3": "Ihre Aufgabe wurde erfolgreich veröffentlicht!",
+    "txt4": "Aufgabensichtbarkeit",
+    "txt5": "Ihre Aufgabe ist für Helfer sichtbar, bis sie akzeptiert wird.",
+    "txt6": "Regel der ersten Annahme",
+    "txt7": "Sobald sie angenommen wurde, kann nur dieser Helfer sie sehen, bis der Deal abgeschlossen ist.",
     "txt8": "Kein Deal? Einfach erneut posten",
-    "txt9": "Wenn keine Einigung erzielt wird, kannst du deine Aufgabe im Tab 'Meine Anfragen' unter dem Filter 'Aktiv' erneut posten.",
-    "txt10": "Bleib auf dem Laufenden",
-    "txt11": "Du erhältst Benachrichtigungen, wenn sich jemand für deine Aufgabe interessiert oder dir ein Angebot sendet.",
+    "txt9": "Wenn kein Deal zustande kommt, posten Sie sie unter 'Meine Anfragen' im Bereich 'Aktiv' erneut.",
+    "txt10": "Bleiben Sie auf dem Laufenden",
+    "txt11": "Sie erhalten Benachrichtigungen, wenn jemand interessiert ist oder ein Angebot sendet.",
     "txt12": "Meine Anfragen ansehen"
   },
   "profile": {
@@ -381,17 +381,16 @@
     "txt9": "Dein kostenloses Probeabo endet in 4 Tagen. Bleibe abonnierter Nutzer, um vollen Zugriff zu behalten."
   },
   "modal": {
-  "txt1": "Aufgabe erfolgreich akzeptiert!",
-  "txt2": "Beginne zu kommunizieren",
-  "txt3": "Du kannst nun den Auftraggeber kontaktieren, um Details und Vereinbarungen zur Aufgabe zu besprechen.",
-  "txt4": "In Meine Anfragen finden",
-  "txt5": "Diese Aufgabe erscheint im Tab 'Meine Anfragen' unter dem Filter 'Akzeptiert' für einen einfachen Zugriff.",
-  "txt6": "Bleib auf dem Laufenden",
-  "txt7": "Du erhältst Benachrichtigungen über alle Updates oder Nachrichten vom Auftraggeber.",
-  "txt8": "Nächste Schritte",
-  "txt9": "Koordiniere dich mit dem Auftraggeber, um die Aufgabe erfolgreich zu planen und abzuschließen.",
-  "txt10": "Verstanden!",
-  "txt11": "Meine Anfragen ansehen"
-}
-
+    "txt1": "Aufgabe erfolgreich angenommen!",
+    "txt2": "Kommunikation starten",
+    "txt3": "Sie können jetzt mit dem Auftraggeber über die Aufgabendetails chatten.",
+    "txt4": "In Meine Anfragen ansehen",
+    "txt5": "Diese Aufgabe wird unter 'Akzeptiert' in Meine Anfragen angezeigt.",
+    "txt6": "Bleiben Sie auf dem Laufenden",
+    "txt7": "Sie erhalten Benachrichtigungen über Updates oder Nachrichten.",
+    "txt8": "Nächste Schritte",
+    "txt9": "Arbeiten Sie mit dem Auftraggeber zusammen, um die Aufgabe abzuschließen.",
+    "txt10": "Verstanden!",
+    "txt11": "Meine Anfragen ansehen"
+  }
 }

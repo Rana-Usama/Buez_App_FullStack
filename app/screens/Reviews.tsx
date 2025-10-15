@@ -255,7 +255,7 @@ export default function Reviews({ navigation }) {
         </View>
 
         {/* Review Text */}
-        <Text style={[styles.reviewText, { color: theme.heading }]}>
+        <Text style={[styles.reviewText, { color: theme.heading, fontStyle:'italic' }]}>
           "{translatedReview}"
         </Text>
 
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    minHeight: RFPercentage(20),
+    minHeight: RFPercentage(18),
     borderWidth: 1,
     width: "90%",
     alignSelf: "center",
@@ -545,7 +545,6 @@ const styles = StyleSheet.create({
   },
   reviewText: {
     fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2.2),
     marginBottom: RFPercentage(1.5),
     fontStyle: "italic",
