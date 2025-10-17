@@ -286,7 +286,7 @@
     "txt13": "Se hai domande su questa informativa, contattaci a support@example.com."
   },
   "terms": {
-    "txt1": "Benvenuto su BUEZ, una piattaforma gestita da Devappics che mette in contatto chi ha bisogno di aiuto per faccende quotidiane con persone disponibili a fornire assistenza in cambio di una ricompensa. Accedendo o utilizzando l’app BUEZ (“App”) o i servizi correlati (“Servizio”), accetti i presenti Termini e Condizioni (“Termini”). Se non sei d’accordo, non utilizzare il Servizio.",
+    "txt1": "Benvenuto su BUEZ, una piattaforma gestita da Buez Solution che mette in contatto chi ha bisogno di aiuto per faccende quotidiane con persone disponibili a fornire assistenza in cambio di una ricompensa. Accedendo o utilizzando l’app BUEZ (“App”) o i servizi correlati (“Servizio”), accetti i presenti Termini e Condizioni (“Termini”). Se non sei d’accordo, non utilizzare il Servizio.",
     "txt2": "1. Requisiti",
     "txt3": "Devi avere almeno 18 anni per usare BUEZ. Registrandoti confermi di avere la capacità legale di stipulare questo accordo. BUEZ può sospendere o chiudere account che violano i Termini.",
     "txt4": "2. Account utente",
@@ -300,7 +300,7 @@
     "txt12": "6. Limitazione di responsabilità",
     "txt13": "BUEZ è un facilitatore e non è responsabile per danni diretti, indiretti o causati dall’uso del Servizio. Non garantisce qualità, affidabilità o sicurezza dei servizi forniti dagli utenti.",
     "txt14": "7. Contatti",
-    "txt15": "Per domande o assistenza, contattaci su info@buez.com"
+    "txt15": "Per domande o assistenza, contattaci su info@buezapp.com"
   },
   "successScreen": {
     "txt1": "Richiesta pubblicata con successo",
@@ -323,11 +323,13 @@
     "txt4": "Attività completate"
   },
   "editProfile": {
-    "txt1": "Aggiungi il tuo nome",
-    "txt2": "Aggiungi il tuo numero di telefono",
+    "txt1": "Inserisci il tuo nome",
+    "txt2": "Modifica profilo",
     "txt3": "Modifica informazioni",
-    "txt4": "Modifica",
-    "txt5": "Numero di telefono"
+    "txt4": "Aggiorna profilo",
+    "biography": "Biografia",
+    "biographyPlaceholder": "Condividi le tue competenze, esperienze e ciò che ti appassiona...",
+    "biographyHint": "Una breve biografia aiuta gli altri a comprendere la tua esperienza e il tuo approccio"
   },
   "reviews": {
     "txt1": "Le mie recensioni",

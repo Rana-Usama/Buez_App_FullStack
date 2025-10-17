@@ -286,7 +286,7 @@
     "txt13": "Si vous avez des questions à ce sujet, merci de nous contacter à support@example.com."
   },
   "terms": {
-    "txt1": "Bienvenue sur BUEZ, plateforme exploité par Devappics qui met en relation des utilisateurs ayant besoin d’aide pour les tâches quotidiennes avec des personnes prêtes à aider contre rémunération. En utilisant l’application mobile BUEZ (« App ») ou ses services, vous acceptez ces Conditions générales. Si vous n’êtes pas d’accord, ne pas utiliser le Service.",
+    "txt1": "Bienvenue sur BUEZ, plateforme exploité par Buez Solution qui met en relation des utilisateurs ayant besoin d’aide pour les tâches quotidiennes avec des personnes prêtes à aider contre rémunération. En utilisant l’application mobile BUEZ (« App ») ou ses services, vous acceptez ces Conditions générales. Si vous n’êtes pas d’accord, ne pas utiliser le Service.",
     "txt2": "1. Conditions d’accès",
     "txt3": "Vous devez avoir au moins 18 ans pour utiliser BUEZ. En vous inscrivant, vous confirmez être légalement apte. Devappics se réserve le droit de suspendre ou supprimer les comptes inappropriés.",
     "txt4": "2. Compte utilisateur",
@@ -300,7 +300,7 @@
     "txt12": "6. Limitation de responsabilité",
     "txt13": "BUEZ facilite les connexions, mais décline toute responsabilité quant aux dommages directs ou indirects liés à l’usage du Service. La qualité, fiabilité ou sécurité des services n’est pas garantie.",
     "txt14": "7. Contact",
-    "txt15": "Pour toute question ou assistance, veuillez nous contacter à info@buez.com"
+    "txt15": "Pour toute question ou assistance, veuillez nous contacter à info@buezapp.com"
   },
   "successScreen": {
     "txt1": "Demande publiée avec succès",
@@ -324,11 +324,13 @@
   },
 
   "editProfile": {
-    "txt1": "Ajoutez votre nom",
-    "txt2": "Ajoutez votre numéro de téléphone",
-    "txt3": "Modifier vos informations",
-    "txt4": "Modifier",
-    "txt5": "Numéro de téléphone"
+    "txt1": "Entrez votre nom",
+    "txt2": "Modifier le profil",
+    "txt3": "Modifier les informations",
+    "txt4": "Mettre à jour le profil",
+    "biography": "Biographie",
+    "biographyPlaceholder": "Partagez vos compétences, votre expérience et ce qui vous passionne...",
+    "biographyHint": "Une courte biographie aide les autres à comprendre votre expertise et votre approche"
   },
   "reviews": {
     "txt1": "Mes avis",

@@ -23,7 +23,14 @@ const resources = {
 const getStoredLanguage = async () => {
   try {
     const storedLang = await SecureStore.getItemAsync("appLanguage");
-    return storedLang || Localization.locale.split("-")[0] || "en";
+    if (storedLang) {
+      return storedLang;
+    }
+    const deviceLocale = Localization.locale;
+    if (deviceLocale.startsWith("de")) {
+      return "de";
+    }
+    return deviceLocale.split("-")[0] || "en";
   } catch (error) {
     console.log("Failed to get stored language:", error);
     return "en";

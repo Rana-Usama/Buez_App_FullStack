@@ -167,7 +167,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   fontSize: RFPercentage(1.4),
                   top:
                     route.name === `${t("bottomTab.txt3")}`
-                      ? RFPercentage(-2.2)
+                      ? RFPercentage(-2)
                       : RFPercentage(0.5),
                   fontFamily: isFocused
                     ? "Poppins_500Medium"

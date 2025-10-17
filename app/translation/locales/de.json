@@ -286,7 +286,7 @@
     "txt13": "Wenn du Froge zur Datenschutz-Richtlinie hesch, meld di bitte bi üs unter support@example.com."
   },
   "terms": {
-    "txt1": "Willkomme bi BUEZ, e Plattform vo Devappics, wo Lüüt verbindet, wo Hülfe bi Alltagsufgabe brauche mit de, wo gärn hälfe möchted gegen e Entschädigung. Wenn du d'BUEZ App (d’App) oder verwandti Dienscht (zäme „Dienscht“) bruuchsch, stimmsch du däne AGB (Allgemeini Geschäftsbedingige) zue. Wenn nöd, denn derfsch du d'Dienscht nöd nutze.",
+    "txt1": "Willkomme bi BUEZ, e Plattform vo Buez Solution, wo Lüüt verbindet, wo Hülfe bi Alltagsufgabe brauche mit de, wo gärn hälfe möchted gegen e Entschädigung. Wenn du d'BUEZ App (d’App) oder verwandti Dienscht (zäme „Dienscht“) bruuchsch, stimmsch du däne AGB (Allgemeini Geschäftsbedingige) zue. Wenn nöd, denn derfsch du d'Dienscht nöd nutze.",
     "txt2": "1. Nutzigsberechtigung",
     "txt3": "Du muesch mindestens 18 Jahr alt sii, zum BUEZ nutze. Mit dr Registrierig bestätigsch du, dass du d'rechtlichi Fähigkeit hesch, dem Vertrag zzustimme. BUEZ behält sich s’Recht vor, Kontos z’sperre oder lösche, wo d’Bedingige verletze.",
     "txt4": "2. Nutzerkonto",
@@ -300,7 +300,7 @@
     "txt12": "6. Haftigsbeschränkig",
     "txt13": "BUEZ isch e Vermittler und haftet nöd für direkti, indirekti oder folgendi Schädä, wo dur d'Nutzig vom Dienscht entstöh. BUEZ garantiert weder d’Qualität, Zuverlässigkeit no d'Sicherhei vo de Dienscht, wo vo Nutzer aebote wärde.",
     "txt14": "7. Kontaktinformatione",
-    "txt15": "Für Froge oder Support: Bitte kontaktier üs unter info@buez.com"
+    "txt15": "Für Froge oder Support: Bitte kontaktier üs unter info@buezapp.com"
   },
   "successScreen": {
     "txt1": "Anfrage erfolgreich veröffentlicht",
@@ -323,11 +323,13 @@
     "txt4": "Abgeschlossene Aufgaben"
   },
   "editProfile": {
-    "txt1": "Gib dis Name a",
-    "txt2": "Gib dis Telefonnumere a",
-    "txt3": "Info bearbeite",
-    "txt4": "Bearbeite",
-    "txt5": "Telefonnummer"
+    "txt1": "Gib deinen Namen ein",
+    "txt2": "Profil bearbeiten",
+    "txt3": "Informationen bearbeiten",
+    "txt4": "Profil aktualisieren",
+    "biography": "Biografie",
+    "biographyPlaceholder": "Teile deine Fähigkeiten, Erfahrungen und Leidenschaften...",
+    "biographyHint": "Eine kurze Biografie hilft anderen, dein Fachwissen und deinen Ansatz zu verstehen"
   },
   "reviews": {
     "txt1": "Meine Bewertungen",

@@ -16,7 +16,7 @@ import LottieView from "lottie-react-native";
 import i18n from "../translation/i18n";
 // components
 import Screen from "../components/Screen";
-
+import Feather from '@expo/vector-icons/Feather';
 // config
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
@@ -214,9 +214,7 @@ function Onboarding(props) {
             end={{ x: 1, y: 0 }}
             style={styles.gradient}
           >
-            <Text style={[styles.gradientText, { color: theme.pureWhite }]}>
-              {renderNextButtonText()}
-            </Text>
+            <Feather name="arrow-right" size={RFPercentage(3.5)} color={theme.pureWhite} />
           </LinearGradient>
         </TouchableOpacity>
       </View>

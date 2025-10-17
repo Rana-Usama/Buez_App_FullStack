@@ -59,6 +59,7 @@ function PostRequest({ navigation, route }) {
   const { theme } = useAppTheme();
   const selectedLocation = useSelector((state: any) => state.location);
   const inputRef = useRef(null);
+  const [customTaskTitle, setCustomTaskTitle] = useState("");
 
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
@@ -127,6 +128,10 @@ function PostRequest({ navigation, route }) {
             await cachedTranslate(currentPostRequest.otherCompensation)
           );
           setBudget(`${formatCurrency(currentPostRequest.monitarily)}`);
+
+          if (currentPostRequest.taskType === "Other") {
+            setCustomTaskTitle(currentPostRequest.customTaskTitle || "");
+          }
           const temp = [...imageUris];
           currentPostRequest.imageUrls.forEach((imgUrl, i) => {
             temp[i] = imgUrl;
@@ -153,6 +158,9 @@ function PostRequest({ navigation, route }) {
     setSelectedTask(task.name); // Translated
     const original = taskOptions.find((t) => t.id === task.id)?.name;
     setOriginalTaskType(original); // Store original
+    if (original !== "Other") {
+      setCustomTaskTitle("");
+    }
     setShowTaskDropdown(false);
   };
 
@@ -287,7 +295,8 @@ function PostRequest({ navigation, route }) {
       !selectedCompensation ||
       !description ||
       !location ||
-      (!compensation && !budget)
+      (!compensation && !budget) ||
+      (originalTaskType === "Other" && !customTaskTitle)
     ) {
       Toast.show({
         type: "info",
@@ -314,6 +323,7 @@ function PostRequest({ navigation, route }) {
         status: REQUEST_STATUS.Active,
         acceptedBy: null,
         reviews: reviews || null,
+        customTaskTitle: originalTaskType === "Other" ? customTaskTitle : "",
       };
       const imgs = imageUris?.filter((img) => Boolean(img));
       if (imgs?.length === 0) {
@@ -449,6 +459,22 @@ function PostRequest({ navigation, route }) {
             />
           )}
 
+          {originalTaskType === "Other" && (
+            <InputFieldNew
+              placeholder={`${t("postRequest.customTaskTitle")}`} // You'll need to add this translation
+              value={customTaskTitle}
+              onChangeText={setCustomTaskTitle}
+              customStyle={{
+                width: "90%",
+                borderRadius: RFPercentage(1),
+                backgroundColor: theme.white,
+                borderColor: theme.border,
+                marginTop: RFPercentage(2),
+                height: RFPercentage(6.5),
+              }}
+            />
+          )}
+
           <View style={styles.typeWrapper}>
             <TouchableOpacity
               activeOpacity={0.8}
@@ -485,7 +511,11 @@ function PostRequest({ navigation, route }) {
                     : "keyboard-arrow-down"
                 }
                 style={styles.dropdownIcon}
-                color={selectedTask ? theme.black : theme.inputFieldPlaceholder}
+                color={
+                  selectedCompensation
+                    ? theme.black
+                    : theme.inputFieldPlaceholder
+                }
               />
             </TouchableOpacity>
 

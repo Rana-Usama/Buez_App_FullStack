@@ -211,7 +211,8 @@
     "txt11": "e.g, 100$",
     "txt12": "Upload Photos From Gallery",
     "txt13": "Edit",
-    "txt14": "Post"
+    "txt14": "Post",
+    "customTaskTitle": "Please specify your task type"
   },
   "messages": {
     "txt1": "Messages",
@@ -286,7 +287,7 @@
     "txt13": "If you have any questions about this Privacy Policy, please contact us at support@example.com."
   },
   "terms": {
-    "txt1": " Welcome to BUEZ, a platform operated by Devappics that connects users who need help with daily tasks to individuals willing to provide assistance in exchange for compensation. By accessing or using the BUEZ mobile application (the 'App') or any related services (collectively, the 'Service'), you agree to be bound by these Terms and Conditions ('Terms'). If you do not agree, you must not use the Service.",
+    "txt1": " Welcome to BUEZ, a platform operated by Buez Solution that connects users who need help with daily tasks to individuals willing to provide assistance in exchange for compensation. By accessing or using the BUEZ mobile application (the 'App') or any related services (collectively, the 'Service'), you agree to be bound by these Terms and Conditions ('Terms'). If you do not agree, you must not use the Service.",
     "txt2": "1. Eligibility",
     "txt3": "You must be at least 18 years old to use BUEZ. By registering, you confirm that you have the legal capacity to enter into this agreement. BUEZ reserves the right to suspend or terminate accounts that violate these Terms.",
     "txt4": "2. User Accounts",
@@ -300,7 +301,7 @@
     "txt12": "6. Limitation of Liability",
     "txt13": "BUEZ is a facilitator and is not liable for any direct, indirect, incidental, or consequential damages arising from the use of the Service. BUEZ does not guarantee the quality, reliability, or safety of services provided by users.",
     "txt14": "7. Contact Information",
-    "txt15": "For questions or support, please contact us at info@buez.com"
+    "txt15": "For questions or support, please contact us at info@buezapp.com"
   },
   "successScreen": {
     "txt1": "Request Posted Successfully",
@@ -323,11 +324,13 @@
     "txt4": "Completed Tasks"
   },
   "editProfile": {
-    "txt1": "Add your Name",
-    "txt2": "Add your Phone Number",
+    "txt1": "Enter your name",
+    "txt2": "Edit Profile",
     "txt3": "Edit Info",
-    "txt4": "Edit",
-    "txt5": "Phone Number"
+    "txt4": "Update Profile",
+    "biography": "Biography",
+    "biographyPlaceholder": "Share your skills, experience, and what you're passionate about...",
+    "biographyHint": "A short biography helps others understand your expertise and approach"
   },
   "reviews": {
     "txt1": "My Reviews",
