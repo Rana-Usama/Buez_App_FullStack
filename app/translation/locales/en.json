@@ -265,12 +265,6 @@
     "txt6": "New Password",
     "txt7": "Repeat Password"
   },
-  "faqs": {
-    "txt1": "What areas do you serve?",
-    "txt2": "Can I post my own requests?",
-    "txt3": "Can I cancel a request after I accept it?",
-    "txt4": "Can I leave a review to requester?"
-  },
   "privacyPolicy": {
     "txt1": "Welcome to our Privacy Policy. Your privacy is critically important to us. This Privacy Policy explains how we collect, use, and protect your personal data when you use our application.",
     "txt2": "Information We Collect",
@@ -395,5 +389,104 @@
     "txt9": "Coordinate with the requester to finish the task.",
     "txt10": "Got It!",
     "txt11": "View My Requests"
+  },
+
+  "faqs": {
+    "txt1" : "How can we help you?",
+    "txt2" : " Find answers to frequently asked questions",
+    "txt3" : " Still need help?",
+    "txt4" : "Our support team is here to assist you",
+    "txt5" : "Contact Support",
+    "section1": {
+      "title": "General Information",
+      "questions": {
+        "q1": "What is BUEZ?",
+        "a1": "BUEZ is a community-driven mobile application that connects people who need help with daily tasks to those willing to provide assistance in exchange for compensation or other benefits.",
+        "q2": "How does BUEZ work?",
+        "a2": "Users can post tasks they need help with, and others can browse and accept these requests. The platform facilitates communication and task completion through a secure messaging system.",
+        "q3": "Is BUEZ available in my area?",
+        "a3": "BUEZ shows requests within a 100 km radius of your location. You can see nearby requests and apply a location filter in the app.",
+        "q4": "What types of tasks can I post on BUEZ?",
+        "a4": "You can post various daily tasks including cleaning, moving, gardening and others with custom title."
+      }
+    },
+    "section2": {
+      "title": "Account & Subscription",
+      "questions": {
+        "q1": "Do I need a subscription to use BUEZ?",
+        "a1": "Yes, BUEZ operates on a subscription-based model. You need an active subscription to browse and post requests. However, you can register and create an account with a 14-day free trial.",
+        "q2": "How much does BUEZ subscription cost?",
+        "a2": "BUEZ offers a monthly subscription plan at $12.99. You can start with a 14-day free trial to explore all features.",
+        "q3": "Can I cancel my subscription?",
+        "a3": "Yes, you can cancel your subscription at any time through the app settings. You'll maintain access until the end of your billing period.",
+        "q4": "What happens if I don't subscribe?",
+        "a4": "Without an active subscription, you can still create an account but won't be able to browse requests or post your own tasks."
+      }
+    },
+    "section3": {
+      "title": "Posting & Accepting Requests",
+      "questions": {
+        "q1": "How do I post a request for help?",
+        "a1": "Go to the 'Post Request' section, select your task type, add description, location, and compensation details. You can also upload photos to better explain your task.",
+        "q2": "What compensation can I offer?",
+        "a2": "You can offer monetary compensation or other benefits like gift cards, movie tickets, or any mutually agreed-upon reward.",
+        "q3": "Can I cancel a request after posting it?",
+        "a3": "Yes, you can cancel your active requests at any time from the 'My Requests' section.",
+        "q4": "How do I accept a task?",
+        "a4": "Browse available requests in the 'Home' section, view task details, and tap 'Accept Task' if you're interested in helping.",
+        "q5": "Can I cancel a task I've accepted?",
+        "a5": "Yes, you can cancel accepted tasks, though we encourage communicating with the requester first to avoid inconvenience."
+      }
+    },
+    "section4": {
+      "title": "Payments & Compensation",
+      "questions": {
+        "q1": "How are payments handled?",
+        "a1": "Compensation is arranged directly between the requester and helper. BUEZ facilitates the connection but doesn't process payments between users.",
+        "q2": "When do I get paid for completed tasks?",
+        "a2": "Payment timing and method are agreed upon between you and the requester. We recommend discussing payment details before starting the task.",
+        "q3": "What if there's a dispute about payment?",
+        "a3": "BUEZ encourages clear communication about compensation before task acceptance. While we don't mediate payment disputes, we provide a review system to maintain community trust."
+      }
+    },
+    "section5": {
+      "title": "Safety & Community",
+      "questions": {
+        "q1": "Is BUEZ safe to use?",
+        "a1": "Yes, we prioritize user safety through review systems, and secure messaging. However, we always recommend meeting in public places for first-time interactions.",
+        "q2": "Can I review other users?",
+        "a2": "Yes, after task completion, you can leave reviews and ratings, helping build a trustworthy community.",
+        "q3": "What should I do if I have a bad experience?",
+        "a3": "You can report any concerns through our support system. We take community guidelines seriously and may suspend accounts that violate our terms.",
+        "q4": "How does the messaging system work?",
+        "a4": "Our built-in messaging allows private communication between requesters and helpers. This helps discuss task details, compensation, and coordination safely within the app."
+      }
+    },
+    "section6": {
+      "title": "Technical Support",
+      "questions": {
+        "q1": "How do I reset my password?",
+        "a1": "Use the 'Forgot Password' feature on the login screen. We'll send a reset link to your registered email address.",
+        "q2": "Can I change my profile information?",
+        "a2": "Yes, you can update your name, biography, and other profile details in the 'Edit Profile' section.",
+        "q3": "What if the app isn't working properly?",
+        "a3": "Try restarting the app or your device. If issues persist, contact our support team through the app's help section.",
+        "q4": "How do I manage notifications?",
+        "a4": "You can customize your notification preferences in the Settings section to control what alerts you receive."
+      }
+    },
+    "section7": {
+      "title": "Free Trial Management",
+      "questions": {
+        "q1": "How does the 14-day free trial work?",
+        "a1": "New users get full access to all BUEZ features for 14 days completely free. No credit card required upfront.",
+        "q2": "Will I be charged after the free trial?",
+        "a2": "If you don't cancel before the trial ends, your subscription will automatically continue at the monthly rate of $12.99.",
+        "q3": "How do I cancel my subscription?",
+        "a3": "Go to Settings → Cancel Subscription. You'll maintain access until the end of your current billing period.",
+        "q4": "Can I get a refund?",
+        "a4": "Subscription fees are non-refundable, but you can cancel anytime to prevent future charges."
+      }
+    }
   }
 }

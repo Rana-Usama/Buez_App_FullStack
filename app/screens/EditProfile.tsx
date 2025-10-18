@@ -163,16 +163,12 @@ function EditProfile({ navigation }) {
     biography.trim() !== originalData.biography.trim() ||
     imageUri !== originalData.imageUri;
 
-  const removePhoto = () => {
-    setImageUri(null);
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={[styles.keyboard, { backgroundColor: "#F8FAFC" }]}
+      style={[styles.keyboard, { backgroundColor: theme.white }]}
     >
-      <View style={styles.screen}>
+      <View style={[styles.screen, { backgroundColor: theme.white }]}>
         {/* Navigation Header */}
         <Nav
           dpNull={true}
@@ -218,32 +214,21 @@ function EditProfile({ navigation }) {
                 </View>
               </TouchableOpacity>
             </View>
-
-            <Text style={[styles.imageHint, { color: theme.darkGrey }]}>
-              Tap to change profile photo
-            </Text>
-            {imageUri && (
-              <TouchableOpacity onPress={removePhoto}>
-                {/* <MaterialIcons
-                  name="close"
-                  size={RFPercentage(1.8)}
-                  color={theme.white}
-                /> */}
-                <Text
-                  style={[
-                    styles.imageHint,
-                    { color: "#DC2626", fontFamily: "Poppins_500Medium" },
-                  ]}
-                >
-                  Remove profile photo
-                </Text>
-              </TouchableOpacity>
-            )}
           </View>
 
           {/* Form Section */}
           <View
-            style={[styles.formContainer, { backgroundColor: theme.white }]}
+            style={[
+              styles.formContainer,
+              {
+                backgroundColor: theme.white,
+                borderWidth: 1,
+                borderColor:
+                  theme.mode === "dark"
+                    ? theme.border
+                    : "rgba(238, 238, 238, 1)",
+              },
+            ]}
           >
             {/* Name Field */}
             <View style={styles.fieldSection}>
@@ -328,7 +313,6 @@ function EditProfile({ navigation }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
   },
   keyboard: {
     flex: 1,
@@ -441,7 +425,7 @@ const styles = StyleSheet.create({
   },
   biographyInput: {
     fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.5),
     lineHeight: RFPercentage(2.2),
     flex: 1,
     textAlignVertical: "top",
@@ -451,8 +435,8 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
   },
   biographyHint: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.3),
+    // fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(1),
     fontStyle: "italic",
   },

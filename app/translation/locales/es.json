@@ -1,0 +1,493 @@
+{
+  "buttons": {
+    "next": "Siguiente",
+    "start": "Comenzar",
+    "skip": "Saltar",
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "yes": "Sí",
+    "cancel": "Cancelar"
+  },
+  "common": {
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "name": "Nombre",
+    "confirm": "Confirmar Contraseña",
+    "currency": "ej: 90$",
+    "sign": "$",
+    "gotIt": "Entendido"
+  },
+  "validations": {
+    "inValid": "Correo electrónico inválido",
+    "emailReq": "El correo electrónico es requerido",
+    "passwordReq": "La contraseña es requerida",
+    "userReq": "El nombre de usuario es requerido",
+    "passwordLen": "La contraseña debe tener al menos 6 caracteres",
+    "passwordMatch": "Las contraseñas deben coincidir"
+  },
+  "toast": {
+    "login": {
+      "one": "¡Bienvenido de vuelta!",
+      "two": "¡Sesión iniciada correctamente!",
+      "three": "Error al iniciar sesión",
+      "four": "Algo salió mal. Por favor, inténtalo de nuevo.",
+      "five": "Credenciales inválidas"
+    },
+    "signup": {
+      "one": "Registrarse",
+      "two": "¡Usuario registrado exitosamente!",
+      "three": "Error en el registro",
+      "four": "Las credenciales ya están en uso"
+    },
+    "forgetPassword": {
+      "one": "Enlace de restablecimiento enviado",
+      "two": "Revisa tu correo para restablecer tu contraseña.",
+      "three": "Error",
+      "four": "Error al enviar el enlace de restablecimiento."
+    },
+    "subscriptionV2": {
+      "one": "Suscripción Incompleta",
+      "two": "Tu suscripción no pudo completarse. Por favor, inténtalo de nuevo.",
+      "three": "Prueba Gratuita Activada",
+      "four": "Tu prueba gratuita de 14 días ha comenzado exitosamente."
+    },
+    "subscription": {
+      "one": "¡Suscripción Exitosa!",
+      "two": "Plan mensual activado correctamente."
+    },
+    "myRequests": {
+      "one": "Estado de la Solicitud",
+      "two": "Solicitud",
+      "three": "marcada como completada",
+      "four": "cancelada",
+      "five": "¡Algo salió mal!",
+      "six": "No se pudo actualizar el estado de la solicitud.",
+      "seven": "Solicitud Reposteada Exitosamente"
+    },
+    "cancelSubscription": {
+      "one": "Sin Suscripción Activa",
+      "two": "No encontramos una suscripción activa vinculada a tu cuenta.",
+      "three": "Suscripción Cancelada",
+      "four": "Tu suscripción ha sido cancelada exitosamente. Mantendrás el acceso hasta el final de tu período de facturación."
+    },
+    "changePassword": {
+      "one": "Contraseña Cambiada",
+      "two": "¡La contraseña ha sido cambiada exitosamente!",
+      "three": "Error",
+      "four": "¡Algo salió mal!"
+    },
+    "editProfile": {
+      "one": "Perfil Actualizado",
+      "two": "¡Tu perfil ha sido actualizado exitosamente!",
+      "three": "Actualización Fallida",
+      "four": "Ocurrió un error al actualizar tu perfil. Por favor, inténtalo de nuevo."
+    }
+  },
+  "onBoarding": {
+    "onBoarding1": {
+      "Title": "Bienvenido a Büez",
+      "Desc": "Conecta, colabora y crece - tu red para apoyo profesional comienza aquí."
+    },
+    "onBoarding2": {
+      "Title": "Publica en qué necesitas ayuda",
+      "Desc": "Comparte tu trabajo o desafíos. Recibe respuestas de personas reales listas para ayudar."
+    },
+    "onBoarding3": {
+      "Title": "Gestiona publicaciones y chatea libremente",
+      "Desc": "Realiza un seguimiento de tus solicitudes, actualiza tus publicaciones y chatea con tus seguidores - todo en un solo lugar."
+    },
+    "onBoarding4": {
+      "Title": "Disfruta 14 días de acceso completo",
+      "Desc": "Prueba todas las funciones de Büez completamente gratis. Sin restricciones, sin compromisos."
+    },
+    "onBoarding5": {
+      "Title": "Continuar con suscripción",
+      "Desc": "Después de tu prueba gratuita de 14 días, continúa disfrutando Büez con el plan mensual de $12.99. Cancela en cualquier momento."
+    }
+  },
+  "login": {
+    "txt1": "Bienvenido de Vuelta",
+    "txt2": "¿Recordarme?",
+    "txt3": "¿Olvidaste tu Contraseña?",
+    "txt4": "o inicia sesión con",
+    "txt5": "¿No tienes una cuenta?"
+  },
+  "signup": {
+    "txt1": "¡Bienvenido!",
+    "txt2": "o regístrate con",
+    "txt3": "¿Ya tienes una cuenta?"
+  },
+  "forgetPassword": {
+    "txt1": "¿Restablecer Contraseña?",
+    "txt2": "Enviar Enlace",
+    "txt3": "El enlace para restablecer la contraseña ha sido enviado a tu correo",
+    "txt4": " Por favor, revisa tu carpeta de Spam si no ves el correo de restablecimiento.",
+    "txt5": "Ok",
+    "txt6": "No hay ninguna cuenta asociada con esta dirección de correo."
+  },
+  "freeTrial": {
+    "txt1": "Comienza tu Prueba Gratuita de 14 Días",
+    "txt2": "Cómo Funciona tu Prueba Gratuita",
+    "txt3": "Hoy",
+    "txt4": "Disfruta acceso ilimitado a todas nuestras funciones premium por 14 días, completamente gratis.",
+    "txt5": "Después de 10 Días",
+    "txt6": "Te enviaremos un recordatorio amistoso cuando tu período de prueba termine en 4 días.",
+    "txt7": "Continuar después de la prueba",
+    "txt8": "Tu suscripción continuará automáticamente después de 14 días. Puedes cancelar en cualquier momento.",
+    "txt9": "Comenzar Mi Prueba Gratuita"
+  },
+  "subscriptionV2": {
+    "txt1": "Compra nuestro premium para acceder a todos los servicios",
+    "txt2": ".99/mes",
+    "txt3": "Publica solicitudes diarias de tareas",
+    "txt4": "Ve solicitudes diariamente",
+    "txt5": "Gana dinero haciendo tareas diarias",
+    "txt6": "Cancela en cualquier momento",
+    "txt7": "Agregar Tarjeta"
+  },
+  "subscription": {
+    "txt1": "Tu prueba gratuita de 14 días ha terminado.",
+    "txt2": "Actualiza a Premium para desbloquear acceso completo.",
+    "txt3": "Pagar"
+  },
+  "home": {
+    "txt1": "Inicio",
+    "txt2": "Buscar",
+    "txt3": "Categorías",
+    "txt4": "Todos",
+    "txt5": "Limpieza",
+    "txt6": "Mudanza",
+    "txt7": "Jardinería",
+    "txt8": "Otros",
+    "txt9": "Solicitudes Cercanas",
+    "txt10": "Compensación",
+    "txt11": "¡No se encontraron registros!",
+    "txt12": "Cargando solicitudes..."
+  },
+  "details": {
+    "txt1": "Detalles de la Tarea",
+    "txt2": "Leer menos",
+    "txt3": "Leer más",
+    "txt4": "Ubicación",
+    "txt5": "Fecha y Hora de Solicitud",
+    "txt6": "Compensación",
+    "txt7": "Enviar Mensaje al Solicitante",
+    "txt8": "Mis Solicitudes",
+    "txt9": "Mensaje",
+    "txt10": "¡Aún no hay reseñas!",
+    "txt11": "más",
+    "txt12": "Aceptar Tarea",
+    "txt13": "Categoría",
+    "txt14": "Calificación Promedio"
+  },
+  "myRequests": {
+    "txt1": "Mis Solicitudes",
+    "txt2": "Activas",
+    "txt3": "Completadas",
+    "txt4": "Publicada:",
+    "txt5": "Marcar como Hecho",
+    "txt6": "Cancelar",
+    "txt7": "¿Estás seguro de que quieres eliminar\nesta solicitud?",
+    "txt8": "Cancelada",
+    "txt9": "Republicar",
+    "txt10": "Aceptada",
+    "txt11": "Aceptada Por:",
+    "txt12": "Solicitud aceptada cancelada exitosamente.",
+    "txt13": "Cargando tus solicitudes...",
+    "repostSuccess": "¡Solicitud Reposteada!",
+    "repostAvailable": "Tu solicitud ha sido reposteada y ahora está disponible para que otros usuarios la acepten."
+  },
+  "postRequest": {
+    "txt1": "Publicar Solicitud",
+    "txt2": "Editar Solicitud",
+    "txt3": "Tipo de Tarea",
+    "txt4": "Gaming",
+    "txt5": "Monitarely",
+    "txt6": "Otro",
+    "txt7": "Tipo de Compensación",
+    "txt8": "Descripción",
+    "txt9": "Ubicación (Visible para usuarios dentro de 100 km)",
+    "txt10": "Detalles de Compensación ej: Dos Entradas de Cine",
+    "txt11": "ej: 100$",
+    "txt12": "Subir Fotos desde la Galería",
+    "txt13": "Editar",
+    "txt14": "Publicar",
+    "customTaskTitle": "Por favor especifica tu tipo de tarea"
+  },
+  "messages": {
+    "txt1": "Mensajes",
+    "txt2": "Todos",
+    "txt3": "No Leídos",
+    "txt4": "No hay Mensajes No Leídos",
+    "txt5": "Aún no hay Mensajes",
+    "txt6": "Saluda a"
+  },
+  "chat": {
+    "txt1": "Cargar mensajes anteriores",
+    "txt2": "Escribe un mensaje",
+    "txt3": " Eliminar Mensaje",
+    "txt4": "¿Quieres eliminar este mensaje?",
+    "txt5": "Eliminar"
+  },
+  "settings": {
+    "txt1": "Cancelar Suscripción",
+    "txt2": "Cambiar Contraseña",
+    "txt3": "Términos y Condiciones",
+    "txt4": "Política de Privacidad",
+    "txt5": "Preguntas Frecuentes",
+    "txt6": "Cerrar Sesión",
+    "txt7": "Eliminar Cuenta",
+    "txt8": "Ayuda y Seguridad",
+    "txt9": "Configuración",
+    "txt10": "¿Estás seguro de que quieres eliminar\nesta cuenta?",
+    "txt11": "¿Estás seguro de que quieres cerrar sesión\nen esta cuenta?",
+    "txt12": "Cambiar Idioma",
+    "txt13": "Tema Oscuro"
+  },
+  "cancelSubscription": {
+    "txt1": "Cancelar Suscripción Premium",
+    "txt2": "Plan Actual",
+    "txt3": ".99/mes",
+    "txt4": "Tus servicios ya no serán visibles para otros usuarios",
+    "txt5": "Ya no recibirás solicitudes diarias",
+    "txt6": "No podrás ganar dinero con tareas diarias",
+    "txt7": "Ya no tendrás opciones especiales de cancelación",
+    "txt8": "No estás suscrito a ningún plan activo.",
+    "txt9": "Activar Suscripción",
+    "txt10": "¿Estás seguro de que quieres cancelar\ntu suscripción mensual?"
+  },
+  "chnagePassword": {
+    "txt1": "Ingresa Contraseña Antigua",
+    "txt2": "Ingresa Nueva Contraseña",
+    "txt3": "Repite Nueva Contraseña",
+    "txt4": "Cambiar",
+    "txt5": "Contraseña Antigua",
+    "txt6": "Nueva Contraseña",
+    "txt7": "Repetir Contraseña"
+  },
+
+  "privacyPolicy": {
+    "txt1": "Bienvenido a nuestra Política de Privacidad. Tu privacidad es críticamente importante para nosotros. Esta Política de Privacidad explica cómo recopilamos, usamos y protegemos tus datos personales cuando usas nuestra aplicación.",
+    "txt2": "Información que Recopilamos",
+    "txt3": "Recopilamos información que nos proporcionas directamente, como cuando creas una cuenta, envías una solicitud o te comunicas con soporte al cliente. Esto puede incluir tu nombre, correo electrónico, número de teléfono y otros detalles relevantes.",
+    "txt4": "Cómo Usamos tu Información",
+    "txt5": "Usamos la información recopilada para proporcionar, mejorar y personalizar nuestros servicios. Esto incluye procesar transacciones, enviar notificaciones, garantizar seguridad y analizar tendencias de uso.",
+    "txt6": "Compartición de Datos y Seguridad",
+    "txt7": "No vendemos tus datos personales a terceros. Podemos compartir datos con proveedores de servicios confiables para operaciones necesarias, cumplir con obligaciones legales o garantizar la seguridad del usuario. Implementamos medidas de seguridad para proteger tus datos.",
+    "txt8": "Tus Derechos",
+    "txt9": "Tienes derecho a acceder, actualizar o eliminar tu información personal. También puedes optar por no participar en ciertas prácticas de recopilación de datos. Contáctanos si tienes inquietudes sobre privacidad.",
+    "txt10": "Cambios en esta Política",
+    "txt11": "Podemos actualizar esta Política de Privacidad periódicamente. Te recomendamos revisarla periódicamente para ver cambios. El uso continuado de nuestros servicios después de actualizaciones constituye tu aceptación de la política revisada.",
+    "txt12": "Contáctanos",
+    "txt13": "Si tienes preguntas sobre esta Política de Privacidad, contáctanos en support@example.com."
+  },
+  "terms": {
+    "txt1": " Bienvenido a BUEZ, una plataforma operada por Buez Solution que conecta usuarios que necesitan ayuda con tareas diarias con individuos dispuestos a proporcionar asistencia a cambio de compensación. Al acceder o usar la aplicación móvil BUEZ (la 'App') o cualquier servicio relacionado (colectivamente, el 'Servicio'), aceptas estar sujeto a estos Términos y Condiciones ('Términos'). Si no estás de acuerdo, no debes usar el Servicio.",
+    "txt2": "1. Elegibilidad",
+    "txt3": "Debes tener al menos 18 años para usar BUEZ. Al registrarte, confirmas que tienes la capacidad legal para celebrar este acuerdo. BUEZ se reserva el derecho de suspender o terminar cuentas que violen estos Términos.",
+    "txt4": "2. Cuentas de Usuario",
+    "txt5": "Debes crear una cuenta para acceder y usar el Servicio. Eres responsable de mantener la confidencialidad de tus credenciales de cuenta. BUEZ no es responsable por ningún acceso no autorizado a tu cuenta.",
+    "txt6": "3. Suscripción y Pagos",
+    "txt7": "BUEZ opera bajo un modelo basado en suscripción. Los usuarios deben suscribirse para acceder y publicar solicitudes. Las tarifas de suscripción se cobran mensualmente y continuarán hasta que el usuario las cancele. Los pagos se procesan a través de proveedores de pago de terceros.",
+    "txt8": "4. Uso del Servicio",
+    "txt9": "Los usuarios pueden publicar solicitudes de asistencia, especificando compensación y detalles de la tarea. La compensación se maneja directamente entre el solicitante y el ayudante, y BUEZ no garantiza ni procesa pagos entre usuarios.",
+    "txt10": "5. Actividades Prohibidas",
+    "txt11": "Los usuarios no deben publicar contenido engañoso, dañino u ofensivo, usar la plataforma para actividades ilegales o intentar hackear o interrumpir la funcionalidad de la plataforma.",
+    "txt12": "6. Limitación de Responsabilidad",
+    "txt13": "BUEZ es un facilitador y no es responsable por ningún daño directo, indirecto, incidental o consecuente que surja del uso del Servicio. BUEZ no garantiza la calidad, confiabilidad o seguridad de los servicios proporcionados por los usuarios.",
+    "txt14": "7. Información de Contacto",
+    "txt15": "Para preguntas o soporte, contáctanos en info@buezapp.com"
+  },
+  "successScreen": {
+    "txt1": "Solicitud Publicada Exitosamente",
+    "txt2": "Inicio",
+    "txt3": "¡Tu tarea ha sido publicada exitosamente!",
+    "txt4": "Visibilidad de la Tarea",
+    "txt5": "Tu tarea ahora es visible para ayudantes hasta que sea aceptada.",
+    "txt6": "Regla de Primera Aceptación",
+    "txt7": "Una vez aceptada, solo ese ayudante puede verla hasta que se complete el trato.",
+    "txt8": "¿Sin trato? Republica Fácilmente",
+    "txt9": "Si no se realiza ningún trato, republícala desde 'Mis Solicitudes' bajo 'Activas'.",
+    "txt10": "Mantente Actualizado",
+    "txt11": "Recibirás notificaciones cuando alguien esté interesado o envíe una oferta.",
+    "txt12": "Ver Mis Solicitudes"
+  },
+  "profile": {
+    "txt1": "Perfil",
+    "txt2": "Editar Perfil",
+    "txt3": "Calificaciones y Reseñas",
+    "txt4": "Tareas Completadas"
+  },
+  "editProfile": {
+    "txt1": "Ingresa tu nombre",
+    "txt2": "Editar Perfil",
+    "txt3": "Editar Información",
+    "txt4": "Actualizar Perfil",
+    "biography": "Biografía",
+    "biographyPlaceholder": "Comparte tus habilidades, experiencia y lo que te apasiona...",
+    "biographyHint": "Una breve biografía ayuda a otros a entender tu experiencia y enfoque"
+  },
+  "reviews": {
+    "txt1": "Mis Reseñas",
+    "txt2": "Fecha:",
+    "txt3": "Por:",
+    "txt4": "Reseñado",
+    "txt5": "Calificación Promedio",
+    "txt6": "Basado en",
+    "txt7": "reseña",
+    "txt8": "reseñas"
+  },
+  "bottomTab": {
+    "txt1": "Mis Solicitudes",
+    "txt2": "Publicar Solicitud",
+    "txt3": "Inicio",
+    "txt4": "Mensajes",
+    "txt5": "Configuración"
+  },
+  "location": {
+    "placholder": "Buscar una ubicación",
+    "by": "+ Agregar Ubicación",
+    "apply": "Aplicar Ubicación"
+  },
+  "password": {
+    "txt1": "Iniciaste sesión con Google. Para cambiar tu contraseña, administra tu Cuenta de Google.",
+    "txt2": "Cuenta de Google"
+  },
+  "notifications": {
+    "txt1": "Cargando notificaciones...",
+    "txt2": "Cuando recibas notificaciones, aparecerán aquí",
+    "txt3": "Calificación:"
+  },
+  "completed": {
+    "txt1": "RESEÑADO",
+    "txt2": "COMPLETADO",
+    "txt3": "Tu Reseña",
+    "txt4": "Tareas Completadas",
+    "txt5": " Reseñado",
+    "txt6": "Reseña Pendiente",
+    "txt7": "Cargando tus tareas completadas..."
+  },
+  "pushNotifications": {
+    "txt1": "aceptó tu solicitud de tarea.",
+    "txt2": "te dejó una reseña en tu tarea!",
+    "txt3": "¡Tarea Completada!",
+    "txt4": "Tu tarea aceptada",
+    "txt5": "ha sido marcada como completada por",
+    "txt6": "¡Seguimiento de Tarea!",
+    "txt7": "Este es un recordatorio sobre tu publicación reciente de tarea. Por favor revisa tu progreso y actualiza el estado si está completada.",
+    "txt8": "⏰ Prueba Gratuita Terminando Pronto",
+    "txt9": "Tu prueba gratuita termina en 4 días. Mantén tu suscripción para conservar el acceso completo."
+  },
+  "modal": {
+    "txt1": "¡Tarea Aceptada Exitosamente!",
+    "txt2": "Comenzar a Comunicarse",
+    "txt3": "Ahora puedes chatear con el solicitante sobre los detalles de la tarea.",
+    "txt4": "Encontrar en Mis Solicitudes",
+    "txt5": "Esta tarea está listada bajo 'Aceptadas' en Mis Solicitudes.",
+    "txt6": "Mantente Actualizado",
+    "txt7": "Recibirás notificaciones para actualizaciones o mensajes.",
+    "txt8": "Próximos Pasos",
+    "txt9": "Coordina con el solicitante para terminar la tarea.",
+    "txt10": "¡Entendido!",
+    "txt11": "Ver Mis Solicitudes"
+  },
+
+  "faqs": {
+    "txt1": "¿Cómo podemos ayudarte?",
+    "txt2": "Encuentra respuestas a preguntas frecuentes",
+    "txt3": "¿Sigues necesitando ayuda?",
+    "txt4": "Nuestro equipo de soporte está aquí para asistirte",
+    "txt5": "Contactar Soporte",
+    "section1": {
+      "title": "Información General",
+      "questions": {
+        "q1": "¿Qué es BUEZ?",
+        "a1": "BUEZ es una aplicación móvil impulsada por la comunidad que conecta a personas que necesitan ayuda con tareas diarias con aquellas dispuestas a proporcionar asistencia a cambio de compensación u otros beneficios.",
+        "q2": "¿Cómo funciona BUEZ?",
+        "a2": "Los usuarios pueden publicar tareas con las que necesitan ayuda, y otros pueden explorar y aceptar estas solicitudes. La plataforma facilita la comunicación y la finalización de tareas a través de un sistema de mensajería seguro.",
+        "q3": "¿Está BUEZ disponible en mi área?",
+        "a3": "BUEZ muestra solicitudes dentro de un radio de 100 km de tu ubicación. Puedes ver solicitudes cercanas y aplicar un filtro de ubicación en la aplicación.",
+        "q4": "¿Qué tipos de tareas puedo publicar en BUEZ?",
+        "a4": "Puedes publicar varias tareas diarias incluyendo limpieza, mudanzas, jardinería y otras con título personalizado."
+      }
+    },
+    "section2": {
+      "title": "Cuenta & Suscripción",
+      "questions": {
+        "q1": "¿Necesito una suscripción para usar BUEZ?",
+        "a1": "Sí, BUEZ opera bajo un modelo basado en suscripción. Necesitas una suscripción activa para explorar y publicar solicitudes. Sin embargo, puedes registrarte y crear una cuenta con una prueba gratuita de 14 días.",
+        "q2": "¿Cuánto cuesta la suscripción de BUEZ?",
+        "a2": "BUEZ ofrece un plan de suscripción mensual por $12.99. Puedes comenzar con una prueba gratuita de 14 días para explorar todas las funciones.",
+        "q3": "¿Puedo cancelar mi suscripción?",
+        "a3": "Sí, puedes cancelar tu suscripción en cualquier momento a través de la configuración de la aplicación. Mantendrás el acceso hasta el final de tu período de facturación.",
+        "q4": "¿Qué sucede si no me suscribo?",
+        "a4": "Sin una suscripción activa, aún puedes crear una cuenta pero no podrás explorar solicitudes ni publicar tus propias tareas."
+      }
+    },
+    "section3": {
+      "title": "Publicar & Aceptar Solicitudes",
+      "questions": {
+        "q1": "¿Cómo publico una solicitud de ayuda?",
+        "a1": "Ve a la sección 'Publicar Solicitud', selecciona tu tipo de tarea, añade descripción, ubicación y detalles de compensación. También puedes subir fotos para explicar mejor tu tarea.",
+        "q2": "¿Qué compensación puedo ofrecer?",
+        "a2": "Puedes ofrecer compensación monetaria u otros beneficios como tarjetas de regalo, entradas de cine, o cualquier recompensa mutuamente acordada.",
+        "q3": "¿Puedo cancelar una solicitud después de publicarla?",
+        "a3": "Sí, puedes cancelar tus solicitudes activas en cualquier momento desde la sección 'Mis Solicitudes'.",
+        "q4": "¿Cómo acepto una tarea?",
+        "a4": "Explora las solicitudes disponibles en la sección 'Inicio', ve los detalles de la tarea y toca 'Aceptar Tarea' si estás interesado en ayudar.",
+        "q5": "¿Puedo cancelar una tarea que he aceptado?",
+        "a5": "Sí, puedes cancelar tareas aceptadas, aunque recomendamos comunicarte primero con el solicitante para evitar inconvenientes."
+      }
+    },
+    "section4": {
+      "title": "Pagos & Compensación",
+      "questions": {
+        "q1": "¿Cómo se manejan los pagos?",
+        "a1": "La compensación se acuerda directamente entre el solicitante y el ayudante. BUEZ facilita la conexión pero no procesa pagos entre usuarios.",
+        "q2": "¿Cuándo me pagan por las tareas completadas?",
+        "a2": "El momento y método de pago se acuerdan entre tú y el solicitante. Recomendamos discutir los detalles de pago antes de comenzar la tarea.",
+        "q3": "¿Qué pasa si hay una disputa sobre el pago?",
+        "a3": "BUEZ fomenta una comunicación clara sobre la compensación antes de aceptar la tarea. Aunque no mediamos en disputas de pago, proporcionamos un sistema de reseñas para mantener la confianza de la comunidad."
+      }
+    },
+    "section5": {
+      "title": "Seguridad & Comunidad",
+      "questions": {
+        "q1": "¿Es seguro usar BUEZ?",
+        "a1": "Sí, priorizamos la seguridad del usuario a través de sistemas de reseñas y mensajería segura. Sin embargo, siempre recomendamos reunirse en lugares públicos para las primeras interacciones.",
+        "q2": "¿Puedo reseñar a otros usuarios?",
+        "a2": "Sí, después de completar una tarea, puedes dejar reseñas y calificaciones, ayudando a construir una comunidad confiable.",
+        "q3": "¿Qué debo hacer si tengo una mala experiencia?",
+        "a3": "Puedes reportar cualquier inquietud a través de nuestro sistema de soporte. Tomamos en serio las pautas de la comunidad y podemos suspender cuentas que violen nuestros términos.",
+        "q4": "¿Cómo funciona el sistema de mensajería?",
+        "a4": "Nuestra mensajería integrada permite comunicación privada entre solicitantes y ayudantes. Esto ayuda a discutir detalles de tareas, compensación y coordinación de forma segura dentro de la aplicación."
+      }
+    },
+    "section6": {
+      "title": "Soporte Técnico",
+      "questions": {
+        "q1": "¿Cómo restablezco mi contraseña?",
+        "a1": "Usa la función 'Olvidé mi Contraseña' en la pantalla de inicio de sesión. Enviaremos un enlace de restablecimiento a tu dirección de correo electrónico registrada.",
+        "q2": "¿Puedo cambiar mi información de perfil?",
+        "a2": "Sí, puedes actualizar tu nombre, biografía y otros detalles del perfil en la sección 'Editar Perfil'.",
+        "q3": "¿Qué pasa si la aplicación no funciona correctamente?",
+        "a3": "Intenta reiniciar la aplicación o tu dispositivo. Si los problemas persisten, contacta a nuestro equipo de soporte a través de la sección de ayuda de la aplicación.",
+        "q4": "¿Cómo gestiono las notificaciones?",
+        "a4": "Puedes personalizar tus preferencias de notificación en la sección Configuración para controlar qué alertas recibes."
+      }
+    },
+    "section7": {
+      "title": "Gestión de Prueba Gratuita",
+      "questions": {
+        "q1": "¿Cómo funciona la prueba gratuita de 14 días?",
+        "a1": "Los nuevos usuarios obtienen acceso completo a todas las funciones de BUEZ durante 14 días completamente gratis. No se requiere tarjeta de crédito por adelantado.",
+        "q2": "¿Me cobrarán después de la prueba gratuita?",
+        "a2": "Si no cancelas antes de que termine la prueba, tu suscripción continuará automáticamente a la tarifa mensual de $12.99.",
+        "q3": "¿Cómo cancelo mi suscripción?",
+        "a3": "Ve a Configuración → Cancelar Suscripción. Mantendrás el acceso hasta el final de tu período de facturación actual.",
+        "q4": "¿Puedo obtener un reembolso?",
+        "a4": "Las tarifas de suscripción no son reembolsables, pero puedes cancelar en cualquier momento para evitar cargos futuros."
+      }
+    }
+  }
+}

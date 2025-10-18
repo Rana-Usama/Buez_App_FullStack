@@ -264,12 +264,6 @@
     "txt6": "Nouveau mot de passe",
     "txt7": "Répéter le mot de passe"
   },
-  "faqs": {
-    "txt1": "Dans quelles régions intervenez‑vous ?",
-    "txt2": "Puis‑je publier mes propres demandes ?",
-    "txt3": "Puis‑je annuler une demande après l’avoir acceptée ?",
-    "txt4": "Puis‑je laisser un avis au demandeur ?"
-  },
   "privacyPolicy": {
     "txt1": "Bienvenue dans notre politique de confidentialité. Votre vie privée est primordiale pour nous. Cette politique explique comment nous collectons, utilisons et protégeons vos données personnelles lorsque vous utilisez notre application.",
     "txt2": "Informations collectées",
@@ -395,5 +389,104 @@
     "txt9": "Coordonnez-vous avec le demandeur pour terminer la tâche.",
     "txt10": "Compris !",
     "txt11": "Voir Mes demandes"
+  },
+
+  "faqs": {
+    "txt1": "Comment pouvons-nous vous aider?",
+    "txt2": "Trouvez des réponses aux questions fréquemment posées",
+    "txt3": "Vous avez encore besoin d'aide?",
+    "txt4": "Notre équipe de support est là pour vous aider",
+    "txt5": "Contacter le Support",
+    "section1": {
+      "title": "Informations Générales",
+      "questions": {
+        "q1": "Qu'est-ce que BUEZ ?",
+        "a1": "BUEZ est une application mobile communautaire qui connecte les personnes ayant besoin d'aide pour des tâches quotidiennes avec celles prêtes à fournir une assistance en échange d'une compensation ou d'autres avantages.",
+        "q2": "Comment fonctionne BUEZ ?",
+        "a2": "Les utilisateurs peuvent publier des tâches pour lesquelles ils ont besoin d'aide, et d'autres peuvent parcourir et accepter ces demandes. La plateforme facilite la communication et l'accomplissement des tâches grâce à un système de messagerie sécurisé.",
+        "q3": "BUEZ est-il disponible dans ma région ?",
+        "a3": "BUEZ affiche les demandes dans un rayon de 100 km autour de votre position. Vous pouvez voir les demandes à proximité et appliquer un filtre de localisation dans l'application.",
+        "q4": "Quels types de tâches puis-je publier sur BUEZ ?",
+        "a4": "Vous pouvez publier diverses tâches quotidiennes incluant le ménage, le déménagement, le jardinage et d'autres avec un titre personnalisé."
+      }
+    },
+    "section2": {
+      "title": "Compte & Abonnement",
+      "questions": {
+        "q1": "Ai-je besoin d'un abonnement pour utiliser BUEZ ?",
+        "a1": "Oui, BUEZ fonctionne sur un modèle basé sur l'abonnement. Vous avez besoin d'un abonnement actif pour parcourir et publier des demandes. Cependant, vous pouvez vous inscrire et créer un compte avec un essai gratuit de 14 jours.",
+        "q2": "Combien coûte l'abonnement BUEZ ?",
+        "a2": "BUEZ propose un abonnement mensuel à 12,99 $. Vous pouvez commencer avec un essai gratuit de 14 jours pour explorer toutes les fonctionnalités.",
+        "q3": "Puis-je annuler mon abonnement ?",
+        "a3": "Oui, vous pouvez annuler votre abonnement à tout moment via les paramètres de l'application. Vous conserverez l'accès jusqu'à la fin de votre période de facturation.",
+        "q4": "Que se passe-t-il si je ne m'abonne pas ?",
+        "a4": "Sans abonnement actif, vous pouvez toujours créer un compte mais vous ne pourrez pas parcourir les demandes ni publier vos propres tâches."
+      }
+    },
+    "section3": {
+      "title": "Publication & Acceptation des Demandes",
+      "questions": {
+        "q1": "Comment publier une demande d'aide ?",
+        "a1": "Allez dans la section 'Publier une Demande', sélectionnez votre type de tâche, ajoutez une description, la localisation et les détails de compensation. Vous pouvez également télécharger des photos pour mieux expliquer votre tâche.",
+        "q2": "Quelle compensation puis-je offrir ?",
+        "a2": "Vous pouvez offrir une compensation monétaire ou d'autres avantages comme des cartes-cadeaux, des billets de cinéma, ou toute récompense mutuellement convenue.",
+        "q3": "Puis-je annuler une demande après l'avoir publiée ?",
+        "a3": "Oui, vous pouvez annuler vos demandes actives à tout moment depuis la section 'Mes Demandes'.",
+        "q4": "Comment accepter une tâche ?",
+        "a4": "Parcourez les demandes disponibles dans la section 'Accueil', consultez les détails de la tâche et appuyez sur 'Accepter la Tâche' si vous êtes intéressé à aider.",
+        "q5": "Puis-je annuler une tâche que j'ai acceptée ?",
+        "a5": "Oui, vous pouvez annuler les tâches acceptées, bien que nous encouragions à communiquer d'abord avec le demandeur pour éviter tout inconvénient."
+      }
+    },
+    "section4": {
+      "title": "Paiements & Compensation",
+      "questions": {
+        "q1": "Comment les paiements sont-ils gérés ?",
+        "a1": "La compensation est arrangée directement entre le demandeur et l'aidant. BUEZ facilite la connexion mais ne traite pas les paiements entre utilisateurs.",
+        "q2": "Quand suis-je payé pour les tâches terminées ?",
+        "a2": "Le moment et la méthode de paiement sont convenus entre vous et le demandeur. Nous recommandons de discuter des détails de paiement avant de commencer la tâche.",
+        "q3": "Que se passe-t-il en cas de litige concernant le paiement ?",
+        "a3": "BUEZ encourage une communication claire sur la compensation avant l'acceptation de la tâche. Bien que nous ne médiations pas les litiges de paiement, nous fournissons un système d'avis pour maintenir la confiance communautaire."
+      }
+    },
+    "section5": {
+      "title": "Sécurité & Communauté",
+      "questions": {
+        "q1": "BUEZ est-il sûr à utiliser ?",
+        "a1": "Oui, nous priorisons la sécurité des utilisateurs grâce aux systèmes d'avis et à la messagerie sécurisée. Cependant, nous recommandons toujours de se rencontrer dans des lieux publics pour les premières interactions.",
+        "q2": "Puis-je évaluer d'autres utilisateurs ?",
+        "a2": "Oui, après l'achèvement d'une tâche, vous pouvez laisser des avis et des notes, aidant à construire une communauté digne de confiance.",
+        "q3": "Que dois-je faire si j'ai une mauvaise expérience ?",
+        "a3": "Vous pouvez signaler toute préoccupation via notre système de support. Nous prenons les directives communautaires au sérieux et pouvons suspendre les comptes qui violent nos conditions.",
+        "q4": "Comment fonctionne le système de messagerie ?",
+        "a4": "Notre messagerie intégrée permet une communication privée entre les demandeurs et les aidants. Cela aide à discuter des détails des tâches, de la compensation et de la coordination en toute sécurité dans l'application."
+      }
+    },
+    "section6": {
+      "title": "Support Technique",
+      "questions": {
+        "q1": "Comment réinitialiser mon mot de passe ?",
+        "a1": "Utilisez la fonction 'Mot de passe oublié' sur l'écran de connexion. Nous enverrons un lien de réinitialisation à votre adresse email enregistrée.",
+        "q2": "Puis-je modifier mes informations de profil ?",
+        "a2": "Oui, vous pouvez mettre à jour votre nom, biographie et autres détails du profil dans la section 'Modifier le Profil'.",
+        "q3": "Que faire si l'application ne fonctionne pas correctement ?",
+        "a3": "Essayez de redémarrer l'application ou votre appareil. Si les problèmes persistent, contactez notre équipe de support via la section d'aide de l'application.",
+        "q4": "Comment gérer les notifications ?",
+        "a4": "Vous pouvez personnaliser vos préférences de notification dans la section Paramètres pour contrôler les alertes que vous recevez."
+      }
+    },
+    "section7": {
+      "title": "Gestion de l'Essai Gratuit",
+      "questions": {
+        "q1": "Comment fonctionne l'essai gratuit de 14 jours ?",
+        "a1": "Les nouveaux utilisateurs obtiennent un accès complet à toutes les fonctionnalités de BUEZ pendant 14 jours, entièrement gratuit. Aucune carte de crédit n'est requise à l'avance.",
+        "q2": "Serai-je facturé après l'essai gratuit ?",
+        "a2": "Si vous n'annulez pas avant la fin de l'essai, votre abonnement continuera automatiquement au tarif mensuel de 12,99 $.",
+        "q3": "Comment annuler mon abonnement ?",
+        "a3": "Allez dans Paramètres → Annuler l'Abonnement. Vous conserverez l'accès jusqu'à la fin de votre période de facturation actuelle.",
+        "q4": "Puis-je obtenir un remboursement ?",
+        "a4": "Les frais d'abonnement ne sont pas remboursables, mais vous pouvez annuler à tout moment pour éviter les frais futurs."
+      }
+    }
   }
 }

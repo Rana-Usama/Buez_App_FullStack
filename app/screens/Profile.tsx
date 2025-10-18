@@ -25,10 +25,10 @@ function Profile({ navigation }) {
   const userBio = user?.biography || "";
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const needsReadMore = userBio.length > 120;
+  const needsReadMore = userBio.length > 80;
   const displayText = isExpanded
     ? userBio
-    : userBio.slice(0, 120) + (needsReadMore ? "..." : "");
+    : userBio.slice(0, 80) + (needsReadMore ? "..." : "");
 
   const toggleReadMore = () => setIsExpanded(!isExpanded);
 
@@ -51,7 +51,7 @@ function Profile({ navigation }) {
   ];
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.background || "#FFFFFF" }]}>
+    <View style={[styles.screen, { backgroundColor: theme.white || "#FFFFFF" }]}>
       {/* Navigation Header */}
       <Nav
         dpNull
@@ -68,7 +68,7 @@ function Profile({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Card */}
-        <View style={[styles.profileCard, { backgroundColor: theme.white }]}>
+        <View style={[styles.profileCard, { backgroundColor: theme.white, borderWidth:1, borderColor: theme.mode === 'dark' ? theme.border  : 'rgba(238, 238, 238, 1)'}]}>
           {/* Profile Image with Professional Border */}
           <View style={styles.imageSection}>
             <TouchableOpacity
@@ -92,26 +92,26 @@ function Profile({ navigation }) {
             <Text style={[styles.userName, { color: theme.heading }]}>{userName}</Text>
             
             {/* Professional Title/Badge - You can add this field to your user data */}
-            <Text style={[styles.userTitle, { color: theme.primary }]}>
+            {/* <Text style={[styles.userTitle, { color: theme.primary }]}>
               Professional Member
-            </Text>
+            </Text> */}
 
             {/* Biography Section */}
             {userBio ? (
               <View style={styles.biographySection}>
-                <Text style={[styles.biographyLabel, { color: theme.darkGrey }]}>
+                {/* <Text style={[styles.biographyLabel, { color: theme.darkGrey }]}>
                   ABOUT
-                </Text>
+                </Text> */}
                 <Text style={[styles.biographyText, { color: theme.darkGrey }]}>
                   {displayText}
-                  {needsReadMore && (
+                  {/* {needsReadMore && (
                     <Text
                       style={[styles.readMoreText, { color: theme.primary }]}
                       onPress={toggleReadMore}
                     >
                       {isExpanded ? " Show less" : " Read more"}
                     </Text>
-                  )}
+                  )} */}
                 </Text>
               </View>
             ) : (
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   userName: {
-    fontSize: RFPercentage(2.8),
+    fontSize: RFPercentage(2.4),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(0.5),
     textAlign: "center",
@@ -282,9 +282,9 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   biographyText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    lineHeight: RFPercentage(2.4),
+    lineHeight: RFPercentage(2.1),
     textAlign: "center",
   },
   readMoreText: {

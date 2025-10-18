@@ -191,20 +191,37 @@ function Home({ navigation }) {
   };
 
   const displayTasks = allTasks.filter((task) => {
+    // Category filter
     if (filterMap[activeFilter] !== "All") {
       if (
         task.taskType?.toLowerCase() !== filterMap[activeFilter]?.toLowerCase()
       )
         return false;
     }
+
+    // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
+
+      const descriptionMatch = (task.description || "")
+        .toLowerCase()
+        .includes(q);
+      const userNameMatch = (task.user?.userName || "")
+        .toLowerCase()
+        .includes(q);
+      const taskTypeMatch = (task.taskType || "").toLowerCase().includes(q);
+
+      // 🔥 For "Other" tasks, also check customTaskTitle
+      const customTitleMatch =
+        task.taskType?.toLowerCase() === "other"
+          ? (task.customTaskTitle || "").toLowerCase().includes(q)
+          : false;
+
       return (
-        (task.description || "").toLowerCase().includes(q) ||
-        (task.user?.userName || "").toLowerCase().includes(q) ||
-        (task.taskType || "").toLowerCase().includes(q)
+        descriptionMatch || userNameMatch || taskTypeMatch || customTitleMatch
       );
     }
+
     return true;
   });
 
@@ -216,7 +233,6 @@ function Home({ navigation }) {
   }, [displayTasks.length]);
 
   console.log("Home render");
-  
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

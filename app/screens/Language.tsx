@@ -20,11 +20,21 @@ import {
   cachedTranslate,
 } from "../utils/cachedTranslations";
 
-const languages = ["German", "French", "Italian", "English"];
+const languages = [
+  "Swiss German",
+  "Germany German",
+  "French",
+  "Italian",
+  "Spanish",
+  "English",
+];
+
 const languageMap = {
-  German: "de",
+  "Swiss German": "de-CH",
+  "Germany German": "de-DE",
   French: "fr",
   Italian: "it",
+  Spanish: "es",
   English: "en",
 };
 
@@ -72,7 +82,7 @@ function Language({ navigation }) {
           leftLogo={false}
           navigation={navigation}
           title={`${t("settings.txt12")}`}
-          onPress={()=> navigation.navigate("TabNavigator")}
+          onPress={() => navigation.navigate("TabNavigator")}
         />
         <View style={styles.container}>
           {languages.map((lang) => (

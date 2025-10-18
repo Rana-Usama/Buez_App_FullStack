@@ -604,8 +604,8 @@ function PostRequest({ navigation, route }) {
                   color: selectedLocation?.name ? theme.black : theme.heading,
                 }}
               >
-                {location.name
-                  ? location.name
+                {location?.name
+                  ? location?.name
                   : selectedLocation.name
                   ? selectedLocation?.name
                   : `${t("postRequest.txt9")}`}

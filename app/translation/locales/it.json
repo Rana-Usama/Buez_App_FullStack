@@ -264,12 +264,7 @@
     "txt6": "Nuova password",
     "txt7": "Ripeti la password"
   },
-  "faqs": {
-    "txt1": "In quali zone operate?",
-    "txt2": "Posso pubblicare le mie richieste?",
-    "txt3": "Posso annullare una richiesta dopo averla accettata?",
-    "txt4": "Posso lasciare una recensione al richiedente?"
-  },
+
   "privacyPolicy": {
     "txt1": "Benvenuto nella nostra Informativa sulla privacy. La tua privacy è estremamente importante per noi. Questa informativa spiega come raccogliamo, usiamo e proteggiamo i tuoi dati personali quando utilizzi la nostra app.",
     "txt2": "Informazioni che raccogliamo",
@@ -394,5 +389,104 @@
     "txt9": "Coordina con il richiedente per completare l’attività.",
     "txt10": "Capito!",
     "txt11": "Vedi Le mie richieste"
+  },
+
+  "faqs": {
+      "txt1": "Come possiamo aiutarti?",
+    "txt2": "Trova risposte alle domande frequenti",
+    "txt3": "Hai ancora bisogno di aiuto?",
+    "txt4": "Il nostro team di supporto è qui per assisterti",
+    "txt5": "Contatta Supporto",
+    "section1": {
+      "title": "Informazioni Generali",
+      "questions": {
+        "q1": "Cos'è BUEZ?",
+        "a1": "BUEZ è un'applicazione mobile guidata dalla comunità che collega persone che hanno bisogno di aiuto con compiti quotidiani a quelle disposte a fornire assistenza in cambio di compenso o altri benefici.",
+        "q2": "Come funziona BUEZ?",
+        "a2": "Gli utenti possono pubblicare compiti per cui hanno bisogno di aiuto, e altri possono sfogliare e accettare queste richieste. La piattaforma facilita la comunicazione e il completamento dei compiti attraverso un sistema di messaggistica sicuro.",
+        "q3": "BUEZ è disponibile nella mia zona?",
+        "a3": "BUEZ mostra le richieste entro un raggio di 100 km dalla tua posizione. Puoi vedere le richieste vicine e applicare un filtro di posizione nell'app.",
+        "q4": "Quali tipi di compiti posso pubblicare su BUEZ?",
+        "a4": "Puoi pubblicare vari compiti quotidiani inclusi pulizie, traslochi, giardinaggio e altri con titolo personalizzato."
+      }
+    },
+    "section2": {
+      "title": "Account & Abbonamento",
+      "questions": {
+        "q1": "Ho bisogno di un abbonamento per usare BUEZ?",
+        "a1": "Sì, BUEZ opera con un modello basato su abbonamento. Hai bisogno di un abbonamento attivo per sfogliare e pubblicare richieste. Tuttavia, puoi registrarti e creare un account con una prova gratuita di 14 giorni.",
+        "q2": "Quanto costa l'abbonamento BUEZ?",
+        "a2": "BUEZ offre un piano di abbonamento mensile a $12.99. Puoi iniziare con una prova gratuita di 14 giorni per esplorare tutte le funzionalità.",
+        "q3": "Posso cancellare il mio abbonamento?",
+        "a3": "Sì, puoi cancellare il tuo abbonamento in qualsiasi momento tramite le impostazioni dell'app. Conserverai l'accesso fino alla fine del tuo periodo di fatturazione.",
+        "q4": "Cosa succede se non mi abbono?",
+        "a4": "Senza un abbonamento attivo, puoi comunque creare un account ma non potrai sfogliare le richieste o pubblicare i tuoi compiti."
+      }
+    },
+    "section3": {
+      "title": "Pubblicare & Accettare Richieste",
+      "questions": {
+        "q1": "Come pubblico una richiesta di aiuto?",
+        "a1": "Vai alla sezione 'Pubblica Richiesta', seleziona il tipo di compito, aggiungi descrizione, posizione e dettagli del compenso. Puoi anche caricare foto per spiegare meglio il tuo compito.",
+        "q2": "Quale compenso posso offrire?",
+        "a2": "Puoi offrire un compenso monetario o altri benefici come carte regalo, biglietti del cinema o qualsiasi ricompensa reciprocamente concordata.",
+        "q3": "Posso cancellare una richiesta dopo averla pubblicata?",
+        "a3": "Sì, puoi cancellare le tue richieste attive in qualsiasi momento dalla sezione 'Le Mie Richieste'.",
+        "q4": "Come accetto un compito?",
+        "a4": "Sfoglia le richieste disponibili nella sezione 'Home', visualizza i dettagli del compito e tocca 'Accetta Compito' se sei interessato ad aiutare.",
+        "q5": "Posso cancellare un compito che ho accettato?",
+        "a5": "Sì, puoi cancellare i compiti accettati, anche se incoraggiamo a comunicare prima con il richiedente per evitare inconvenienti."
+      }
+    },
+    "section4": {
+      "title": "Pagamenti & Compenso",
+      "questions": {
+        "q1": "Come vengono gestiti i pagamenti?",
+        "a1": "Il compenso viene concordato direttamente tra il richiedente e l'aiutante. BUEZ facilita la connessione ma non elabora pagamenti tra utenti.",
+        "q2": "Quando vengo pagato per i compiti completati?",
+        "a2": "Il momento e il metodo di pagamento sono concordati tra te e il richiedente. Raccomandiamo di discutere i dettagli del pagamento prima di iniziare il compito.",
+        "q3": "Cosa succede se c'è una disputa sul pagamento?",
+        "a3": "BUEZ incoraggia una comunicazione chiara sul compenso prima dell'accettazione del compito. Anche se non mediiamo nelle dispute di pagamento, forniamo un sistema di recensioni per mantenere la fiducia della comunità."
+      }
+    },
+    "section5": {
+      "title": "Sicurezza & Comunità",
+      "questions": {
+        "q1": "BUEZ è sicuro da usare?",
+        "a1": "Sì, diamo priorità alla sicurezza dell'utente attraverso sistemi di recensione e messaggistica sicura. Tuttavia, raccomandiamo sempre di incontrarsi in luoghi pubblici per i primi incontri.",
+        "q2": "Posso recensire altri utenti?",
+        "a2": "Sì, dopo il completamento di un compito, puoi lasciare recensioni e valutazioni, aiutando a costruire una comunità affidabile.",
+        "q3": "Cosa devo fare se ho una brutta esperienza?",
+        "a3": "Puoi segnalare qualsiasi preoccupazione attraverso il nostro sistema di supporto. Prendiamo sul serio le linee guida della comunità e possiamo sospendere gli account che violano i nostri termini.",
+        "q4": "Come funziona il sistema di messaggistica?",
+        "a4": "La nostra messaggistica integrata consente la comunicazione privata tra richiedenti e aiutanti. Questo aiuta a discutere dettagli dei compiti, compenso e coordinamento in sicurezza all'interno dell'app."
+      }
+    },
+    "section6": {
+      "title": "Supporto Tecnico",
+      "questions": {
+        "q1": "Come reimposto la mia password?",
+        "a1": "Usa la funzione 'Password Dimenticata' nella schermata di accesso. Invieremo un link di reimpostazione al tuo indirizzo email registrato.",
+        "q2": "Posso cambiare le mie informazioni del profilo?",
+        "a2": "Sì, puoi aggiornare il tuo nome, biografia e altri dettagli del profilo nella sezione 'Modifica Profilo'.",
+        "q3": "Cosa succede se l'app non funziona correttamente?",
+        "a3": "Prova a riavviare l'app o il tuo dispositivo. Se i problemi persistono, contatta il nostro team di supporto tramite la sezione di aiuto dell'app.",
+        "q4": "Come gestisco le notifiche?",
+        "a4": "Puoi personalizzare le tue preferenze di notifica nella sezione Impostazioni per controllare quali avvisi ricevi."
+      }
+    },
+    "section7": {
+      "title": "Gestione Prova Gratuita",
+      "questions": {
+        "q1": "Come funziona la prova gratuita di 14 giorni?",
+        "a1": "I nuovi utenti ottengono l'accesso completo a tutte le funzionalità di BUEZ per 14 giorni completamente gratis. Nessuna carta di credito richiesta in anticipo.",
+        "q2": "Verrò addebitato dopo la prova gratuita?",
+        "a2": "Se non annulli prima della fine della prova, il tuo abbonamento continuerà automaticamente alla tariffa mensile di $12.99.",
+        "q3": "Come cancello il mio abbonamento?",
+        "a3": "Vai su Impostazioni → Cancella Abbonamento. Conserverai l'accesso fino alla fine del tuo attuale periodo di fatturazione.",
+        "q4": "Posso ottenere un rimborso?",
+        "a4": "Le tariffe dell'abbonamento non sono rimborsabili, ma puoi cancellare in qualsiasi momento per evitare addebiti futuri."
+      }
+    }
   }
 }

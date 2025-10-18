@@ -56,6 +56,7 @@ function OfferDetail({ navigation, route }) {
     taskType: "",
     description: "",
     otherCompensation: "",
+    customTaskTitle: "",
   });
   const [isAccepted, setIsAccepted] = useState(!!postRequest?.acceptedBy);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -116,15 +117,18 @@ function OfferDetail({ navigation, route }) {
         translatedTaskType,
         translatedDescription,
         translatedCompensation,
+        translatedCustomTitle,
       ] = await Promise.all([
         translateWithCache(postRequest.taskType || ""),
         translateWithCache(postRequest.description || ""),
         translateWithCache(postRequest.otherCompensation || ""),
+        translateWithCache(postRequest.customTaskTitle || ""),
       ]);
       setTranslatedOffer({
         taskType: translatedTaskType,
         description: translatedDescription,
         otherCompensation: translatedCompensation,
+        customTaskTitle: translatedCustomTitle,
       });
     };
     if (postRequest) {
@@ -310,7 +314,10 @@ function OfferDetail({ navigation, route }) {
               }}
             >
               <Text style={[styles.title, { color: "white" }]}>
-                {translatedOffer?.taskType}
+                {postRequest?.taskType === "Other"
+                  ? translatedOffer?.customTaskTitle ||
+                    translatedOffer?.taskType
+                  : translatedOffer?.taskType}
               </Text>
             </LinearGradient>
             <Image

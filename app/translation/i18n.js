@@ -5,32 +5,39 @@ import * as SecureStore from "expo-secure-store";
 
 // Import translations
 import en from "./locales/en.json";
-import de from "./locales/de.json";
+import deDE from "./locales/de-DE.json"; // Germany German
+import deCH from "./locales/de-CH.json"; // Swiss German
 import fr from "./locales/fr.json";
 import it from "./locales/it.json";
-import rm from "./locales/rm.json";
+import es from "./locales/es.json"; // Spanish
 
 // Map translations
 const resources = {
   en: { translation: en },
-  de: { translation: de },
+  "de-DE": { translation: deDE },
+  "de-CH": { translation: deCH },
   fr: { translation: fr },
   it: { translation: it },
-  rm: { translation: rm },
+  es: { translation: es },
 };
 
 // Async function to get preferred language
 const getStoredLanguage = async () => {
   try {
     const storedLang = await SecureStore.getItemAsync("appLanguage");
-    if (storedLang) {
-      return storedLang;
-    }
+    if (storedLang) return storedLang;
+
+    // Detect device locale
     const deviceLocale = Localization.locale;
-    if (deviceLocale.startsWith("de")) {
-      return "de";
-    }
-    return deviceLocale.split("-")[0] || "en";
+
+    if (deviceLocale.startsWith("de-CH")) return "de-CH";
+    if (deviceLocale.startsWith("de-DE") || deviceLocale.startsWith("de"))
+      return "de-DE";
+    if (deviceLocale.startsWith("es")) return "es";
+    if (deviceLocale.startsWith("fr")) return "fr";
+    if (deviceLocale.startsWith("it")) return "it";
+
+    return "en"; // default fallback
   } catch (error) {
     console.log("Failed to get stored language:", error);
     return "en";

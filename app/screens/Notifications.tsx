@@ -506,7 +506,12 @@ export default function Notifications({ navigation }) {
                 </Text>
 
                 {!isExpanded && !!previewText && (
-                  <Text style={[styles.sub, { marginTop: RFPercentage(0.3), color:theme.grey }]}>
+                  <Text
+                    style={[
+                      styles.sub,
+                      { marginTop: RFPercentage(0.3), color: theme.grey },
+                    ]}
+                  >
                     {previewText}
                   </Text>
                 )}
@@ -560,14 +565,18 @@ export default function Notifications({ navigation }) {
                       <Text
                         style={[styles.reviewText, { color: theme.darkGrey }]}
                       >
-                        {translatedText || tr.noReviewText}
+                        {translatedText.length > 50
+                          ? `${translatedText.substring(0, 50)}…`
+                          : translatedText || tr.noReviewText}
                       </Text>
                     </View>
                   ) : (
                     <Text
                       style={[styles.description, { color: theme.darkGrey }]}
                     >
-                      {translatedText}
+                      {translatedText.length > 50
+                        ? `${translatedText.substring(0, 50)}…`
+                        : translatedText}
                     </Text>
                   )}
 

@@ -1,0 +1,492 @@
+{
+  "buttons": {
+    "next": "Weiter",
+    "start": "Starten",
+    "skip": "Überspringen",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "yes": "Ja",
+    "cancel": "Abbrechen"
+  },
+  "common": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "name": "Name",
+    "confirm": "Passwort bestätigen",
+    "currency": "z.B. 90$",
+    "sign": "$",
+    "gotIt": "Verstanden"
+  },
+  "validations": {
+    "inValid": "Ungültige E-Mail",
+    "emailReq": "E-Mail ist erforderlich",
+    "passwordReq": "Passwort ist erforderlich",
+    "userReq": "Benutzername ist erforderlich",
+    "passwordLen": "Passwort muss mindestens 6 Zeichen lang sein",
+    "passwordMatch": "Passwörter müssen übereinstimmen"
+  },
+  "toast": {
+    "login": {
+      "one": "Willkommen zurück!",
+      "two": "Erfolgreich angemeldet!",
+      "three": "Anmeldung fehlgeschlagen",
+      "four": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "five": "Ungültige Anmeldedaten"
+    },
+    "signup": {
+      "one": "Registrieren",
+      "two": "Benutzer erfolgreich registriert!",
+      "three": "Registrierungsfehler",
+      "four": "Anmeldedaten werden bereits verwendet"
+    },
+    "forgetPassword": {
+      "one": "Link zum Zurücksetzen gesendet",
+      "two": "Überprüfe deine E-Mail, um dein Passwort zurückzusetzen.",
+      "three": "Fehler",
+      "four": "Link zum Zurücksetzen konnte nicht gesendet werden."
+    },
+    "subscriptionV2": {
+      "one": "Abo nicht abgeschlossen",
+      "two": "Dein Abo konnte nicht abgeschlossen werden. Bitte versuche es erneut.",
+      "three": "Kostenlose Testversion aktiviert",
+      "four": "Deine 14-tägige kostenlose Testversion wurde erfolgreich gestartet."
+    },
+    "subscription": {
+      "one": "Abo erfolgreich!",
+      "two": "Monatlicher Plan erfolgreich aktiviert."
+    },
+    "myRequests": {
+      "one": "Anfragestatus",
+      "two": "Anfrage",
+      "three": "als erledigt markiert",
+      "four": "storniert",
+      "five": "Etwas ist schiefgelaufen!",
+      "six": "Anfragestatus konnte nicht aktualisiert werden.",
+      "seven": "Anfrage erfolgreich erneut gepostet"
+    },
+    "cancelSubscription": {
+      "one": "Kein aktives Abo",
+      "two": "Wir konnten kein aktives Abo finden, das mit deinem Konto verknüpft ist.",
+      "three": "Abo gekündigt",
+      "four": "Dein Abo wurde erfolgreich gekündigt. Du behältst den Zugang bis zum Ende deiner Abrechnungsperiode."
+    },
+    "changePassword": {
+      "one": "Passwort geändert",
+      "two": "Passwort wurde erfolgreich geändert!",
+      "three": "Fehler",
+      "four": "Etwas ist schiefgelaufen!"
+    },
+    "editProfile": {
+      "one": "Profil aktualisiert",
+      "two": "Dein Profil wurde erfolgreich aktualisiert!",
+      "three": "Aktualisierung fehlgeschlagen",
+      "four": "Beim Aktualisieren deines Profils ist ein Fehler aufgetreten. Bitte versuche es erneut."
+    }
+  },
+  "onBoarding": {
+    "onBoarding1": {
+      "Title": "Willkommen bei Büez",
+      "Desc": "Vernetze dich, arbeite zusammen und wachse – dein Netzwerk für professionelle Unterstützung beginnt hier."
+    },
+    "onBoarding2": {
+      "Title": "Poste, wobei du Hilfe benötigst",
+      "Desc": "Teile deine Arbeit oder Herausforderungen. Erhalte Antworten von echten Menschen, die bereit sind zu helfen."
+    },
+    "onBoarding3": {
+      "Title": "Verwalte Beiträge & chatte kostenlos",
+      "Desc": "Behalte deine Anfragen im Blick, aktualisiere deine Beiträge und chatte mit Unterstützern – alles an einem Ort."
+    },
+    "onBoarding4": {
+      "Title": "Genieße 14 Tage vollen Zugriff",
+      "Desc": "Teste alle Funktionen von Büez komplett kostenlos. Keine Einschränkungen, keine Verpflichtungen."
+    },
+    "onBoarding5": {
+      "Title": "Mit Abo fortfahren",
+      "Desc": "Nach deiner 14-tägigen kostenlosen Testphase genießt du Büez weiterhin mit dem monatlichen Plan für 12,99 $. Jederzeit kündbar."
+    }
+  },
+  "login": {
+    "txt1": "Willkommen zurück",
+    "txt2": "Erinnere dich an mich?",
+    "txt3": "Passwort vergessen?",
+    "txt4": "oder anmelden mit",
+    "txt5": "Noch kein Konto?"
+  },
+  "signup": {
+    "txt1": "Willkommen!",
+    "txt2": "oder registrieren mit",
+    "txt3": "Hast du bereits ein Konto?"
+  },
+  "forgetPassword": {
+    "txt1": "Passwort zurücksetzen?",
+    "txt2": "Link senden",
+    "txt3": "Link zum Zurücksetzen des Passworts wurde an deine E-Mail gesendet",
+    "txt4": " Bitte überprüfe deinen Spam-Ordner, wenn du die E-Mail zum Zurücksetzen nicht siehst.",
+    "txt5": "OK",
+    "txt6": "Mit dieser E-Mail-Adresse ist kein Konto verknüpft."
+  },
+  "freeTrial": {
+    "txt1": "Beginne deine 14-tägige kostenlose Testversion",
+    "txt2": "So funktioniert deine kostenlose Testversion",
+    "txt3": "Heute",
+    "txt4": "Genieße 14 Tage lang unbegrenzten Zugang zu allen Premium-Funktionen, komplett kostenlos.",
+    "txt5": "Nach 10 Tagen",
+    "txt6": "Wir senden dir eine freundliche Erinnerung, da deine Testphase in 4 Tagen endet.",
+    "txt7": "Nach der Testphase fortfahren",
+    "txt8": "Dein Abo wird nach 14 Tagen automatisch fortgesetzt. Du kannst jederzeit kündigen.",
+    "txt9": "Kostenlose Testversion starten"
+  },
+  "subscriptionV2": {
+    "txt1": "Kaufe unser Premium-Abo, um auf alle Dienste zuzugreifen",
+    "txt2": ",99/Monat",
+    "txt3": "Täglich Aufgabenanfragen posten",
+    "txt4": "Täglich Anfragen sehen",
+    "txt5": "Verdiene Geld durch tägliche Aufgaben",
+    "txt6": "Jederzeit kündbar",
+    "txt7": "Karte hinzufügen"
+  },
+  "subscription": {
+    "txt1": "Deine 14-tägige kostenlose Testversion ist beendet.",
+    "txt2": "Upgrade auf Premium, um vollen Zugriff zu erhalten.",
+    "txt3": "Zur Kasse"
+  },
+  "home": {
+    "txt1": "Startseite",
+    "txt2": "Suchen",
+    "txt3": "Kategorien",
+    "txt4": "Alle",
+    "txt5": "Reinigung",
+    "txt6": "Umzug",
+    "txt7": "Gartenarbeit",
+    "txt8": "Andere",
+    "txt9": "Anfragen in der Nähe",
+    "txt10": "Vergütung",
+    "txt11": "Keine Einträge gefunden!",
+    "txt12": "Anfragen werden geladen..."
+  },
+  "details": {
+    "txt1": "Aufgabendetails",
+    "txt2": "Weniger anzeigen",
+    "txt3": "Mehr anzeigen",
+    "txt4": "Standort",
+    "txt5": "Anfragedatum & -zeit",
+    "txt6": "Vergütung",
+    "txt7": "Anfragenden kontaktieren",
+    "txt8": "Meine Anfragen",
+    "txt9": "Nachricht",
+    "txt10": "Noch keine Bewertungen!",
+    "txt11": "mehr",
+    "txt12": "Aufgabe annehmen",
+    "txt13": "Kategorie",
+    "txt14": "Durchschn. Bewertung"
+  },
+  "myRequests": {
+    "txt1": "Meine Anfragen",
+    "txt2": "Aktiv",
+    "txt3": "Abgeschlossen",
+    "txt4": "Gepostet:",
+    "txt5": "Als erledigt markieren",
+    "txt6": "Abbrechen",
+    "txt7": "Bist du sicher, dass du diese Anfrage löschen möchtest?",
+    "txt8": "Storniert",
+    "txt9": "Erneut posten",
+    "txt10": "Akzeptiert",
+    "txt11": "Akzeptiert von:",
+    "txt12": "Akzeptierte Anfrage erfolgreich storniert.",
+    "txt13": "Deine Anfragen werden geladen...",
+    "repostSuccess": "Anfrage erneut gepostet!",
+    "repostAvailable": "Deine Anfrage wurde erneut gepostet und ist jetzt für andere Benutzer zur Annahme verfügbar."
+  },
+  "postRequest": {
+    "txt1": "Anfrage posten",
+    "txt2": "Anfrage bearbeiten",
+    "txt3": "Aufgabentyp",
+    "txt4": "Gaming",
+    "txt5": "Monitarely",
+    "txt6": "Andere",
+    "txt7": "Vergütungsart",
+    "txt8": "Beschreibung",
+    "txt9": "Standort (Sichtbar für Benutzer innerhalb von 100 km)",
+    "txt10": "Vergütungsdetails z.B. zwei Kinotickets",
+    "txt11": "z.B. 100$",
+    "txt12": "Fotos aus Galerie hochladen",
+    "txt13": "Bearbeiten",
+    "txt14": "Posten",
+    "customTaskTitle": "Bitte gib deinen Aufgabentyp an"
+  },
+  "messages": {
+    "txt1": "Nachrichten",
+    "txt2": "Alle",
+    "txt3": "Ungelesen",
+    "txt4": "Keine ungelesenen Nachrichten",
+    "txt5": "Noch keine Nachrichten",
+    "txt6": "Sag Hallo zu"
+  },
+  "chat": {
+    "txt1": "Frühere Nachrichten laden",
+    "txt2": "Nachricht eingeben",
+    "txt3": " Nachricht löschen",
+    "txt4": "Möchtest du diese Nachricht löschen?",
+    "txt5": "Löschen"
+  },
+  "settings": {
+    "txt1": "Abo kündigen",
+    "txt2": "Passwort ändern",
+    "txt3": "AGB",
+    "txt4": "Datenschutzerklärung",
+    "txt5": "FAQ's",
+    "txt6": "Abmelden",
+    "txt7": "Konto löschen",
+    "txt8": "Hilfe & Sicherheit",
+    "txt9": "Einstellungen",
+    "txt10": "Bist du sicher, dass du dieses Konto löschen möchtest?",
+    "txt11": "Bist du sicher, dass du dich von diesem Konto abmelden möchtest?",
+    "txt12": "Sprache ändern",
+    "txt13": "Dunkles Design"
+  },
+  "cancelSubscription": {
+    "txt1": "Premium-Abo kündigen",
+    "txt2": "Aktueller Plan",
+    "txt3": ",99/Monat",
+    "txt4": "Deine Dienste sind nicht mehr für andere Benutzer sichtbar",
+    "txt5": "Du erhältst keine täglichen Anfragen mehr",
+    "txt6": "Du kannst kein Geld mit täglichen Aufgaben verdienen",
+    "txt7": "Du hast keine speziellen Stornierungsoptionen mehr",
+    "txt8": "Du hast kein aktives Abonnement.",
+    "txt9": "Abo aktivieren",
+    "txt10": "Bist du sicher, dass du dein monatliches Abo kündigen möchtest?"
+  },
+  "chnagePassword": {
+    "txt1": "Altes Passwort eingeben",
+    "txt2": "Neues Passwort eingeben",
+    "txt3": "Neues Passwort wiederholen",
+    "txt4": "Ändern",
+    "txt5": "Altes Passwort",
+    "txt6": "Neues Passwort",
+    "txt7": "Passwort wiederholen"
+  },
+  "privacyPolicy": {
+    "txt1": "Willkommen zu unserer Datenschutzerklärung. Deine Privatsphäre ist uns extrem wichtig. Diese Datenschutzerklärung erklärt, wie wir deine persönlichen Daten erfassen, verwenden und schützen, wenn du unsere Anwendung nutzt.",
+    "txt2": "Informationen, die wir erfassen",
+    "txt3": "Wir erfassen Informationen, die du uns direkt zur Verfügung stellst, wie wenn du ein Konto erstellst, eine Anfrage einreichst oder mit dem Kundenservice kommunizierst. Dies kann deinen Namen, deine E-Mail, Telefonnummer und andere relevante Details umfassen.",
+    "txt4": "Wie wir deine Informationen verwenden",
+    "txt5": "Wir verwenden die gesammelten Informationen, um unsere Dienste bereitzustellen, zu verbessern und zu personalisieren. Dazu gehören die Abwicklung von Transaktionen, das Senden von Benachrichtigungen, die Gewährleistung der Sicherheit und die Analyse von Nutzungstrends.",
+    "txt6": "Datenaustausch und Sicherheit",
+    "txt7": "Wir verkaufen deine persönlichen Daten nicht an Dritte. Wir können Daten mit vertrauenswürdigen Dienstleistern für notwendige Operationen teilen, um rechtlichen Verpflichtungen nachzukommen oder die Sicherheit der Benutzer zu gewährleisten. Wir setzen Sicherheitsmaßnahmen zum Schutz deiner Daten um.",
+    "txt8": "Deine Rechte",
+    "txt9": "Du hast das Recht, auf deine persönlichen Informationen zuzugreifen, sie zu aktualisieren oder zu löschen. Du kannst dich auch von bestimmten Datenerfassungspraktiken abmelden. Kontaktiere uns, wenn du Datenschutzbedenken hast.",
+    "txt10": "Änderungen dieser Richtlinie",
+    "txt11": "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Wir ermutigen dich, sie regelmäßig auf Änderungen zu überprüfen. Die weitere Nutzung unserer Dienste nach Aktualisierungen stellt deine Zustimmung zur überarbeiteten Richtlinie dar.",
+    "txt12": "Kontaktiere uns",
+    "txt13": "Wenn du Fragen zu dieser Datenschutzerklärung hast, kontaktiere uns bitte unter support@example.com."
+  },
+  "terms": {
+    "txt1": " Willkommen bei BUEZ, einer Plattform, die von Buez Solution betrieben wird und Benutzer, die Hilfe bei täglichen Aufgaben benötigen, mit Personen verbindet, die bereit sind, gegen Vergütung Unterstützung zu leisten. Durch den Zugriff auf oder die Nutzung der BUEZ-Mobilapplikation (die 'App') oder verwandter Dienste (zusammen der 'Dienst') erklärst du dich mit diesen Allgemeinen Geschäftsbedingungen ('AGB') einverstanden. Wenn du nicht einverstanden bist, darfst du den Dienst nicht nutzen.",
+    "txt2": "1. Berechtigung",
+    "txt3": "Du musst mindestens 18 Jahre alt sein, um BUEZ zu nutzen. Durch die Registrierung bestätigst du, dass du die rechtliche Handlungsfähigkeit besitzt, diese Vereinbarung einzugehen. BUEZ behält sich das Recht vor, Konten zu sperren oder zu kündigen, die gegen diese AGB verstoßen.",
+    "txt4": "2. Benutzerkonten",
+    "txt5": "Du musst ein Konto erstellen, um auf den Dienst zuzugreifen und ihn zu nutzen. Du bist für die Vertraulichkeit deiner Kontozugangsdaten verantwortlich. BUEZ ist nicht haftbar für unbefugten Zugriff auf dein Konto.",
+    "txt6": "3. Abonnement und Zahlungen",
+    "txt7": "BUEZ operiert auf einem Abonnement-basierten Modell. Benutzer müssen ein Abonnement abschließen, um Anfragen zu sehen und zu posten. Abonnementgebühren werden monatlich berechnet und laufen weiter, bis sie vom Benutzer gekündigt werden. Zahlungen werden über Drittanbieter abgewickelt.",
+    "txt8": "4. Nutzung des Dienstes",
+    "txt9": "Benutzer können Anfragen für Hilfe posten und dabei Vergütung und Aufgabendetails angeben. Die Vergütung wird direkt zwischen dem Anfragenden und dem Helfer abgewickelt; BUEZ garantiert oder bearbeitet keine Zahlungen zwischen Benutzern.",
+    "txt10": "5. Verbotene Aktivitäten",
+    "txt11": "Benutzer dürfen keine irreführenden, schädlichen oder anstößigen Inhalte posten, die Plattform nicht für illegale Aktivitäten nutzen oder versuchen, die Plattform zu hacken oder ihre Funktionalität zu stören.",
+    "txt12": "6. Haftungsbeschränkung",
+    "txt13": "BUEZ ist ein Vermittler und haftet nicht für direkte, indirekte, zufällige oder Folgeschäden, die aus der Nutzung des Dienstes entstehen. BUEZ garantiert nicht die Qualität, Zuverlässigkeit oder Sicherheit der von Benutzern erbrachten Dienstleistungen.",
+    "txt14": "7. Kontaktinformationen",
+    "txt15": "Bei Fragen oder Support kontaktiere uns bitte unter info@buezapp.com"
+  },
+  "successScreen": {
+    "txt1": "Anfrage erfolgreich gepostet",
+    "txt2": "Startseite",
+    "txt3": "Deine Aufgabe wurde erfolgreich gepostet!",
+    "txt4": "Aufgabensichtbarkeit",
+    "txt5": "Deine Aufgabe ist jetzt für Helfer sichtbar, bis sie angenommen wird.",
+    "txt6": "Erst-Annahme-Regel",
+    "txt7": "Sobald angenommen, kann nur dieser Helfer sie einsehen, bis der Deal abgeschlossen ist.",
+    "txt8": "Kein Deal? Einfach erneut posten",
+    "txt9": "Wenn kein Deal zustande kommt, poste sie erneut unter 'Meine Anfragen' bei 'Aktiv'.",
+    "txt10": "Bleib auf dem Laufenden",
+    "txt11": "Du erhältst Benachrichtigungen, wenn jemand interessiert ist oder ein Angebot sendet.",
+    "txt12": "Meine Anfragen anzeigen"
+  },
+  "profile": {
+    "txt1": "Profil",
+    "txt2": "Profil bearbeiten",
+    "txt3": "Bewertungen & Rezensionen",
+    "txt4": "Abgeschlossene Aufgaben"
+  },
+  "editProfile": {
+    "txt1": "Gib deinen Namen ein",
+    "txt2": "Profil bearbeiten",
+    "txt3": "Info bearbeiten",
+    "txt4": "Profil aktualisieren",
+    "biography": "Biografie",
+    "biographyPlaceholder": "Teile deine Fähigkeiten, Erfahrungen und wofür du brennst...",
+    "biographyHint": "Eine kurze Biografie hilft anderen, deine Expertise und deinen Ansatz zu verstehen"
+  },
+  "reviews": {
+    "txt1": "Meine Bewertungen",
+    "txt2": "Datiert:",
+    "txt3": "Von:",
+    "txt4": "Bewertet",
+    "txt5": "Durchschnittliche Bewertung",
+    "txt6": "Basierend auf",
+    "txt7": "Bewertung",
+    "txt8": "Bewertungen"
+  },
+  "bottomTab": {
+    "txt1": "Meine Anfragen",
+    "txt2": "Anfrage posten",
+    "txt3": "Startseite",
+    "txt4": "Nachrichten",
+    "txt5": "Einstellungen"
+  },
+  "location": {
+    "placholder": "Nach einem Ort suchen",
+    "by": "+ Ort hinzufügen",
+    "apply": "Ort übernehmen"
+  },
+  "password": {
+    "txt1": "Du hast dich mit Google angemeldet. Um dein Passwort zu ändern, verwalte bitte dein Google-Konto.",
+    "txt2": "Google-Konto"
+  },
+  "notifications": {
+    "txt1": "Benachrichtigungen werden geladen...",
+    "txt2": "Wenn du Benachrichtigungen erhältst, erscheinen sie hier",
+    "txt3": "Bewertung:"
+  },
+  "completed": {
+    "txt1": "BEWERTET",
+    "txt2": "ABGESCHLOSSEN",
+    "txt3": "Deine Bewertung",
+    "txt4": "Abgeschlossene Aufgaben",
+    "txt5": " Bewertet",
+    "txt6": "Bewertung ausstehend",
+    "txt7": "Deine abgeschlossenen Aufgaben werden geladen..."
+  },
+  "pushNotifications": {
+    "txt1": "hat deine Aufgabenanfrage angenommen.",
+    "txt2": "hat dir eine Bewertung zu deiner Aufgabe hinterlassen!",
+    "txt3": "Aufgabe abgeschlossen!",
+    "txt4": "Deine angenommene Aufgabe",
+    "txt5": "wurde von",
+    "txt6": "Aufgaben-Follow-up!",
+    "txt7": "Dies ist eine Erinnerung an deine kürzlich gepostete Aufgabe. Bitte überprüfe deinen Fortschritt und aktualisiere den Status, falls abgeschlossen.",
+    "txt8": "⏰ Kostenlose Testversion endet bald",
+    "txt9": "Deine kostenlose Testversion endet in 4 Tagen. Bleibe abonniert, um den vollen Zugriff zu behalten."
+  },
+  "modal": {
+    "txt1": "Aufgabe erfolgreich angenommen!",
+    "txt2": "Kommunikation starten",
+    "txt3": "Du kannst jetzt mit dem Anfragenden über Aufgabendetails chatten.",
+    "txt4": "Finden unter Meine Anfragen",
+    "txt5": "Diese Aufgabe ist unter 'Akzeptiert' in Meine Anfragen aufgeführt.",
+    "txt6": "Bleib auf dem Laufenden",
+    "txt7": "Du erhältst Benachrichtigungen für Updates oder Nachrichten.",
+    "txt8": "Nächste Schritte",
+    "txt9": "Koordiniere mit dem Anfragenden, um die Aufgabe abzuschließen.",
+    "txt10": "Verstanden!",
+    "txt11": "Meine Anfragen anzeigen"
+  },
+
+  "faqs": {
+    "txt1": "Wie können wir Ihnen helfen?",
+    "txt2": "Finden Sie Antworten auf häufig gestellte Fragen",
+    "txt3": "Brauchen Sie noch Hilfe?",
+    "txt4": "Unser Support-Team ist hier, um Ihnen zu helfen",
+    "txt5": "Support kontaktieren",
+    "section1": {
+      "title": "Allgemeine Informationen",
+      "questions": {
+        "q1": "Was ist BUEZ?",
+        "a1": "BUEZ ist eine Community-gestützte mobile Anwendung, die Menschen verbindet, die Hilfe bei täglichen Aufgaben benötigen, mit denen, die bereit sind, gegen Vergütung oder andere Vorteile Hilfe zu leisten.",
+        "q2": "Wie funktioniert BUEZ?",
+        "a2": "Benutzer können Anfragen für Hilfe posten, und andere können diese Anfragen durchsuchen und annehmen. Die Plattform ermöglicht Kommunikation und Aufgabenabwicklung durch ein sicheres Nachrichtensystem.",
+        "q3": "Ist BUEZ in meiner Gegend verfügbar?",
+        "a3": "BUEZ zeigt Anfragen innerhalb eines 100 km Radius um Ihren Standort an. Sie können Anfragen in Ihrer Nähe sehen und einen Standortfilter in der App anwenden.",
+        "q4": "Welche Arten von Aufgaben kann ich bei BUEZ posten?",
+        "a4": "Sie können verschiedene tägliche Aufgaben posten, einschließlich Reinigung, Umzug, Gartenarbeit und andere mit individuellem Titel."
+      }
+    },
+    "section2": {
+      "title": "Konto & Abonnement",
+      "questions": {
+        "q1": "Benötige ich ein Abonnement, um BUEZ zu nutzen?",
+        "a1": "Ja, BUEZ funktioniert mit einem Abonnement-Modell. Sie benötigen ein aktives Abonnement, um Anfragen zu durchsuchen und zu posten. Sie können sich jedoch mit einer 14-tägigen kostenlosen Testphase registrieren und ein Konto erstellen.",
+        "q2": "Wie viel kostet das BUEZ Abonnement?",
+        "a2": "BUEZ bietet ein monatliches Abonnement für 12,99 $ an. Sie können mit einer 14-tägigen kostenlosen Testphase beginnen, um alle Funktionen zu erkunden.",
+        "q3": "Kann ich mein Abonnement kündigen?",
+        "a3": "Ja, Sie können Ihr Abonnement jederzeit über die App-Einstellungen kündigen. Sie behalten den Zugang bis zum Ende Ihres Abrechnungszeitraums.",
+        "q4": "Was passiert, wenn ich kein Abonnement habe?",
+        "a4": "Ohne aktives Abonnement können Sie immer noch ein Konto erstellen, aber Sie können keine Anfragen durchsuchen oder eigene Aufgaben posten."
+      }
+    },
+    "section3": {
+      "title": "Anfragen Posten & Annehmen",
+      "questions": {
+        "q1": "Wie poste ich eine Hilfsanfrage?",
+        "a1": "Gehen Sie zum 'Anfrage Posten'-Bereich, wählen Sie Ihren Aufgabentyp aus, fügen Sie Beschreibung, Standort und Vergütungsdetails hinzu. Sie können auch Fotos hochladen, um Ihre Aufgabe besser zu erklären.",
+        "q2": "Welche Vergütung kann ich anbieten?",
+        "a2": "Sie können monetäre Vergütung oder andere Vorteile wie Geschenkgutscheine, Kinokarten oder jede gemeinsam vereinbarte Belohnung anbieten.",
+        "q3": "Kann ich eine Anfrage nach dem Posten stornieren?",
+        "a3": "Ja, Sie können Ihre aktiven Anfragen jederzeit im 'Meine Anfragen'-Bereich stornieren.",
+        "q4": "Wie nehme ich eine Aufgabe an?",
+        "a4": "Durchsuchen Sie verfügbare Anfragen auf der Startseite, sehen Sie sich die Aufgabendetails an und tippen Sie auf 'Aufgabe Annehmen', wenn Sie interessiert sind zu helfen.",
+        "q5": "Kann ich eine angenommene Aufgabe stornieren?",
+        "a5": "Ja, Sie können angenommene Aufgaben stornieren, aber wir empfehlen, zuerst mit dem Anfragenden zu kommunizieren, um Unannehmlichkeiten zu vermeiden."
+      }
+    },
+    "section4": {
+      "title": "Zahlungen & Vergütung",
+      "questions": {
+        "q1": "Wie werden Zahlungen abgewickelt?",
+        "a1": "Die Vergütung wird direkt zwischen dem Anfragenden und dem Helfer vereinbart. BUEZ vermittelt die Verbindung, verarbeitet aber keine Zahlungen zwischen Benutzern.",
+        "q2": "Wann werde ich für abgeschlossene Aufgaben bezahlt?",
+        "a2": "Zahlungszeitpunkt und -methode werden zwischen Ihnen und dem Anfragenden vereinbart. Wir empfehlen, Zahlungsdetails vor Aufgabebeginn zu besprechen.",
+        "q3": "Was passiert bei Streitigkeiten über Zahlungen?",
+        "a3": "BUEZ ermutigt zu klarer Kommunikation über die Vergütung vor Aufgabename. Während wir keine Zahlungsstreitigkeiten schlichten, bieten wir ein Bewertungssystem, um das Vertrauen in der Community zu stärken."
+      }
+    },
+    "section5": {
+      "title": "Sicherheit & Community",
+      "questions": {
+        "q1": "Ist BUEZ sicher zu verwenden?",
+        "a1": "Ja, wir priorisieren die Sicherheit der Benutzer durch Bewertungssysteme und sichere Nachrichtenübermittlung. Wir empfehlen jedoch, sich für erstmalige Interaktionen an öffentlichen Orten zu treffen.",
+        "q2": "Kann ich andere Benutzer bewerten?",
+        "a2": "Ja, nach Aufgabenabschluss können Sie Bewertungen und Sterne hinterlassen, was hilft, eine vertrauenswürdige Community aufzubauen.",
+        "q3": "Was soll ich tun, wenn ich eine schlechte Erfahrung habe?",
+        "a3": "Sie können Bedenken über unser Support-System melden. Wir nehmen Community-Richtlinien ernst und können Konten sperren, die gegen unsere Bedingungen verstoßen.",
+        "q4": "Wie funktioniert das Nachrichtensystem?",
+        "a4": "Unser integriertes Nachrichtensystem ermöglicht private Kommunikation zwischen Anfragenden und Helfern. Dies hilft, Aufgabendetails, Vergütung und Koordination sicher innerhalb der App zu besprechen."
+      }
+    },
+    "section6": {
+      "title": "Technischer Support",
+      "questions": {
+        "q1": "Wie setze ich mein Passwort zurück?",
+        "a1": "Verwenden Sie die 'Passwort vergessen'-Funktion auf dem Anmeldebildschirm. Wir senden einen Reset-Link an Ihre registrierte E-Mail-Adresse.",
+        "q2": "Kann ich meine Profilinformationen ändern?",
+        "a2": "Ja, Sie können Ihren Namen, Biografie und andere Profildetails im 'Profil bearbeiten'-Bereich aktualisieren.",
+        "q3": "Was, wenn die App nicht richtig funktioniert?",
+        "a3": "Versuchen Sie, die App oder Ihr Gerät neu zu starten. Wenn Probleme bestehen bleiben, kontaktieren Sie unser Support-Team über den Hilfe-Bereich in der App.",
+        "q4": "Wie verwalte ich Benachrichtigungen?",
+        "a4": "Sie können Ihre Benachrichtigungseinstellungen im Einstellungsbereich anpassen, um zu steuern, welche Warnungen Sie erhalten."
+      }
+    },
+    "section7": {
+      "title": "Verwaltung der Kostenlosen Testphase",
+      "questions": {
+        "q1": "Wie funktioniert die 14-tägige kostenlose Testphase?",
+        "a1": "Neue Benutzer erhalten 14 Tage lang vollen Zugriff auf alle BUEZ-Funktionen, komplett kostenlos. Keine Kreditkarte im Voraus erforderlich.",
+        "q2": "Werde ich nach der Testphase belastet?",
+        "a2": "Wenn Sie nicht vor Ende der Testphase kündigen, wird Ihr Abonnement automatisch zum monatlichen Preis von 12,99 $ fortgesetzt.",
+        "q3": "Wie kündige ich mein Abonnement?",
+        "a3": "Gehen Sie zu Einstellungen → Abonnement kündigen. Sie behalten den Zugang bis zum Ende Ihres aktuellen Abrechnungszeitraums.",
+        "q4": "Kann ich eine Rückerstattung erhalten?",
+        "a4": "Abonnementgebühren sind nicht erstattungsfähig, aber Sie können jederzeit kündigen, um zukünftige Gebühren zu verhindern."
+      }
+    }
+  }
+}
