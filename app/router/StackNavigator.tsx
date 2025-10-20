@@ -48,6 +48,8 @@ import AddReview from "../screens/AddReview";
 import InstagramBusinessLoginWebView from "../utils/InstagramLogin";
 import FacebookLoginWebView from "../utils/facebookLogin";
 import NetworkError from "../screens/NetworkError";
+import TopRatedUsers from "../screens/TopRatedUsers";
+import TopRatedUserProfile from "../screens/TopRatedUserProfile";
 
 const Stack = createStackNavigator();
 
@@ -79,7 +81,7 @@ const StackNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-      id={undefined}
+        id={undefined}
         initialRouteName={"Decider"}
         screenOptions={{
           headerShown: false,
@@ -135,6 +137,14 @@ const StackNavigator = () => {
         <Stack.Screen
           name="FacebookLoginWebView"
           component={FacebookLoginWebView}
+        />
+        <Stack.Screen
+          name="TopRatedUsers"
+          component={TopRatedUsers}
+        />
+          <Stack.Screen
+          name="TopRatedUserProfile"
+          component={TopRatedUserProfile}
         />
       </Stack.Navigator>
     </NavigationContainer>

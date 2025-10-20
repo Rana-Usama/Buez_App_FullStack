@@ -37,6 +37,8 @@ import { selectLocation } from "../redux/Actions";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { useLocation } from "../utils/useLocation";
 import { formatCurrency } from "../utils/currencyChange";
+import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { fetchUsersWithTaskStats } from "../services/Review.service";
 
 const { width } = Dimensions.get("window");
 
@@ -232,34 +234,44 @@ function Home({ navigation }) {
     setActiveIndices(idx);
   }, [displayTasks.length]);
 
-  console.log("Home render");
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const res = await fetchUsersWithTaskStats();
+      setUsers(res);
+    };
+    fetchUsers();
+  }, []);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={[styles.screen, { backgroundColor: theme.white }]}>
-        <StatusBar
-          barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-          backgroundColor={theme.white}
-        />
-        {/* Nav */}
-        <Nav
-          crown={true}
-          marginTop={RFPercentage(6)}
-          profileImage={profileImgUrl}
-          leftLogo={true}
-          navigation={navigation}
-          title={`${t("home.txt1")}`}
-        />
-
+    <>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={theme.white}
+        translucent
+      />
+      {/* Nav */}
+      <Nav
+        crown={true}
+        marginTop={RFPercentage(6)}
+        profileImage={profileImgUrl}
+        leftLogo={true}
+        navigation={navigation}
+        title={`${t("home.txt1")}`}
+      />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           onScroll={(e) =>
             (scrollPosition.current = e.nativeEvent.contentOffset.y)
           }
-          style={styles.scrollView}
+          style={[styles.scrollView, { backgroundColor: theme.white }]}
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="always"
-          contentContainerStyle={styles.scrollViewContent}
+          contentContainerStyle={[
+            styles.scrollViewContent,
+            { backgroundColor: theme.white },
+          ]}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -269,196 +281,428 @@ function Home({ navigation }) {
             />
           }
         >
-          <View style={styles.inputFieldContainer}>
-            {inputField?.map((item, i) => (
-              <View key={i} style={styles.inputFieldWrapper}>
-                <InputField
-                  placeholder={item.placeholder}
-                  placeholderColor={"#6B7280"}
-                  height={
-                    Platform.OS === "android"
-                      ? RFPercentage(6.4)
-                      : RFPercentage(5.5)
-                  }
-                  backgroundColor={theme.white}
-                  borderWidth={RFPercentage(0.1)}
-                  borderColor={theme.border}
-                  secure={item.secure}
-                  borderRadius={RFPercentage(1.2)}
-                  color={theme.black}
-                  fontSize={RFPercentage(1.7)}
-                  fontFamily={"Poppins_400Regular"}
-                  handleFeild={(text) => handleChange(text, i)}
-                  value={item.value}
-                  width={"97%"}
-                />
-              </View>
-            ))}
-          </View>
+          <View style={[styles.screen, { backgroundColor: theme.white }]}>
+            <View style={styles.inputFieldContainer}>
+              {inputField?.map((item, i) => (
+                <View key={i} style={styles.inputFieldWrapper}>
+                  <InputField
+                    placeholder={item.placeholder}
+                    placeholderColor={"#6B7280"}
+                    height={
+                      Platform.OS === "android"
+                        ? RFPercentage(6.4)
+                        : RFPercentage(5.5)
+                    }
+                    backgroundColor={theme.white}
+                    borderWidth={RFPercentage(0.1)}
+                    borderColor={theme.border}
+                    secure={item.secure}
+                    borderRadius={RFPercentage(1.2)}
+                    color={theme.black}
+                    fontSize={RFPercentage(1.7)}
+                    fontFamily={"Poppins_400Regular"}
+                    handleFeild={(text) => handleChange(text, i)}
+                    value={item.value}
+                    width={"97%"}
+                  />
+                </View>
+              ))}
+            </View>
 
-          <View style={styles.categoriesContainer}>
-            <Text
-              style={[styles.categoriesText, { color: theme.heading }]}
-            >{`${t("home.txt3")}`}</Text>
-          </View>
+            <View style={styles.categoriesContainer}>
+              <Text
+                style={[styles.categoriesText, { color: theme.heading }]}
+              >{`${t("home.txt3")}`}</Text>
+              <View></View>
+            </View>
 
-          {/* Filter Buttons */}
-          <FlatList
-            horizontal
-            data={filterOptions}
-            keyExtractor={(item) => item}
-            keyboardShouldPersistTaps="always"
-            contentContainerStyle={styles.filterButtonsContainer}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => setActiveFilter(item)}>
-                {activeFilter === item ? (
-                  <LinearGradient
-                    colors={[Colors.primary, "#4557B0"]}
-                    style={styles.gradient}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Poppins_500Medium",
-                        color: "white",
-                        fontSize: RFPercentage(1.7),
-                      }}
+            {/* Filter Buttons */}
+            <FlatList
+              horizontal
+              data={filterOptions}
+              keyExtractor={(item) => item}
+              keyboardShouldPersistTaps="always"
+              contentContainerStyle={styles.filterButtonsContainer}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => setActiveFilter(item)}>
+                  {activeFilter === item ? (
+                    <LinearGradient
+                      colors={[Colors.primary, "#4557B0"]}
+                      style={styles.gradient}
                     >
-                      {item}
-                    </Text>
-                  </LinearGradient>
-                ) : (
-                  <View
-                    style={[styles.nonGradient, { borderColor: theme.border }]}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Poppins_400Regular",
-                        color: Colors.heading,
-                        fontSize: RFPercentage(1.7),
-                      }}
+                      <Text
+                        style={{
+                          fontFamily: "Poppins_500Medium",
+                          color: "white",
+                          fontSize: RFPercentage(1.7),
+                        }}
+                      >
+                        {item}
+                      </Text>
+                    </LinearGradient>
+                  ) : (
+                    <View
+                      style={[
+                        styles.nonGradient,
+                        { borderColor: theme.border },
+                      ]}
                     >
-                      {item}
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            )}
-          />
+                      <Text
+                        style={{
+                          fontFamily: "Poppins_400Regular",
+                          color: Colors.heading,
+                          fontSize: RFPercentage(1.7),
+                        }}
+                      >
+                        {item}
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              )}
+            />
 
-          <View
-            style={[styles.categoriesContainer, styles.recentRequestsContainer]}
-          >
-            <Text
-              style={[styles.categoriesText, { color: theme.heading }]}
-            >{`${t("home.txt9")}`}</Text>
-
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                width: "90%",
+                alignSelf: "center",
+                justifyContent: "space-between",
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: RFPercentage(3),
+              }}
+            >
+              <Text style={[styles.categoriesText, { color: theme.heading }]}>
+                Top Rated
+              </Text>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.navigate("Location", { home: true })}
+                onPress={() => navigation.navigate("TopRatedUsers")}
               >
                 <Text
                   style={[
                     styles.categoriesText,
                     {
-                      color: theme.primary,
+                      color: theme.heading,
+                      fontSize: RFPercentage(1.7),
                       fontFamily: "Poppins_600SemiBold",
-                      fontSize: RFPercentage(1.8),
                     },
                   ]}
                 >
-                  {selectedLocation.name2
-                    ? selectedLocation.name2.length > 15
-                      ? `${selectedLocation.name2.slice(0, 15)}...`
-                      : selectedLocation.name2
-                    : `${t("location.by")}`}
+                  View All
                 </Text>
               </TouchableOpacity>
-
-              {/* Show cross icon only if location is selected */}
-              {selectedLocation.name2 && (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={{
-                    marginLeft: RFPercentage(1),
-                    bottom: RFPercentage(0.3),
-                  }}
-                  onPress={async () => {
-                    dispatch(selectLocation(null)); // clears redux
-                    await getCurrentLocation(); // refresh GPS
-                  }}
-                >
-                  <AntDesign
-                    name="closecircle"
-                    size={RFPercentage(2.5)}
-                    color={theme.primary}
-                  />
-                </TouchableOpacity>
-              )}
             </View>
-          </View>
 
-          {/* Carts */}
-          {loading ? (
-            <View style={{ marginTop: RFPercentage(18) }}>
-              <ActivityIndicator size="large" color={theme.primary} />
-              <Text
-                style={{
-                  color: Colors.primary,
-                  fontSize: RFPercentage(1.8),
-                  fontFamily: "Poppins_500Medium",
-                  marginTop: RFPercentage(0.5),
-                }}
-              >
-                {t("home.txt12")}
-              </Text>
-            </View>
-          ) : (
-            <>
-              <FlatList
-                data={displayTasks}
-                keyExtractor={(item, index) => index.toString()}
-                scrollEventThrottle={16}
-                nestedScrollEnabled={true}
-                renderItem={({ item, index }) => (
+            <FlatList
+              horizontal
+              data={users}
+              keyExtractor={(item) => item}
+              keyboardShouldPersistTaps="always"
+              contentContainerStyle={styles.filterButtonsContainer}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => {
+                return (
                   <TouchableOpacity
-                    onPress={() =>
-                      navigation.navigate("OfferDetail", { postRequest: item })
-                    }
                     activeOpacity={0.8}
+                    onPress={() => {
+                      navigation.navigate("TopRatedUserProfile");
+                    }}
                     style={[
-                      styles.cartContainer,
-                      { borderColor: theme.border },
+                      {
+                        width: RFPercentage(18),
+                        height: RFPercentage(21),
+                        borderWidth: 1,
+                        borderRadius: RFPercentage(1.8),
+                        alignItems: "center",
+                        marginLeft: RFPercentage(1.2),
+                      },
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: theme.border,
+                      },
                     ]}
                   >
-                    <FlatList
-                      data={item.imageUrls}
-                      keyExtractor={(_, imgIndex) => imgIndex.toString()}
-                      horizontal
-                      pagingEnabled
-                      showsHorizontalScrollIndicator={false}
-                      scrollEnabled={true}
-                      nestedScrollEnabled={true}
-                      onScroll={(e) => {
-                        const slideIndex = Math.round(
-                          e.nativeEvent.contentOffset.x / (width * 0.9)
-                        );
-                        setActiveIndices((prev) => ({
-                          ...prev,
-                          [index]: slideIndex,
-                        }));
-                      }}
-                      renderItem={({ item: imageUrl }) => (
+                    <View style={{ width: "90%", alignSelf: "center" }}>
+                      <View
+                        style={{
+                          alignSelf: "center",
+                          marginTop: RFPercentage(2),
+                        }}
+                      >
                         <Image
-                          resizeMode="cover"
-                          source={{ uri: imageUrl }}
-                          style={styles.img}
+                          source={Icons.dp}
+                          resizeMode="contain"
+                          style={{
+                            width: RFPercentage(5.8),
+                            height: RFPercentage(5.8),
+                            borderRadius: RFPercentage(100),
+                            alignSelf: "center",
+                          }}
                         />
-                      )}
-                    />
+                        <View
+                          style={{
+                            width: RFPercentage(5.5),
+                            height: RFPercentage(1.6),
+                            borderRadius: RFPercentage(100),
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#45B356",
+                            alignSelf: "center",
+                            marginTop: RFPercentage(0.8),
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: Colors.white,
+                              fontSize: RFPercentage(0.7),
+                              fontFamily: "Poppins_500Medium",
+                            }}
+                          >
+                            Top Rated
+                          </Text>
+                        </View>
+                      </View>
+                      <Text
+                        style={[
+                          {
+                            textAlign: "center",
+                            fontFamily: "Poppins_600SemiBold",
+                            fontSize: RFPercentage(1.6),
+                            marginTop: RFPercentage(0.6),
+                          },
+                          { color: theme.darkGrey },
+                        ]}
+                      >
+                        Sana Asghar
+                      </Text>
+                      <View
+                        style={[
+                          {
+                            width: "100%",
+                            height: RFPercentage(0.1),
+                            marginTop: RFPercentage(1.2),
+                          },
+                          { backgroundColor: theme.border },
+                        ]}
+                      ></View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginTop: RFPercentage(1),
+                          width: "95%",
+                          alignSelf: "center",
+                        }}
+                      >
+                        <View
+                          style={{ flexDirection: "row", alignItems: "center" }}
+                        >
+                          {/* <MaterialIcons
+                            name="pending-actions"
+                            size={RFPercentage(1.5)}
+                            color={theme.primary}
+                          /> */}
+                          <Text
+                            style={[
+                              {
+                                fontFamily: "Poppins_500Medium",
+                                fontSize: RFPercentage(1.2),
+                                marginLeft: RFPercentage(0.5),
+                              },
+                              { color: theme.primary },
+                            ]}
+                          >
+                            Active
+                          </Text>
+                        </View>
+                        <View>
+                          <Text
+                            style={[
+                              {
+                                fontFamily: "Poppins_600SemiBold",
+                                fontSize: RFPercentage(1.4),
+                              },
+                              { color: theme.primary },
+                            ]}
+                          >
+                            3
+                          </Text>
+                        </View>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginTop: RFPercentage(0.5),
+                          width: "95%",
+                          alignSelf: "center",
+                        }}
+                      >
+                        <View
+                          style={{ flexDirection: "row", alignItems: "center" }}
+                        >
+                          {/* <FontAwesome5
+                            name="tasks"
+                            size={RFPercentage(1.1)}
+                            color={theme.darkGrey}
+                          /> */}
+                          <Text
+                            style={[
+                              {
+                                fontFamily: "Poppins_500Medium",
+                                fontSize: RFPercentage(1.2),
+                                marginLeft: RFPercentage(0.5),
+                              },
+                              { color: theme.darkGrey },
+                            ]}
+                          >
+                            Completed
+                          </Text>
+                        </View>
+                        <View>
+                          <Text
+                            style={[
+                              {
+                                fontFamily: "Poppins_600SemiBold",
+                                fontSize: RFPercentage(1.4),
+                              },
+                              { color: theme.darkGrey },
+                            ]}
+                          >
+                            22
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              }}
+            />
 
-                    {/* {item?.imageUrls?.length > 1 && (
+            <View
+              style={[
+                styles.categoriesContainer,
+                styles.recentRequestsContainer,
+              ]}
+            >
+              <Text
+                style={[styles.categoriesText, { color: theme.heading }]}
+              >{`${t("home.txt9")}`}</Text>
+
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    navigation.navigate("Location", { home: true })
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.categoriesText,
+                      {
+                        color: theme.primary,
+                        fontFamily: "Poppins_600SemiBold",
+                        fontSize: RFPercentage(1.8),
+                      },
+                    ]}
+                  >
+                    {selectedLocation.name2
+                      ? selectedLocation.name2.length > 15
+                        ? `${selectedLocation.name2.slice(0, 15)}...`
+                        : selectedLocation.name2
+                      : `${t("location.by")}`}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Show cross icon only if location is selected */}
+                {selectedLocation.name2 && (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={{
+                      marginLeft: RFPercentage(1),
+                      bottom: RFPercentage(0.3),
+                    }}
+                    onPress={async () => {
+                      dispatch(selectLocation(null)); // clears redux
+                      await getCurrentLocation(); // refresh GPS
+                    }}
+                  >
+                    <AntDesign
+                      name="closecircle"
+                      size={RFPercentage(2.5)}
+                      color={theme.primary}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            {/* Carts */}
+            {loading ? (
+              <View style={{ marginTop: RFPercentage(18) }}>
+                <ActivityIndicator size="large" color={theme.primary} />
+                <Text
+                  style={{
+                    color: Colors.primary,
+                    fontSize: RFPercentage(1.8),
+                    fontFamily: "Poppins_500Medium",
+                    marginTop: RFPercentage(0.5),
+                  }}
+                >
+                  {t("home.txt12")}
+                </Text>
+              </View>
+            ) : (
+              <>
+                <FlatList
+                  data={displayTasks}
+                  keyExtractor={(item, index) => index.toString()}
+                  scrollEventThrottle={16}
+                  nestedScrollEnabled={true}
+                  renderItem={({ item, index }) => (
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("OfferDetail", {
+                          postRequest: item,
+                        })
+                      }
+                      activeOpacity={0.8}
+                      style={[
+                        styles.cartContainer,
+                        { borderColor: theme.border },
+                      ]}
+                    >
+                      <FlatList
+                        data={item.imageUrls}
+                        keyExtractor={(_, imgIndex) => imgIndex.toString()}
+                        horizontal
+                        pagingEnabled
+                        showsHorizontalScrollIndicator={false}
+                        scrollEnabled={true}
+                        nestedScrollEnabled={true}
+                        onScroll={(e) => {
+                          const slideIndex = Math.round(
+                            e.nativeEvent.contentOffset.x / (width * 0.9)
+                          );
+                          setActiveIndices((prev) => ({
+                            ...prev,
+                            [index]: slideIndex,
+                          }));
+                        }}
+                        renderItem={({ item: imageUrl }) => (
+                          <Image
+                            resizeMode="cover"
+                            source={{ uri: imageUrl }}
+                            style={styles.img}
+                          />
+                        )}
+                      />
+
+                      {/* {item?.imageUrls?.length > 1 && (
                     <View style={styles.dotsContainer}>
                       {item.imageUrls.map((_, imageIndex) => (
                         <View
@@ -477,88 +721,92 @@ function Home({ navigation }) {
                     </View>
                   )} */}
 
-                    <View style={styles.infoWrapper}>
-                      <View style={styles.cartInfoContainer}>
-                        <View>
-                          <Image
-                            style={styles.userImage}
-                            source={
-                              item?.user?.profileImage
-                                ? { uri: item?.user?.profileImage }
-                                : Icons.dp
-                            }
-                          />
-                        </View>
-                        <Text
-                          style={[styles.userName, { color: theme.heading }]}
-                        >
-                          {item?.user?.userName?.length > 12
-                            ? `${item?.user?.userName.substring(0, 12)}...`
-                            : item?.user?.userName}
-                        </Text>
-                        <Text
-                          style={[styles.postDate, { color: theme.darkGrey }]}
-                        >
-                          {t("myRequests.txt4")}{" "}
-                          <Text style={{ fontFamily: "Poppins_400Regular" }}>
-                            {" "}
-                            {getFormatedDate(item.createdAt)}
-                          </Text>
-                        </Text>
-                      </View>
-
-                      <View style={styles.taskInfoContainer}>
-                        <Text
-                          style={[styles.taskText, { color: theme.darkGrey2 }]}
-                        >
-                          {item.description?.substr(0, 90) +
-                            (item.description?.length > 90 ? "..." : "")}
-                        </Text>
-                        <View style={styles.compensationWrapper}>
-                          <Image
-                            tintColor={theme.darkGrey}
-                            style={styles.compansationIcon}
-                            source={require("../../assets/Images/compensation.png")}
-                          />
+                      <View style={styles.infoWrapper}>
+                        <View style={styles.cartInfoContainer}>
+                          <View>
+                            <Image
+                              style={styles.userImage}
+                              source={
+                                item?.user?.profileImage
+                                  ? { uri: item?.user?.profileImage }
+                                  : Icons.dp
+                              }
+                            />
+                          </View>
                           <Text
-                            style={[
-                              styles.compensationText,
-                              { color: theme.darkGrey2 },
-                            ]}
+                            style={[styles.userName, { color: theme.heading }]}
                           >
-                            {`${t("home.txt10")}`}:{" "}
-                            <Text
-                              style={[
-                                styles.compensationAmount,
-                                { color: theme.primary },
-                              ]}
-                            >
-                              {item.compensationType === "Monitarely"
-                                ? `${formatCurrency(item.monitarily)}`
-                                : item.otherCompensation?.substr(0, 20) +
-                                  (item.otherCompensation?.length > 20
-                                    ? "..."
-                                    : "")}
+                            {item?.user?.userName?.length > 12
+                              ? `${item?.user?.userName.substring(0, 12)}...`
+                              : item?.user?.userName}
+                          </Text>
+                          <Text
+                            style={[styles.postDate, { color: theme.darkGrey }]}
+                          >
+                            {t("myRequests.txt4")}{" "}
+                            <Text style={{ fontFamily: "Poppins_400Regular" }}>
+                              {" "}
+                              {getFormatedDate(item.createdAt)}
                             </Text>
                           </Text>
                         </View>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                )}
-              />
-            </>
-          )}
 
-          {!loading && displayTasks?.length === 0 && (
-            <View style={{ bottom: RFPercentage(10) }}>
-              <NotFound title={`${t("home.txt11")}`} />
-            </View>
-          )}
-          <View style={styles.bottomSpacing} />
+                        <View style={styles.taskInfoContainer}>
+                          <Text
+                            style={[
+                              styles.taskText,
+                              { color: theme.darkGrey2 },
+                            ]}
+                          >
+                            {item.description?.substr(0, 90) +
+                              (item.description?.length > 90 ? "..." : "")}
+                          </Text>
+                          <View style={styles.compensationWrapper}>
+                            <Image
+                              tintColor={theme.darkGrey}
+                              style={styles.compansationIcon}
+                              source={require("../../assets/Images/compensation.png")}
+                            />
+                            <Text
+                              style={[
+                                styles.compensationText,
+                                { color: theme.darkGrey2 },
+                              ]}
+                            >
+                              {`${t("home.txt10")}`}:{" "}
+                              <Text
+                                style={[
+                                  styles.compensationAmount,
+                                  { color: theme.primary },
+                                ]}
+                              >
+                                {item.compensationType === "Monitarely"
+                                  ? `${formatCurrency(item.monitarily)}`
+                                  : item.otherCompensation?.substr(0, 20) +
+                                    (item.otherCompensation?.length > 20
+                                      ? "..."
+                                      : "")}
+                              </Text>
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                />
+              </>
+            )}
+
+            {!loading && displayTasks?.length === 0 && (
+              <View style={{ bottom: RFPercentage(10) }}>
+                <NotFound title={`${t("home.txt11")}`} />
+              </View>
+            )}
+            <View style={styles.bottomSpacing} />
+          </View>
         </ScrollView>
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </>
   );
 }
 
@@ -598,8 +846,8 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
   },
   filterButtonsContainer: {
-    paddingHorizontal: RFPercentage(1.4),
     marginTop: RFPercentage(1.4),
+    paddingHorizontal: RFPercentage(1.5),
     // backgroundColor: "red",
   },
   filterButton: {
