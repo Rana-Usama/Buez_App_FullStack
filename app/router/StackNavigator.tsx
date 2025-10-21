@@ -50,6 +50,7 @@ import FacebookLoginWebView from "../utils/facebookLogin";
 import NetworkError from "../screens/NetworkError";
 import TopRatedUsers from "../screens/TopRatedUsers";
 import TopRatedUserProfile from "../screens/TopRatedUserProfile";
+import AddReviewToAccepter from "../screens/AddReviewToAccepter";
 
 const Stack = createStackNavigator();
 
@@ -138,13 +139,14 @@ const StackNavigator = () => {
           name="FacebookLoginWebView"
           component={FacebookLoginWebView}
         />
+        <Stack.Screen name="TopRatedUsers" component={TopRatedUsers} />
         <Stack.Screen
-          name="TopRatedUsers"
-          component={TopRatedUsers}
-        />
-          <Stack.Screen
           name="TopRatedUserProfile"
           component={TopRatedUserProfile}
+        />
+        <Stack.Screen
+          name="AddReviewToAccepter"
+          component={AddReviewToAccepter}
         />
       </Stack.Navigator>
     </NavigationContainer>

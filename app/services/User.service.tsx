@@ -1,5 +1,15 @@
 // eslint-disable-next-line import/no-unresolved
-import { doc, setDoc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  onSnapshot,
+  collection,
+  where,
+  query,
+  getDocs,
+} from "firebase/firestore";
 // FIREBASE config
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 // shared
@@ -7,7 +17,18 @@ import { uploadImage } from "./Shared.service";
 
 const db = FIREBASE_DB;
 
-export const addUser = async (id: any, { userName, email, phoneNumber = "", profileImage = "", isSubscribed, token, isFreeTrial }) => {
+export const addUser = async (
+  id: any,
+  {
+    userName,
+    email,
+    phoneNumber = "",
+    profileImage = "",
+    isSubscribed,
+    token,
+    isFreeTrial,
+  }
+) => {
   try {
     console.log("ADD_USER");
     const user = {
@@ -18,7 +39,7 @@ export const addUser = async (id: any, { userName, email, phoneNumber = "", prof
       isSubscribed,
       token,
       isFreeTrial,
-      userId : id
+      userId: id,
     };
 
     await setDoc(doc(db, "users", id), user);
@@ -64,7 +85,6 @@ export const addUser = async (id: any, { userName, email, phoneNumber = "", prof
 //   }
 // };
 
-
 export const subscribeToUserData = (userId: any, callback: any) => {
   if (userId) {
     const docRef = doc(db, "users", userId);
@@ -85,9 +105,6 @@ export const subscribeToUserData = (userId: any, callback: any) => {
     callback(null);
   }
 };
-
-
-
 
 export const getLoggedInUser = async () => {
   try {
@@ -155,5 +172,87 @@ export const updateUserToken = async (userId: string, token: string) => {
   } catch (error) {
     console.error("Error updating push token:", error);
     throw error;
+  }
+};
+
+// services/User.service.js
+export const fetchUserDetailedProfile = async (userId) => {
+  console.log(userId)
+  try {
+    // Fetch user basic info
+    const userDocRef = doc(FIREBASE_DB, "users", userId);
+    const userDocSnap = await getDoc(userDocRef);
+    
+    let userData = null;
+    if (userDocSnap.exists()) {
+      userData = userDocSnap.data();
+      console.log('User data found:', userData);
+    } else {
+      console.log('No user found with ID:', userId);
+    }
+    console.log("............", userDocSnap);
+
+    // Fetch user's tasks from completedTask collection
+    const tasksQuery = query(
+      collection(FIREBASE_DB, "completedTask"),
+      where("acceptedBy.userId", "==", userId)
+    );
+    const tasksSnap = await getDocs(tasksQuery);
+
+    let completedTasks = [];
+    let activeTasks = [];
+    let totalEarnings = 0;
+
+    tasksSnap.docs.forEach((doc) => {
+      const taskData = doc.data();
+      if (taskData.status === "Completed") {
+        completedTasks.push(taskData);
+        // Calculate earnings if you have compensation field
+        if (taskData.compensation) {
+          totalEarnings +=
+            parseFloat(taskData.compensation.replace("$", "")) || 0;
+        }
+      } else if (taskData.status === "pending") {
+        activeTasks.push(taskData);
+      }
+    });
+
+    // Calculate success rate
+    const totalTasks = completedTasks.length + activeTasks.length;
+    const successRate =
+      totalTasks > 0
+        ? Math.round((completedTasks.length / totalTasks) * 100)
+        : 0;
+
+    // Get member since date
+    const memberSince = userData?.freeTrialStartedAt
+      ? new Date(userData.freeTrialStartedAt.seconds * 1000).toLocaleDateString(
+          "en-US",
+          {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }
+        )
+      : "Recently";
+
+    return {
+      userBasic: userData,
+      stats: {
+        activeTasks: activeTasks.length,
+        completedTasks: completedTasks.length,
+        successRate: successRate,
+        totalEarnings: totalEarnings,
+        memberSince: memberSince,
+        totalTasks: totalTasks,
+      },
+      tasks: {
+        completed: completedTasks,
+        active: activeTasks,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching user detailed profile:", error);
+    return null;
   }
 };

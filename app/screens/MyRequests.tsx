@@ -635,81 +635,91 @@ function MyRequests({ navigation }) {
                       { color: theme.darkGrey, marginLeft: RFPercentage(0.6) },
                     ]}
                   >
-                    { activeFilter === `${t("myRequests.txt10")}` ? `${t("common.you")}`  : cart?.acceptedBy?.userName?.substr(0, 12) +
-                      (cart?.acceptedBy?.userName?.length > 12 ? "..." : "")}
+                    {activeFilter === `${t("myRequests.txt10")}`
+                      ? `${t("common.you")}`
+                      : cart?.acceptedBy?.userName?.substr(0, 12) +
+                        (cart?.acceptedBy?.userName?.length > 12 ? "..." : "")}
                   </Text>
-                  {/* {activeFilter === `${t("myRequests.txt3")}` ? (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    disabled={
-                      markLoaderIndex === index || repostingIndex === index
-                    }
-                    onPress={() =>
-                      navigation.navigate("AddReview", { task: cart })
-                    }
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Ionicons
-                      name="star"
-                      size={RFPercentage(1.8)}
-                      color={Colors.primary}
-                    />
-                    <Text
-                      style={{
-                        color: Colors.primary,
-                        fontFamily: "Poppins_500Medium",
-                        fontSize: RFPercentage(1.5),
-                        marginLeft: RFPercentage(0.4),
-                      }}
-                    >
-                      Add Review
-                    </Text>
-                  </TouchableOpacity>
-                ) : ( */}
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    disabled={
-                      markLoaderIndex === index || repostingIndex === index
-                    }
-                    onPress={() => {
-                      if (activeFilter === `${t("myRequests.txt10")}`) {
-                        handleStartChat(cart?.user);
-                      } else {
-                        handleStartChat(cart?.acceptedBy);
+                  {activeFilter === `${t("myRequests.txt3")}` ? (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      disabled={
+                        markLoaderIndex === index || repostingIndex === index
                       }
-                    }}
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      source={Icons.messages}
-                      resizeMode="contain"
+                      onPress={() =>
+                        navigation.navigate("AddReviewToAccepter", {
+                          task: cart,
+                        })
+                      }
                       style={{
-                        width: RFPercentage(2.3),
-                        height: RFPercentage(2.3),
-                      }}
-                    />
-                    <Text
-                      style={{
-                        color: Colors.primary,
-                        fontFamily: "Poppins_500Medium",
-                        fontSize: RFPercentage(1.5),
-                        marginLeft: RFPercentage(0.4),
+                        position: "absolute",
+                        right: 0,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor:
+                          theme.mode === "dark"
+                            ? Colors.primary + "40"
+                            : Colors.primary + "15",
+                        padding: RFPercentage(1),
+                        borderRadius: RFPercentage(1),
                       }}
                     >
-                      {t("details.txt9")}
-                    </Text>
-                  </TouchableOpacity>
-                  {/* )} */}
+                      <Ionicons
+                        name="star"
+                        size={RFPercentage(1.8)}
+                        color={Colors.primary}
+                      />
+                      <Text
+                        style={{
+                          color: Colors.primary,
+                          fontFamily: "Poppins_500Medium",
+                          fontSize: RFPercentage(1.5),
+                          marginLeft: RFPercentage(0.4),
+                        }}
+                      >
+                        Add Review
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      disabled={
+                        markLoaderIndex === index || repostingIndex === index
+                      }
+                      onPress={() => {
+                        if (activeFilter === `${t("myRequests.txt10")}`) {
+                          handleStartChat(cart?.user);
+                        } else {
+                          handleStartChat(cart?.acceptedBy);
+                        }
+                      }}
+                      style={{
+                        position: "absolute",
+                        right: 0,
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Image
+                        source={Icons.messages}
+                        resizeMode="contain"
+                        style={{
+                          width: RFPercentage(2.3),
+                          height: RFPercentage(2.3),
+                        }}
+                      />
+                      <Text
+                        style={{
+                          color: Colors.primary,
+                          fontFamily: "Poppins_500Medium",
+                          fontSize: RFPercentage(1.5),
+                          marginLeft: RFPercentage(0.4),
+                        }}
+                      >
+                        {t("details.txt9")}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </>
             )}

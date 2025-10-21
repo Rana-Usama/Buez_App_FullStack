@@ -31,7 +31,7 @@ const TopRatedUsers = ({ navigation }: any) => {
   ]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // 'all', 'pro', 'rising'
+  const [filter, setFilter] = useState('all'); // 'all', 'pro', 'rising', 'normal'
 
   const handleChange = (text, i) => {
     const tmp = [...inputField];
@@ -44,68 +44,28 @@ const TopRatedUsers = ({ navigation }: any) => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const res = await fetchUsersWithTaskStats();
-        // Mock data - replace with actual API response
-        const mockUsers = [
-          {
-            id: 1,
-            userName: "Sana Asghar",
-            profileImage: null,
-            memberSince: "April 4, 2024",
-            activeTasks: 3,
-            completedTasks: 23,
-            successRate: 98,
-            type: 'pro',
-            rating: 4.9
-          },
-          {
-            id: 2,
-            userName: "Alex Johnson",
-            profileImage: null,
-            memberSince: "March 15, 2024",
-            activeTasks: 2,
-            completedTasks: 18,
-            successRate: 95,
-            type: 'pro',
-            rating: 4.8
-          },
-          {
-            id: 3,
-            userName: "Maria Garcia",
-            profileImage: null,
-            memberSince: "May 20, 2024",
-            activeTasks: 4,
-            completedTasks: 12,
-            successRate: 92,
-            type: 'rising',
-            rating: 4.7
-          },
-          {
-            id: 4,
-            userName: "David Chen",
-            profileImage: null,
-            memberSince: "February 8, 2024",
-            activeTasks: 1,
-            completedTasks: 28,
-            successRate: 96,
-            type: 'pro',
-            rating: 4.9
-          },
-          {
-            id: 5,
-            userName: "Emma Wilson",
-            profileImage: null,
-            memberSince: "June 12, 2024",
-            activeTasks: 3,
-            completedTasks: 8,
-            successRate: 89,
-            type: 'rising',
-            rating: 4.6
-          }
-        ];
-        setUsers(mockUsers);
+        // Get real data from your API
+        const apiUsers = await fetchUsersWithTaskStats();
+        
+        // Map API response to match your component structure
+        const mappedUsers = apiUsers.map((user, index) => ({
+          id: user.userId || `user-${index}`,
+          userName: user.name || "Unknown User",
+          profileImage: user.profileImage || null,
+          memberSince: "Recently", // You can calculate this from user data if available
+          activeTasks: user.activeCount || 0,
+          completedTasks: user.completedCount || 0,
+          successRate: calculateSuccessRate(user),
+          type: mapCategoryToType(user.category),
+          rating: 4.5 + (user.completedCount * 0.01),
+          // Include original API data for the profile screen
+          originalData: user
+        }));
+
+        setUsers(mappedUsers);
       } catch (error) {
         console.error("Error fetching users:", error);
+        setUsers([]);
       } finally {
         setLoading(false);
       }
@@ -113,9 +73,37 @@ const TopRatedUsers = ({ navigation }: any) => {
     fetchUsers();
   }, []);
 
+  // Helper function to calculate success rate
+  const calculateSuccessRate = (user) => {
+    const totalTasks = (user.activeCount || 0) + (user.completedCount || 0);
+    if (totalTasks === 0) return 0;
+    return Math.round((user.completedCount / totalTasks) * 100);
+  };
+
+  // Helper function to map API category to your type
+  const mapCategoryToType = (category) => {
+    switch (category) {
+      case 'Top Rated':
+        return 'pro';
+      case 'Rising Talent':
+        return 'rising';
+      default:
+        return 'normal';
+    }
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.userName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filter === 'all' || user.type === filter;
+    
+    let matchesFilter = true;
+    if (filter === 'pro') {
+      matchesFilter = user.type === 'pro';
+    } else if (filter === 'rising') {
+      matchesFilter = user.type === 'rising';
+    } else if (filter === 'normal') {
+      matchesFilter = user.type === 'normal';
+    }
+    
     return matchesSearch && matchesFilter;
   });
 
@@ -137,6 +125,14 @@ const TopRatedUsers = ({ navigation }: any) => {
           bgColor: 'rgba(255, 107, 53, 0.15)',
           borderColor: 'rgba(255, 107, 53, 0.3)'
         };
+      case 'normal':
+        return {
+          icon: 'star',
+          text: 'TOP',
+          color: Colors.primary,
+          bgColor: Colors.primary + '15',
+          borderColor: Colors.primary + '30'
+        };
       default:
         return {
           icon: 'star',
@@ -155,11 +151,10 @@ const TopRatedUsers = ({ navigation }: any) => {
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => {
-          navigation.navigate("TopRatedUserProfile", { user });
+          navigation.navigate("TopRatedUserProfile", { user: user.originalData || user });
         }}
         style={[styles.userCard, { backgroundColor: theme.white, borderColor: theme.border }]}
       >
-        {/* User Info Row */}
         <View style={styles.userInfoRow}>
           <View style={styles.avatarContainer}>
             <Image
@@ -189,7 +184,6 @@ const TopRatedUsers = ({ navigation }: any) => {
               Member since {user.memberSince}
             </Text>
 
-            {/* Stats Row */}
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <MaterialIcons name="pending-actions" size={RFPercentage(1.4)} color={Colors.primary} />
@@ -263,7 +257,6 @@ const TopRatedUsers = ({ navigation }: any) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Search Section */}
         <View style={styles.searchSection}>
           {inputField?.map((item, i) => (
             <View key={i} style={styles.inputFieldWrapper}>
@@ -289,7 +282,6 @@ const TopRatedUsers = ({ navigation }: any) => {
           ))}
         </View>
 
-        {/* Filter Section */}
         <View style={styles.filterSection}>
           <Text style={[styles.filterTitle, { color: theme.heading }]}>
             Filter by:
@@ -298,17 +290,16 @@ const TopRatedUsers = ({ navigation }: any) => {
             <FilterButton title="All" value="all" isActive={filter === 'all'} />
             <FilterButton title="Pro" value="pro" isActive={filter === 'pro'} />
             <FilterButton title="Rising" value="rising" isActive={filter === 'rising'} />
+            <FilterButton title="Normal" value="normal" isActive={filter === 'normal'} />
           </View>
         </View>
 
-        {/* Results Count */}
         <View style={styles.resultsSection}>
           <Text style={[styles.resultsText, { color: theme.darkGrey }]}>
             {filteredUsers.length} {filteredUsers.length === 1 ? 'performer' : 'performers'} found
           </Text>
         </View>
 
-        {/* Users List */}
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={Colors.primary} />

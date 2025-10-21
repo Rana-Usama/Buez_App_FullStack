@@ -10,7 +10,7 @@ import {
   ScrollView,
   StatusBar,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAppTheme } from "../contexts/themeContext";
 import Nav from "../components/common/Nav";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -28,68 +28,75 @@ import {
   FontAwesome5,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import { fetchUserDetailedProfile } from "../services/User.service";
+import moment from "moment";
+import { createNewChat } from "../services/Chat.service";
+import { getAuth } from "firebase/auth";
+import { useUser } from "../contexts/user.context";
 
 const TopRatedUserProfile = ({ navigation, route }: any) => {
   const { theme } = useAppTheme();
   const { t } = useTranslation();
   const { user } = route.params || {};
-
+  const [userDetailedData, setUserDetailedData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
   const [activeTab, setActiveTab] = useState("completed"); // 'completed' or 'reviews'
 
-  // Mock data - replace with actual API data
-  const userStats = {
-    activeTasks: 3,
-    completedTasks: 23,
-    successRate: 98,
-    memberSince: "April 4, 2024",
-    bio: "I am passionate Mobile App Developer with expertise in React Native. I love creating efficient solutions and helping others with technical tasks.",
-    rating: 4.9,
+  useEffect(() => {
+    if (user?.userId) {
+      fetchUserData(user.userId);
+    }
+  }, [user]);
+
+  const fetchUserData = async (userId) => {
+    try {
+      setLoading(true);
+      const detailedData = await fetchUserDetailedProfile(userId);
+      setUserDetailedData(detailedData);
+
+      // You might want to fetch reviews from another collection
+      // const userReviews = await fetchUserReviews(userId);
+      // setReviews(userReviews);
+    } catch (error) {
+      console.log("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const completedTasks = [
-    {
-      id: 1,
-      title: "Help in Gardening on Weekend",
-      category: "Gardening",
-      client: "Emma Stone",
-      completedDate: "04-03-2025",
-      compensation: "$60",
-      image: Icons.garden,
-      description:
-        "Need help with garden maintenance and planting seasonal flowers in the backyard...",
-    },
-    {
-      id: 2,
-      title: "App Development Consultation",
-      category: "Technical",
-      client: "John Doe",
-      completedDate: "02-03-2025",
-      compensation: "$120",
-      image: Icons.dp,
-      description:
-        "Mobile app development guidance and code review for React Native project...",
-    },
-  ];
+  // Calculate category based on completed tasks
+  const getUserCategory = (completedCount) => {
+    if (completedCount > 6) return "Top Rated";
+    if (completedCount > 3) return "Rising Talent";
+    return "Normal";
+  };
 
-  const reviews = [
-    {
-      id: 1,
-      client: "Emma Stone",
-      rating: 5,
-      comment:
-        "Sana did an amazing job with my garden! Very professional and attention to detail.",
-      date: "1 week ago",
-    },
-    {
-      id: 2,
-      client: "John Doe",
-      rating: 5,
-      comment:
-        "Excellent technical guidance. Helped me fix critical issues in my app.",
-      date: "2 weeks ago",
-    },
-  ];
+  const getCategoryBadge = (completedCount) => {
+    const category = getUserCategory(completedCount);
+    switch (category) {
+      case "Top Rated":
+        return {
+          icon: "trophy",
+          color: "#FFD700",
+          text: "Top Rated",
+        };
+      case "Rising Talent":
+        return {
+          icon: "trending-up",
+          color: "#fdc73eff",
+          text: "Rising Talent",
+        };
+      default:
+        return {
+          icon: "person",
+          color: Colors.primary,
+          text: "Tasker",
+        };
+    }
+  };
 
+  // StatCard Component
   const StatCard = ({ icon, value, label, color }) => (
     <View
       style={[
@@ -107,7 +114,8 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     </View>
   );
 
-  const renderTaskItem = ({ item }) => (
+  // Render actual completed tasks
+  const renderTaskItem = ({ item, index }) => (
     <TouchableOpacity
       activeOpacity={0.9}
       style={[
@@ -115,56 +123,74 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         { backgroundColor: theme.white, borderColor: theme.border },
       ]}
     >
-      <View style={styles.taskHeader}>
+      <View style={{ width: "100%" }}>
         <Image
-          source={item.image}
+          source={item?.taskDetails?.imageUrls}
           resizeMode="cover"
-          style={styles.taskImage}
+          style={{ width: "100%", height: RFPercentage(18) }}
         />
-        <LinearGradient
-          colors={[Colors.primary, "#4557B0"]}
-          style={styles.categoryBadge}
-        >
-          <Text style={styles.categoryText}>{item.category}</Text>
-        </LinearGradient>
       </View>
-
       <View style={styles.taskContent}>
-        <Text
-          style={[styles.taskTitle, { color: theme.heading }]}
-          numberOfLines={2}
-        >
-          {item.title}
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Image
+            source={
+              item?.taskDetails?.user?.profileImage
+                ? { uri: item?.taskDetails?.user?.profileImage }
+                : Icons.dp
+            }
+            resizeMode="contain"
+            style={{
+              width: RFPercentage(5),
+              height: RFPercentage(5),
+              borderRadius: RFPercentage(100),
+              borderWidth: RFPercentage(0.2),
+              borderColor: Colors.primary,
+            }}
+          />
+          <Text
+            style={[
+              styles.taskTitle,
+              { color: theme.heading, marginLeft: RFPercentage(1.3) },
+            ]}
+          >
+            {item?.taskDetails?.user?.userName}
+          </Text>
 
-        <View style={styles.taskMeta}>
-          <View style={styles.clientInfo}>
-            <Image source={Icons.profile2} style={styles.clientAvatar} />
-            <Text style={[styles.clientName, { color: theme.darkGrey }]}>
-              {item.client}
+          <View style={styles.taskMeta}>
+            <Text style={[styles.completedDate, { color: theme.grey }]}>
+              Completed:{" "}
+              {item.completedAt
+                ? moment(item.completedAt.seconds * 1000).format(
+                    "MMMM DD, YYYY"
+                  )
+                : "Recently"}
             </Text>
           </View>
-          <Text style={[styles.completedDate, { color: theme.grey }]}>
-            Completed: {item.completedDate}
-          </Text>
         </View>
 
-        <Text
-          style={[styles.taskDescription, { color: theme.darkGrey }]}
-          numberOfLines={2}
-        >
-          {item.description}
-        </Text>
+        {item.taskDetails?.description && (
+          <Text
+            style={[styles.taskDescription, { color: theme.darkGrey }]}
+            numberOfLines={2}
+          >
+            {item.taskDetails?.description}
+          </Text>
+        )}
 
         <View style={styles.taskFooter}>
-          <View style={styles.compensationContainer}>
-            <Image
-              tintColor={Colors.primary}
-              source={require("../../assets/Images/compensation.png")}
-              style={styles.compensationIcon}
-            />
-            <Text style={styles.compensationText}>{item.compensation}</Text>
-          </View>
+          {item?.taskDetails && (
+            <View style={styles.compensationContainer}>
+              <Image
+                tintColor={Colors.primary}
+                source={require("../../assets/Images/compensation.png")}
+                style={styles.compensationIcon}
+              />
+              <Text style={styles.compensationText}>
+                {item?.taskDetails?.monetarily ||
+                  item?.taskDetails?.otherCompensation}
+              </Text>
+            </View>
+          )}
           <View
             style={[
               styles.successBadge,
@@ -172,12 +198,12 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
             ]}
           >
             <Ionicons
-              name="checkmark-done"
+              name="sparkles"
               size={RFPercentage(1.6)}
               color={Colors.primary}
             />
             <Text style={[styles.successText, { color: Colors.primary }]}>
-              Completed
+              {item?.taskDetails?.taskType}
             </Text>
           </View>
         </View>
@@ -185,6 +211,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     </TouchableOpacity>
   );
 
+  // Render review items
   const renderReviewItem = ({ item }) => (
     <View
       style={[
@@ -210,7 +237,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               key={star}
               name={star <= item.rating ? "star" : "star-outline"}
               size={RFPercentage(1.6)}
-              color={Colors.star}
+              color={Colors.star || "#FFD700"}
             />
           ))}
         </View>
@@ -220,6 +247,61 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       </Text>
     </View>
   );
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.white }]}>
+        <Nav
+          marginTop={RFPercentage(5)}
+          leftLogo={false}
+          navigation={navigation}
+          title={"Profile"}
+          dpNull
+        />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
+            Loading profile...
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!userDetailedData) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.white }]}>
+        <Nav
+          marginTop={RFPercentage(5)}
+          leftLogo={false}
+          navigation={navigation}
+          title={"Profile"}
+          dpNull
+        />
+        <View style={styles.errorContainer}>
+          <Text style={[styles.errorText, { color: theme.darkGrey }]}>
+            User not found
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  const { userBasic, stats, tasks } = userDetailedData;
+  const categoryBadge = getCategoryBadge(stats.completedTasks);
+
+  const currentUser = useUser();
+  const currentUserId = getAuth().currentUser?.uid;
+
+  const handleStartChat = async (receiverUser) => {
+    const chatId = await createNewChat(currentUserId, receiverUser.userId);
+    navigation.navigate("Chat", {
+      chatId: chatId,
+      senderId: currentUserId,
+      senderName: currentUser.userData.userName,
+      receiver: receiverUser,
+    });
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
@@ -240,37 +322,68 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         <View style={styles.headerSection}>
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
-              <Image source={Icons.dp} style={styles.avatar} />
-              <View style={styles.topRatedBadge}>
+              <Image
+                source={
+                  user?.profileImage ? { uri: user.profileImage } : Icons.dp
+                }
+                style={[styles.avatar, { borderColor: categoryBadge.color }]}
+              />
+              <View
+                style={[
+                  styles.categoryBadge,
+                  {
+                    borderColor: categoryBadge.color + "20",
+                    backgroundColor: categoryBadge.color,
+                  },
+                ]}
+              >
                 <Ionicons
-                  name="trophy"
-                  size={RFPercentage(1.8)}
-                  color="#FFD700"
+                  name={categoryBadge?.icon}
+                  size={RFPercentage(1.5)}
+                  color={Colors.white}
                 />
-                <Text style={styles.topRatedText}>Top Rated</Text>
+                <Text
+                  style={[styles.categoryBadgeText, { color: Colors.white }]}
+                >
+                  {categoryBadge.text}
+                </Text>
               </View>
             </View>
 
             <View style={styles.profileInfo}>
               <Text style={[styles.userName, { color: theme.heading }]}>
-                Sana Asghar
+                {user?.name || userBasic?.userName || "Unknown User"}
               </Text>
               <Text style={[styles.userTitle, { color: Colors.primary }]}>
-                Task Expert • {userStats.successRate}% Success Rate
+                Task Expert • {stats.successRate}% Success Rate
               </Text>
               <Text style={[styles.userBio, { color: theme.darkGrey }]}>
-                {userStats.bio}
-              </Text>
-              <Text style={[styles.memberSince, { color: theme.grey }]}>
-                Member since {userStats.memberSince}
+                {userBasic?.bio ||
+                  `Completed ${stats.completedTasks} tasks with ${stats.successRate}% success rate.`}
               </Text>
             </View>
           </View>
-          <View style={{ alignSelf: "center", alignItems: "center" , width:"100%"}}>
+
+          <View
+            style={{
+              alignSelf: "center",
+              alignItems: "center",
+              width: "100%",
+              justifyContent: "space-between",
+              flexDirection: "row",
+              marginTop: RFPercentage(2),
+            }}
+          >
+            <Text style={[styles.memberSince, { color: theme.grey }]}>
+              Member since {stats.memberSince}
+            </Text>
             <MyAppButton
               title={t("details.txt9")}
-              marginTop={RFPercentage(2)}
-              width="60%"
+              marginTop={RFPercentage(0)}
+              width="42%"
+              onPress={(userBasic) => {
+                handleStartChat(userBasic);
+              }}
             />
           </View>
         </View>
@@ -285,7 +398,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 color={Colors.primary}
               />
             }
-            value={userStats.activeTasks}
+            value={stats.activeTasks}
             label="Active Tasks"
             color={Colors.primary}
           />
@@ -297,7 +410,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 color="#45B356"
               />
             }
-            value={userStats.completedTasks}
+            value={stats.completedTasks}
             label="Completed"
             color="#45B356"
           />
@@ -309,7 +422,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 color="#FF6B35"
               />
             }
-            value={`${userStats.successRate}%`}
+            value={`${stats.successRate}%`}
             label="Success Rate"
             color="#FF6B35"
           />
@@ -335,7 +448,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   : { color: theme.darkGrey },
               ]}
             >
-              Completed Tasks ({completedTasks.length})
+              Completed Tasks ({tasks.completed.length})
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -364,15 +477,21 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         {/* Content Section */}
         <View style={styles.contentSection}>
           {activeTab === "completed" ? (
-            <FlatList
-              data={completedTasks}
-              renderItem={renderTaskItem}
-              keyExtractor={(item) => item.id.toString()}
-              scrollEnabled={false}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.tasksList}
-            />
-          ) : (
+            tasks.completed.length > 0 ? (
+              <FlatList
+                data={tasks.completed}
+                renderItem={renderTaskItem}
+                keyExtractor={(item, index) => index.toString()}
+                scrollEnabled={false}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.tasksList}
+              />
+            ) : (
+              <Text style={[styles.noDataText, { color: theme.grey }]}>
+                No completed tasks yet
+              </Text>
+            )
+          ) : reviews.length > 0 ? (
             <FlatList
               data={reviews}
               renderItem={renderReviewItem}
@@ -381,6 +500,10 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.reviewsList}
             />
+          ) : (
+            <Text style={[styles.noDataText, { color: theme.grey }]}>
+              No reviews yet
+            </Text>
           )}
         </View>
       </ScrollView>
@@ -414,20 +537,18 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.primary + "20",
   },
-  topRatedBadge: {
-    position: "absolute",
-    bottom: -RFPercentage(1),
-    left: RFPercentage(2),
-    right: RFPercentage(2),
+  categoryBadge: {
+    // position: "absolute",
+    bottom: RFPercentage(1),
+    left: RFPercentage(0),
+    right: RFPercentage(0),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.white,
-    paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
+    paddingHorizontal: RFPercentage(0),
+    height: RFPercentage(2.5),
+    borderRadius: RFPercentage(100),
     borderWidth: 1,
-    borderColor: Colors.primary + "20",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -436,10 +557,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    width:RFPercentage(8),
+    alignSelf:'center'
   },
-  topRatedText: {
-    color: Colors.primary,
-    fontSize: RFPercentage(1),
+  categoryBadgeText: {
+    fontSize: RFPercentage(0.8),
     fontFamily: "Poppins_600SemiBold",
     marginLeft: RFPercentage(0.3),
   },
@@ -567,14 +689,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: RFPercentage(16),
   },
-  categoryBadge: {
-    position: "absolute",
-    top: RFPercentage(1),
-    right: RFPercentage(1),
-    paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(0.7),
-    borderRadius: RFPercentage(0.8),
-  },
+
   categoryText: {
     color: Colors.white,
     fontSize: RFPercentage(1.3),
@@ -586,13 +701,13 @@ const styles = StyleSheet.create({
   taskTitle: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(1),
   },
   taskMeta: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: RFPercentage(1),
+    position: "absolute",
+    right: 0,
   },
   clientInfo: {
     flexDirection: "row",
@@ -609,19 +724,20 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
   },
   completedDate: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_500Medium",
   },
   taskDescription: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2),
-    marginBottom: RFPercentage(1.5),
+    marginTop: RFPercentage(1),
   },
   taskFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: RFPercentage(1),
   },
   compensationContainer: {
     flexDirection: "row",
@@ -696,5 +812,30 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2),
     fontStyle: "italic",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: RFPercentage(2),
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+  },
+  noDataText: {
+    textAlign: "center",
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    marginTop: RFPercentage(5),
   },
 });

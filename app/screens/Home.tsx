@@ -213,7 +213,7 @@ function Home({ navigation }) {
         .includes(q);
       const taskTypeMatch = (task.taskType || "").toLowerCase().includes(q);
 
-      // 🔥 For "Other" tasks, also check customTaskTitle
+      // For "Other" tasks, also check customTaskTitle
       const customTitleMatch =
         task.taskType?.toLowerCase() === "other"
           ? (task.customTaskTitle || "").toLowerCase().includes(q)
@@ -243,8 +243,10 @@ function Home({ navigation }) {
     fetchUsers();
   }, []);
 
+  console.log("userssss...........", users)
+
   return (
-    <View style={{backgroundColor:theme.white,flex:1 }}>
+    <View style={{ backgroundColor: theme.white, flex: 1 }}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
@@ -258,7 +260,6 @@ function Home({ navigation }) {
         leftLogo={true}
         navigation={navigation}
         title={`${t("home.txt1")}`}
-        
       />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
@@ -364,7 +365,7 @@ function Home({ navigation }) {
               )}
             />
 
-            {/* <View
+            <View
               style={{
                 width: "90%",
                 alignSelf: "center",
@@ -395,11 +396,11 @@ function Home({ navigation }) {
                   View All
                 </Text>
               </TouchableOpacity>
-            </View> */}
+            </View>
 
             <FlatList
               horizontal
-              data={[]}
+              data={users}
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={styles.topRatedContainer}
               showsHorizontalScrollIndicator={false}
@@ -463,9 +464,9 @@ function Home({ navigation }) {
 
                     {/* User Name */}
                     <Text style={[styles.userName2, { color: theme.heading }]}>
-                      {item?.userName?.length > 10
-                        ? `${item.userName.substring(0, 10)}...`
-                        : item.userName || "User"}
+                      {item?.name?.length > 10
+                        ? `${item.name.substring(0, 10)}...`
+                        : item.name || "User"}
                     </Text>
 
                     {/* User Title */}
@@ -484,7 +485,7 @@ function Home({ navigation }) {
                                 { color: theme.heading },
                               ]}
                             >
-                              {item.activeTasks || 3}
+                              {item.activeCount || 0}
                             </Text>
                             <Text
                               style={[
@@ -514,7 +515,7 @@ function Home({ navigation }) {
                                 { color: theme.heading },
                               ]}
                             >
-                              {item.completedTasks || 22}
+                              {item.completedCount || 0}
                             </Text>
                             <Text
                               style={[
@@ -567,8 +568,6 @@ function Home({ navigation }) {
                 );
               }}
             />
-
-
 
             <View
               style={[
