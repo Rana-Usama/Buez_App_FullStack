@@ -22,7 +22,7 @@ import {
 
 const languages = [
   "Swiss German",
-  "Germany German",
+  "German",
   "French",
   "Italian",
   "Spanish",
@@ -31,7 +31,7 @@ const languages = [
 
 const languageMap = {
   "Swiss German": "de-CH",
-  "Germany German": "de-DE",
+  "German": "de-DE",
   French: "fr",
   Italian: "it",
   Spanish: "es",

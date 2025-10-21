@@ -74,10 +74,7 @@ function SuccessScreen({ navigation }) {
       end={{ x: 0, y: 1 }}
       style={styles.container}
     >
-      <StatusBar
-        backgroundColor={theme.white}
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-      />
+      <StatusBar backgroundColor={theme.white} barStyle={"light-content"} />
 
       {/* Success Icon */}
       <View style={styles.iconContainer}>

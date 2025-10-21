@@ -15,7 +15,9 @@
     "confirm": "Passwort bestätige",
     "currency": "z.B. 90$",
     "sign": "$",
-    "gotIt": "Ha verstange"
+    "gotIt": "Ha verstange",
+      "you": "Du"
+
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -278,7 +280,7 @@
     "txt10": "Änderige a dere Politik",
     "txt11": "Mir chönne die Datäschutzerklärig von Zit zu Zit aktualisiere. Mir empfähle dir, sie regelmässig z überprüefe. Witeri Nutzig nach Update giltet als Akzeptanz.",
     "txt12": "Kontakt",
-    "txt13": "Wenn du Fräge hesch, kontaktier üs bitte unter support@example.com."
+    "txt13": "Wenn du Fräge hesch, kontaktier üs bitte unter info@buezapp.com."
   },
   "terms": {
     "txt1": " Willkomme bi BUEZ, ere Plattform wo vo Buez Solution betribe wird und Benutzer wo Hilf bi tägliche Ufgabä bruuched mit Persone verbindet, wo bereit sind, Hilf z leiste. Durch d Nutzig vo dr BUEZ App (d 'App') oder verwandte Dienst (zsämme dr 'Dienst') erklärsch du dich mit dene AGB ivverstande. Wenn du nid ivverstande bisch, darfsch du dr Dienst nid nutze.",

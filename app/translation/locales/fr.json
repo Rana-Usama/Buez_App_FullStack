@@ -15,7 +15,9 @@
     "confirm": "Confirmer le mot de passe",
     "currency": "ex. 90€",
     "sign": "€",
-    "gotIt": "Compris"
+    "gotIt": "Compris",
+      "you": "Tu"
+
   },
   "validations": {
     "inValid": "Email invalide",
@@ -277,7 +279,7 @@
     "txt10": "Mises à jour de cette politique",
     "txt11": "Cette politique peut être mise à jour périodiquement. Nous vous invitons à la consulter régulièrement. L’utilisation continue de nos services après les modifications vaut acceptation.",
     "txt12": "Contactez‑nous",
-    "txt13": "Si vous avez des questions à ce sujet, merci de nous contacter à support@example.com."
+    "txt13": "Si vous avez des questions à ce sujet, merci de nous contacter à info@buezapp.com."
   },
   "terms": {
     "txt1": "Bienvenue sur BUEZ, plateforme exploité par Buez Solution qui met en relation des utilisateurs ayant besoin d’aide pour les tâches quotidiennes avec des personnes prêtes à aider contre rémunération. En utilisant l’application mobile BUEZ (« App ») ou ses services, vous acceptez ces Conditions générales. Si vous n’êtes pas d’accord, ne pas utiliser le Service.",

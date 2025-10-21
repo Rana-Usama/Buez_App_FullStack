@@ -15,7 +15,8 @@
     "confirm": "Passwort bestätigen",
     "currency": "z.B. 90$",
     "sign": "$",
-    "gotIt": "Verstanden"
+    "gotIt": "Verstanden",
+     "you": "Du"
   },
   "validations": {
     "inValid": "Ungültige E-Mail",
@@ -278,7 +279,7 @@
     "txt10": "Änderungen dieser Richtlinie",
     "txt11": "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Wir ermutigen dich, sie regelmäßig auf Änderungen zu überprüfen. Die weitere Nutzung unserer Dienste nach Aktualisierungen stellt deine Zustimmung zur überarbeiteten Richtlinie dar.",
     "txt12": "Kontaktiere uns",
-    "txt13": "Wenn du Fragen zu dieser Datenschutzerklärung hast, kontaktiere uns bitte unter support@example.com."
+    "txt13": "Wenn du Fragen zu dieser Datenschutzerklärung hast, kontaktiere uns bitte unter info@buezapp.com."
   },
   "terms": {
     "txt1": " Willkommen bei BUEZ, einer Plattform, die von Buez Solution betrieben wird und Benutzer, die Hilfe bei täglichen Aufgaben benötigen, mit Personen verbindet, die bereit sind, gegen Vergütung Unterstützung zu leisten. Durch den Zugriff auf oder die Nutzung der BUEZ-Mobilapplikation (die 'App') oder verwandter Dienste (zusammen der 'Dienst') erklärst du dich mit diesen Allgemeinen Geschäftsbedingungen ('AGB') einverstanden. Wenn du nicht einverstanden bist, darfst du den Dienst nicht nutzen.",

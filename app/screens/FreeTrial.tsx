@@ -159,6 +159,7 @@ const FreeTrial = ({ navigation }: any) => {
       <MyAppButton
         title={`${t("freeTrial.txt9")}`}
         onPress={() => navigation.navigate("SubscriptionV2")}
+        width={"45%"}
       />
     </Screen>
   );

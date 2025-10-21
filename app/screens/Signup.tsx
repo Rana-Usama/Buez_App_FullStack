@@ -8,7 +8,7 @@ import {
   ScrollView,
   Modal,
   StatusBar,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
@@ -83,6 +83,8 @@ function Signup({ navigation }: any) {
       const password = values.password.trim();
       const user = await createAccountWithEmail(email, password);
       await SecureStore.setItemAsync("loggedOut", "false");
+      await SecureStore.setItemAsync("password2", password);
+
       if (user) {
         const userData = {
           userName: userName,
@@ -311,7 +313,7 @@ function Signup({ navigation }: any) {
                     },
                   ]}
                 >
-                  <Text style={[styles.modalText,{color:theme.black}]}>
+                  <Text style={[styles.modalText, { color: theme.black }]}>
                     Instagram Login Requirements
                   </Text>
                   <View style={{ marginTop: RFPercentage(1) }}>

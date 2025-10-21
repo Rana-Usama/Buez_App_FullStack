@@ -39,6 +39,7 @@ import { fetchActiveTasksFromFirebase } from "../services/Review.service";
 import { formatCurrency } from "../utils/currencyChange";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import RepostSuccessModal from "../components/common/RepostModal";
+import { Ionicons } from "@expo/vector-icons";
 
 function MyRequests({ navigation }) {
   const { t } = useTranslation();
@@ -118,6 +119,7 @@ function MyRequests({ navigation }) {
           title: await cachedTranslate(item?.title || ""),
           description: await cachedTranslate(item?.description || ""),
           taskType: await cachedTranslate(item?.taskType || ""),
+          customTaskTitle: await cachedTranslate(item?.customTaskTitle || ""),
           otherCompensation: await cachedTranslate(
             item?.otherCompensation || ""
           ),
@@ -360,7 +362,7 @@ function MyRequests({ navigation }) {
         },
         receiver: {
           userId: task.acceptedBy?.userId,
-          name: task.acceptedBy?.name,
+          name: task.acceptedBy?.userName,
           email: task.acceptedBy?.email,
           token: task.acceptedBy?.token,
         },
@@ -463,7 +465,11 @@ function MyRequests({ navigation }) {
                   resizeMode="cover"
                 >
                   <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryText}>{cart.taskType}</Text>
+                    <Text style={styles.categoryText}>
+                      {cart?.taskType === "Other"
+                        ? cart.customTaskTitle
+                        : cart?.taskType}
+                    </Text>
                   </View>
                   {cart.status === REQUEST_STATUS.Active && (
                     <View style={styles.cartWrapper}>
@@ -520,8 +526,8 @@ function MyRequests({ navigation }) {
             {/* Description */}
             <View style={styles.taskInfoContainer}>
               <Text style={[styles.taskText, { color: theme.darkGrey }]}>
-                {cart?.description?.substr(0, 45) +
-                  (cart?.description?.length > 45 ? "..." : "")}
+                {cart?.description?.substr(0, 34) +
+                  (cart?.description?.length > 34 ? "..." : "")}
               </Text>
             </View>
 
@@ -534,12 +540,12 @@ function MyRequests({ navigation }) {
                 >
                   {cart.compensationType === "Monitarely"
                     ? `${formatCurrency(cart.monitarily)}`
-                    : cart.otherCompensation?.substr(0, 12) +
-                      (cart.otherCompensation?.length > 12 ? "..." : "")}
+                    : cart.otherCompensation?.substr(0, 15) +
+                      (cart.otherCompensation?.length > 15 ? "..." : "")}
                 </Text>
               </Text>
 
-              {/* Repost only for Completed or Cancelled filter */}
+              {/* Repost only for Completed or Cancelled filter and active after someone accepted */}
               {(activeFilter === `${t("myRequests.txt3")}` ||
                 activeFilter === `${t("myRequests.txt8")}` ||
                 (activeFilter === `${t("myRequests.txt2")}` &&
@@ -596,72 +602,116 @@ function MyRequests({ navigation }) {
                 ))}
             </View>
             {cart?.acceptedBy && (
-              <View
-                style={{
-                  marginTop: RFPercentage(0.6),
-                  width: "92%",
-                  alignSelf: "center",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={[
-                    styles.compensation,
-                    { color: theme.heading, marginTop: 0 },
-                  ]}
-                >
-                  {t("myRequests.txt11")}
-                </Text>
-                <Text
-                  style={[
-                    styles.taskText,
-                    { color: theme.darkGrey, marginLeft: RFPercentage(0.6) },
-                  ]}
-                >
-                  {cart?.acceptedBy?.name.substr(0, 12) +
-                    (cart?.acceptedBy?.name?.length > 12 ? "..." : "")}
-                </Text>
-
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  disabled={
-                    markLoaderIndex === index || repostingIndex === index
-                  }
-                  onPress={() => {
-                    if (activeFilter === `${t("myRequests.txt10")}`) {
-                      handleStartChat(cart?.user);
-                    } else {
-                      handleStartChat(cart?.acceptedBy);
-                    }
-                  }}
+              <>
+                <View
                   style={{
-                    position: "absolute",
-                    right: 0,
+                    width: "90%",
+                    height: RFPercentage(0.1),
+                    backgroundColor: theme.border,
+                    alignSelf: "center",
+                    marginVertical: RFPercentage(2),
+                  }}
+                ></View>
+
+                <View
+                  style={{
+                    width: "92%",
+                    alignSelf: "center",
                     flexDirection: "row",
                     alignItems: "center",
                   }}
                 >
-                  <Image
-                    source={Icons.messages}
-                    resizeMode="contain"
-                    style={{
-                      width: RFPercentage(2.3),
-                      height: RFPercentage(2.3),
-                    }}
-                  />
                   <Text
+                    style={[
+                      styles.compensation,
+                      { color: theme.heading, marginTop: 0 },
+                    ]}
+                  >
+                    {t("myRequests.txt11")}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.taskText,
+                      { color: theme.darkGrey, marginLeft: RFPercentage(0.6) },
+                    ]}
+                  >
+                    { activeFilter === `${t("myRequests.txt10")}` ? `${t("common.you")}`  : cart?.acceptedBy?.userName?.substr(0, 12) +
+                      (cart?.acceptedBy?.userName?.length > 12 ? "..." : "")}
+                  </Text>
+                  {/* {activeFilter === `${t("myRequests.txt3")}` ? (
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    disabled={
+                      markLoaderIndex === index || repostingIndex === index
+                    }
+                    onPress={() =>
+                      navigation.navigate("AddReview", { task: cart })
+                    }
                     style={{
-                      color: Colors.primary,
-                      fontFamily: "Poppins_500Medium",
-                      fontSize: RFPercentage(1.5),
-                      marginLeft: RFPercentage(0.4),
+                      position: "absolute",
+                      right: 0,
+                      flexDirection: "row",
+                      alignItems: "center",
                     }}
                   >
-                    {t("details.txt9")}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                    <Ionicons
+                      name="star"
+                      size={RFPercentage(1.8)}
+                      color={Colors.primary}
+                    />
+                    <Text
+                      style={{
+                        color: Colors.primary,
+                        fontFamily: "Poppins_500Medium",
+                        fontSize: RFPercentage(1.5),
+                        marginLeft: RFPercentage(0.4),
+                      }}
+                    >
+                      Add Review
+                    </Text>
+                  </TouchableOpacity>
+                ) : ( */}
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    disabled={
+                      markLoaderIndex === index || repostingIndex === index
+                    }
+                    onPress={() => {
+                      if (activeFilter === `${t("myRequests.txt10")}`) {
+                        handleStartChat(cart?.user);
+                      } else {
+                        handleStartChat(cart?.acceptedBy);
+                      }
+                    }}
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      source={Icons.messages}
+                      resizeMode="contain"
+                      style={{
+                        width: RFPercentage(2.3),
+                        height: RFPercentage(2.3),
+                      }}
+                    />
+                    <Text
+                      style={{
+                        color: Colors.primary,
+                        fontFamily: "Poppins_500Medium",
+                        fontSize: RFPercentage(1.5),
+                        marginLeft: RFPercentage(0.4),
+                      }}
+                    >
+                      {t("details.txt9")}
+                    </Text>
+                  </TouchableOpacity>
+                  {/* )} */}
+                </View>
+              </>
             )}
 
             {/* Actions (only when Active filter is selected) */}
@@ -900,7 +950,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(3.7),
   },
   compensation: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
     marginTop: RFPercentage(0.7),
   },
@@ -952,7 +1002,7 @@ const styles = StyleSheet.create({
     // top: RFPercentage(-5),
   },
   taskText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
   },
   compensationText: {
@@ -964,7 +1014,7 @@ const styles = StyleSheet.create({
   compensationAmount: {
     color: Colors.primary,
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.5),
   },
   bottomSpacing: {
     marginBottom: RFPercentage(6),
@@ -986,8 +1036,8 @@ const styles = StyleSheet.create({
     top: RFPercentage(2),
   },
   markButton: {
-    borderRadius: RFPercentage(100),
-    height: RFPercentage(5.2),
+    borderRadius: RFPercentage(1),
+    height: RFPercentage(5),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
@@ -997,9 +1047,9 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1),
   },
   cancel: {
-    borderRadius: RFPercentage(100),
+    borderRadius: RFPercentage(1),
     width: "45%",
-    height: RFPercentage(5.2),
+    height: RFPercentage(5),
     borderWidth: 1.5,
     justifyContent: "center",
     alignItems: "center",

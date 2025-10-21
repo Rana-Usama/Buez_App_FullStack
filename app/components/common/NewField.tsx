@@ -98,6 +98,6 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontSize: RFPercentage(1.3),
     fontFamily: 'Poppins_400Regular',
-    right:RFPercentage(2)
+    right:RFPercentage(0)
   },
 });

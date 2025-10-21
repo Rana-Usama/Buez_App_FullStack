@@ -464,6 +464,7 @@ function PostRequest({ navigation, route }) {
               placeholder={`${t("postRequest.customTaskTitle")}`} // You'll need to add this translation
               value={customTaskTitle}
               onChangeText={setCustomTaskTitle}
+              maxLength={20}
               customStyle={{
                 width: "90%",
                 borderRadius: RFPercentage(1),

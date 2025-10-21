@@ -523,7 +523,7 @@ const Chat = ({ navigation, route }) => {
                       lineHeight: RFPercentage(2),
                     }}
                   >
-                    {receiver?.userName?.[0] || "?"}
+                    {receiver?.userName?.[0] || receiver?.name?.[0] || "?"}
                   </Text>
                 </View>
               );

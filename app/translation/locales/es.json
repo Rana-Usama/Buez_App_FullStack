@@ -15,7 +15,8 @@
     "confirm": "Confirmar Contraseña",
     "currency": "ej: 90$",
     "sign": "$",
-    "gotIt": "Entendido"
+    "gotIt": "Entendido",
+    "you": "Tú"
   },
   "validations": {
     "inValid": "Correo electrónico inválido",
@@ -279,7 +280,7 @@
     "txt10": "Cambios en esta Política",
     "txt11": "Podemos actualizar esta Política de Privacidad periódicamente. Te recomendamos revisarla periódicamente para ver cambios. El uso continuado de nuestros servicios después de actualizaciones constituye tu aceptación de la política revisada.",
     "txt12": "Contáctanos",
-    "txt13": "Si tienes preguntas sobre esta Política de Privacidad, contáctanos en support@example.com."
+    "txt13": "Si tienes preguntas sobre esta Política de Privacidad, contáctanos en info@buezapp.com."
   },
   "terms": {
     "txt1": " Bienvenido a BUEZ, una plataforma operada por Buez Solution que conecta usuarios que necesitan ayuda con tareas diarias con individuos dispuestos a proporcionar asistencia a cambio de compensación. Al acceder o usar la aplicación móvil BUEZ (la 'App') o cualquier servicio relacionado (colectivamente, el 'Servicio'), aceptas estar sujeto a estos Términos y Condiciones ('Términos'). Si no estás de acuerdo, no debes usar el Servicio.",

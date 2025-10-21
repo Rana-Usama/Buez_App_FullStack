@@ -349,8 +349,9 @@ function FAQ({ navigation }) {
           ))}
         </View>
 
+
         {/* Support Footer */}
-        <View
+        {/* <View
           style={[
             styles.supportSection,
             {
@@ -405,7 +406,8 @@ function FAQ({ navigation }) {
           >
             <Text style={styles.contactButtonText}> {t("faqs.txt5")}</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
+        
       </ScrollView>
     </View>
   );

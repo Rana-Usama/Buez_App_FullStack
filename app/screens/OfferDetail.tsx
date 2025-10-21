@@ -201,7 +201,7 @@ function OfferDetail({ navigation, route }) {
       await updateDoc(taskDocRef, {
         acceptedBy: {
           userId: currentUserId,
-          name: currentUser?.userData?.userName,
+          userName: currentUser?.userData?.userName,
           email: currentUserId2.email,
           profileImage: currentUser?.userData?.profileImage || null,
           phone: currentUser?.userData?.phone || null,

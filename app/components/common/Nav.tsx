@@ -29,6 +29,7 @@ interface NavProps {
   leftLogo?: boolean;
   post?: boolean;
   profileImage?: string | null;
+  paddingTop? : number
 }
 
 const Nav: React.FC<NavProps> = ({
@@ -40,6 +41,7 @@ const Nav: React.FC<NavProps> = ({
   leftLogo = false,
   post = false,
   profileImage,
+  paddingTop,
   onPress,
 }) => {
   const { unreadCount } = useNotifications();
@@ -53,6 +55,7 @@ const Nav: React.FC<NavProps> = ({
           marginTop: Platform.OS === "android" ? 0 : marginTop,
           borderBottomColor:
             theme.mode === "dark" ? theme.border : "rgba(224, 227, 232, 0.5)",
+            paddingTop
         },
       ]}
     >

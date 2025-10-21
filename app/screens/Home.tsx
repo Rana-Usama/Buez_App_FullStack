@@ -244,7 +244,7 @@ function Home({ navigation }) {
   }, []);
 
   return (
-    <>
+    <View style={{backgroundColor:theme.white,flex:1 }}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
@@ -258,6 +258,7 @@ function Home({ navigation }) {
         leftLogo={true}
         navigation={navigation}
         title={`${t("home.txt1")}`}
+        
       />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
@@ -363,7 +364,7 @@ function Home({ navigation }) {
               )}
             />
 
-            <View
+            {/* <View
               style={{
                 width: "90%",
                 alignSelf: "center",
@@ -371,10 +372,11 @@ function Home({ navigation }) {
                 flexDirection: "row",
                 alignItems: "center",
                 marginTop: RFPercentage(3),
+                marginBottom: RFPercentage(1),
               }}
             >
               <Text style={[styles.categoriesText, { color: theme.heading }]}>
-                Top Rated
+                Top Performers
               </Text>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -384,7 +386,7 @@ function Home({ navigation }) {
                   style={[
                     styles.categoriesText,
                     {
-                      color: theme.heading,
+                      color: theme.primary,
                       fontSize: RFPercentage(1.7),
                       fontFamily: "Poppins_600SemiBold",
                     },
@@ -393,195 +395,180 @@ function Home({ navigation }) {
                   View All
                 </Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
 
             <FlatList
               horizontal
-              data={users}
-              keyExtractor={(item) => item}
-              keyboardShouldPersistTaps="always"
-              contentContainerStyle={styles.filterButtonsContainer}
+              data={[]}
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={styles.topRatedContainer}
               showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => {
+              renderItem={({ item, index }) => {
                 return (
                   <TouchableOpacity
-                    activeOpacity={0.8}
+                    activeOpacity={0.9}
                     onPress={() => {
-                      navigation.navigate("TopRatedUserProfile");
+                      navigation.navigate("TopRatedUserProfile", {
+                        user: item,
+                      });
                     }}
                     style={[
-                      {
-                        width: RFPercentage(18),
-                        height: RFPercentage(21),
-                        borderWidth: 1,
-                        borderRadius: RFPercentage(1.8),
-                        alignItems: "center",
-                        marginLeft: RFPercentage(1.2),
-                      },
+                      styles.topRatedCard,
                       {
                         backgroundColor: theme.white,
                         borderColor: theme.border,
+                        shadowColor:
+                          theme.mode === "dark" ? "#000" : "rgba(0,0,0,0.1)",
                       },
                     ]}
                   >
-                    <View style={{ width: "90%", alignSelf: "center" }}>
-                      <View
-                        style={{
-                          alignSelf: "center",
-                          marginTop: RFPercentage(2),
-                        }}
-                      >
-                        <Image
-                          source={Icons.dp}
-                          resizeMode="contain"
-                          style={{
-                            width: RFPercentage(5.8),
-                            height: RFPercentage(5.8),
-                            borderRadius: RFPercentage(100),
-                            alignSelf: "center",
-                          }}
-                        />
-                        <View
-                          style={{
-                            width: RFPercentage(5.5),
-                            height: RFPercentage(1.6),
-                            borderRadius: RFPercentage(100),
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: "#45B356",
-                            alignSelf: "center",
-                            marginTop: RFPercentage(0.8),
-                          }}
-                        >
-                          <Text
-                            style={{
-                              color: Colors.white,
-                              fontSize: RFPercentage(0.7),
-                              fontFamily: "Poppins_500Medium",
-                            }}
-                          >
-                            Top Rated
-                          </Text>
-                        </View>
-                      </View>
-                      <Text
-                        style={[
-                          {
-                            textAlign: "center",
-                            fontFamily: "Poppins_600SemiBold",
-                            fontSize: RFPercentage(1.6),
-                            marginTop: RFPercentage(0.6),
-                          },
-                          { color: theme.darkGrey },
-                        ]}
-                      >
-                        Sana Asghar
-                      </Text>
+                    {/* Premium Badge */}
+                    <View style={styles.premiumBadge}>
+                      <Ionicons
+                        name="diamond"
+                        size={RFPercentage(1.2)}
+                        color="#FFD700"
+                      />
+                      <Text style={styles.premiumText}>PRO</Text>
+                    </View>
+
+                    {/* <View style={styles.risingTalentBadge}>
+                      <Ionicons
+                        name="rocket"
+                        size={RFPercentage(1.2)}
+                        color="#FF6B35"
+                      />
+                      <Text style={styles.risingTalentText}>RISING</Text>
+                    </View> */}
+
+                    {/* User Avatar */}
+                    <View style={styles.avatarContainer}>
+                      <Image
+                        source={
+                          item?.profileImage
+                            ? { uri: item.profileImage }
+                            : Icons.dp
+                        }
+                        resizeMode="cover"
+                        style={styles.avatar}
+                      />
+                      {/* Online Status */}
                       <View
                         style={[
-                          {
-                            width: "100%",
-                            height: RFPercentage(0.1),
-                            marginTop: RFPercentage(1.2),
-                          },
-                          { backgroundColor: theme.border },
+                          styles.onlineStatus,
+                          { borderColor: theme.white },
                         ]}
-                      ></View>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          marginTop: RFPercentage(1),
-                          width: "95%",
-                          alignSelf: "center",
-                        }}
-                      >
-                        <View
-                          style={{ flexDirection: "row", alignItems: "center" }}
-                        >
-                          {/* <MaterialIcons
-                            name="pending-actions"
-                            size={RFPercentage(1.5)}
-                            color={theme.primary}
-                          /> */}
-                          <Text
-                            style={[
-                              {
-                                fontFamily: "Poppins_500Medium",
-                                fontSize: RFPercentage(1.2),
-                                marginLeft: RFPercentage(0.5),
-                              },
-                              { color: theme.primary },
-                            ]}
-                          >
-                            Active
-                          </Text>
-                        </View>
-                        <View>
-                          <Text
-                            style={[
-                              {
-                                fontFamily: "Poppins_600SemiBold",
-                                fontSize: RFPercentage(1.4),
-                              },
-                              { color: theme.primary },
-                            ]}
-                          >
-                            3
-                          </Text>
+                      />
+                    </View>
+
+                    {/* User Name */}
+                    <Text style={[styles.userName2, { color: theme.heading }]}>
+                      {item?.userName?.length > 10
+                        ? `${item.userName.substring(0, 10)}...`
+                        : item.userName || "User"}
+                    </Text>
+
+                    {/* User Title */}
+                    <Text style={[styles.userTitle, { color: theme.primary }]}>
+                      Task Expert
+                    </Text>
+
+                    {/* Stats Container */}
+                    <View style={styles.statsContainer}>
+                      <View style={styles.statColumn}>
+                        <View style={styles.statItem}>
+                          <View style={styles.statInfo}>
+                            <Text
+                              style={[
+                                styles.statValue,
+                                { color: theme.heading },
+                              ]}
+                            >
+                              {item.activeTasks || 3}
+                            </Text>
+                            <Text
+                              style={[
+                                styles.statLabel,
+                                { color: theme.darkGrey },
+                              ]}
+                            >
+                              Active
+                            </Text>
+                          </View>
                         </View>
                       </View>
+
                       <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          marginTop: RFPercentage(0.5),
-                          width: "95%",
-                          alignSelf: "center",
-                        }}
-                      >
-                        <View
-                          style={{ flexDirection: "row", alignItems: "center" }}
-                        >
-                          {/* <FontAwesome5
-                            name="tasks"
-                            size={RFPercentage(1.1)}
-                            color={theme.darkGrey}
-                          /> */}
-                          <Text
-                            style={[
-                              {
-                                fontFamily: "Poppins_500Medium",
-                                fontSize: RFPercentage(1.2),
-                                marginLeft: RFPercentage(0.5),
-                              },
-                              { color: theme.darkGrey },
-                            ]}
-                          >
-                            Completed
-                          </Text>
-                        </View>
-                        <View>
-                          <Text
-                            style={[
-                              {
-                                fontFamily: "Poppins_600SemiBold",
-                                fontSize: RFPercentage(1.4),
-                              },
-                              { color: theme.darkGrey },
-                            ]}
-                          >
-                            22
-                          </Text>
+                        style={[
+                          styles.statDivider,
+                          { borderColor: theme.border },
+                        ]}
+                      />
+
+                      <View style={styles.statColumn}>
+                        <View style={styles.statItem}>
+                          <View style={styles.statInfo}>
+                            <Text
+                              style={[
+                                styles.statValue,
+                                { color: theme.heading },
+                              ]}
+                            >
+                              {item.completedTasks || 22}
+                            </Text>
+                            <Text
+                              style={[
+                                styles.statLabel,
+                                { color: theme.darkGrey },
+                              ]}
+                            >
+                              Done
+                            </Text>
+                          </View>
                         </View>
                       </View>
                     </View>
+
+                    {/* Success Rate */}
+                    {/* <View
+                      style={[
+                        styles.successRateContainer,
+                        { backgroundColor: theme.primary + "08" },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.successRateText,
+                          { color: theme.primary },
+                        ]}
+                      >
+                        ⚡ 98% Success Rate
+                      </Text>
+                    </View> */}
+
+                    {/* View Profile Button */}
+                    <TouchableOpacity
+                      style={[
+                        styles.viewProfileButton,
+                        {
+                          backgroundColor: Colors.primary,
+                        },
+                      ]}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.viewProfileText}>View Profile</Text>
+                      <Ionicons
+                        name="arrow-forward"
+                        size={RFPercentage(1.6)}
+                        color={Colors.white}
+                      />
+                    </TouchableOpacity>
                   </TouchableOpacity>
                 );
               }}
             />
+
+
 
             <View
               style={[
@@ -806,7 +793,7 @@ function Home({ navigation }) {
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
-    </>
+    </View>
   );
 }
 
@@ -822,7 +809,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
-    paddingBottom: RFPercentage(9),
+    paddingBottom: RFPercentage(13),
   },
   inputFieldContainer: {
     justifyContent: "center",
@@ -898,7 +885,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
   },
   recentRequestsContainer: {
-    marginTop: RFPercentage(3.5),
+    marginTop: RFPercentage(2),
   },
   cartContainer: {
     width: width * 0.9,
@@ -1042,6 +1029,167 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
+  },
+
+  topRatedContainer: {
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(0.5),
+  },
+  topRatedCard: {
+    width: RFPercentage(22),
+    height: RFPercentage(29.5),
+    borderRadius: RFPercentage(2.1),
+    alignItems: "center",
+    marginHorizontal: RFPercentage(0.7),
+    padding: RFPercentage(2),
+    borderWidth: 1,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 6,
+    overflow: "hidden",
+  },
+  premiumBadge: {
+    position: "absolute",
+    top: RFPercentage(1),
+    right: RFPercentage(1),
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 215, 0, 0.15)",
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.3),
+    borderRadius: RFPercentage(1),
+    borderWidth: 1,
+    borderColor: "rgba(255, 215, 0, 0.3)",
+  },
+  premiumText: {
+    color: "#B8860B",
+    fontSize: RFPercentage(1),
+    fontFamily: "Poppins_700Bold",
+    marginLeft: RFPercentage(0.3),
+  },
+  avatarContainer: {
+    position: "relative",
+    marginBottom: RFPercentage(1),
+    marginTop: RFPercentage(1),
+  },
+  avatar: {
+    width: RFPercentage(8),
+    height: RFPercentage(8),
+    borderRadius: RFPercentage(4),
+    borderWidth: 3,
+    borderColor: Colors.primary + "20",
+  },
+  onlineStatus: {
+    position: "absolute",
+    bottom: RFPercentage(0.5),
+    right: RFPercentage(0.5),
+    width: RFPercentage(1.5),
+    height: RFPercentage(1.5),
+    borderRadius: RFPercentage(0.75),
+    backgroundColor: "#45B356",
+    borderWidth: 2,
+  },
+  userName2: {
+    textAlign: "center",
+    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.8),
+    marginBottom: RFPercentage(0.3),
+  },
+  userTitle: {
+    textAlign: "center",
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.3),
+    marginBottom: RFPercentage(1.5),
+    opacity: 0.8,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(0.5),
+  },
+  statColumn: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statItem: {
+    alignItems: "center",
+  },
+  statIcon: {
+    width: RFPercentage(3.5),
+    height: RFPercentage(3.5),
+    borderRadius: RFPercentage(1),
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.5),
+  },
+  statInfo: {
+    alignItems: "center",
+  },
+  statValue: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_700Bold",
+    marginBottom: RFPercentage(0.2),
+  },
+  statLabel: {
+    fontSize: RFPercentage(1.1),
+    fontFamily: "Poppins_400Regular",
+    opacity: 0.8,
+  },
+  statDivider: {
+    width: 1,
+    height: RFPercentage(4),
+    marginHorizontal: RFPercentage(1),
+  },
+  successRateContainer: {
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.6),
+    borderRadius: RFPercentage(1),
+    marginBottom: RFPercentage(1.5),
+  },
+  successRateText: {
+    fontSize: RFPercentage(1.1),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  viewProfileButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: RFPercentage(1),
+    width: "100%",
+  },
+  viewProfileText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.white,
+    marginRight: RFPercentage(0.5),
+  },
+  risingTalentBadge: {
+    position: "absolute",
+    top: RFPercentage(1),
+    right: RFPercentage(1),
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 107, 53, 0.15)", // Orange background
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.3),
+    borderRadius: RFPercentage(1),
+    borderWidth: 1,
+    borderColor: "rgba(255, 107, 53, 0.3)",
+  },
+  risingTalentText: {
+    color: "#FF6B35",
+    fontSize: RFPercentage(1),
+    fontFamily: "Poppins_700Bold",
+    marginLeft: RFPercentage(0.3),
   },
 });
 

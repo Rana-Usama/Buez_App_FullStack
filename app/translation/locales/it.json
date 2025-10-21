@@ -15,7 +15,9 @@
     "confirm": "Conferma password",
     "currency": "es. 90€",
     "sign": "€",
-    "gotIt": "Capito"
+    "gotIt": "Capito",
+      "you": "Tu"
+
   },
   "validations": {
     "inValid": "Email non valida",
@@ -278,7 +280,7 @@
     "txt10": "Modifiche a questa informativa",
     "txt11": "Potremmo aggiornare questa informativa periodicamente. Ti consigliamo di consultarla regolarmente. L’uso continuato dei nostri servizi dopo le modifiche implica accettazione.",
     "txt12": "Contattaci",
-    "txt13": "Se hai domande su questa informativa, contattaci a support@example.com."
+    "txt13": "Se hai domande su questa informativa, contattaci a info@buezapp.com."
   },
   "terms": {
     "txt1": "Benvenuto su BUEZ, una piattaforma gestita da Buez Solution che mette in contatto chi ha bisogno di aiuto per faccende quotidiane con persone disponibili a fornire assistenza in cambio di una ricompensa. Accedendo o utilizzando l’app BUEZ (“App”) o i servizi correlati (“Servizio”), accetti i presenti Termini e Condizioni (“Termini”). Se non sei d’accordo, non utilizzare il Servizio.",
