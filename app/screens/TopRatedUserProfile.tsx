@@ -15,24 +15,24 @@ import { useAppTheme } from "../contexts/themeContext";
 import Nav from "../components/common/Nav";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useTranslation } from "react-i18next";
-import InputField from "../components/common/AuthInputField";
-import { fetchUsersWithTaskStats } from "../services/Review.service";
+
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
-import Feather from "@expo/vector-icons/Feather";
 import MyAppButton from "../components/common/MyAppButton";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { LinearGradient } from "expo-linear-gradient";
-import {
-  Ionicons,
-  FontAwesome5,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { fetchUserDetailedProfile } from "../services/User.service";
 import moment from "moment";
 import { createNewChat } from "../services/Chat.service";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
+import { cachedTranslate } from "../utils/cachedTranslations";
+import {
+  formatCurrency,
+  convertCurrency,
+  getCurrencyInfo,
+} from "../utils/currencyChange";
+import { useLocation } from "../utils/useLocation";
 
 const TopRatedUserProfile = ({ navigation, route }: any) => {
   const { theme } = useAppTheme();
@@ -40,8 +40,31 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
   const { user } = route.params || {};
   const [userDetailedData, setUserDetailedData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState([]);
   const [activeTab, setActiveTab] = useState("completed"); // 'completed' or 'reviews'
+  const [translatedTasks, setTranslatedTasks] = useState([]);
+  const [translatedReviews, setTranslatedReviews] = useState([]);
+  const { location: currentLocation } = useLocation();
+
+  const getConvertedCompensation = (task) => {
+    if (task?.compensationType !== "Monitarely") return null;
+    try {
+      const originalAmount = parseFloat(task.monitarily) || 0;
+      const locationToUse = currentLocation;
+      if (!task.currencyInfo) {
+        return formatCurrency(originalAmount, locationToUse);
+      }
+      const targetCurrency = getCurrencyInfo(locationToUse).code;
+      const convertedAmount = convertCurrency(
+        originalAmount,
+        task.currencyInfo.code,
+        targetCurrency
+      );
+      return formatCurrency(convertedAmount, locationToUse);
+    } catch (error) {
+      console.log("Currency conversion error:", error);
+      return formatCurrency(parseFloat(task.monitarily) || 0, currentLocation);
+    }
+  };
 
   useEffect(() => {
     if (user?.userId) {
@@ -54,10 +77,16 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       setLoading(true);
       const detailedData = await fetchUserDetailedProfile(userId);
       setUserDetailedData(detailedData);
+      if (detailedData?.tasks?.completed) {
+        const translated = await translateTasks(detailedData.tasks.completed);
+        setTranslatedTasks(translated);
+      }
 
-      // You might want to fetch reviews from another collection
-      // const userReviews = await fetchUserReviews(userId);
-      // setReviews(userReviews);
+      // Translate review data
+      if (detailedData?.reviews) {
+        const translated = await translateReviews(detailedData.reviews);
+        setTranslatedReviews(translated);
+      }
     } catch (error) {
       console.log("Error fetching user data:", error);
     } finally {
@@ -65,11 +94,67 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     }
   };
 
+  const translateTasks = async (tasks) => {
+    const translatedTasks = [];
+    for (const task of tasks) {
+      try {
+        const translatedTask = { ...task };
+        // Translate task description
+        if (task.taskDetails?.description) {
+          translatedTask.taskDetails.description = await cachedTranslate(
+            task.taskDetails.description
+          );
+        }
+        // Translate task type
+        if (task.taskDetails?.taskType) {
+          translatedTask.taskDetails.taskType = await cachedTranslate(
+            task.taskDetails.taskType
+          );
+        }
+        // Translate other compensation
+        if (
+          task.taskDetails?.compensationType === "Other" &&
+          task.taskDetails?.otherCompensation
+        ) {
+          translatedTask.taskDetails.otherCompensation = await cachedTranslate(
+            task.taskDetails.otherCompensation
+          );
+        }
+        translatedTasks.push(translatedTask);
+      } catch (error) {
+        console.log("Error translating task:", error);
+        translatedTasks.push(task); // Fallback to original task
+      }
+    }
+    return translatedTasks;
+  };
+
+  // Translate review text
+  const translateReviews = async (reviews) => {
+    const translatedReviews = [];
+    for (const review of reviews) {
+      try {
+        const translatedReview = { ...review };
+        // Translate review text
+        if (review.reviewText) {
+          translatedReview.reviewText = await cachedTranslate(
+            review.reviewText
+          );
+        }
+        translatedReviews.push(translatedReview);
+      } catch (error) {
+        console.log("Error translating review:", error);
+        translatedReviews.push(review); // Fallback to original review
+      }
+    }
+    return translatedReviews;
+  };
+
   // Calculate category based on completed tasks
   const getUserCategory = (completedCount) => {
-    if (completedCount > 6) return "Top Rated";
-    if (completedCount > 3) return "Rising Talent";
-    return "Normal";
+    if (completedCount >= 3) return "Top Rated";
+    if (completedCount >= 2) return "Rising Talent";
+    return "Beginner";
   };
 
   const getCategoryBadge = (completedCount) => {
@@ -78,20 +163,20 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       case "Top Rated":
         return {
           icon: "trophy",
-          color: "#FFD700",
-          text: "Top Rated",
+          color: Colors.primary,
+          text: `${t("profileRank.txt39")}`,
         };
       case "Rising Talent":
         return {
           icon: "trending-up",
-          color: "#fdc73eff",
-          text: "Rising Talent",
+          color: Colors.primary,
+          text: `${t("profileRank.txt40")}`,
         };
       default:
         return {
-          icon: "person",
+          icon: "leaf",
           color: Colors.primary,
-          text: "Tasker",
+          text: `${t("profileRank.txt41")}`,
         };
     }
   };
@@ -110,7 +195,12 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         {icon}
       </View>
       <Text style={[styles.statValue, { color: theme.heading }]}>{value}</Text>
-      <Text style={[styles.statLabel, { color: theme.darkGrey }]}>{label}</Text>
+      <Text
+        style={[styles.statLabel, { color: theme.darkGrey }]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
     </View>
   );
 
@@ -122,6 +212,9 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         styles.taskCard,
         { backgroundColor: theme.white, borderColor: theme.border },
       ]}
+      onPress={() => {
+        console.log(item?.taskDetails);
+      }}
     >
       <View style={{ width: "100%" }}>
         <Image
@@ -153,17 +246,18 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               { color: theme.heading, marginLeft: RFPercentage(1.3) },
             ]}
           >
-            {item?.taskDetails?.user?.userName}
+            {item?.taskDetails?.user?.userName.substr(0, 8) +
+              (item?.taskDetails?.user?.userName.length > 8 ? "..." : "")}
           </Text>
 
           <View style={styles.taskMeta}>
             <Text style={[styles.completedDate, { color: theme.grey }]}>
-              Completed:{" "}
+              {t("profileRank.txt23")} :{" "}
               {item.completedAt
                 ? moment(item.completedAt.seconds * 1000).format(
                     "MMMM DD, YYYY"
                   )
-                : "Recently"}
+                : `${t("profileRank.txt24")}`}
             </Text>
           </View>
         </View>
@@ -186,8 +280,12 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 style={styles.compensationIcon}
               />
               <Text style={styles.compensationText}>
-                {item?.taskDetails?.monetarily ||
-                  item?.taskDetails?.otherCompensation}
+                {item.taskDetails.compensationType === "Monitarely"
+                  ? getConvertedCompensation(item.taskDetails)
+                  : item.taskDetails.otherCompensation?.substr(0, 15) +
+                    (item.taskDetails.otherCompensation?.length > 15
+                      ? "..."
+                      : "")}
               </Text>
             </View>
           )}
@@ -221,13 +319,22 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     >
       <View style={styles.reviewHeader}>
         <View style={styles.reviewerInfo}>
-          <Image source={Icons.profile2} style={styles.reviewerAvatar} />
+          <Image
+            source={
+              item.reviewer.profileImage
+                ? { uri: item.reviewer.profileImage }
+                : Icons.dp
+            }
+            style={styles.reviewerAvatar}
+          />
           <View>
             <Text style={[styles.reviewerName, { color: theme.heading }]}>
-              {item.client}
+              {item.reviewer.userName}
             </Text>
             <Text style={[styles.reviewDate, { color: theme.grey }]}>
-              {item.date}
+              {item.createdAt
+                ? moment(item.createdAt.seconds * 1000).format("MMMM DD, YYYY")
+                : `${t("profileRank.txt24")}`}
             </Text>
           </View>
         </View>
@@ -243,7 +350,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         </View>
       </View>
       <Text style={[styles.reviewComment, { color: theme.darkGrey }]}>
-        "{item.comment}"
+        "{item.reviewText}"
       </Text>
     </View>
   );
@@ -255,13 +362,13 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
           marginTop={RFPercentage(5)}
           leftLogo={false}
           navigation={navigation}
-          title={"Profile"}
+          title={`${t("profileRank.txt27")}`}
           dpNull
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
-            Loading profile...
+            {t("profileRank.txt25")}
           </Text>
         </View>
       </View>
@@ -275,33 +382,35 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
           marginTop={RFPercentage(5)}
           leftLogo={false}
           navigation={navigation}
-          title={"Profile"}
+          title={t("profileRank.txt27")}
           dpNull
         />
         <View style={styles.errorContainer}>
           <Text style={[styles.errorText, { color: theme.darkGrey }]}>
-            User not found
+            {t("profileRank.txt26")}
           </Text>
         </View>
       </View>
     );
   }
 
-  const { userBasic, stats, tasks } = userDetailedData;
+  const { userBasic, stats, tasks, reviews } = userDetailedData;
   const categoryBadge = getCategoryBadge(stats.completedTasks);
 
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
 
-  const handleStartChat = async (receiverUser) => {
-    const chatId = await createNewChat(currentUserId, receiverUser.userId);
+  const handleStartChat = async () => {
+    const chatId = await createNewChat(currentUserId, userBasic.userId);
     navigation.navigate("Chat", {
       chatId: chatId,
       senderId: currentUserId,
       senderName: currentUser.userData.userName,
-      receiver: receiverUser,
+      receiver: userBasic,
     });
   };
+
+  console.log("stats,,,,,,,,,,,,,", stats);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
@@ -313,7 +422,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         marginTop={RFPercentage(5)}
         leftLogo={false}
         navigation={navigation}
-        title={"Profile"}
+        title={t("profileRank.txt27")}
         dpNull
       />
 
@@ -355,11 +464,18 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 {user?.name || userBasic?.userName || "Unknown User"}
               </Text>
               <Text style={[styles.userTitle, { color: Colors.primary }]}>
-                Task Expert • {stats.successRate}% Success Rate
+                {stats.completedTasks >= 3
+                  ? `${t("profileRank.txt28")}`
+                  : stats.completedTasks >= 2
+                  ? `${t("profileRank.txt29")}`
+                  : `${t("profileRank.txt30")}`}{" "}
+                • {stats.successRate}% {`${t("profileRank.txt31")}`}
               </Text>
               <Text style={[styles.userBio, { color: theme.darkGrey }]}>
-                {userBasic?.bio ||
-                  `Completed ${stats.completedTasks} tasks with ${stats.successRate}% success rate.`}
+                {userBasic?.biography ||
+                  `${t("profileRank.txt23")} ${stats.completedTasks} ${t(
+                    "profileRank.txt32"
+                  )} ${stats.successRate}% ${t("profileRank.txt33")}.`}
               </Text>
             </View>
           </View>
@@ -375,14 +491,14 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
             }}
           >
             <Text style={[styles.memberSince, { color: theme.grey }]}>
-              Member since {stats.memberSince}
+              {t("profileRank.txt9")} {stats.memberSince}
             </Text>
             <MyAppButton
               title={t("details.txt9")}
               marginTop={RFPercentage(0)}
               width="42%"
-              onPress={(userBasic) => {
-                handleStartChat(userBasic);
+              onPress={() => {
+                handleStartChat();
               }}
             />
           </View>
@@ -399,7 +515,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               />
             }
             value={stats.activeTasks}
-            label="Active Tasks"
+            label={`${t("profileRank.txt6")}`}
             color={Colors.primary}
           />
           <StatCard
@@ -411,7 +527,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               />
             }
             value={stats.completedTasks}
-            label="Completed"
+            label={`${t("profileRank.txt23")}`}
             color="#45B356"
           />
           <StatCard
@@ -419,11 +535,11 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               <Ionicons
                 name="trending-up"
                 size={RFPercentage(2)}
-                color="#FF6B35"
+                color="#a96d28ff"
               />
             }
             value={`${stats.successRate}%`}
-            label="Success Rate"
+            label={`${t("profileRank.txt31")}`}
             color="#FF6B35"
           />
         </View>
@@ -448,7 +564,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   : { color: theme.darkGrey },
               ]}
             >
-              Completed Tasks ({tasks.completed.length})
+              {t("profileRank.txt34")} ({tasks.completed.length})
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -469,7 +585,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   : { color: theme.darkGrey },
               ]}
             >
-              Reviews ({reviews.length})
+              {t("profileRank.txt35")} ({reviews.length})
             </Text>
           </TouchableOpacity>
         </View>
@@ -477,9 +593,12 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         {/* Content Section */}
         <View style={styles.contentSection}>
           {activeTab === "completed" ? (
-            tasks.completed.length > 0 ? (
+            (translatedTasks.length > 0 ? translatedTasks : tasks.completed)
+              .length > 0 ? (
               <FlatList
-                data={tasks.completed}
+                data={
+                  translatedTasks.length > 0 ? translatedTasks : tasks.completed
+                }
                 renderItem={renderTaskItem}
                 keyExtractor={(item, index) => index.toString()}
                 scrollEnabled={false}
@@ -488,12 +607,13 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               />
             ) : (
               <Text style={[styles.noDataText, { color: theme.grey }]}>
-                No completed tasks yet
+                {t("profileRank.txt36")}
               </Text>
             )
-          ) : reviews.length > 0 ? (
+          ) : (translatedReviews.length > 0 ? translatedReviews : reviews)
+              .length > 0 ? (
             <FlatList
-              data={reviews}
+              data={translatedReviews.length > 0 ? translatedReviews : reviews}
               renderItem={renderReviewItem}
               keyExtractor={(item) => item.id.toString()}
               scrollEnabled={false}
@@ -502,7 +622,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
             />
           ) : (
             <Text style={[styles.noDataText, { color: theme.grey }]}>
-              No reviews yet
+              {t("profileRank.txt37")}
             </Text>
           )}
         </View>
@@ -557,8 +677,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    width:RFPercentage(8),
-    alignSelf:'center'
+    width: RFPercentage(10),
+    alignSelf: "center",
   },
   categoryBadgeText: {
     fontSize: RFPercentage(0.8),
@@ -795,6 +915,8 @@ const styles = StyleSheet.create({
     height: RFPercentage(4),
     borderRadius: RFPercentage(2),
     marginRight: RFPercentage(1),
+    borderWidth: RFPercentage(0.15),
+    borderColor: Colors.primary,
   },
   reviewerName: {
     fontSize: RFPercentage(1.5),
@@ -809,7 +931,6 @@ const styles = StyleSheet.create({
   },
   reviewComment: {
     fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2),
     fontStyle: "italic",
   },

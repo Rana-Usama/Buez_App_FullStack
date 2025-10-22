@@ -16,8 +16,7 @@
     "currency": "ex. 90€",
     "sign": "€",
     "gotIt": "Compris",
-      "you": "Tu"
-
+    "you": "Tu"
   },
   "validations": {
     "inValid": "Email invalide",
@@ -490,5 +489,55 @@
         "a4": "Les frais d'abonnement ne sont pas remboursables, mais vous pouvez annuler à tout moment pour éviter les frais futurs."
       }
     }
+  },
+  "profileRank": {
+    "txt1": "Meilleurs Performers",
+    "txt2": "Voir Tout",
+    "txt3": "DÉBUTANT",
+    "txt4": "MONTANT",
+    "txt5": "PRO",
+    "txt6": "Tâches actives",
+    "txt7": "Tâches terminées",
+    "txt8": "Voir le Profil",
+    "txt9": "Membre depuis",
+    "txt10": "Succès",
+    "txt11": "Rechercher les meilleurs performers...",
+    "txt12": "Tous",
+    "txt13": "Pro",
+    "txt14": "Montant",
+    "txt15": "Débutant",
+    "txt16": "Performer",
+    "txt17": "Performers",
+    "txt18": "Trouvé",
+    "txt19": "Chargement des meilleurs performers...",
+    "txt20": "Aucun performer trouvé",
+    "txt21": "Essayez d'ajuster vos termes de recherche",
+    "txt22": "Aucun meilleur performer disponible pour le moment",
+    "txt23": "Terminé",
+    "txt24": "Récemment",
+    "txt25": "Chargement du profil...",
+    "txt26": "Utilisateur non trouvé",
+    "txt27": "Profil",
+    "txt28": "AIDE D'ÉLITE",
+    "txt29": "EXPERT EN TÂCHES",
+    "txt30": "NOUVEL AIDE",
+    "txt31": "Taux de Réussite",
+    "txt32": "tâches avec",
+    "txt33": "taux de réussite",
+    "txt34": "Tâches Terminées",
+    "txt35": "Avis",
+    "txt36": "Aucune tâche terminée pour le moment",
+    "txt37": "Aucun avis pour le moment",
+    "txt38": "Filtrer par",
+    "txt39": "Hautement noté",
+    "txt40": "Talent montant",
+    "txt41": "Débutant",
+    "txt42": "Trouver des Performers",
+    "txt43": "Près de Moi",
+    "txt44": "Sélectionner un Lieu",
+    "txt45": "Découvrir les Meilleurs Performers",
+    "txt46": "Utilisant",
+    "txt47": "basé sur",
+    "txt48": "Près de"
   }
 }

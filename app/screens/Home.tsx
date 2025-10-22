@@ -36,9 +36,16 @@ import { AntDesign } from "@expo/vector-icons";
 import { selectLocation } from "../redux/Actions";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { useLocation } from "../utils/useLocation";
-import { formatCurrency } from "../utils/currencyChange";
-import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import {
+  formatCurrency,
+  getCurrencySymbolFromLocation,
+  extractNumericValue,
+  getCurrencyInfo,
+  convertCurrency, // Add this import
+} from "../utils/currencyChange";
+import { Ionicons, MaterialIcons, FontAwesome6 } from "@expo/vector-icons";
 import { fetchUsersWithTaskStats } from "../services/Review.service";
+import { updateUserLocation } from "../services/User.service";
 
 const { width } = Dimensions.get("window");
 
@@ -49,7 +56,7 @@ function Home({ navigation }) {
   const dispatch = useDispatch();
   const { location: currentLocation, getCurrentLocation } = useLocation();
   const { theme } = useAppTheme();
-  const selectedLocation = useSelector((state) => state.location);
+  const selectedLocation = useSelector((state: any) => state.location);
   useExitAppOnBack();
   const [filterOptions, setFilterOptions] = useState([]);
   const [filterMap, setFilterMap] = useState({});
@@ -76,6 +83,29 @@ function Home({ navigation }) {
   const [allTasks, setAllTasks] = useState([]);
   const [activeIndices, setActiveIndices] = useState({});
   const unsubscribeRef = useRef(null);
+
+  const updateUserLocationInDB = async (location) => {
+    try {
+      if (!location || !location.latitude || !location.longitude) return;
+
+      const locationData = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      };
+
+      await updateUserLocation(locationData);
+      console.log("User location updated successfully");
+    } catch (error) {
+      console.log("Error updating user location:", error);
+    }
+  };
+
+  // Update location when currentLocation changes
+  useEffect(() => {
+    if (currentLocation && user?.userId) {
+      updateUserLocationInDB(currentLocation);
+    }
+  }, [currentLocation, user?.userId]);
 
   const isWithin100km = (userLoc, taskLoc) =>
     haversine(userLoc, taskLoc, { unit: "km" }) <= 100;
@@ -243,7 +273,32 @@ function Home({ navigation }) {
     fetchUsers();
   }, []);
 
-  console.log("userssss...........", users)
+  const getConvertedCompensation = (item) => {
+    if (item.compensationType !== "Monitarely") return null;
+    try {
+      const originalAmount = parseFloat(item.monitarily) || 0;
+      if (!currentLocation) {
+        return item.currencyInfo
+          ? `${item.currencyInfo.symbol}${originalAmount.toLocaleString()}`
+          : `$${originalAmount.toLocaleString()}`;
+      }
+      if (!item.currencyInfo) {
+        return formatCurrency(originalAmount, currentLocation);
+      }
+      const targetCurrency = getCurrencyInfo(currentLocation).code;
+      const convertedAmount = convertCurrency(
+        originalAmount,
+        item.currencyInfo.code,
+        targetCurrency
+      );
+      return formatCurrency(convertedAmount, currentLocation);
+    } catch (error) {
+      console.log("Currency conversion error:", error);
+      return item.currencyInfo
+        ? `${item.currencyInfo.symbol}${parseFloat(item.monitarily) || 0}`
+        : `$${parseFloat(item.monitarily) || 0}`;
+    }
+  };
 
   return (
     <View style={{ backgroundColor: theme.white, flex: 1 }}>
@@ -364,210 +419,249 @@ function Home({ navigation }) {
                 </TouchableOpacity>
               )}
             />
+            {users?.length > 0 ? (
+              <>
+                <View
+                  style={{
+                    width: "90%",
+                    alignSelf: "center",
+                    justifyContent: "space-between",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginTop: RFPercentage(3),
+                    marginBottom: RFPercentage(1),
+                  }}
+                >
+                  <Text
+                    style={[styles.categoriesText, { color: theme.heading }]}
+                  >
+                    {t("profileRank.txt1")}
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("TopRatedUsers")}
+                  >
+                    <Text
+                      style={[
+                        styles.categoriesText,
+                        {
+                          color: theme.primary,
+                          fontSize: RFPercentage(1.7),
+                          fontFamily: "Poppins_600SemiBold",
+                        },
+                      ]}
+                    >
+                      {t("profileRank.txt2")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={{ width: "100%", alignSelf: "flex-start" }}>
+                  <FlatList
+                    horizontal
+                    data={users}
+                    keyExtractor={(item, index) => index.toString()}
+                    contentContainerStyle={styles.topRatedContainer}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({ item, index }) => {
+                      return (
+                        <TouchableOpacity
+                          activeOpacity={0.9}
+                          onPress={() => {
+                            navigation.navigate("TopRatedUserProfile", {
+                              user: item,
+                            });
+                          }}
+                          style={[
+                            styles.topRatedCard,
+                            {
+                              backgroundColor: theme.white,
+                              borderColor: theme.border,
+                              shadowColor:
+                                theme.mode === "dark"
+                                  ? "#000"
+                                  : "rgba(0,0,0,0.1)",
+                            },
+                          ]}
+                        >
+                          {/* Premium Badges */}
+                          {item.category === "Beginner" && (
+                            <View style={[styles.badge, styles.beginnerBadge]}>
+                              <Ionicons
+                                name="leaf"
+                                size={RFPercentage(1.2)}
+                                color="#4CAF50"
+                              />
+                              <Text style={styles.beginnerText}>
+                                {t("profileRank.txt3")}
+                              </Text>
+                            </View>
+                          )}
 
-            <View
-              style={{
-                width: "90%",
-                alignSelf: "center",
-                justifyContent: "space-between",
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: RFPercentage(3),
-                marginBottom: RFPercentage(1),
-              }}
-            >
-              <Text style={[styles.categoriesText, { color: theme.heading }]}>
-                Top Performers
-              </Text>
+                          {item.category === "Rising Talent" && (
+                            <View style={[styles.badge, styles.risingBadge]}>
+                              <Ionicons
+                                name="trending-up"
+                                size={RFPercentage(1.2)}
+                                color="#FF9800"
+                              />
+                              <Text style={styles.risingText}>
+                                {t("profileRank.txt4")}
+                              </Text>
+                            </View>
+                          )}
+
+                          {item.category === "Top Rated" && (
+                            <View style={[styles.badge, styles.topRatedBadge]}>
+                              <Ionicons
+                                name="trophy"
+                                size={RFPercentage(1.2)}
+                                color="#FFD700"
+                              />
+                              <Text style={styles.topRatedText}>
+                                {t("profileRank.txt5")}
+                              </Text>
+                            </View>
+                          )}
+
+                          {/* User Avatar */}
+                          <View style={styles.avatarContainer}>
+                            <Image
+                              source={
+                                item?.profileImage
+                                  ? { uri: item.profileImage }
+                                  : Icons.dp
+                              }
+                              resizeMode="cover"
+                              style={[styles.avatar]}
+                            />
+                          </View>
+
+                          {/* User Name */}
+                          <Text
+                            style={[styles.userName2, { color: theme.heading }]}
+                          >
+                            {item?.name?.length > 10
+                              ? `${item.name.substring(0, 10)}...`
+                              : item.name || "User"}
+                          </Text>
+
+                          {/* User Title */}
+                          <Text
+                            style={[styles.userTitle, { color: theme.primary }]}
+                          >
+                            {item.category === "Top Rated"
+                              ? `${t("profileRank.txt5")}`
+                              : item.category === "Rising Talent"
+                              ? `${t("profileRank.txt4")}`
+                              : `${t("profileRank.txt3")}`}
+                          </Text>
+
+                          {/* Stats Container */}
+                          <View style={styles.statsContainer}>
+                            <View style={styles.statColumn}>
+                              <View style={styles.statItem}>
+                                <View style={styles.statInfo}>
+                                  <Text
+                                    style={[
+                                      styles.statValue,
+                                      { color: theme.heading },
+                                    ]}
+                                  >
+                                    {item.activeCount || 0}
+                                  </Text>
+                                  <Text
+                                    style={[
+                                      styles.statLabel,
+                                      { color: theme.darkGrey },
+                                    ]}
+                                    numberOfLines={1}
+                                  >
+                                    {t("profileRank.txt6")}
+                                  </Text>
+                                </View>
+                              </View>
+                            </View>
+
+                            <View
+                              style={[
+                                styles.statDivider,
+                                { borderColor: theme.border },
+                              ]}
+                            />
+
+                            <View style={styles.statColumn}>
+                              <View style={styles.statItem}>
+                                <View style={styles.statInfo}>
+                                  <Text
+                                    style={[
+                                      styles.statValue,
+                                      { color: theme.heading },
+                                    ]}
+                                  >
+                                    {item.completedCount || 0}
+                                  </Text>
+                                  <Text
+                                    style={[
+                                      styles.statLabel,
+                                      { color: theme.darkGrey },
+                                    ]}
+                                    numberOfLines={1}
+                                  >
+                                    {t("profileRank.txt7")}
+                                  </Text>
+                                </View>
+                              </View>
+                            </View>
+                          </View>
+
+                          {/* View Profile Button */}
+                          <TouchableOpacity
+                            style={[
+                              styles.viewProfileButton,
+                              {
+                                backgroundColor: Colors.primary,
+                              },
+                            ]}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                              navigation.navigate("TopRatedUserProfile", {
+                                user: item,
+                              });
+                            }}
+                          >
+                            <Text style={styles.viewProfileText}>
+                              {t("profileRank.txt8")}
+                            </Text>
+                            <Ionicons
+                              name="arrow-forward"
+                              size={RFPercentage(1.6)}
+                              color={Colors.white}
+                            />
+                          </TouchableOpacity>
+                        </TouchableOpacity>
+                      );
+                    }}
+                  />
+                </View>
+              </>
+            ) : (
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => navigation.navigate("TopRatedUsers")}
+                style={styles.exploreContainer}
               >
-                <Text
-                  style={[
-                    styles.categoriesText,
-                    {
-                      color: theme.primary,
-                      fontSize: RFPercentage(1.7),
-                      fontFamily: "Poppins_600SemiBold",
-                    },
-                  ]}
-                >
-                  View All
-                </Text>
+                <View style={styles.exploreContent}>
+                  <Text style={[styles.exploreText, { color: Colors.primary }]}>
+                   {`${t("profileRank.txt45")}`}
+                  </Text>
+                  <FontAwesome6
+                    name="arrow-right"
+                    size={RFPercentage(1.8)}
+                    color={Colors.primary}
+                  />
+                </View>
               </TouchableOpacity>
-            </View>
-
-            <FlatList
-              horizontal
-              data={users}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={styles.topRatedContainer}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item, index }) => {
-                return (
-                  <TouchableOpacity
-                    activeOpacity={0.9}
-                    onPress={() => {
-                      navigation.navigate("TopRatedUserProfile", {
-                        user: item,
-                      });
-                    }}
-                    style={[
-                      styles.topRatedCard,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        shadowColor:
-                          theme.mode === "dark" ? "#000" : "rgba(0,0,0,0.1)",
-                      },
-                    ]}
-                  >
-                    {/* Premium Badge */}
-                    <View style={styles.premiumBadge}>
-                      <Ionicons
-                        name="diamond"
-                        size={RFPercentage(1.2)}
-                        color="#FFD700"
-                      />
-                      <Text style={styles.premiumText}>PRO</Text>
-                    </View>
-
-                    {/* <View style={styles.risingTalentBadge}>
-                      <Ionicons
-                        name="rocket"
-                        size={RFPercentage(1.2)}
-                        color="#FF6B35"
-                      />
-                      <Text style={styles.risingTalentText}>RISING</Text>
-                    </View> */}
-
-                    {/* User Avatar */}
-                    <View style={styles.avatarContainer}>
-                      <Image
-                        source={
-                          item?.profileImage
-                            ? { uri: item.profileImage }
-                            : Icons.dp
-                        }
-                        resizeMode="cover"
-                        style={styles.avatar}
-                      />
-                      {/* Online Status */}
-                      <View
-                        style={[
-                          styles.onlineStatus,
-                          { borderColor: theme.white },
-                        ]}
-                      />
-                    </View>
-
-                    {/* User Name */}
-                    <Text style={[styles.userName2, { color: theme.heading }]}>
-                      {item?.name?.length > 10
-                        ? `${item.name.substring(0, 10)}...`
-                        : item.name || "User"}
-                    </Text>
-
-                    {/* User Title */}
-                    <Text style={[styles.userTitle, { color: theme.primary }]}>
-                      Task Expert
-                    </Text>
-
-                    {/* Stats Container */}
-                    <View style={styles.statsContainer}>
-                      <View style={styles.statColumn}>
-                        <View style={styles.statItem}>
-                          <View style={styles.statInfo}>
-                            <Text
-                              style={[
-                                styles.statValue,
-                                { color: theme.heading },
-                              ]}
-                            >
-                              {item.activeCount || 0}
-                            </Text>
-                            <Text
-                              style={[
-                                styles.statLabel,
-                                { color: theme.darkGrey },
-                              ]}
-                            >
-                              Active
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-
-                      <View
-                        style={[
-                          styles.statDivider,
-                          { borderColor: theme.border },
-                        ]}
-                      />
-
-                      <View style={styles.statColumn}>
-                        <View style={styles.statItem}>
-                          <View style={styles.statInfo}>
-                            <Text
-                              style={[
-                                styles.statValue,
-                                { color: theme.heading },
-                              ]}
-                            >
-                              {item.completedCount || 0}
-                            </Text>
-                            <Text
-                              style={[
-                                styles.statLabel,
-                                { color: theme.darkGrey },
-                              ]}
-                            >
-                              Done
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* Success Rate */}
-                    {/* <View
-                      style={[
-                        styles.successRateContainer,
-                        { backgroundColor: theme.primary + "08" },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.successRateText,
-                          { color: theme.primary },
-                        ]}
-                      >
-                        ⚡ 98% Success Rate
-                      </Text>
-                    </View> */}
-
-                    {/* View Profile Button */}
-                    <TouchableOpacity
-                      style={[
-                        styles.viewProfileButton,
-                        {
-                          backgroundColor: Colors.primary,
-                        },
-                      ]}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={styles.viewProfileText}>View Profile</Text>
-                      <Ionicons
-                        name="arrow-forward"
-                        size={RFPercentage(1.6)}
-                        color={Colors.white}
-                      />
-                    </TouchableOpacity>
-                  </TouchableOpacity>
-                );
-              }}
-            />
+            )}
 
             <View
               style={[
@@ -767,7 +861,7 @@ function Home({ navigation }) {
                                 ]}
                               >
                                 {item.compensationType === "Monitarely"
-                                  ? `${formatCurrency(item.monitarily)}`
+                                  ? getConvertedCompensation(item)
                                   : item.otherCompensation?.substr(0, 20) +
                                     (item.otherCompensation?.length > 20
                                       ? "..."
@@ -884,7 +978,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
   },
   recentRequestsContainer: {
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(2.5),
   },
   cartContainer: {
     width: width * 0.9,
@@ -1051,25 +1145,7 @@ const styles = StyleSheet.create({
     elevation: 6,
     overflow: "hidden",
   },
-  premiumBadge: {
-    position: "absolute",
-    top: RFPercentage(1),
-    right: RFPercentage(1),
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 215, 0, 0.15)",
-    paddingHorizontal: RFPercentage(0.8),
-    paddingVertical: RFPercentage(0.3),
-    borderRadius: RFPercentage(1),
-    borderWidth: 1,
-    borderColor: "rgba(255, 215, 0, 0.3)",
-  },
-  premiumText: {
-    color: "#B8860B",
-    fontSize: RFPercentage(1),
-    fontFamily: "Poppins_700Bold",
-    marginLeft: RFPercentage(0.3),
-  },
+
   avatarContainer: {
     position: "relative",
     marginBottom: RFPercentage(1),
@@ -1079,8 +1155,8 @@ const styles = StyleSheet.create({
     width: RFPercentage(8),
     height: RFPercentage(8),
     borderRadius: RFPercentage(4),
-    borderWidth: 3,
-    borderColor: Colors.primary + "20",
+    borderWidth: 2,
+    borderColor: Colors.primary + "30",
   },
   onlineStatus: {
     position: "absolute",
@@ -1095,7 +1171,7 @@ const styles = StyleSheet.create({
   userName2: {
     textAlign: "center",
     fontFamily: "Poppins_700Bold",
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     marginBottom: RFPercentage(0.3),
   },
   userTitle: {
@@ -1189,6 +1265,103 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1),
     fontFamily: "Poppins_700Bold",
     marginLeft: RFPercentage(0.3),
+  },
+
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.3),
+    borderRadius: RFPercentage(1),
+    marginLeft: RFPercentage(0.5),
+  },
+
+  // Beginner Badge
+  beginnerBadge: {
+    backgroundColor: "#E8F5E8",
+    borderWidth: 1,
+    borderColor: "#4CAF50",
+    position: "absolute",
+    right: 8,
+    top: 8,
+  },
+  beginnerText: {
+    color: "#2E7D32",
+    fontSize: RFPercentage(0.8),
+    fontFamily: "Poppins_700Bold",
+    marginLeft: RFPercentage(0.3),
+  },
+
+  // Rising Talent Badge
+  risingBadge: {
+    backgroundColor: "#FFF3E0",
+    borderWidth: 1,
+    borderColor: "#FF9800",
+    position: "absolute",
+    right: 8,
+    top: 8,
+  },
+  risingText: {
+    color: "#FF9800",
+    fontSize: RFPercentage(0.8),
+    fontFamily: "Poppins_700Bold",
+    marginLeft: RFPercentage(0.3),
+  },
+
+  // Top Rated Badge
+  topRatedBadge: {
+    backgroundColor: "#FFFDE7",
+    borderWidth: 1,
+    borderColor: "#FFD700",
+    position: "absolute",
+    right: 8,
+    top: 8,
+  },
+  topRatedText: {
+    color: "#cdb114ff",
+    fontSize: RFPercentage(0.8),
+    fontFamily: "Poppins_700Bold",
+    marginLeft: RFPercentage(0.3),
+  },
+
+  // Premium Badge (existing)
+  premiumBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFDE7",
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.3),
+    borderRadius: RFPercentage(1),
+    borderWidth: 1,
+    borderColor: "#FFD700",
+    marginLeft: RFPercentage(0.5),
+  },
+  premiumText: {
+    color: "#F57F17",
+    fontSize: RFPercentage(1),
+    fontWeight: "bold",
+    marginLeft: RFPercentage(0.3),
+  },
+  exploreContainer: {
+    marginTop: RFPercentage(2),
+    width: "90%",
+    alignSelf: "flex-start",
+    marginLeft: RFPercentage(2.2),
+  },
+  exploreContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(2),
+    borderColor: Colors.primary + "30",
+    borderRadius: RFPercentage(1),
+    backgroundColor: Colors.primary + "08",
+  },
+  exploreText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.6),
+    marginRight: RFPercentage(1),
   },
 });
 

@@ -42,6 +42,14 @@ function Settings({ navigation }) {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   useExitAppOnBack();
   const [loading, setLoading] = useState(false);
+  const [provider, setProvider] = useState<string | null>(null);
+
+  useEffect(() => {
+    const user = FIREBASE_AUTH.currentUser;
+    if (user && user.providerData.length > 0) {
+      setProvider(user.providerData[0].providerId);
+    }
+  }, []);
 
   const { theme, toggleTheme } = useAppTheme();
   const [credentials, setCredentials] = useState({
@@ -215,10 +223,10 @@ function Settings({ navigation }) {
           try {
             setLoading(true); // show loader
             const password2 = await SecureStore.getItemAsync("password2");
-            if (password2) {
-              await deleteCurrentUser(password2);
-            } else {
+            if (provider === "google.com") {
               await deleteGoogleAccount();
+            } else {
+              await deleteCurrentUser(password2);
             }
             await removeCredentials();
             await SecureStore.deleteItemAsync("appLanguage");

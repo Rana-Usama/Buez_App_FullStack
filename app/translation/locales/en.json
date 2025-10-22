@@ -16,7 +16,7 @@
     "currency": "e.g; 90$",
     "sign": "$",
     "gotIt": "Got It",
-    "you" : "You"
+    "you": "You"
   },
   "validations": {
     "inValid": "Invalid email",
@@ -393,11 +393,11 @@
   },
 
   "faqs": {
-    "txt1" : "How can we help you?",
-    "txt2" : " Find answers to frequently asked questions",
-    "txt3" : " Still need help?",
-    "txt4" : "Our support team is here to assist you",
-    "txt5" : "Contact Support",
+    "txt1": "How can we help you?",
+    "txt2": " Find answers to frequently asked questions",
+    "txt3": " Still need help?",
+    "txt4": "Our support team is here to assist you",
+    "txt5": "Contact Support",
     "section1": {
       "title": "General Information",
       "questions": {
@@ -489,5 +489,55 @@
         "a4": "Subscription fees are non-refundable, but you can cancel anytime to prevent future charges."
       }
     }
+  },
+  "profileRank": {
+    "txt1": "Top Performers",
+    "txt2": "View All",
+    "txt3": "BEGINNER",
+    "txt4": "RISING",
+    "txt5": "PRO",
+    "txt6": "Active Tasks",
+    "txt7": "Completed Tasks",
+    "txt8": "View Profile",
+    "txt9": "Member since",
+    "txt10": "Success",
+    "txt11": "Search top performers...",
+    "txt12": "All",
+    "txt13": "Pro",
+    "txt14": "Rising",
+    "txt15": "Beginner",
+    "txt16": "Performer",
+    "txt17": "Performers",
+    "txt18": "Found",
+    "txt19": "Loading top performers...",
+    "txt20": "No performers found",
+    "txt21": "Try adjusting your search terms",
+    "txt22": "No top performers available at the moment",
+    "txt23": "Completed",
+    "txt24": "Recently",
+    "txt25": "Loading profile...",
+    "txt26": "User not found",
+    "txt27": "Profile",
+    "txt28": "ELITE HELPER",
+    "txt29": "TASK EXPERT",
+    "txt30": "NEW HELPER",
+    "txt31": "Success Rate",
+    "txt32": "tasks with",
+    "txt33": "success rate",
+    "txt34": "Completed Tasks",
+    "txt35": "Reviews",
+    "txt36": "No completed tasks yet",
+    "txt37": "No reviews yet",
+    "txt38": "Filter By",
+    "txt39": "Top Rated",
+    "txt40": "Rising Talent",
+    "txt41": "Beginner",
+    "txt42": "Find Performers",
+    "txt43": "Near Me",
+    "txt44": "Select Location",
+    "txt45" : "Explore Top Performers",
+    "txt46" : "Using",
+    "txt47" : "based on",
+    "txt48" : "Near"
   }
 }

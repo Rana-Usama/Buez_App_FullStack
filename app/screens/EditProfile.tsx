@@ -26,6 +26,7 @@ import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 type InputFieldType = {
   placeholder: string;
@@ -48,6 +49,16 @@ function EditProfile({ navigation }) {
     imageUri: null,
   });
 
+  const [translatedTexts, setTranslatedTexts] = useState({
+    biographyTitle: "",
+    biographyPlaceholder: "",
+    biographyHint: "",
+    validationError: "",
+    pleaseEnterName: "",
+    cameraPermissionTitle: "",
+    cameraPermissionMessage: ""
+  });
+
   const [inputField, setInputField] = useState<InputFieldType[]>([
     {
       placeholder: `${t("editProfile.txt1")}`,
@@ -58,6 +69,79 @@ function EditProfile({ navigation }) {
   ]);
 
   const [biography, setBiography] = useState("");
+  const [translatedBiography, setTranslatedBiography] = useState("");
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  // Translate static texts
+  useEffect(() => {
+    const translateTexts = async () => {
+      try {
+        const [
+          biographyTitle,
+          biographyPlaceholder,
+          biographyHint,
+          validationError,
+          pleaseEnterName,
+          cameraPermissionTitle,
+          cameraPermissionMessage
+        ] = await Promise.all([
+          cachedTranslate("Biography"),
+          cachedTranslate("Tell others about yourself, your skills, and experience..."),
+          cachedTranslate("Share your professional background, skills, and what makes you a great performer"),
+          cachedTranslate("Validation Error"),
+          cachedTranslate("Please enter your name"),
+          cachedTranslate("Permission Required"),
+          cachedTranslate("Sorry, we need camera roll permissions to change your profile picture.")
+        ]);
+
+        setTranslatedTexts({
+          biographyTitle,
+          biographyPlaceholder,
+          biographyHint,
+          validationError,
+          pleaseEnterName,
+          cameraPermissionTitle,
+          cameraPermissionMessage
+        });
+      } catch (error) {
+        console.log("Error translating texts:", error);
+        // Set fallback texts
+        setTranslatedTexts({
+          biographyTitle: "Biography",
+          biographyPlaceholder: "Tell others about yourself, your skills, and experience...",
+          biographyHint: "Share your professional background, skills, and what makes you a great performer",
+          validationError: "Validation Error",
+          pleaseEnterName: "Please enter your name",
+          cameraPermissionTitle: "Permission Required",
+          cameraPermissionMessage: "Sorry, we need camera roll permissions to change your profile picture."
+        });
+      }
+    };
+
+    translateTexts();
+  }, []);
+
+  // Translate existing biography when component loads or biography changes
+  useEffect(() => {
+    const translateExistingBiography = async () => {
+      if (biography && biography.trim() !== '') {
+        setIsTranslating(true);
+        try {
+          const translated = await cachedTranslate(biography);
+          setTranslatedBiography(translated);
+        } catch (error) {
+          console.log("Error translating existing biography:", error);
+          setTranslatedBiography(biography); // Fallback to original
+        } finally {
+          setIsTranslating(false);
+        }
+      } else {
+        setTranslatedBiography("");
+      }
+    };
+
+    translateExistingBiography();
+  }, [biography]);
 
   const handleChange = (text, i) => {
     let tempFields = [...inputField];
@@ -65,13 +149,19 @@ function EditProfile({ navigation }) {
     setInputField(tempFields);
   };
 
+  const handleBiographyChange = (text) => {
+    setBiography(text);
+    // When user is typing, show the text directly without translation
+    setTranslatedBiography(text);
+  };
+
   const pickImage = async () => {
     // Request permissions
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
-        "Permission Required",
-        "Sorry, we need camera roll permissions to change your profile picture."
+        translatedTexts.cameraPermissionTitle || "Permission Required",
+        translatedTexts.cameraPermissionMessage || "Sorry, we need camera roll permissions to change your profile picture."
       );
       return;
     }
@@ -122,20 +212,20 @@ function EditProfile({ navigation }) {
 
   const updateProfileData = async () => {
     const userName = inputField[0].value.trim();
-    const userBio = biography.trim();
+    const userBio = biography.trim(); // Store the original biography text
 
     if (!userName) {
       Toast.show({
         type: "error",
-        text1: "Validation Error",
-        text2: "Please enter your name",
+        text1: translatedTexts.validationError || "Validation Error",
+        text2: translatedTexts.pleaseEnterName || "Please enter your name",
       });
       return;
     }
 
     const userData = {
       userName,
-      biography: userBio,
+      biography: userBio, // Store original text, not translated
     };
 
     setIsUpdating(true);
@@ -258,7 +348,7 @@ function EditProfile({ navigation }) {
             <View style={styles.fieldSection}>
               <View style={styles.biographyHeader}>
                 <Text style={[styles.fieldLabel, { color: theme.heading }]}>
-                  {t("editProfile.biography")}
+                  {translatedTexts.biographyTitle || "Biography"}
                 </Text>
                 <Text style={[styles.charCount, { color: theme.darkGrey }]}>
                   {biography.length}/300
@@ -274,23 +364,31 @@ function EditProfile({ navigation }) {
                   },
                 ]}
               >
-                <TextInput
-                  placeholder={t("editProfile.biographyPlaceholder")}
-                  placeholderTextColor={theme.inputFieldPlaceholder}
-                  value={biography}
-                  multiline
-                  onChangeText={setBiography}
-                  maxLength={300}
-                  style={[styles.biographyInput, { color: theme.black }]}
-                  textAlignVertical="top"
-                  cursorColor={theme.primary}
-                  selectionColor={`${theme.primary}40`}
-                  numberOfLines={5}
-                />
+                {isTranslating ? (
+                  <View style={styles.translatingContainer}>
+                    <Text style={[styles.translatingText, { color: theme.darkGrey }]}>
+                      Translating...
+                    </Text>
+                  </View>
+                ) : (
+                  <TextInput
+                    placeholder={translatedTexts.biographyPlaceholder || "Tell others about yourself, your skills, and experience..."}
+                    placeholderTextColor={theme.inputFieldPlaceholder}
+                    value={translatedBiography}
+                    multiline
+                    onChangeText={handleBiographyChange}
+                    maxLength={300}
+                    style={[styles.biographyInput, { color: theme.black }]}
+                    textAlignVertical="top"
+                    cursorColor={theme.primary}
+                    selectionColor={`${theme.primary}40`}
+                    numberOfLines={5}
+                  />
+                )}
               </View>
 
               <Text style={[styles.biographyHint, { color: theme.darkGrey }]}>
-                {t("editProfile.biographyHint")}
+                {translatedTexts.biographyHint || "Share your professional background, skills, and what makes you a great performer"}
               </Text>
             </View>
           </View>
@@ -436,7 +534,7 @@ const styles = StyleSheet.create({
   },
   biographyHint: {
     fontSize: RFPercentage(1.3),
-    // fontFamily: "Poppins_400Regular",
+    fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(1),
     fontStyle: "italic",
   },
@@ -456,6 +554,17 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_500Medium",
+  },
+  translatingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: RFPercentage(10),
+  },
+  translatingText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+    fontStyle: "italic",
   },
 });
 

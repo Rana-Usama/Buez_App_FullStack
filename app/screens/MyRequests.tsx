@@ -36,10 +36,16 @@ import { createNewChat } from "../services/Chat.service";
 const { width: screenWidth } = Dimensions.get("window");
 import { getAuth } from "firebase/auth";
 import { fetchActiveTasksFromFirebase } from "../services/Review.service";
-import { formatCurrency } from "../utils/currencyChange";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import RepostSuccessModal from "../components/common/RepostModal";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  formatCurrency,
+  convertCurrency,
+  getCurrencyInfo,
+} from "../utils/currencyChange";
+import { useSelector } from "react-redux";
+import { useLocation } from "../utils/useLocation"; // Your location hook
 
 function MyRequests({ navigation }) {
   const { t } = useTranslation();
@@ -56,10 +62,41 @@ function MyRequests({ navigation }) {
   const [selectedRequestIndex, setSelectedRequestIndex] = useState(null);
   const [selectedRequestItem, setSelectedRequestItem] = useState(null);
   const [activeIndices, setActiveIndices] = useState({});
+  const { location: currentLocation } = useLocation(); // Add this
   useExitAppOnBack();
   const { theme } = useAppTheme();
   const [markLoaderIndex, setMarkLoaderIndex] = useState(null);
   const [cancelLoaderIndex, setCancelLoaderIndex] = useState(null);
+
+  const getConvertedCompensation = (item) => {
+    if (item.compensationType !== "Monitarely") return null;
+
+    try {
+      const originalAmount = parseFloat(item.monitarily) || 0;
+
+      // Use currentLocation first, fallback to selectedLocation
+      const locationToUse = currentLocation;
+
+      if (!item.currencyInfo) {
+        return formatCurrency(originalAmount, locationToUse);
+      }
+
+      // Get target currency from current location
+      const targetCurrency = getCurrencyInfo(locationToUse).code;
+
+      // Convert the amount
+      const convertedAmount = convertCurrency(
+        originalAmount,
+        item.currencyInfo.code, // Original currency
+        targetCurrency // Target currency (from current location)
+      );
+
+      return formatCurrency(convertedAmount, locationToUse);
+    } catch (error) {
+      console.log("Currency conversion error:", error);
+      return formatCurrency(parseFloat(item.monitarily) || 0, currentLocation);
+    }
+  };
 
   const param =
     activeFilter === `${t("myRequests.txt2")}`
@@ -516,7 +553,8 @@ function MyRequests({ navigation }) {
                 />
               </TouchableOpacity>
               <Text style={[styles.userName, { color: theme.heading }]}>
-                {cart?.user?.userName}
+                {cart?.user?.userName?.substr(0, 10) +
+                  (cart?.user?.userName?.length > 10 ? "..." : "")}
               </Text>
               <Text style={[styles.postDate, { color: theme.darkGrey }]}>{`${t(
                 "myRequests.txt4"
@@ -539,7 +577,7 @@ function MyRequests({ navigation }) {
                   style={[styles.compensationAmount, { color: theme.primary }]}
                 >
                   {cart.compensationType === "Monitarely"
-                    ? `${formatCurrency(cart.monitarily)}`
+                    ? getConvertedCompensation(cart)
                     : cart.otherCompensation?.substr(0, 15) +
                       (cart.otherCompensation?.length > 15 ? "..." : "")}
                 </Text>

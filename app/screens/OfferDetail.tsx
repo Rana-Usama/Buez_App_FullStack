@@ -36,8 +36,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { onSnapshot } from "firebase/firestore";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { formatCurrency } from "../utils/currencyChange";
 import AcceptanceSuccessModal from "../components/common/AcceptanceSuccessModal";
+import { formatCurrency, convertCurrency, getCurrencyInfo } from "../utils/currencyChange";
+import { useSelector } from "react-redux";
+import { useLocation } from "../utils/useLocation"; // Your location hook
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -60,6 +62,40 @@ function OfferDetail({ navigation, route }) {
   });
   const [isAccepted, setIsAccepted] = useState(!!postRequest?.acceptedBy);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const { location: currentLocation } = useLocation();
+
+  console.log("postRequest..............",postRequest)
+
+  const getConvertedCompensation = (item) => {
+  if (item.compensationType !== "Monitarely") return null;
+
+  try {
+    const originalAmount = parseFloat(item.monitarily) || 0;
+    
+    // Use currentLocation first, fallback to selectedLocation
+    const locationToUse = currentLocation ;
+    
+    if (!item.currencyInfo) {
+      return formatCurrency(originalAmount, locationToUse);
+    }
+    
+    // Get target currency from current location
+    const targetCurrency = getCurrencyInfo(locationToUse).code;
+    
+    // Convert the amount
+    const convertedAmount = convertCurrency(
+      originalAmount,
+      item.currencyInfo.code, // Original currency
+      targetCurrency // Target currency (from current location)
+    );
+    
+    return formatCurrency(convertedAmount, locationToUse);
+    
+  } catch (error) {
+    console.log("Currency conversion error:", error);
+    return formatCurrency(parseFloat(item.monitarily) || 0, currentLocation );
+  }
+};
 
   const handleModalClose = () => {
     setShowSuccessModal(false);
@@ -573,7 +609,7 @@ function OfferDetail({ navigation, route }) {
         <View style={{ width: "90%", alignSelf: "center" }}>
           <Text style={[styles.description, { color: theme.darkGrey }]}>
             {postRequest.compensationType === "Monitarely"
-              ? `${formatCurrency(postRequest.monitarily)}`
+              ? getConvertedCompensation(postRequest)
               : translatedOffer.otherCompensation}
           </Text>
         </View>

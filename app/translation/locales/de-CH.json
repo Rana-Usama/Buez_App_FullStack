@@ -16,8 +16,7 @@
     "currency": "z.B. 90$",
     "sign": "$",
     "gotIt": "Ha verstange",
-      "you": "Du"
-
+    "you": "Du"
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -394,7 +393,7 @@
   },
 
   "faqs": {
-     "txt1": "Wie chömed mir der helfe?",
+    "txt1": "Wie chömed mir der helfe?",
     "txt2": "Find Antwortä uf häufig gstellti Fragä",
     "txt3": "Brüchsch immer no Hilf?",
     "txt4": "Üses Support-Team isch do zum der helfe",
@@ -490,5 +489,55 @@
         "a4": "Abo-Gebühre sind nid rückerstattbar, aber du chasch jederzit chündige zum zukünftigi Chöste z verhindere."
       }
     }
+  },
+  "profileRank": {
+    "txt1": "Top-Performer",
+    "txt2": "Alli aaluege",
+    "txt3": "AFÄNGER",
+    "txt4": "UFSTIEGER",
+    "txt5": "PRO",
+    "txt6": "Aktivi Ufgabe",
+    "txt7": "Abgschlosseni Ufgabe",
+    "txt8": "Profil aaluege",
+    "txt9": "Mitglied sit",
+    "txt10": "Erfolg",
+    "txt11": "Top-Performer sueche...",
+    "txt12": "Alli",
+    "txt13": "Pro",
+    "txt14": "Ufstieger",
+    "txt15": "Afänger",
+    "txt16": "Performer",
+    "txt17": "Performer",
+    "txt18": "Gfunde",
+    "txt19": "Lade Top-Performer...",
+    "txt20": "Kei Performer gfunde",
+    "txt21": "Versuech dini Suechbegriff aazpasse",
+    "txt22": "Momentan kei Top-Performer verfüegbar",
+    "txt23": "Abgschlosse",
+    "txt24": "Chürzlich",
+    "txt25": "Lade Profil...",
+    "txt26": "Benutzer nid gfunde",
+    "txt27": "Profil",
+    "txt28": "ELITE-HELFER",
+    "txt29": "AUFGABE-EXPERTE",
+    "txt30": "NEUE HELFER",
+    "txt31": "Erfolgsquote",
+    "txt32": "Ufgabe mit",
+    "txt33": "Erfolgsquote",
+    "txt34": "Abgschlosseni Ufgabe",
+    "txt35": "Bewertige",
+    "txt36": "Nonig kei abgschlosseni Ufgabe",
+    "txt37": "Nonig kei Bewertige",
+    "txt38": "Filtere nach",
+    "txt39": "Top Bewertet",
+    "txt40": "Ufstiegstalänt",
+    "txt41": "Afänger",
+    "txt42": "Performer finde",
+    "txt43": "In minere Nöchi",
+    "txt44": "Ort uuswähle",
+    "txt45": "Top Performer entdecke",
+    "txt46": "Verwändet",
+    "txt47": "basierend uf",
+    "txt48": "Bi"
   }
 }

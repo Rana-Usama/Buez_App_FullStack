@@ -31,6 +31,43 @@ export default function Location({ navigation, route }) {
   const { location: currentLocation, getCurrentLocation } = useLocation();
   const key = process.env.EXPO_PUBLIC_LOCATION_NAME;
 
+  // Function to extract country code from Google Geocoding response
+  const extractCountryCode = (addressComponents) => {
+    if (!addressComponents) return null;
+    
+    const countryComponent = addressComponents.find(component =>
+      component.types.includes("country")
+    );
+    
+    if (countryComponent) {
+      return countryComponent.short_name; // Returns ISO 3166-1 alpha-2 country code (e.g., "US", "DE", "FR")
+    }
+    
+    return null;
+  };
+
+  // Function to extract address components
+  const extractAddressInfo = (addressComponents) => {
+    if (!addressComponents) return {};
+    
+    const countryComponent = addressComponents.find(component =>
+      component.types.includes("country")
+    );
+    const localityComponent = addressComponents.find(component =>
+      component.types.includes("locality")
+    );
+    const administrativeAreaComponent = addressComponents.find(component =>
+      component.types.includes("administrative_area_level_1")
+    );
+    
+    return {
+      countryCode: countryComponent?.short_name || null,
+      country: countryComponent?.long_name || null,
+      city: localityComponent?.long_name || null,
+      state: administrativeAreaComponent?.long_name || null,
+    };
+  };
+
   useEffect(() => {
     const fetchUserLocation = async () => {
       const loc = await getCurrentLocation();
@@ -41,11 +78,18 @@ export default function Location({ navigation, route }) {
           );
           const results = response.data.results;
           const address = results[0]?.formatted_address || "Current Location";
+          const addressComponents = results[0]?.address_components;
+          
+          const addressInfo = extractAddressInfo(addressComponents);
 
           setMarker(loc);
           setSelectedLocation({
             ...loc,
             name: address,
+            countryCode: addressInfo.countryCode,
+            country: addressInfo.country,
+            city: addressInfo.city,
+            state: addressInfo.state,
           });
 
           mapRef.current?.animateToRegion({
@@ -58,6 +102,10 @@ export default function Location({ navigation, route }) {
           setSelectedLocation({
             ...loc,
             name: "Current Location",
+            countryCode: null,
+            country: null,
+            city: null,
+            state: null,
           });
         }
       } else {
@@ -88,23 +136,32 @@ export default function Location({ navigation, route }) {
       );
       const results = response.data.results;
       const address = results[0]?.formatted_address || "Selected Location";
+      const addressComponents = results[0]?.address_components;
+      
+      const addressInfo = extractAddressInfo(addressComponents);
 
-      setSelectedLocation({
+      const locationData = {
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
         name: address,
-      });
+        countryCode: addressInfo.countryCode,
+        country: addressInfo.country,
+        city: addressInfo.city,
+        state: addressInfo.state,
+      };
 
-      console.log("📍 Selected Location:", {
-        latitude: coordinate.latitude,
-        longitude: coordinate.longitude,
-        name: address,
-      });
+      setSelectedLocation(locationData);
+
+      console.log("📍 Selected Location:", locationData);
     } catch (error) {
       setSelectedLocation({
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
         name: "Unknown Location",
+        countryCode: null,
+        country: null,
+        city: null,
+        state: null,
       });
     }
   };
@@ -113,12 +170,85 @@ export default function Location({ navigation, route }) {
     if (!selectedLocation) {
       return;
     }
+    
+    // Prepare location data for dispatch
+    const locationData = {
+      latitude: selectedLocation.latitude,
+      longitude: selectedLocation.longitude,
+      name: selectedLocation.name,
+      countryCode: selectedLocation.countryCode,
+      country: selectedLocation.country,
+      city: selectedLocation.city,
+      state: selectedLocation.state,
+    };
+
     if (home) {
-      dispatch(selectLocation(selectedLocation));
+      dispatch(selectLocation(locationData));
     } else {
-      dispatch(setLocation(selectedLocation));
+      dispatch(setLocation(locationData));
     }
+    
+    console.log("📍 Dispatching location:", locationData);
     navigation.goBack();
+  };
+
+  // Handle Google Places selection with country code extraction
+  const handlePlaceSelect = async (data, details = null) => {
+    const location = details.geometry.location;
+    
+    try {
+      // Get detailed address information using reverse geocoding
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${key}`
+      );
+      
+      const results = response.data.results;
+      const address = data.description;
+      const addressComponents = results[0]?.address_components;
+      
+      const addressInfo = extractAddressInfo(addressComponents);
+
+      const coordinate = {
+        latitude: location.lat,
+        longitude: location.lng,
+        name: address,
+        countryCode: addressInfo.countryCode,
+        country: addressInfo.country,
+        city: addressInfo.city,
+        state: addressInfo.state,
+      };
+
+      mapRef.current.animateToRegion({
+        ...coordinate,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+
+      setMarker(coordinate);
+      setSelectedLocation(coordinate);
+      
+      console.log("📍 Place selected:", coordinate);
+    } catch (error) {
+      // Fallback if reverse geocoding fails
+      const coordinate = {
+        latitude: location.lat,
+        longitude: location.lng,
+        name: data.description,
+        countryCode: null,
+        country: null,
+        city: null,
+        state: null,
+      };
+      
+      mapRef.current.animateToRegion({
+        ...coordinate,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+
+      setMarker(coordinate);
+      setSelectedLocation(coordinate);
+    }
   };
 
   return (
@@ -144,23 +274,7 @@ export default function Location({ navigation, route }) {
           <GooglePlacesAutocomplete
             placeholder={t("location.placholder")}
             fetchDetails={true}
-            onPress={(data, details = null) => {
-              const location = details.geometry.location;
-              const coordinate = {
-                latitude: location.lat,
-                longitude: location.lng,
-                name: data.description,
-              };
-
-              mapRef.current.animateToRegion({
-                ...coordinate,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              });
-
-              setMarker(coordinate);
-              setSelectedLocation(coordinate);
-            }}
+            onPress={handlePlaceSelect}
             query={{
               key: key,
               language: "en",
@@ -181,8 +295,6 @@ export default function Location({ navigation, route }) {
             }}
             textInputProps={{
               placeholderTextColor: theme.grey,
-              onChangeText: (text) => {
-              },
             }}
           />
         </View>
@@ -218,6 +330,14 @@ export default function Location({ navigation, route }) {
           >
             <Text style={styles.applyButtonText}>{t("location.apply")}</Text>
           </TouchableOpacity>
+          
+          {/* Show location details for debugging */}
+          {selectedLocation.countryCode && (
+            <Text style={[styles.locationDetails, { color: theme.white }]}>
+              {selectedLocation.city && `${selectedLocation.city}, `}
+              {selectedLocation.country} ({selectedLocation.countryCode})
+            </Text>
+          )}
         </View>
       )}
     </View>
@@ -249,6 +369,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: RFPercentage(5),
     alignSelf: "center",
+    alignItems: "center",
   },
   applyButton: {
     paddingHorizontal: RFPercentage(2.4),
@@ -256,10 +377,17 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(10),
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: RFPercentage(1),
   },
   applyButtonText: {
     color: "white",
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
+  },
+  locationDetails: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    opacity: 0.8,
   },
 });

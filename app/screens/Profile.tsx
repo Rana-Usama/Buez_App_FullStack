@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,13 +8,15 @@ import {
   ScrollView,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { fetchCompletedTasksFromFirebase } from "../services/Review.service";
+import { cachedTranslate } from "../utils/cachedTranslations";
 
 function Profile({ navigation }) {
   const { userData: user } = useUser();
@@ -25,12 +27,134 @@ function Profile({ navigation }) {
   const userBio = user?.biography || "";
 
   const [isExpanded, setIsExpanded] = useState(false);
+  const [completedTasksCount, setCompletedTasksCount] = useState(0);
+  const [userBadge, setUserBadge] = useState(null);
+  const [translatedBadgeText, setTranslatedBadgeText] = useState("");
+  const [translatedTasksText, setTranslatedTasksText] = useState("");
+  const [translatedReadMore, setTranslatedReadMore] = useState({
+    readMore: "",
+    readLess: ""
+  });
+  const [translatedAddBio, setTranslatedAddBio] = useState("");
+  const [translatedBiography, setTranslatedBiography] = useState("");
+
   const needsReadMore = userBio.length > 80;
   const displayText = isExpanded
-    ? userBio
-    : userBio.slice(0, 80) + (needsReadMore ? "..." : "");
+    ? translatedBiography
+    : translatedBiography.slice(0, 80) + (needsReadMore ? "..." : "");
 
-  const toggleReadMore = () => setIsExpanded(!isExpanded);
+  // Fetch completed tasks and calculate badge
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      try {
+        const records = await fetchCompletedTasksFromFirebase();
+        const count = records?.length || 0;
+        setCompletedTasksCount(count);
+        
+        // Determine badge based on completed tasks count
+        let badge = null;
+        if (count >= 3) {
+          badge = {
+            type: "pro",
+            icon: "trophy",
+            text: "TOP RATED",
+            color: "#FFD700",
+            bgColor: "#FFFDE7",
+            borderColor: "#FFD700"
+          };
+        } else if (count >= 2) {
+          badge = {
+            type: "rising",
+            icon: "trending-up", 
+            text: "RISING TALENT",
+            color: "#FF9800",
+            bgColor: "#FFF3E0",
+            borderColor: "#FF9800"
+          };
+        } else if (count >= 1) {
+          badge = {
+            type: "beginner",
+            icon: "leaf",
+            text: "BEGINNER",
+            color: "#4CAF50",
+            bgColor: "#E8F5E8",
+            borderColor: "#4CAF50"
+          };
+        }
+        setUserBadge(badge);
+
+        // Translate badge text if badge exists
+        if (badge) {
+          const translatedText = await cachedTranslate(badge.text);
+          setTranslatedBadgeText(translatedText);
+        }
+      } catch (error) {
+        console.log("Error fetching user stats:", error);
+      }
+    };
+
+    fetchUserStats();
+  }, []);
+
+  // Translate static texts
+  useEffect(() => {
+    const translateTexts = async () => {
+      try {
+        // Translate tasks completed text
+        const tasksText = await cachedTranslate("tasks completed");
+        setTranslatedTasksText(tasksText);
+
+        // Translate read more/less texts
+        const readMoreText = await cachedTranslate("Read more");
+        const readLessText = await cachedTranslate("Read less");
+        setTranslatedReadMore({
+          readMore: readMoreText,
+          readLess: readLessText
+        });
+
+        // Translate add bio text
+        const addBioText = await cachedTranslate("Add professional bio");
+        setTranslatedAddBio(addBioText);
+
+        // Translate biography if it exists
+        if (userBio) {
+          const translatedBio = await cachedTranslate(userBio);
+          setTranslatedBiography(translatedBio);
+        }
+      } catch (error) {
+        console.log("Error translating texts:", error);
+        // Set fallback texts
+        setTranslatedTasksText("tasks completed");
+        setTranslatedReadMore({
+          readMore: "Read more",
+          readLess: "Read less"
+        });
+        setTranslatedAddBio("Add professional bio");
+        setTranslatedBiography(userBio);
+      }
+    };
+
+    translateTexts();
+  }, [userBio]);
+
+  // Update biography translation when userBio changes
+  useEffect(() => {
+    const translateBiography = async () => {
+      if (userBio) {
+        try {
+          const translatedBio = await cachedTranslate(userBio);
+          setTranslatedBiography(translatedBio);
+        } catch (error) {
+          console.log("Error translating biography:", error);
+          setTranslatedBiography(userBio);
+        }
+      } else {
+        setTranslatedBiography("");
+      }
+    };
+
+    translateBiography();
+  }, [userBio]);
 
   const navigationsList = [
     {
@@ -51,7 +175,9 @@ function Profile({ navigation }) {
   ];
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.white || "#FFFFFF" }]}>
+    <View
+      style={[styles.screen, { backgroundColor: theme.white || "#FFFFFF" }]}
+    >
       {/* Navigation Header */}
       <Nav
         dpNull
@@ -68,60 +194,115 @@ function Profile({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Card */}
-        <View style={[styles.profileCard, { backgroundColor: theme.white, borderWidth:1, borderColor: theme.mode === 'dark' ? theme.border  : 'rgba(238, 238, 238, 1)'}]}>
+        <View
+          style={[
+            styles.profileCard,
+            {
+              backgroundColor: theme.white,
+              borderWidth: 1,
+              borderColor:
+                theme.mode === "dark" ? theme.border : "rgba(238, 238, 238, 1)",
+            },
+          ]}
+        >
           {/* Profile Image with Professional Border */}
           <View style={styles.imageSection}>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => navigation.navigate("EditProfile")}
             >
-              <View style={[styles.imageContainer, { borderColor: theme.primary }]}>
+              <View
+                style={[styles.imageContainer, { borderColor: theme.primary }]}
+              >
                 <Image
                   style={styles.profileImage}
                   source={profileImgUrl ? { uri: profileImgUrl } : Icons.dp}
                 />
-                <View style={[styles.editBadge, { backgroundColor: theme.primary }]}>
-                  <MaterialIcons name="edit" size={RFPercentage(1.8)} color={theme.white} />
-                </View>
+                {/* <View
+                  style={[styles.editBadge, { backgroundColor: theme.primary }]}
+                >
+                  <MaterialIcons
+                    name="edit"
+                    size={RFPercentage(1.8)}
+                    color={theme.white}
+                  />
+                </View> */}
               </View>
             </TouchableOpacity>
           </View>
 
           {/* User Information */}
           <View style={styles.infoSection}>
-            <Text style={[styles.userName, { color: theme.heading }]}>{userName}</Text>
-            
-            {/* Professional Title/Badge - You can add this field to your user data */}
-            {/* <Text style={[styles.userTitle, { color: theme.primary }]}>
-              Professional Member
-            </Text> */}
+            <Text style={[styles.userName, { color: theme.heading }]}>
+              {userName}
+            </Text>
+
+            {/* User Badge */}
+            {userBadge && (
+              <View 
+                style={[
+                  styles.badgeContainer,
+                  { 
+                    backgroundColor: userBadge.bgColor,
+                    borderColor: userBadge.borderColor
+                  }
+                ]}
+              >
+                <Ionicons
+                  name={userBadge.icon}
+                  size={RFPercentage(1.4)}
+                  color={userBadge.color}
+                />
+                <Text style={[styles.badgeText, { color: userBadge.color }]}>
+                  {translatedBadgeText || userBadge.text}
+                </Text>
+              </View>
+            )}
+
+            {/* Tasks Completed Count */}
+            <View style={styles.tasksCountContainer}>
+              <Ionicons
+                name="checkmark-done-circle"
+                size={RFPercentage(1.6)}
+                color={Colors.primary}
+              />
+              <Text style={[styles.tasksCountText, { color: theme.darkGrey }]}>
+                {completedTasksCount} {translatedTasksText || "tasks completed"}
+              </Text>
+            </View>
 
             {/* Biography Section */}
             {userBio ? (
               <View style={styles.biographySection}>
-                {/* <Text style={[styles.biographyLabel, { color: theme.darkGrey }]}>
-                  ABOUT
-                </Text> */}
                 <Text style={[styles.biographyText, { color: theme.darkGrey }]}>
                   {displayText}
-                  {/* {needsReadMore && (
-                    <Text
-                      style={[styles.readMoreText, { color: theme.primary }]}
-                      onPress={toggleReadMore}
-                    >
-                      {isExpanded ? " Show less" : " Read more"}
-                    </Text>
-                  )} */}
                 </Text>
+                {needsReadMore && (
+                  <TouchableOpacity
+                    onPress={() => setIsExpanded(!isExpanded)}
+                    style={styles.readMoreButton}
+                  >
+                    <Text style={[styles.readMoreText, { color: theme.primary }]}>
+                      {isExpanded 
+                        ? translatedReadMore.readLess || "Read less" 
+                        : translatedReadMore.readMore || "Read more"
+                      }
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             ) : (
               <TouchableOpacity
                 onPress={() => navigation.navigate("EditProfile")}
                 style={[styles.addBioButton, { borderColor: theme.border }]}
               >
-                <MaterialIcons name="add" size={RFPercentage(2)} color={theme.primary} />
+                <MaterialIcons
+                  name="add"
+                  size={RFPercentage(2)}
+                  color={theme.primary}
+                />
                 <Text style={[styles.addBioText, { color: theme.primary }]}>
-                  Add professional bio
+                  {translatedAddBio || "Add professional bio"}
                 </Text>
               </TouchableOpacity>
             )}
@@ -150,14 +331,21 @@ function Profile({ navigation }) {
               >
                 <View style={styles.navigationContent}>
                   <View style={styles.itemLeft}>
-                    <View style={[styles.iconContainer, { backgroundColor: `${theme.primary}15` }]}>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        { backgroundColor: `${theme.primary}15` },
+                      ]}
+                    >
                       <Image
                         style={styles.navigationIcon}
                         source={item.iconSource}
                         tintColor={theme.primary}
                       />
                     </View>
-                    <Text style={[styles.navigationTitle, { color: theme.heading }]}>
+                    <Text
+                      style={[styles.navigationTitle, { color: theme.heading }]}
+                    >
                       {item.title}
                     </Text>
                   </View>
@@ -171,22 +359,6 @@ function Profile({ navigation }) {
             ))}
           </View>
         </View>
-
-        {/* Stats Section - Optional professional touch */}
-        {/* <View style={styles.statsSection}>
-          <View style={[styles.statCard, { backgroundColor: theme.white }]}>
-            <Text style={[styles.statNumber, { color: theme.primary }]}>0</Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>Completed Tasks</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: theme.white }]}>
-            <Text style={[styles.statNumber, { color: theme.primary }]}>0</Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>Reviews</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: theme.white }]}>
-            <Text style={[styles.statNumber, { color: theme.primary }]}>0</Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>Rating</Text>
-          </View>
-        </View> */}
 
         <View style={styles.bottomSpace} />
       </ScrollView>
@@ -264,22 +436,35 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.5),
     textAlign: "center",
   },
-  userTitle: {
-    fontSize: RFPercentage(1.6),
+  // Badge Styles
+  badgeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(1),
+    borderWidth: 1,
+    marginBottom: RFPercentage(1),
+  },
+  badgeText: {
+    fontSize: RFPercentage(1.1),
+    fontFamily: "Poppins_600SemiBold",
+    marginLeft: RFPercentage(0.3),
+  },
+  // Tasks Count Styles
+  tasksCountContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(1.5),
+  },
+  tasksCountText: {
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
-    marginBottom: RFPercentage(2),
-    textAlign: "center",
+    marginLeft: RFPercentage(0.5),
   },
   biographySection: {
     width: "100%",
     alignItems: "center",
-  },
-  biographyLabel: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(1),
-    letterSpacing: 1,
-    opacity: 0.7,
   },
   biographyText: {
     fontSize: RFPercentage(1.5),
@@ -287,10 +472,12 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(2.1),
     textAlign: "center",
   },
+  readMoreButton: {
+    marginTop: RFPercentage(0.5),
+  },
   readMoreText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_500Medium",
-    marginLeft: RFPercentage(0.5),
   },
   addBioButton: {
     flexDirection: "row",
@@ -361,37 +548,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
     flex: 1,
-  },
-  statsSection: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginHorizontal: RFPercentage(2),
-    marginTop: RFPercentage(4),
-  },
-  statCard: {
-    flex: 1,
-    alignItems: "center",
-    padding: RFPercentage(2),
-    borderRadius: RFPercentage(1.5),
-    marginHorizontal: RFPercentage(0.5),
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  statNumber: {
-    fontSize: RFPercentage(2.4),
-    fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(0.5),
-  },
-  statLabel: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
   },
   bottomSpace: {
     height: RFPercentage(3),

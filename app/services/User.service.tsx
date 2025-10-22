@@ -177,18 +177,18 @@ export const updateUserToken = async (userId: string, token: string) => {
 
 // services/User.service.js
 export const fetchUserDetailedProfile = async (userId) => {
-  console.log(userId)
+  console.log(userId);
   try {
     // Fetch user basic info
     const userDocRef = doc(FIREBASE_DB, "users", userId);
     const userDocSnap = await getDoc(userDocRef);
-    
+
     let userData = null;
     if (userDocSnap.exists()) {
       userData = userDocSnap.data();
-      console.log('User data found:', userData);
+      console.log("User data found:", userData);
     } else {
-      console.log('No user found with ID:', userId);
+      console.log("No user found with ID:", userId);
     }
     console.log("............", userDocSnap);
 
@@ -199,9 +199,16 @@ export const fetchUserDetailedProfile = async (userId) => {
     );
     const tasksSnap = await getDocs(tasksQuery);
 
+    const reviewsQuery = query(
+      collection(FIREBASE_DB, "reviews"),
+      where("taskOwnerId", "==", userId)
+    );
+    const reviewsSnap = await getDocs(reviewsQuery);
+
     let completedTasks = [];
     let activeTasks = [];
     let totalEarnings = 0;
+    let reviews = [];
 
     tasksSnap.docs.forEach((doc) => {
       const taskData = doc.data();
@@ -217,12 +224,48 @@ export const fetchUserDetailedProfile = async (userId) => {
       }
     });
 
+    reviewsSnap.docs.forEach((doc) => {
+      const reviewData = doc.data();
+      reviews.push({
+        id: doc.id,
+        ...reviewData,
+      });
+    });
+
+    const averageRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, review) => sum + (review.rating || 0), 0) /
+          reviews.length
+        : 0;
+
     // Calculate success rate
     const totalTasks = completedTasks.length + activeTasks.length;
-    const successRate =
-      totalTasks > 0
-        ? Math.round((completedTasks.length / totalTasks) * 100)
-        : 0;
+
+    // Bayesian Average - balances user's rating with platform average
+    const calculateBayesianSuccessRate = (reviews, completedTasks) => {
+      const platformAverageRating = 4.0; // Assume platform average is 4 stars
+      const platformWeight = 5; // Number of "virtual" platform reviews for smoothing
+      if (reviews.length === 0) {
+        // Fallback to completion rate if no reviews
+        return totalTasks > 0
+          ? Math.round((completedTasks.length / totalTasks) * 100)
+          : 0;
+      }
+      const userTotalRating = reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0
+      );
+      const userReviewCount = reviews.length;
+      // Bayesian calculation: (user_rating * user_reviews + platform_avg * platform_weight) / (user_reviews + platform_weight)
+      const bayesianRating =
+        (userTotalRating + platformAverageRating * platformWeight) /
+        (userReviewCount + platformWeight);
+      // Convert to percentage (4+ stars = 100%, 3 stars = 75%, etc.)
+      const successRate = Math.min(100, Math.round((bayesianRating / 5) * 100));
+      return successRate;
+    };
+
+    let successRate = calculateBayesianSuccessRate(reviews, completedTasks);
 
     // Get member since date
     const memberSince = userData?.freeTrialStartedAt
@@ -245,14 +288,36 @@ export const fetchUserDetailedProfile = async (userId) => {
         totalEarnings: totalEarnings,
         memberSince: memberSince,
         totalTasks: totalTasks,
+        totalReviews: reviews.length,
+        averageRating: Math.round(averageRating * 10) / 10,
       },
       tasks: {
         completed: completedTasks,
         active: activeTasks,
       },
+      reviews: reviews,
     };
   } catch (error) {
     console.error("Error fetching user detailed profile:", error);
     return null;
+  }
+};
+
+export const updateUserLocation = async (locationData) => {
+  try {
+    const user = FIREBASE_AUTH.currentUser;
+    if (user) {
+      const userRef = doc(db, "users", user?.uid);
+      await updateDoc(userRef, {
+        ...locationData,
+        lastLocationUpdate: new Date().toISOString(),
+      });
+      console.log("User location updated");
+    } else {
+      console.log("No user is logged in to update location");
+    }
+  } catch (error) {
+    console.log("Error updating user location:", error);
+    throw error;
   }
 };

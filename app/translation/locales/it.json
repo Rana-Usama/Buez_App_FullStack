@@ -16,8 +16,7 @@
     "currency": "es. 90€",
     "sign": "€",
     "gotIt": "Capito",
-      "you": "Tu"
-
+    "you": "Tu"
   },
   "validations": {
     "inValid": "Email non valida",
@@ -394,7 +393,7 @@
   },
 
   "faqs": {
-      "txt1": "Come possiamo aiutarti?",
+    "txt1": "Come possiamo aiutarti?",
     "txt2": "Trova risposte alle domande frequenti",
     "txt3": "Hai ancora bisogno di aiuto?",
     "txt4": "Il nostro team di supporto è qui per assisterti",
@@ -490,5 +489,55 @@
         "a4": "Le tariffe dell'abbonamento non sono rimborsabili, ma puoi cancellare in qualsiasi momento per evitare addebiti futuri."
       }
     }
+  },
+  "profileRank": {
+    "txt1": "Migliori Performers",
+    "txt2": "Vedi Tutti",
+    "txt3": "PRINCIPIANTE",
+    "txt4": "EMERGENTE",
+    "txt5": "PRO",
+    "txt6": "Attività attive",
+    "txt7": "Attività completate",
+    "txt8": "Vedi Profilo",
+    "txt9": "Membro dal",
+    "txt10": "Successo",
+    "txt11": "Cerca i migliori performers...",
+    "txt12": "Tutti",
+    "txt13": "Pro",
+    "txt14": "Emergente",
+    "txt15": "Principiante",
+    "txt16": "Performer",
+    "txt17": "Performers",
+    "txt18": "Trovati",
+    "txt19": "Caricamento migliori performers...",
+    "txt20": "Nessun performer trovato",
+    "txt21": "Prova ad aggiustare i termini di ricerca",
+    "txt22": "Nessun top performer disponibile al momento",
+    "txt23": "Completato",
+    "txt24": "Recentemente",
+    "txt25": "Caricamento profilo...",
+    "txt26": "Utente non trovato",
+    "txt27": "Profilo",
+    "txt28": "AIUTANTE D'ÉLITE",
+    "txt29": "ESPERTO DI COMPITI",
+    "txt30": "NUOVO AIUTANTE",
+    "txt31": "Tasso di Successo",
+    "txt32": "compiti con",
+    "txt33": "tasso di successo",
+    "txt34": "Compiti Completati",
+    "txt35": "Recensioni",
+    "txt36": "Nessun compito completato ancora",
+    "txt37": "Nessuna recensione ancora",
+    "txt38": "Filtra per",
+    "txt39": "Più votati",
+    "txt40": "Talento emergente",
+    "txt41": "Principiante",
+    "txt42": "Trova Esecutori",
+    "txt43": "Vicino a Me",
+    "txt44": "Seleziona Posizione",
+    "txt45": "Esplora i Migliori Esecutori",
+    "txt46": "Utilizzando",
+    "txt47": "basato su",
+    "txt48": "Vicino a"
   }
 }

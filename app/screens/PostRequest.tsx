@@ -38,7 +38,13 @@ import { useSelector } from "react-redux";
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
-import { formatCurrency } from "../utils/currencyChange";
+
+import {
+  formatCurrency,
+  getCurrencySymbolFromLocation,
+  extractNumericValue,
+  getCurrencyInfo,
+} from "../utils/currencyChange";
 
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
@@ -54,6 +60,8 @@ function PostRequest({ navigation, route }) {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState({});
   const [budget, setBudget] = useState("");
+  const [numericBudget, setNumericBudget] = useState(""); // Store numeric value separately
+
   const [compensation, setCompensation] = useState("");
   const [reviews, setReviews] = useState([]);
   const { theme } = useAppTheme();
@@ -78,11 +86,38 @@ function PostRequest({ navigation, route }) {
     { id: 2, type: "Other" },
   ];
 
+  console.log(selectedLocation)
+
   const [translatedTaskOptions, setTranslatedTaskOptions] = useState([]);
   const [translatedCompensationOptions, setTranslatedCompensationOptions] =
     useState([]);
   const [originalTaskType, setOriginalTaskType] = useState("");
   const [originalCompensationType, setOriginalCompensationType] = useState("");
+
+  const currencyInfo = getCurrencyInfo(selectedLocation);
+  const currentCurrencySymbol = getCurrencySymbolFromLocation(selectedLocation);
+
+  const handleBudgetChange = (text) => {
+    // Extract numeric value (remove all non-digit characters)
+    const numericValue = text.replace(/[^\d]/g, "");
+    setNumericBudget(numericValue);
+
+    // Format for display based on selected location
+    if (numericValue) {
+      const formatted = formatCurrency(numericValue, selectedLocation);
+      setBudget(formatted);
+    } else {
+      setBudget("");
+    }
+  };
+
+  // Get placeholder text with current currency
+  const getBudgetPlaceholder = () => {
+    return formatCurrency("0", selectedLocation, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  };
 
   const fetchMyReviews = async () => {
     try {
@@ -96,6 +131,13 @@ function PostRequest({ navigation, route }) {
   useEffect(() => {
     fetchMyReviews();
   }, []);
+
+  useEffect(() => {
+    if (numericBudget) {
+      const formatted = formatCurrency(numericBudget, selectedLocation);
+      setBudget(formatted);
+    }
+  }, [selectedLocation, numericBudget]);
 
   useFocusEffect(
     useCallback(() => {
@@ -127,8 +169,13 @@ function PostRequest({ navigation, route }) {
           setCompensation(
             await cachedTranslate(currentPostRequest.otherCompensation)
           );
-          setBudget(`${formatCurrency(currentPostRequest.monitarily)}`);
-
+          if (currentPostRequest.monitarily) {
+            const numericValue = extractNumericValue(
+              currentPostRequest.monitarily.toString()
+            );
+            setNumericBudget(numericValue.toString());
+            setBudget(formatCurrency(numericValue, selectedLocation));
+          }
           if (currentPostRequest.taskType === "Other") {
             setCustomTaskTitle(currentPostRequest.customTaskTitle || "");
           }
@@ -317,13 +364,19 @@ function PostRequest({ navigation, route }) {
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude,
           name: selectedLocation.name,
+          countryCode: selectedLocation.countryCode,
         },
         otherCompensation: compensation,
-        monitarily: budget,
+        monitarily: numericBudget || "0",
         status: REQUEST_STATUS.Active,
         acceptedBy: null,
         reviews: reviews || null,
         customTaskTitle: originalTaskType === "Other" ? customTaskTitle : "",
+        currencyInfo: {
+          code: currencyInfo.code,
+          symbol: currencyInfo.symbol,
+          locale: currencyInfo.locale,
+        },
       };
       const imgs = imageUris?.filter((img) => Boolean(img));
       if (imgs?.length === 0) {
@@ -630,20 +683,24 @@ function PostRequest({ navigation, route }) {
             ) : (
               <>
                 <InputFieldNew
-                  placeholder={t("common.currency")}
+                  placeholder={getBudgetPlaceholder()}
                   value={budget}
-                  onChangeText={(text) => {
-                    const numeric = text.replace(/[^0-9]/g, "");
-                    setBudget(numeric ? `${t("common.sign")}${numeric}` : "");
-                  }}
+                  onChangeText={handleBudgetChange}
                   customStyle={{
                     width: "90%",
                     borderRadius: RFPercentage(1),
                     backgroundColor: theme.white,
                     borderColor: theme.border,
+                    marginTop: RFPercentage(2),
                   }}
                   keyboardType="numeric"
                 />
+                {selectedLocation?.name && (
+                  <Text style={[styles.currencyNote, { color: theme.primary }]}>
+                     {`${t("profileRank.txt46")}`} {currentCurrencySymbol} ({currencyInfo.code})  {`${t("profileRank.txt47")}`}{" "}
+                    {selectedLocation.name}
+                  </Text>
+                )}
               </>
             )}
           </View>
@@ -826,6 +883,13 @@ const styles = StyleSheet.create({
   img2: { width: "100%", height: "100%", borderRadius: RFPercentage(1.4) },
   img3: { width: RFPercentage(3), height: RFPercentage(3) },
   space: { marginBottom: RFPercentage(13) },
+   currencyNote: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular",
+    marginTop: RFPercentage(0.5),
+    width:"100%",
+    marginLeft:RFPercentage(6)
+  },
 });
 
 export default PostRequest;
