@@ -681,9 +681,7 @@ function MyRequests({ navigation }) {
                   {activeFilter === `${t("myRequests.txt3")}` ? (
                     <TouchableOpacity
                       activeOpacity={0.8}
-                      disabled={
-                        markLoaderIndex === index || repostingIndex === index
-                      }
+                      disabled={cart?.reviewedAccepter}
                       onPress={() =>
                         navigation.navigate("AddReviewToAccepter", {
                           task: cart,
@@ -715,7 +713,9 @@ function MyRequests({ navigation }) {
                           marginLeft: RFPercentage(0.4),
                         }}
                       >
-                        Add Review
+                        {cart?.reviewedAccepter
+                          ? `${t("profileRank.txt50")}`
+                          : `${t("profileRank.txt49")}`}
                       </Text>
                     </TouchableOpacity>
                   ) : (

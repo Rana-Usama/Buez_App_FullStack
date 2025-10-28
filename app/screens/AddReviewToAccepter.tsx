@@ -278,6 +278,11 @@ function AddReviewToAccepter() {
           })
         )
       );
+      const taskDocRef = doc(FIREBASE_DB, "taskRequests", task.id);
+      await updateDoc(taskDocRef, {
+        reviewedAccepter: true,
+      });
+
       await sendReviewPushNotification();
       await saveReviewNotification();
       Toast.show({

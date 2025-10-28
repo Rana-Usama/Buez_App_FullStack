@@ -511,6 +511,7 @@ export default function Notifications({ navigation }) {
                       styles.sub,
                       { marginTop: RFPercentage(0.3), color: theme.grey },
                     ]}
+                    numberOfLines={1}
                   >
                     {previewText}
                   </Text>
@@ -564,6 +565,7 @@ export default function Notifications({ navigation }) {
                       </View>
                       <Text
                         style={[styles.reviewText, { color: theme.darkGrey }]}
+                        numberOfLines={1}
                       >
                         {translatedText.length > 50
                           ? `${translatedText.substring(0, 50)}…`
@@ -573,6 +575,7 @@ export default function Notifications({ navigation }) {
                   ) : (
                     <Text
                       style={[styles.description, { color: theme.darkGrey }]}
+                      numberOfLines={1}
                     >
                       {translatedText.length > 50
                         ? `${translatedText.substring(0, 50)}…`

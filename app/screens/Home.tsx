@@ -1310,7 +1310,7 @@ const styles = StyleSheet.create({
 
   // Top Rated Badge
   topRatedBadge: {
-    backgroundColor: "#FFFDE7",
+    backgroundColor: "rgba(255, 215, 0, 0.15)",
     borderWidth: 1,
     borderColor: "#FFD700",
     position: "absolute",

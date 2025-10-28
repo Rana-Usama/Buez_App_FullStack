@@ -938,6 +938,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    bottom:50
   },
   loadingText: {
     marginTop: RFPercentage(2),

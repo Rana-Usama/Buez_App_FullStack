@@ -33,7 +33,7 @@ function Profile({ navigation }) {
   const [translatedTasksText, setTranslatedTasksText] = useState("");
   const [translatedReadMore, setTranslatedReadMore] = useState({
     readMore: "",
-    readLess: ""
+    readLess: "",
   });
   const [translatedAddBio, setTranslatedAddBio] = useState("");
   const [translatedBiography, setTranslatedBiography] = useState("");
@@ -50,7 +50,7 @@ function Profile({ navigation }) {
         const records = await fetchCompletedTasksFromFirebase();
         const count = records?.length || 0;
         setCompletedTasksCount(count);
-        
+
         // Determine badge based on completed tasks count
         let badge = null;
         if (count >= 3) {
@@ -60,16 +60,16 @@ function Profile({ navigation }) {
             text: "TOP RATED",
             color: "#FFD700",
             bgColor: "#FFFDE7",
-            borderColor: "#FFD700"
+            borderColor: "#FFD700",
           };
         } else if (count >= 2) {
           badge = {
             type: "rising",
-            icon: "trending-up", 
+            icon: "trending-up",
             text: "RISING TALENT",
             color: "#FF9800",
             bgColor: "#FFF3E0",
-            borderColor: "#FF9800"
+            borderColor: "#FF9800",
           };
         } else if (count >= 1) {
           badge = {
@@ -78,7 +78,7 @@ function Profile({ navigation }) {
             text: "BEGINNER",
             color: "#4CAF50",
             bgColor: "#E8F5E8",
-            borderColor: "#4CAF50"
+            borderColor: "#4CAF50",
           };
         }
         setUserBadge(badge);
@@ -109,7 +109,7 @@ function Profile({ navigation }) {
         const readLessText = await cachedTranslate("Read less");
         setTranslatedReadMore({
           readMore: readMoreText,
-          readLess: readLessText
+          readLess: readLessText,
         });
 
         // Translate add bio text
@@ -127,7 +127,7 @@ function Profile({ navigation }) {
         setTranslatedTasksText("tasks completed");
         setTranslatedReadMore({
           readMore: "Read more",
-          readLess: "Read less"
+          readLess: "Read less",
         });
         setTranslatedAddBio("Add professional bio");
         setTranslatedBiography(userBio);
@@ -239,13 +239,13 @@ function Profile({ navigation }) {
 
             {/* User Badge */}
             {userBadge && (
-              <View 
+              <View
                 style={[
                   styles.badgeContainer,
-                  { 
+                  {
                     backgroundColor: userBadge.bgColor,
-                    borderColor: userBadge.borderColor
-                  }
+                    borderColor: userBadge.borderColor,
+                  },
                 ]}
               >
                 <Ionicons
@@ -260,16 +260,21 @@ function Profile({ navigation }) {
             )}
 
             {/* Tasks Completed Count */}
-            <View style={styles.tasksCountContainer}>
-              <Ionicons
-                name="checkmark-done-circle"
-                size={RFPercentage(1.6)}
-                color={Colors.primary}
-              />
-              <Text style={[styles.tasksCountText, { color: theme.darkGrey }]}>
-                {completedTasksCount} {translatedTasksText || "tasks completed"}
-              </Text>
-            </View>
+            {completedTasksCount > 0 && (
+              <View style={styles.tasksCountContainer}>
+                <Ionicons
+                  name="checkmark-done-circle"
+                  size={RFPercentage(1.6)}
+                  color={Colors.primary}
+                />
+                <Text
+                  style={[styles.tasksCountText, { color: theme.darkGrey }]}
+                >
+                  {completedTasksCount}{" "}
+                  {translatedTasksText || "tasks completed"}
+                </Text>
+              </View>
+            )}
 
             {/* Biography Section */}
             {userBio ? (
@@ -282,11 +287,12 @@ function Profile({ navigation }) {
                     onPress={() => setIsExpanded(!isExpanded)}
                     style={styles.readMoreButton}
                   >
-                    <Text style={[styles.readMoreText, { color: theme.primary }]}>
-                      {isExpanded 
-                        ? translatedReadMore.readLess || "Read less" 
-                        : translatedReadMore.readMore || "Read more"
-                      }
+                    <Text
+                      style={[styles.readMoreText, { color: theme.primary }]}
+                    >
+                      {isExpanded
+                        ? translatedReadMore.readLess || "Read less"
+                        : translatedReadMore.readMore || "Read more"}
                     </Text>
                   </TouchableOpacity>
                 )}

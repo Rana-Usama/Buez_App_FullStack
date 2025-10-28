@@ -339,7 +339,17 @@ const TopRatedUsers = ({ navigation }: any) => {
               </View>
             )}
 
-            <View style={styles.statsRow}>
+            <View
+              style={[
+                styles.statsRow,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? Colors.primary + "20"
+                      : Colors.primary + "09",
+                },
+              ]}
+            >
               <View style={styles.statItem}>
                 <MaterialIcons
                   name="pending-actions"
@@ -419,6 +429,7 @@ const TopRatedUsers = ({ navigation }: any) => {
     <TouchableOpacity
       style={[
         styles.filterButton,
+        { borderColor: theme.border },
         isActive && [
           styles.activeFilterButton,
           { backgroundColor: Colors.primary },
@@ -533,7 +544,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                 }}
               >
                 {" "}
-                 {`${t("profileRank.txt48")}`} {selectedLocation.name2}
+                {`${t("profileRank.txt48")}`} {selectedLocation.name2}
               </Text>
             )}
           </Text>
@@ -566,7 +577,9 @@ const TopRatedUsers = ({ navigation }: any) => {
               {searchQuery
                 ? `${t("profileRank.txt21")}`
                 : useCustomLocation && selectedLocation?.name2
-                ? `${t("profileRank.txt22")} ${t("profileRank.txt48")} ${selectedLocation.name2}`
+                ? `${t("profileRank.txt22")} ${t("profileRank.txt48")} ${
+                    selectedLocation.name2
+                  }`
                 : `${t("profileRank.txt22")}`}
             </Text>
           </View>
@@ -784,9 +797,10 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.3),
   },
   statLabel: {
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1),
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(0.2),
+    marginHorizontal:20
   },
   statDivider: {
     width: 1,
