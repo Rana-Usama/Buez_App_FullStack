@@ -38,8 +38,6 @@ import { cachedTranslate } from "../utils/cachedTranslations";
 import { useLocation } from "../utils/useLocation";
 import {
   formatCurrency,
-  getCurrencySymbolFromLocation,
-  extractNumericValue,
   getCurrencyInfo,
   convertCurrency, // Add this import
 } from "../utils/currencyChange";
@@ -87,12 +85,10 @@ function Home({ navigation }) {
   const updateUserLocationInDB = async (location) => {
     try {
       if (!location || !location.latitude || !location.longitude) return;
-
       const locationData = {
         latitude: location.latitude,
         longitude: location.longitude,
       };
-
       await updateUserLocation(locationData);
       console.log("User location updated successfully");
     } catch (error) {
@@ -106,9 +102,6 @@ function Home({ navigation }) {
       updateUserLocationInDB(currentLocation);
     }
   }, [currentLocation, user?.userId]);
-
-  const isWithin100km = (userLoc, taskLoc) =>
-    haversine(userLoc, taskLoc, { unit: "km" }) <= 100;
 
   const translateTask = async (task) => ({
     ...task,
@@ -140,15 +133,13 @@ function Home({ navigation }) {
     }, [])
   );
 
+  // Tasks By Location ----------------
   useEffect(() => {
     if (!currentLocation) return;
-
     let unsubscribe;
     let mounted = true;
-
     const startListening = async () => {
       setLoading(true);
-
       const refLoc =
         selectedLocation?.latitude2 && selectedLocation?.longitude2
           ? {
@@ -156,16 +147,13 @@ function Home({ navigation }) {
               longitude: selectedLocation.longitude2,
             }
           : currentLocation;
-
       if (unsubscribeRef.current) unsubscribeRef.current();
-
       unsubscribe = getRequestList(
         filterMap[activeFilter] || "",
         searchQuery,
         null,
         async ({ tasksArray, lastVisible }) => {
           if (!mounted) return;
-
           const filtered = tasksArray.filter((task) => {
             const loc = task?.address;
             if (!loc?.latitude || !loc?.longitude) return false;
@@ -177,9 +165,7 @@ function Home({ navigation }) {
               ) <= 100
             );
           });
-
           const translated = await Promise.all(filtered.map(translateTask));
-
           // Only update if changed
           setAllTasks((prev) => {
             const prevIds = prev.map((t) => t.id).join(",");
@@ -191,17 +177,13 @@ function Home({ navigation }) {
             }
             return translated;
           });
-
           setLoading(false);
         },
         (err) => console.log("GET_POSTS_LIST Error:", err)
       );
-
       unsubscribeRef.current = unsubscribe;
     };
-
     startListening();
-
     return () => {
       mounted = false;
       if (unsubscribeRef.current) unsubscribeRef.current();
@@ -222,6 +204,7 @@ function Home({ navigation }) {
     setSearchQuery(text);
   };
 
+  // Tasks To Dispaly
   const displayTasks = allTasks.filter((task) => {
     // Category filter
     if (filterMap[activeFilter] !== "All") {
@@ -230,11 +213,9 @@ function Home({ navigation }) {
       )
         return false;
     }
-
     // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-
       const descriptionMatch = (task.description || "")
         .toLowerCase()
         .includes(q);
@@ -242,28 +223,26 @@ function Home({ navigation }) {
         .toLowerCase()
         .includes(q);
       const taskTypeMatch = (task.taskType || "").toLowerCase().includes(q);
-
       // For "Other" tasks, also check customTaskTitle
       const customTitleMatch =
         task.taskType?.toLowerCase() === "other"
           ? (task.customTaskTitle || "").toLowerCase().includes(q)
           : false;
-
       return (
         descriptionMatch || userNameMatch || taskTypeMatch || customTitleMatch
       );
     }
-
     return true;
   });
 
   useEffect(() => {
-    if (displayTasks.length === Object.keys(activeIndices).length) return;
+    if (displayTasks?.length === Object.keys(activeIndices).length) return;
     const idx = {};
     displayTasks.forEach((_, i) => (idx[i] = 0));
     setActiveIndices(idx);
-  }, [displayTasks.length]);
+  }, [displayTasks?.length]);
 
+  // Top Rated Users
   const [users, setUsers] = useState([]);
   useEffect(() => {
     const fetchUsers = async () => {
@@ -273,6 +252,7 @@ function Home({ navigation }) {
     fetchUsers();
   }, []);
 
+  // Compensation Conversion
   const getConvertedCompensation = (item) => {
     if (item.compensationType !== "Monitarely") return null;
     try {
@@ -305,7 +285,6 @@ function Home({ navigation }) {
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
-        translucent
       />
       {/* Nav */}
       <Nav
@@ -353,7 +332,6 @@ function Home({ navigation }) {
                     backgroundColor={theme.white}
                     borderWidth={RFPercentage(0.1)}
                     borderColor={theme.border}
-                    secure={item.secure}
                     borderRadius={RFPercentage(1.2)}
                     color={theme.black}
                     fontSize={RFPercentage(1.7)}
@@ -421,17 +399,7 @@ function Home({ navigation }) {
             />
             {users?.length > 0 ? (
               <>
-                <View
-                  style={{
-                    width: "90%",
-                    alignSelf: "center",
-                    justifyContent: "space-between",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: RFPercentage(3),
-                    marginBottom: RFPercentage(1),
-                  }}
-                >
+                <View style={styles.wrap}>
                   <Text
                     style={[styles.categoriesText, { color: theme.heading }]}
                   >
@@ -652,7 +620,7 @@ function Home({ navigation }) {
               >
                 <View style={styles.exploreContent}>
                   <Text style={[styles.exploreText, { color: Colors.primary }]}>
-                   {`${t("profileRank.txt45")}`}
+                    {`${t("profileRank.txt45")}`}
                   </Text>
                   <FontAwesome6
                     name="arrow-right"
@@ -725,16 +693,7 @@ function Home({ navigation }) {
             {loading ? (
               <View style={{ marginTop: RFPercentage(18) }}>
                 <ActivityIndicator size="large" color={theme.primary} />
-                <Text
-                  style={{
-                    color: Colors.primary,
-                    fontSize: RFPercentage(1.8),
-                    fontFamily: "Poppins_500Medium",
-                    marginTop: RFPercentage(0.5),
-                  }}
-                >
-                  {t("home.txt12")}
-                </Text>
+                <Text style={styles.txt}>{t("home.txt12")}</Text>
               </View>
             ) : (
               <>
@@ -1130,7 +1089,7 @@ const styles = StyleSheet.create({
   },
   topRatedCard: {
     width: RFPercentage(22),
-    height: RFPercentage(29.5),
+    // height: RFPercentage(29.5),
     borderRadius: RFPercentage(2.1),
     alignItems: "center",
     marginHorizontal: RFPercentage(0.7),
@@ -1274,11 +1233,12 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(0.3),
     borderRadius: RFPercentage(1),
     marginLeft: RFPercentage(0.5),
+    justifyContent: "center",
   },
 
   // Beginner Badge
   beginnerBadge: {
-    backgroundColor: "#E8F5E8",
+    backgroundColor: "rgba(47, 255, 0, 0.15)",
     borderWidth: 1,
     borderColor: "#4CAF50",
     position: "absolute",
@@ -1290,6 +1250,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(0.8),
     fontFamily: "Poppins_700Bold",
     marginLeft: RFPercentage(0.3),
+    lineHeight: RFPercentage(1),
   },
 
   // Rising Talent Badge
@@ -1306,6 +1267,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(0.8),
     fontFamily: "Poppins_700Bold",
     marginLeft: RFPercentage(0.3),
+    lineHeight: RFPercentage(1),
   },
 
   // Top Rated Badge
@@ -1322,6 +1284,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(0.8),
     fontFamily: "Poppins_700Bold",
     marginLeft: RFPercentage(0.3),
+    lineHeight: RFPercentage(1),
   },
 
   // Premium Badge (existing)
@@ -1341,6 +1304,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1),
     fontWeight: "bold",
     marginLeft: RFPercentage(0.3),
+    lineHeight: RFPercentage(1),
   },
   exploreContainer: {
     marginTop: RFPercentage(2),
@@ -1362,6 +1326,21 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.6),
     marginRight: RFPercentage(1),
+  },
+  txt: {
+    color: Colors.primary,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_500Medium",
+    marginTop: RFPercentage(0.5),
+  },
+  wrap: {
+    width: "90%",
+    alignSelf: "center",
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: RFPercentage(3),
+    marginBottom: RFPercentage(1),
   },
 });
 

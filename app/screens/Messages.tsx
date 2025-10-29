@@ -49,7 +49,6 @@ function Messages({ navigation }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState(t("messages.txt2"));
   const pageSize = 10;
-
   useExitAppOnBack();
 
   const filters = [t("messages.txt2"), t("messages.txt3")];
@@ -60,9 +59,11 @@ function Messages({ navigation }) {
     return () => unsubscribe && unsubscribe();
   }, []);
 
-  const getChatData = async (d) => {
+
+// Fetching Chats
+  const getChatData = async (d : any) => {
     const chatData = d.data();
-    const otherUser = chatData.participants.find((u) => u !== userId);
+    const otherUser = chatData.participants.find((u : any) => u !== userId);
     const userRef = doc(FIREBASE_DB, "users", otherUser);
     const userDoc = await getDoc(userRef);
     const otherUserData = userDoc.exists() ? userDoc.data() : null;
@@ -71,7 +72,7 @@ function Messages({ navigation }) {
     if (translatedText) {
       try {
         translatedText = await cachedTranslate(translatedText);
-      } catch (e) {
+      } catch (e : any) {
         console.log("Translation error:", e);
       }
     }
@@ -118,9 +119,9 @@ function Messages({ navigation }) {
     }
   };
 
+  // Fetching more chats on loading
   const fetchMoreChats = async () => {
     if (!lastVisible || loadingMore) return;
-
     setLoadingMore(true);
     try {
       const q = query(
@@ -152,6 +153,7 @@ function Messages({ navigation }) {
     setIsRefreshing(false);
   };
 
+  // Listening New Chats
   const listenForNewChats = () => {
     const q = query(
       collection(FIREBASE_DB, "chats"),
@@ -194,6 +196,7 @@ function Messages({ navigation }) {
     });
   };
 
+  // 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
       activeOpacity={0.8}

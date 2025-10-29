@@ -103,6 +103,7 @@ function AddReviewToAccepter() {
       .map(() => new Animated.Value(1))
   );
 
+  // Rating Star Animation
   const animateStar = (index: number) => {
     Animated.sequence([
       Animated.timing(starAnimations[index], {
@@ -118,6 +119,7 @@ function AddReviewToAccepter() {
     ]).start();
   };
 
+  // Saving Review In Notifications DB
   const saveReviewNotification = async () => {
     try {
       await addDoc(collection(FIREBASE_DB, "notifications"), {
@@ -152,6 +154,7 @@ function AddReviewToAccepter() {
     }
   };
 
+  // Sending Push Notification
   const sendReviewPushNotification = async () => {
     if (!recipientUser?.token) return;
     try {
@@ -182,6 +185,8 @@ function AddReviewToAccepter() {
     }
   };
 
+
+  // Translations-----
   useEffect(() => {
     (async () => {
       const l = await getTargetLanguage();
@@ -226,10 +231,10 @@ function AddReviewToAccepter() {
     })();
   }, [originalDesc, lang]);
 
+
   const toggleStar = (idx: number) => {
     const newRating = rating.map((_, i) => i <= idx);
     setRating(newRating);
-
     // Animate all stars up to the selected one
     newRating.forEach((selected, index) => {
       if (selected && index <= idx) {
@@ -238,6 +243,7 @@ function AddReviewToAccepter() {
     });
   };
 
+  // Review Submission
   const submitReview = async () => {
     const stars = rating.filter(Boolean).length;
     if (reviewText.trim() === "") {

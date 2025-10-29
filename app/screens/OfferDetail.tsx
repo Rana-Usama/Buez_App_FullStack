@@ -37,8 +37,11 @@ import { cachedTranslate } from "../utils/cachedTranslations";
 import { onSnapshot } from "firebase/firestore";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import AcceptanceSuccessModal from "../components/common/AcceptanceSuccessModal";
-import { formatCurrency, convertCurrency, getCurrencyInfo } from "../utils/currencyChange";
-import { useSelector } from "react-redux";
+import {
+  formatCurrency,
+  convertCurrency,
+  getCurrencyInfo,
+} from "../utils/currencyChange";
 import { useLocation } from "../utils/useLocation"; // Your location hook
 
 const screenWidth = Dimensions.get("window").width;
@@ -64,38 +67,30 @@ function OfferDetail({ navigation, route }) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { location: currentLocation } = useLocation();
 
-  console.log("postRequest..............",postRequest)
-
   const getConvertedCompensation = (item) => {
-  if (item.compensationType !== "Monitarely") return null;
+    if (item.compensationType !== "Monitarely") return null;
 
-  try {
-    const originalAmount = parseFloat(item.monitarily) || 0;
-    
-    // Use currentLocation first, fallback to selectedLocation
-    const locationToUse = currentLocation ;
-    
-    if (!item.currencyInfo) {
-      return formatCurrency(originalAmount, locationToUse);
+    try {
+      const originalAmount = parseFloat(item.monitarily) || 0;
+      // Use currentLocation first, fallback to selectedLocation
+      const locationToUse = currentLocation;
+      if (!item.currencyInfo) {
+        return formatCurrency(originalAmount, locationToUse);
+      }
+      // Get target currency from current location
+      const targetCurrency = getCurrencyInfo(locationToUse).code;
+      // Convert the amount
+      const convertedAmount = convertCurrency(
+        originalAmount,
+        item.currencyInfo.code, // Original currency
+        targetCurrency // Target currency (from current location)
+      );
+      return formatCurrency(convertedAmount, locationToUse);
+    } catch (error) {
+      console.log("Currency conversion error:", error);
+      return formatCurrency(parseFloat(item.monitarily) || 0, currentLocation);
     }
-    
-    // Get target currency from current location
-    const targetCurrency = getCurrencyInfo(locationToUse).code;
-    
-    // Convert the amount
-    const convertedAmount = convertCurrency(
-      originalAmount,
-      item.currencyInfo.code, // Original currency
-      targetCurrency // Target currency (from current location)
-    );
-    
-    return formatCurrency(convertedAmount, locationToUse);
-    
-  } catch (error) {
-    console.log("Currency conversion error:", error);
-    return formatCurrency(parseFloat(item.monitarily) || 0, currentLocation );
-  }
-};
+  };
 
   const handleModalClose = () => {
     setShowSuccessModal(false);
@@ -182,7 +177,6 @@ function OfferDetail({ navigation, route }) {
           }))
         );
         setTranslatedReviews(translated);
-
         // Calculate average rating
         const ratings = postRequest.reviews
           .map((r) => r.rating)
@@ -339,15 +333,7 @@ function OfferDetail({ navigation, route }) {
               colors={[Colors.primary, "#4557B0"]}
               start={{ x: 0, y: 1 }}
               end={{ x: 1, y: 0 }}
-              style={{
-                paddingHorizontal: RFPercentage(4),
-                paddingVertical: 4,
-                justifyContent: "center",
-                alignItems: "center",
-                borderTopRightRadius: RFPercentage(3),
-                borderBottomLeftRadius: RFPercentage(3),
-                alignSelf: "flex-start",
-              }}
+              style={styles.gradient}
             >
               <Text style={[styles.title, { color: "white" }]}>
                 {postRequest?.taskType === "Other"
@@ -360,12 +346,7 @@ function OfferDetail({ navigation, route }) {
               source={Icons.bar}
               resizeMode="contain"
               tintColor={Colors.primary}
-              style={{
-                width: RFPercentage(3.5),
-                height: RFPercentage(3.5),
-                bottom: RFPercentage(1),
-                right: RFPercentage(0.5),
-              }}
+              style={styles.img}
             />
           </View>
         </View>
@@ -413,13 +394,7 @@ function OfferDetail({ navigation, route }) {
           </View>
         )}
 
-        <View
-          style={{
-            width: "90%",
-            alignSelf: "center",
-            marginTop: RFPercentage(2.5),
-          }}
-        >
+        <View style={styles.wrap}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <View>
               <Image
@@ -433,11 +408,9 @@ function OfferDetail({ navigation, route }) {
             </View>
             <Text
               style={[
+                styles.txt,
                 {
                   color: theme.heading,
-                  fontFamily: "Poppins_600SemiBold",
-                  fontSize: RFPercentage(1.8),
-                  marginLeft: RFPercentage(0.6),
                 },
               ]}
             >
@@ -452,17 +425,15 @@ function OfferDetail({ navigation, route }) {
             style={[styles.infoContainer, { marginTop: RFPercentage(2.5) }]}
           >
             <View
-              style={{
-                width: RFPercentage(3),
-                height: RFPercentage(3),
-                borderRadius: RFPercentage(100),
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.primary + "40"
-                    : Colors.primary + "15",
-              }}
+              style={[
+                styles.wrap2,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? Colors.primary + "40"
+                      : Colors.primary + "15",
+                },
+              ]}
             >
               <Image
                 style={styles.icon}
@@ -494,17 +465,15 @@ function OfferDetail({ navigation, route }) {
 
         <View style={styles.infoContainer}>
           <View
-            style={{
-              width: RFPercentage(3),
-              height: RFPercentage(3),
-              borderRadius: RFPercentage(100),
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor:
-                theme.mode === "dark"
-                  ? Colors.primary + "40"
-                  : Colors.primary + "15",
-            }}
+            style={[
+              styles.wrap2,
+              {
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? Colors.primary + "40"
+                    : Colors.primary + "15",
+              },
+            ]}
           >
             <Image
               style={styles.icon}
@@ -518,34 +487,21 @@ function OfferDetail({ navigation, route }) {
             "details.txt4"
           )}`}</Text>
         </View>
-        <Text
-          style={[
-            {
-              color: theme.darkGrey,
-              fontSize: RFPercentage(1.8),
-              fontFamily: "Poppins_400Regular",
-              alignSelf: "center",
-              width: "90%",
-              marginTop: RFPercentage(0.5),
-            },
-          ]}
-        >
+        <Text style={[styles.txt4, { color: theme.darkGrey }]}>
           {postRequest.address.name}
         </Text>
 
         <View style={styles.infoContainer}>
           <View
-            style={{
-              width: RFPercentage(3),
-              height: RFPercentage(3),
-              borderRadius: RFPercentage(100),
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor:
-                theme.mode === "dark"
-                  ? Colors.primary + "40"
-                  : Colors.primary + "15",
-            }}
+            style={[
+              styles.wrap2,
+              {
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? Colors.primary + "40"
+                    : Colors.primary + "15",
+              },
+            ]}
           >
             <Image
               style={styles.icon}
@@ -565,34 +521,22 @@ function OfferDetail({ navigation, route }) {
             alignSelf: "center",
           }}
         >
-          <Text
-            style={[
-              {
-                color: theme.darkGrey,
-                fontSize: RFPercentage(1.8),
-                fontFamily: "Poppins_400Regular",
-                width: "100%",
-                marginTop: RFPercentage(0.5),
-              },
-            ]}
-          >
+          <Text style={[styles.txt3, { color: theme.darkGrey }]}>
             {getDateTime(postRequest.createdAt)}
           </Text>
         </View>
 
         <View style={styles.compensationContainer}>
           <View
-            style={{
-              width: RFPercentage(3),
-              height: RFPercentage(3),
-              borderRadius: RFPercentage(100),
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor:
-                theme.mode === "dark"
-                  ? Colors.primary + "40"
-                  : Colors.primary + "15",
-            }}
+            style={[
+              styles.wrap2,
+              {
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? Colors.primary + "40"
+                    : Colors.primary + "15",
+              },
+            ]}
           >
             <Image
               style={styles.icon}
@@ -614,28 +558,18 @@ function OfferDetail({ navigation, route }) {
           </Text>
         </View>
 
-        <View
-          style={{
-            width: "90%",
-            alignSelf: "center",
-            marginTop: RFPercentage(2.1),
-            // flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
+        <View style={styles.inner}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <View
-              style={{
-                width: RFPercentage(3),
-                height: RFPercentage(3),
-                borderRadius: RFPercentage(100),
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.primary + "40"
-                    : Colors.primary + "15",
-              }}
+              style={[
+                styles.wrap2,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? Colors.primary + "40"
+                      : Colors.primary + "15",
+                },
+              ]}
             >
               <AntDesign
                 name="barschart"
@@ -653,14 +587,7 @@ function OfferDetail({ navigation, route }) {
             </Text>
           </View>
           {averageRating && (
-            <View
-              style={{
-                flexDirection: "row",
-                // justifyContent: "space-between",
-                alignItems: "center",
-                marginTop: RFPercentage(1),
-              }}
-            >
+            <View style={styles.inner2}>
               <Text style={[styles.rating, { color: theme.heading }]}>
                 {t("details.txt14")}:
               </Text>
@@ -708,8 +635,6 @@ function OfferDetail({ navigation, route }) {
                                 styles.userName,
                                 {
                                   color: theme.heading,
-                                  fontSize: RFPercentage(1.7),
-                                  fontFamily: "Poppins_600SemiBold",
                                 },
                               ]}
                             >
@@ -718,12 +643,7 @@ function OfferDetail({ navigation, route }) {
 
                             {item?.createdAt && (
                               <Text
-                                style={{
-                                  fontSize: RFPercentage(1.4),
-                                  color: theme.darkGrey,
-                                  fontFamily: "Poppins_400Regular",
-                                  alignSelf: "flex-start",
-                                }}
+                                style={[styles.date, { color: theme.darkGrey }]}
                               >
                                 {getDateTime(item.createdAt)}
                               </Text>
@@ -759,29 +679,16 @@ function OfferDetail({ navigation, route }) {
                       {/* Review Text */}
                       <Text
                         style={[
-                          styles.userName,
+                          styles.userName2,
                           {
                             color: theme.darkGrey,
-                            marginTop: RFPercentage(0.6),
-                            fontFamily: "Poppins_400Regular_Italic",
-                            fontSize: RFPercentage(1.6),
-                            fontStyle: "italic",
                           },
                         ]}
                       >
                         {item?.translatedText}
                       </Text>
 
-                      {!isLastItem && (
-                        <View
-                          style={{
-                            width: "60%",
-                            height: RFPercentage(0.1),
-                            backgroundColor: "rgba(226, 226, 226, 0.4)",
-                            marginTop: RFPercentage(1),
-                          }}
-                        />
-                      )}
+                      {!isLastItem && <View style={styles.last} />}
                     </View>
                   );
                 }}
@@ -1006,8 +913,15 @@ const styles = StyleSheet.create({
   },
   userName: {
     color: Colors.heading,
-    fontFamily: "Poppins_500Medium",
+
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  userName2: {
+    marginTop: RFPercentage(0.6),
+    fontFamily: "Poppins_400Regular_Italic",
     fontSize: RFPercentage(1.6),
+    fontStyle: "italic",
   },
   text: {
     color: Colors.primary,
@@ -1022,6 +936,74 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     marginTop: RFPercentage(4),
+  },
+  gradient: {
+    paddingHorizontal: RFPercentage(4),
+    paddingVertical: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopRightRadius: RFPercentage(3),
+    borderBottomLeftRadius: RFPercentage(3),
+    alignSelf: "flex-start",
+  },
+  img: {
+    width: RFPercentage(3.5),
+    height: RFPercentage(3.5),
+    bottom: RFPercentage(1),
+    right: RFPercentage(0.5),
+  },
+  wrap: {
+    width: "90%",
+    alignSelf: "center",
+    marginTop: RFPercentage(2.5),
+  },
+  txt: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.8),
+    marginLeft: RFPercentage(0.6),
+  },
+  wrap2: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+    borderRadius: RFPercentage(100),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  last: {
+    width: "60%",
+    height: RFPercentage(0.1),
+    backgroundColor: "rgba(226, 226, 226, 0.4)",
+    marginTop: RFPercentage(1),
+  },
+  date: {
+    fontSize: RFPercentage(1.4),
+
+    fontFamily: "Poppins_400Regular",
+    alignSelf: "flex-start",
+  },
+  inner: {
+    width: "90%",
+    alignSelf: "center",
+    marginTop: RFPercentage(2.1),
+    justifyContent: "space-between",
+  },
+  inner2: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: RFPercentage(1),
+  },
+  txt3: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+    width: "100%",
+    marginTop: RFPercentage(0.5),
+  },
+  txt4: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_400Regular",
+    alignSelf: "center",
+    width: "90%",
+    marginTop: RFPercentage(0.5),
   },
 });
 

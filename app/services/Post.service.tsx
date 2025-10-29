@@ -143,62 +143,7 @@ export const getMyReuqests = async (
   }
 };
 
-// export const getRequestList = async (
-//   taskType = "",
-//   searchQuery = "",
-//   lastVisiblePost = null,
-//   pageSize = PAGE_SIZE
-// ) => {
-//   try {
-//     const userId = getAuth().currentUser?.uid;
-//     if (!userId) throw new Error("User is not logged in");
-
-//     let q = query(
-//       collection(FIREBASE_DB, "taskRequests"),
-//       where("status", "==", "Active"),
-//       where("userId", "!=", userId),
-//       where("acceptedBy", "==", null),
-//       orderBy("createdAt", "desc"),
-//       limit(pageSize)
-//     );
-
-//     if (lastVisiblePost) {
-//       q = query(q, startAfter(lastVisiblePost));
-//     }
-
-//     if (taskType && taskType !== "All") {
-//       q = query(q, where("taskType", "==", taskType));
-//     }
-
-//     if (searchQuery) {
-//       const keywords = searchQuery
-//         .trim()
-//         .split(" ")
-//         .map((k) => k.toLowerCase());
-//       q = query(
-//         q,
-//         where("descriptionKeywords", "array-contains-any", keywords)
-//       );
-//     }
-
-//     const snapshot = await getDocs(q);
-
-//     const tasksArray = snapshot.docs.map((docSnapshot) => ({
-//       id: docSnapshot.id,
-//       ...docSnapshot.data(),
-//     }));
-
-//     const lastVisible = snapshot.docs[snapshot.docs.length - 1];
-//     return { tasksArray, lastVisible };
-
-//   } catch (error) {
-//     console.log("GET_POSTS_LIST: ", error);
-//     throw error;
-//   }
-// };
-
 // real-time version of getRequestList
-
 export const getRequestList = (
   taskType = "",
   searchQuery = "",

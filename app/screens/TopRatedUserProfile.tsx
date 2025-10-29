@@ -217,11 +217,13 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       }}
     >
       <View style={{ width: "100%" }}>
-        <Image
-          source={item?.taskDetails?.imageUrls}
-          resizeMode="cover"
-          style={{ width: "100%", height: RFPercentage(18) }}
-        />
+        {item?.taskDetails?.imageUrls?.length > 0 && (
+          <Image
+            source={{ uri: item.taskDetails.imageUrls[0] }}
+            resizeMode="cover"
+            style={{ width: "100%", height: RFPercentage(18) }}
+          />
+        )}
       </View>
       <View style={styles.taskContent}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -447,7 +449,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 ]}
               >
                 <Ionicons
-                  name={categoryBadge?.icon}
+                  name={categoryBadge?.icon as any}
                   size={RFPercentage(1.5)}
                   color={Colors.white}
                 />
@@ -593,11 +595,13 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         {/* Content Section */}
         <View style={styles.contentSection}>
           {activeTab === "completed" ? (
-            (translatedTasks.length > 0 ? translatedTasks : tasks.completed)
+            (translatedTasks?.length > 0 ? translatedTasks : tasks?.completed)
               .length > 0 ? (
               <FlatList
                 data={
-                  translatedTasks.length > 0 ? translatedTasks : tasks.completed
+                  translatedTasks?.length > 0
+                    ? translatedTasks
+                    : tasks?.completed
                 }
                 renderItem={renderTaskItem}
                 keyExtractor={(item, index) => index.toString()}
@@ -610,10 +614,10 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 {t("profileRank.txt36")}
               </Text>
             )
-          ) : (translatedReviews.length > 0 ? translatedReviews : reviews)
+          ) : (translatedReviews?.length > 0 ? translatedReviews : reviews)
               .length > 0 ? (
             <FlatList
-              data={translatedReviews.length > 0 ? translatedReviews : reviews}
+              data={translatedReviews?.length > 0 ? translatedReviews : reviews}
               renderItem={renderReviewItem}
               keyExtractor={(item) => item.id.toString()}
               scrollEnabled={false}
@@ -684,6 +688,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(0.8),
     fontFamily: "Poppins_600SemiBold",
     marginLeft: RFPercentage(0.3),
+    lineHeight: RFPercentage(1),
   },
   profileInfo: {
     flex: 1,
@@ -774,6 +779,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
+    lineHeight: RFPercentage(2),
   },
   activeTabText: {
     color: Colors.white,
@@ -938,7 +944,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    bottom:50
+    bottom: 50,
   },
   loadingText: {
     marginTop: RFPercentage(2),

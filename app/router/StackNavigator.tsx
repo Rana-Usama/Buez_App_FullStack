@@ -72,7 +72,7 @@ const StackNavigator = () => {
 
   // Loading screen while initial route resolves
   if (isLoading || userLoading || !initialRoute) {
-    <InitialScreen />;
+    return <InitialScreen />;
   }
 
   console.log("📍 userData:", userData);

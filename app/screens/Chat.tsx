@@ -45,11 +45,9 @@ import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { Icons } from "../config/theme";
-import { chatCache } from "../contexts/chatCache";
 
 const Chat = ({ navigation, route }) => {
   const { t } = useTranslation();
-
   const {
     chatId,
     senderId: currentUserId,
@@ -170,49 +168,8 @@ const Chat = ({ navigation, route }) => {
         setLoader(false); // stop loader
       }
     };
-
     fetchInitialMessages();
   }, [chatId]);
-
-  // const fetchMoreMessages = async () => {
-  //   if (!lastVisible) return;
-  //   const q = query(
-  //     collection(FIREBASE_DB, `chats/${chatId}/messages`),
-  //     orderBy("timestamp", "desc"),
-  //     startAfter(lastVisible),
-  //     limit(100)
-  //   );
-  //   const snapshot = await getDocs(q);
-  //   const newMessages = await Promise.all(
-  //     snapshot.docs.map(async (doc) => {
-  //       const firebaseMessage = doc.data();
-  //       const translatedText = await cachedTranslate(firebaseMessage?.text);
-  //       return {
-  //         _id: doc.id,
-  //         text: translatedText,
-  //         createdAt: firebaseMessage.timestamp.toDate(),
-  //         user: {
-  //           _id: firebaseMessage.senderId,
-  //           name: firebaseMessage.senderName,
-  //         },
-  //       };
-  //     })
-  //   );
-
-  //   setMessages((prevMessages) => {
-  //     const messagesMap = new Map();
-  //     prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-  //     newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-  //     const combinedMessages = Array.from(messagesMap.values()).sort(
-  //       (a, b) =>
-  //         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  //     );
-  //     return GiftedChat.append([], combinedMessages).filter(Boolean);
-  //   });
-
-  //   markMessagesAsRead();
-  //   setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-  // };
 
   const onSend = useCallback(async (messages = []) => {
     const message = messages[0];
@@ -263,7 +220,6 @@ const Chat = ({ navigation, route }) => {
         }
       );
       const data = await response.text();
-      console.log("data........", data);
       return data;
     } catch (error) {
       console.log("sendPushNotification error:", error);
@@ -340,10 +296,7 @@ const Chat = ({ navigation, route }) => {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <View
-        style={[
-          styles.profileContainer,
-          { borderBottomColor: "rgba(218, 218, 218, 1)" },
-        ]}
+        style={[styles.profileContainer, { borderBottomColor: Colors.white5 }]}
       >
         <TouchableOpacity
           activeOpacity={0.8}
@@ -413,12 +366,12 @@ const Chat = ({ navigation, route }) => {
             }}
             renderInputToolbar={(props) => (
               <View
-                style={{
-                  backgroundColor: theme.white,
-                  minHeight: RFPercentage(10),
-                  justifyContent: "center",
-                  paddingVertical: RFPercentage(2),
-                }}
+                style={[
+                  styles.wrap,
+                  {
+                    backgroundColor: theme.white,
+                  },
+                ]}
               >
                 <InputToolbar
                   {...props}
@@ -492,52 +445,21 @@ const Chat = ({ navigation, route }) => {
               return receiver?.profileImage ? (
                 <Image
                   source={{ uri: receiver.profileImage }}
-                  style={{
-                    width: RFPercentage(5),
-                    height: RFPercentage(5),
-                    borderRadius: RFPercentage(50),
-                    borderWidth: 1,
-                    borderColor: Colors.primary,
-                    bottom: RFPercentage(0.3),
-                  }}
+                  style={styles.img}
                 />
               ) : (
-                <View
-                  style={{
-                    width: RFPercentage(5),
-                    height: RFPercentage(5),
-                    borderRadius: RFPercentage(50),
-                    backgroundColor: theme.white,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bottom: RFPercentage(0.3),
-                    borderWidth: 1,
-                    borderColor: Colors.primary,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: theme.primary,
-                      fontSize: RFPercentage(1.8),
-                      fontFamily: "Poppins_600SemiBold",
-                      lineHeight: RFPercentage(2),
-                    }}
-                  >
+                <View style={[styles.inner, { backgroundColor: theme.white }]}>
+                  <Text style={[styles.nm, { color: theme.primary }]}>
                     {receiver?.userName?.[0] || receiver?.name?.[0] || "?"}
                   </Text>
                 </View>
               );
             }}
             renderBubble={(props) => {
-              const isFromCurrentUser =
-                props.currentMessage?.user?._id === currentUserId;
               const isFromSameUser =
                 props.currentMessage?.user?._id ===
                 props.previousMessage?.user?._id;
-
-              // Only show the bubble if the message exists
               if (!props.currentMessage) return null;
-
               return (
                 <View
                   style={{
@@ -585,39 +507,21 @@ const Chat = ({ navigation, route }) => {
                       },
                     }}
                   />
-                  {/* {isFromCurrentUser && (
-                    <TouchableOpacity
-                      onPress={() =>
-                        handleDeletePress(props.currentMessage._id)
-                      }
-                      style={{ top: RFPercentage(0.4) }}
-                    >
-                      <Entypo
-                        name="dots-three-vertical"
-                        size={RFPercentage(2.2)}
-                        color={theme.darkGrey}
-                      />
-                    </TouchableOpacity>
-                  )} */}
                 </View>
               );
             }}
           />
           {loader && (
             <View
-              style={{
-                position: "absolute",
-                top: 0,
-                bottom: RFPercentage(10),
-                left: 0,
-                right: 0,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? "rgba(4, 4, 4, 0.6)"
-                    : "rgba(255,255,255,0.6)",
-              }}
+              style={[
+                styles.loader,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? "rgba(4, 4, 4, 0.6)"
+                      : "rgba(255,255,255,0.6)",
+                },
+              ]}
             >
               <ActivityIndicator
                 size="large"
@@ -665,15 +569,7 @@ const Chat = ({ navigation, route }) => {
                 style={styles.markButton}
                 onPress={confirmDelete}
               >
-                <Text
-                  style={{
-                    color: "white",
-                    fontFamily: "Poppins_500Medium",
-                    fontSize: RFPercentage(1.7),
-                  }}
-                >
-                  {t("chat.txt5")}
-                </Text>
+                <Text style={styles.txt}>{t("chat.txt5")}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -832,6 +728,49 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.primary,
     width: RFPercentage(17.5),
+  },
+  wrap: {
+    minHeight: RFPercentage(10),
+    justifyContent: "center",
+    paddingVertical: RFPercentage(2),
+  },
+  img: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(50),
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    bottom: RFPercentage(0.3),
+  },
+  inner: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(50),
+
+    alignItems: "center",
+    justifyContent: "center",
+    bottom: RFPercentage(0.3),
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  nm: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+    lineHeight: RFPercentage(2),
+  },
+  loader: {
+    position: "absolute",
+    top: 0,
+    bottom: RFPercentage(10),
+    left: 0,
+    right: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  txt: {
+    color: "white",
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.7),
   },
 });
 

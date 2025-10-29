@@ -5,7 +5,7 @@ import { useUser } from "../contexts/user.context";
 
 const SubscriptionListener = ({ userId }) => {
   const { userData, loading } = useUser();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     if (loading || !userData) return;
@@ -14,20 +14,28 @@ const SubscriptionListener = ({ userId }) => {
     const trialStartTimestamp = userData?.freeTrialStartedAt?.seconds;
     const isFreeTrial = userData?.isFreeTrial ?? false;
 
-    const trialStartDate = trialStartTimestamp ? new Date(trialStartTimestamp * 1000) : null;
+    const trialStartDate = trialStartTimestamp
+      ? new Date(trialStartTimestamp * 1000)
+      : null;
 
     if (trialStartDate) {
       const trialAge = differenceInDays(new Date(), trialStartDate);
       if (isFreeTrial && trialAge >= 0 && trialAge <= 14) {
         navigation.navigate("Home");
-      } else if ((isFreeTrial && trialAge < 0) || (trialAge > 14 && !isSubscribed)) {
+      } else if (
+        (isFreeTrial && trialAge < 0) ||
+        (trialAge > 14 && !isSubscribed)
+      ) {
         navigation.navigate("Subscription");
       } else {
         navigation.navigate("FreeTrial");
       }
     } else if (isSubscribed) {
       navigation.navigate("Home");
-    } else if (!isSubscribed && userData?.freeTrialStartedAt <= userData?.freeTrialEndAt) {
+    } else if (
+      !isSubscribed &&
+      userData?.freeTrialStartedAt <= userData?.freeTrialEndAt
+    ) {
       navigation.navigate("Home");
     } else {
       navigation.navigate("FreeTrial");

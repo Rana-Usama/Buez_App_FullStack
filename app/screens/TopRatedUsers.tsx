@@ -29,6 +29,17 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { selectLocation } from "../redux/Actions";
 
+type ApiUser = {
+  userId: string;
+  name: string;
+  profileImage?: string;
+  memberSince?: string;
+  activeCount?: number;
+  completedCount?: number;
+  category?: string;
+  distance?: number;
+};
+
 const TopRatedUsers = ({ navigation }: any) => {
   const { theme } = useAppTheme();
   const { t } = useTranslation();
@@ -64,7 +75,9 @@ const TopRatedUsers = ({ navigation }: any) => {
               }
             : null;
 
-        const apiUsers = await fetchUsersWithTaskStats(customLocation);
+        const apiUsers = (await fetchUsersWithTaskStats(
+          customLocation
+        )) as ApiUser[];
 
         console.log(apiUsers);
 
@@ -308,7 +321,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                 ]}
               >
                 <Ionicons
-                  name={badgeInfo.icon}
+                  name={badgeInfo.icon as any}
                   size={RFPercentage(1.2)}
                   color={badgeInfo.color}
                 />
@@ -477,7 +490,6 @@ const TopRatedUsers = ({ navigation }: any) => {
                 backgroundColor={theme.white}
                 borderWidth={1}
                 borderColor={theme.border}
-                secure={item.secure}
                 borderRadius={RFPercentage(1.2)}
                 color={theme.heading}
                 fontSize={RFPercentage(1.6)}
@@ -485,8 +497,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                 handleFeild={(text) => handleChange(text, i)}
                 value={item.value}
                 width={"100%"}
-                icon="search"
-                iconColor={theme.grey}
+                icon={true}
               />
             </View>
           ))}
@@ -800,7 +811,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1),
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(0.2),
-    marginHorizontal:20
+    marginHorizontal: 20,
   },
   statDivider: {
     width: 1,

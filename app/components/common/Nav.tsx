@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "flex-end",
     alignSelf: "center",
-    height: RFPercentage(10),
+    height:  Platform.OS === 'ios' ?  RFPercentage(10) : RFPercentage(10),
     backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "rgba(224, 227, 232, 0.5)",

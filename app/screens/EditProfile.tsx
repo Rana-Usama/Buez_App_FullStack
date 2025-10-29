@@ -18,7 +18,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import MyAppButton from "../components/common/MyAppButton";
 import Nav from "../components/common/Nav";
 import InputField from "../components/common/InputField";
-import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { useFocusEffect } from "@react-navigation/native";
 import { updateProfile } from "../services/User.service";
@@ -56,7 +55,7 @@ function EditProfile({ navigation }) {
     validationError: "",
     pleaseEnterName: "",
     cameraPermissionTitle: "",
-    cameraPermissionMessage: ""
+    cameraPermissionMessage: "",
   });
 
   const [inputField, setInputField] = useState<InputFieldType[]>([
@@ -83,15 +82,21 @@ function EditProfile({ navigation }) {
           validationError,
           pleaseEnterName,
           cameraPermissionTitle,
-          cameraPermissionMessage
+          cameraPermissionMessage,
         ] = await Promise.all([
           cachedTranslate("Biography"),
-          cachedTranslate("Tell others about yourself, your skills, and experience..."),
-          cachedTranslate("Share your professional background, skills, and what makes you a great performer"),
+          cachedTranslate(
+            "Tell others about yourself, your skills, and experience..."
+          ),
+          cachedTranslate(
+            "Share your professional background, skills, and what makes you a great performer"
+          ),
           cachedTranslate("Validation Error"),
           cachedTranslate("Please enter your name"),
           cachedTranslate("Permission Required"),
-          cachedTranslate("Sorry, we need camera roll permissions to change your profile picture.")
+          cachedTranslate(
+            "Sorry, we need camera roll permissions to change your profile picture."
+          ),
         ]);
 
         setTranslatedTexts({
@@ -101,47 +106,28 @@ function EditProfile({ navigation }) {
           validationError,
           pleaseEnterName,
           cameraPermissionTitle,
-          cameraPermissionMessage
+          cameraPermissionMessage,
         });
       } catch (error) {
         console.log("Error translating texts:", error);
         // Set fallback texts
         setTranslatedTexts({
           biographyTitle: "Biography",
-          biographyPlaceholder: "Tell others about yourself, your skills, and experience...",
-          biographyHint: "Share your professional background, skills, and what makes you a great performer",
+          biographyPlaceholder:
+            "Tell others about yourself, your skills, and experience...",
+          biographyHint:
+            "Share your professional background, skills, and what makes you a great performer",
           validationError: "Validation Error",
           pleaseEnterName: "Please enter your name",
           cameraPermissionTitle: "Permission Required",
-          cameraPermissionMessage: "Sorry, we need camera roll permissions to change your profile picture."
+          cameraPermissionMessage:
+            "Sorry, we need camera roll permissions to change your profile picture.",
         });
       }
     };
 
     translateTexts();
   }, []);
-
-  // Translate existing biography when component loads or biography changes
-  useEffect(() => {
-    const translateExistingBiography = async () => {
-      if (biography && biography.trim() !== '') {
-        setIsTranslating(true);
-        try {
-          const translated = await cachedTranslate(biography);
-          setTranslatedBiography(translated);
-        } catch (error) {
-          console.log("Error translating existing biography:", error);
-          setTranslatedBiography(biography); // Fallback to original
-        } finally {
-          setIsTranslating(false);
-        }
-      } else {
-        setTranslatedBiography("");
-      }
-    };
-
-    translateExistingBiography();
-  }, [biography]);
 
   const handleChange = (text, i) => {
     let tempFields = [...inputField];
@@ -151,17 +137,16 @@ function EditProfile({ navigation }) {
 
   const handleBiographyChange = (text) => {
     setBiography(text);
-    // When user is typing, show the text directly without translation
-    setTranslatedBiography(text);
   };
 
+  // Image Picker
   const pickImage = async () => {
-    // Request permissions
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
         translatedTexts.cameraPermissionTitle || "Permission Required",
-        translatedTexts.cameraPermissionMessage || "Sorry, we need camera roll permissions to change your profile picture."
+        translatedTexts.cameraPermissionMessage ||
+          "Sorry, we need camera roll permissions to change your profile picture."
       );
       return;
     }
@@ -192,21 +177,34 @@ function EditProfile({ navigation }) {
     }, [])
   );
 
+  // When fetching user data
   const fetchUserData = async () => {
-    try {
-      if (user) {
-        const name = user?.userName || "";
-        const bio = user?.biography || "";
-        const image = user?.profileImage || null;
-        const tempFields = [...inputField];
-        tempFields[0].value = name;
-        setInputField(tempFields);
-        setOriginalData({ name, biography: bio, imageUri: image });
-        setImageUri(image);
-        setBiography(bio);
+    if (user) {
+      const name = user?.userName || "";
+      const bio = user?.biography || "";
+      const image = user?.profileImage || null;
+
+      const tempFields = [...inputField];
+      tempFields[0].value = name;
+      setInputField(tempFields);
+
+      setOriginalData({ name, biography: bio, imageUri: image });
+      setImageUri(image);
+      setBiography(bio);
+
+      // Translate only if bio exists
+      if (bio.trim()) {
+        setIsTranslating(true);
+        try {
+          const translated = await cachedTranslate(bio);
+          setTranslatedBiography(translated);
+        } catch (error) {
+          console.log("Error translating biography:", error);
+          setTranslatedBiography(bio); // fallback
+        } finally {
+          setIsTranslating(false);
+        }
       }
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -366,15 +364,23 @@ function EditProfile({ navigation }) {
               >
                 {isTranslating ? (
                   <View style={styles.translatingContainer}>
-                    <Text style={[styles.translatingText, { color: theme.darkGrey }]}>
+                    <Text
+                      style={[
+                        styles.translatingText,
+                        { color: theme.darkGrey },
+                      ]}
+                    >
                       Translating...
                     </Text>
                   </View>
                 ) : (
                   <TextInput
-                    placeholder={translatedTexts.biographyPlaceholder || "Tell others about yourself, your skills, and experience..."}
+                    placeholder={
+                      translatedTexts.biographyPlaceholder ||
+                      "Tell others about yourself, your skills, and experience..."
+                    }
                     placeholderTextColor={theme.inputFieldPlaceholder}
-                    value={translatedBiography}
+                    value={biography}
                     multiline
                     onChangeText={handleBiographyChange}
                     maxLength={300}
@@ -388,7 +394,8 @@ function EditProfile({ navigation }) {
               </View>
 
               <Text style={[styles.biographyHint, { color: theme.darkGrey }]}>
-                {translatedTexts.biographyHint || "Share your professional background, skills, and what makes you a great performer"}
+                {translatedTexts.biographyHint ||
+                  "Share your professional background, skills, and what makes you a great performer"}
               </Text>
             </View>
           </View>

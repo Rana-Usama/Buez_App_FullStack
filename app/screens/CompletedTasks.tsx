@@ -42,6 +42,7 @@ export default function CompletedTasks({ navigation }: any) {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const { theme } = useAppTheme();
 
+  // Translations-----
   useEffect(() => {
     (async () => {
       const base: Translations = {
@@ -65,6 +66,7 @@ export default function CompletedTasks({ navigation }: any) {
     })();
   }, []);
 
+  // Fetching Completed Tasks-------------
   const fetchCompletedTasks = async () => {
     setLoading(true);
     try {
@@ -88,7 +90,6 @@ export default function CompletedTasks({ navigation }: any) {
           };
         })
       );
-
       setCache(newCache);
       setTasks(records);
     } catch (e) {
@@ -98,6 +99,7 @@ export default function CompletedTasks({ navigation }: any) {
     }
   };
 
+  
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchCompletedTasks();
@@ -132,7 +134,9 @@ export default function CompletedTasks({ navigation }: any) {
     const owner = details.user || {};
     const doneOn =
       item.completedAt || item.acceptedAt || new Date().toISOString();
-    const cached = cache[item.id] || {};
+    const cached = cache[item.id] as
+      | { desc?: string; category?: string }
+      | undefined;
     const desc = cached?.desc ?? tr.translating;
     const catName = cached?.category ?? tr.translating;
 
@@ -284,7 +288,7 @@ export default function CompletedTasks({ navigation }: any) {
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       {/* Header */}
-      <View style={[styles.headerContainer,{backgroundColor:theme.white}]}>
+      <View style={[styles.headerContainer, { backgroundColor: theme.white }]}>
         <Nav
           dpNull
           marginTop={RFPercentage(5)}

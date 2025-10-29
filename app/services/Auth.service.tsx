@@ -19,9 +19,9 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
+
 
 export const resetPassword = async (email: any) => {
   try {
@@ -33,12 +33,12 @@ export const resetPassword = async (email: any) => {
   }
 };
 
+
 export const emailVerification = async (user: any) => {
   if (!user) {
     alert("Unable to complete the process, please try again");
     return;
   }
-
   try {
     sendEmailVerification(user, {
       handleCodeInApp: true,
@@ -64,6 +64,7 @@ export const emailVerification = async (user: any) => {
   }
 };
 
+
 // Function to update user password
 export const updatePassword = async (
   currentPassword: any,
@@ -88,6 +89,7 @@ export const updatePassword = async (
   }
 };
 
+
 export const logout = async () => {
   await signOut(FIREBASE_AUTH);
   await SecureStore.setItemAsync("loggedOut", "true");
@@ -97,6 +99,7 @@ export const logout = async () => {
     text2: "You have been successfully logged out from your account!",
   });
 };
+
 
 // Remember me
 // Save credentials
@@ -116,6 +119,7 @@ export async function removeCredentials() {
   await SecureStore.deleteItemAsync("email");
   await SecureStore.deleteItemAsync("password");
 }
+
 
 export const deleteCurrentUser = async (currentPassword) => {
   const user = FIREBASE_AUTH.currentUser;
@@ -155,6 +159,7 @@ export const deleteCurrentUser = async (currentPassword) => {
   }
 };
 
+
 export const saveLocationToSecureStore = async (location) => {
   try {
     await SecureStore.setItemAsync("user_location", JSON.stringify(location));
@@ -162,6 +167,7 @@ export const saveLocationToSecureStore = async (location) => {
     console.log("Error saving location:", e);
   }
 };
+
 
 export const getLocationFromSecureStore = async () => {
   try {
@@ -172,6 +178,7 @@ export const getLocationFromSecureStore = async () => {
     return null;
   }
 };
+
 
 export async function deleteGoogleAccount() {
   try {

@@ -118,10 +118,7 @@ export default function Reviews({ navigation }) {
           review.createdAt?.toDate?.() ?? review.createdAt ?? new Date();
         const title = getSectionTitle(new Date(createdAt), lang);
         if (!translationMap[review.id]) {
-          const translatedText = await cachedTranslate(
-            review.reviewText || "",
-            lang
-          );
+          const translatedText = await cachedTranslate(review.reviewText || "");
           translationMap[review.id] = translatedText;
         }
         const arr = grouped.get(title) || [];
@@ -182,16 +179,6 @@ export default function Reviews({ navigation }) {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        // <View
-        //   key={i}
-        //   style={[
-        //     styles.starContainer,
-        //     {
-        //       backgroundColor: i <= rating ? Colors.star : theme.white,
-        //       borderColor: i <= rating ? Colors.star : Colors.lightGrey,
-        //     },
-        //   ]}
-        // >
         <Text
           style={{
             color: i <= rating ? Colors.star : theme.lightGrey,
@@ -201,7 +188,6 @@ export default function Reviews({ navigation }) {
         >
           ★
         </Text>
-        // </View>
       );
     }
     return <View style={styles.starsRow}>{stars}</View>;
@@ -255,7 +241,12 @@ export default function Reviews({ navigation }) {
         </View>
 
         {/* Review Text */}
-        <Text style={[styles.reviewText, { color: theme.heading, fontStyle:'italic' }]}>
+        <Text
+          style={[
+            styles.reviewText,
+            { color: theme.heading, fontStyle: "italic" },
+          ]}
+        >
           "{translatedReview}"
         </Text>
 

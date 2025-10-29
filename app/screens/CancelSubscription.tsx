@@ -7,7 +7,7 @@ import {
   Image,
   StatusBar,
   Platform,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
@@ -18,7 +18,6 @@ import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
-import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
@@ -90,10 +89,17 @@ function CancelSubscription({ navigation }: any) {
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
       />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom:RFPercentage(3), alignItems:"center"}} style={{}}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: RFPercentage(3),
+          alignItems: "center",
+        }}
+        style={{}}
+      >
         <Image style={styles.logo} source={Icons.logo} />
         <TouchableOpacity
-        activeOpacity={0.8}
+          activeOpacity={0.8}
           style={{
             position: "absolute",
             left: RFPercentage(2),
@@ -208,6 +214,7 @@ function CancelSubscription({ navigation }: any) {
         title={t("cancelSubscription.txt10")}
         theme={theme}
         t={t}
+        loading={isloading}
       />
     </Screen>
   );

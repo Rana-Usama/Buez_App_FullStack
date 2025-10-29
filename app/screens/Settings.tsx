@@ -6,10 +6,6 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  Switch,
-  Platform,
-  Modal,
-  Pressable,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -52,18 +48,6 @@ function Settings({ navigation }) {
   }, []);
 
   const { theme, toggleTheme } = useAppTheme();
-  const [credentials, setCredentials] = useState({
-    email: null,
-    password: null,
-  });
-
-  useEffect(() => {
-    const fetchCredentials = async () => {
-      const savedCredentials = await getCredentials();
-      setCredentials(savedCredentials);
-    };
-    fetchCredentials();
-  }, []);
 
   const navigationsList = [
     {

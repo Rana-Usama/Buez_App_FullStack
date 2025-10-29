@@ -24,7 +24,8 @@ const Colors: { [key: string]: string } = {
   chat: "#A7ADCE",
   star : "#F3CF2C",
   success2 : "#4557B0",
-  switch : "rgb(224, 224, 227)"
+  switch : "rgb(224, 224, 227)",
+  white5 : "rgba(218, 218, 218, 1)"
 };
 
 export default Colors;

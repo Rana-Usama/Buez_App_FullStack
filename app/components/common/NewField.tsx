@@ -5,28 +5,32 @@ import {
   View,
   TouchableOpacity,
   Platform,
-} from 'react-native';
-import React, {useState} from 'react';
-import {RFPercentage} from 'react-native-responsive-fontsize';
+  KeyboardTypeOptions,
+} from "react-native";
+import React, { useState } from "react";
+import { RFPercentage } from "react-native-responsive-fontsize";
 import Feather from "@expo/vector-icons/Feather";
-import Colors from '../../config/Colors';
-import { useAppTheme } from '../../contexts/themeContext';
+import Colors from "../../config/Colors";
+import { useAppTheme } from "../../contexts/themeContext";
 
 interface Props {
   value?: any;
   onChangeText?: (text: string) => void;
   placeholder?: string;
   password?: boolean;
-  keyboardType?: string;
+  keyboardType?: KeyboardTypeOptions;
   customStyle?: object;
   handleBlur?: (event: any) => void;
   maxLength?: number;
-  editable? : boolean
+  editable?: boolean;
+  onSubmitEditing?: () => void;
 }
 
 const InputFieldNew = (props: Props) => {
-  const [visible, setVisible] = useState<boolean>(props.password ?  false : true);
-  const {theme} = useAppTheme()
+  const [visible, setVisible] = useState<boolean>(
+    props.password ? false : true
+  );
+  const { theme } = useAppTheme();
   const togglePasswordVisibility = () => {
     setVisible(!visible);
   };
@@ -35,7 +39,7 @@ const InputFieldNew = (props: Props) => {
     <View style={[styles.container, props.customStyle]}>
       <TextInput
         placeholder={props.placeholder}
-        style={[styles.textInput, {color:theme.black}]}
+        style={[styles.textInput, { color: theme.black }]}
         value={props.value}
         onChangeText={props.onChangeText}
         placeholderTextColor={theme.heading}
@@ -46,15 +50,15 @@ const InputFieldNew = (props: Props) => {
         editable={props.editable}
         selectionColor={theme.black}
         cursorColor={theme.black}
-        
+        onSubmitEditing={props.onSubmitEditing}
       />
       {props.password && (
         <TouchableOpacity onPress={togglePasswordVisibility} style={{}}>
           <Feather
-            name={visible ? 'eye' : 'eye-off'}
+            name={visible ? "eye" : "eye-off"}
             size={RFPercentage(1.8)}
             color={theme.lightGrey}
-            style={{right: RFPercentage(0.7)}}
+            style={{ right: RFPercentage(0.7) }}
           />
         </TouchableOpacity>
       )}
@@ -72,32 +76,31 @@ export default InputFieldNew;
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: "100%",
     borderWidth: 1.2,
-    borderColor: '#E5E7EB',
-    alignItems: 'center',
+    borderColor: "#E5E7EB",
+    alignItems: "center",
     borderRadius: RFPercentage(1.2),
     marginTop: RFPercentage(2.5),
-    justifyContent: 'space-between',
-    flexDirection: 'row',
+    justifyContent: "space-between",
+    flexDirection: "row",
     paddingHorizontal: RFPercentage(1.5),
-    height: Platform.OS === 'android' ? RFPercentage(6.5) : RFPercentage(5.8),
+    height: Platform.OS === "android" ? RFPercentage(6.5) : RFPercentage(5.8),
   },
   textInput: {
-    width: '92%',
+    width: "92%",
     color: Colors.black,
-    fontFamily: 'Poppins_400Regular',
+    fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.7),
-    alignSelf: 'center',
+    alignSelf: "center",
     height: RFPercentage(5.7),
-    justifyContent: 'center',
-    paddingVertical:0,
-    
+    justifyContent: "center",
+    paddingVertical: 0,
   },
   counterText: {
-    color: '#6B7280',
+    color: "#6B7280",
     fontSize: RFPercentage(1.3),
-    fontFamily: 'Poppins_400Regular',
-    right:RFPercentage(0)
+    fontFamily: "Poppins_400Regular",
+    right: RFPercentage(0),
   },
 });

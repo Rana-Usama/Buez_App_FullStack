@@ -12,7 +12,7 @@ import { getCredentials } from "../services/Auth.service";
 
 const DeciderScreen = () => {
   const { theme } = useAppTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { userData, loading: userLoading } = useUser();
 
   const [initialRoute, setInitialRoute] = useState(null);
@@ -29,7 +29,7 @@ const DeciderScreen = () => {
         const { email, password } = creds || {};
         const now = new Date();
 
-        console.log('creds.........', creds);
+        console.log("creds.........", creds);
 
         // 🔒 Explicitly logged out → Login
         if (loggedOut === "true") {

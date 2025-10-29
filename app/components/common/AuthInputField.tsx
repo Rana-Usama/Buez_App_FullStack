@@ -5,12 +5,8 @@ import {
   TouchableOpacity,
   Image,
   TextInputProps,
-  StyleProp,
-  TextStyle,
-  ViewStyle,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
 
@@ -154,7 +150,9 @@ const InputField: React.FC<InputFieldProps> = ({
         )}
 
         {cardIcon && (
-          <TouchableOpacity style={{ position: "absolute", right: RFPercentage(1) }}>
+          <TouchableOpacity
+            style={{ position: "absolute", right: RFPercentage(1) }}
+          >
             <Image
               style={{ width: RFPercentage(3.5), height: RFPercentage(3) }}
               source={Icons.visa}
@@ -163,7 +161,9 @@ const InputField: React.FC<InputFieldProps> = ({
         )}
 
         {icon && (
-          <TouchableOpacity style={{ position: "absolute", right: RFPercentage(1) }}>
+          <TouchableOpacity
+            style={{ position: "absolute", right: RFPercentage(1) }}
+          >
             <Ionicons
               color={Colors.darkGrey2}
               style={{ right: RFPercentage(0.5) }}
@@ -174,7 +174,9 @@ const InputField: React.FC<InputFieldProps> = ({
         )}
 
         {iconName === "Wifi" && (
-          <TouchableOpacity style={{ position: "absolute", right: RFPercentage(1) }}>
+          <TouchableOpacity
+            style={{ position: "absolute", right: RFPercentage(1) }}
+          >
             <Feather
               color={Colors.darkGrey2}
               style={{ right: RFPercentage(0.5) }}

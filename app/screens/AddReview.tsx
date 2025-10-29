@@ -118,6 +118,7 @@ function AddReview() {
     ]).start();
   };
 
+  //Save Review in Notification DB
   const saveReviewNotification = async () => {
     try {
       await addDoc(collection(FIREBASE_DB, "notifications"), {
@@ -152,6 +153,7 @@ function AddReview() {
     }
   };
 
+  // Sending Push Notification
   const sendReviewPushNotification = async () => {
     if (!recipientUser?.token) return;
     try {
@@ -182,6 +184,7 @@ function AddReview() {
     }
   };
 
+  // Translations
   useEffect(() => {
     (async () => {
       const l = await getTargetLanguage();
@@ -226,10 +229,11 @@ function AddReview() {
     })();
   }, [originalDesc, lang]);
 
+
+  // Selecting Star Rating
   const toggleStar = (idx: number) => {
     const newRating = rating.map((_, i) => i <= idx);
     setRating(newRating);
-
     // Animate all stars up to the selected one
     newRating.forEach((selected, index) => {
       if (selected && index <= idx) {
@@ -238,6 +242,7 @@ function AddReview() {
     });
   };
 
+  // Submitting Review
   const submitReview = async () => {
     const stars = rating.filter(Boolean).length;
     if (reviewText.trim() === "") {
@@ -297,6 +302,7 @@ function AddReview() {
     }
   };
 
+  // Star Color
   const getStarColor = (selected: boolean) => {
     return selected
       ? Colors.star

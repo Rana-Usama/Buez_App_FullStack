@@ -44,8 +44,26 @@ import {
   convertCurrency,
   getCurrencyInfo,
 } from "../utils/currencyChange";
-import { useSelector } from "react-redux";
 import { useLocation } from "../utils/useLocation"; // Your location hook
+
+type TaskRecord = {
+  id?: string;
+  title?: string;
+  description?: string;
+  taskType?: string;
+  customTaskTitle?: string;
+  otherCompensation?: string;
+  compensationType?: string;
+  monitarily?: string;
+  currencyInfo?: any;
+  acceptedBy?: any;
+  user?: any;
+  status?: string;
+  imageUrls?: string[];
+  createdAt?: any;
+  reviewedAccepter?: boolean;
+  taskDetails?: any; // for nested structures from Firebase
+};
 
 function MyRequests({ navigation }) {
   const { t } = useTranslation();
@@ -54,7 +72,7 @@ function MyRequests({ navigation }) {
   const [activeFilter, setActiveFilter] = useState(`${t("myRequests.txt2")}`);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [taskRecords, setTaskRecords] = useState([]);
+  const [taskRecords, setTaskRecords] = useState<TaskRecord[]>([]);
   const [lastVisiblePost, setLastVisiblePost] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -70,27 +88,21 @@ function MyRequests({ navigation }) {
 
   const getConvertedCompensation = (item) => {
     if (item.compensationType !== "Monitarely") return null;
-
     try {
       const originalAmount = parseFloat(item.monitarily) || 0;
-
       // Use currentLocation first, fallback to selectedLocation
       const locationToUse = currentLocation;
-
       if (!item.currencyInfo) {
         return formatCurrency(originalAmount, locationToUse);
       }
-
       // Get target currency from current location
       const targetCurrency = getCurrencyInfo(locationToUse).code;
-
       // Convert the amount
       const convertedAmount = convertCurrency(
         originalAmount,
         item.currencyInfo.code, // Original currency
         targetCurrency // Target currency (from current location)
       );
-
       return formatCurrency(convertedAmount, locationToUse);
     } catch (error) {
       console.log("Currency conversion error:", error);
@@ -131,12 +143,12 @@ function MyRequests({ navigation }) {
       if (activeFilter === `${t("myRequests.txt10")}`) {
         newRecords = await fetchActiveTasksFromFirebase();
         console.log("newRecords.........", newRecords);
-        newRecords = newRecords.map((item) => ({
+        newRecords = (newRecords as any[]).map((item) => ({
           ...item.taskDetails,
           acceptedBy: item.acceptedBy,
           status: item.status,
           completedTaskId: item.id,
-        }));
+        })) as TaskRecord[];
       }
 
       // ✅ All other filters (My own tasks: Active, Cancelled, etc.)
@@ -197,11 +209,12 @@ function MyRequests({ navigation }) {
       );
 
       const translatedRecords = await Promise.all(
-        newRecords.map(async (item) => ({
+        (newRecords as TaskRecord[]).map(async (item) => ({
           ...item,
           title: await cachedTranslate(item?.title || ""),
           description: await cachedTranslate(item?.description || ""),
           taskType: await cachedTranslate(item?.taskType || ""),
+          customTaskTitle: await cachedTranslate(item?.customTaskTitle || ""),
           otherCompensation: await cachedTranslate(
             item?.otherCompensation || ""
           ),
@@ -589,48 +602,17 @@ function MyRequests({ navigation }) {
                 (activeFilter === `${t("myRequests.txt2")}` &&
                   cart?.acceptedBy)) &&
                 (repostingIndex === index ? (
-                  <View
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                      bottom: 2,
-                      height: RFPercentage(2.8),
-                      width: RFPercentage(12),
-                      borderRadius: RFPercentage(100),
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
+                  <View style={styles.repostWrap}>
                     <ActivityIndicator size="small" color={theme.heading} />
                   </View>
                 ) : (
                   <TouchableOpacity
                     onPress={() => repostRequest(index, cart)}
                     activeOpacity={0.8}
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                      flexDirection: "row",
-                      bottom: 2,
-                      alignItems: "center",
-                      backgroundColor: Colors.primary,
-                      borderRadius: RFPercentage(100),
-                      paddingHorizontal: RFPercentage(1.5),
-                      height: RFPercentage(2.8),
-                      justifyContent: "center",
-                    }}
+                    style={styles.repostInner}
                     disabled={markLoaderIndex === index}
                   >
-                    <Text
-                      style={{
-                        color: Colors.white,
-                        fontFamily: "Poppins_600SemiBold",
-                        fontSize: RFPercentage(1.4),
-                        marginRight: RFPercentage(0.5),
-                      }}
-                    >
-                      {t("myRequests.txt9")}
-                    </Text>
+                    <Text style={styles.txt}>{t("myRequests.txt9")}</Text>
                     <Feather
                       name="repeat"
                       size={RFPercentage(1.3)}
@@ -642,23 +624,10 @@ function MyRequests({ navigation }) {
             {cart?.acceptedBy && (
               <>
                 <View
-                  style={{
-                    width: "90%",
-                    height: RFPercentage(0.1),
-                    backgroundColor: theme.border,
-                    alignSelf: "center",
-                    marginVertical: RFPercentage(2),
-                  }}
+                  style={[styles.liner, { backgroundColor: theme.border }]}
                 ></View>
 
-                <View
-                  style={{
-                    width: "92%",
-                    alignSelf: "center",
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
+                <View style={styles.wrap2}>
                   <Text
                     style={[
                       styles.compensation,
@@ -687,32 +656,22 @@ function MyRequests({ navigation }) {
                           task: cart,
                         })
                       }
-                      style={{
-                        position: "absolute",
-                        right: 0,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        backgroundColor:
-                          theme.mode === "dark"
-                            ? Colors.primary + "40"
-                            : Colors.primary + "15",
-                        padding: RFPercentage(1),
-                        borderRadius: RFPercentage(1),
-                      }}
+                      style={[
+                        styles.press,
+                        {
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? Colors.primary + "40"
+                              : Colors.primary + "15",
+                        },
+                      ]}
                     >
                       <Ionicons
                         name="star"
                         size={RFPercentage(1.8)}
                         color={Colors.primary}
                       />
-                      <Text
-                        style={{
-                          color: Colors.primary,
-                          fontFamily: "Poppins_500Medium",
-                          fontSize: RFPercentage(1.5),
-                          marginLeft: RFPercentage(0.4),
-                        }}
-                      >
+                      <Text style={styles.txt3}>
                         {cart?.reviewedAccepter
                           ? `${t("profileRank.txt50")}`
                           : `${t("profileRank.txt49")}`}
@@ -731,12 +690,7 @@ function MyRequests({ navigation }) {
                           handleStartChat(cart?.acceptedBy);
                         }
                       }}
-                      style={{
-                        position: "absolute",
-                        right: 0,
-                        flexDirection: "row",
-                        alignItems: "center",
-                      }}
+                      style={styles.abs}
                     >
                       <Image
                         source={Icons.messages}
@@ -746,16 +700,7 @@ function MyRequests({ navigation }) {
                           height: RFPercentage(2.3),
                         }}
                       />
-                      <Text
-                        style={{
-                          color: Colors.primary,
-                          fontFamily: "Poppins_500Medium",
-                          fontSize: RFPercentage(1.5),
-                          marginLeft: RFPercentage(0.4),
-                        }}
-                      >
-                        {t("details.txt9")}
-                      </Text>
+                      <Text style={styles.txt4}>{t("details.txt9")}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -845,16 +790,7 @@ function MyRequests({ navigation }) {
         {(loading || loadingMore) && (
           <View style={{ marginTop: RFPercentage(28) }}>
             <ActivityIndicator size="large" color={Colors.primary} />
-            <Text
-              style={{
-                color: Colors.primary,
-                fontSize: RFPercentage(1.8),
-                fontFamily: "Poppins_500Medium",
-                marginTop: RFPercentage(0.5),
-              }}
-            >
-              {t("myRequests.txt13")}
-            </Text>
+            <Text style={styles.empty}>{t("myRequests.txt13")}</Text>
           </View>
         )}
 
@@ -1142,5 +1078,78 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     width: "45%",
     alignSelf: "center",
+  },
+  repostWrap: {
+    position: "absolute",
+    right: 0,
+    bottom: 2,
+    height: RFPercentage(2.8),
+    width: RFPercentage(12),
+    borderRadius: RFPercentage(100),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  repostInner: {
+    position: "absolute",
+    right: 0,
+    flexDirection: "row",
+    bottom: 2,
+    alignItems: "center",
+    backgroundColor: Colors.primary,
+    borderRadius: RFPercentage(100),
+    paddingHorizontal: RFPercentage(1.5),
+    height: RFPercentage(2.8),
+    justifyContent: "center",
+  },
+  txt: {
+    color: Colors.white,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.4),
+    marginRight: RFPercentage(0.5),
+  },
+  liner: {
+    width: "90%",
+    height: RFPercentage(0.1),
+    alignSelf: "center",
+    marginVertical: RFPercentage(2),
+  },
+  wrap2: {
+    width: "92%",
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  txt3: {
+    color: Colors.primary,
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.5),
+    marginLeft: RFPercentage(0.4),
+  },
+  press: {
+    position: "absolute",
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+
+    padding: RFPercentage(1),
+    borderRadius: RFPercentage(1),
+  },
+  abs: {
+    position: "absolute",
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  txt4: {
+    color: Colors.primary,
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.5),
+    marginLeft: RFPercentage(0.4),
+  },
+  empty: {
+    color: Colors.primary,
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_500Medium",
+    marginTop: RFPercentage(0.5),
   },
 });

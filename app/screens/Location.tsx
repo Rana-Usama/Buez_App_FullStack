@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   map: { ...StyleSheet.absoluteFillObject },
   topRow: {
     position: "absolute",
-    top: Platform.OS === "ios" ? RFPercentage(8) : RFPercentage(2),
+    top: Platform.OS === "ios" ? RFPercentage(8) : RFPercentage(8),
     flexDirection: "row",
     width: "90%",
     alignSelf: "center",

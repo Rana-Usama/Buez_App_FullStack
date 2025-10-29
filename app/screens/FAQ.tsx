@@ -348,66 +348,6 @@ function FAQ({ navigation }) {
             </View>
           ))}
         </View>
-
-
-        {/* Support Footer */}
-        {/* <View
-          style={[
-            styles.supportSection,
-            {
-              backgroundColor:
-                theme.mode === "dark"
-                  ? Colors.primary + "40"
-                  : Colors.primary + "15",
-            },
-          ]}
-        >
-          <Ionicons
-            name="chatbubble-ellipses"
-            size={RFPercentage(3)}
-            color={theme.primary}
-          />
-          <Text style={[styles.supportTitle, { color: theme.heading }]}>
-            {t("faqs.txt3")}
-          </Text>
-          <Text style={[styles.supportText, { color: theme.darkGrey }]}>
-            {t("faqs.txt4")}
-          </Text>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={[styles.contactButton, { backgroundColor: theme.primary }]}
-            onPress={async () => {
-              const email = "info@buezapp.com";
-              const subject = "BUEZ App Support";
-              const body =
-                "Hello BUEZ Support Team,\n\nI need assistance with:";
-
-              if (Platform.OS === "android") {
-                const url = `mailto:${email}?subject=${encodeURIComponent(
-                  subject
-                )}&body=${encodeURIComponent(body)}`;
-
-                try {
-                  await Linking.openURL(url);
-                } catch (err) {
-                  console.log("Error opening email client:", err);
-                }
-              } else {
-                const url = `mailto:${email}?subject=${encodeURIComponent(
-                  subject
-                )}&body=${encodeURIComponent(body)}`;
-                try {
-                  await Linking.openURL(url);
-                } catch (err) {
-                  console.log("Error opening email client:", err);
-                }
-              }
-            }}
-          >
-            <Text style={styles.contactButtonText}> {t("faqs.txt5")}</Text>
-          </TouchableOpacity>
-        </View> */}
-        
       </ScrollView>
     </View>
   );

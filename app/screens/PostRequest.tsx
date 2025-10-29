@@ -86,7 +86,7 @@ function PostRequest({ navigation, route }) {
     { id: 2, type: "Other" },
   ];
 
-  console.log(selectedLocation)
+  console.log(selectedLocation);
 
   const [translatedTaskOptions, setTranslatedTaskOptions] = useState([]);
   const [translatedCompensationOptions, setTranslatedCompensationOptions] =
@@ -101,7 +101,6 @@ function PostRequest({ navigation, route }) {
     // Extract numeric value (remove all non-digit characters)
     const numericValue = text.replace(/[^\d]/g, "");
     setNumericBudget(numericValue);
-
     // Format for display based on selected location
     if (numericValue) {
       const formatted = formatCurrency(numericValue, selectedLocation);
@@ -139,6 +138,7 @@ function PostRequest({ navigation, route }) {
     }
   }, [selectedLocation, numericBudget]);
 
+  // Current Post Data
   useFocusEffect(
     useCallback(() => {
       const currentPostRequest = route.params?.postRequest;
@@ -249,6 +249,7 @@ function PostRequest({ navigation, route }) {
     setImageUris(tempImageUris);
   };
 
+  // Default Images
   const DEFAULT_IMAGES = {
     Gardening: [
       "https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -308,6 +309,7 @@ function PostRequest({ navigation, route }) {
     ],
   };
 
+  // Random Images bY Category
   function getRandomImage(taskType) {
     const defaultType = t("postRequest.txt6");
     const images = DEFAULT_IMAGES?.[taskType] || DEFAULT_IMAGES?.[defaultType];
@@ -319,6 +321,7 @@ function PostRequest({ navigation, route }) {
     return images[randomIndex];
   }
 
+  // Task Reminder Scheduling
   async function scheduleTaskReminder(postId, userToken) {
     const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
     const triggerDate = new Date(Date.now() + twoDaysInMs);
@@ -336,6 +339,7 @@ function PostRequest({ navigation, route }) {
     });
   }
 
+  // Posting-----------
   const submitPostData = async () => {
     if (
       !selectedTask ||
@@ -638,18 +642,10 @@ function PostRequest({ navigation, route }) {
             <TouchableOpacity
               onPress={() => navigation.navigate("Location", { home: false })}
               activeOpacity={0.8}
-              style={{
-                width: "90%",
-                borderRadius: RFPercentage(0.9),
-                backgroundColor: theme.white,
-                borderColor: theme.border,
-                alignSelf: "center",
-                height: RFPercentage(6.6),
-                borderWidth: 1,
-                paddingHorizontal: RFPercentage(2),
-                justifyContent: "center",
-                marginTop: RFPercentage(2.5),
-              }}
+              style={[
+                styles.press,
+                { backgroundColor: theme.white, borderColor: theme.border },
+              ]}
             >
               <Text
                 style={{
@@ -697,7 +693,8 @@ function PostRequest({ navigation, route }) {
                 />
                 {selectedLocation?.name && (
                   <Text style={[styles.currencyNote, { color: theme.primary }]}>
-                     {`${t("profileRank.txt46")}`} {currentCurrencySymbol} ({currencyInfo.code})  {`${t("profileRank.txt47")}`}{" "}
+                    {`${t("profileRank.txt46")}`} {currentCurrencySymbol} (
+                    {currencyInfo.code}) {`${t("profileRank.txt47")}`}{" "}
                     {selectedLocation.name}
                   </Text>
                 )}
@@ -883,12 +880,23 @@ const styles = StyleSheet.create({
   img2: { width: "100%", height: "100%", borderRadius: RFPercentage(1.4) },
   img3: { width: RFPercentage(3), height: RFPercentage(3) },
   space: { marginBottom: RFPercentage(13) },
-   currencyNote: {
+  currencyNote: {
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(0.5),
-    width:"100%",
-    marginLeft:RFPercentage(6)
+    width: "100%",
+    marginLeft: RFPercentage(6),
+  },
+  press: {
+    width: "90%",
+    borderRadius: RFPercentage(0.9),
+
+    alignSelf: "center",
+    height: RFPercentage(6.6),
+    borderWidth: 1,
+    paddingHorizontal: RFPercentage(2),
+    justifyContent: "center",
+    marginTop: RFPercentage(2.5),
   },
 });
 

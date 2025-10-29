@@ -16,7 +16,7 @@ import LottieView from "lottie-react-native";
 import i18n from "../translation/i18n";
 // components
 import Screen from "../components/Screen";
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 // config
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
@@ -95,7 +95,7 @@ function Onboarding(props) {
     SecureStore.setItemAsync("onboard", "1");
   };
 
-  const handleDotPress = (index) => {
+  const handleDotPress = (index: any) => {
     setActiveIndex(index);
   };
 
@@ -114,14 +114,6 @@ function Onboarding(props) {
         }}
       />
     ));
-  };
-
-  const renderNextButtonText = () => {
-    if (activeIndex === onboardingData.length - 1) {
-      return `${t("buttons.start")}`;
-    } else {
-      return `${t("buttons.next")}`;
-    }
   };
 
   const { lottie, title, description } = onboardingData[activeIndex];
@@ -214,7 +206,11 @@ function Onboarding(props) {
             end={{ x: 1, y: 0 }}
             style={styles.gradient}
           >
-            <Feather name="arrow-right" size={RFPercentage(3.5)} color={theme.pureWhite} />
+            <Feather
+              name="arrow-right"
+              size={RFPercentage(3.5)}
+              color={theme.pureWhite}
+            />
           </LinearGradient>
         </TouchableOpacity>
       </View>

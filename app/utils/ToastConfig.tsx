@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, Dimensions, Platform } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useAppTheme } from "../contexts/themeContext";
 import Colors from "../config/Colors";
+import { ToastConfig, ToastConfigParams } from "react-native-toast-message";
 
 const { width } = Dimensions.get("window");
 
@@ -13,14 +14,25 @@ const baseToastStyle = {
   borderRadius: RFPercentage(1),
   marginHorizontal: RFPercentage(2),
   width: width * 0.85,
-  marginTop : Platform.OS === 'ios' ? RFPercentage(3) : RFPercentage(1)
+  marginTop: Platform.OS === "ios" ? RFPercentage(3) : RFPercentage(1),
 };
 
-const ThemedToast = ({ type, text1, text2 }) => {
+type ThemedToastProps = {
+  type: "success" | "error" | "info";
+  text1?: string;
+  text2?: string;
+};
+
+const ThemedToast = ({ type, text1, text2 }: ThemedToastProps) => {
   const { theme } = useAppTheme();
 
   const backgroundColor = theme.white;
-  const borderLeftColor = type === "success" ? theme.primary : type === "error" ? "#dc3545" : "#17a2b8";
+  const borderLeftColor =
+    type === "success"
+      ? theme.primary
+      : type === "error"
+      ? "#dc3545"
+      : "#17a2b8";
 
   return (
     <View
@@ -38,16 +50,23 @@ const ThemedToast = ({ type, text1, text2 }) => {
         },
       ]}
     >
-      <Text style={[styles.text1, { color: theme.heading }]}>{text1}</Text>
-      <Text style={[styles.text2, { color: theme.darkGrey }]}>{text2}</Text>
+      {text1 && <Text style={[styles.text1, { color: theme.heading }]}>{text1}</Text>}
+      {text2 && <Text style={[styles.text2, { color: theme.darkGrey }]}>{text2}</Text>}
     </View>
   );
 };
 
-export const toastConfig = {
-  success: ({ text1, text2 }) => <ThemedToast type="success" text1={text1} text2={text2} />,
-  error: ({ text1, text2 }) => <ThemedToast type="error" text1={text1} text2={text2} />,
-  info: ({ text1, text2 }) => <ThemedToast type="info" text1={text1} text2={text2} />,
+// ✅ Properly typed ToastConfig
+export const toastConfig: ToastConfig = {
+  success: (params: ToastConfigParams<any>) => (
+    <ThemedToast type="success" text1={params.text1} text2={params.text2} />
+  ),
+  error: (params: ToastConfigParams<any>) => (
+    <ThemedToast type="error" text1={params.text1} text2={params.text2} />
+  ),
+  info: (params: ToastConfigParams<any>) => (
+    <ThemedToast type="info" text1={params.text1} text2={params.text2} />
+  ),
 };
 
 const styles = StyleSheet.create({

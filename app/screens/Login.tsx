@@ -178,7 +178,9 @@ function Login({ navigation }) {
                     />
                     {touched.email && errors.email && (
                       <View style={styles.errorContainer}>
-                        <Text style={styles.errorText}>{errors?.email}</Text>
+                        <Text style={styles.errorText}>
+                          {errors?.email as string}
+                        </Text>
                       </View>
                     )}
 
@@ -198,7 +200,9 @@ function Login({ navigation }) {
                     />
                     {touched.password && errors.password && (
                       <View style={styles.errorContainer}>
-                        <Text style={styles.errorText}>{errors?.password}</Text>
+                        <Text style={styles.errorText}>
+                          {errors?.password as string}
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -245,7 +249,7 @@ function Login({ navigation }) {
                     title={t("buttons.login")}
                     loading={indicator}
                     marginTop={RFPercentage(7)}
-                    onPress={handleSubmit}
+                    onPress={() => handleSubmit}
                     disabled={indicator}
                   />
                 </>

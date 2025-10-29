@@ -119,11 +119,9 @@ export default function Notifications({ navigation }) {
   useEffect(() => {
     const init = async () => {
       setBusy(true); // busy starts true
-
       // 1️⃣ Get language
       const l = await getTargetLanguage();
       setLang(l);
-
       // 2️⃣ Translation
       const phrases = {
         today: "Today",
@@ -164,6 +162,7 @@ export default function Notifications({ navigation }) {
     init();
   }, [currentUserId]);
 
+// Fetching Notifications------
   const fetchNotifications = async () => {
     if (!currentUserId) return;
     setBusy(true);

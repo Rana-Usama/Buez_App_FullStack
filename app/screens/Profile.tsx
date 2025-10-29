@@ -218,15 +218,6 @@ function Profile({ navigation }) {
                   style={styles.profileImage}
                   source={profileImgUrl ? { uri: profileImgUrl } : Icons.dp}
                 />
-                {/* <View
-                  style={[styles.editBadge, { backgroundColor: theme.primary }]}
-                >
-                  <MaterialIcons
-                    name="edit"
-                    size={RFPercentage(1.8)}
-                    color={theme.white}
-                  />
-                </View> */}
               </View>
             </TouchableOpacity>
           </View>
@@ -317,15 +308,12 @@ function Profile({ navigation }) {
 
         {/* Navigation Menu */}
         <View style={styles.navigationSection}>
-          <Text style={[styles.sectionTitle, { color: theme.heading }]}>
-            ACCOUNT
-          </Text>
           <View style={styles.navigationList}>
             {navigationsList.map((item, i) => (
               <TouchableOpacity
                 key={i}
                 onPress={item.navigation}
-                activeOpacity={0.7}
+                activeOpacity={1}
                 style={[
                   styles.navigationItem,
                   {
@@ -406,7 +394,7 @@ const styles = StyleSheet.create({
     position: "relative",
     borderWidth: RFPercentage(0.3),
     borderRadius: RFPercentage(10),
-    padding: RFPercentage(0.5),
+    padding: RFPercentage(0.1),
   },
   profileImage: {
     width: RFPercentage(12),
