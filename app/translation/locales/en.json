@@ -351,7 +351,9 @@
   },
   "password": {
     "txt1": "You signed in with Google. To change your password, please manage your Google Account.",
-    "txt2": "Google Account"
+    "txt2": "Google Account",
+    "txt3" : "Manage Apple ID",
+    "txt4" : "You signed in with Apple. Manage your password in your Apple ID settings."
   },
   "notifications": {
     "txt1": "Loading notifications...",

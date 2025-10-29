@@ -178,6 +178,8 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
+						DevelopmentTeam = "34G27X37J4";
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -485,9 +487,9 @@
 				CODE_SIGN_ENTITLEMENTS = Buez/Buez.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = "34G27X37J4";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 34G27X37J4;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -528,9 +530,9 @@
 				CODE_SIGN_ENTITLEMENTS = Buez/Buez.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = "34G27X37J4";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 34G27X37J4;
 				INFOPLIST_FILE = Buez/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;

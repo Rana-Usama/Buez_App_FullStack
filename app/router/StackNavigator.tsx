@@ -70,7 +70,7 @@ const StackNavigator = () => {
   // Network error handling
   if (!isConnected) return <NetworkError />;
 
-  // Loading screen while initial route resolves
+  // // Loading screen while initial route resolves
   if (isLoading || userLoading || !initialRoute) {
     return <InitialScreen />;
   }

@@ -38,6 +38,8 @@ import { BlurView } from "expo-blur";
 import { decideUserRoute } from "../utils/decideLoginRoute";
 import { doc, getDoc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig"; // adjust path
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AppleLoginButton from "../utils/appleLogin";
 
 function Login({ navigation }) {
   const [indicator, showIndicator] = useState(false);
@@ -270,6 +272,9 @@ function Login({ navigation }) {
 
             <View style={styles.socialIconsContainer}>
               <GoogleLoginButton navigation={navigation} />
+              <View style={{ marginLeft: RFPercentage(1.3) }}>
+                <AppleLoginButton navigation={navigation} />
+              </View>
             </View>
 
             <View style={styles.signupContainer}>
@@ -472,6 +477,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   socialIcon: {
     width: RFPercentage(4.8),

@@ -196,6 +196,10 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
         }
       }
 
+      if (!currentUserLocation) {
+        return []; // or prompt user to enable location
+      }
+
       // Initialize helper user if not exists
       if (!usersMap[helperUserId]) {
         usersMap[helperUserId] = {

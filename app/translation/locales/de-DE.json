@@ -350,8 +350,10 @@
     "apply": "Ort übernehmen"
   },
   "password": {
-    "txt1": "Du hast dich mit Google angemeldet. Um dein Passwort zu ändern, verwalte bitte dein Google-Konto.",
-    "txt2": "Google-Konto"
+    "txt1": "Sie haben sich mit Google angemeldet. Um Ihr Passwort zu ändern, verwalten Sie bitte Ihr Google-Konto.",
+    "txt2": "Google-Konto",
+    "txt3": "Apple-ID verwalten",
+    "txt4": "Sie haben sich mit Apple angemeldet. Verwalten Sie Ihr Passwort in Ihren Apple-ID-Einstellungen."
   },
   "notifications": {
     "txt1": "Benachrichtigungen werden geladen...",

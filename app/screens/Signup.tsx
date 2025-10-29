@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import GoogleLoginButton from "../utils/googleLogin";
 import { useAppTheme } from "../contexts/themeContext";
 import { BlurView } from "expo-blur";
+import AppleLoginButton from "../utils/appleLogin";
 
 function Signup({ navigation }: any) {
   const { t } = useTranslation();
@@ -272,6 +273,9 @@ function Signup({ navigation }: any) {
             </TouchableOpacity>
           </View> */}
           <GoogleLoginButton navigation={navigation} />
+          <View style={{ marginLeft: RFPercentage(1.3) }}>
+            <AppleLoginButton navigation={navigation} />
+          </View>
         </View>
 
         <View style={styles.footer}>

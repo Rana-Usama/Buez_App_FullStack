@@ -350,8 +350,10 @@
     "apply": "Ort überneh"
   },
   "password": {
-    "txt1": "Du hesch dich mit Google aagmäldet. Zum s Passwort z änderä, verwalt bitte dis Google-Konto.",
-    "txt2": "Google-Konto"
+    "txt1": "Du hesch dich mit Google aagmeldet. Zum dini Passwort z'ändere, verwaltet bitte dis Google-Konto.",
+    "txt2": "Google-Konto",
+    "txt3": "Apple-ID verwaltet",
+    "txt4": "Du hesch dich mit Apple aagmeldet. Verwaltet dini Passwort i dine Apple-ID Iistellige."
   },
   "notifications": {
     "txt1": "Benachrichtigunge werded glade...",
@@ -539,7 +541,7 @@
     "txt46": "Verwändet",
     "txt47": "basierend uf",
     "txt48": "Bi",
-    "txt49" : "Rezension schriibe",
-"txt50" : "Rezensiert"
+    "txt49": "Rezension schriibe",
+    "txt50": "Rezensiert"
   }
 }

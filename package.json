@@ -14,6 +14,7 @@
     "@expo/config-plugins": "~9.0.0",
     "@expo/prebuild-config": "^8.2.0",
     "@expo/vector-icons": "~14.0.4",
+    "@invertase/react-native-apple-authentication": "^2.4.1",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-community/netinfo": "^11.4.1",

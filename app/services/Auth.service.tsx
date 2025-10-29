@@ -7,6 +7,7 @@ import {
   reauthenticateWithCredential,
   sendPasswordResetEmail,
   GoogleAuthProvider,
+  OAuthProvider
 } from "firebase/auth";
 import { deleteUser } from "firebase/auth";
 import {
@@ -21,7 +22,8 @@ import {
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
-
+import { appleAuth } from "@invertase/react-native-apple-authentication"; // ✅ Needed for Apple login
+import { Linking } from "react-native";
 
 export const resetPassword = async (email: any) => {
   try {
@@ -32,7 +34,6 @@ export const resetPassword = async (email: any) => {
     throw error;
   }
 };
-
 
 export const emailVerification = async (user: any) => {
   if (!user) {
@@ -64,7 +65,6 @@ export const emailVerification = async (user: any) => {
   }
 };
 
-
 // Function to update user password
 export const updatePassword = async (
   currentPassword: any,
@@ -89,7 +89,6 @@ export const updatePassword = async (
   }
 };
 
-
 export const logout = async () => {
   await signOut(FIREBASE_AUTH);
   await SecureStore.setItemAsync("loggedOut", "true");
@@ -99,7 +98,6 @@ export const logout = async () => {
     text2: "You have been successfully logged out from your account!",
   });
 };
-
 
 // Remember me
 // Save credentials
@@ -119,7 +117,6 @@ export async function removeCredentials() {
   await SecureStore.deleteItemAsync("email");
   await SecureStore.deleteItemAsync("password");
 }
-
 
 export const deleteCurrentUser = async (currentPassword) => {
   const user = FIREBASE_AUTH.currentUser;
@@ -159,7 +156,6 @@ export const deleteCurrentUser = async (currentPassword) => {
   }
 };
 
-
 export const saveLocationToSecureStore = async (location) => {
   try {
     await SecureStore.setItemAsync("user_location", JSON.stringify(location));
@@ -167,7 +163,6 @@ export const saveLocationToSecureStore = async (location) => {
     console.log("Error saving location:", e);
   }
 };
-
 
 export const getLocationFromSecureStore = async () => {
   try {
@@ -178,7 +173,6 @@ export const getLocationFromSecureStore = async () => {
     return null;
   }
 };
-
 
 export async function deleteGoogleAccount() {
   try {
@@ -211,5 +205,74 @@ export async function deleteGoogleAccount() {
     console.log("Google account deleted ✅");
   } catch (error) {
     console.log("Error deleting Google user:", error.message);
+  }
+}
+
+export async function deleteAppleAccount() {
+  try {
+    const user = FIREBASE_AUTH.currentUser;
+    if (!user) throw new Error("No user signed in");
+
+    // 1️⃣ Perform Apple Sign-In request again for reauthentication
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: appleAuth.Operation.LOGIN,
+      requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+    });
+
+    const { identityToken, nonce, authorizationCode } =
+      appleAuthRequestResponse;
+
+    if (!identityToken) {
+      throw new Error("No identity token from Apple Sign-In");
+    }
+
+    // 2️⃣ Reauthenticate user with Apple credentials
+    const provider = new OAuthProvider("apple.com");
+    const credential = provider.credential({
+      idToken: identityToken,
+      rawNonce: nonce,
+    });
+
+    await reauthenticateWithCredential(user, credential);
+
+    const userId = user.uid;
+
+    // 3️⃣ Delete user-related documents in Firestore (batch delete utility)
+    const batchDelete = async (
+      colName: string,
+      field: string,
+      op: any,
+      value: any
+    ) => {
+      const q = query(
+        collection(FIREBASE_DB, colName),
+        where(field, op, value)
+      );
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const batch = writeBatch(FIREBASE_DB);
+        snapshot.forEach((docSnap) => batch.delete(docSnap.ref));
+        await batch.commit();
+      }
+    };
+
+    // Delete all related collections
+    await deleteDoc(doc(FIREBASE_DB, "users", userId));
+    await batchDelete("taskRequests", "userId", "==", userId);
+    await batchDelete("chats", "participants", "array-contains", userId);
+    await batchDelete("completedTask", "taskOwnerId", "==", userId);
+
+    // if (authorizationCode) {
+    //   await revokeToken(FIREBASE_AUTH, authorizationCode);
+    // }
+    await Linking.openURL("https://appleid.apple.com/account/manage");
+
+    // 5️⃣ Delete user from Firebase Authentication
+    await deleteUser(user);
+
+    console.log("🍎 Apple account deleted successfully ✅");
+  } catch (error: any) {
+    console.log("❌ Error deleting Apple user:", error.message || error);
+    throw error;
   }
 }

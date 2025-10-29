@@ -10,6 +10,7 @@ import {
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
+  deleteAppleAccount,
   deleteGoogleAccount,
   removeCredentials,
 } from "../services/Auth.service";
@@ -207,11 +208,14 @@ function Settings({ navigation }) {
           try {
             setLoading(true); // show loader
             const password2 = await SecureStore.getItemAsync("password2");
-            if (provider === "google.com") {
+            if (provider === "apple.com") {
+              await deleteAppleAccount();
+            } else if (provider === "google.com") {
               await deleteGoogleAccount();
             } else {
               await deleteCurrentUser(password2);
             }
+
             await removeCredentials();
             await SecureStore.deleteItemAsync("appLanguage");
             await SecureStore.deleteItemAsync("password2");

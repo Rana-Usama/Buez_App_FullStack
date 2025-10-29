@@ -88,7 +88,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
         />
 
         {/* If Google login → show message + manage account link */}
-        {provider === "google.com" ? (
+        {provider === "google.com" || provider === "apple.com" ? (
           <View style={styles.googleContainer}>
             <Text
               style={[
@@ -100,14 +100,22 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                 },
               ]}
             >
-              🔑 {t("password.txt1")}{" "}
+              {provider === "google.com"
+                ? `🔑 ${t("password.txt1")}`
+                : `🔑 ${t("password.txt4")}`}
             </Text>
 
             <MyAppButton
-              title={t("password.txt2")}
+              title={
+                provider === "google.com"
+                  ? t("password.txt2") // e.g., "Manage Google Account"
+                  : t("password.txt3")
+              }
               marginTop={RFPercentage(5)}
               onPress={() =>
-                Linking.openURL("https://myaccount.google.com/security")
+                provider === "google.com"
+                  ? Linking.openURL("https://myaccount.google.com/security")
+                  : Linking.openURL("https://appleid.apple.com/")
               }
             />
           </View>

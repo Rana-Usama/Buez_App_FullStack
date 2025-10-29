@@ -351,8 +351,10 @@
     "apply": "Aplicar Ubicación"
   },
   "password": {
-    "txt1": "Iniciaste sesión con Google. Para cambiar tu contraseña, administra tu Cuenta de Google.",
-    "txt2": "Cuenta de Google"
+    "txt1": "Iniciaste sesión con Google. Para cambiar tu contraseña, gestiona tu cuenta de Google.",
+    "txt2": "Cuenta de Google",
+    "txt3": "Gestionar Apple",
+    "txt4": "Iniciaste sesión con Apple. Gestiona tu contraseña en la configuración de tu Apple ID."
   },
   "notifications": {
     "txt1": "Cargando notificaciones...",

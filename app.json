@@ -21,6 +21,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "usesAppleSignIn": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "config": {
         "googleMapsApiKey": "AIzaSyBSq361kA1Z14M0ymJ_u6UlKn4ulBLLrKQ"
@@ -43,11 +44,14 @@
         ],
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["buez"]
+            "CFBundleURLSchemes": [
+              "buez"
+            ]
           }
         ]
       },
-      "bundleIdentifier": "com.adamburg.Buez"
+      "bundleIdentifier": "com.adamburg.Buez",
+      "appleTeamId": "34G27X37J4"
     },
     "android": {
       "adaptiveIcon": {
@@ -56,7 +60,9 @@
       },
       "googleServicesFile": "./google-services.json",
       "package": "com.adamburg.Buez",
-      "permissions": ["android.permission.INTERNET"]
+      "permissions": [
+        "android.permission.INTERNET"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

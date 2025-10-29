@@ -350,8 +350,10 @@
     "apply": "Appliquer"
   },
   "password": {
-    "txt1": "Vous vous êtes connecté avec Google. Pour modifier votre mot de passe, veuillez gérer votre compte Google.",
-    "txt2": "Compte Google"
+    "txt1": "Vous vous êtes connecté avec Google. Pour changer votre mot de passe, veuillez gérer votre compte Google.",
+    "txt2": "Compte Google",
+    "txt3": "Gérer Apple",
+    "txt4": "Vous vous êtes connecté avec Apple. Gérez votre mot de passe dans les paramètres de votre identifiant Apple."
   },
   "notifications": {
     "txt1": "Chargement des notifications...",
@@ -539,8 +541,8 @@
     "txt46": "Utilisant",
     "txt47": "basé sur",
     "txt48": "Près de",
-    "txt49" : "Ajouter un Avis",
+    "txt49": "Ajouter un Avis",
 
-"txt50" : "Avis donné"
+    "txt50": "Avis donné"
   }
 }

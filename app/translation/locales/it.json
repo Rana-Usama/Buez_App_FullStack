@@ -350,8 +350,10 @@
     "apply": "Applica posizione"
   },
   "password": {
-    "txt1": "Hai effettuato l'accesso con Google. Per modificare la tua password, gestisci il tuo account Google.",
-    "txt2": "Account Google"
+    "txt1": "Hai effettuato l'accesso con Google. Per cambiare la password, gestisci il tuo account Google.",
+    "txt2": "Account Google",
+    "txt3": "Gestisci Apple ID",
+    "txt4": "Hai effettuato l'accesso con Apple. Gestisci la password nelle impostazioni del tuo Apple ID."
   },
   "notifications": {
     "txt1": "Caricamento delle notifiche...",
@@ -539,8 +541,8 @@
     "txt46": "Utilizzando",
     "txt47": "basato su",
     "txt48": "Vicino a",
-    "txt49" : "Aggiungi Recensione",
+    "txt49": "Aggiungi Recensione",
 
-"txt50" : "Recensito"
+    "txt50": "Recensito"
   }
 }

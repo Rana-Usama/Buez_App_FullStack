@@ -203,31 +203,39 @@ export const fetchUserDetailedProfile = async (userId) => {
     // Calculate success rate
     const totalTasks = completedTasks.length + activeTasks.length;
 
-    // Bayesian Average - balances user's rating with platform average
-    const calculateBayesianSuccessRate = (reviews, completedTasks) => {
-      const platformAverageRating = 4.0; // Assume platform average is 4 stars
-      const platformWeight = 5; // Number of "virtual" platform reviews for smoothing
-      if (reviews.length === 0) {
-        // Fallback to completion rate if no reviews
-        return totalTasks > 0
-          ? Math.round((completedTasks.length / totalTasks) * 100)
-          : 0;
+    const calculateSuccessRate = (reviews, completedTasks, totalTasks) => {
+      // If no tasks at all, success rate is 0
+      if (totalTasks === 0) {
+        return 0;
       }
-      const userTotalRating = reviews.reduce(
-        (sum, review) => sum + review.rating,
-        0
-      );
-      const userReviewCount = reviews.length;
-      // Bayesian calculation: (user_rating * user_reviews + platform_avg * platform_weight) / (user_reviews + platform_weight)
-      const bayesianRating =
-        (userTotalRating + platformAverageRating * platformWeight) /
-        (userReviewCount + platformWeight);
-      // Convert to percentage (4+ stars = 100%, 3 stars = 75%, etc.)
-      const successRate = Math.min(100, Math.round((bayesianRating / 5) * 100));
-      return successRate;
+      // If user has reviews, use Bayesian average
+      if (reviews.length > 0) {
+        const platformAverageRating = 4.0; // Assume platform average is 4 stars
+        const platformWeight = 5; // Number of "virtual" platform reviews for smoothing
+        const userTotalRating = reviews.reduce(
+          (sum, review) => sum + review.rating,
+          0
+        );
+        const userReviewCount = reviews.length;
+        // Bayesian calculation: (user_rating * user_reviews + platform_avg * platform_weight) / (user_reviews + platform_weight)
+        const bayesianRating =
+          (userTotalRating + platformAverageRating * platformWeight) /
+          (userReviewCount + platformWeight);
+        // Convert to percentage (5 stars = 100%, 4 stars = 80%, etc.)
+        const successRate = Math.min(
+          100,
+          Math.round((bayesianRating / 5) * 100)
+        );
+        return successRate;
+      }
+      const completionRate = completedTasks.length / totalTasks;
+      const newUserPenalty = 0.7; // 30% penalty for users without reviews
+      const adjustedRate = Math.round(completionRate * newUserPenalty * 100);
+
+      return Math.max(0, Math.min(100, adjustedRate));
     };
 
-    let successRate = calculateBayesianSuccessRate(reviews, completedTasks);
+    let successRate = calculateSuccessRate(reviews, completedTasks, totalTasks);
 
     // Get member since date
     const memberSince = userData?.freeTrialStartedAt
