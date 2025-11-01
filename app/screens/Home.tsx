@@ -244,16 +244,21 @@ function Home({ navigation }) {
 
   // Top Rated Users
   const [users, setUsers] = useState([]);
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const res = await fetchUsersWithTaskStats();
-      setUsers(res);
-    };
-    fetchUsers();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUsers = async () => {
+        const res = await fetchUsersWithTaskStats();
+        setUsers(res);
+      };
+      fetchUsers();
+      return () => {
+        setUsers([]); // or leave empty if not needed
+      };
+    }, [])
+  );
 
   // Compensation Conversion
-  const getConvertedCompensation = (item) => {
+  const getConvertedCompensation = (item: any) => {
     if (item.compensationType !== "Monitarely") return null;
     try {
       const originalAmount = parseFloat(item.monitarily) || 0;
@@ -456,7 +461,7 @@ function Home({ navigation }) {
                             <View style={[styles.badge, styles.beginnerBadge]}>
                               <Ionicons
                                 name="leaf"
-                                size={RFPercentage(1.2)}
+                                size={RFPercentage(1.4)}
                                 color="#4CAF50"
                               />
                               <Text style={styles.beginnerText}>
@@ -469,7 +474,7 @@ function Home({ navigation }) {
                             <View style={[styles.badge, styles.risingBadge]}>
                               <Ionicons
                                 name="trending-up"
-                                size={RFPercentage(1.2)}
+                                size={RFPercentage(1.4)}
                                 color="#FF9800"
                               />
                               <Text style={styles.risingText}>
@@ -482,7 +487,7 @@ function Home({ navigation }) {
                             <View style={[styles.badge, styles.topRatedBadge]}>
                               <Ionicons
                                 name="trophy"
-                                size={RFPercentage(1.2)}
+                                size={RFPercentage(1.4)}
                                 color="#FFD700"
                               />
                               <Text style={styles.topRatedText}>
@@ -516,6 +521,7 @@ function Home({ navigation }) {
                           {/* User Title */}
                           <Text
                             style={[styles.userTitle, { color: theme.primary }]}
+                            numberOfLines={1}
                           >
                             {item.category === "Top Rated"
                               ? `${t("profileRank.txt5")}`
@@ -1108,7 +1114,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     position: "relative",
     marginBottom: RFPercentage(1),
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(2),
   },
   avatar: {
     width: RFPercentage(8),
@@ -1136,7 +1142,7 @@ const styles = StyleSheet.create({
   userTitle: {
     textAlign: "center",
     fontFamily: "Poppins_500Medium",
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     marginBottom: RFPercentage(1.5),
     opacity: 0.8,
   },
@@ -1167,12 +1173,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(2),
     fontFamily: "Poppins_700Bold",
     marginBottom: RFPercentage(0.2),
   },
   statLabel: {
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
     opacity: 0.8,
   },
@@ -1201,7 +1207,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   viewProfileText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
     color: Colors.white,
     marginRight: RFPercentage(0.5),
@@ -1247,10 +1253,10 @@ const styles = StyleSheet.create({
   },
   beginnerText: {
     color: "#2E7D32",
-    fontSize: RFPercentage(0.8),
+    fontSize: RFPercentage(1),
     fontFamily: "Poppins_700Bold",
     marginLeft: RFPercentage(0.3),
-    lineHeight: RFPercentage(1),
+    lineHeight: RFPercentage(1.2),
   },
 
   // Rising Talent Badge
@@ -1264,10 +1270,10 @@ const styles = StyleSheet.create({
   },
   risingText: {
     color: "#FF9800",
-    fontSize: RFPercentage(0.8),
+    fontSize: RFPercentage(1),
     fontFamily: "Poppins_700Bold",
     marginLeft: RFPercentage(0.3),
-    lineHeight: RFPercentage(1),
+    lineHeight: RFPercentage(1.2),
   },
 
   // Top Rated Badge
@@ -1281,10 +1287,10 @@ const styles = StyleSheet.create({
   },
   topRatedText: {
     color: "#cdb114ff",
-    fontSize: RFPercentage(0.8),
+    fontSize: RFPercentage(1),
     fontFamily: "Poppins_700Bold",
     marginLeft: RFPercentage(0.3),
-    lineHeight: RFPercentage(1),
+    lineHeight: RFPercentage(1.2),
   },
 
   // Premium Badge (existing)

@@ -206,15 +206,11 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
   // Render actual completed tasks
   const renderTaskItem = ({ item, index }) => (
-    <TouchableOpacity
-      activeOpacity={0.9}
+    <View
       style={[
         styles.taskCard,
         { backgroundColor: theme.white, borderColor: theme.border },
       ]}
-      onPress={() => {
-        console.log(item?.taskDetails);
-      }}
     >
       <View style={{ width: "100%" }}>
         {item?.taskDetails?.imageUrls?.length > 0 && (
@@ -308,7 +304,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   // Render review items
@@ -685,10 +681,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   categoryBadgeText: {
-    fontSize: RFPercentage(0.8),
+    fontSize: RFPercentage(1),
     fontFamily: "Poppins_600SemiBold",
     marginLeft: RFPercentage(0.3),
-    lineHeight: RFPercentage(1),
+    lineHeight: RFPercentage(1.2),
   },
   profileInfo: {
     flex: 1,
@@ -710,7 +706,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   memberSince: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
   },
   statsGrid: {
@@ -748,7 +744,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.3),
   },
   statLabel: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
   },
@@ -762,7 +758,7 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    paddingVertical: RFPercentage(1.2),
+    paddingVertical: RFPercentage(1.5),
     borderRadius: RFPercentage(0.8),
     alignItems: "center",
   },
@@ -777,7 +773,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   tabText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
     lineHeight: RFPercentage(2),
   },
@@ -818,7 +814,7 @@ const styles = StyleSheet.create({
 
   categoryText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
   },
   taskContent: {
@@ -854,7 +850,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
   },
   taskDescription: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2),
     marginTop: RFPercentage(1),
@@ -876,7 +872,7 @@ const styles = StyleSheet.create({
   },
   compensationText: {
     color: Colors.primary,
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
   },
   successBadge: {
@@ -936,7 +932,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   reviewComment: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     lineHeight: RFPercentage(2),
     fontStyle: "italic",
   },
@@ -948,7 +944,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: RFPercentage(2),
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },
   errorContainer: {

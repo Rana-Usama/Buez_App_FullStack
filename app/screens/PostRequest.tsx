@@ -679,7 +679,7 @@ function PostRequest({ navigation, route }) {
             ) : (
               <>
                 <InputFieldNew
-                  placeholder={getBudgetPlaceholder()}
+                  placeholder={t("postRequest.pr")}
                   value={budget}
                   onChangeText={handleBudgetChange}
                   customStyle={{

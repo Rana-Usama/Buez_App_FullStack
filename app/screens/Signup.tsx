@@ -273,9 +273,9 @@ function Signup({ navigation }: any) {
             </TouchableOpacity>
           </View> */}
           <GoogleLoginButton navigation={navigation} />
-          <View style={{ marginLeft: RFPercentage(1.3) }}>
+          {/* <View style={{ marginLeft: RFPercentage(1.3) }}>
             <AppleLoginButton navigation={navigation} />
-          </View>
+          </View> */}
         </View>
 
         <View style={styles.footer}>

@@ -108,11 +108,37 @@ const TopRatedUsers = ({ navigation }: any) => {
     fetchUsers();
   }, [useCustomLocation, selectedLocation]);
 
-  // Helper function to calculate success rate
+
+
   const calculateSuccessRate = (user) => {
+    // If no tasks at all, success rate is 0
     const totalTasks = (user.activeCount || 0) + (user.completedCount || 0);
-    if (totalTasks === 0) return 0;
-    return Math.round((user.completedCount / totalTasks) * 100);
+
+    if (totalTasks === 0) {
+      return 0;
+    }
+    // If user has reviews, use Bayesian average
+    if (user.reviews?.length > 0) {
+      const platformAverageRating = 4.0; // Assume platform average is 4 stars
+      const platformWeight = 5; // Number of "virtual" platform reviews for smoothing
+      const userTotalRating = user.reviews?.reduce(
+        (sum, review) => sum + review.rating,
+        0
+      );
+      const userReviewCount = user.reviews?.length;
+      // Bayesian calculation: (user_rating * user_reviews + platform_avg * platform_weight) / (user_reviews + platform_weight)
+      const bayesianRating =
+        (userTotalRating + platformAverageRating * platformWeight) /
+        (userReviewCount + platformWeight);
+      // Convert to percentage (5 stars = 100%, 4 stars = 80%, etc.)
+      const successRate = Math.min(100, Math.round((bayesianRating / 5) * 100));
+      return successRate;
+    }
+    const completionRate = user.completedCount.length / totalTasks;
+    const newUserPenalty = 0.7; // 30% penalty for users without reviews
+    const adjustedRate = Math.round(completionRate * newUserPenalty * 100);
+
+    return Math.max(0, Math.min(100, adjustedRate));
   };
 
   // Helper function to map API category to your type
@@ -322,7 +348,7 @@ const TopRatedUsers = ({ navigation }: any) => {
               >
                 <Ionicons
                   name={badgeInfo.icon as any}
-                  size={RFPercentage(1.2)}
+                  size={RFPercentage(1.4)}
                   color={badgeInfo.color}
                 />
                 <Text style={[styles.badgeText, { color: badgeInfo.color }]}>
@@ -366,7 +392,7 @@ const TopRatedUsers = ({ navigation }: any) => {
               <View style={styles.statItem}>
                 <MaterialIcons
                   name="pending-actions"
-                  size={RFPercentage(1.4)}
+                  size={RFPercentage(1.6)}
                   color={Colors.primary}
                 />
                 <Text
@@ -388,7 +414,7 @@ const TopRatedUsers = ({ navigation }: any) => {
               <View style={styles.statItem}>
                 <FontAwesome5
                   name="check-circle"
-                  size={RFPercentage(1.2)}
+                  size={RFPercentage(1.5)}
                   color="#45B356"
                 />
                 <Text style={[styles.statValue, { color: theme.heading }]}>
@@ -407,7 +433,7 @@ const TopRatedUsers = ({ navigation }: any) => {
               <View style={styles.statItem}>
                 <Ionicons
                   name="trending-up"
-                  size={RFPercentage(1.4)}
+                  size={RFPercentage(1.7)}
                   color="#db952bff"
                 />
                 <Text
@@ -420,7 +446,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                   style={[styles.statLabel, { color: theme.grey }]}
                   numberOfLines={1}
                 >
-                  {t("profileRank.txt10")}
+                  {t("profileRank.txt31")}
                 </Text>
               </View>
             </View>
@@ -626,7 +652,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(0,0,0,0.05)",
   },
   locationTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(1),
   },
@@ -640,7 +666,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1.2),
+    paddingVertical: RFPercentage(1.5),
     borderRadius: RFPercentage(1),
     borderWidth: 1,
     gap: RFPercentage(0.5),
@@ -656,7 +682,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   locationButtonText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
     textAlign: "center",
   },
@@ -682,7 +708,7 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(1.3),
     borderRadius: RFPercentage(1),
     marginRight: RFPercentage(1),
     borderWidth: 1,
@@ -714,7 +740,7 @@ const styles = StyleSheet.create({
     paddingRight: RFPercentage(2),
   },
   resultsText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
   },
   usersList: {
@@ -772,7 +798,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   badgeText: {
-    fontSize: RFPercentage(1),
+    fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_600SemiBold",
     marginLeft: RFPercentage(0.3),
   },
@@ -803,15 +829,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_700Bold",
     marginTop: RFPercentage(0.3),
   },
   statLabel: {
-    fontSize: RFPercentage(1),
+    fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(0.2),
-    marginHorizontal: 20,
+    marginHorizontal: 10,
   },
   statDivider: {
     width: 1,
@@ -846,7 +872,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   emptyText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
     lineHeight: RFPercentage(2.2),

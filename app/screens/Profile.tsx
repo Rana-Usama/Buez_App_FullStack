@@ -57,7 +57,7 @@ function Profile({ navigation }) {
           badge = {
             type: "pro",
             icon: "trophy",
-            text: "TOP RATED",
+            text: `${t("profileRank.txt5")}`,
             color: "#FFD700",
             bgColor: "#FFFDE7",
             borderColor: "#FFD700",
@@ -66,7 +66,7 @@ function Profile({ navigation }) {
           badge = {
             type: "rising",
             icon: "trending-up",
-            text: "RISING TALENT",
+            text: `${t("profileRank.txt4")}`,
             color: "#FF9800",
             bgColor: "#FFF3E0",
             borderColor: "#FF9800",
@@ -75,7 +75,7 @@ function Profile({ navigation }) {
           badge = {
             type: "beginner",
             icon: "leaf",
-            text: "BEGINNER",
+            text: `${t("profileRank.txt3")}`,
             color: "#4CAF50",
             bgColor: "#E8F5E8",
             borderColor: "#4CAF50",
@@ -245,7 +245,7 @@ function Profile({ navigation }) {
                   color={userBadge.color}
                 />
                 <Text style={[styles.badgeText, { color: userBadge.color }]}>
-                  {translatedBadgeText || userBadge.text}
+                  { userBadge.text}
                 </Text>
               </View>
             )}

@@ -120,9 +120,23 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
 
     // Fetch users data
     const usersSnap = await getDocs(collection(FIREBASE_DB, "users"));
+    const reviewsSnap = await getDocs(collection(FIREBASE_DB, "reviews"));
 
     const usersMap = {};
     const usersDataMap = {};
+
+    const reviewsByHelper = {};
+    reviewsSnap.docs.forEach((doc) => {
+      const reviewData = doc.data();
+      const helperId =
+        reviewData.helperId || reviewData.taskOwnerId || reviewData.userId;
+      if (!helperId) return;
+      if (!reviewsByHelper[helperId]) reviewsByHelper[helperId] = [];
+      reviewsByHelper[helperId].push({
+        id: doc.id,
+        ...reviewData,
+      });
+    });
 
     // First, create a map of all users for quick lookup
     usersSnap.docs.forEach((doc) => {
@@ -216,6 +230,7 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
           memberSince: usersDataMap[helperUserId]?.memberSince || "Recently",
           latitude: usersDataMap[helperUserId]?.latitude || null,
           longitude: usersDataMap[helperUserId]?.longitude || null,
+          reviews: reviewsByHelper[helperUserId] || [],
         };
       }
 

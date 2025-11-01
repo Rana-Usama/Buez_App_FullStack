@@ -72,6 +72,7 @@ function Login({ navigation }) {
   };
 
   const handleLogin = async (values) => {
+    console.log();
     showIndicator(true);
     try {
       const { email, password } = values;
@@ -251,7 +252,7 @@ function Login({ navigation }) {
                     title={t("buttons.login")}
                     loading={indicator}
                     marginTop={RFPercentage(7)}
-                    onPress={() => handleSubmit}
+                    onPress={handleSubmit}
                     disabled={indicator}
                   />
                 </>
@@ -272,9 +273,9 @@ function Login({ navigation }) {
 
             <View style={styles.socialIconsContainer}>
               <GoogleLoginButton navigation={navigation} />
-              <View style={{ marginLeft: RFPercentage(1.3) }}>
+              {/* <View style={{ marginLeft: RFPercentage(1.3) }}>
                 <AppleLoginButton navigation={navigation} />
-              </View>
+              </View> */}
             </View>
 
             <View style={styles.signupContainer}>
