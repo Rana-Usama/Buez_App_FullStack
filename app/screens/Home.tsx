@@ -90,7 +90,6 @@ function Home({ navigation }) {
         longitude: location.longitude,
       };
       await updateUserLocation(locationData);
-      console.log("User location updated successfully");
     } catch (error) {
       console.log("Error updating user location:", error);
     }
@@ -252,7 +251,7 @@ function Home({ navigation }) {
       };
       fetchUsers();
       return () => {
-        setUsers([]); // or leave empty if not needed
+        setUsers([]); 
       };
     }, [])
   );

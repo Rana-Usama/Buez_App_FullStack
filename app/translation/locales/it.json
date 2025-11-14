@@ -12,9 +12,9 @@
     "email": "Email",
     "password": "Password",
     "name": "Nome",
-    "confirm": "Conferma password",
-    "currency": "es. 90€",
-    "sign": "€",
+    "confirm": "Conferma Password",
+    "currency": "es: 90$",
+    "sign": "$",
     "gotIt": "Capito",
     "you": "Tu"
   },
@@ -23,14 +23,14 @@
     "emailReq": "L'email è obbligatoria",
     "passwordReq": "La password è obbligatoria",
     "userReq": "Il nome utente è obbligatorio",
-    "passwordLen": "La password deve contenere almeno 6 caratteri",
+    "passwordLen": "La password deve essere di almeno 6 caratteri",
     "passwordMatch": "Le password devono corrispondere"
   },
   "toast": {
     "login": {
       "one": "Bentornato!",
       "two": "Accesso effettuato con successo!",
-      "three": "Accesso non riuscito",
+      "three": "Accesso fallito",
       "four": "Qualcosa è andato storto. Riprova.",
       "five": "Credenziali non valide"
     },
@@ -41,16 +41,16 @@
       "four": "Credenziali già in uso"
     },
     "forgetPassword": {
-      "one": "Link di reimpostazione inviato",
+      "one": "Link di reset inviato",
       "two": "Controlla la tua email per reimpostare la password.",
       "three": "Errore",
-      "four": "Invio del link di reimpostazione fallito."
+      "four": "Invio link di reset fallito."
     },
     "subscriptionV2": {
-      "one": "Abbonamento incompleto",
-      "two": "Impossibile completare l'abbonamento. Riprova.",
-      "three": "Prova gratuita attivata",
-      "four": "La tua prova gratuita di 14 giorni è stata attivata con successo."
+      "one": "Pagamento annullato",
+      "two": "Puoi riprovare in qualsiasi momento",
+      "three": "Pagamento riuscito!",
+      "four": "Benvenuto in Premium!"
     },
     "subscription": {
       "one": "Abbonamento riuscito!",
@@ -59,17 +59,16 @@
     "myRequests": {
       "one": "Stato della richiesta",
       "two": "Richiesta",
-      "three": "segna come completata",
-      "four": "annullata",
+      "three": "marcata come completata",
+      "four": "cancellata",
       "five": "Qualcosa è andato storto!",
       "six": "Impossibile aggiornare lo stato della richiesta.",
       "seven": "Richiesta ripubblicata con successo"
     },
-    "cancelSubscription": {
+   "cancelSubscription": {
       "one": "Nessun abbonamento attivo",
-      "two": "Non abbiamo trovato un abbonamento attivo associato al tuo account.",
-      "three": "Abbonamento annullato",
-      "four": "Il tuo abbonamento è stato annullato con successo. Rimarrai attivo fino alla fine del periodo di fatturazione."
+      "two": "Non hai abbonamenti da cancellare",
+      "three": "Abbonamento cancellato"
     },
     "changePassword": {
       "one": "Password cambiata",
@@ -79,120 +78,165 @@
     },
     "editProfile": {
       "one": "Profilo aggiornato",
-      "two": "Il tuo profilo è stato aggiornato con successo!",
+      "two": "Il tuo profilo è stato aggiornato con successo!.",
       "three": "Aggiornamento fallito",
-      "four": "Si è verificato un errore durante l’aggiornamento del profilo. Riprova."
+      "four": "Si è verificato un errore durante l'aggiornamento del profilo. Riprova."
+    },
+    "upgradePlan": {
+      "paymentCancelled": "Pagamento annullato",
+      "tryAgain": "Puoi riprovare in qualsiasi momento",
+      "upgradeSuccess": "Aggiornamento riuscito!",
+      "nowOnYearly": "Ora sei sul piano annuale",
+      "upgradeFailed": "Aggiornamento fallito",
+      "tryAgainLater": "Riprova più tardi"
     }
   },
   "onBoarding": {
     "onBoarding1": {
       "Title": "Benvenuto su Büez",
-      "Desc": "Connettiti, collabora e cresci – la tua rete per il supporto professionale inizia qui."
+      "Desc": "Connetti, collabora e cresci – la tua rete di supporto professionale inizia qui."
     },
     "onBoarding2": {
-      "Title": "Pubblica ciò con cui hai bisogno di aiuto",
-      "Desc": "Condividi il tuo lavoro o le tue sfide. Ricevi risposte da persone reali pronte ad aiutarti."
+      "Title": "Pubblica ciò per cui hai bisogno di aiuto",
+      "Desc": "Condividi il tuo lavoro o le tue sfide. Ricevi risposte da persone reali pronte ad aiutare."
     },
     "onBoarding3": {
-      "Title": "Gestisci post e chat liberamente",
-      "Desc": "Tieni traccia delle tue richieste, aggiorna i tuoi post e chatta con chi ti supporta – tutto in un unico posto."
+      "Title": "Gestisci post e chatta liberamente",
+      "Desc": "Tieni traccia delle tue richieste, aggiorna i tuoi post e chatta con i supporter – tutto in un unico posto."
     },
     "onBoarding4": {
       "Title": "Goditi 14 giorni di accesso completo",
-      "Desc": "Prova tutte le funzionalità di Büez gratuitamente. Nessuna restrizione, nessun impegno."
+      "Desc": "Prova tutte le funzionalità di Büez completamente gratis. Nessuna restrizione, nessun impegno."
     },
     "onBoarding5": {
-      "Title": "Continua con l’abbonamento",
-      "Desc": "Dopo i 14 giorni di prova gratuita, continua a usare Büez con il piano mensile da $12.99. Disdici in qualsiasi momento."
+      "Title": "Continua con l'abbonamento",
+      "Desc": "Dopo la tua prova gratuita di 14 giorni, continua a goderti Büez con il piano mensile da $12.99. Cancella in qualsiasi momento."
     }
   },
   "login": {
     "txt1": "Bentornato",
-    "txt2": "Mi riconosci?",
+    "txt2": "Ricordami?",
     "txt3": "Password dimenticata?",
-    "txt4": "oppure accedi con",
+    "txt4": "o accedi con",
     "txt5": "Non hai un account?"
   },
   "signup": {
     "txt1": "Benvenuto!",
-    "txt2": "oppure registrati con",
+    "txt2": "o registrati con",
     "txt3": "Hai già un account?"
   },
   "forgetPassword": {
-    "txt1": "Reimpostare la password?",
+    "txt1": "Reimposta password?",
     "txt2": "Invia link",
     "txt3": "Il link per reimpostare la password è stato inviato alla tua email",
-    "txt4": "Controlla la cartella Spam se non vedi l'email di reimpostazione.",
+    "txt4": " Controlla la cartella Spam se non vedi l'email di reset.",
     "txt5": "Ok",
-    "txt6": "Nessun account è associato a questo indirizzo email."
+    "txt6": "Nessun account associato a questo indirizzo email."
   },
   "freeTrial": {
-    "txt1": "Attiva la tua prova gratuita di 14 giorni!",
-    "txt2": "Come funziona la prova gratuita",
+    "txt1": "Inizia la tua prova gratuita di 14 giorni",
+    "txt2": "Come funziona la tua prova gratuita",
     "txt3": "Oggi",
-    "txt4": "Sblocca l’accesso completo — usa tutte le funzionalità dell’app, gratuitamente.",
-    "txt5": "Tra 10 giorni",
-    "txt6": "Ti avviseremo quando la prova si avvicina alla fine — resta aggiornato.",
-    "txt7": "Tra 14 giorni",
-    "txt8": "L’abbonamento partirà automaticamente. Disdici prima per evitare addebiti.",
-    "txt9": "Inizia prova gratuita"
+    "txt4": "Goditi l'accesso illimitato a tutte le nostre funzionalità premium per 14 giorni, completamente gratis.",
+    "txt5": "Dopo 10 giorni",
+    "txt6": "Ti invieremo un promemoria amichevole quando il tuo periodo di prova terminerà in 4 giorni.",
+    "txt7": "Continua dopo la prova",
+    "txt8": "Il tuo abbonamento continuerà automaticamente dopo 14 giorni. Puoi cancellarti in qualsiasi momento.",
+    "txt9": "Inizia la mia prova gratuita"
   },
   "subscriptionV2": {
-    "txt1": "Acquista il nostro premium per l’accesso completo ai servizi",
-    "txt2": "0,99 CHF/mese",
-    "txt3": "Pubblica richieste quotidiane di faccende",
-    "txt4": "Vedi le richieste quotidianamente",
-    "txt5": "Guadagna facendo faccende giornaliere",
-    "txt6": "Disdici quando vuoi",
-    "txt7": "Aggiungi Carta"
+    "txt1": "Acquista il nostro premium per accedere a tutti i servizi",
+    "txt2": ",99/mese",
+    "txt3": "Pubblica richieste di commissioni giornaliere",
+    "txt4": "Vedi le richieste giornalmente",
+    "txt5": "Guadagna facendo commissioni giornaliere",
+    "txt6": "Annulla in qualsiasi momento",
+    "txt7": "Aggiungi carta",
+    "freeTrial": "Prova gratuita",
+    "monthly": "Mensile",
+    "yearly": "Annuale",
+    "for7Days": "per 14 giorni",
+    "perMonth": "al mese",
+    "perYear": "all'anno",
+    "tryPremium": "Prova tutte le funzionalità premium",
+    "fullAccess": "Accesso completo a tutte le funzionalità",
+    "bestValue": "Miglior rapporto qualità-prezzo",
+    "choosePlan": "Scegli il tuo piano",
+    "startFree": "Inizia con una prova gratuita, aggiorna quando vuoi",
+    "mostPopular": "PIÙ POPOLARE",
+    "save30": "Risparmia il 36%",
+    "noCreditCard": "Nessuna carta di credito",
+    "securePayment": "Elaborazione pagamenti sicura",
+    "cancelAnytime": "Annulla in qualsiasi momento",
+    "startFreeTrial": "Inizia prova gratuita",
+    "continueWith": "Continua con",
+    "maybeLater": "Forse più tardi",
+    "prioritySupport": "Supporto prioritario",
+    "exclusiveContent": "Contenuto esclusivo",
+    "selected": "Selezionato",
+    "select": "Seleziona"
+  },
+  "freeTrialModal": {
+    "title": "Inizia la tua prova gratuita",
+    "subtitle": "Scegli come vuoi iniziare la tua prova gratuita di 14 giorni",
+    "addCardNow": "Aggiungi carta ora",
+    "skipForNow": "Salta per ora",
+    "info1": "Aggiungere una carta ora garantisce il servizio senza interruzioni dopo la prova",
+    "info2": "La tua carta non verrà addebitata fino a dopo 14 giorni",
+    "info3": "Puoi annullare in qualsiasi momento durante il periodo di prova"
   },
   "subscription": {
     "txt1": "La tua prova gratuita di 14 giorni è terminata.",
-    "txt2": "Passa a Premium per sbloccare l’accesso completo.",
-    "txt3": "Procedi al pagamento"
+    "txt2": "Passa a Premium per sbloccare l'accesso completo.",
+    "txt3": "Checkout",
+    "renewSubscription": "Rinnova abbonamento",
+    "choosePlanToContinue": "Scegli un piano per continuare a godere delle funzionalità premium on BUEZ",
+    "renewWith": "Rinnova con",
+    "securePayment": "Elaborazione pagamenti sicura",
+    "cancelAnytime": "Annulla in qualsiasi momento"
   },
   "home": {
     "txt1": "Home",
     "txt2": "Cerca",
     "txt3": "Categorie",
     "txt4": "Tutto",
-    "txt5": "Pulizie",
-    "txt6": "Traslochi",
+    "txt5": "Pulizia",
+    "txt6": "Trasloco",
     "txt7": "Giardinaggio",
-    "txt8": "Altro",
-    "txt9": "Richieste recenti",
+    "txt8": "Altri",
+    "txt9": "Richieste vicine",
     "txt10": "Compenso",
     "txt11": "Nessun record trovato!",
     "txt12": "Caricamento richieste..."
   },
   "details": {
-    "txt1": "Dettagli",
+    "txt1": "Dettagli attività",
     "txt2": "Leggi meno",
     "txt3": "Leggi di più",
     "txt4": "Posizione",
-    "txt5": "Data e ora della richiesta",
+    "txt5": "Data e ora richiesta",
     "txt6": "Compenso",
     "txt7": "Messaggio al richiedente",
     "txt8": "Le mie richieste",
     "txt9": "Messaggio",
-    "txt10": "Nessuna recensione ancora!",
-    "txt11": "di più",
-    "txt12": "Accetta compito",
+    "txt10": "Ancora nessuna recensione!",
+    "txt11": "altro",
+    "txt12": "Accetta attività",
     "txt13": "Categoria",
-    "txt14": "Valutazione"
+    "txt14": "Valutazione media"
   },
   "myRequests": {
     "txt1": "Le mie richieste",
     "txt2": "Attive",
     "txt3": "Completate",
-    "txt4": "Pub:",
-    "txt5": "Segna come svolta",
+    "txt4": "Pubblicata:",
+    "txt5": "Segna come fatto",
     "txt6": "Annulla",
     "txt7": "Sei sicuro di voler eliminare\nquesta richiesta?",
-    "txt8": "Annullato",
+    "txt8": "Annullata",
     "txt9": "Ripubblica",
-    "txt10": "Accettato",
-    "txt11": "Accettato da:",
+    "txt10": "Accettata",
+    "txt11": "Accettata da:",
     "txt12": "Richiesta accettata annullata con successo.",
     "txt13": "Caricamento delle tue richieste...",
     "repostSuccess": "Richiesta ripubblicata!",
@@ -203,17 +247,18 @@
     "txt2": "Modifica richiesta",
     "txt3": "Tipo di attività",
     "txt4": "Gaming",
-    "txt5": "Compenso",
+    "txt5": "Monetario",
     "txt6": "Altro",
     "txt7": "Tipo di compenso",
     "txt8": "Descrizione",
     "txt9": "Posizione (Visibile agli utenti entro 100 km)",
-    "txt10": "Dettagli del compenso, es. due biglietti per il cinema",
-    "txt11": "es. 100 CHF",
+    "txt10": "Dettagli compenso es: Due biglietti cinema",
+    "txt11": "es: 100$",
     "txt12": "Carica foto dalla galleria",
     "txt13": "Modifica",
     "txt14": "Pubblica",
-    "pr" : "Prezzo"
+    "customTaskTitle": "Specifica il tipo di attività",
+    "pr": "Prezzo"
   },
   "messages": {
     "txt1": "Messaggi",
@@ -226,92 +271,96 @@
   "chat": {
     "txt1": "Carica messaggi precedenti",
     "txt2": "Scrivi un messaggio",
-    "txt3": "Elimina messaggio",
+    "txt3": " Elimina messaggio",
     "txt4": "Vuoi eliminare questo messaggio?",
     "txt5": "Elimina"
   },
   "settings": {
     "txt1": "Annulla abbonamento",
     "txt2": "Cambia password",
-    "txt3": "Termini & Condizioni",
-    "txt4": "Politica sulla privacy",
+    "txt3": "Termini e Condizioni",
+    "txt4": "Privacy Policy",
     "txt5": "FAQ",
-    "txt6": "Disconnettiti",
+    "txt6": "Disconnetti",
     "txt7": "Elimina account",
-    "txt8": "Aiuto & Sicurezza",
+    "txt8": "Aiuto e sicurezza",
     "txt9": "Impostazioni",
     "txt10": "Sei sicuro di voler eliminare\nquesto account?",
-    "txt11": "Sei sicuro di voler uscire\nda questo account?",
+    "txt11": "Sei sicuro di voler disconnetterti\nda questo account?",
     "txt12": "Cambia lingua",
-    "txt13": "Tema Scuro"
+    "txt13": "Tema scuro"
   },
-  "cancelSubscription": {
-    "txt1": "Annulla abbonamento Premium",
-    "txt2": "Piano attuale",
-    "txt3": "0,99 CHF/mese",
-    "txt4": "I tuoi servizi non saranno più visibili agli altri",
-    "txt5": "Non riceverai più richieste giornaliere",
-    "txt6": "Non potrai più guadagnare con le faccende quotidiane",
-    "txt7": "Perderai l’accesso alle cancellazioni flessibili",
-    "txt8": "Non hai un abbonamento attivo.",
-    "txt9": "Attiva abbonamento",
-    "txt10": "Sei sicuro di voler annullare\nil tuo abbonamento mensile?"
+ "cancelSubscription": {
+    "txt1": "Il tuo abbonamento attuale",
+    "txt8": "Non hai un abbonamento attivo",
+    "txt10": "Annulla abbonamento",
+    "monthlyPlan": "PIANO MENSILE",
+    "yearlyPlan": "PIANO ANNUALE",
+    "save36": "Risparmia il 36%",
+    "cancellationNote": "Dettagli cancellazione",
+    "monthlyCancellation": "Il tuo abbonamento rimarrà attivo fino alla fine del periodo di fatturazione corrente. Non verrai più addebitato.",
+    "yearlyCancellation": "Il tuo abbonamento annuale rimarrà attivo fino alla fine del ciclo di fatturazione corrente. Nessun rimborso per il tempo non utilizzato.",
+    "monthlyConfirmation": "Sei sicuro di voler cancellare l'abbonamento mensile? Perderai l'accesso alle funzionalità premium alla fine del periodo di fatturazione.",
+    "yearlyConfirmation": "Sei sicuro di voler cancellare l'abbonamento annuale? Perderai l'accesso alle funzionalità premium alla fine del ciclo di fatturazione. Nessun rimborso verrà fornito.",
+    "confirmCancel": "Sì, annulla",
+    "keepSubscription": "Mantieni abbonamento",
+    "monthlyCancelled": "Abbonamento mensile annullato con successo",
+    "yearlyCancelled": "Abbonamento annuale annullato con successo"
   },
   "chnagePassword": {
-    "txt1": "Inserisci la vecchia password",
-    "txt2": "Inserisci la nuova password",
-    "txt3": "Ripeti la nuova password",
+    "txt1": "Inserisci vecchia password",
+    "txt2": "Inserisci nuova password",
+    "txt3": "Ripeti nuova password",
     "txt4": "Cambia",
     "txt5": "Vecchia password",
     "txt6": "Nuova password",
-    "txt7": "Ripeti la password"
+    "txt7": "Ripeti password"
   },
-
   "privacyPolicy": {
-    "txt1": "Benvenuto nella nostra Informativa sulla privacy. La tua privacy è estremamente importante per noi. Questa informativa spiega come raccogliamo, usiamo e proteggiamo i tuoi dati personali quando utilizzi la nostra app.",
+    "txt1": "Benvenuto nella nostra Informativa sulla Privacy. La tua privacy è estremamente importante per noi. Questa Informativa sulla Privacy spiega come raccogliamo, utilizziamo e proteggiamo i tuoi dati personali quando usi la nostra applicazione.",
     "txt2": "Informazioni che raccogliamo",
-    "txt3": "Raccogliamo le informazioni che fornisci direttamente, ad esempio quando crei un account, invii una richiesta o contatti il supporto. Queste possono includere nome, email, numero di telefono e altri dati pertinenti.",
-    "txt4": "Come usiamo le tue informazioni",
-    "txt5": "Utilizziamo le informazioni raccolte per fornire, migliorare e personalizzare i nostri servizi. Ciò include elaborare transazioni, inviare notifiche, garantire la sicurezza e analizzare le tendenze di utilizzo.",
-    "txt6": "Condivisione dati e sicurezza",
-    "txt7": "Non vendiamo i tuoi dati personali a terzi. Possiamo condividerli con fornitori di servizi fidati per necessità operative, obblighi legali o sicurezza degli utenti. Implementiamo misure per proteggerli.",
+    "txt3": "Raccogliamo informazioni che ci fornisci direttamente, come quando crei un account, invii una richiesta o comunichi con l'assistenza clienti. Questo può includere nome, email, numero di telefono e altri dettagli rilevanti.",
+    "txt4": "Come utilizziamo le tue informazioni",
+    "txt5": "Utilizziamo le informazioni raccolte per fornire, migliorare e personalizzare i nostri servizi. Questo include elaborare transazioni, inviare notifiche, garantire sicurezza e analizzare tendenze d'uso.",
+    "txt6": "Condivisione e sicurezza dati",
+    "txt7": "Non vendiamo i tuoi dati personali a terzi. Possiamo condividere dati con fornitori di servizi fidati per operazioni necessarie, conformità legale o sicurezza utenti. Implementiamo misure di sicurezza per proteggere i tuoi dati.",
     "txt8": "I tuoi diritti",
-    "txt9": "Hai il diritto di accedere, aggiornare o cancellare i tuoi dati personali. Puoi anche rinunciare ad alcune pratiche di raccolta. Contattaci per qualsiasi dubbio sulla privacy.",
-    "txt10": "Modifiche a questa informativa",
-    "txt11": "Potremmo aggiornare questa informativa periodicamente. Ti consigliamo di consultarla regolarmente. L’uso continuato dei nostri servizi dopo le modifiche implica accettazione.",
+    "txt9": "Hai il diritto di accedere, aggiornare o eliminare le tue informazioni personali. Puoi anche rifiutare certe pratiche di raccolta dati. Contattaci per preoccupazioni sulla privacy.",
+    "txt10": "Modifiche a questa policy",
+    "txt11": "Possiamo aggiornare questa Informativa sulla Privacy periodicamente. Ti incoraggiamo a rivederla per eventuali cambiamenti. L'uso continuato dei nostri servizi dopo aggiornamenti costituisce accettazione della policy revisionata.",
     "txt12": "Contattaci",
-    "txt13": "Se hai domande su questa informativa, contattaci a info@buezapp.com."
+    "txt13": "Per domande su questa Informativa sulla Privacy, contattaci a info@buezapp.com."
   },
   "terms": {
-    "txt1": "Benvenuto su BUEZ, una piattaforma gestita da Buez Solution che mette in contatto chi ha bisogno di aiuto per faccende quotidiane con persone disponibili a fornire assistenza in cambio di una ricompensa. Accedendo o utilizzando l’app BUEZ (“App”) o i servizi correlati (“Servizio”), accetti i presenti Termini e Condizioni (“Termini”). Se non sei d’accordo, non utilizzare il Servizio.",
-    "txt2": "1. Requisiti",
-    "txt3": "Devi avere almeno 18 anni per usare BUEZ. Registrandoti confermi di avere la capacità legale di stipulare questo accordo. BUEZ può sospendere o chiudere account che violano i Termini.",
+    "txt1": " Benvenuto su BUEZ, una piattaforma operata da Buez Solution che connette utenti che necessitano aiuto con compiti quotidiani a individui disposti a fornire assistenza in cambio di compenso. Accedendo o usando l'app mobile BUEZ (l'\"App\") o servizi correlati (collettivamente, il \"Servizio\"), accetti di essere vincolato da questi Termini e Condizioni (\"Termini\"). Se non sei d'accordo, non devi usare il Servizio.",
+    "txt2": "1. Idoneità",
+    "txt3": "Devi avere almeno 18 anni per usare BUEZ. Registrandoti, confermi di avere la capacità legale di stipulare questo accordo. BUEZ si riserva il diritto di sospendere o terminare account che violano questi Termini.",
     "txt4": "2. Account utente",
-    "txt5": "Devi creare un account per usare il Servizio. Sei responsabile di mantenere riservati i tuoi dati di accesso. BUEZ non è responsabile per accessi non autorizzati.",
-    "txt6": "3. Abbonamenti e pagamenti",
-    "txt7": "BUEZ funziona con un modello in abbonamento. Gli utenti devono abbonarsi per usare e pubblicare richieste. I pagamenti sono mensili e continuano finché non disdetti. Sono gestiti da provider esterni.",
+    "txt5": "Devi creare un account per accedere e usare il Servizio. Sei responsabile della riservatezza delle credenziali del tuo account. BUEZ non è responsabile per accessi non autorizzati al tuo account.",
+    "txt6": "3. Abbonamento e pagamenti",
+    "txt7": "BUEZ opera su modello in abbonamento. Gli utenti devono abbonarsi per accedere e pubblicare richieste. Le tariffe di abbonamento sono addebitate mensilmente e continueranno fino a cancellazione dell'utente. I pagamenti sono elaborati tramite provider di pagamento terzi.",
     "txt8": "4. Uso del Servizio",
-    "txt9": "Gli utenti possono pubblicare richieste di aiuto indicando compenso e dettagli. Il compenso è gestito direttamente tra chi chiede e chi aiuta; BUEZ non garantisce né elabora i pagamenti.",
+    "txt9": "Gli utenti possono pubblicare richieste di assistenza, specificando compenso e dettagli attività. Il compenso è gestito direttamente tra richiedente e aiutante, e BUEZ non garantisce né elabora pagamenti tra utenti.",
     "txt10": "5. Attività vietate",
-    "txt11": "Non devi pubblicare contenuti ingannevoli, dannosi o offensivi, usare la piattaforma per scopi illegali o tentare di compromettere la piattaforma.",
+    "txt11": "Gli utenti non devono pubblicare contenuti ingannevoli, dannosi o offensivi, usare la piattaforma per attività illegali, o tentare di hackerare o interrompere la funzionalità della piattaforma.",
     "txt12": "6. Limitazione di responsabilità",
-    "txt13": "BUEZ è un facilitatore e non è responsabile per danni diretti, indiretti o causati dall’uso del Servizio. Non garantisce qualità, affidabilità o sicurezza dei servizi forniti dagli utenti.",
-    "txt14": "7. Contatti",
-    "txt15": "Per domande o assistenza, contattaci su info@buezapp.com"
+    "txt13": "BUEZ è un facilitatore e non è responsabile per danni diretti, indiretti, incidentali o consequenziali derivanti dall'uso del Servizio. BUEZ non garantisce qualità, affidabilità o sicurezza dei servizi forniti dagli utenti.",
+    "txt14": "7. Informazioni di contatto",
+    "txt15": "Per domande o supporto, contattaci a info@buezapp.com"
   },
   "successScreen": {
     "txt1": "Richiesta pubblicata con successo",
     "txt2": "Home",
     "txt3": "La tua attività è stata pubblicata con successo!",
-    "txt4": "Visibilità dell’attività",
-    "txt5": "La tua attività è visibile agli aiutanti finché non viene accettata.",
-    "txt6": "Regola della prima accettazione",
-    "txt7": "Una volta accettata, solo quell’aiutante può visualizzarla fino alla fine dell’accordo.",
+    "txt4": "Visibilità attività",
+    "txt5": "La tua attività è ora visibile agli aiutanti finché non viene accettata.",
+    "txt6": "Regola prima accettazione",
+    "txt7": "Una volta accettata, solo quell'aiutante può vederla finché l'accordo non è concluso.",
     "txt8": "Nessun accordo? Ripubblica facilmente",
-    "txt9": "Se non si raggiunge un accordo, ripubblicala da 'Le mie richieste' sotto 'Attive'.",
+    "txt9": "Se nessun accordo è concluso, ripubblica da 'Le mie rich' sotto 'Attive'.",
     "txt10": "Rimani aggiornato",
-    "txt11": "Riceverai notifiche quando qualcuno è interessato o invia un’offerta.",
-    "txt12": "Vedi Le mie richieste"
+    "txt11": "Riceverai notifiche quando qualcuno è interessato o invia un'offerta.",
+    "txt12": "Vedi le mie richieste"
   },
   "profile": {
     "txt1": "Profilo",
@@ -325,12 +374,12 @@
     "txt3": "Modifica informazioni",
     "txt4": "Aggiorna profilo",
     "biography": "Biografia",
-    "biographyPlaceholder": "Condividi le tue competenze, esperienze e ciò che ti appassiona...",
-    "biographyHint": "Una breve biografia aiuta gli altri a comprendere la tua esperienza e il tuo approccio"
+    "biographyPlaceholder": "Condividi le tue abilità, esperienza e passioni...",
+    "biographyHint": "Una breve biografia aiuta gli altri a capire la tua competenza e approccio"
   },
   "reviews": {
     "txt1": "Le mie recensioni",
-    "txt2": "Datato:",
+    "txt2": "Data:",
     "txt3": "Da:",
     "txt4": "Recensito",
     "txt5": "Valutazione media",
@@ -339,26 +388,26 @@
     "txt8": "recensioni"
   },
   "bottomTab": {
-    "txt1": "Mie Rich.",
+    "txt1": "Le mie rich",
     "txt2": "Pubblica",
     "txt3": "Home",
     "txt4": "Messaggi",
     "txt5": "Impostazioni"
   },
   "location": {
-    "placholder": "Cerca una località",
+    "placholder": "Cerca una posizione",
     "by": "+ Aggiungi posizione",
     "apply": "Applica posizione"
   },
   "password": {
-    "txt1": "Hai effettuato l'accesso con Google. Per cambiare la password, gestisci il tuo account Google.",
+    "txt1": "Hai effettuato l'accesso con Google. Per cambiare password, gestisci il tuo Account Google.",
     "txt2": "Account Google",
     "txt3": "Gestisci Apple ID",
     "txt4": "Hai effettuato l'accesso con Apple. Gestisci la password nelle impostazioni del tuo Apple ID."
   },
   "notifications": {
-    "txt1": "Caricamento delle notifiche...",
-    "txt2": "Quando riceverai delle notifiche, appariranno qui",
+    "txt1": "Caricamento notifiche...",
+    "txt2": "Quando ricevi notifiche, appariranno qui",
     "txt3": "Valutazione:"
   },
   "completed": {
@@ -367,155 +416,155 @@
     "txt3": "La tua recensione",
     "txt4": "Attività completate",
     "txt5": " Recensito",
-    "txt6": "In attesa di recensione",
-    "txt7": "Caricamento delle tue attività completate..."
+    "txt6": "Recensione in sospeso",
+    "txt7": "Caricamento attività completate..."
   },
   "pushNotifications": {
-    "txt1": "Ha accettato la tua richiesta di attività.",
+    "txt1": "ha accettato la tua richiesta di attività.",
     "txt2": "ti ha lasciato una recensione sulla tua attività!",
     "txt3": "Attività completata!",
     "txt4": "La tua attività accettata",
     "txt5": "è stata segnata come completata da",
-    "txt6": "Follow-up dell'attività!",
-    "txt7": "Questo è un promemoria sulla tua recente pubblicazione di attività. Controlla i tuoi progressi e aggiorna lo stato se completato.",
+    "txt6": "Follow-up attività!",
+    "txt7": "Questo è un promemoria sulla tua recente pubblicazione di attività. Controlla i progressi e aggiorna lo stato se completata.",
     "txt8": "⏰ Prova gratuita in scadenza",
-    "txt9": "La tua prova gratuita termina tra 4 giorni. Resta abbonato per mantenere l'accesso completo."
+    "txt9": "La tua prova gratuita termina in 4 giorni. Mantieni l'abbonamento per accesso completo."
   },
   "modal": {
     "txt1": "Attività accettata con successo!",
     "txt2": "Inizia a comunicare",
-    "txt3": "Ora puoi chattare con il richiedente sui dettagli dell’attività.",
+    "txt3": "Ora puoi chattare con il richiedente sui dettagli dell'attività.",
     "txt4": "Trova in Le mie richieste",
     "txt5": "Questa attività è elencata sotto 'Accettate' in Le mie richieste.",
     "txt6": "Rimani aggiornato",
     "txt7": "Riceverai notifiche per aggiornamenti o messaggi.",
     "txt8": "Prossimi passi",
-    "txt9": "Coordina con il richiedente per completare l’attività.",
+    "txt9": "Coordina con il richiedente per finire l'attività.",
     "txt10": "Capito!",
-    "txt11": "Vedi Le mie richieste"
+    "txt11": "Vedi le mie richieste"
   },
 
   "faqs": {
     "txt1": "Come possiamo aiutarti?",
-    "txt2": "Trova risposte alle domande frequenti",
-    "txt3": "Hai ancora bisogno di aiuto?",
+    "txt2": " Trova risposte a domande frequenti",
+    "txt3": " Hai ancora bisogno di aiuto?",
     "txt4": "Il nostro team di supporto è qui per assisterti",
-    "txt5": "Contatta Supporto",
+    "txt5": "Contatta supporto",
     "section1": {
-      "title": "Informazioni Generali",
+      "title": "Informazioni generali",
       "questions": {
         "q1": "Cos'è BUEZ?",
-        "a1": "BUEZ è un'applicazione mobile guidata dalla comunità che collega persone che hanno bisogno di aiuto con compiti quotidiani a quelle disposte a fornire assistenza in cambio di compenso o altri benefici.",
+        "a1": "BUEZ è un'app mobile community-driven che connette persone che necessitano aiuto con compiti quotidiani a quelle disposte a fornire assistenza in cambio di compenso o altri benefici.",
         "q2": "Come funziona BUEZ?",
-        "a2": "Gli utenti possono pubblicare compiti per cui hanno bisogno di aiuto, e altri possono sfogliare e accettare queste richieste. La piattaforma facilita la comunicazione e il completamento dei compiti attraverso un sistema di messaggistica sicuro.",
-        "q3": "BUEZ è disponibile nella mia zona?",
-        "a3": "BUEZ mostra le richieste entro un raggio di 100 km dalla tua posizione. Puoi vedere le richieste vicine e applicare un filtro di posizione nell'app.",
-        "q4": "Quali tipi di compiti posso pubblicare su BUEZ?",
-        "a4": "Puoi pubblicare vari compiti quotidiani inclusi pulizie, traslochi, giardinaggio e altri con titolo personalizzato."
+        "a2": "Gli utenti possono pubblicare attività in cui necessitano aiuto, e altri possono navigare e accettare queste richieste. La piattaforma facilita comunicazione e completamento attività tramite sistema di messaggistica sicuro.",
+        "q3": "BUEZ è disponibile nella mia area?",
+        "a3": "BUEZ mostra richieste entro un raggio di 100 km dalla tua posizione. Puoi vedere richieste vicine e applicare un filtro posizione nell'app.",
+        "q4": "Che tipi di attività posso pubblicare su BUEZ?",
+        "a4": "Puoi pubblicare varie attività quotidiane incluse pulizia, trasloco, giardinaggio e altre con titolo personalizzato."
       }
     },
     "section2": {
-      "title": "Account & Abbonamento",
+      "title": "Account e abbonamento",
       "questions": {
-        "q1": "Ho bisogno di un abbonamento per usare BUEZ?",
-        "a1": "Sì, BUEZ opera con un modello basato su abbonamento. Hai bisogno di un abbonamento attivo per sfogliare e pubblicare richieste. Tuttavia, puoi registrarti e creare un account con una prova gratuita di 14 giorni.",
+        "q1": "Serve un abbonamento per usare BUEZ?",
+        "a1": "Sì, BUEZ opera su modello in abbonamento. Serve un abbonamento attivo per navigare e pubblicare richieste. Tuttavia, puoi registrarti e creare un account con una prova gratuita di 14 giorni.",
         "q2": "Quanto costa l'abbonamento BUEZ?",
         "a2": "BUEZ offre un piano di abbonamento mensile a $12.99. Puoi iniziare con una prova gratuita di 14 giorni per esplorare tutte le funzionalità.",
         "q3": "Posso cancellare il mio abbonamento?",
-        "a3": "Sì, puoi cancellare il tuo abbonamento in qualsiasi momento tramite le impostazioni dell'app. Conserverai l'accesso fino alla fine del tuo periodo di fatturazione.",
+        "a3": "Sì, puoi cancellare il tuo abbonamento in qualsiasi momento tramite impostazioni app. Manterrai l'accesso fino alla fine del periodo di fatturazione.",
         "q4": "Cosa succede se non mi abbono?",
-        "a4": "Senza un abbonamento attivo, puoi comunque creare un account ma non potrai sfogliare le richieste o pubblicare i tuoi compiti."
+        "a4": "Senza abbonamento attivo, puoi ancora creare un account ma non potrai navigare richieste o pubblicare le tue attività."
       }
     },
     "section3": {
-      "title": "Pubblicare & Accettare Richieste",
+      "title": "Pubblicare e accettare richieste",
       "questions": {
         "q1": "Come pubblico una richiesta di aiuto?",
-        "a1": "Vai alla sezione 'Pubblica Richiesta', seleziona il tipo di compito, aggiungi descrizione, posizione e dettagli del compenso. Puoi anche caricare foto per spiegare meglio il tuo compito.",
-        "q2": "Quale compenso posso offrire?",
-        "a2": "Puoi offrire un compenso monetario o altri benefici come carte regalo, biglietti del cinema o qualsiasi ricompensa reciprocamente concordata.",
+        "a1": "Vai alla sezione 'Pubblica richiesta', seleziona il tipo di attività, aggiungi descrizione, posizione e dettagli compenso. Puoi anche caricare foto per spiegare meglio l'attività.",
+        "q2": "Che compenso posso offrire?",
+        "a2": "Puoi offrire compenso monetario o altri benefici come carte regalo, biglietti cinema, o qualsiasi ricompensa mutualmente concordata.",
         "q3": "Posso cancellare una richiesta dopo averla pubblicata?",
-        "a3": "Sì, puoi cancellare le tue richieste attive in qualsiasi momento dalla sezione 'Le Mie Richieste'.",
-        "q4": "Come accetto un compito?",
-        "a4": "Sfoglia le richieste disponibili nella sezione 'Home', visualizza i dettagli del compito e tocca 'Accetta Compito' se sei interessato ad aiutare.",
-        "q5": "Posso cancellare un compito che ho accettato?",
-        "a5": "Sì, puoi cancellare i compiti accettati, anche se incoraggiamo a comunicare prima con il richiedente per evitare inconvenienti."
+        "a3": "Sì, puoi cancellare le tue richieste attive in qualsiasi momento dalla sezione 'Le mie richieste'.",
+        "q4": "Come accetto un'attività?",
+        "a4": "Naviga le richieste disponibili nella sezione 'Home', vedi i dettagli attività e tocca 'Accetta attività' se sei interessato ad aiutare.",
+        "q5": "Posso cancellare un'attività che ho accettato?",
+        "a5": "Sì, puoi cancellare attività accettate, sebbene incoraggiamo a comunicare prima con il richiedente per evitare inconvenienti."
       }
     },
     "section4": {
-      "title": "Pagamenti & Compenso",
+      "title": "Pagamenti e compenso",
       "questions": {
-        "q1": "Come vengono gestiti i pagamenti?",
-        "a1": "Il compenso viene concordato direttamente tra il richiedente e l'aiutante. BUEZ facilita la connessione ma non elabora pagamenti tra utenti.",
-        "q2": "Quando vengo pagato per i compiti completati?",
-        "a2": "Il momento e il metodo di pagamento sono concordati tra te e il richiedente. Raccomandiamo di discutere i dettagli del pagamento prima di iniziare il compito.",
-        "q3": "Cosa succede se c'è una disputa sul pagamento?",
-        "a3": "BUEZ incoraggia una comunicazione chiara sul compenso prima dell'accettazione del compito. Anche se non mediiamo nelle dispute di pagamento, forniamo un sistema di recensioni per mantenere la fiducia della comunità."
+        "q1": "Come sono gestiti i pagamenti?",
+        "a1": "Il compenso è organizzato direttamente tra richiedente e aiutante. BUEZ facilita la connessione ma non elabora pagamenti tra utenti.",
+        "q2": "Quando vengo pagato per attività completate?",
+        "a2": "Tempistica e metodo di pagamento sono concordati tra te e il richiedente. Raccomandiamo di discutere i dettagli di pagamento prima di iniziare l'attività.",
+        "q3": "E se c'è una disputa sul pagamento?",
+        "a3": "BUEZ incoraggia comunicazione chiara sul compenso prima dell'accettazione attività. Sebbene non mediiamo dispute di pagamento, forniamo un sistema di recensioni per mantenere fiducia nella community."
       }
     },
     "section5": {
-      "title": "Sicurezza & Comunità",
+      "title": "Sicurezza e community",
       "questions": {
         "q1": "BUEZ è sicuro da usare?",
-        "a1": "Sì, diamo priorità alla sicurezza dell'utente attraverso sistemi di recensione e messaggistica sicura. Tuttavia, raccomandiamo sempre di incontrarsi in luoghi pubblici per i primi incontri.",
+        "a1": "Sì, diamo priorità alla sicurezza utente tramite sistemi di recensione e messaggistica sicura. Tuttavia, raccomandiamo sempre di incontrarsi in luoghi pubblici per prime interazioni.",
         "q2": "Posso recensire altri utenti?",
-        "a2": "Sì, dopo il completamento di un compito, puoi lasciare recensioni e valutazioni, aiutando a costruire una comunità affidabile.",
+        "a2": "Sì, dopo il completamento attività, puoi lasciare recensioni e valutazioni, aiutando a costruire una community affidabile.",
         "q3": "Cosa devo fare se ho una brutta esperienza?",
-        "a3": "Puoi segnalare qualsiasi preoccupazione attraverso il nostro sistema di supporto. Prendiamo sul serio le linee guida della comunità e possiamo sospendere gli account che violano i nostri termini.",
+        "a3": "Puoi segnalare preoccupazioni tramite il nostro sistema di supporto. Prendiamo sul serio le linee guida della community e possiamo sospendere account che violano i nostri termini.",
         "q4": "Come funziona il sistema di messaggistica?",
-        "a4": "La nostra messaggistica integrata consente la comunicazione privata tra richiedenti e aiutanti. Questo aiuta a discutere dettagli dei compiti, compenso e coordinamento in sicurezza all'interno dell'app."
+        "a4": "La nostra messaggistica integrata permette comunicazione privata tra richiedenti e aiutanti. Questo aiuta a discutere dettagli attività, compenso e coordinazione in sicurezza within l'app."
       }
     },
     "section6": {
-      "title": "Supporto Tecnico",
+      "title": "Supporto tecnico",
       "questions": {
-        "q1": "Come reimposto la mia password?",
-        "a1": "Usa la funzione 'Password Dimenticata' nella schermata di accesso. Invieremo un link di reimpostazione al tuo indirizzo email registrato.",
-        "q2": "Posso cambiare le mie informazioni del profilo?",
-        "a2": "Sì, puoi aggiornare il tuo nome, biografia e altri dettagli del profilo nella sezione 'Modifica Profilo'.",
-        "q3": "Cosa succede se l'app non funziona correttamente?",
-        "a3": "Prova a riavviare l'app o il tuo dispositivo. Se i problemi persistono, contatta il nostro team di supporto tramite la sezione di aiuto dell'app.",
+        "q1": "Come reimposto la password?",
+        "a1": "Usa la funzione 'Password dimenticata' nella schermata di accesso. Invieremo un link di reset al tuo indirizzo email registrato.",
+        "q2": "Posso cambiare le informazioni del profilo?",
+        "a2": "Sì, puoi aggiornare nome, biografia e altri dettagli profilo nella sezione 'Modifica profilo'.",
+        "q3": "E se l'app non funziona correttamente?",
+        "a3": "Prova a riavviare l'app o il dispositivo. Se i problemi persistono, contatta il nostro team di supporto tramite la sezione aiuto dell'app.",
         "q4": "Come gestisco le notifiche?",
-        "a4": "Puoi personalizzare le tue preferenze di notifica nella sezione Impostazioni per controllare quali avvisi ricevi."
+        "a4": "Puoi personalizzare le preferenze di notifica nella sezione Impostazioni per controllare quali avvisi ricevi."
       }
     },
     "section7": {
-      "title": "Gestione Prova Gratuita",
+      "title": "Gestione prova gratuita",
       "questions": {
         "q1": "Come funziona la prova gratuita di 14 giorni?",
-        "a1": "I nuovi utenti ottengono l'accesso completo a tutte le funzionalità di BUEZ per 14 giorni completamente gratis. Nessuna carta di credito richiesta in anticipo.",
+        "a1": "I nuovi utenti ottengono accesso completo a tutte le funzionalità BUEZ per 14 giorni completamente gratis. Nessuna carta di credito richiesta in anticipo.",
         "q2": "Verrò addebitato dopo la prova gratuita?",
-        "a2": "Se non annulli prima della fine della prova, il tuo abbonamento continuerà automaticamente alla tariffa mensile di $12.99.",
+        "a2": "Se non cancelli prima della fine della prova, il tuo abbonamento continuerà automaticamente alla tariffa mensile di $12.99.",
         "q3": "Come cancello il mio abbonamento?",
-        "a3": "Vai su Impostazioni → Cancella Abbonamento. Conserverai l'accesso fino alla fine del tuo attuale periodo di fatturazione.",
+        "a3": "Vai a Impostazioni → Annulla abbonamento. Manterrai l'accesso fino alla fine del periodo di fatturazione corrente.",
         "q4": "Posso ottenere un rimborso?",
-        "a4": "Le tariffe dell'abbonamento non sono rimborsabili, ma puoi cancellare in qualsiasi momento per evitare addebiti futuri."
+        "a4": "Le tariffe di abbonamento non sono rimborsabili, ma puoi cancellare in qualsiasi momento per prevenire addebiti futuri."
       }
     }
   },
   "profileRank": {
-    "txt1": "Profili Migliori",
-    "txt2": "Visualizza Tutti",
+    "txt1": "Profili migliori",
+    "txt2": "Vedi tutti",
     "txt3": "MINI BUEZER",
     "txt4": "BUEZER",
     "txt5": "PRO BUEZER",
-    "txt6": "Attività Attive",
-    "txt7": "Attività Completate",
-    "txt8": "Visualizza Profilo",
+    "txt6": "Attività attive",
+    "txt7": "Attività completate",
+    "txt8": "Vedi profilo",
     "txt9": "Membro dal",
     "txt10": "Successo",
-    "txt11": "Cerca utenti popolari...",
+    "txt11": "Cerca utenti migliori...",
     "txt12": "Tutti",
     "txt13": "Pro",
-    "txt14": "Emergente",
+    "txt14": "Emergenti",
     "txt15": "Principiante",
     "txt16": "Utente",
     "txt17": "Utenti",
     "txt18": "Trovato",
-    "txt19": "Caricamento migliori profili...",
+    "txt19": "Caricamento profili migliori...",
     "txt20": "Nessun utente trovato",
-    "txt21": "Prova a modificare i termini di ricerca",
-    "txt22": "Nessun utente popolare disponibile al momento",
+    "txt21": "Prova ad aggiustare i termini di ricerca",
+    "txt22": "Nessun utente di rilievo disponibile al momento",
     "txt23": "Completato",
     "txt24": "Recente",
     "txt25": "Caricamento profilo...",
@@ -523,26 +572,45 @@
     "txt27": "Profilo",
     "txt28": "ELITE BUEZER",
     "txt29": "TASK BUEZER",
-    "txt30": "NUOVO BUEZER",
-    "txt31": "Successo delle Attività",
+    "txt30": "NEW BUEZER",
+    "txt31": "Successo attività",
     "txt32": "attività con",
-    "txt33": "successo delle attività",
-    "txt34": "Attività Completate",
+    "txt33": "di successo attività",
+    "txt34": "Attività completate",
     "txt35": "Recensioni",
-    "txt36": "Nessuna attività completata ancora",
-    "txt37": "Nessuna recensione ancora",
-    "txt38": "Filtra Per",
+    "txt36": "Ancora nessuna attività completata",
+    "txt37": "Ancora nessuna recensione",
+    "txt38": "Filtra per",
     "txt39": "Pro Buezer",
     "txt40": "Buezer",
     "txt41": "Mini Buezer",
-    "txt42": "Trova Utenti",
-    "txt43": "Nelle Mie Vicinanze",
-    "txt44": "Seleziona Posizione",
-    "txt45": "Esplora gli Utenti Migliori",
-    "txt46": "Utilizzando",
+    "txt42": "Trova utenti",
+    "txt43": "Vicino a me",
+    "txt44": "Seleziona posizione",
+    "txt45": "Esplora utenti migliori",
+    "txt46": "Usando",
     "txt47": "basato su",
     "txt48": "Vicino a",
-    "txt49": "Aggiungi Recensione",
+    "txt49": "Aggiungi recensione",
     "txt50": "Recensito"
-}
+  },
+  "upgradePlan": {
+    "upgradeYourPlan": "Aggiorna il tuo piano",
+    "getBetterValue": "Passa ad annuale e risparmia",
+    "youSave": "Risparmierai il 36%",
+    "yearlySavings": "Passa ad annuale e risparmia $55.89 all'anno",
+    "planComparison": "Confronto piani",
+    "monthlyCost": "Costo piano mensile per anno:",
+    "yearlyCost": "Costo piano annuale:",
+    "totalSavings": "Il tuo risparmio totale:",
+    "currentPlan": "PIANO ATTUALE",
+    "recommended": "RACCOMANDATO",
+    "save36": "Risparmia il 36%",
+    "upgradeNow": "Aggiorna ora",
+    "bestValue": "Miglior valore - Risparmia il 36%",
+    "whyUpgrade": "Perché passare ad annuale?",
+    "saveMoney": "Risparmia il 36% rispetto al mensile",
+    "oneTimePayment": "Pagamento una tantum, nessuna seccatura mensile",
+    "exclusiveFeatures": "Accesso a funzionalità esclusive"
+  }
 }

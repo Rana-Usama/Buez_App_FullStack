@@ -274,7 +274,7 @@ export default function CompletedTasks({ navigation }: any) {
               <MyAppButton
                 title={tr.review || "Add Review"}
                 height={RFPercentage(5)}
-                width={RFPercentage(20)}
+                // width={RFPercentage(20)}
                 marginTop={0}
                 onPress={() => navigation.navigate("AddReview", { task: item })}
               />

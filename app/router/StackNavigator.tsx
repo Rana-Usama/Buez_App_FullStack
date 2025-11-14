@@ -51,6 +51,7 @@ import NetworkError from "../screens/NetworkError";
 import TopRatedUsers from "../screens/TopRatedUsers";
 import TopRatedUserProfile from "../screens/TopRatedUserProfile";
 import AddReviewToAccepter from "../screens/AddReviewToAccepter";
+import UpgradePlan from "../screens/UpgradePlan";
 
 const Stack = createStackNavigator();
 
@@ -70,14 +71,9 @@ const StackNavigator = () => {
   // Network error handling
   if (!isConnected) return <NetworkError />;
 
-  // // Loading screen while initial route resolves
   if (isLoading || userLoading || !initialRoute) {
     return <InitialScreen />;
   }
-
-  console.log("📍 userData:", userData);
-  console.log("🚀 Decided route:", initialRoute);
-  console.log("📍 userLoading:", userLoading);
 
   return (
     <NavigationContainer>
@@ -94,7 +90,6 @@ const StackNavigator = () => {
       >
         {/* Auth + Onboarding */}
         <Stack.Screen name="Decider" component={DeciderScreen} />
-
         <Stack.Screen name="OnBoarding" component={Onboarding} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
@@ -147,6 +142,10 @@ const StackNavigator = () => {
         <Stack.Screen
           name="AddReviewToAccepter"
           component={AddReviewToAccepter}
+        />
+         <Stack.Screen
+          name="UpgradePlan"
+          component={UpgradePlan}
         />
       </Stack.Navigator>
     </NavigationContainer>

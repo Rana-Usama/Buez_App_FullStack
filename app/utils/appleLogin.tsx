@@ -1,11 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  TouchableOpacity,
-  Image,
-  Platform,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import React, { useState } from "react";
+import { TouchableOpacity, Platform, ActivityIndicator } from "react-native";
 import { getDoc, doc, setDoc } from "firebase/firestore";
 import { signInWithCredential, OAuthProvider } from "firebase/auth";
 import appleAuth from "@invertase/react-native-apple-authentication";
@@ -28,12 +22,13 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
   const handleAppleLogin = async () => {
     if (Platform.OS !== "ios") return;
     setLoading(true);
+
     try {
-      let appleAuthRequestResponse;
+      let appleAuthResponse;
+
       if (!appleAuth.isSupported) {
-        //  Mock Apple sign-in result for simulator
-        console.log("Simulator detected – using mock Apple login");
-        appleAuthRequestResponse = {
+        // Mock for simulator
+        appleAuthResponse = {
           user: "simulatedUser",
           email: "simulator@test.com",
           fullName: { givenName: "Simulator", familyName: "User" },
@@ -41,121 +36,136 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
           nonce: "mock-nonce",
         };
       } else {
-        // Real Apple sign-in for physical device
-        appleAuthRequestResponse = await appleAuth.performRequest({
+        appleAuthResponse = await appleAuth.performRequest({
           requestedOperation: appleAuth.Operation.LOGIN,
           requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
         });
       }
 
-      const { identityToken, nonce, email, fullName } =
-        appleAuthRequestResponse;
+      const {
+        identityToken,
+        nonce,
+        email,
+        fullName,
+        user: appleUserId,
+      } = appleAuthResponse;
 
-      if (!email && !fullName) {
-        Alert.alert(
-          "Apple Sign-In Info",
-          "Apple only shares your name and email the first time you sign in. " +
-            "To get them again, go to iPhone Settings → Apple ID → " +
-            "Sign in with Apple → Apps Using Your Apple ID → Stop using Apple ID for this app, then try again."
-        );
-      }
       if (!identityToken)
         throw new Error("No identity token from Apple Sign-In");
 
-      // Create Firebase credential
+      // Firebase credential
       const provider = new OAuthProvider("apple.com");
       const credential = provider.credential({
         idToken: identityToken,
         rawNonce: nonce,
       });
 
-      console.log("credential................", credential);
-
-      // Sign in to Firebase
       const userCredential = await signInWithCredential(
         FIREBASE_AUTH,
         credential
       );
-
       const user = userCredential.user;
-      console.log("user................", user);
 
-      // Register for push notifications
-      let pushToken = null;
+      console.log("user.........", user);
+
+      // Push token
+      let pushToken: string | null = null;
       try {
         pushToken = await registerForPushNotificationsAsync();
       } catch (e) {
-        console.log("Push token registration failed:", e);
+        console.log("Push token registration failed", e);
       }
 
-      // 5️⃣ Firestore user reference
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnap = await getDoc(userRef);
-      let storedEmail = await SecureStore.getItemAsync("apple_email");
-      let storedName = await SecureStore.getItemAsync("apple_name");
 
-      if (email) await SecureStore.setItemAsync("apple_email", email);
-      if (fullName && (fullName.givenName || fullName.familyName)) {
-        const name = `${fullName.givenName || ""} ${
-          fullName.familyName || ""
-        }`.trim();
-        await SecureStore.setItemAsync("apple_name", name);
-      }
-      const finalEmail =
-        email || user.email || storedEmail || `${user.uid}@appleuser.com`; // fallback fake email
-      const finalName =
-        (fullName &&
-          `${fullName.givenName || ""} ${fullName.familyName || ""}`.trim()) ||
-        storedName ||
-        "Apple User";
-
-      const userData = {
-        userName: finalName,
-        email: finalEmail,
-        profileImage: user.photoURL || null,
-        token: pushToken,
-        phoneNumber: user.phoneNumber || null,
-        userId: user.uid,
-        isSubscribed: false,
-        isFreeTrial: false,
-      };
+      // Compute final email and name
+      let finalEmail = email || user.email || `${user.uid}@appleuser.com`;
+      let finalName = fullName
+        ? `${fullName.givenName || ""} ${fullName.familyName || ""}`.trim()
+        : user.displayName || "Apple User";
 
       if (userSnap.exists()) {
-        await setDoc(userRef, { ...userData }, { merge: true });
+        const data = userSnap.data();
+        // Merge logic: reuse previous email/name if identity token matches
+        if (data.appleIdentityToken === identityToken) {
+          finalEmail = data.email || finalEmail;
+          finalName = data.userName || finalName;
+        }
+
+        await setDoc(
+          userRef,
+          {
+            userName: finalName || data.userName || "Apple User",
+            profileImage: data.profileImage || user.photoURL || null,
+            token: pushToken || data.token || null,
+            phoneNumber: user.phoneNumber || data.phoneNumber || null,
+            email: finalEmail || data.email,
+            userId: data.userId || user.uid,
+            appleId: appleUserId,
+            appleIdentityToken: identityToken,
+            isSubscribed: data.isSubscribed ?? false,
+            isFreeTrial: data.isFreeTrial ?? false,
+            freeTrialStartedAt: data.freeTrialStartedAt || null,
+            subscriptionStart: data.subscriptionStart || null,
+            subscriptionEnd: data.subscriptionEnd || null,
+          },
+          { merge: true }
+        );
       } else {
-        await setDoc(userRef, userData);
+        await setDoc(userRef, {
+          userName: finalName,
+          email: finalEmail || "Apple User",
+          profileImage: user.photoURL || null,
+          phoneNumber: user.phoneNumber || null,
+          token: pushToken,
+          userId: user.uid,
+          appleId: appleUserId,
+          appleIdentityToken: identityToken,
+          isSubscribed: false,
+          isFreeTrial: false,
+          freeTrialStartedAt: null,
+          subscriptionStart: null,
+          subscriptionEnd: null,
+        });
       }
 
-      await saveCredentials(finalEmail, "123456");
+      // Save credentials and user info in SecureStore
+      await saveCredentials(String(finalEmail), String(appleUserId));
       await SecureStore.setItemAsync("loggedOut", "false");
+      await SecureStore.setItemAsync("apple_email", String(finalEmail));
+      await SecureStore.setItemAsync("apple_name", String(finalName));
+      await SecureStore.setItemAsync(
+        "apple_user_data",
+        JSON.stringify({ uid: user.uid, email: finalEmail, name: finalName })
+      );
 
-      // 6️⃣ Subscription / Free Trial logic
-      const updatedSnapshot = await getDoc(userRef);
-      const existingUser = updatedSnapshot.data();
+      // Navigation based on subscription/trial
+      const data = (await getDoc(userRef)).data();
       const now = new Date();
-      const subscriptionStart = existingUser?.subscriptionStart
-        ? new Date(existingUser.subscriptionStart)
+
+      const subStart = data?.subscriptionStart
+        ? new Date(data.subscriptionStart)
         : null;
-      const subscriptionEnd = existingUser?.subscriptionEnd
-        ? new Date(existingUser.subscriptionEnd)
+      const subEnd = data?.subscriptionEnd
+        ? new Date(data.subscriptionEnd)
         : null;
       const isWithinPaidPeriod =
-        subscriptionStart &&
-        subscriptionEnd &&
-        now >= subscriptionStart &&
-        now <= subscriptionEnd;
+        subStart && subEnd && now >= subStart && now <= subEnd;
 
-      let trialDays = null;
       let isTrialValid = false;
-      if (
-        existingUser.isFreeTrial &&
-        existingUser?.freeTrialStartedAt?.seconds
-      ) {
-        const trialStart = new Date(
-          existingUser.freeTrialStartedAt.seconds * 1000
-        );
-        trialDays = differenceInDays(now, trialStart);
+      if (data?.isFreeTrial && data?.freeTrialStartedAt?.seconds) {
+        const trialStart = new Date(data.freeTrialStartedAt.seconds * 1000);
+        const trialDays = differenceInDays(now, trialStart);
         isTrialValid = trialDays >= 0 && trialDays <= 14;
+      }
+
+      if (data?.isSubscribed || isWithinPaidPeriod || isTrialValid) {
+        navigation.navigate("TabNavigator");
+      } else if (data?.isFreeTrial && !isTrialValid) {
+        navigation.navigate("Subscription");
+      } else {
+        navigation.navigate("FreeTrial");
       }
 
       Toast.show({
@@ -163,20 +173,8 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
         text1: t("toast.login.one"),
         text2: t("toast.login.two"),
       });
-
-      if (existingUser.isSubscribed || isWithinPaidPeriod || isTrialValid) {
-        navigation.navigate("TabNavigator");
-      } else if (
-        existingUser.isFreeTrial &&
-        trialDays !== null &&
-        (trialDays < 0 || trialDays > 14)
-      ) {
-        navigation.navigate("Subscription");
-      } else {
-        navigation.navigate("FreeTrial");
-      }
     } catch (error) {
-      console.log("Apple Sign-In Error:", error);
+      console.log("🍎 Apple Sign-In Error:", error);
       Toast.show({
         type: "error",
         text1: t("toast.login.three"),
@@ -187,7 +185,6 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  // if (Platform.OS !== "ios") return null;
   if (loading) return <ActivityIndicator size="small" color="grey" />;
 
   return (

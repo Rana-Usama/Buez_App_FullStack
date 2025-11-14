@@ -168,9 +168,6 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
     completedTasksSnap.docs.forEach((doc) => {
       const data = doc.data();
       const taskUser = data?.acceptedBy; // This is the helper who accepted the task
-
-      console.log("taskUser..", taskUser);
-
       // Only process if there's a user who accepted the task (helper)
       if (!taskUser?.userId) return;
 
@@ -180,7 +177,6 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
       if (currentUserId && helperUserId === currentUserId) {
         return; // Skip processing tasks for current user
       }
-
       // Only include users who are helpers (not task owners)
       // In your data structure, taskOwnerId is the requester, acceptedBy.userId is the helper
       const taskOwnerId = data.taskOwnerId || data.user?.userId;

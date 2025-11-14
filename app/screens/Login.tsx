@@ -273,9 +273,11 @@ function Login({ navigation }) {
 
             <View style={styles.socialIconsContainer}>
               <GoogleLoginButton navigation={navigation} />
-              {/* <View style={{ marginLeft: RFPercentage(1.3) }}>
-                <AppleLoginButton navigation={navigation} />
-              </View> */}
+              {Platform.OS === "android" ? null : (
+                <View style={{ marginLeft: RFPercentage(1.3) }}>
+                  <AppleLoginButton navigation={navigation} />
+                </View>
+              )}
             </View>
 
             <View style={styles.signupContainer}>

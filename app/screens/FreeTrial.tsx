@@ -36,8 +36,8 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? theme.lightGrey
-                        : "rgb(233, 233, 233)",
+                        ? Colors.primary + "40"
+                        : Colors.primary + "15",
                   },
                 ]}
               >
@@ -53,8 +53,8 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? theme.lightGrey
-                        : "rgb(233, 233, 233)",
+                        ? Colors.primary + "40"
+                        : Colors.primary + "15",
                   },
                 ]}
               />
@@ -79,8 +79,8 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? theme.lightGrey
-                        : "rgb(233, 233, 233)",
+                        ? Colors.primary + "40"
+                        : Colors.primary + "15",
                   },
                 ]}
               >
@@ -96,8 +96,8 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? theme.lightGrey
-                        : "rgb(233, 233, 233)",
+                        ? Colors.primary + "40"
+                        : Colors.primary + "15",
                   },
                 ]}
               />
@@ -121,8 +121,8 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? theme.lightGrey
-                        : "rgb(233, 233, 233)",
+                        ? Colors.primary + "40"
+                        : Colors.primary + "15",
                   },
                 ]}
               >
@@ -138,8 +138,8 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? theme.lightGrey
-                        : "rgb(233, 233, 233)",
+                        ? Colors.primary + "40"
+                        : Colors.primary + "15",
                   },
                 ]}
               />
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(0.4),
-    width:"85%"
+    width: "85%",
   },
   connectorLine1: {
     width: RFPercentage(0.8),

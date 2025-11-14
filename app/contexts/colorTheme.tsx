@@ -1,7 +1,7 @@
 export const lightTheme = {
   mode: "light",
   primary: "#253275",
-  secondary: "#DD53A8",
+  secondary: "#5ac567ff",
   lightPrimary: "#F4FFF4",
   heading: "#6B7280",
   lightWhite: "#F7F7F7",
@@ -35,8 +35,8 @@ export const lightTheme = {
 
 export const darkTheme = {
   mode: "dark",
-  primary: "#7C90D9",
-  secondary: "#FF7DC1",
+  primary: "#253275",
+  secondary: "#5ac567ff",
   lightPrimary: "#1A1F2B",
   heading: "#D1D5DB",
   lightWhite: "#1F2937",

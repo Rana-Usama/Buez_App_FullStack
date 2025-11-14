@@ -47,10 +47,10 @@
       "four": "Failed to send reset link."
     },
     "subscriptionV2": {
-      "one": "Subscription Incomplete",
-      "two": "Your subscription could not be completed. Please try again.",
-      "three": "Free Trial Activated",
-      "four": "Your 14-day free trial has started successfully."
+      "one": "Payment cancelled",
+      "two": "You can try again anytime",
+      "three": "Payment successful!",
+      "four": "Welcome to Premium!"
     },
     "subscription": {
       "one": "Subscription Successful!",
@@ -65,11 +65,10 @@
       "six": "Unable to update request status.",
       "seven": "Request Reposted Successfully"
     },
-    "cancelSubscription": {
-      "one": "No Active Subscription",
-      "two": "We couldn't find an active subscription linked to your account.",
-      "three": "Subscription Cancelled",
-      "four": "Your subscription has been successfully cancelled. You will retain access until the end of your billing period."
+   "cancelSubscription": {
+      "one": "No active subscription",
+      "two": "You don't have any subscription to cancel",
+      "three": "Subscription cancelled"
     },
     "changePassword": {
       "one": "Password Changed",
@@ -82,6 +81,14 @@
       "two": "Your profile has been updated successfully!.",
       "three": "Update Failed",
       "four": "An error occurred while updating your profile. Please try again."
+    },
+    "upgradePlan": {
+      "paymentCancelled": "Payment cancelled",
+      "tryAgain": "You can try again anytime",
+      "upgradeSuccess": "Upgrade successful!",
+      "nowOnYearly": "You're now on the yearly plan",
+      "upgradeFailed": "Upgrade failed",
+      "tryAgainLater": "Please try again later"
     }
   },
   "onBoarding": {
@@ -144,12 +151,49 @@
     "txt4": "See requests daily",
     "txt5": "Earn money by doing daily chores",
     "txt6": "Cancel anytime",
-    "txt7": "Add Card"
+    "txt7": "Add Card",
+    "freeTrial": "Free Trial",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "for7Days": "for 14 days",
+    "perMonth": "per month",
+    "perYear": "per year",
+    "tryPremium": "Try all premium features",
+    "fullAccess": "Full access to all features",
+    "bestValue": "Best value",
+    "choosePlan": "Choose Your Plan",
+    "startFree": "Start with a free trial, upgrade anytime",
+    "mostPopular": "MOST POPULAR",
+    "save30": "Save 36%",
+    "noCreditCard": "No credit card",
+    "securePayment": "Secure payment processing",
+    "cancelAnytime": "Cancel anytime",
+    "startFreeTrial": "Start Free Trial",
+    "continueWith": "Continue with",
+    "maybeLater": "Maybe Later",
+    "prioritySupport": "Priority support",
+    "exclusiveContent": "Exclusive content",
+    "selected": "Selected",
+    "select": "Select"
+  },
+  "freeTrialModal": {
+    "title": "Start Your Free Trial",
+    "subtitle": "Choose how you'd like to start your 14-day free trial",
+    "addCardNow": "Add Card Now",
+    "skipForNow": "Skip for Now",
+    "info1": "Adding a card now ensures uninterrupted service after trial",
+    "info2": "Your card won't be charged until after 14 days",
+    "info3": "You can cancel anytime during the trial period"
   },
   "subscription": {
     "txt1": "Your 14-day free trial has ended.",
     "txt2": "Upgrade to Premium to unlock full access.",
-    "txt3": "Checkout"
+    "txt3": "Checkout",
+    "renewSubscription": "Renew Subscription",
+    "choosePlanToContinue": "Choose a plan to continue enjoying premium\nfeatures on BUEZ",
+    "renewWith": "Renew with",
+    "securePayment": "Secure payment processing",
+    "cancelAnytime": "Cancel anytime"
   },
   "home": {
     "txt1": "Home",
@@ -214,7 +258,7 @@
     "txt13": "Edit",
     "txt14": "Post",
     "customTaskTitle": "Please specify your task type",
-    "pr" : "Price"
+    "pr": "Price"
   },
   "messages": {
     "txt1": "Messages",
@@ -246,17 +290,22 @@
     "txt12": "Change Language",
     "txt13": "Dark Theme"
   },
-  "cancelSubscription": {
-    "txt1": "Cancel Premium Subscription",
-    "txt2": "Current Plan",
-    "txt3": ".99/month",
-    "txt4": "Your services will no longer be visible to other users",
-    "txt5": "You will no longer receive daily requests",
-    "txt6": "You will not be able to earn from daily tasks",
-    "txt7": "You will no longer have special cancellation options",
-    "txt8": "You are not subscribed to any active plan.",
-    "txt9": "Activate Subscription",
-    "txt10": "Are you sure you want to cancel\nyour monthly subscription?"
+ "cancelSubscription": {
+    "txt1": "Your Current Subscription",
+    "txt8": "You don't have an active subscription",
+    "txt10": "Cancel Subscription",
+    "monthlyPlan": "MONTHLY PLAN",
+    "yearlyPlan": "YEARLY PLAN",
+    "save36": "Saving 36%",
+    "cancellationNote": "Cancellation Details",
+    "monthlyCancellation": "If you cancel your monthly subscription now, it will stay active until the end of your current billing period. You won’t be charged again.",
+    "yearlyCancellation": "If you cancel your yearly subscription now, it will remain active until the end of your current billing cycle. No refunds will be issued for unused time.",
+    "monthlyConfirmation": "Are you sure you want to cancel your monthly subscription? You'll lose access to premium features at the end of your billing period.",
+    "yearlyConfirmation": "Are you sure you want to cancel your yearly subscription? You'll lose access to premium features at the end of your billing cycle. No refund will be provided.",
+    "confirmCancel": "Yes, Cancel",
+    "keepSubscription": "Keep Subscription",
+    "monthlyCancelled": "Monthly subscription cancelled successfully",
+    "yearlyCancelled": "Yearly subscription cancelled successfully"
   },
   "chnagePassword": {
     "txt1": "Enter Old Password",
@@ -353,8 +402,8 @@
   "password": {
     "txt1": "You signed in with Google. To change your password, please manage your Google Account.",
     "txt2": "Google Account",
-    "txt3" : "Manage Apple ID",
-    "txt4" : "You signed in with Apple. Manage your password in your Apple ID settings."
+    "txt3": "Manage Apple ID",
+    "txt4": "You signed in with Apple. Manage your password in your Apple ID settings."
   },
   "notifications": {
     "txt1": "Loading notifications...",
@@ -538,11 +587,30 @@
     "txt42": "Find Users",
     "txt43": "Near Me",
     "txt44": "Select Location",
-    "txt45" : "Explore Top Users",
-    "txt46" : "Using",
-    "txt47" : "based on",
-    "txt48" : "Near",
-    "txt49" : "Add Review",
-    "txt50" : "Reviewed"
+    "txt45": "Explore Top Users",
+    "txt46": "Using",
+    "txt47": "based on",
+    "txt48": "Near",
+    "txt49": "Add Review",
+    "txt50": "Reviewed"
+  },
+  "upgradePlan": {
+    "upgradeYourPlan": "Upgrade Your Plan",
+    "getBetterValue": "Switch to yearly plan and save money",
+    "youSave": "You will Save 36%",
+    "yearlySavings": "Switch to yearly plan and save $55.89 per year",
+    "planComparison": "Plan Comparison",
+    "monthlyCost": "Monthly plan cost per year:",
+    "yearlyCost": "Yearly plan cost:",
+    "totalSavings": "Your total savings:",
+    "currentPlan": "CURRENT PLAN",
+    "recommended": "MOST POPULAR",
+    "save36": "Save 36%",
+    "upgradeNow": "Upgrade Now",
+    "bestValue": "Best value - Save 36%",
+    "whyUpgrade": "Why Upgrade to Yearly?",
+    "saveMoney": "Save 36% compared to monthly billing",
+    "oneTimePayment": "One-time payment, no monthly hassle",
+    "exclusiveFeatures": "Access to exclusive features"
   }
 }

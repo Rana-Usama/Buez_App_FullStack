@@ -282,7 +282,6 @@ export const updateUserLocation = async (locationData) => {
         ...locationData,
         lastLocationUpdate: new Date().toISOString(),
       });
-      console.log("User location updated");
     } else {
       console.log("No user is logged in to update location");
     }

@@ -41,6 +41,10 @@ function Settings({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [provider, setProvider] = useState<string | null>(null);
 
+  const currentPlan = user?.planType || "free";
+  const isYearlyPlan = currentPlan === "yearly";
+  const isMonthlyPlan = currentPlan === "monthly";
+
   useEffect(() => {
     const user = FIREBASE_AUTH.currentUser;
     if (user && user.providerData.length > 0) {
@@ -55,6 +59,11 @@ function Settings({ navigation }) {
       iconSource: Icons.cancel,
       title: `${t("settings.txt1")}`,
       navigation: () => navigation.navigate("CancelSubscription"),
+    },
+    {
+      iconSource: Icons.cancel,
+      title: `Upgrade Plan`,
+      navigation: () => navigation.navigate("UpgradePlan"),
     },
     {
       iconSource: Icons.privacy,
@@ -152,52 +161,57 @@ function Settings({ navigation }) {
         </TouchableOpacity>
 
         {/* Navigation List */}
-        {navigationsList.map((item, i) => (
-          <TouchableOpacity
-            key={i}
-            onPress={item.navigation}
-            activeOpacity={0.8}
-            style={[
-              styles.navigationWrap,
-              {
-                marginTop: RFPercentage(2.5),
-                borderColor: theme.border,
-              },
-            ]}
-          >
-            <View style={styles.content2}>
-              {i === 2 ? (
-                <>
+        {navigationsList
+          .filter((item) => {
+            // Hide "Upgrade Plan" unless it's monthly
+            if (item.title === "Upgrade Plan" && isMonthlyPlan) {
+              return false;
+            }
+            return true;
+          })
+          .map((item, i) => (
+            <TouchableOpacity
+              key={i}
+              onPress={item.navigation}
+              activeOpacity={0.8}
+              style={[
+                styles.navigationWrap,
+                {
+                  marginTop: RFPercentage(2.5),
+                  borderColor: theme.border,
+                },
+              ]}
+            >
+              <View style={styles.content2}>
+                {i === 2 ? (
                   <Feather name="globe" size={24} color={theme.heading} />
-                </>
-              ) : (
-                <>
+                ) : (
                   <Image
                     style={styles.img}
                     source={item.iconSource}
                     tintColor={item.redColor ? Colors.red : theme.heading}
                   />
-                </>
-              )}
-              <Text
-                style={[
-                  styles.title,
-                  { color: item.redColor ? Colors.red : theme.heading },
-                ]}
-              >
-                {item.title}
-              </Text>
-              <MaterialIcons
-                name="arrow-forward-ios"
-                style={[
-                  styles.icon,
-                  { color: item.redColor ? Colors.red : theme.heading },
-                ]}
-                color={Colors.heading}
-              />
-            </View>
-          </TouchableOpacity>
-        ))}
+                )}
+
+                <Text
+                  style={[
+                    styles.title,
+                    { color: item.redColor ? Colors.red : theme.heading },
+                  ]}
+                >
+                  {item.title}
+                </Text>
+
+                <MaterialIcons
+                  name="arrow-forward-ios"
+                  style={[
+                    styles.icon,
+                    { color: item.redColor ? Colors.red : theme.heading },
+                  ]}
+                />
+              </View>
+            </TouchableOpacity>
+          ))}
       </ScrollView>
 
       <ConfirmationModal

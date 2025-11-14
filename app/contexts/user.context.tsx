@@ -59,19 +59,22 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   useEffect(() => {
     let unsubscribeUserData: (() => void) | undefined;
-
     if (authUser) {
+      setLoading(true);
       try {
-        unsubscribeUserData = subscribeToUserData(authUser.uid, setUserData);
+        unsubscribeUserData = subscribeToUserData(authUser.uid, (data) => {
+          setUserData(data);
+          setLoading(false);
+        });
       } catch (err) {
         setError((err as Error).message);
+        setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
-
     return () => {
-      if (unsubscribeUserData) {
-        unsubscribeUserData();
-      }
+      if (unsubscribeUserData) unsubscribeUserData();
     };
   }, [authUser]);
 

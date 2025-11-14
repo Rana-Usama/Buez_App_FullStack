@@ -32,28 +32,35 @@ function CancelSubscription({ navigation }: any) {
   const [isloading, setIsLoading] = useState(false);
   const { theme } = useAppTheme();
 
+  // Determine current plan type from user data
+  const currentPlan = userData?.planType || "monthly"; // Default to monthly if not specified
+  const isYearlyPlan = currentPlan === "yearly";
+
   const cancelSubscription = async () => {
     if (!userData?.subscriptionId) {
       Toast.show({
         type: "error",
-        text1: `${t("toast.cancelSubscription.one")}`,
-        text2: `${t("toast.cancelSubscription.two")}`,
+        text1: t("toast.cancelSubscription.one"),
+        text2: t("toast.cancelSubscription.two"),
       });
       return;
     }
     try {
-      setIsLoading(true); // Start loader
+      setIsLoading(true);
       const res = await fetch(
         "https://buez-server-khaki.vercel.app/api/cancel-subscription",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscriptionId: userData.subscriptionId }),
+          body: JSON.stringify({
+            subscriptionId: userData.subscriptionId,
+            planType: currentPlan,
+          }),
         }
       );
-      const text = await res.text(); // Read as text first
+      const text = await res.text();
       try {
-        const result = JSON.parse(text); // Try parsing manually
+        const result = JSON.parse(text);
         if (result.success) {
           const { currentPeriodEnd } = result;
           if (userId) {
@@ -62,6 +69,7 @@ function CancelSubscription({ navigation }: any) {
               await updateDoc(userRef, {
                 isSubscribed: false,
                 subscriptionId: null,
+                planType: null,
               });
             } catch (error) {
               console.log("Failed to update subscription status:", error);
@@ -69,11 +77,12 @@ function CancelSubscription({ navigation }: any) {
           }
           Toast.show({
             type: "success",
-            text1: `${t("toast.cancelSubscription.three")}`,
-            text2: `${t("toast.cancelSubscription.four")}`,
+            text1: t("toast.cancelSubscription.three"),
+            text2: isYearlyPlan
+              ? t("cancelSubscription.yearlyCancelled")
+              : t("cancelSubscription.monthlyCancelled"),
             visibilityTime: 5000,
           });
-        } else {
         }
       } catch (err) {
         console.log(err);
@@ -83,28 +92,40 @@ function CancelSubscription({ navigation }: any) {
     }
   };
 
+  // Plan details based on current subscription
+  const planDetails = {
+    monthly: {
+      price: "$12.99",
+      period: t("subscriptionV2.perMonth") || "per month",
+      title: t("subscriptionV2.monthly") || "Monthly Plan",
+      savings: null,
+    },
+    yearly: {
+      price: "$99.99",
+      period: t("subscriptionV2.perYear") || "per year",
+      title: t("subscriptionV2.yearly") || "Yearly Plan",
+      savings: t("cancelSubscription.save36") || "Save 36%",
+    },
+  };
+
+  const currentPlanDetails = planDetails[currentPlan];
+
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={theme.white}
       />
+
       <ScrollView
+        style={styles.container}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: RFPercentage(3),
-          alignItems: "center",
-        }}
-        style={{}}
+        contentContainerStyle={styles.scrollContent}
       >
         <Image style={styles.logo} source={Icons.logo} />
         <TouchableOpacity
           activeOpacity={0.8}
-          style={{
-            position: "absolute",
-            left: RFPercentage(2),
-            top: Platform.OS === "ios" ? RFPercentage(9) : RFPercentage(5),
-          }}
+          style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons
@@ -113,22 +134,32 @@ function CancelSubscription({ navigation }: any) {
             color={theme.heading}
           />
         </TouchableOpacity>
+
         {userData?.subscriptionId ? (
           <>
-            <Image
-              style={{
-                width: RFPercentage(50),
-                height: RFPercentage(22),
-                marginTop: RFPercentage(3),
-              }}
+            {/* <Image
+              style={styles.subscriptionImage}
               source={Icons.notActive}
               resizeMode="contain"
-            />
+            /> */}
 
             <View style={styles.premiumInfo}>
-              <Text
-                style={[styles.premiumText, { color: theme.heading }]}
-              >{`${t("cancelSubscription.txt1")}`}</Text>
+              <Text style={[styles.premiumText, { color: theme.heading }]}>
+                {t("cancelSubscription.txt1")}
+              </Text>
+            </View>
+
+            {/* Current Plan Badge */}
+            <View style={styles.planBadgeContainer}>
+              <View
+                style={[styles.planBadge, { backgroundColor: theme.primary }]}
+              >
+                <Text style={styles.planBadgeText}>
+                  {isYearlyPlan
+                    ? t("cancelSubscription.yearlyPlan")
+                    : t("cancelSubscription.monthlyPlan")}
+                </Text>
+              </View>
             </View>
 
             <View
@@ -139,35 +170,93 @@ function CancelSubscription({ navigation }: any) {
             >
               <View style={styles.priceContainer}>
                 <Image style={styles.starIconLeft} source={Icons.stars} />
-                <Text
-                  style={{
-                    fontFamily: "Poppins_600SemiBold",
-                    color: theme.darkGrey,
-                  }}
-                >{`${t("cancelSubscription.txt2")}`}</Text>
+                <Text style={[styles.planTitle, { color: theme.primary }]}>
+                  {currentPlanDetails.title}
+                </Text>
                 <Text style={[styles.priceText, { color: theme.darkGrey }]}>
-                  $12
-                  <Text style={styles.priceSubText}>{`${t(
-                    "cancelSubscription.txt3"
-                  )}`}</Text>
+                  {currentPlanDetails.price.split(".")[0]}
+                  <Text style={styles.priceDecimal}>
+                    .{currentPlanDetails.price.split(".")[1]}
+                  </Text>
+                </Text>
+                <Text style={[styles.periodText, { color: theme.darkGrey }]}>
+                  {currentPlanDetails.period}
                 </Text>
               </View>
+
+              {currentPlanDetails.savings && (
+                <View
+                  style={[
+                    styles.savingsBadge,
+                    { backgroundColor: theme.secondary },
+                  ]}
+                >
+                  <Text style={styles.savingsText}>
+                    {currentPlanDetails.savings}
+                  </Text>
+                </View>
+              )}
 
               <View style={[styles.divider, { borderColor: theme.stroke }]} />
 
               {/* Details */}
               <View style={styles.detailsContainer}>
                 <Text style={[styles.detailText, { color: theme.darkGrey }]}>
-                  ⊙ {`${t("cancelSubscription.txt4")}`}
+                  ✓ {t("subscriptionV2.txt3")}
                 </Text>
                 <Text style={[styles.detailText, { color: theme.darkGrey }]}>
-                  ⊙ {`${t("cancelSubscription.txt5")}`}
+                  ✓ {t("subscriptionV2.txt4")}
                 </Text>
                 <Text style={[styles.detailText, { color: theme.darkGrey }]}>
-                  ⊙ {`${t("cancelSubscription.txt6")}`}
+                  ✓ {t("subscriptionV2.txt5")}
                 </Text>
                 <Text style={[styles.detailText, { color: theme.darkGrey }]}>
-                  ⊙ {`${t("cancelSubscription.txt7")}`}
+                  ✓ {t("subscriptionV2.txt6")}
+                </Text>
+                {isYearlyPlan && (
+                  <>
+                    <Text
+                      style={[styles.detailText, { color: theme.darkGrey }]}
+                    >
+                      ✓{" "}
+                      {t("subscriptionV2.prioritySupport") ||
+                        "Priority support"}
+                    </Text>
+                    <Text
+                      style={[styles.detailText, { color: theme.darkGrey }]}
+                    >
+                      ✓{" "}
+                      {t("subscriptionV2.exclusiveContent") ||
+                        "Exclusive content"}
+                    </Text>
+                  </>
+                )}
+              </View>
+
+              {/* Cancellation Info */}
+              <View
+                style={[
+                  styles.cancellationInfo,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? Colors.primary + "40"
+                        : Colors.primary + "15",
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.cancellationTitle, { color: theme.primary }]}
+                >
+                  {t("cancelSubscription.cancellationNote") ||
+                    "Cancellation Details"}
+                </Text>
+                <Text
+                  style={[styles.cancellationText, { color: theme.darkGrey }]}
+                >
+                  {isYearlyPlan
+                    ? t("cancelSubscription.yearlyCancellation")
+                    : t("cancelSubscription.monthlyCancellation")}
                 </Text>
               </View>
 
@@ -175,19 +264,15 @@ function CancelSubscription({ navigation }: any) {
                 <Image style={styles.starIconRight} source={Icons.stars} />
               </View>
             </View>
-            <View
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                width: "80%",
-              }}
-            >
+
+            <View style={styles.buttonContainer}>
               <MyAppButton
-                title={`${t("buttons.cancel")}`}
-                marginTop={RFPercentage(3)}
+                title={t("buttons.cancel")}
+                marginTop={RFPercentage(2)}
                 onPress={() => setModalVisible2(true)}
-                width={RFPercentage(20)}
+                width={"45%"}
                 loading={isloading}
+                // backgroundColor={theme.red}
               />
             </View>
           </>
@@ -198,12 +283,13 @@ function CancelSubscription({ navigation }: any) {
               source={Icons.notActive}
               resizeMode="contain"
             />
-            <Text style={[styles.notActive, { color: theme.heading }]}>{`${t(
-              "cancelSubscription.txt8"
-            )}`}</Text>
+            <Text style={[styles.notActive, { color: theme.heading }]}>
+              {t("cancelSubscription.txt8")}
+            </Text>
           </>
         )}
       </ScrollView>
+
       <ConfirmationModal
         isVisible={modalVisible2}
         onClose={() => setModalVisible2(false)}
@@ -212,6 +298,11 @@ function CancelSubscription({ navigation }: any) {
           setModalVisible2(false);
         }}
         title={t("cancelSubscription.txt10")}
+        message={
+          isYearlyPlan
+            ? t("cancelSubscription.yearlyConfirmation")
+            : t("cancelSubscription.monthlyConfirmation")
+        }
         theme={theme}
         t={t}
         loading={isloading}
@@ -223,51 +314,169 @@ function CancelSubscription({ navigation }: any) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
     backgroundColor: Colors.white,
+  },
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: RFPercentage(4),
   },
   logo: {
     width: RFPercentage(6.5),
     height: RFPercentage(9.5),
     marginTop: RFPercentage(2),
+    alignSelf: "center",
+  },
+  backButton: {
+    position: "absolute",
+    left: RFPercentage(2),
+    top: Platform.OS === "ios" ? RFPercentage(6) : RFPercentage(4),
+  },
+  subscriptionImage: {
+    width: RFPercentage(50),
+    height: RFPercentage(22),
+    marginTop: RFPercentage(6),
+    alignSelf: "center",
   },
   vector: {
     marginTop: RFPercentage(12),
     width: RFPercentage(34),
     height: RFPercentage(34),
+    alignSelf: "center",
   },
   premiumInfo: {
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(5),
     width: "90%",
     justifyContent: "center",
     alignItems: "center",
-    flexDirection: "row",
-  },
-  crownIcon: {
-    width: RFPercentage(3),
-    height: RFPercentage(3),
+    alignSelf: "center",
   },
   premiumText: {
     color: Colors.darkGrey,
     fontSize: RFPercentage(2),
+    fontFamily: "Poppins_600SemiBold",
+    textAlign: "center",
+  },
+  planBadgeContainer: {
+    alignItems: "center",
+    marginTop: RFPercentage(1),
+  },
+  planBadge: {
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: RFPercentage(1),
+  },
+  planBadgeText: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
   },
   subscriptionContainer: {
     justifyContent: "flex-start",
     alignItems: "center",
     width: "90%",
-    // height: RFPercentage(45),
     borderColor: Colors.stroke,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(2),
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(2),
+    alignSelf: "center",
+    paddingBottom: RFPercentage(2),
   },
   priceContainer: {
     width: "90%",
     justifyContent: "center",
     alignItems: "center",
     marginTop: RFPercentage(2),
+  },
+  planTitle: {
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_700Bold",
+    marginBottom: RFPercentage(1),
+    textAlign: "center",
+  },
+  priceText: {
+    color: Colors.darkGrey,
+    fontSize: RFPercentage(3.5),
+    fontFamily: "Poppins_700Bold",
+    textAlign: "center",
+  },
+  priceDecimal: {
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_500Medium",
+  },
+  periodText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    color: Colors.darkGrey,
+    marginTop: RFPercentage(0.5),
+  },
+  savingsBadge: {
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(0.6),
+    borderRadius: RFPercentage(1),
+    marginTop: RFPercentage(1),
+  },
+  savingsText: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  starIconLeft: {
+    position: "absolute",
+    left: RFPercentage(-1.5),
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+  },
+  divider: {
+    width: "100%",
+    height: RFPercentage(0.1),
+    borderColor: Colors.stroke,
+    borderWidth: RFPercentage(0.1),
+    marginTop: RFPercentage(2),
+  },
+  detailsContainer: {
+    paddingVertical: RFPercentage(2),
+    width: "90%",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+  },
+  detailText: {
+    color: Colors.darkGrey,
+    fontSize: RFPercentage(1.5),
+    marginTop: RFPercentage(1),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2),
+  },
+  cancellationInfo: {
+    width: "90%",
+    padding: RFPercentage(2),
+    backgroundColor: Colors.lightGrey,
+    borderRadius: RFPercentage(1),
+    marginTop: RFPercentage(1),
+  },
+  cancellationTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(0.5),
+  },
+  cancellationText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2),
+  },
+  starContainer: {
+    width: "90%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: RFPercentage(1),
+  },
+  starIconRight: {
+    position: "absolute",
+    right: RFPercentage(-1.5),
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+    bottom: -3,
   },
   notActive: {
     color: Colors.darkGrey,
@@ -277,66 +486,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(8),
     textAlign: "center",
   },
-  button: {
-    flexDirection: "row",
+  buttonContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: RFPercentage(2),
-    marginTop: RFPercentage(4),
-  },
-
-  starIconLeft: {
-    position: "absolute",
-    left: RFPercentage(-1.5),
-    width: RFPercentage(6),
-    height: RFPercentage(6),
-  },
-  buttonText: {
-    color: Colors.primary,
-    fontSize: RFPercentage(1.9),
-    fontFamily: "Poppins_500Medium",
-  },
-  priceText: {
-    color: Colors.darkGrey,
-    fontSize: RFPercentage(4.2),
-    fontFamily: "Poppins_500Medium",
-  },
-  priceSubText: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_500Medium",
-  },
-  divider: {
     width: "100%",
-    height: RFPercentage(0.1),
-    borderColor: Colors.stroke,
-    borderWidth: RFPercentage(0.1),
-    marginTop: RFPercentage(1.5),
-  },
-  detailsContainer: {
-    paddingVertical: RFPercentage(2),
-    width: "90%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    // backgroundColor:'red'
-  },
-  detailText: {
-    color: Colors.darkGrey,
-    fontSize: RFPercentage(1.8),
-    marginTop: RFPercentage(1.3),
-    fontFamily: "Poppins_400Regular",
-  },
-  starContainer: {
-    width: "90%",
-    justifyContent: "center",
-    alignItems: "center",
     marginTop: RFPercentage(2),
-  },
-  starIconRight: {
-    position: "absolute",
-    right: RFPercentage(-1.5),
-    width: RFPercentage(6),
-    height: RFPercentage(6),
-    bottom: -3,
   },
 });
 

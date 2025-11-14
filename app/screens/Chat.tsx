@@ -329,11 +329,11 @@ const Chat = ({ navigation, route }) => {
             </>
           )}
         </View>
-        <View style={{ marginLeft: RFPercentage(1.5) }}>
+        <View style={{ marginLeft: RFPercentage(1.5), width:"60%",}}>
           <Text
             style={{
               color: theme.heading,
-              fontSize: RFPercentage(2.2),
+              fontSize: RFPercentage(2),
               fontFamily: "Poppins_500Medium",
             }}
           >

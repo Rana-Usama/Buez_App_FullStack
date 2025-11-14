@@ -43,12 +43,15 @@ import {
   getCurrencyInfo,
 } from "../utils/currencyChange";
 import { useLocation } from "../utils/useLocation"; // Your location hook
+import ImageView from "react-native-image-viewing";
 
 const screenWidth = Dimensions.get("window").width;
 
 function OfferDetail({ navigation, route }) {
   const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [visible, setIsVisible] = useState(false);
+
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
   const currentUserId2 = getAuth().currentUser;
@@ -66,6 +69,8 @@ function OfferDetail({ navigation, route }) {
   const [isAccepted, setIsAccepted] = useState(!!postRequest?.acceptedBy);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { location: currentLocation } = useLocation();
+  const imageObjects =
+    postRequest?.imageUrls?.map((url) => ({ uri: url })) || [];
 
   const getConvertedCompensation = (item) => {
     if (item.compensationType !== "Monitarely") return null;
@@ -313,6 +318,7 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
+
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <Nav
@@ -358,19 +364,26 @@ function OfferDetail({ navigation, route }) {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={(event) => {
-              setActiveIndex(
-                Math.floor(
-                  event.nativeEvent.contentOffset.x /
-                    event.nativeEvent.layoutMeasurement.width
-                )
+              const index = Math.round(
+                event.nativeEvent.contentOffset.x /
+                  event.nativeEvent.layoutMeasurement.width
               );
+              setActiveIndex(index);
             }}
-            renderItem={({ item }) => (
-              <ImageBackground
-                style={styles.imageBackground}
-                imageStyle={styles.image}
-                source={{ uri: item }}
-              />
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => {
+                  setActiveIndex(index);
+                  setIsVisible(true);
+                }}
+              >
+                <ImageBackground
+                  style={styles.imageBackground}
+                  imageStyle={styles.image}
+                  source={{ uri: item }}
+                />
+              </TouchableOpacity>
             )}
             keyExtractor={(item, index) => index.toString()}
           />
@@ -393,6 +406,13 @@ function OfferDetail({ navigation, route }) {
             ))}
           </View>
         )}
+
+        <ImageView
+          images={imageObjects}
+          imageIndex={activeIndex}
+          visible={visible}
+          onRequestClose={() => setIsVisible(false)}
+        />
 
         <View style={styles.wrap}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>

@@ -1,16 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as SecureStore from "expo-secure-store";
 import { getCredentials } from "../services/Auth.service";
 import { differenceInDays } from "date-fns";
 
 export const useInitialRoute = (userData, userLoading) => {
-  const [initialRoute, setInitialRoute] = useState(null);
+  const [initialRoute, setInitialRoute] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const retryRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCount = useRef(0);
+
 
   useEffect(() => {
-    const loadInitialRoute = async () => {
+    let isMounted = true;
+
+    const decideRoute = async () => {
+      if (!isMounted) return;
+
       try {
-        // wait for user loading
+        // Wait until userLoading finishes
         if (userLoading) return;
 
         const creds = await getCredentials();
@@ -18,30 +25,41 @@ export const useInitialRoute = (userData, userLoading) => {
         const { email, password } = creds || {};
         const now = new Date();
 
-        // 🔒 If explicitly logged out → go to Login
+        console.log("email", email, "password", password, "userData", !!userData);
+
+        // If user logged out → go to Login
         if (loggedOut === "true") {
-          console.log("🚀 Decided route: Login");
-          setInitialRoute("Login");
-          setIsLoading(false);
+          if (isMounted) {
+            setInitialRoute("Login");
+            setIsLoading(false);
+          }
           return;
         }
 
-        // ⏳ Wait for userData if creds exist but userData not yet loaded
+        // If creds exist but userData not ready → retry up to 10 times (5s)
         if ((email || password) && !userData) {
-          console.log("⏳ Waiting for Firestore userData...");
-          return;
+          if (retryCount.current < 10) {
+            retryCount.current++;
+            retryRef.current = setTimeout(decideRoute, 500);
+            return;
+          } else {
+            console.log("Retry limit reached → defaulting to OnBoarding");
+            setInitialRoute("OnBoarding");
+            setIsLoading(false);
+            return;
+          }
         }
 
-        // 🚫 No user at all → OnBoarding
+        // No creds & no userData → go to OnBoarding
         if (!userData) {
-          console.log("🚀 Decided route: OnBoarding (no creds)");
-          setInitialRoute("OnBoarding");
-          setIsLoading(false);
+          if (isMounted) {
+            setInitialRoute("OnBoarding");
+            setIsLoading(false);
+          }
           return;
         }
 
-        console.log("📍 userData:", userData);
-
+        // Subscription logic
         const {
           isSubscribed,
           isFreeTrial,
@@ -50,64 +68,44 @@ export const useInitialRoute = (userData, userLoading) => {
           freeTrialStartedAt,
         } = userData;
 
-        // 🎯 Case 1: No sub + no trial → FreeTrial
-        if (!isSubscribed && !isFreeTrial) {
-          console.log("🚀 Decided route: FreeTrial (new user)");
-          setInitialRoute("FreeTrial");
-          setIsLoading(false);
-          return;
-        }
-
-        // 🎯 Case 2: Active subscription
-        const subStartDate = subscriptionStart
-          ? new Date(subscriptionStart)
-          : null;
+        const subStartDate = subscriptionStart ? new Date(subscriptionStart) : null;
         const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
+
         const isWithinPaidPeriod =
           subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
-        if (isSubscribed && isWithinPaidPeriod) {
-          console.log("🚀 Decided route: TabNavigator (sub active)");
-          setInitialRoute("TabNavigator");
-          setIsLoading(false);
-          return;
-        }
+        let route = "OnBoarding"; // fallback
 
-        // 🎯 Case 3: Active free trial (within 14 days)
-        let isTrialValid = false;
-        if (isFreeTrial && freeTrialStartedAt?.seconds) {
+        if (isSubscribed && isWithinPaidPeriod) {
+          route = "TabNavigator";
+        } else if (isFreeTrial && freeTrialStartedAt?.seconds) {
           const trialStart = new Date(freeTrialStartedAt.seconds * 1000);
           const trialDays = differenceInDays(now, trialStart);
-          isTrialValid = trialDays >= 0 && trialDays <= 14;
+          if (trialDays >= 0 && trialDays <= 14) route = "TabNavigator";
+          else route = "Subscription";
+        } else if (!isSubscribed && !isFreeTrial) {
+          route = "FreeTrial";
         }
 
-        if (isTrialValid) {
-          console.log("🚀 Decided route: TabNavigator (trial active)");
-          setInitialRoute("TabNavigator");
+        if (isMounted) {
+          setInitialRoute(route);
           setIsLoading(false);
-          return;
         }
-
-        // 🎯 Case 4: Trial expired → Subscription
-        if (isFreeTrial && !isTrialValid) {
-          console.log("🚀 Decided route: Subscription (trial expired)");
-          setInitialRoute("Subscription");
+      } catch (err) {
+        console.log("Error in initial route hook:", err);
+        if (isMounted) {
+          setInitialRoute("OnBoarding");
           setIsLoading(false);
-          return;
         }
-
-        // 💤 Fallback
-        console.log("🚀 Decided route: OnBoarding (fallback)");
-        setInitialRoute("OnBoarding");
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error determining initial route:", error);
-        setInitialRoute("OnBoarding");
-        setIsLoading(false);
       }
     };
 
-    loadInitialRoute();
+    decideRoute();
+
+    return () => {
+      isMounted = false;
+      if (retryRef.current) clearTimeout(retryRef.current);
+    };
   }, [userData, userLoading]);
 
   return { initialRoute, isLoading };

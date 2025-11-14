@@ -333,7 +333,7 @@ export default function Location({ navigation, route }) {
           
           {/* Show location details for debugging */}
           {selectedLocation.countryCode && (
-            <Text style={[styles.locationDetails, { color: theme.white }]}>
+            <Text style={[styles.locationDetails, { color: theme.darkGrey }]}>
               {selectedLocation.city && `${selectedLocation.city}, `}
               {selectedLocation.country} ({selectedLocation.countryCode})
             </Text>
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     paddingHorizontal: RFPercentage(2.4),
-    paddingVertical: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1.6),
     borderRadius: RFPercentage(10),
     justifyContent: "center",
     alignItems: "center",
@@ -383,11 +383,13 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
+    lineHeight : RFPercentage(2)
   },
   locationDetails: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
-    opacity: 0.8,
+    opacity: 1,
+    width:"90%",
   },
 });

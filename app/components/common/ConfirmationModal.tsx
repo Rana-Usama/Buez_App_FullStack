@@ -1,21 +1,70 @@
 import React from "react";
-import { Modal, View, Text, Pressable, StyleSheet, Platform } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import { BlurView } from "expo-blur";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "./MyAppButton";
 
-const ConfirmationModal = ({ isVisible, onClose, onConfirm, title, theme, t,loading}) => {
+const ConfirmationModal = ({
+  isVisible,
+  onClose,
+  onConfirm,
+  title,
+  theme,
+  t,
+  loading,
+  message,
+}) => {
   return (
-    <Modal animationType="fade" transparent visible={isVisible} onRequestClose={onClose}>
-      <BlurView intensity={5} style={[styles.modalBackground, { backgroundColor: theme.modal }]}>
+    <Modal
+      animationType="fade"
+      transparent
+      visible={isVisible}
+      onRequestClose={onClose}
+    >
+      <BlurView
+        intensity={5}
+        style={[styles.modalBackground, { backgroundColor: theme.modal }]}
+      >
         <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
-          <Text style={[styles.modalText, { color: theme.heading }]}>{title}</Text>
+          <Text style={[styles.modalText, { color: theme.heading }]}>
+            {title}
+          </Text>
+          {message && (
+            <Text style={[styles.modalText, { color: theme.darkGrey, fontSize:RFPercentage(1.4),fontFamily:"Poppins_400Regular"  }]}>
+              {message}
+            </Text>
+          )}
           <View style={styles.modalButtons}>
-            <Pressable style={[styles.cancelButton, { borderColor: theme.lightGrey }]} onPress={onClose}>
-              <Text style={[styles.cancelButtonText, { color: theme.lightGrey }]}>{t("buttons.cancel")}</Text>
+            <Pressable
+              style={[styles.cancelButton, { borderColor: theme.lightGrey }]}
+              onPress={onClose}
+            >
+              <Text
+                style={[styles.cancelButtonText, { color: theme.lightGrey }]}
+              >
+                {t("buttons.cancel")}
+              </Text>
             </Pressable>
 
-            <MyAppButton title={t("buttons.yes")} marginTop={RFPercentage(0)} height={Platform.OS === 'android' ? RFPercentage(5.8) : RFPercentage(5)} width={Platform.OS === 'android' ? RFPercentage(17) : RFPercentage(15)} onPress={onConfirm} loading={loading} />
+            <MyAppButton
+              title={t("buttons.yes")}
+              marginTop={RFPercentage(0)}
+              height={
+                Platform.OS === "android" ? RFPercentage(5.8) : RFPercentage(5)
+              }
+              width={
+                Platform.OS === "android" ? RFPercentage(17) : RFPercentage(15)
+              }
+              onPress={onConfirm}
+              loading={loading}
+            />
           </View>
         </View>
       </BlurView>
@@ -53,15 +102,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2),
   },
   cancelButton: {
-    height: Platform.OS === 'android' ? RFPercentage(5.8) : RFPercentage(5),
-    width: Platform.OS === 'android' ? RFPercentage(17) : RFPercentage(15),
+    height: Platform.OS === "android" ? RFPercentage(5.8) : RFPercentage(5),
+    width: Platform.OS === "android" ? RFPercentage(17) : RFPercentage(15),
     borderRadius: RFPercentage(100),
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   cancelButtonText: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
   },
 });

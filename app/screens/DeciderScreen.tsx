@@ -29,7 +29,8 @@ const DeciderScreen = () => {
         const { email, password } = creds || {};
         const now = new Date();
 
-        console.log("creds.........", creds);
+        console.log("email.........", email);
+        console.log("password.........", password);
 
         // 🔒 Explicitly logged out → Login
         if (loggedOut === "true") {
@@ -41,6 +42,8 @@ const DeciderScreen = () => {
 
         // ⏳ Wait for Firestore if creds exist but no userData yet
         if ((email || password) && !userData) {
+          console.log("email.........", email);
+          console.log("password.........", password);
           console.log("⏳ Waiting for Firestore userData...");
           // safety fallback
           setTimeout(() => {
