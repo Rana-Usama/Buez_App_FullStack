@@ -161,7 +161,7 @@
     "tryPremium": "Alle Premium-Funktionen testen",
     "fullAccess": "Voller Zugang zu allen Funktionen",
     "bestValue": "Bester Wert",
-    "choosePlan": "Wähle deinen Plan",
+    "choosePlan": "Wähle deinen BUEZ Plan",
     "startFree": "Starte mit kostenlosem Test, upgrade jederzeit",
     "mostPopular": "BELIEBTESTE",
     "save30": "Spare 36%",
@@ -288,7 +288,9 @@
     "txt10": "Bist du sicher, dass du dieses\nKonto löschen möchtest?",
     "txt11": "Bist du sicher, dass du dich von diesem\nKonto abmelden möchtest?",
     "txt12": "Sprache ändern",
-    "txt13": "Dunkles Design"
+    "txt13": "Dunkles Design",
+    "txt14" : "Upgrade-Plan"
+
   },
  "cancelSubscription": {
     "txt1": "Dein aktuelles Abonnement",

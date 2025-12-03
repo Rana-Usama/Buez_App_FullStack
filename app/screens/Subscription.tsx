@@ -10,6 +10,7 @@ import {
   ScrollView,
   FlatList,
   Dimensions,
+  Platform,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -24,6 +25,9 @@ import Toast from "react-native-toast-message";
 import { saveSubscription } from "../services/User.service";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import * as Localization from "expo-localization";
+import { handlePaymentSheet } from "../services/Subscription.service";
+import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -36,149 +40,89 @@ function Subscription(props) {
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const { theme } = useAppTheme();
-  const [selectedPlan, setSelectedPlan] = useState("yearly"); // Default to yearly (most popular)
+  const [selectedPlan, setSelectedPlan] = useState("monthly");
   const flatListRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(1); // Start with yearly plan (index 1)
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const updateSubscriptionStatus = async (start, end, planType) => {
-    if (!userId) return;
-    const userRef = doc(firestore, "users", userId);
-    try {
-      await updateDoc(userRef, {
-        isSubscribed: true,
-        isFreeTrial: false,
-        subscriptionStart: start,
-        subscriptionEnd: end,
-        planType: planType,
-      });
-    } catch (error) {
-      console.error("Failed to update subscription status:", error);
-    }
+  const prices = {
+    monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
+    yearly: { USD: 95, EUR: 89, CHF: 79 },
+    free: { USD: 0, EUR: 0, CHF: 0 },
   };
 
-  const fetchSetupIntent = async () => {
-    try {
-      const response = await fetch(
-        "https://buez-server-khaki.vercel.app/api/payment-sheet",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: userData?.email }),
-        }
-      );
-      const { setupIntentClientSecret, customerId } = await response.json();
+  const locale = Localization.locale;
+  const userCurrency = getCurrencyFromLocale(locale);
 
-      if (!setupIntentClientSecret || !customerId) {
-        throw new Error("Missing client secret or customer ID");
-      }
-      return { setupIntentClientSecret, customerId };
-    } catch (error) {
-      Alert.alert("Error", "Could not create customer. Please try again.");
-      return null;
-    }
+  const priceLabelForPlan = (planId) => {
+    const amount = prices[planId]?.[userCurrency] ?? prices[planId]?.USD ?? 0;
+    return formatCurrency(amount, userCurrency);
   };
 
   const openPaymentSheet = async () => {
     setLoading(true);
-    const setupData = await fetchSetupIntent();
-    if (!setupData) return;
-    const { setupIntentClientSecret, customerId } = setupData;
-    const { error: initError } = await initPaymentSheet({
-      setupIntentClientSecret,
-      merchantDisplayName: "BUEZ",
-      returnURL: "buez://payment-complete",
+    const res = await handlePaymentSheet({
+      initPaymentSheet,
+      presentPaymentSheet,
+      selectedPlan,
+      userCurrency,
+      email: userData?.email,
+      userId,
+      t,
     });
-
-    if (initError) {
-      setLoading(false);
-      return;
-    }
-
-    const { error: paymentError } = await presentPaymentSheet();
-    if (paymentError) {
-      Toast.show({
-        type: "info",
-        text1: t("toast.subscriptionV2.one"),
-        text2: t("toast.subscriptionV2.two"),
-      });
-      setLoading(false);
-      return;
-    }
-    const setupIntentId = setupIntentClientSecret.split("_secret")[0];
-    let endpoint = "";
-    if (selectedPlan === "monthly") {
-      endpoint =
-        "https://buez-server-khaki.vercel.app/api/withoutTrial-subscription";
-    } else if (selectedPlan === "yearly") {
-      endpoint = "https://buez-server-khaki.vercel.app/api/yearly-subscription";
-    }
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customerId,
-        setupIntentId,
-        userId,
-        planType: selectedPlan,
-      }),
-    });
-
-    const result = await res.json();
-    if (result.success) {
-      await updateSubscriptionStatus(
-        result?.currentPeriodStart,
-        result?.currentPeriodEnd,
-        selectedPlan
-      );
-      await saveSubscription(userId, result?.subscriptionId);
-      Toast.show({
-        type: "success",
-        text1: t("toast.subscription.one"),
-        text2: t("toast.subscription.two"),
-      });
+    console.log("res...............", res);
+    if (res.success) {
       props.navigation.navigate("TabNavigator");
-    } else {
-      setModalVisible2(true);
     }
+    setLoading(false);
   };
+
+  const yearlyPrice = priceLabelForPlan("yearly");
+  const monthlyPrice = priceLabelForPlan("monthly");
+
+  const savingsPercentage =
+    ((prices.monthly[userCurrency] * 12 - prices.yearly[userCurrency]) /
+      (prices.monthly[userCurrency] * 12)) *
+    100;
+
+  const highlightText = `Save ${Math.round(savingsPercentage)}%`;
 
   const plans = [
     {
       id: "monthly",
-      title: t("subscriptionV2.monthly") || "Monthly",
-      price: "$12",
-      price2: ".99",
-      period: t("subscriptionV2.perMonth") || "per month",
-      description:
-        t("subscriptionV2.fullAccess") || "Full access to all features",
+      title: t("subscriptionV2.monthly"),
+      price: monthlyPrice,
+      period: t("subscriptionV2.perMonth"),
+      description: t("subscriptionV2.fullAccess"),
       features: [
         t("subscriptionV2.txt3"),
         t("subscriptionV2.txt4"),
         t("subscriptionV2.txt5"),
         t("subscriptionV2.txt6"),
-        t("subscriptionV2.prioritySupport") || "Priority support",
+        t("subscriptionV2.prioritySupport"),
       ],
       popular: false,
-      highlight: t("subscriptionV2.prioritySupport") || "Flexible",
+      highlight: t("subscriptionV2.prioritySupport"),
     },
     {
       id: "yearly",
-      title: t("subscriptionV2.yearly") || "Yearly",
-      price: "$99",
-      price2: ".99",
-      period: t("subscriptionV2.perYear") || "per year",
-      originalPrice: "$155",
-      description: t("subscriptionV2.bestValue") || "Best value",
+      title: t("subscriptionV2.yearly"),
+      price: yearlyPrice,
+      period: t("subscriptionV2.perYear"),
+      originalPrice: formatCurrency(
+        prices.monthly[userCurrency] * 12,
+        userCurrency
+      ),
+      description: t("subscriptionV2.bestValue"),
       features: [
         t("subscriptionV2.txt3"),
         t("subscriptionV2.txt4"),
         t("subscriptionV2.txt5"),
         t("subscriptionV2.txt6"),
-        t("subscriptionV2.prioritySupport") || "Priority support",
-        t("subscriptionV2.exclusiveContent") || "Exclusive content",
+        t("subscriptionV2.prioritySupport"),
+        t("subscriptionV2.exclusiveContent"),
       ],
-      popular: true, // Most popular on yearly
-      highlight: t("subscriptionV2.save30") || "Save 36%",
+      popular: true,
+      highlight: highlightText,
     },
   ];
 
@@ -210,7 +154,6 @@ function Subscription(props) {
 
   const getBorderGradient = (isSelected) => {
     if (!isSelected) return { borderColor: "rgba(232, 232, 232, 1)" };
-
     return {
       borderColor: theme.primary,
       borderWidth: 1.2,
@@ -219,7 +162,6 @@ function Subscription(props) {
 
   const renderPlanCard = ({ item, index }) => {
     const isSelected = selectedPlan === item.id;
-
     return (
       <TouchableOpacity
         style={[
@@ -236,7 +178,6 @@ function Subscription(props) {
         onPress={() => {
           setSelectedPlan(item.id);
           setCurrentIndex(index);
-          // Scroll to the selected card
           flatListRef.current?.scrollToIndex({
             index,
             animated: true,
@@ -245,7 +186,6 @@ function Subscription(props) {
         }}
         activeOpacity={0.7}
       >
-        {/* Popular Badge - Now on Yearly plan */}
         {item.popular && (
           <View
             style={[styles.popularBadge, { backgroundColor: theme.primary }]}
@@ -261,7 +201,7 @@ function Subscription(props) {
           <View
             style={[
               styles.selectedGlow,
-              { backgroundColor: theme.primary + "10" },
+              { backgroundColor: theme.primary + "05" },
             ]}
           />
         )}
@@ -281,53 +221,74 @@ function Subscription(props) {
         {/* Price Section */}
         <View style={styles.priceSection}>
           <View style={styles.priceContainer}>
-            <Text style={[styles.price, { color: theme.primary }]}>
-              {item.price}
-              <Text style={{ fontSize: RFPercentage(2.3) }}>{item.price2}</Text>
-            </Text>
+            {(() => {
+              const priceStr = priceLabelForPlan(item.id);
+              const [integerPart, decimalPart] = priceStr.split(".");
+              return (
+                <Text style={[styles.price, { color: theme.primary }]}>
+                  {integerPart}
+                  {decimalPart && (
+                    <Text style={{ fontSize: RFPercentage(1.9) }}>
+                      .{decimalPart}
+                    </Text>
+                  )}
+                </Text>
+              );
+            })()}
             <Text style={[styles.period, { color: theme.darkGrey }]}>
               {item.period}
             </Text>
-            {item.originalPrice && (
-              <Text style={[styles.originalPrice, { color: theme.darkGrey }]}>
-                {item.originalPrice}
-              </Text>
-            )}
           </View>
         </View>
 
         {/* Highlight Badge */}
+
         <View
-          style={[
-            styles.highlightBadge,
-            {
-              backgroundColor: item.popular
-                ? theme.secondary
-                : item.id === "yearly"
-                ? theme.secondary
-                : theme.mode === "dark"
-                ? Colors.primary + "40"
-                : Colors.primary + "15",
-            },
-          ]}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: RFPercentage(2),
+          }}
         >
-          <Text
+          <View
             style={[
-              styles.highlightText,
+              styles.highlightBadge,
               {
-                color:
-                  item.popular || item.id === "yearly"
-                    ? theme.white
-                    : theme.primary,
-                fontSize:
-                  item.popular || item.id === "yearly"
-                    ? RFPercentage(1.5)
-                    : RFPercentage(1.3),
+                backgroundColor: item.popular
+                  ? theme.secondary
+                  : item.id === "yearly"
+                  ? theme.secondary
+                  : theme.mode === "dark"
+                  ? Colors.primary + "40"
+                  : Colors.primary + "15",
               },
             ]}
           >
-            {item.highlight}
-          </Text>
+            <Text
+              style={[
+                styles.highlightText,
+                {
+                  color:
+                    item.popular || item.id === "yearly"
+                      ? theme.white
+                      : theme.primary,
+                  fontSize:
+                    item.popular || item.id === "yearly"
+                      ? RFPercentage(1.5)
+                      : RFPercentage(1.3),
+                },
+              ]}
+            >
+              {item.highlight}
+            </Text>
+          </View>
+
+          {item.originalPrice && (
+            <Text style={[styles.originalPrice, { color: theme.darkGrey }]}>
+              {item.originalPrice}
+            </Text>
+          )}
         </View>
 
         {/* Features */}
@@ -344,6 +305,20 @@ function Subscription(props) {
               </Text>
             </View>
           ))}
+        </View>
+        <View>
+          <Image
+            source={Icons.stars}
+            resizeMode="contain"
+            style={{
+              width: RFPercentage(10),
+              height: RFPercentage(10),
+              alignSelf: "flex-end",
+              position: "absolute",
+              bottom: -RFPercentage(3),
+              right: -RFPercentage(2),
+            }}
+          />
         </View>
       </TouchableOpacity>
     );
@@ -389,7 +364,7 @@ function Subscription(props) {
             contentContainerStyle={styles.flatListContent}
             onScroll={handleScroll}
             scrollEventThrottle={16}
-            initialScrollIndex={1} // Start with yearly plan (index 1)
+            initialScrollIndex={0} // Start with yearly plan (index 1)
             getItemLayout={(data, index) => ({
               length: screenWidth * 0.8 + RFPercentage(2),
               offset: (screenWidth * 0.8 + RFPercentage(2)) * index,
@@ -453,7 +428,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    paddingTop: RFPercentage(4),
+    marginTop: Platform.OS === "android" ? RFPercentage(7) : RFPercentage(4),
     paddingHorizontal: RFPercentage(3),
   },
   logo: {
@@ -467,13 +442,13 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   subtitle: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
     lineHeight: RFPercentage(1.9),
   },
   cardsContainer: {
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(6),
   },
   flatListContent: {
     alignItems: "center",
@@ -520,7 +495,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_700Bold",
   },
   planHeader: {
-    marginBottom: RFPercentage(2),
+    marginBottom: RFPercentage(1),
   },
   planTitle: {
     fontSize: RFPercentage(2.4),
@@ -535,7 +510,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
-    marginBottom: RFPercentage(2),
+    marginBottom: RFPercentage(1),
   },
   priceContainer: {
     flexDirection: "row",
@@ -555,14 +530,13 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     textDecorationLine: "line-through",
     opacity: 0.8,
-    marginLeft: RFPercentage(5),
   },
   highlightBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.5),
     borderRadius: RFPercentage(1),
-    marginBottom: RFPercentage(2),
+    // marginBottom: RFPercentage(2),
   },
   highlightText: {
     fontSize: RFPercentage(1.3),

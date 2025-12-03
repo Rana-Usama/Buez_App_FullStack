@@ -39,7 +39,8 @@ import { useLocation } from "../utils/useLocation";
 import {
   formatCurrency,
   getCurrencyInfo,
-  convertCurrency, // Add this import
+  convertCurrency,
+  getLiveExchangeRates, // Add this import
 } from "../utils/currencyChange";
 import { Ionicons, MaterialIcons, FontAwesome6 } from "@expo/vector-icons";
 import { fetchUsersWithTaskStats } from "../services/Review.service";
@@ -100,6 +101,7 @@ function Home({ navigation }) {
     if (currentLocation && user?.userId) {
       updateUserLocationInDB(currentLocation);
     }
+    // getLiveExchangeRates()
   }, [currentLocation, user?.userId]);
 
   const translateTask = async (task) => ({
@@ -251,12 +253,12 @@ function Home({ navigation }) {
       };
       fetchUsers();
       return () => {
-        setUsers([]); 
+        setUsers([]);
       };
     }, [])
   );
 
-  // Compensation Conversion
+  // Compensation Conversion - Only use currentLocation
   const getConvertedCompensation = (item: any) => {
     if (item.compensationType !== "Monitarely") return null;
     try {
@@ -1029,7 +1031,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   postDate: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.3),
     position: "absolute",
     right: 0,
     fontFamily: "Poppins_600SemiBold",

@@ -81,12 +81,18 @@ const DeciderScreen = () => {
           setIsLoading(false);
           return;
         }
+        const parseDate = (date) => {
+          if (!date) return null;
+          // Firestore Timestamp
+          if (date.seconds) return new Date(date.seconds * 1000);
+          // ISO string
+          if (typeof date === "string") return new Date(date);
+          return null;
+        };
 
-        // 🎯 Case 2: Active subscription
-        const subStartDate = subscriptionStart
-          ? new Date(subscriptionStart)
-          : null;
-        const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
+        const subStartDate = parseDate(subscriptionStart);
+        const subEndDate = parseDate(subscriptionEnd);
+
         const isWithinPaidPeriod =
           subStartDate &&
           subEndDate &&
@@ -103,7 +109,10 @@ const DeciderScreen = () => {
         // 🎯 Case 3: Active free trial (within 14 days)
         let isTrialValid = false;
         if (isFreeTrial && freeTrialStartedAt?.seconds) {
-          const trialStart = new Date(freeTrialStartedAt.seconds * 1000);
+          const trialStart = freeTrialStartedAt?.seconds
+            ? new Date(freeTrialStartedAt.seconds * 1000)
+            : null;
+
           const trialDays = differenceInDays(now, trialStart);
           isTrialValid = trialDays >= 0 && trialDays <= 14;
         }

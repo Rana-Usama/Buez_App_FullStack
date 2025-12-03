@@ -65,7 +65,7 @@
       "six": "No se puede actualizar el estado de la solicitud.",
       "seven": "Solicitud republicada exitosamente"
     },
-   "cancelSubscription": {
+    "cancelSubscription": {
       "one": "Sin suscripción activa",
       "two": "No tienes ninguna suscripción para cancelar",
       "three": "Suscripción cancelada"
@@ -161,7 +161,7 @@
     "tryPremium": "Prueba todas las funciones premium",
     "fullAccess": "Acceso completo a todas las funciones",
     "bestValue": "Mejor valor",
-    "choosePlan": "Elige tu plan",
+    "choosePlan": "Elige tu BUEZ plan",
     "startFree": "Comienza con una prueba gratuita, actualiza en cualquier momento",
     "mostPopular": "MÁS POPULAR",
     "save30": "Ahorra 36%",
@@ -288,9 +288,10 @@
     "txt10": "¿Estás seguro de que quieres eliminar\nesta cuenta?",
     "txt11": "¿Estás seguro de que quieres cerrar sesión\nde esta cuenta?",
     "txt12": "Cambiar idioma",
-    "txt13": "Tema oscuro"
+    "txt13": "Tema oscuro",
+    "txt14": "Plan de actualización"
   },
- "cancelSubscription": {
+  "cancelSubscription": {
     "txt1": "Tu suscripción actual",
     "txt8": "No tienes una suscripción activa",
     "txt10": "Cancelar suscripción",

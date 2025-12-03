@@ -1,5 +1,20 @@
-
 /// Exchange rates (USD → target currency) - Update these regularly
+
+import axios from "axios";
+
+export const getLiveExchangeRates = async () => {
+  try {
+    const response = await axios.get(
+      "https://api.exchangerate.host/latest?base=USD"
+    );
+    console.log("getLiveExchangeRates...........", response);
+    return response.data.rates; // returns { EUR: 0.92, GBP: 0.79, ... }
+  } catch (error) {
+    console.error("Error fetching live rates:", error);
+    return null; // fallback handled below
+  }
+};
+
 const exchangeRates = {
   USD: 1,
   EUR: 0.93,
@@ -657,7 +672,6 @@ export const convertCurrency = (amount, fromCurrency, toCurrency) => {
  * @returns {string}
  */
 
-
 export const formatCurrencyByLocation = (
   amount,
   location = null,
@@ -669,7 +683,6 @@ export const formatCurrencyByLocation = (
     maximumFractionDigits = 2,
     showSymbol = true,
   } = options;
-
 
   // Get target currency from location
   const targetCurrency =
@@ -686,7 +699,6 @@ export const formatCurrencyByLocation = (
     numericAmount = Number(amount) || 0;
   }
 
-
   // Format the currency
   const formatter = new Intl.NumberFormat(locale, {
     style: showSymbol ? "currency" : "decimal",
@@ -699,10 +711,9 @@ export const formatCurrencyByLocation = (
 };
 
 /**
- * @param {string} formattedAmount 
- * @returns {number} 
+ * @param {string} formattedAmount
+ * @returns {number}
  */
-
 
 export const extractNumericValue = (formattedAmount) => {
   if (!formattedAmount) return 0;
@@ -710,12 +721,10 @@ export const extractNumericValue = (formattedAmount) => {
   return parseFloat(numericString) || 0;
 };
 
-
 /**
-* @param {string} formattedAmount 
- * @returns {string} 
+ * @param {string} formattedAmount
+ * @returns {string}
  */
-
 
 export const detectCurrencyFromString = (formattedAmount) => {
   if (!formattedAmount) return "USD";
@@ -729,10 +738,10 @@ export const detectCurrencyFromString = (formattedAmount) => {
 };
 
 /**
- * @param {number|string} amount 
+ * @param {number|string} amount
  * @param {Object} location
  * @param {Object} options
- * @returns {string} 
+ * @returns {string}
  */
 export const formatCurrency = (amount, location = null, options = {}) => {
   return formatCurrencyByLocation(amount, location, options);
@@ -740,7 +749,7 @@ export const formatCurrency = (amount, location = null, options = {}) => {
 
 /**
  * @param {Object} location -
- * @returns {Object} 
+ * @returns {Object}
  */
 export const getCurrencyInfo = (location = null) => {
   const currency = getCurrencyFromCountry(

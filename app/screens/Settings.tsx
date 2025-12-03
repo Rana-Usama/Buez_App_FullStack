@@ -41,9 +41,12 @@ function Settings({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [provider, setProvider] = useState<string | null>(null);
 
-  const currentPlan = user?.planType || "free";
+  console.log("user------------------",user)
+  const currentPlan =
+    user?.planType || user?.subscription?.planInterval || "free";
   const isYearlyPlan = currentPlan === "yearly";
   const isMonthlyPlan = currentPlan === "monthly";
+  const freePlan = user?.planType === "free"
 
   useEffect(() => {
     const user = FIREBASE_AUTH.currentUser;
@@ -61,8 +64,8 @@ function Settings({ navigation }) {
       navigation: () => navigation.navigate("CancelSubscription"),
     },
     {
-      iconSource: Icons.cancel,
-      title: `Upgrade Plan`,
+      iconSource: Icons.upgrade,
+      title: `${t("settings.txt14")}`,
       navigation: () => navigation.navigate("UpgradePlan"),
     },
     {
@@ -107,6 +110,33 @@ function Settings({ navigation }) {
       },
     },
   ];
+
+  const cancelUserSubscription = async () => {
+    if (!user?.subscriptionId) return false;
+
+    try {
+      const res = await fetch(
+        "https://buez-server-khaki.vercel.app/api/cancel-subscription",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subscriptionId: user.subscriptionId,
+            planType: currentPlan || "monthly",
+          }),
+        }
+      );
+      const result = await res.json();
+      if (result.success) {
+        console.log("Subscription canceled successfully");
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.log("Error canceling subscription:", err);
+      return false;
+    }
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
@@ -164,8 +194,11 @@ function Settings({ navigation }) {
         {navigationsList
           .filter((item) => {
             // Hide "Upgrade Plan" unless it's monthly
-            if (item.title === "Upgrade Plan" && isMonthlyPlan) {
+            if (item.title === "Upgrade Plan" && !isMonthlyPlan) {
               return false;
+            }
+            if(item.title === `${t("settings.txt1")}` && freePlan){
+              return false
             }
             return true;
           })
@@ -222,6 +255,8 @@ function Settings({ navigation }) {
           try {
             setLoading(true); // show loader
             const password2 = await SecureStore.getItemAsync("password2");
+            await cancelUserSubscription();
+
             if (provider === "apple.com") {
               await deleteAppleAccount();
             } else if (provider === "google.com") {
@@ -249,6 +284,7 @@ function Settings({ navigation }) {
         title={t("settings.txt10")}
         theme={theme}
         t={t}
+        message={false}
       />
 
       <ConfirmationModal
@@ -285,6 +321,7 @@ function Settings({ navigation }) {
         title={t("settings.txt11")}
         theme={theme}
         t={t}
+        message={false}
       />
     </View>
   );

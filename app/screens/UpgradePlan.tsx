@@ -27,6 +27,9 @@ import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
+import * as Localization from "expo-localization";
+import { handlePaymentSheet } from "../services/Subscription.service";
+import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -41,7 +44,22 @@ function UpgradePlan(props) {
   const flatListRef = useRef(null);
   const navigation = useNavigation();
 
-  const currentPlan = "monthly"; // This should come from your user context or props
+  const prices = {
+    monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
+    yearly: { USD: 95, EUR: 89, CHF: 79 },
+    free: { USD: 0, EUR: 0, CHF: 0 },
+  };
+
+  const locale = Localization.locale;
+  const userCurrency = getCurrencyFromLocale(locale);
+
+  const priceLabelForPlan = (planId) => {
+    const amount = prices[planId]?.[userCurrency] ?? prices[planId]?.USD ?? 0;
+    return formatCurrency(amount, userCurrency);
+  };
+
+  const currentPlan =
+    userData?.planType || userData?.subscription?.planInterval || "free";
 
   const updateSubscriptionStatus = async (start, end) => {
     if (!userId) return;
@@ -51,7 +69,8 @@ function UpgradePlan(props) {
         isSubscribed: true,
         subscriptionStart: start,
         subscriptionEnd: end,
-        planType: "yearly", // Update to yearly plan
+        planType: "yearly",
+        isCancelled: false,
       });
     } catch (error) {
       console.error("Failed to update subscription status:", error);
@@ -65,7 +84,7 @@ function UpgradePlan(props) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: userData?.email }),
+          body: JSON.stringify({ email: userData?.email, userId }),
         }
       );
       const { setupIntentClientSecret, customerId } = await response.json();
@@ -85,6 +104,10 @@ function UpgradePlan(props) {
     const setupData = await fetchSetupIntent();
     if (!setupData) return;
     const { setupIntentClientSecret, customerId } = setupData;
+
+    console.log("SetupIntent Client Secret:", setupIntentClientSecret);
+    console.log("Customer ID:", customerId);
+
     const { error: initError } = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: "BUEZ",
@@ -92,12 +115,14 @@ function UpgradePlan(props) {
     });
 
     if (initError) {
+      console.log("Payment sheet init error:", initError);
       setLoading(false);
       return;
     }
 
     const { error: paymentError } = await presentPaymentSheet();
     if (paymentError) {
+      console.log("Payment sheet error:", paymentError);
       Toast.show({
         type: "info",
         text1: t("toast.upgradePlan.paymentCancelled"),
@@ -107,51 +132,77 @@ function UpgradePlan(props) {
       return;
     }
 
+    // Payment was successful - get the SetupIntent ID
     const setupIntentId = setupIntentClientSecret.split("_secret")[0];
-    console.log("setupIntentId..........", setupIntentId);
+    console.log("setupIntentId:", setupIntentId);
+    console.log("customerId:", customerId);
+    console.log("currentSubscriptionId:", userData.subscriptionId);
+    console.log("userId:", userId);
 
-    const res = await fetch(
-      "https://buez-server-khaki.vercel.app/api/upgrade-plan",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerId,
-          currentSubscriptionId: userData.subscriptionId,
-          userId,
-        }),
-      }
-    );
-
-    const result = await res.json();
-    console.log("result..........", result);
-    if (result.success) {
-      await updateSubscriptionStatus(
-        result?.currentPeriodStart,
-        result?.currentPeriodEnd
+    try {
+      const res = await fetch(
+        "https://buez-server-khaki.vercel.app/api/upgrade-plan",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerId,
+            currentSubscriptionId: userData.subscriptionId,
+            userId,
+            setupIntentId,
+            userCurrency,
+          }),
+        }
       );
-      await saveSubscription(userId, result?.subscriptionId);
-      Toast.show({
-        type: "success",
-        text1: t("toast.upgradePlan.upgradeSuccess"),
-        text2: t("toast.upgradePlan.nowOnYearly"),
-      });
-      props.navigation.navigate("TabNavigator");
-    } else {
+
+      const result = await res.json();
+      console.log("Upgrade result:", result);
+
+      if (result.success) {
+        await updateSubscriptionStatus(
+          result?.currentPeriodStart,
+          result?.currentPeriodEnd
+        );
+        await saveSubscription(userId, result?.subscriptionId);
+        Toast.show({
+          type: "success",
+          text1: t("toast.upgradePlan.upgradeSuccess"),
+          text2: t("toast.upgradePlan.nowOnYearly"),
+        });
+        props.navigation.navigate("TabNavigator");
+      } else {
+        Toast.show({
+          type: "error",
+          text1: t("toast.upgradePlan.upgradeFailed"),
+          text2: result.message || t("toast.upgradePlan.tryAgainLater"),
+        });
+      }
+    } catch (error) {
+      console.log("Fetch error:", error);
       Toast.show({
         type: "error",
         text1: t("toast.upgradePlan.upgradeFailed"),
         text2: t("toast.upgradePlan.tryAgainLater"),
       });
+    } finally {
+      setLoading(false);
     }
   };
+
+  const yearlyPrice = priceLabelForPlan("yearly");
+  const monthlyPrice = priceLabelForPlan("monthly");
+  const savingsPercentage =
+    ((prices.monthly[userCurrency] * 12 - prices.yearly[userCurrency]) /
+      (prices.monthly[userCurrency] * 12)) *
+    100;
+
+  const highlightText = `Save ${Math.round(savingsPercentage)}%`;
 
   const plans = [
     {
       id: "monthly",
       title: t("subscriptionV2.monthly") || "Monthly",
-      price: "$12",
-      price2: ".99",
+      price: monthlyPrice,
       period: t("subscriptionV2.perMonth") || "per month",
       description:
         t("subscriptionV2.fullAccess") || "Full access to all features",
@@ -166,31 +217,39 @@ function UpgradePlan(props) {
     },
     {
       id: "yearly",
-      title: t("subscriptionV2.yearly") || "Yearly",
-      price: "$99",
-      price2: ".99",
-      period: t("subscriptionV2.perYear") || "per year",
-      originalPrice: "$155",
-      description: t("upgradePlan.bestValue") || "Best value - Save 36%",
+      title: t("subscriptionV2.yearly"),
+      price: yearlyPrice,
+      period: t("subscriptionV2.perYear"),
+      originalPrice: formatCurrency(
+        prices.monthly[userCurrency] * 12,
+        userCurrency
+      ),
+      description: `${t("upgradePlan.bestValue")} ${highlightText}`,
       features: [
         t("subscriptionV2.txt3"),
         t("subscriptionV2.txt4"),
         t("subscriptionV2.txt5"),
         t("subscriptionV2.txt6"),
-        t("subscriptionV2.prioritySupport") || "Priority support",
-        t("subscriptionV2.exclusiveContent") || "Exclusive content",
+        t("subscriptionV2.prioritySupport"),
+        t("subscriptionV2.exclusiveContent"),
       ],
       popular: true,
-      highlight: t("upgradePlan.recommended") || "Recommended",
-      savings: t("upgradePlan.save36") || "Save 36%",
+      highlight: t("upgradePlan.recommended"),
+      savings: highlightText,
     },
   ];
 
+  const monthlyAmount = prices.monthly[userCurrency] ?? prices.monthly.USD;
+  const yearlyAmount = prices.yearly[userCurrency] ?? prices.yearly.USD;
+
+  // Compute savings with currency formatting
   const yearlySavings = {
-    monthlyCost: 12.99 * 12, // $155.88 yearly
-    yearlyCost: 99.99, // $99.99 yearly
-    savings: 12.99 * 12 - 99.99, // $55.89 savings
-    savingsPercentage: Math.round(((12.99 * 12 - 99.99) / (12.99 * 12)) * 100), // 36% savings
+    monthlyCost: formatCurrency(monthlyAmount * 12, userCurrency), // total if paying monthly
+    yearlyCost: formatCurrency(yearlyAmount, userCurrency), // yearly plan cost
+    savings: formatCurrency(monthlyAmount * 12 - yearlyAmount, userCurrency), // saved amount
+    savingsPercentage: Math.round(
+      ((monthlyAmount * 12 - yearlyAmount) / (monthlyAmount * 12)) * 100
+    ), // e.g., 25%
   };
 
   const renderPlanCard = ({ item, index }) => (
@@ -263,40 +322,57 @@ function UpgradePlan(props) {
       {/* Price Section */}
       <View style={styles.priceSection}>
         <View style={styles.priceContainer}>
-          <Text
-            style={[
-              styles.price,
-              {
-                color: item.current
-                  ? theme.primary
-                  : item.popular
-                  ? theme.secondary
-                  : theme.primary,
-              },
-            ]}
-          >
-            {item.price}
-            <Text style={{ fontSize: RFPercentage(2.3) }}>{item.price2}</Text>
-          </Text>
+          {(() => {
+            const priceStr = priceLabelForPlan(item.id);
+            const [integerPart, decimalPart] = priceStr.split(".");
+            return (
+              <Text
+                style={[
+                  styles.price,
+                  {
+                    color:
+                      item.id === "yearly" ? theme.secondary : theme.primary,
+                  },
+                ]}
+              >
+                {integerPart}
+                {decimalPart && (
+                  <Text style={{ fontSize: RFPercentage(1.9) }}>
+                    .{decimalPart}
+                  </Text>
+                )}
+              </Text>
+            );
+          })()}
           <Text style={[styles.period, { color: theme.darkGrey }]}>
             {item.period}
           </Text>
-          {item.originalPrice && (
-            <Text style={[styles.originalPrice, { color: theme.darkGrey }]}>
-              {item.originalPrice}
-            </Text>
-          )}
         </View>
       </View>
 
       {/* Savings Badge */}
-      {item.savings && (
-        <View
-          style={[styles.savingsBadge, { backgroundColor: theme.secondary }]}
-        >
-          <Text style={styles.savingsText}>{item.savings}</Text>
-        </View>
-      )}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: RFPercentage(2),
+        }}
+      >
+        {item.savings && (
+          <View
+            style={[styles.savingsBadge, { backgroundColor: theme.secondary }]}
+          >
+            <Text style={styles.savingsText}>{item.savings}</Text>
+          </View>
+        )}
+
+        {item.originalPrice && (
+          <Text style={[styles.originalPrice, { color: theme.darkGrey }]}>
+            {item.originalPrice}
+          </Text>
+        )}
+      </View>
 
       {/* Features */}
       <View style={styles.featuresContainer}>
@@ -307,10 +383,10 @@ function UpgradePlan(props) {
                 styles.checkIcon,
                 {
                   backgroundColor: item.current
-                    ? theme.primary
+                    ? theme.border
                     : item.popular
-                    ? theme.secondary
-                    : theme.primary,
+                    ? theme.border
+                    : theme.border,
                 },
               ]}
             >
@@ -329,9 +405,10 @@ function UpgradePlan(props) {
           style={[styles.upgradeButton, { backgroundColor: theme.secondary }]}
           onPress={openPaymentSheet}
           disabled={loading}
+          activeOpacity={0.8}
         >
           {loading ? (
-            <ActivityIndicator size="small" color={theme.white} />
+            <ActivityIndicator size="small" color={"white"} />
           ) : (
             <Text style={styles.upgradeButtonText}>
               {t("upgradePlan.upgradeNow") || "Upgrade Now"}
@@ -339,6 +416,20 @@ function UpgradePlan(props) {
           )}
         </TouchableOpacity>
       )}
+      <View>
+        <Image
+          source={Icons.stars}
+          resizeMode="contain"
+          style={{
+            width: RFPercentage(10),
+            height: RFPercentage(10),
+            alignSelf: "flex-end",
+            position: "absolute",
+            bottom: -RFPercentage(4),
+            right: -RFPercentage(3),
+          }}
+        />
+      </View>
     </View>
   );
 
@@ -352,18 +443,17 @@ function UpgradePlan(props) {
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
         <TouchableOpacity
-          style={{ position: "absolute", left: RFPercentage(2) }}
           activeOpacity={0.8}
           onPress={() => navigation.goBack()}
         >
           <MaterialCommunityIcons
             name="keyboard-backspace"
             style={{ fontSize: RFPercentage(2.9) }}
-            color={theme.primary}
+            color={theme.grey}
           />
         </TouchableOpacity>
         <View>
-          <Text style={[styles.title, { color: theme.primary }]}>
+          <Text style={[styles.title, { color: theme.heading }]}>
             {t("upgradePlan.upgradeYourPlan") || "Upgrade Your Plan"}
           </Text>
           {/* <Text style={[styles.subtitle, { color: theme.darkGrey }]}>
@@ -391,13 +481,10 @@ function UpgradePlan(props) {
           ]}
         >
           <Text style={[styles.savingsTitle, { color: theme.primary }]}>
-            {t("upgradePlan.youSave") || `You Save $55.89%`}
+            {t("upgradePlan.youSave")} {highlightText}
           </Text>
           <Text style={[styles.savingsDescription, { color: theme.darkGrey }]}>
-            {t("upgradePlan.yearlySavings") ||
-              `Switch to yearly and save $${yearlySavings.savings.toFixed(
-                2
-              )} per year`}
+            {t("upgradePlan.yearlySavings")} {yearlySavings.savings}
           </Text>
         </View>
 
@@ -412,7 +499,7 @@ function UpgradePlan(props) {
               {t("upgradePlan.monthlyCost") || "Monthly plan cost per year:"}
             </Text>
             <Text style={[styles.comparisonValue, { color: theme.darkGrey }]}>
-              ${yearlySavings.monthlyCost.toFixed(2)}
+              {yearlySavings.monthlyCost}
             </Text>
           </View>
 
@@ -421,7 +508,7 @@ function UpgradePlan(props) {
               {t("upgradePlan.yearlyCost") || "Yearly plan cost:"}
             </Text>
             <Text style={[styles.comparisonValue, { color: theme.secondary }]}>
-              ${yearlySavings.yearlyCost.toFixed(2)}
+              {yearlySavings.yearlyCost}
             </Text>
           </View>
 
@@ -435,7 +522,7 @@ function UpgradePlan(props) {
               {t("upgradePlan.totalSavings") || "Your total savings:"}
             </Text>
             <Text style={[styles.comparisonValue, { color: theme.secondary }]}>
-              ${yearlySavings.savings.toFixed(2)}
+              {yearlySavings.savings}
             </Text>
           </View>
         </View>
@@ -472,13 +559,14 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    paddingTop: RFPercentage(2),
+    paddingTop: RFPercentage(4),
     width: "100%",
     alignSelf: "center",
     flexDirection: "row",
-    justifyContent: "center",
-    borderBottomWidth: RFPercentage(0.06),
-    paddingBottom: RFPercentage(1),
+    justifyContent: "flex-start",
+    borderBottomWidth: RFPercentage(0.1),
+    paddingBottom: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
   },
   logo: {
     width: RFPercentage(8),
@@ -486,10 +574,9 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(2),
   },
   title: {
-    fontSize: RFPercentage(2.3),
-    fontFamily: "Poppins_700Bold",
-    textAlign: "center",
-    marginBottom: RFPercentage(0.9),
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_600SemiBold",
+    marginLeft: RFPercentage(2),
   },
   subtitle: {
     fontSize: RFPercentage(1.5),
@@ -636,14 +723,13 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     textDecorationLine: "line-through",
     opacity: 0.8,
-    marginLeft: RFPercentage(5),
   },
   savingsBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.5),
     borderRadius: RFPercentage(1),
-    marginBottom: RFPercentage(2),
+    // marginBottom: RFPercentage(2),
   },
   savingsText: {
     color: Colors.white,
@@ -682,6 +768,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: RFPercentage(2),
+    zIndex:9999
   },
   upgradeButtonText: {
     color: Colors.white,

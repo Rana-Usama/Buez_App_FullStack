@@ -45,6 +45,7 @@ import {
   extractNumericValue,
   getCurrencyInfo,
 } from "../utils/currencyChange";
+import { useLocation } from "../utils/useLocation";
 
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
@@ -61,6 +62,7 @@ function PostRequest({ navigation, route }) {
   const [location, setLocation] = useState({});
   const [budget, setBudget] = useState("");
   const [numericBudget, setNumericBudget] = useState(""); // Store numeric value separately
+  const { location: currentLocation, getCurrentLocation } = useLocation();
 
   const [compensation, setCompensation] = useState("");
   const [reviews, setReviews] = useState([]);
@@ -86,7 +88,7 @@ function PostRequest({ navigation, route }) {
     { id: 2, type: "Other" },
   ];
 
-  console.log(selectedLocation);
+  console.log("curr......", currentLocation);
 
   const [translatedTaskOptions, setTranslatedTaskOptions] = useState([]);
   const [translatedCompensationOptions, setTranslatedCompensationOptions] =
@@ -94,30 +96,50 @@ function PostRequest({ navigation, route }) {
   const [originalTaskType, setOriginalTaskType] = useState("");
   const [originalCompensationType, setOriginalCompensationType] = useState("");
 
-  const currencyInfo = getCurrencyInfo(selectedLocation);
-  const currentCurrencySymbol = getCurrencySymbolFromLocation(selectedLocation);
+  const getLocationForCurrency = () => {
+    return selectedLocation?.name ? selectedLocation : currentLocation;
+  };
+
+  const currencyInfo = getCurrencyInfo(getLocationForCurrency());
+  const currentCurrencySymbol = getCurrencySymbolFromLocation(
+    getLocationForCurrency()
+  );
+
+  // In your PostRequest component, add this useEffect to debug the location data
+  useEffect(() => {
+    if (numericBudget) {
+      const locationToUse = getLocationForCurrency(); // Use this instead of selectedLocation
+      const formatted = formatCurrency(numericBudget, locationToUse);
+      setBudget(formatted);
+    }
+  }, [selectedLocation, currentLocation, numericBudget]);
+
+  console.log(budget);
 
   const handleBudgetChange = (text) => {
     // Extract numeric value (remove all non-digit characters)
     const numericValue = text.replace(/[^\d]/g, "");
     setNumericBudget(numericValue);
-    // Format for display based on selected location
+    // Format for display based on available location
     if (numericValue) {
-      const formatted = formatCurrency(numericValue, selectedLocation);
-      setBudget(formatted);
+      const locationToUse = getLocationForCurrency();
+      console.log("🔄 handleBudgetChange - locationToUse:", locationToUse);
+      console.log("🔄 handleBudgetChange - numericValue:", numericValue);
+
+      if (locationToUse) {
+        const formatted = formatCurrency(numericValue, locationToUse);
+        console.log("🔄 handleBudgetChange - formatted:", formatted);
+        setBudget(formatted);
+      } else {
+        console.log("❌ No location available, using fallback");
+        // Fallback formatting
+        const formatted = `$ ${new Intl.NumberFormat().format(numericValue)}`;
+        setBudget(formatted);
+      }
     } else {
       setBudget("");
     }
   };
-
-  // Get placeholder text with current currency
-  const getBudgetPlaceholder = () => {
-    return formatCurrency("0", selectedLocation, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-  };
-
   const fetchMyReviews = async () => {
     try {
       const records = await fetchMyReviewsFromFirebase();
@@ -131,13 +153,7 @@ function PostRequest({ navigation, route }) {
     fetchMyReviews();
   }, []);
 
-  useEffect(() => {
-    if (numericBudget) {
-      const formatted = formatCurrency(numericBudget, selectedLocation);
-      setBudget(formatted);
-    }
-  }, [selectedLocation, numericBudget]);
-
+  
   // Current Post Data
   useFocusEffect(
     useCallback(() => {

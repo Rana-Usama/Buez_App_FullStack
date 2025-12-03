@@ -161,7 +161,7 @@
     "tryPremium": "Prova tutte le funzionalità premium",
     "fullAccess": "Accesso completo a tutte le funzionalità",
     "bestValue": "Miglior rapporto qualità-prezzo",
-    "choosePlan": "Scegli il tuo piano",
+    "choosePlan": "Scegli il tuo BUEZ piano",
     "startFree": "Inizia con una prova gratuita, aggiorna quando vuoi",
     "mostPopular": "PIÙ POPOLARE",
     "save30": "Risparmia il 36%",
@@ -288,7 +288,9 @@
     "txt10": "Sei sicuro di voler eliminare\nquesto account?",
     "txt11": "Sei sicuro di voler disconnetterti\nda questo account?",
     "txt12": "Cambia lingua",
-    "txt13": "Tema scuro"
+    "txt13": "Tema scuro",
+    "txt14" : "Piano di aggiornamento"
+
   },
  "cancelSubscription": {
     "txt1": "Il tuo abbonamento attuale",

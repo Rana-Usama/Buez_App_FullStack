@@ -50,11 +50,17 @@
       "one": "Payment cancelled",
       "two": "You can try again anytime",
       "three": "Payment successful!",
-      "four": "Welcome to Premium!"
+      "four": "Welcome to Premium!",
+      "subscriptionActive": "Subscription is active!",
+      "enjoyPremium": "Enjoy full premium features now.",
+      "paymentFailed": "Payment failed",
+      "tryAgain": "Please try again",
+      "error": "Something went wrong"
     },
     "subscription": {
       "one": "Subscription Successful!",
-      "two": "Monthly plan activated successfully."
+      "two": "Monthly plan activated successfully.",
+      "three": "Yearly plan activated successfully."
     },
     "myRequests": {
       "one": "Request Status",
@@ -65,7 +71,7 @@
       "six": "Unable to update request status.",
       "seven": "Request Reposted Successfully"
     },
-   "cancelSubscription": {
+    "cancelSubscription": {
       "one": "No active subscription",
       "two": "You don't have any subscription to cancel",
       "three": "Subscription cancelled"
@@ -142,7 +148,7 @@
     "txt6": "We'll send you a friendly reminder as your trial period ends in 4 days.",
     "txt7": "Continue after trial",
     "txt8": "Your subscription will continue automatically after 14 days. You can cancel anytime.",
-    "txt9": "Start My Free Trial"
+    "txt9": "Start Free Trial"
   },
   "subscriptionV2": {
     "txt1": "Buy our premium to access full services",
@@ -161,7 +167,7 @@
     "tryPremium": "Try all premium features",
     "fullAccess": "Full access to all features",
     "bestValue": "Best value",
-    "choosePlan": "Choose Your Plan",
+    "choosePlan": "Choose Your BUEZ Plan",
     "startFree": "Start with a free trial, upgrade anytime",
     "mostPopular": "MOST POPULAR",
     "save30": "Save 36%",
@@ -177,13 +183,15 @@
     "select": "Select"
   },
   "freeTrialModal": {
-    "title": "Start Your Free Trial",
-    "subtitle": "Choose how you'd like to start your 14-day free trial",
-    "addCardNow": "Add Card Now",
-    "skipForNow": "Skip for Now",
-    "info1": "Adding a card now ensures uninterrupted service after trial",
-    "info2": "Your card won't be charged until after 14 days",
-    "info3": "You can cancel anytime during the trial period"
+    "title": "Start Your 14-Day Free Trial",
+    "subtitle": "Choose how you'd like to start your free trial",
+    "importantNote": "Start Your Premium Journey",
+    "automaticSubscription": "Enjoy full premium access for 14 days free! After your trial, Your monthly subscription will automatically continue if you add card, so you never lose access to your premium benefits.",
+    "addCardNow": "Add Card",
+    "skipForNow": "Skip Card",
+    "noChargeDuringTrial": "• No charges during 14-day trial",
+    "cancelAnytime": "• Cancel anytime during trial to avoid charges",
+    "fullAccess": "• Full access to all premium features during trial"
   },
   "subscription": {
     "txt1": "Your 14-day free trial has ended.",
@@ -288,10 +296,11 @@
     "txt10": "Are you sure you want to delete\nthis account?",
     "txt11": "Are you sure you want to logout\nfrom this account?",
     "txt12": "Change Language",
-    "txt13": "Dark Theme"
+    "txt13": "Dark Theme",
+    "txt14": "Upgrade Plan"
   },
- "cancelSubscription": {
-    "txt1": "Your Current Subscription",
+  "cancelSubscription": {
+    "txt1": "Your Current BUEZ Subscription",
     "txt8": "You don't have an active subscription",
     "txt10": "Cancel Subscription",
     "monthlyPlan": "MONTHLY PLAN",
@@ -597,8 +606,8 @@
   "upgradePlan": {
     "upgradeYourPlan": "Upgrade Your Plan",
     "getBetterValue": "Switch to yearly plan and save money",
-    "youSave": "You will Save 36%",
-    "yearlySavings": "Switch to yearly plan and save $55.89 per year",
+    "youSave": "You will ",
+    "yearlySavings": "Switch to yearly plan and save",
     "planComparison": "Plan Comparison",
     "monthlyCost": "Monthly plan cost per year:",
     "yearlyCost": "Yearly plan cost:",
@@ -607,7 +616,7 @@
     "recommended": "MOST POPULAR",
     "save36": "Save 36%",
     "upgradeNow": "Upgrade Now",
-    "bestValue": "Best value - Save 36%",
+    "bestValue": "Best value - ",
     "whyUpgrade": "Why Upgrade to Yearly?",
     "saveMoney": "Save 36% compared to monthly billing",
     "oneTimePayment": "One-time payment, no monthly hassle",

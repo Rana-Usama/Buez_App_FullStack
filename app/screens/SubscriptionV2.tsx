@@ -28,12 +28,18 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import Colors from "../config/Colors";
-import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
-import { saveSubscription } from "../services/User.service";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { scheduleFreeTrialNotification } from "../utils/notificationService";
+import * as Localization from "expo-localization";
+import {
+  handlePaymentSheet,
+  fetchSetupIntent,
+  createSubscription,
+} from "../services/Subscription.service";
+import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
+import { Icons } from "../config/theme";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -52,140 +58,47 @@ function SubscriptionV2(props) {
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0); // Start with yearly plan (index 2)
 
- const updateSubscriptionStatus = async (start, end, planType) => {
-    if (!userId) return;
-    const userRef = doc(firestore, "users", userId);
-    try {
-      const updateData = {
-        isSubscribed: true,
-        subscriptionStart: start,
-        subscriptionEnd: end,
-        planType: planType,
-      };
-
-      // Only set free trial fields if it's a free trial
-      if (selectedPlan === "free") {
-        updateData.isFreeTrial = true;
-        updateData.freeTrialStartedAt = serverTimestamp();
-      }
-
-      await updateDoc(userRef, updateData);
-    } catch (error) {
-      console.error("Error updating subscription status:", error);
-    }
+  const prices = {
+    monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
+    yearly: { USD: 95, EUR: 89, CHF: 79 },
+    free: { USD: 0, EUR: 0, CHF: 0 },
   };
 
-  const fetchSetupIntent = async () => {
-    try {
-      const response = await fetch(
-        "https://buez-server-khaki.vercel.app/api/payment-sheet",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: userData?.email }),
-        }
-      );
-      const { setupIntentClientSecret, customerId } = await response.json();
-      if (!setupIntentClientSecret || !customerId) {
-        throw new Error("Missing client secret or customer ID");
-      }
-      return { setupIntentClientSecret, customerId };
-    } catch (error) {
-      Alert.alert("Error", "Could not create customer. Please try again.");
-      return null;
-    }
+  const locale = Localization.locale;
+  const userCurrency = getCurrencyFromLocale(locale);
+
+  const priceLabelForPlan = (planId) => {
+    const amount = prices[planId]?.[userCurrency] ?? prices[planId]?.USD ?? 0;
+    return formatCurrency(amount, userCurrency);
   };
+
+  console.log("locale..........", locale);
+  console.log("userCurrency..........", userCurrency);
 
   const openPaymentSheet = async () => {
     if (selectedPlan === "free") {
       setFreeTrialModalVisible(true);
       return;
     }
-
     setLoading(true);
-    const setupData = await fetchSetupIntent();
-    if (!setupData) return;
-    const { setupIntentClientSecret, customerId } = setupData;
-    const { error: initError } = await initPaymentSheet({
-      setupIntentClientSecret,
-      merchantDisplayName: "BUEZ",
-      returnURL: "buez://payment-complete",
-    });
-
-    if (initError) {
-      setLoading(false);
-      return;
-    }
-
-    const { error: paymentError } = await presentPaymentSheet();
-    if (paymentError) {
-      Toast.show({
-        type: "info",
-        text1: t("toast.subscriptionV2.one"),
-        text2: t("toast.subscriptionV2.two"),
-      });
-      setLoading(false);
-      return;
-    }
-
-    const setupIntentId = setupIntentClientSecret.split("_secret")[0];
-
-    // Determine which endpoint to call based on selected plan
-    let endpoint = "";
-    if (selectedPlan === "monthly") {
-      endpoint = "https://buez-server-khaki.vercel.app/api/create-subscription";
-    } else if (selectedPlan === "yearly") {
-      endpoint = "https://buez-server-khaki.vercel.app/api/yearly-subscription";
-    }
-
     try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerId,
-          setupIntentId,
-          userId,
-          planType: selectedPlan,
-        }),
+      const result = await handlePaymentSheet({
+        initPaymentSheet,
+        presentPaymentSheet,
+        selectedPlan,
+        userCurrency,
+        email: userData?.email,
+        userId,
+        t,
       });
-
-      const result = await res.json();
+      console.log("res.........", result);
       if (result.success) {
-        await updateSubscriptionStatus(
-          result?.currentPeriodStart,
-          result?.currentPeriodEnd,
-          selectedPlan
-        );
-        await saveSubscription(userId, result?.subscriptionId);
-
-        if (selectedPlan === "free") {
-          await scheduleFreeTrialNotification(10);
-        }
-
-        Toast.show({
-          type: "success",
-          text1:
-            selectedPlan === "free"
-              ? t("toast.subscriptionV2.three")
-              : t("toast.subscriptionV2.subscriptionActive"),
-          text2:
-            selectedPlan === "free"
-              ? t("toast.subscriptionV2.four")
-              : t("toast.subscriptionV2.enjoyPremium"),
-          visibilityTime: 5000,
-        });
         props.navigation.navigate("TabNavigator");
       } else {
         setModalVisible2(true);
-        Toast.show({
-          type: "error",
-          text1: t("toast.subscriptionV2.paymentFailed"),
-          text2: t("toast.subscriptionV2.tryAgain"),
-        });
       }
     } catch (error) {
-      console.error("Subscription error:", error);
+      console.log(error);
       Toast.show({
         type: "error",
         text1: t("toast.subscriptionV2.error"),
@@ -200,7 +113,6 @@ function SubscriptionV2(props) {
     if (!userId) return;
     try {
       setLoader(true);
-      setFreeTrialModalVisible(false); // Close modal
       const userRef = doc(firestore, "users", userId);
       await updateDoc(userRef, {
         isFreeTrial: true,
@@ -208,6 +120,7 @@ function SubscriptionV2(props) {
         planType: "free",
       });
       await scheduleFreeTrialNotification(10);
+      setFreeTrialModalVisible(false); // Close modal
       props.navigation.navigate("TabNavigator");
     } catch (error) {
       Toast.show({
@@ -221,67 +134,65 @@ function SubscriptionV2(props) {
   };
 
   const handleAddCardNow = async () => {
-    setFreeTrialModalVisible(false); // Close modal
+    setFreeTrialModalVisible(false);
     setLoading(true);
-    const setupData = await fetchSetupIntent();
-    if (!setupData) return;
-    const { setupIntentClientSecret, customerId } = setupData;
-    const { error: initError } = await initPaymentSheet({
-      setupIntentClientSecret,
-      merchantDisplayName: "BUEZ",
-      returnURL: "buez://payment-complete",
-    });
-
-    if (initError) {
-      setLoading(false);
-      return;
-    }
-    const { error: paymentError } = await presentPaymentSheet();
-    if (paymentError) {
-      Toast.show({
-        type: "info",
-        text1: t("toast.subscriptionV2.one"),
-        text2: t("toast.subscriptionV2.two"),
-      });
-      setLoading(false);
-      return;
-    }
-    // For free trial with card, we just save the payment method but don't charge yet
     try {
-      const userRef = doc(firestore, "users", userId);
-      await updateDoc(userRef, {
-        isFreeTrial: true,
-        freeTrialStartedAt: serverTimestamp(),
-        hasPaymentMethod: true,
-        planType: "free",
+      const setupData = await fetchSetupIntent(userData?.email, userId);
+      if (!setupData) return;
+      const { setupIntentClientSecret, customerId } = setupData;
+      const { error: initError } = await initPaymentSheet({
+        setupIntentClientSecret,
+        merchantDisplayName: "BUEZ",
+        returnURL: "buez://payment-complete",
       });
-      await scheduleFreeTrialNotification(10);
-      Toast.show({
-        type: "success",
-        text1: "Free Trial Started!",
-        text2: "Your payment method has been saved for future use.",
-        visibilityTime: 5000,
+      if (initError) return;
+      const { error: paymentError } = await presentPaymentSheet();
+      if (paymentError) {
+        Toast.show({
+          type: "info",
+          text1: t("toast.subscriptionV2.one"),
+          text2: t("toast.subscriptionV2.two"),
+        });
+        return;
+      }
+      const setupIntentId = setupIntentClientSecret.split("_secret")[0];
+      await createSubscription({
+        customerId,
+        setupIntentId,
+        planType: "monthly", // Add card always converts free trial to monthly
+        userCurrency,
+        t,
       });
       props.navigation.navigate("TabNavigator");
     } catch (error) {
+      console.log(error);
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: "Failed to save payment method. Please try again.",
+        text1: t("toast.subscriptionV2.error"),
+        text2: t("toast.subscriptionV2.tryAgain"),
       });
     } finally {
       setLoading(false);
     }
   };
 
+  const yearlyPrice = priceLabelForPlan("yearly");
+  const monthlyPrice = priceLabelForPlan("monthly");
+
+  const savingsPercentage =
+    ((prices.monthly[userCurrency] * 12 - prices.yearly[userCurrency]) /
+      (prices.monthly[userCurrency] * 12)) *
+    100;
+
+  const highlightText = `Save ${Math.round(savingsPercentage)}%`;
+
   const plans = [
     {
       id: "free",
-      title: t("subscriptionV2.freeTrial") || "Free Trial",
+      title: t("subscriptionV2.freeTrial"),
       price: "$0",
-      price2: "",
-      period: t("subscriptionV2.for7Days") || "for 14 days",
-      description: t("subscriptionV2.tryPremium") || "Try all premium features",
+      period: t("subscriptionV2.for7Days"),
+      description: t("subscriptionV2.tryPremium"),
       features: [
         t("subscriptionV2.txt3"),
         t("subscriptionV2.txt4"),
@@ -289,44 +200,44 @@ function SubscriptionV2(props) {
         t("subscriptionV2.txt6"),
       ],
       popular: false,
-      highlight: t("subscriptionV2.noCreditCard") || "No credit card",
+      highlight: t("subscriptionV2.noCreditCard"),
     },
     {
       id: "monthly",
-      title: t("subscriptionV2.monthly") || "Monthly",
-      price: "$12",
-      price2: ".99",
-      period: t("subscriptionV2.perMonth") || "per month",
-      description:
-        t("subscriptionV2.fullAccess") || "Full access to all features",
+      title: t("subscriptionV2.monthly"),
+      price: monthlyPrice,
+      period: t("subscriptionV2.perMonth"),
+      description: t("subscriptionV2.fullAccess"),
       features: [
         t("subscriptionV2.txt3"),
         t("subscriptionV2.txt4"),
         t("subscriptionV2.txt5"),
         t("subscriptionV2.txt6"),
-        t("subscriptionV2.prioritySupport") || "Priority support",
+        t("subscriptionV2.prioritySupport"),
       ],
       popular: false,
-      highlight: t("subscriptionV2.prioritySupport") || "Flexible",
+      highlight: t("subscriptionV2.prioritySupport"),
     },
     {
       id: "yearly",
-      title: t("subscriptionV2.yearly") || "Yearly",
-      price: "$99",
-      price2: ".99",
-      period: t("subscriptionV2.perYear") || "per year",
-      originalPrice: "$155",
-      description: t("subscriptionV2.bestValue") || "Best value",
+      title: t("subscriptionV2.yearly"),
+      price: yearlyPrice,
+      period: t("subscriptionV2.perYear"),
+      originalPrice: formatCurrency(
+        prices.monthly[userCurrency] * 12,
+        userCurrency
+      ),
+      description: t("subscriptionV2.bestValue"),
       features: [
         t("subscriptionV2.txt3"),
         t("subscriptionV2.txt4"),
         t("subscriptionV2.txt5"),
         t("subscriptionV2.txt6"),
-        t("subscriptionV2.prioritySupport") || "Priority support",
-        t("subscriptionV2.exclusiveContent") || "Exclusive content",
+        t("subscriptionV2.prioritySupport"),
+        t("subscriptionV2.exclusiveContent"),
       ],
-      popular: true, // Moved most popular to yearly
-      highlight: t("subscriptionV2.save30") || "Save 36%",
+      popular: true,
+      highlight: highlightText,
     },
   ];
 
@@ -343,7 +254,6 @@ function SubscriptionV2(props) {
 
   const getCardGradient = (isSelected) => {
     if (!isSelected) return null;
-
     return {
       shadowColor: theme.primary,
       shadowOffset: {
@@ -358,7 +268,6 @@ function SubscriptionV2(props) {
 
   const getBorderGradient = (isSelected) => {
     if (!isSelected) return { borderColor: "rgba(232, 232, 232, 1)" };
-
     return {
       borderColor: theme.primary,
       borderWidth: 1.2,
@@ -367,7 +276,6 @@ function SubscriptionV2(props) {
 
   const renderPlanCard = ({ item, index }) => {
     const isSelected = selectedPlan === item.id;
-
     return (
       <TouchableOpacity
         style={[
@@ -399,7 +307,7 @@ function SubscriptionV2(props) {
             style={[styles.popularBadge, { backgroundColor: theme.primary }]}
           >
             <Text style={styles.popularText}>
-              {t("subscriptionV2.mostPopular") || "MOST POPULAR"}
+              {t("subscriptionV2.mostPopular")}
             </Text>
           </View>
         )}
@@ -409,7 +317,7 @@ function SubscriptionV2(props) {
           <View
             style={[
               styles.selectedGlow,
-              { backgroundColor: theme.primary + "10" },
+              { backgroundColor: theme.primary + "05" },
             ]}
           />
         )}
@@ -429,53 +337,73 @@ function SubscriptionV2(props) {
         {/* Price Section */}
         <View style={styles.priceSection}>
           <View style={styles.priceContainer}>
-            <Text style={[styles.price, { color: theme.primary }]}>
-              {item.price}
-              <Text style={{ fontSize: RFPercentage(2.3) }}>{item.price2}</Text>
-            </Text>
+            {(() => {
+              const priceStr = priceLabelForPlan(item.id); // e.g. "$8.90"
+              const [integerPart, decimalPart] = priceStr.split(".");
+              return (
+                <Text style={[styles.price, { color: theme.primary }]}>
+                  {integerPart}
+                  {decimalPart && (
+                    <Text style={{ fontSize: RFPercentage(1.9) }}>
+                      .{decimalPart}
+                    </Text>
+                  )}
+                </Text>
+              );
+            })()}
             <Text style={[styles.period, { color: theme.darkGrey }]}>
               {item.period}
             </Text>
-            {item.originalPrice && (
-              <Text style={[styles.originalPrice, { color: theme.darkGrey }]}>
-                {item.originalPrice}
-              </Text>
-            )}
+           
           </View>
         </View>
 
         {/* Highlight Badge */}
         <View
-          style={[
-            styles.highlightBadge,
-            {
-              backgroundColor: item.popular
-                ? theme.secondary
-                : item.id === "yearly"
-                ? theme.secondary
-                : theme.mode === "dark"
-                ? Colors.primary + "40"
-                : Colors.primary + "15",
-            },
-          ]}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: RFPercentage(2),
+          }}
         >
-          <Text
+          <View
             style={[
-              styles.highlightText,
+              styles.highlightBadge,
               {
-                color:
-                  item.popular || item.id === "yearly"
-                    ? theme.white
-                    : theme.primary,
-                fontSize:
-                  item.popular || item.id === "yearly"
-                    ? RFPercentage(1.6)
-                    : RFPercentage(1.3),
+                backgroundColor: item.popular
+                  ? theme.secondary
+                  : item.id === "yearly"
+                  ? theme.secondary
+                  : theme.mode === "dark"
+                  ? Colors.primary + "40"
+                  : Colors.primary + "15",
               },
             ]}
           >
-            {item.highlight}
-          </Text>
+            <Text
+              style={[
+                styles.highlightText,
+                {
+                  color:
+                    item.popular || item.id === "yearly"
+                      ? theme.white
+                      : theme.primary,
+                  fontSize:
+                    item.popular || item.id === "yearly"
+                      ? RFPercentage(1.6)
+                      : RFPercentage(1.3),
+                },
+              ]}
+            >
+              {item.highlight}
+            </Text>
+          </View>
+          {item.originalPrice && (
+            <Text style={[styles.originalPrice, { color: theme.darkGrey }]}>
+              {item.originalPrice}
+            </Text>
+          )}
         </View>
 
         {/* Features */}
@@ -492,6 +420,20 @@ function SubscriptionV2(props) {
               </Text>
             </View>
           ))}
+        </View>
+        <View>
+          <Image
+            source={Icons.stars}
+            resizeMode="contain"
+            style={{
+              width: RFPercentage(10),
+              height: RFPercentage(10),
+              alignSelf: "flex-end",
+              position: "absolute",
+              bottom: -RFPercentage(3),
+              right: -RFPercentage(2),
+            }}
+          />
         </View>
       </TouchableOpacity>
     );
@@ -512,11 +454,10 @@ function SubscriptionV2(props) {
         {/* Main Title */}
         <View style={styles.titleContainer}>
           <Text style={[styles.mainTitle, { color: theme.primary }]}>
-            {t("subscriptionV2.choosePlan") || "Choose Your Plan"}
+            {t("subscriptionV2.choosePlan")}
           </Text>
           <Text style={[styles.subTitle, { color: theme.darkGrey }]}>
-            {t("subscriptionV2.startFree") ||
-              "Start with a free trial, upgrade anytime"}
+            {t("subscriptionV2.startFree")}
           </Text>
         </View>
 
@@ -544,7 +485,12 @@ function SubscriptionV2(props) {
         </View>
 
         {/* Plan Indicators */}
-        <View style={[styles.indicatorsContainer,{marginTop: selectedPlan === 'free' ?  -20 : 0}]}>
+        <View
+          style={[
+            styles.indicatorsContainer,
+            { marginTop: selectedPlan === "free" ? -20 : 0 },
+          ]}
+        >
           {plans.map((plan, index) => (
             <View
               key={plan.id}
@@ -574,8 +520,8 @@ function SubscriptionV2(props) {
         <MyAppButton
           title={
             selectedPlan === "free"
-              ? t("subscriptionV2.startFreeTrial") || "Start Free Trial"
-              : `${t("subscriptionV2.continueWith") || "Continue with"} ${
+              ? t("subscriptionV2.startFreeTrial")
+              : `${t("subscriptionV2.continueWith")} ${
                   plans.find((p) => p.id === selectedPlan)?.title
                 }`
           }
@@ -598,64 +544,92 @@ function SubscriptionV2(props) {
           onPress={() => setFreeTrialModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
-            <View
-              style={[styles.modalContent, { backgroundColor: theme.white }]}
-            >
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: theme.primary }]}>
-                  {t("freeTrialModal.title") || "Start Your Free Trial"}
-                </Text>
-                <Text style={[styles.modalSubtitle, { color: theme.darkGrey }]}>
-                  {t("freeTrialModal.subtitle") ||
-                    "Choose how you'd like to start your 14-day free trial"}
-                </Text>
-              </View>
+            <TouchableWithoutFeedback>
+              <View
+                style={[styles.modalContent, { backgroundColor: theme.white }]}
+              >
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: theme.primary }]}>
+                    {t("freeTrialModal.title")}
+                  </Text>
+                  {/* <Text
+                    style={[styles.modalSubtitle, { color: theme.darkGrey }]}
+                  >
+                    {t("freeTrialModal.subtitle") ||
+                      "Choose how you'd like to start your free trial"}
+                  </Text> */}
+                </View>
 
-              <View style={styles.modalButtonsContainer}>
-                {/* Add Card Now Button */}
-                <TouchableOpacity
+                {/* Important Information Card */}
+                <View
                   style={[
-                    styles.modalButton,
-                    styles.primaryModalButton,
-                    { backgroundColor: theme.primary },
+                    styles.infoCard,
+                    { backgroundColor: theme.primary + "10" },
                   ]}
-                  onPress={handleAddCardNow}
-                  disabled={loading}
                 >
-                  {loading ? (
-                    <ActivityIndicator size="small" color={theme.white} />
-                  ) : (
-                    <Text style={styles.primaryButtonText}>
-                      {t("freeTrialModal.addCardNow") || "Add Card Now"}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-
-                {/* Skip Card Button */}
-                <TouchableOpacity
-                  style={[
-                    styles.modalButton,
-                    styles.secondaryModalButton,
-                    { borderColor: theme.primary },
-                  ]}
-                  onPress={handleFreeTrial}
-                  disabled={loader}
-                >
-                  {loader ? (
-                    <ActivityIndicator size="small" color={theme.primary} />
-                  ) : (
+                  <View style={styles.infoIcon}>
                     <Text
-                      style={[
-                        styles.secondaryButtonText,
-                        { color: theme.primary },
-                      ]}
+                      style={[styles.infoIconText, { color: theme.primary }]}
                     >
-                      {t("freeTrialModal.skipForNow") || "Skip for Now"}
+                      ℹ️
                     </Text>
-                  )}
-                </TouchableOpacity>
+                  </View>
+                  <View style={styles.infoContent}>
+                    <Text style={[styles.infoTitle, { color: theme.primary }]}>
+                      {t("freeTrialModal.importantNote")}
+                    </Text>
+                    <Text style={[styles.infoText, { color: theme.darkGrey }]}>
+                      {t("freeTrialModal.automaticSubscription")}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.modalButtonsContainer}>
+                  {/* Add Card Now Button */}
+                  <TouchableOpacity
+                    style={[
+                      styles.modalButton,
+                      styles.primaryModalButton,
+                      { backgroundColor: theme.primary },
+                    ]}
+                    onPress={handleAddCardNow}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <ActivityIndicator size="small" color={theme.white} />
+                    ) : (
+                      <Text style={styles.primaryButtonText}>
+                        {t("freeTrialModal.addCardNow")}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+
+                  {/* Skip Card Button */}
+                  <TouchableOpacity
+                    style={[
+                      styles.modalButton,
+                      styles.secondaryModalButton,
+                      { borderColor: theme.primary },
+                    ]}
+                    onPress={handleFreeTrial}
+                    disabled={loader}
+                  >
+                    {loader ? (
+                      <ActivityIndicator size="small" color={theme.primary} />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.secondaryButtonText,
+                          { color: theme.primary },
+                        ]}
+                      >
+                        {t("freeTrialModal.skipForNow")}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
@@ -676,7 +650,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    paddingTop: RFPercentage(4),
+    paddingTop: Platform.OS === "android" ? RFPercentage(7) : RFPercentage(4),
     paddingHorizontal: RFPercentage(3),
   },
   logo: {
@@ -698,7 +672,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     alignItems: "center",
     paddingHorizontal: RFPercentage(3),
-    marginTop: RFPercentage(4),
+    marginTop: Platform.OS === "android" ? RFPercentage(7) : RFPercentage(4),
     marginBottom: RFPercentage(3),
   },
   mainTitle: {
@@ -708,12 +682,13 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.5),
   },
   subTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
     lineHeight: RFPercentage(2),
   },
   cardsContainer: {
+    marginTop: RFPercentage(5),
     // marginVertical: RFPercentage(2),
   },
   flatListContent: {
@@ -761,7 +736,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_700Bold",
   },
   planHeader: {
-    marginBottom: RFPercentage(2),
+    marginBottom: RFPercentage(1),
   },
   planTitle: {
     fontSize: RFPercentage(2.4),
@@ -776,7 +751,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
-    marginBottom: RFPercentage(2),
+    marginBottom: RFPercentage(1),
   },
   priceContainer: {
     flexDirection: "row",
@@ -803,7 +778,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.5),
     borderRadius: RFPercentage(1),
-    marginBottom: RFPercentage(2),
+    // marginBottom: RFPercentage(2),
   },
   highlightText: {
     fontSize: RFPercentage(1.3),
@@ -871,15 +846,16 @@ const styles = StyleSheet.create({
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: RFPercentage(3),
   },
   modalContent: {
     width: "100%",
-    borderRadius: RFPercentage(3),
+    borderRadius: RFPercentage(2),
     padding: RFPercentage(3),
+    paddingVertical: RFPercentage(4),
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -891,13 +867,12 @@ const styles = StyleSheet.create({
   },
   modalHeader: {
     alignItems: "center",
-    marginBottom: RFPercentage(3),
+    // marginBottom: RFPercentage(3),
   },
   modalTitle: {
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2),
     fontFamily: "Poppins_700Bold",
     textAlign: "center",
-    marginBottom: RFPercentage(1),
   },
   modalSubtitle: {
     fontSize: RFPercentage(1.6),
@@ -907,18 +882,22 @@ const styles = StyleSheet.create({
   },
   modalButtonsContainer: {
     gap: RFPercentage(2),
-    marginBottom: RFPercentage(3),
+    marginBottom: RFPercentage(1),
+    flexDirection: "row",
+    alignItems: "center",
   },
   modalButton: {
-    paddingVertical: RFPercentage(1.7),
+    paddingVertical: RFPercentage(1.4),
     borderRadius: RFPercentage(100),
     alignItems: "center",
     justifyContent: "center",
-    width: "70%",
+    width: "45%",
     alignSelf: "center",
   },
   primaryModalButton: {
     backgroundColor: Colors.primary,
+    borderWidth: 1,
+    borderColor: Colors.primary,
   },
   secondaryModalButton: {
     borderWidth: 1,
@@ -927,17 +906,46 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: Colors.white,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
   },
   secondaryButtonText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
   },
   modalInfo: {
     // gap: RFPercentage(1),
   },
   modalInfoText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2),
+  },
+  infoCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: RFPercentage(2),
+    borderRadius: RFPercentage(1.5),
+    marginVertical: RFPercentage(4),
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.primary,
+  },
+  infoIcon: {
+    marginRight: RFPercentage(1.5),
+    marginTop: RFPercentage(0.2),
+  },
+  infoIconText: {
+    fontSize: RFPercentage(2),
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(0.5),
+  },
+  infoText: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2),

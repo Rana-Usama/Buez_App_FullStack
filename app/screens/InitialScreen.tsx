@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
   image: {
     width: RFPercentage(60),
     height: RFPercentage(30),
+    
   },
   title: {
     textAlign: "center",

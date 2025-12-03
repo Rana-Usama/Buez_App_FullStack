@@ -189,7 +189,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
 
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={handleAppleLogin}>
-      <FontAwesome name="apple" size={RFPercentage(5)} color={theme.black} />
+      <FontAwesome name="apple" size={RFPercentage(5.3)} color={theme.black} style={{bottom : 0.5}}/>
     </TouchableOpacity>
   );
 };

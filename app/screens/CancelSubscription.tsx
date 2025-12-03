@@ -18,10 +18,12 @@ import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import ConfirmationModal from "../components/common/ConfirmationModal";
+import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
+import * as Localization from "expo-localization";
 
 function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
@@ -32,9 +34,32 @@ function CancelSubscription({ navigation }: any) {
   const [isloading, setIsLoading] = useState(false);
   const { theme } = useAppTheme();
 
-  // Determine current plan type from user data
-  const currentPlan = userData?.planType || "monthly"; // Default to monthly if not specified
+  const currentPlan =
+    userData?.planType || userData?.subscription?.planInterval || "monthly"; // Default to monthly if not specified
   const isYearlyPlan = currentPlan === "yearly";
+
+  console.log(userData?.planType);
+
+  const locale = Localization.locale;
+  const userCurrency = getCurrencyFromLocale(locale);
+
+  const prices = {
+    monthly: {
+      USD: 9.5,
+      EUR: 8.9,
+      CHF: 7.9,
+    },
+    yearly: {
+      USD: 95,
+      EUR: 89,
+      CHF: 79,
+    },
+  };
+
+  const formattedPrice = formatCurrency(
+    prices[currentPlan][userCurrency],
+    userCurrency
+  );
 
   const cancelSubscription = async () => {
     if (!userData?.subscriptionId) {
@@ -53,7 +78,7 @@ function CancelSubscription({ navigation }: any) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            subscriptionId: userData.subscriptionId,
+            subscriptionId: userData?.subscriptionId,
             planType: currentPlan,
           }),
         }
@@ -67,9 +92,7 @@ function CancelSubscription({ navigation }: any) {
             const userRef = doc(firestore, "users", userId);
             try {
               await updateDoc(userRef, {
-                isSubscribed: false,
-                subscriptionId: null,
-                planType: null,
+                isCancelled: true,
               });
             } catch (error) {
               console.log("Failed to update subscription status:", error);
@@ -92,19 +115,31 @@ function CancelSubscription({ navigation }: any) {
     }
   };
 
-  // Plan details based on current subscription
+  const getSavingsPercent = (monthly, yearly) => {
+    const normalYearly = monthly * 12;
+    const saved = normalYearly - yearly;
+    return Math.round((saved / normalYearly) * 100); // round to whole number
+  };
+
+  const savingsPercent = getSavingsPercent(
+    prices.monthly[userCurrency],
+    prices.yearly[userCurrency]
+  );
+
+  const savingsLabel = `Saving ${savingsPercent}%`;
+
   const planDetails = {
     monthly: {
-      price: "$12.99",
+      price: formattedPrice,
       period: t("subscriptionV2.perMonth") || "per month",
       title: t("subscriptionV2.monthly") || "Monthly Plan",
       savings: null,
     },
     yearly: {
-      price: "$99.99",
+      price: formattedPrice,
       period: t("subscriptionV2.perYear") || "per year",
       title: t("subscriptionV2.yearly") || "Yearly Plan",
-      savings: t("cancelSubscription.save36") || "Save 36%",
+      savings: savingsLabel,
     },
   };
 
@@ -117,25 +152,20 @@ function CancelSubscription({ navigation }: any) {
         backgroundColor={theme.white}
       />
 
+
+
+
+
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <Image style={styles.logo} source={Icons.logo} />
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons
-            name="chevron-back"
-            style={{ fontSize: RFPercentage(2.8) }}
-            color={theme.heading}
-          />
-        </TouchableOpacity>
 
-        {userData?.subscriptionId ? (
+
+        {/* <Image style={styles.logo} source={Icons.logo} /> */}
+
+        {!userData?.isCancelled && userData?.planType != "free" ? (
           <>
             {/* <Image
               style={styles.subscriptionImage}
@@ -144,6 +174,17 @@ function CancelSubscription({ navigation }: any) {
             /> */}
 
             <View style={styles.premiumInfo}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}
+              >
+                <MaterialCommunityIcons
+                  name="keyboard-backspace"
+                  style={{ fontSize: RFPercentage(2.8) }}
+                  color={theme.heading}
+                />
+              </TouchableOpacity>
               <Text style={[styles.premiumText, { color: theme.heading }]}>
                 {t("cancelSubscription.txt1")}
               </Text>
@@ -171,20 +212,21 @@ function CancelSubscription({ navigation }: any) {
               <View style={styles.priceContainer}>
                 <Image style={styles.starIconLeft} source={Icons.stars} />
                 <Text style={[styles.planTitle, { color: theme.primary }]}>
-                  {currentPlanDetails.title}
+                  {currentPlanDetails?.title}
                 </Text>
+
                 <Text style={[styles.priceText, { color: theme.darkGrey }]}>
-                  {currentPlanDetails.price.split(".")[0]}
+                  {currentPlanDetails?.price?.split(".")[0]}
                   <Text style={styles.priceDecimal}>
-                    .{currentPlanDetails.price.split(".")[1]}
+                    .{currentPlanDetails?.price?.split(".")[1]}
                   </Text>
                 </Text>
                 <Text style={[styles.periodText, { color: theme.darkGrey }]}>
-                  {currentPlanDetails.period}
+                  {currentPlanDetails?.period}
                 </Text>
               </View>
 
-              {currentPlanDetails.savings && (
+              {currentPlanDetails?.savings && (
                 <View
                   style={[
                     styles.savingsBadge,
@@ -192,7 +234,7 @@ function CancelSubscription({ navigation }: any) {
                   ]}
                 >
                   <Text style={styles.savingsText}>
-                    {currentPlanDetails.savings}
+                    {currentPlanDetails?.savings}
                   </Text>
                 </View>
               )}
@@ -278,6 +320,22 @@ function CancelSubscription({ navigation }: any) {
           </>
         ) : (
           <>
+            <View style={styles.premiumInfo}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}
+              >
+                <MaterialCommunityIcons
+                  name="keyboard-backspace"
+                  style={{ fontSize: RFPercentage(2.8) }}
+                  color={theme.heading}
+                />
+              </TouchableOpacity>
+              <Text style={[styles.premiumText, { color: theme.heading }]}>
+                {t("cancelSubscription.txt1")}
+              </Text>
+            </View>
             <Image
               style={styles.vector}
               source={Icons.notActive}
@@ -330,8 +388,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    left: RFPercentage(2),
-    top: Platform.OS === "ios" ? RFPercentage(6) : RFPercentage(4),
+    left: RFPercentage(0),
+    // top: Platform.OS === "ios" ? RFPercentage(6) : RFPercentage(4),
   },
   subscriptionImage: {
     width: RFPercentage(50),
@@ -340,13 +398,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   vector: {
-    marginTop: RFPercentage(12),
+    marginTop: RFPercentage(18),
     width: RFPercentage(34),
     height: RFPercentage(34),
     alignSelf: "center",
   },
   premiumInfo: {
-    marginTop: RFPercentage(5),
+    marginTop: Platform.OS === "android" ? RFPercentage(5) : RFPercentage(3),
     width: "90%",
     justifyContent: "center",
     alignItems: "center",
@@ -360,7 +418,7 @@ const styles = StyleSheet.create({
   },
   planBadgeContainer: {
     alignItems: "center",
-    marginTop: RFPercentage(1),
+    marginTop: RFPercentage(6),
   },
   planBadge: {
     paddingHorizontal: RFPercentage(2),
@@ -403,7 +461,7 @@ const styles = StyleSheet.create({
   },
   priceDecimal: {
     fontSize: RFPercentage(2),
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "Poppins_600SemiBold",
   },
   periodText: {
     fontSize: RFPercentage(1.6),
@@ -490,7 +548,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(6),
   },
 });
 

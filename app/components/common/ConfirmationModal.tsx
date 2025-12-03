@@ -29,7 +29,7 @@ const ConfirmationModal = ({
       onRequestClose={onClose}
     >
       <BlurView
-        intensity={5}
+        intensity={8}
         style={[styles.modalBackground, { backgroundColor: theme.modal }]}
       >
         <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
@@ -37,7 +37,7 @@ const ConfirmationModal = ({
             {title}
           </Text>
           {message && (
-            <Text style={[styles.modalText, { color: theme.darkGrey, fontSize:RFPercentage(1.4),fontFamily:"Poppins_400Regular"  }]}>
+            <Text style={[styles.modalText, { color: theme.darkGrey, fontSize:RFPercentage(1.6),fontFamily:"Poppins_400Regular"  , width:"75%"}]}>
               {message}
             </Text>
           )}

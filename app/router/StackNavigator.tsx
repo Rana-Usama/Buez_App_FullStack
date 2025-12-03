@@ -90,6 +90,7 @@ const StackNavigator = () => {
       >
         {/* Auth + Onboarding */}
         <Stack.Screen name="Decider" component={DeciderScreen} />
+        
         <Stack.Screen name="OnBoarding" component={Onboarding} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />

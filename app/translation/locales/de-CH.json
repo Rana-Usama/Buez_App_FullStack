@@ -161,7 +161,7 @@
     "tryPremium": "Probier all Premium-Funktione",
     "fullAccess": "Volli Zugriff uf all Funktionä",
     "bestValue": "Beschts Preis-Leistigs-Verhältnis",
-    "choosePlan": "Wähl din Plan",
+    "choosePlan": "Wähl din BUEZ Plan",
     "startFree": "Start mit eme gratis Test, upgrade jederziit",
     "mostPopular": "AM BELIEBTESTE",
     "save30": "Spar 36%",
@@ -288,7 +288,9 @@
     "txt10": "Bisch sicher, dass du de\nAccount wotsch löschen?",
     "txt11": "Bisch sicher, dass du dich\nvom Account abmelde wotsch?",
     "txt12": "Sprach ändere",
-    "txt13": "Dunks Thema"
+    "txt13": "Dunks Thema",
+    "txt14" : "Upgrade-Plan"
+
   },
  "cancelSubscription": {
     "txt1": "Dini aktuell Abonnemänt",

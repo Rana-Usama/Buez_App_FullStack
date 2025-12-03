@@ -252,7 +252,7 @@ function Login({ navigation }) {
                     title={t("buttons.login")}
                     loading={indicator}
                     marginTop={RFPercentage(7)}
-                    onPress={handleSubmit}
+                    onPress={() => handleSubmit()}
                     disabled={indicator}
                   />
                 </>
@@ -274,7 +274,7 @@ function Login({ navigation }) {
             <View style={styles.socialIconsContainer}>
               <GoogleLoginButton navigation={navigation} />
               {Platform.OS === "android" ? null : (
-                <View style={{ marginLeft: RFPercentage(1.3) }}>
+                <View style={{ marginLeft: RFPercentage(2) }}>
                   <AppleLoginButton navigation={navigation} />
                 </View>
               )}

@@ -161,7 +161,7 @@
     "tryPremium": "Essayez toutes les fonctionnalités premium",
     "fullAccess": "Accès complet à toutes les fonctionnalités",
     "bestValue": "Meilleur rapport qualité-prix",
-    "choosePlan": "Choisissez votre forfait",
+    "choosePlan": "Choisissez votre BUEZ forfait",
     "startFree": "Commencez par un essai gratuit, mettez à niveau à tout moment",
     "mostPopular": "LE PLUS POPULAIRE",
     "save30": "Économisez 36%",
@@ -288,7 +288,9 @@
     "txt10": "Êtes-vous sûr de vouloir supprimer\nce compte ?",
     "txt11": "Êtes-vous sûr de vouloir vous déconnecter\nde ce compte ?",
     "txt12": "Changer la langue",
-    "txt13": "Thème sombre"
+    "txt13": "Thème sombre",
+    "txt14" : "Plan de mise à niveau"
+
   },
  "cancelSubscription": {
     "txt1": "Votre abonnement actuel",
