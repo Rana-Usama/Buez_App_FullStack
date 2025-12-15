@@ -409,6 +409,7 @@ function Subscription(props) {
           width={"100%"}
           loading={loading}
           marginTop={RFPercentage(1.5)}
+          height={RFPercentage(6)}
         />
       </View>
     </Screen>

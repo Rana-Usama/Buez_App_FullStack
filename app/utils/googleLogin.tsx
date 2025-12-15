@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { getDoc, doc, setDoc } from "firebase/firestore";
+import {
+  getDoc,
+  doc,
+  setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
@@ -12,21 +20,27 @@ import { registerForPushNotificationsAsync } from "../utils/notificationService"
 import { Icons } from "../config/theme";
 import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import DeviceInfo from "react-native-device-info";
 
-const webClientId ="211367941601-i7pb5oak2cqq5vcvtvfv0sqsl4t6mgma.apps.googleusercontent.com";
-const iosClientId = "211367941601-en9daed1ci5shk3kemibpao7lcg7622v.apps.googleusercontent.com";
+const webClientId =
+  "211367941601-i7pb5oak2cqq5vcvtvfv0sqsl4t6mgma.apps.googleusercontent.com";
+const iosClientId =
+  "211367941601-en9daed1ci5shk3kemibpao7lcg7622v.apps.googleusercontent.com";
 
 const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+  const [deviceId, setDeviceId] = useState("");
   const { t } = useTranslation();
 
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId,
-      offlineAccess: true,
-      iosClientId,
-    });
+    const fetchDeviceId = async () => {
+      const id = await DeviceInfo.getUniqueId();
+      setDeviceId(id);
+    };
+    fetchDeviceId();
+
+    GoogleSignin.configure({ webClientId, iosClientId, offlineAccess: true });
 
     (async () => {
       const token = await registerForPushNotificationsAsync();
@@ -34,16 +48,39 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
     })();
   }, []);
 
+  const hasDeviceAvailedFreeTrial = async (deviceId: string) => {
+    if (!deviceId) return false;
+    try {
+      const q = query(
+        collection(FIREBASE_DB, "freeTrials"),
+        where("deviceId", "==", deviceId),
+        where("freeTrial", "==", true)
+      );
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    } catch (error) {
+      console.log("Error fetching freeTrials:", error);
+      return false;
+    }
+  };
+
   const handleGoogleLogin = async () => {
+    if (!deviceId) {
+      Toast.show({
+        type: "info",
+        text1: "Device ID loading",
+        text2: "Please wait a moment before logging in.",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await GoogleSignin.hasPlayServices({
+      await GoogleSignin.hasPlayServices({
         showPlayServicesUpdateDialog: true,
       });
-      console.log("hasPlayServices.......", res);
       const userInfo = await GoogleSignin.signIn();
-      console.log("userInfo.......", userInfo);
-      const { idToken } = userInfo?.data;
+      const { idToken } = userInfo.data;
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(
         FIREBASE_AUTH,
@@ -51,15 +88,10 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       );
       const user = userCredential.user;
 
-      let pushToken = null;
-      try {
-        pushToken = await registerForPushNotificationsAsync();
-      } catch (e) {
-        console.log("Push token registration failed", e);
-      }
+      const pushToken =
+        expoPushToken || (await registerForPushNotificationsAsync());
 
       const userRef = doc(FIREBASE_DB, "users", user.uid);
-
       const userSnap = await getDoc(userRef);
 
       if (userSnap.exists()) {
@@ -68,12 +100,11 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
           {
             userName: user.displayName,
             profileImage: user.photoURL,
-            token: pushToken || null,
+            token: pushToken,
             phoneNumber: user.phoneNumber,
             email: user.email,
-            userId: userSnap.data()?.userId || user.uid,
-            isSubscribed: userSnap.data()?.isSubscribed ?? false, // ✅ ensure it exists
-            isFreeTrial: userSnap.data()?.isFreeTrial ?? false, // optional safeguard
+            isSubscribed: userSnap.data()?.isSubscribed ?? false,
+            isFreeTrial: userSnap.data()?.isFreeTrial ?? false,
           },
           { merge: true }
         );
@@ -83,63 +114,66 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
           email: user.email,
           profileImage: user.photoURL,
           phoneNumber: user.phoneNumber,
-          token: pushToken || null,
+          token: pushToken,
           isSubscribed: false,
           isFreeTrial: false,
-          userId: user.uid,
         });
       }
 
       await saveCredentials(user.email, "123456");
       await SecureStore.setItemAsync("loggedOut", "false");
 
-      const updatedSnapshot = await getDoc(userRef);
-      const existingUser = updatedSnapshot.data();
-      const subscriptionStart = existingUser?.subscriptionStart;
-      const subscriptionEnd = existingUser?.subscriptionEnd;
+      const updatedSnap = await getDoc(userRef);
+      const existingUser = updatedSnap.data();
       const now = new Date();
-      let trialDays = null;
-      let isTrialValid = false;
 
+      // Check subscription validity
+      const parseDate = (date) => {
+        if (!date) return null;
+        if (date.seconds) return new Date(date.seconds * 1000);
+        if (typeof date === "string") return new Date(date);
+        return null;
+      };
+
+      const subStartDate = parseDate(existingUser.subscriptionStart);
+      const subEndDate = parseDate(existingUser.subscriptionEnd);
+      const isWithinPaidPeriod =
+        subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
+
+      // Check trial validity
+      let isTrialValid = false;
       if (
         existingUser.isFreeTrial &&
-        existingUser?.freeTrialStartedAt?.seconds
+        existingUser.freeTrialStartedAt?.seconds
       ) {
-        const trialStartDate = new Date(
+        const trialStart = new Date(
           existingUser.freeTrialStartedAt.seconds * 1000
         );
-        trialDays = differenceInDays(now, trialStartDate);
+        const trialDays = differenceInDays(now, trialStart);
         isTrialValid = trialDays >= 0 && trialDays <= 14;
       }
 
-      const subStartDate = subscriptionStart
-        ? new Date(subscriptionStart)
-        : null;
-      const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
-      const isWithinPaidPeriod =
-        subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
+      // Check if device has already used free trial
+      const deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
+
+      // Navigation logic
+      if (existingUser.isSubscribed || isWithinPaidPeriod) {
+        navigation.reset({ index: 0, routes: [{ name: "TabNavigator" }] });
+      } else if (isTrialValid) {
+        navigation.reset({ index: 0, routes: [{ name: "TabNavigator" }] });
+      } else if (deviceUsedTrial) {
+        navigation.reset({ index: 0, routes: [{ name: "Subscription" }] });
+      } else {
+        navigation.reset({ index: 0, routes: [{ name: "FreeTrial" }] });
+      }
 
       Toast.show({
         type: "success",
         text1: `${t("toast.login.one")}`,
         text2: `${t("toast.login.two")}`,
       });
-
-      if (existingUser.isSubscribed || isWithinPaidPeriod) {
-        navigation.navigate("TabNavigator");
-      } else if (isTrialValid) {
-        navigation.navigate("TabNavigator");
-      } else if (
-        existingUser.isFreeTrial &&
-        trialDays !== null &&
-        (trialDays < 0 || trialDays > 14)
-      ) {
-        navigation.navigate("Subscription");
-      } else {
-        navigation.navigate("FreeTrial");
-      }
     } catch (error) {
-      console.log("Google Sign-In Error:", JSON.stringify(error, null, 2));
+      console.log("Google Sign-In Error:", error);
       Toast.show({
         type: "error",
         text1: `${t("toast.login.three")}`,
@@ -150,9 +184,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  if (loading) {
-    return <ActivityIndicator size={"small"} color={"grey"} />;
-  }
+  if (loading) return <ActivityIndicator size={"small"} color={"grey"} />;
 
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={handleGoogleLogin}>

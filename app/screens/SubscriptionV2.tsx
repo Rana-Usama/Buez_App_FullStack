@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 import Colors from "../config/Colors";
 import Toast from "react-native-toast-message";
@@ -40,8 +41,11 @@ import {
 } from "../services/Subscription.service";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 import { Icons } from "../config/theme";
+import DeviceInfo from "react-native-device-info";
+import { FIREBASE_DB } from "../../firebaseConfig";
 
 const { width: screenWidth } = Dimensions.get("window");
+const db = FIREBASE_DB;
 
 function SubscriptionV2(props) {
   const { t } = useTranslation();
@@ -57,6 +61,30 @@ function SubscriptionV2(props) {
   const [freeTrialModalVisible, setFreeTrialModalVisible] = useState(false);
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0); // Start with yearly plan (index 2)
+  const [deviceId, setDeviceId] = useState("");
+
+  useEffect(() => {
+    const fetchId = async () => {
+      const id = await DeviceInfo.getUniqueId();
+      setDeviceId(id);
+      console.log("Device ID:", id);
+    };
+    fetchId();
+  }, []);
+
+  const createFreeTrialRecord = async ({ userId, deviceId }) => {
+    try {
+      const freeTrialRef = doc(db, "freeTrials", `${deviceId}`);
+      await setDoc(freeTrialRef, {
+        userId,
+        deviceId,
+        freeTrial: true,
+        freeTrialStartedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.log("Error creating free trial record:", error);
+    }
+  };
 
   const prices = {
     monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
@@ -71,9 +99,6 @@ function SubscriptionV2(props) {
     const amount = prices[planId]?.[userCurrency] ?? prices[planId]?.USD ?? 0;
     return formatCurrency(amount, userCurrency);
   };
-
-  console.log("locale..........", locale);
-  console.log("userCurrency..........", userCurrency);
 
   const openPaymentSheet = async () => {
     if (selectedPlan === "free") {
@@ -119,6 +144,10 @@ function SubscriptionV2(props) {
         freeTrialStartedAt: serverTimestamp(),
         planType: "free",
       });
+      await createFreeTrialRecord({
+        userId,
+        deviceId,
+      });
       await scheduleFreeTrialNotification(10);
       setFreeTrialModalVisible(false); // Close modal
       props.navigation.navigate("TabNavigator");
@@ -159,9 +188,13 @@ function SubscriptionV2(props) {
       await createSubscription({
         customerId,
         setupIntentId,
-        planType: "monthly", // Add card always converts free trial to monthly
+        planType: "monthly",
         userCurrency,
         t,
+      });
+      await createFreeTrialRecord({
+        userId,
+        deviceId,
       });
       props.navigation.navigate("TabNavigator");
     } catch (error) {
@@ -354,7 +387,6 @@ function SubscriptionV2(props) {
             <Text style={[styles.period, { color: theme.darkGrey }]}>
               {item.period}
             </Text>
-           
           </View>
         </View>
 
@@ -529,6 +561,7 @@ function SubscriptionV2(props) {
           width={"100%"}
           loading={loading}
           marginTop={RFPercentage(1.5)}
+          height={RFPercentage(6)}
         />
       </View>
 

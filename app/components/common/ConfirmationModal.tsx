@@ -23,7 +23,7 @@ const ConfirmationModal = ({
 }) => {
   return (
     <Modal
-      animationType="fade"
+      animationType="none"
       transparent
       visible={isVisible}
       onRequestClose={onClose}

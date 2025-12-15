@@ -31,6 +31,15 @@ import GoogleLoginButton from "../utils/googleLogin";
 import { useAppTheme } from "../contexts/themeContext";
 import { BlurView } from "expo-blur";
 import AppleLoginButton from "../utils/appleLogin";
+import DeviceInfo from "react-native-device-info";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { FIREBASE_DB } from "../../firebaseConfig";
 
 function Signup({ navigation }: any) {
   const { t } = useTranslation();
@@ -54,6 +63,33 @@ function Signup({ navigation }: any) {
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { theme } = useAppTheme();
+  const [deviceId, setDeviceId] = useState("");
+
+  useEffect(() => {
+    const fetchId = async () => {
+      const id = await DeviceInfo.getUniqueId();
+      setDeviceId(id);
+      console.log("Device ID:", id);
+    };
+    fetchId();
+  }, []);
+
+  const hasDeviceAvailedFreeTrial = async (deviceId) => {
+    try {
+      const q = query(
+        collection(FIREBASE_DB, "freeTrials"),
+        where("deviceId", "==", deviceId),
+        where("freeTrial", "==", true)
+      );
+      const snapshot = await getDocs(q);
+      console.log("snapppppp..................",snapshot)
+      // If snapshot is NOT empty → device already used a free trial
+      return !snapshot.empty;
+    } catch (error) {
+      console.log("Error fetching freeTrials:", error);
+      return false;
+    }
+  };
 
   useEffect(() => {
     async function getToken() {
@@ -103,7 +139,13 @@ function Signup({ navigation }: any) {
         text1: `${t("toast.signup.one")}`,
         text2: `${t("toast.signup.two")}`,
       });
-      navigation.navigate("FreeTrial");
+      const alreadyUsed = await hasDeviceAvailedFreeTrial(deviceId);
+      console.log("alreadyUsed............",alreadyUsed)
+      if (alreadyUsed) {
+        navigation.navigate("Subscription");
+      } else {
+        navigation.navigate("FreeTrial");
+      }
     } catch (error) {
       console.log("error.......", error);
       Toast.show({
