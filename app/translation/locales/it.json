@@ -12,11 +12,13 @@
     "email": "Email",
     "password": "Password",
     "name": "Nome",
-    "confirm": "Conferma Password",
-    "currency": "es: 90$",
-    "sign": "$",
-    "gotIt": "Capito",
-    "you": "Tu"
+    "confirm": "Conferma password",
+    "currency": "es. 90 €",
+    "sign": "€",
+    "gotIt": "Ho capito",
+    "you": "Tu",
+    "version": "Versione",
+    "rights": "BUEZ. Tutti i diritti riservati."
   },
   "validations": {
     "inValid": "Email non valida",
@@ -65,7 +67,7 @@
       "six": "Impossibile aggiornare lo stato della richiesta.",
       "seven": "Richiesta ripubblicata con successo"
     },
-   "cancelSubscription": {
+    "cancelSubscription": {
       "one": "Nessun abbonamento attivo",
       "two": "Non hai abbonamenti da cancellare",
       "three": "Abbonamento cancellato"
@@ -266,7 +268,12 @@
     "txt3": "Non letti",
     "txt4": "Nessun messaggio non letto",
     "txt5": "Ancora nessun messaggio",
-    "txt6": "Saluta"
+    "txt6": "Saluta",
+    "loading": "Caricamento chat...",
+    "unknownUser": "Utente sconosciuto",
+    "noResults": "Nessun risultato trovato",
+    "emptyDescription": "Inizia una conversazione inviando un messaggio ai tuoi contatti",
+    "photo": "Foto"
   },
   "chat": {
     "txt1": "Carica messaggi precedenti",
@@ -289,10 +296,9 @@
     "txt11": "Sei sicuro di voler disconnetterti\nda questo account?",
     "txt12": "Cambia lingua",
     "txt13": "Tema scuro",
-    "txt14" : "Piano di aggiornamento"
-
+    "txt14": "Piano di aggiornamento"
   },
- "cancelSubscription": {
+  "cancelSubscription": {
     "txt1": "Il tuo abbonamento attuale",
     "txt8": "Non hai un abbonamento attivo",
     "txt10": "Annulla abbonamento",

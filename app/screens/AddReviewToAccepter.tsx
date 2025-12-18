@@ -38,6 +38,7 @@ import * as Localization from "expo-localization";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { useTranslation } from "react-i18next";
+import CustomNav from "../components/common/CustomNav";
 
 const getTargetLanguage = async () => {
   try {
@@ -185,7 +186,6 @@ function AddReviewToAccepter() {
     }
   };
 
-
   // Translations-----
   useEffect(() => {
     (async () => {
@@ -230,7 +230,6 @@ function AddReviewToAccepter() {
       }
     })();
   }, [originalDesc, lang]);
-
 
   const toggleStar = (idx: number) => {
     const newRating = rating.map((_, i) => i <= idx);
@@ -322,16 +321,8 @@ function AddReviewToAccepter() {
       style={[styles.container, { backgroundColor: theme.white }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.white }]}>
-        <Nav
-          dpNull
-          marginTop={RFPercentage(5)}
-          leftLogo={false}
-          navigation={navigation}
-          title={tr.addReview || "Add Review"}
-        />
-      </View>
+      <CustomNav title={tr.addReview || "Add Review"} showBack />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}

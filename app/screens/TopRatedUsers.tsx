@@ -4,7 +4,6 @@ import {
   View,
   TouchableOpacity,
   Text,
-  FlatList,
   Image,
   ActivityIndicator,
   ScrollView,
@@ -12,7 +11,6 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useAppTheme } from "../contexts/themeContext";
-import Nav from "../components/common/Nav";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useTranslation } from "react-i18next";
 import InputField from "../components/common/AuthInputField";
@@ -28,6 +26,8 @@ import {
 } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { selectLocation } from "../redux/Actions";
+import CustomNav from "../components/common/CustomNav";
+import { LinearGradient } from "expo-linear-gradient";
 
 type ApiUser = {
   userId: string;
@@ -52,9 +52,10 @@ const TopRatedUsers = ({ navigation }: any) => {
   ]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // 'all', 'pro', 'rising', 'normal'
+  const [filter, setFilter] = useState("all");
   const [useCustomLocation, setUseCustomLocation] = useState(false);
 
+  // --- Logic (Kept Original) ---
   const handleChange = (text, i) => {
     const tmp = [...inputField];
     tmp[i].value = text;
@@ -66,7 +67,6 @@ const TopRatedUsers = ({ navigation }: any) => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        // Pass custom location if selected, otherwise use current location
         const customLocation =
           useCustomLocation && selectedLocation?.latitude2
             ? {
@@ -79,9 +79,6 @@ const TopRatedUsers = ({ navigation }: any) => {
           customLocation
         )) as ApiUser[];
 
-        console.log(apiUsers);
-
-        // Map API response to match your component structure
         const mappedUsers = apiUsers.map((user, index) => ({
           id: user.userId || `user-${index}`,
           userName: user.name || "Unknown User",
@@ -93,7 +90,6 @@ const TopRatedUsers = ({ navigation }: any) => {
           type: mapCategoryToType(user.category),
           rating: 4.5 + user.completedCount * 0.01,
           distance: user.distance || null,
-          // Include original API data for the profile screen
           originalData: user,
         }));
 
@@ -108,40 +104,27 @@ const TopRatedUsers = ({ navigation }: any) => {
     fetchUsers();
   }, [useCustomLocation, selectedLocation]);
 
-
-
   const calculateSuccessRate = (user) => {
-    // If no tasks at all, success rate is 0
     const totalTasks = (user.activeCount || 0) + (user.completedCount || 0);
+    if (totalTasks === 0) return 0;
 
-    if (totalTasks === 0) {
-      return 0;
-    }
-    // If user has reviews, use Bayesian average
     if (user.reviews?.length > 0) {
-      const platformAverageRating = 4.0; // Assume platform average is 4 stars
-      const platformWeight = 5; // Number of "virtual" platform reviews for smoothing
+      const platformAverageRating = 4.0;
+      const platformWeight = 5;
       const userTotalRating = user.reviews?.reduce(
         (sum, review) => sum + review.rating,
         0
       );
       const userReviewCount = user.reviews?.length;
-      // Bayesian calculation: (user_rating * user_reviews + platform_avg * platform_weight) / (user_reviews + platform_weight)
       const bayesianRating =
         (userTotalRating + platformAverageRating * platformWeight) /
         (userReviewCount + platformWeight);
-      // Convert to percentage (5 stars = 100%, 4 stars = 80%, etc.)
-      const successRate = Math.min(100, Math.round((bayesianRating / 5) * 100));
-      return successRate;
+      return Math.min(100, Math.round((bayesianRating / 5) * 100));
     }
-    const completionRate = user.completedCount.length / totalTasks;
-    const newUserPenalty = 0.7; // 30% penalty for users without reviews
-    const adjustedRate = Math.round(completionRate * newUserPenalty * 100);
-
-    return Math.max(0, Math.min(100, adjustedRate));
+    const completionRate = (user.completedCount || 0) / totalTasks;
+    return Math.max(0, Math.min(100, Math.round(completionRate * 0.7 * 100)));
   };
 
-  // Helper function to map API category to your type
   const mapCategoryToType = (category) => {
     switch (category) {
       case "Top Rated":
@@ -157,16 +140,7 @@ const TopRatedUsers = ({ navigation }: any) => {
     const matchesSearch = user.userName
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-
-    let matchesFilter = true;
-    if (filter === "pro") {
-      matchesFilter = user.type === "pro";
-    } else if (filter === "rising") {
-      matchesFilter = user.type === "rising";
-    } else if (filter === "beginner") {
-      matchesFilter = user.type === "beginner";
-    }
-
+    let matchesFilter = filter === "all" || user.type === filter;
     return matchesSearch && matchesFilter;
   });
 
@@ -175,317 +149,160 @@ const TopRatedUsers = ({ navigation }: any) => {
       case "pro":
         return {
           icon: "diamond",
-          text: `${t("profileRank.txt5")}`,
+          text: t("profileRank.txt5"),
           color: "#bfa824ff",
-          bgColor: "rgba(255, 215, 0, 0.15)",
-          borderColor: "rgba(255, 215, 0, 0.3)",
+          bgColor: "rgba(255, 215, 0, 0.1)",
         };
       case "rising":
         return {
           icon: "rocket",
-          text: `${t("profileRank.txt4")}`,
+          text: t("profileRank.txt4"),
           color: "#FF9800",
           bgColor: "#FFF3E0",
-          borderColor: "#FF9800",
-        };
-      case "beginner":
-        return {
-          icon: "star",
-          text: `${t("profileRank.txt3")}`,
-          color: Colors.primary,
-          bgColor: Colors.primary + "15",
-          borderColor: Colors.primary + "30",
         };
       default:
         return {
           icon: "star",
-          text: `${t("profileRank.txt3")}`,
+          text: t("profileRank.txt3"),
           color: Colors.primary,
           bgColor: Colors.primary + "15",
-          borderColor: Colors.primary + "30",
         };
     }
   };
 
-  const LocationSelector = () => (
-    <View style={styles.locationSection}>
-      <Text style={[styles.locationTitle, { color: theme.heading }]}>
-        {t("profileRank.txt42")}
-      </Text>
-      <View style={styles.locationButtons}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[
-            styles.locationButton,
-            !useCustomLocation && [
-              styles.activeLocationButton,
-              { backgroundColor: Colors.primary },
-            ],
-            { borderColor: theme.border },
-          ]}
-          onPress={() => {
-            setUseCustomLocation(false);
-            if (selectedLocation?.name2) {
-              dispatch(selectLocation(null));
-            }
-          }}
-        >
-          <Ionicons
-            name="location"
-            size={RFPercentage(1.8)}
-            color={!useCustomLocation ? Colors.white : theme.primary}
-          />
-          <Text
-            style={[
-              styles.locationButtonText,
-              !useCustomLocation
-                ? styles.activeLocationButtonText
-                : { color: theme.darkGrey },
-            ]}
-          >
-            {t("profileRank.txt43")}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[
-            styles.locationButton,
-            useCustomLocation && [
-              styles.activeLocationButton,
-              { backgroundColor: Colors.primary },
-            ],
-            { borderColor: theme.border },
-          ]}
-          onPress={() => {
-            setUseCustomLocation(true);
-            if (!selectedLocation?.name2) {
-              navigation.navigate("Location", { home: true });
-            }
-          }}
-        >
-          <Ionicons
-            name="map"
-            size={RFPercentage(1.8)}
-            color={useCustomLocation ? Colors.white : theme.primary}
-          />
-          <Text
-            style={[
-              styles.locationButtonText,
-              useCustomLocation
-                ? styles.activeLocationButtonText
-                : { color: theme.darkGrey },
-            ]}
-          >
-            {selectedLocation?.name2
-              ? selectedLocation.name2.length > 12
-                ? `${selectedLocation.name2.slice(0, 12)}...`
-                : selectedLocation.name2
-              : t("profileRank.txt44")}
-          </Text>
-
-          {selectedLocation?.name2 && useCustomLocation && (
-            <TouchableOpacity
-              style={styles.clearLocationButton}
-              onPress={() => {
-                dispatch(selectLocation(null));
-                setUseCustomLocation(false);
-              }}
-            >
-              <AntDesign
-                name="closecircle"
-                size={RFPercentage(1.5)}
-                color={Colors.white}
-              />
-            </TouchableOpacity>
-          )}
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   const UserCard = ({ user }) => {
-    const badgeInfo = getBadgeInfo(user.type);
+    const badge = getBadgeInfo(user.type);
+    const getGradientColors = () => {
+      switch (badge.text) {
+        case "PRO BUEZER":
+          return ["#cfc486ff", "#d39345ff"];
+        case "BUEZER":
+          return ["#8053b1ff", "#986bc8ff"];
+        case "MINI BUEZER":
+          return ["#37948aff", "#50C878"];
+        default:
+          return ["#7c8cdd", "#4c669f"];
+      }
+    };
+
+    const getGradientColors2 = () => {
+      switch (badge.text) {
+        case "PRO BUEZER":
+          return ["#585546ff", "#4f3617ff"];
+        case "BUEZER":
+          return ["#372d41ff", "#240d3dff"];
+        case "MINI BUEZER":
+          return ["#2c403eff", "#104521ff"];
+        default:
+          return ["#313445ff", "#0f1f43ff"];
+      }
+    };
+
+    const gr = getGradientColors();
+    const gr2 = getGradientColors2();
 
     return (
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => {
+        onPress={() =>
           navigation.navigate("TopRatedUserProfile", {
             user: user.originalData || user,
-          });
-        }}
-        style={[
-          styles.userCard,
-          { backgroundColor: theme.white, borderColor: theme.border },
-        ]}
+          })
+        }
+        style={[styles.cardContainer, { borderColor: gr[1] }]}
       >
-        <View style={styles.userInfoRow}>
-          <View style={styles.avatarContainer}>
+        <LinearGradient
+          colors={
+            theme.mode === "dark" ? getGradientColors2() : getGradientColors()
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gradientWrapper}
+        >
+          <LinearGradient
+            colors={[theme.mode === 'dark' ?  "rgba(57, 51, 51, 0.4)" : "rgba(255, 255, 255, 0.4)", "transparent"]}
+            style={[
+              StyleSheet.absoluteFill,
+              { transform: [{ rotate: "45deg" }], top: -50 },
+            ]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+          />
+
+          {/* MESH OVERLAY 2 (Shadow Depth) */}
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.15)"]}
+            style={StyleSheet.absoluteFill}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 1 }}
+          />
+          <View style={styles.cardHeader}>
             <Image
-              resizeMode="cover"
               source={user.profileImage ? { uri: user.profileImage } : Icons.dp}
               style={styles.avatar}
             />
-          </View>
-
-          <View style={styles.userDetails}>
-            <View style={styles.nameRow}>
+            <View style={styles.headerInfo}>
+              <View style={styles.nameRow}>
+                {/* Added shadow to text for better legibility on gradients */}
+                <Text
+                  style={[styles.userName, styles.textShadow]}
+                  numberOfLines={1}
+                >
+                  {user.userName}
+                </Text>
+                <View
+                  style={[
+                    styles.badgeTag,
+                    { backgroundColor: "rgba(255,255,255,0.2)" },
+                  ]}
+                >
+                  <Ionicons name={badge.icon as any} size={10} color="#fff" />
+                  <Text style={[styles.badgeText, { color: "#fff" }]}>
+                    {` `}
+                    {badge.text}
+                  </Text>
+                </View>
+              </View>
               <Text
-                style={[styles.userName, { color: theme.heading }]}
-                numberOfLines={1}
+                style={[styles.memberSince, { color: "rgba(255,255,255,0.8)" }]}
               >
-                {user.userName}
+                {t("profileRank.txt9")} {user.memberSince}
               </Text>
-              <View
-                style={[
-                  styles.badge,
-                  {
-                    backgroundColor: badgeInfo.bgColor,
-                    borderColor: badgeInfo.borderColor,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={badgeInfo.icon as any}
-                  size={RFPercentage(1.4)}
-                  color={badgeInfo.color}
-                />
-                <Text style={[styles.badgeText, { color: badgeInfo.color }]}>
-                  {badgeInfo.text}
-                </Text>
-              </View>
             </View>
+            <Feather name="chevron-right" size={20} color="#fff" />
+          </View>
 
-            <Text
-              style={[styles.memberSince, { color: theme.grey }]}
-              numberOfLines={1}
-            >
-              {t("profileRank.txt9")} {user.memberSince}
-            </Text>
-
-            {/* Distance Info */}
-            {user.distance && (
-              <View style={styles.distanceContainer}>
-                <Ionicons
-                  name="location-outline"
-                  size={RFPercentage(1.2)}
-                  color={theme.primary}
-                />
-                <Text style={[styles.distanceText, { color: theme.primary }]}>
-                  {user.distance} km away
-                </Text>
-              </View>
-            )}
-
+          <View style={styles.statsIslandMesh}>
+            <View style={styles.statBox}>
+              <Text style={styles.statValMesh}>{user.activeTasks}</Text>
+              <Text style={styles.statLabMesh}>{t("profileRank.txt6")}</Text>
+            </View>
             <View
-              style={[
-                styles.statsRow,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? Colors.primary + "20"
-                      : Colors.primary + "09",
-                },
-              ]}
-            >
-              <View style={styles.statItem}>
-                <MaterialIcons
-                  name="pending-actions"
-                  size={RFPercentage(1.6)}
-                  color={Colors.primary}
-                />
-                <Text
-                  style={[styles.statValue, { color: theme.heading }]}
-                  numberOfLines={1}
-                >
-                  {user.activeTasks}
-                </Text>
-                <Text
-                  style={[styles.statLabel, { color: theme.grey }]}
-                  numberOfLines={1}
-                >
-                  {t("profileRank.txt6")}
-                </Text>
-              </View>
-
-              <View style={styles.statDivider} />
-
-              <View style={styles.statItem}>
-                <FontAwesome5
-                  name="check-circle"
-                  size={RFPercentage(1.5)}
-                  color="#45B356"
-                />
-                <Text style={[styles.statValue, { color: theme.heading }]}>
-                  {user.completedTasks}
-                </Text>
-                <Text
-                  style={[styles.statLabel, { color: theme.grey }]}
-                  numberOfLines={1}
-                >
-                  {t("profileRank.txt7")}
-                </Text>
-              </View>
-
-              <View style={styles.statDivider} />
-
-              <View style={styles.statItem}>
-                <Ionicons
-                  name="trending-up"
-                  size={RFPercentage(1.7)}
-                  color="#db952bff"
-                />
-                <Text
-                  style={[styles.statValue, { color: theme.heading }]}
-                  numberOfLines={1}
-                >
-                  {user.successRate}%
-                </Text>
-                <Text
-                  style={[styles.statLabel, { color: theme.grey }]}
-                  numberOfLines={1}
-                >
-                  {t("profileRank.txt31")}
-                </Text>
-              </View>
+              style={[styles.divider, { backgroundColor: "rgba(0,0,0,0.05)" }]}
+            />
+            <View style={styles.statBox}>
+              <Text style={styles.statValMesh}>{user.completedTasks}</Text>
+              <Text style={styles.statLabMesh}>{t("profileRank.txt7")}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.statBox}>
+              <Text style={[styles.statValMesh]}>{user.successRate}%</Text>
+              <Text style={styles.statLabMesh}>{t("profileRank.txt31")}</Text>
             </View>
           </View>
 
-          <View style={styles.arrowContainer}>
-            <Feather
-              name="chevron-right"
-              size={RFPercentage(2)}
-              color={theme.primary}
-            />
-          </View>
-        </View>
+          {user.distance && (
+            <View style={styles.distRow}>
+              <Ionicons name="location-outline" size={12} color="#fff" />
+              <Text style={[styles.distText, { color: "#fff" }]}>
+                {user.distance} km away
+              </Text>
+            </View>
+          )}
+        </LinearGradient>
       </TouchableOpacity>
     );
   };
-
-  const FilterButton = ({ title, value, isActive }) => (
-    <TouchableOpacity
-      style={[
-        styles.filterButton,
-        { borderColor: theme.border },
-        isActive && [
-          styles.activeFilterButton,
-          { backgroundColor: Colors.primary },
-        ],
-      ]}
-      onPress={() => setFilter(value)}
-    >
-      <Text
-        style={[
-          styles.filterButtonText,
-          isActive ? styles.activeFilterButtonText : { color: theme.darkGrey },
-        ]}
-      >
-        {title}
-      </Text>
-    </TouchableOpacity>
-  );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
@@ -493,388 +310,330 @@ const TopRatedUsers = ({ navigation }: any) => {
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
       />
 
-      <Nav
-        marginTop={RFPercentage(5)}
-        leftLogo={false}
-        navigation={navigation}
-        title={t("profileRank.txt1")}
-        dpNull
-      />
+      <CustomNav title={t("profileRank.txt1")} showBack={true} />
+
+      <View style={styles.topStickyHeader}>
+        <InputField
+          placeholder={inputField[0].placeholder}
+          placeholderColor={theme.grey}
+          height={RFPercentage(6)}
+          backgroundColor={theme.mode === "dark" ? "#131214ff" : "#F1F3F5"}
+          borderWidth={0}
+          borderRadius={14}
+          color={theme.heading}
+          handleFeild={(text) => handleChange(text, 0)}
+          value={inputField[0].value}
+          icon={true}
+          fontSize={RFPercentage(1.7)}
+        />
+      </View>
 
       <ScrollView
-        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.searchSection}>
-          {inputField?.map((item, i) => (
-            <View key={i} style={styles.inputFieldWrapper}>
-              <InputField
-                placeholder={item.placeholder}
-                placeholderColor={theme.grey}
-                height={RFPercentage(5.5)}
-                backgroundColor={theme.white}
-                borderWidth={1}
-                borderColor={theme.border}
-                borderRadius={RFPercentage(1.2)}
-                color={theme.heading}
-                fontSize={RFPercentage(1.6)}
-                fontFamily={"Poppins_400Regular"}
-                handleFeild={(text) => handleChange(text, i)}
-                value={item.value}
-                width={"100%"}
-                icon={true}
+        {/* Location Tabs */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+            {t("profileRank.txt42")}
+          </Text>
+          <View style={styles.tabRow}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[
+                styles.tab,
+                !useCustomLocation && {
+                  backgroundColor: Colors.primary,
+                  borderColor: Colors.primary,
+                },
+              ]}
+              onPress={() => {
+                setUseCustomLocation(false);
+                dispatch(selectLocation(null));
+              }}
+            >
+              <Ionicons
+                name="navigate"
+                size={16}
+                color={!useCustomLocation ? "#FFF" : theme.grey}
               />
-            </View>
-          ))}
+              <Text
+                style={[
+                  styles.tabText,
+                  { color: !useCustomLocation ? "#FFF" : theme.grey },
+                ]}
+              >
+                {t("profileRank.txt43")}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[
+                styles.tab,
+                useCustomLocation && {
+                  backgroundColor: Colors.primary,
+                  borderColor: Colors.primary,
+                },
+              ]}
+              onPress={() => {
+                setUseCustomLocation(true);
+                navigation.navigate("Location", { home: true });
+              }}
+            >
+              <Ionicons
+                name="map"
+                size={16}
+                color={useCustomLocation ? "#FFF" : theme.grey}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  { color: useCustomLocation ? "#FFF" : theme.grey },
+                ]}
+                numberOfLines={1}
+              >
+                {selectedLocation?.name2
+                  ? selectedLocation.name2.length > 10
+                    ? `${selectedLocation.name2.substring(0, 10)}...`
+                    : selectedLocation.name2
+                  : t("profileRank.txt44")}{" "}
+              </Text>
+              {selectedLocation?.name2 && useCustomLocation && (
+                <AntDesign
+                  name="closecircle"
+                  size={14}
+                  color="#FFF"
+                  onPress={() => {
+                    dispatch(selectLocation(null));
+                    setUseCustomLocation(false);
+                  }}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Location Selector */}
-        <LocationSelector />
-
-        <View style={styles.filterSection}>
-          <Text style={[styles.filterTitle, { color: theme.heading }]}>
+        {/* Filter Chips */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.heading }]}>
             {t("profileRank.txt38")}
           </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterScrollContainer}
+            contentContainerStyle={{ gap: 8 }}
           >
-            <View style={styles.filterButtons}>
-              <FilterButton
-                title={t("profileRank.txt12")}
-                value="all"
-                isActive={filter === "all"}
-              />
-              <FilterButton
-                title={t("profileRank.txt13")}
-                value="pro"
-                isActive={filter === "pro"}
-              />
-              <FilterButton
-                title={t("profileRank.txt14")}
-                value="rising"
-                isActive={filter === "rising"}
-              />
-              <FilterButton
-                title={t("profileRank.txt15")}
-                value="beginner"
-                isActive={filter === "beginner"}
-              />
-            </View>
+            {["all", "pro", "rising", "beginner"].map((v) => (
+              <TouchableOpacity
+                key={v}
+                onPress={() => setFilter(v)}
+                style={[
+                  styles.chip,
+                  filter === v && {
+                    backgroundColor: Colors.primary,
+                    borderColor: Colors.primary,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    { color: filter === v ? "#FFF" : theme.grey },
+                  ]}
+                >
+                  {t(
+                    `profileRank.txt${
+                      v === "all"
+                        ? "12"
+                        : v === "pro"
+                        ? "13"
+                        : v === "rising"
+                        ? "14"
+                        : "15"
+                    }`
+                  )}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </ScrollView>
         </View>
 
-        <View style={styles.resultsSection}>
-          <Text style={[styles.resultsText, { color: theme.darkGrey }]}>
-            {filteredUsers.length}{" "}
-            {filteredUsers.length === 1
-              ? `${t("profileRank.txt16")}`
-              : `${t("profileRank.txt17")}`}{" "}
+        {/* List Section */}
+        <View style={styles.listSection}>
+          <Text style={[styles.resultCount, { color: theme.grey }]}>
+            {filteredUsers.length} {t("profileRank.txt17")}{" "}
             {t("profileRank.txt18")}
-            {useCustomLocation && selectedLocation?.name2 && (
-              <Text
-                style={{
-                  color: Colors.primary,
-                  fontFamily: "Poppins_600SemiBold",
-                }}
-              >
-                {" "}
-                {`${t("profileRank.txt48")}`} {selectedLocation.name2}
-              </Text>
-            )}
           </Text>
-        </View>
 
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
-              {t("profileRank.txt19")}
-            </Text>
-          </View>
-        ) : filteredUsers.length > 0 ? (
-          <View style={styles.usersList}>
-            {filteredUsers.map((user) => (
-              <UserCard key={user.id} user={user} />
-            ))}
-          </View>
-        ) : (
-          <View style={styles.emptyContainer}>
-            <Ionicons
-              name="people-outline"
-              size={RFPercentage(8)}
-              color={theme.grey}
-            />
-            <Text style={[styles.emptyTitle, { color: theme.heading }]}>
-              {t("profileRank.txt20")}
-            </Text>
-            <Text style={[styles.emptyText, { color: theme.grey }]}>
-              {searchQuery
-                ? `${t("profileRank.txt21")}`
-                : useCustomLocation && selectedLocation?.name2
-                ? `${t("profileRank.txt22")} ${t("profileRank.txt48")} ${
-                    selectedLocation.name2
-                  }`
-                : `${t("profileRank.txt22")}`}
-            </Text>
-          </View>
-        )}
+          {loading ? (
+            <View style={styles.center}>
+              <ActivityIndicator size="large" color={Colors.primary} />
+            </View>
+          ) : filteredUsers.length > 0 ? (
+            filteredUsers.map((user) => <UserCard key={user.id} user={user} />)
+          ) : (
+            <View style={styles.center}>
+              <Ionicons name="search-outline" size={50} color={theme.border} />
+              <Text style={[styles.emptyText, { color: theme.grey }]}>
+                {t("profileRank.txt20")}
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
     </View>
   );
 };
 
-export default TopRatedUsers;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: RFPercentage(10),
-  },
-  searchSection: {
-    paddingHorizontal: RFPercentage(2),
-    paddingTop: RFPercentage(2),
-  },
-  inputFieldWrapper: {
-    marginBottom: RFPercentage(1),
-  },
-  locationSection: {
-    paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(1.5),
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
-  },
-  locationTitle: {
-    fontSize: RFPercentage(1.8),
+  container: { flex: 1 },
+  topStickyHeader: { padding: 16, paddingBottom: 8 },
+  scrollContent: { paddingBottom: 100 },
+  section: { paddingHorizontal: 16, marginTop: 16 },
+  sectionTitle: {
+    fontSize: 16,
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(1),
+    marginBottom: 12,
   },
-  locationButtons: {
-    flexDirection: "row",
-    gap: RFPercentage(1),
-  },
-  locationButton: {
+  tabRow: { flexDirection: "row", gap: 10 },
+  tab: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
+    paddingVertical: 12,
+    borderRadius: 12,
     borderWidth: 1,
-    gap: RFPercentage(0.5),
+    borderColor: "#E9ECEF",
+    gap: 6,
   },
-  activeLocationButton: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  locationButtonText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_500Medium",
-    textAlign: "center",
-  },
-  activeLocationButtonText: {
-    color: Colors.white,
-  },
-  clearLocationButton: {
-    marginLeft: RFPercentage(0.5),
-  },
-  filterSection: {
-    paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(2),
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
-  },
-  filterTitle: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(1),
-  },
-  filterButtons: {
-    flexDirection: "row",
-  },
-  filterButton: {
-    paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(1.3),
-    borderRadius: RFPercentage(1),
-    marginRight: RFPercentage(1),
+  tabText: { fontSize: 14, fontFamily: "Poppins_500Medium" },
+  chip: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.1)",
+    borderColor: "#E9ECEF",
   },
-  activeFilterButton: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  filterButtonText: {
-    fontSize: RFPercentage(1.6),
+  chipText: { fontSize: 14, fontFamily: "Poppins_600SemiBold" },
+  listSection: { paddingHorizontal: 16, marginTop: 20 },
+  resultCount: {
+    fontSize: 13,
     fontFamily: "Poppins_500Medium",
+    marginBottom: 15,
   },
-  activeFilterButtonText: {
-    color: Colors.white,
-  },
-  resultsSection: {
-    paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(1.5),
-  },
-  filterScrollContainer: {
-    flexGrow: 1,
-    paddingRight: RFPercentage(2),
-  },
-  resultsText: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_500Medium",
-  },
-  usersList: {
-    paddingHorizontal: RFPercentage(2),
-  },
+
+  // Card UI
   userCard: {
-    borderRadius: RFPercentage(1.5),
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    padding: RFPercentage(2),
-    marginBottom: RFPercentage(1.5),
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 12,
+      },
+      android: { elevation: 2 },
+    }),
+  },
+  cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
+  avatar: { width: 50, height: 50, borderRadius: 12 },
+  headerInfo: { flex: 1, marginLeft: 12 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+
+  badgeText: { fontSize: 9, fontFamily: "Poppins_700Bold" },
+  memberSince: { fontSize: 11, fontFamily: "Poppins_400Regular", marginTop: 2 },
+
+  statsIsland: {
+    flexDirection: "row",
+    borderRadius: 14,
+    paddingVertical: 12,
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  statBox: { alignItems: "center", flex: 1 },
+  statVal: { fontSize: 14, fontFamily: "Poppins_700Bold" },
+  statLab: {
+    fontSize: 9,
+    fontFamily: "Poppins_500Medium",
+    marginTop: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  divider: { width: 1, height: 20, backgroundColor: "#DEE2E6" },
+
+  distRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 12,
+  },
+  distText: {
+    fontSize: 11,
+    color: Colors.primary,
+    fontFamily: "Poppins_600SemiBold",
+  },
+  center: { alignItems: "center", justifyContent: "center", marginTop: 40 },
+  emptyText: { marginTop: 10, fontSize: 14, fontFamily: "Poppins_400Regular" },
+
+  cardContainer: {
+    marginBottom: 15,
+    borderRadius: 16,
+    overflow: "hidden", // Required for gradient border radius
+    elevation: 5,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderWidth: 1,
   },
-  userInfoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatarContainer: {
-    position: "relative",
-    marginRight: RFPercentage(1.5),
-  },
-  avatar: {
-    width: RFPercentage(6),
-    height: RFPercentage(6),
-    borderRadius: RFPercentage(1.5),
-    borderWidth: 2,
-    borderColor: Colors.primary + "20",
-  },
-  userDetails: {
-    flex: 1,
-  },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: RFPercentage(0.5),
+  gradientWrapper: {
+    padding: 16,
   },
   userName: {
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_600SemiBold",
-    marginRight: RFPercentage(1),
-    flex: 1,
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
   },
-  badge: {
+  textShadow: {
+    textShadowColor: "rgba(0, 0, 0, 0.1)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  statsIslandMesh: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: RFPercentage(0.8),
-    paddingVertical: RFPercentage(0.3),
-    borderRadius: RFPercentage(0.8),
-    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    marginTop: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.25)", // Semi-transparent "Glass" effect
   },
-  badgeText: {
-    fontSize: RFPercentage(1.2),
+  statValMesh: {
+    fontSize: 15,
+    textAlign: "center",
+    color: "white",
     fontFamily: "Poppins_600SemiBold",
-    marginLeft: RFPercentage(0.3),
   },
-  memberSince: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_400Regular",
-    marginBottom: RFPercentage(0.5),
-  },
-  distanceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: RFPercentage(1),
-  },
-  distanceText: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_500Medium",
-    marginLeft: RFPercentage(0.3),
-  },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.02)",
-    borderRadius: RFPercentage(1),
-    padding: RFPercentage(1),
-  },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  statValue: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_700Bold",
-    marginTop: RFPercentage(0.3),
-  },
-  statLabel: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_400Regular",
-    marginTop: RFPercentage(0.2),
-    marginHorizontal: 10,
-  },
-  statDivider: {
-    width: 1,
-    height: RFPercentage(2.5),
-    backgroundColor: "rgba(0,0,0,0.1)",
-  },
-  arrowContainer: {
-    marginLeft: RFPercentage(1),
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: RFPercentage(10),
-  },
-  loadingText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Regular",
-    marginTop: RFPercentage(1),
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: RFPercentage(10),
-    paddingHorizontal: RFPercentage(4),
-  },
-  emptyTitle: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_600SemiBold",
-    marginTop: RFPercentage(2),
-    marginBottom: RFPercentage(1),
-  },
-  emptyText: {
-    fontSize: RFPercentage(1.6),
+  statLabMesh: {
+    fontSize: 10,
+    color: "white",
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
-    lineHeight: RFPercentage(2.2),
+  },
+  badgeTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginLeft: 8,
   },
 });
+
+export default TopRatedUsers;

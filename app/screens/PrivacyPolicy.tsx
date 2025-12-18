@@ -5,6 +5,7 @@ import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import CustomNav from "../components/common/CustomNav";
 
 function PrivacyPolicy({ navigation }) {
   const { t } = useTranslation();
@@ -12,12 +13,7 @@ function PrivacyPolicy({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <Nav
-        dpNull
-        marginTop={RFPercentage(5)}
-        navigation={navigation}
-        title={`${t("settings.txt4")}`}
-      />
+      <CustomNav showBack title={`${t("settings.txt4")}`} />
 
       <ScrollView
         style={styles.scroll}

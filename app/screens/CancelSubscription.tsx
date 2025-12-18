@@ -24,6 +24,7 @@ import { useAppTheme } from "../contexts/themeContext";
 import ConfirmationModal from "../components/common/ConfirmationModal";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 import * as Localization from "expo-localization";
+import CustomNav from "../components/common/CustomNav";
 
 function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
@@ -146,23 +147,13 @@ function CancelSubscription({ navigation }: any) {
   const currentPlanDetails = planDetails[currentPlan];
 
   return (
-    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
-      />
-
-
-
-
-
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <CustomNav showBack title={t("cancelSubscription.txt1")} />
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-
-
         {/* <Image style={styles.logo} source={Icons.logo} /> */}
 
         {!userData?.isCancelled && userData?.planType != "free" ? (
@@ -172,23 +163,6 @@ function CancelSubscription({ navigation }: any) {
               source={Icons.notActive}
               resizeMode="contain"
             /> */}
-
-            <View style={styles.premiumInfo}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-              >
-                <MaterialCommunityIcons
-                  name="keyboard-backspace"
-                  style={{ fontSize: RFPercentage(2.8) }}
-                  color={theme.heading}
-                />
-              </TouchableOpacity>
-              <Text style={[styles.premiumText, { color: theme.heading }]}>
-                {t("cancelSubscription.txt1")}
-              </Text>
-            </View>
 
             {/* Current Plan Badge */}
             <View style={styles.planBadgeContainer}>
@@ -365,7 +339,7 @@ function CancelSubscription({ navigation }: any) {
         t={t}
         loading={isloading}
       />
-    </Screen>
+    </View>
   );
 }
 

@@ -22,6 +22,7 @@ import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { useAppTheme } from "../contexts/themeContext";
 import { useTranslation } from "react-i18next";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import CustomNav from "../components/common/CustomNav";
 
 const sameDay = (d1, d2) =>
   d1.getDate() === d2.getDate() &&
@@ -292,16 +293,7 @@ export default function Reviews({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Nav
-          dpNull
-          marginTop={RFPercentage(5)}
-          leftLogo={false}
-          navigation={navigation}
-          title={`${t("profile.txt3")}`}
-        />
-      </View>
+      <CustomNav title={`${t("profile.txt3")}`} showBack />
 
       {/* Rating Overview */}
       {averageRating && (

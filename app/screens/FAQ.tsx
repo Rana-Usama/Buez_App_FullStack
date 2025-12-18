@@ -16,6 +16,7 @@ import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import CustomNav from "../components/common/CustomNav";
 
 function FAQ({ navigation }) {
   const { t } = useTranslation();
@@ -201,13 +202,8 @@ function FAQ({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      {/* Navigation Header */}
-      <Nav
-        dpNull
-        marginTop={RFPercentage(5)}
-        navigation={navigation}
-        title={`${t("settings.txt5")}`}
-      />
+      <CustomNav showBack title={`${t("settings.txt5")}`} />
+
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.scrollContent}

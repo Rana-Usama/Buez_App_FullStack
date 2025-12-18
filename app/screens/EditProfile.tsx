@@ -26,6 +26,7 @@ import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import CustomNav from "../components/common/CustomNav";
 
 type InputFieldType = {
   placeholder: string;
@@ -257,14 +258,7 @@ function EditProfile({ navigation }) {
       style={[styles.keyboard, { backgroundColor: theme.white }]}
     >
       <View style={[styles.screen, { backgroundColor: theme.white }]}>
-        {/* Navigation Header */}
-        <Nav
-          dpNull={true}
-          leftLogo={false}
-          navigation={navigation}
-          title={`${t("profile.txt2")}`}
-          marginTop={RFPercentage(5)}
-        />
+        <CustomNav title={`${t("profile.txt2")}`} showBack />
 
         <ScrollView
           style={styles.scrollView}

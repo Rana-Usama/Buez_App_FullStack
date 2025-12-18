@@ -9,6 +9,10 @@ import {
   ActivityIndicator,
   RefreshControl,
   StatusBar,
+  Animated,
+  Platform,
+  Dimensions,
+  TextInput,
 } from "react-native";
 import {
   collection,
@@ -35,6 +39,9 @@ import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
 import { formatChatTimestamp } from "../services/Shared.service";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import { Feather, MaterialIcons, Ionicons } from "@expo/vector-icons";
+
+const { width } = Dimensions.get("window");
 
 function Messages({ navigation }) {
   const { t } = useTranslation();
@@ -48,6 +55,10 @@ function Messages({ navigation }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState(t("messages.txt2"));
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const fadeAnim = useState(new Animated.Value(0))[0];
+  const slideAnim = useState(new Animated.Value(20))[0];
   const pageSize = 10;
   useExitAppOnBack();
 
@@ -56,14 +67,35 @@ function Messages({ navigation }) {
   useEffect(() => {
     fetchInitialChats();
     const unsubscribe = listenForNewChats();
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     return () => unsubscribe && unsubscribe();
   }, []);
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
 
-// Fetching Chats
-  const getChatData = async (d : any) => {
+  // Handle search close
+  const handleSearchClose = () => {
+    setSearchQuery("");
+  };
+
+  const getChatData = async (d: any) => {
     const chatData = d.data();
-    const otherUser = chatData.participants.find((u : any) => u !== userId);
+    const otherUser = chatData.participants.find((u: any) => u !== userId);
     const userRef = doc(FIREBASE_DB, "users", otherUser);
     const userDoc = await getDoc(userRef);
     const otherUserData = userDoc.exists() ? userDoc.data() : null;
@@ -72,7 +104,7 @@ function Messages({ navigation }) {
     if (translatedText) {
       try {
         translatedText = await cachedTranslate(translatedText);
-      } catch (e : any) {
+      } catch (e: any) {
         console.log("Translation error:", e);
       }
     }
@@ -92,6 +124,7 @@ function Messages({ navigation }) {
         createdAt,
       },
       user: otherUserData,
+      unreadCount: chatData.unreadCount?.[userId] || 0,
     };
   };
 
@@ -119,7 +152,6 @@ function Messages({ navigation }) {
     }
   };
 
-  // Fetching more chats on loading
   const fetchMoreChats = async () => {
     if (!lastVisible || loadingMore) return;
     setLoadingMore(true);
@@ -153,7 +185,6 @@ function Messages({ navigation }) {
     setIsRefreshing(false);
   };
 
-  // Listening New Chats
   const listenForNewChats = () => {
     const q = query(
       collection(FIREBASE_DB, "chats"),
@@ -177,7 +208,6 @@ function Messages({ navigation }) {
 
       const resolvedUpdates = updates.filter(Boolean);
 
-      // Merge updates without resetting the array
       setChats((prev) => {
         const merged = [...prev];
         resolvedUpdates.forEach((update) => {
@@ -196,117 +226,154 @@ function Messages({ navigation }) {
     });
   };
 
-  // 
-  const FilterButton = ({ title, isActive, isFirst }) => (
+  const FilterButton = ({ title, isActive }) => (
     <TouchableOpacity
-      activeOpacity={0.8}
+      activeOpacity={0.7}
       style={[
         styles.filterButton,
         {
-          backgroundColor: isActive ? "transparent" : theme.white,
-          borderColor: isActive ? "transparent" : theme.border,
+          backgroundColor: isActive ? theme.primary : theme.white,
+          borderColor: isActive ? theme.primary : theme.border,
         },
-        isFirst && styles.firstFilterButton,
       ]}
       onPress={() => setActiveFilter(title)}
     >
-      {isActive ? (
-        <LinearGradient
-          colors={[Colors.primary, "#4557B0"]}
-          start={{ x: 0, y: 1 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.gradient}
-        >
-          <Text style={styles.filterButtonTextActive}>{title}</Text>
-        </LinearGradient>
-      ) : (
-        <Text
-          style={[styles.filterButtonTextInactive, { color: theme.heading }]}
-        >
-          {title}
-        </Text>
+      <Text
+        style={[
+          styles.filterButtonText,
+          {
+            color: isActive ? Colors.white : theme.heading,
+            fontFamily: isActive ? "Poppins_600SemiBold" : "Poppins_500Medium",
+          },
+        ]}
+      >
+        {title}
+      </Text>
+      {isActive && (
+        <View
+          style={[styles.activeIndicator, { backgroundColor: theme.white }]}
+        />
       )}
     </TouchableOpacity>
   );
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() =>
-        navigation.navigate("Chat", {
-          chatId: item.id,
-          senderId: userId,
-          senderName: userData.userName,
-          receiver: item.user,
-        })
-      }
-      activeOpacity={0.8}
-      style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
-    >
-      <View
-        key={item.id}
+  const ChatItem = ({ item }) => {
+    const isUnread =
+      item.unreadCount > 0 && item.lastMessage?.senderId !== userId;
+    const lastMessageTime = formatChatTimestamp(item.lastMessage?.createdAt);
+
+    return (
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("Chat", {
+            chatId: item.id,
+            senderId: userId,
+            senderName: userData.userName,
+            receiver: item.user,
+          })
+        }
+        activeOpacity={0.7}
         style={[
-          styles.messageContainer,
-          item.lastMessage?.unread &&
-            item.lastMessage?.senderId !== userId &&
-            styles.unreadMessage,
+          styles.chatItemContainer,
+          {
+            backgroundColor: theme.white,
+            borderBottomColor: theme.border + "40",
+          },
+          isUnread && {
+            backgroundColor: theme.primary + "08",
+          },
         ]}
       >
-        <Image
-          style={styles.messageImage}
-          source={
-            item.user?.profileImage ? { uri: item.user.profileImage } : Icons.dp
-          }
-        />
-        <View style={styles.messageTextContainer}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text
-              style={[
-                styles.messageUserName,
-                item.lastMessage?.unread &&
-                  item.lastMessage?.senderId !== userId &&
-                  styles.unreadText,
-                { color: theme.darkGrey2 },
-              ]}
-            >
-              {item.user?.userName}
-            </Text>
-            {item.unread && item.senderId !== userId && (
+        <View style={styles.chatItemContent}>
+          {/* Avatar with Status Indicator */}
+          <View style={styles.avatarContainer}>
+            <Image
+              style={styles.avatar}
+              source={
+                item.user?.profileImage
+                  ? { uri: item.user.profileImage }
+                  : Icons.dp
+              }
+            />
+            {item.user?.isOnline && (
               <View
-                style={[styles.unreadDot, { backgroundColor: theme.primary }]}
+                style={[
+                  styles.onlineIndicator,
+                  { backgroundColor: theme.success },
+                ]}
               />
             )}
           </View>
-          <Text
-            style={[
-              styles.messageText,
-              item.lastMessage?.unread &&
-                item.lastMessage?.senderId !== userId &&
-                styles.unreadText,
-              {
-                color: item.lastMessage?.text
-                  ? theme.darkGrey
-                  : theme.lightGrey,
-              },
-            ]}
-          >
-            {item.lastMessage?.text
-              ? item.lastMessage.text.replace(/\s+/g, " ").trim().slice(0, 30) +
-                (item.lastMessage.text.replace(/\s+/g, " ").trim().length > 30
-                  ? "..."
-                  : "")
-              : `${t("messages.txt6")} ${item.user?.userName}!`}
-          </Text>
+
+          {/* Chat Content */}
+          <View style={styles.chatContent}>
+            <View style={styles.chatHeader}>
+              <Text
+                style={[
+                  styles.userName,
+                  { color: theme.darkGrey },
+                  isUnread && { fontFamily: "Poppins_600SemiBold" },
+                ]}
+                numberOfLines={1}
+              >
+                {item.user?.userName || t("messages.unknownUser")}
+              </Text>
+              <Text style={[styles.timeText, { color: theme.darkGrey }]}>
+                {lastMessageTime}
+              </Text>
+            </View>
+
+            <View style={styles.messagePreview}>
+              <Text
+                style={[
+                  styles.messageText,
+                  {
+                    color: isUnread ? theme.darkGrey : theme.lightGrey,
+                    flex: 1,
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {item.lastMessage?.text
+                  ? item.lastMessage.text
+                  : `${t("messages.txt6")} ${item.user?.userName}!`}
+              </Text>
+
+              {/* Unread Badge */}
+              {isUnread && (
+                <View
+                  style={[
+                    styles.unreadBadge,
+                    { backgroundColor: theme.primary },
+                  ]}
+                >
+                  <Text style={styles.unreadCount}>{item.unreadCount}</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Message Type Indicator */}
+            {item.lastMessage?.type === "image" && (
+              <View style={styles.messageTypeIndicator}>
+                <Feather
+                  name="image"
+                  size={RFPercentage(1.6)}
+                  color={theme.lightGrey}
+                />
+                <Text
+                  style={[styles.messageTypeText, { color: theme.lightGrey }]}
+                >
+                  {t("messages.photo")}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
-        <Text style={[styles.messageTime, { color: theme.darkGrey }]}>
-          {formatChatTimestamp(item.lastMessage?.createdAt)}
-        </Text>
-      </View>
-      <View style={[styles.separator, { backgroundColor: theme.border }]} />
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   const filteredChats = useMemo(() => {
-    // Only keep chats where lastMessage exists and has text
     let validChats = chats.filter(
       (chat) =>
         chat.lastMessage &&
@@ -314,85 +381,128 @@ function Messages({ navigation }) {
         chat.lastMessage.text.trim() !== ""
     );
 
+    // Apply search filter
+    if (searchQuery.trim()) {
+      validChats = validChats.filter(
+        (chat) =>
+          chat.user?.userName
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          chat.lastMessage?.text
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply unread filter
     if (activeFilter === t("messages.txt3")) {
       return validChats.filter(
-        (chat) => chat?.unread && chat.senderId !== userId
+        (chat) => chat.unreadCount > 0 && chat.lastMessage?.senderId !== userId
       );
     }
 
     return validChats;
-  }, [chats, activeFilter, userId]);
+  }, [chats, activeFilter, searchQuery]);
 
+  const EmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <View
+        style={[
+          styles.emptyIconContainer,
+          { backgroundColor: theme.primary + "20" },
+        ]}
+      >
+        <Ionicons
+          name="chatbubble-ellipses-outline"
+          size={RFPercentage(5)}
+          color={theme.primary}
+        />
+      </View>
+      <Text style={[styles.emptyTitle, { color: theme.darkGrey }]}>
+        {activeFilter === t("messages.txt3")
+          ? t("messages.txt4")
+          : t("messages.txt5")}
+      </Text>
+      <Text style={[styles.emptySubtitle, { color: theme.lightGrey }]}>
+        {searchQuery.trim()
+          ? t("messages.noResults")
+          : t("messages.emptyDescription")}
+      </Text>
+    </View>
+  );
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
+        barStyle={"light-content"}
+        backgroundColor={"transparent"}
+        translucent={true}
       />
       <Nav
         profileImage={profileImgUrl}
-        leftLogo={true}
-        navigation={navigation}
-        title={t("messages.txt1")}
+        leftLogo
+        gradient
+        gradientColors={[Colors.primary, "#0b1544ff"]}
+        title={`${t("messages.txt1")}`}
       />
 
-      {/* Filter Buttons */}
-      <View style={styles.filterContainer}>
+      {/* Filter Tabs */}
+      <View style={styles.filterTabContainer}>
         {filters.map((title, index) => (
           <FilterButton
             key={title}
             title={title}
             isActive={activeFilter === title}
-            isFirst={index === 0}
           />
         ))}
       </View>
 
-      {loadingInitial ? (
-        <ActivityIndicator
-          size="large"
-          color={Colors.primary}
-          style={{ marginTop: RFPercentage(10) }}
-        />
-      ) : (
-        <FlatList
-          style={{ width: "100%", marginTop: RFPercentage(2) }}
-          data={filteredChats}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          onEndReached={fetchMoreChats}
-          onEndReachedThreshold={0.5}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={refreshChats}
-              colors={[Colors.primary]}
-              tintColor={Colors.primary}
-            />
-          }
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              {filteredChats.length === 0 && (
-                <View
-                  style={{ justifyContent: "center", alignItems: "center" }}
-                >
-                  <Image
-                    style={styles.noMessageIcon}
-                    source={Icons.noMessage}
-                  />
-                  <Text style={[styles.emptyText, { color: theme.darkGrey }]}>
-                    {activeFilter === t("messages.txt3")
-                      ? t("messages.txt4")
-                      : t("messages.txt5")}
-                  </Text>
+      {/* Chats List */}
+      <Animated.View
+        style={[
+          styles.chatListContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        {loadingInitial ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.primary} />
+            <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
+              {t("messages.loading")}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredChats}
+            renderItem={({ item }) => <ChatItem item={item} />}
+            keyExtractor={(item) => item.id}
+            onEndReached={fetchMoreChats}
+            onEndReachedThreshold={0.3}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={refreshChats}
+                colors={[theme.primary]}
+                tintColor={theme.primary}
+                progressBackgroundColor={theme.white}
+              />
+            }
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.chatListContent}
+            ListEmptyComponent={<EmptyState />}
+            ListFooterComponent={
+              loadingMore ? (
+                <View style={styles.loadingMoreContainer}>
+                  <ActivityIndicator size="small" color={theme.primary} />
                 </View>
-              )}
-            </View>
-          )}
-        />
-      )}
-      <View style={styles.bottomSpacing} />
+              ) : null
+            }
+          />
+        )}
+      </Animated.View>
     </View>
   );
 }
@@ -400,113 +510,255 @@ function Messages({ navigation }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
     backgroundColor: Colors.white,
   },
-  filterContainer: {
-    marginTop: RFPercentage(3),
-    flexDirection: "row",
-    width: "90%",
-    marginBottom: RFPercentage(1),
+  header: {
+    paddingTop: Platform.OS === "ios" ? RFPercentage(6) : RFPercentage(3),
+    paddingBottom: RFPercentage(2),
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border + "30",
+    elevation: 2,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
   },
-  filterButton: {
-    width: RFPercentage(13),
-    height: RFPercentage(4.8),
-    borderRadius: RFPercentage(1),
-    justifyContent: "center",
+  headerContent: {
+    flexDirection: "row",
     alignItems: "center",
-    marginLeft: RFPercentage(2),
-    alignSelf: "flex-start",
+    paddingHorizontal: RFPercentage(2),
+  },
+  backButton: {
+    padding: RFPercentage(1),
+  },
+  headerTitleContainer: {
+    flex: 1,
+    marginLeft: RFPercentage(1),
+  },
+  headerTitle: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  chatCount: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular",
+    marginTop: RFPercentage(0.2),
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerButton: {
+    padding: RFPercentage(1),
+    marginLeft: RFPercentage(0.5),
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: RFPercentage(2),
+    marginTop: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+    height: RFPercentage(5.5),
+    borderRadius: RFPercentage(1.2),
     borderWidth: 1,
   },
-  firstFilterButton: { marginLeft: 0 },
-  gradient: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    height: "100%",
-    borderRadius: RFPercentage(1),
-  },
-  filterButtonTextActive: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_500Medium",
-  },
-  filterButtonTextInactive: {
-    color: Colors.heading,
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_500Medium",
-  },
-  messageContainer: {
-    width: "90%",
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: RFPercentage(3),
-  },
-  messageImage: {
-    width: RFPercentage(5.8),
-    height: RFPercentage(5.8),
-    borderRadius: RFPercentage(100),
-    borderColor: Colors.primary,
-    borderWidth: RFPercentage(0.1),
-  },
-  messageTextContainer: {
+  searchInput: {
+    flex: 1,
     marginLeft: RFPercentage(1.5),
-    justifyContent: "flex-start",
-  },
-  messageUserName: {
-    color: Colors.darkGrey2,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  messageText: {
-    color: Colors.darkGrey,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  messageTime: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    color: Colors.darkGrey,
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
+    padding: 0,
   },
-  separator: {
-    width: "90%",
-    height: RFPercentage(0.1),
-    backgroundColor: Colors.border,
+  filterTabContainer: {
+    flexDirection: "row",
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(1.5),
+    marginTop: 20,
+  },
+  filterButton: {
+    paddingHorizontal: RFPercentage(3),
+    paddingVertical: RFPercentage(1),
+    borderRadius: RFPercentage(2),
+    borderWidth: 1,
+    marginRight: RFPercentage(1.5),
+    position: "relative",
+    overflow: "hidden",
+  },
+  filterButtonText: {
+    fontSize: RFPercentage(1.6),
+    textAlign: "center",
+  },
+  activeIndicator: {
+    position: "absolute",
+    bottom: -2,
+    left: "25%",
+    right: "25%",
+    height: 3,
+    borderRadius: 1.5,
+  },
+  chatListContainer: {
+    flex: 1,
+  },
+  chatListContent: {
+    paddingBottom: RFPercentage(2),
+  },
+  chatItemContainer: {
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(1.5),
+    borderBottomWidth: 1,
+  },
+  chatItemContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  avatarContainer: {
+    position: "relative",
+  },
+  avatar: {
+    width: RFPercentage(6.5),
+    height: RFPercentage(6.5),
+    borderRadius: RFPercentage(3.25),
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  onlineIndicator: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: RFPercentage(1.5),
+    height: RFPercentage(1.5),
+    borderRadius: RFPercentage(0.75),
+    borderWidth: 2,
+    borderColor: Colors.white,
+  },
+  chatContent: {
+    flex: 1,
+    marginLeft: RFPercentage(1.5),
+  },
+  chatHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.5),
+  },
+  userName: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_500Medium",
+    flex: 1,
+  },
+  timeText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+    marginLeft: RFPercentage(1),
+  },
+  messagePreview: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  messageText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+  },
+  unreadBadge: {
+    minWidth: RFPercentage(2.5),
+    height: RFPercentage(2.5),
+    borderRadius: RFPercentage(1.25),
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: RFPercentage(1),
+  },
+  unreadCount: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
+    paddingHorizontal: RFPercentage(0.5),
+  },
+  messageTypeIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: RFPercentage(0.3),
+  },
+  messageTypeText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+    marginLeft: RFPercentage(0.5),
+  },
+  moreButton: {
+    padding: RFPercentage(0.5),
+    marginLeft: RFPercentage(1),
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: RFPercentage(10),
+  },
+  loadingText: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(2),
   },
-  bottomSpacing: { marginBottom: RFPercentage(6) },
-  unreadMessage: {},
-  unreadText: { fontFamily: "Poppins_500Medium" },
-  unreadDot: {
-    width: RFPercentage(1),
-    height: RFPercentage(1),
-    borderRadius: RFPercentage(0.5),
-    backgroundColor: Colors.primary,
-    marginLeft: RFPercentage(1),
-    top: RFPercentage(-0.1),
+  loadingMoreContainer: {
+    paddingVertical: RFPercentage(2),
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: RFPercentage(17),
+    paddingHorizontal: RFPercentage(5),
+    paddingTop: RFPercentage(15),
   },
-  emptyText: {
-    fontFamily: "Poppins_400Regular",
+  emptyIconContainer: {
+    width: RFPercentage(12),
+    height: RFPercentage(12),
+    borderRadius: RFPercentage(6),
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: RFPercentage(3),
+  },
+  emptyTitle: {
     fontSize: RFPercentage(2),
-    color: Colors.darkGrey,
+    fontFamily: "Poppins_600SemiBold",
     textAlign: "center",
+    marginBottom: RFPercentage(1),
   },
-  noMessageIcon: {
-    borderRadius: RFPercentage(1),
-    width: RFPercentage(26),
-    height: RFPercentage(18),
-    marginBottom: RFPercentage(2),
+  emptySubtitle: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    lineHeight: RFPercentage(2.2),
+    marginBottom: RFPercentage(3),
+  },
+  startChatButton: {
+    paddingHorizontal: RFPercentage(4),
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: RFPercentage(1.2),
+  },
+  startChatButtonText: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  fab: {
+    position: "absolute",
+    bottom: RFPercentage(3),
+    right: RFPercentage(3),
+    width: RFPercentage(7),
+    height: RFPercentage(7),
+    borderRadius: RFPercentage(3.5),
+    elevation: 6,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    overflow: "hidden",
+  },
+  fabGradient: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

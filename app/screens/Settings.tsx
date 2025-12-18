@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -8,14 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { MaterialIcons } from "@expo/vector-icons";
-import {
-  deleteAppleAccount,
-  deleteGoogleAccount,
-  removeCredentials,
-} from "../services/Auth.service";
-import { deleteCurrentUser } from "../services/Auth.service";
-import * as SecureStore from "expo-secure-store";
+import { MaterialIcons, Feather } from "@expo/vector-icons";
 import Nav from "../components/common/Nav";
 import ToggleSwitch from "toggle-switch-react-native";
 import { useAppTheme } from "../contexts/themeContext";
@@ -23,306 +16,137 @@ import Colors from "../config/Colors";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
-import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { useExitAppOnBack } from "../utils/appBack";
-import Toast from "react-native-toast-message";
-import { updateDoc, doc, deleteField } from "firebase/firestore";
-import ConfirmationModal from "../components/common/ConfirmationModal";
-import Feather from "@expo/vector-icons/Feather";
-import { getCredentials } from "../services/Auth.service";
 
 function Settings({ navigation }) {
   const { userData: user } = useUser();
   const { t } = useTranslation();
-  const profileImgUrl = user?.profileImage || "";
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isModalVisible2, setIsModalVisible2] = useState(false);
-  useExitAppOnBack();
-  const [loading, setLoading] = useState(false);
-  const [provider, setProvider] = useState<string | null>(null);
-
-  console.log("user------------------",user)
-  const currentPlan =
-    user?.planType || user?.subscription?.planInterval || "free";
-  const isYearlyPlan = currentPlan === "yearly";
-  const isMonthlyPlan = currentPlan === "monthly";
-  const freePlan = user?.planType === "free"
-
-  useEffect(() => {
-    const user = FIREBASE_AUTH.currentUser;
-    if (user && user.providerData.length > 0) {
-      setProvider(user.providerData[0].providerId);
-    }
-  }, []);
-
   const { theme, toggleTheme } = useAppTheme();
+  useExitAppOnBack();
+
+  const profileImgUrl = user?.profileImage || "";
+  const currentPlan = user?.planType || user?.subscription?.planInterval || "free";
+  const isMonthlyPlan = currentPlan === "monthly";
+  const freePlan = user?.planType === "free";
 
   const navigationsList = [
     {
-      iconSource: Icons.cancel,
-      title: `${t("settings.txt1")}`,
-      navigation: () => navigation.navigate("CancelSubscription"),
-    },
-    {
-      iconSource: Icons.upgrade,
-      title: `${t("settings.txt14")}`,
-      navigation: () => navigation.navigate("UpgradePlan"),
-    },
-    {
       iconSource: Icons.privacy,
-      title: `${t("settings.txt2")}`,
+      title: t("settings.txt2"),
       navigation: () => navigation.navigate("ChangePassword"),
+      iconType: "image"
     },
     {
       iconSource: Icons.language,
-      title: `${t("settings.txt12")}`,
+      title: t("settings.txt12"),
       navigation: () => navigation.navigate("Language"),
+      iconType: "image"
     },
     {
-      iconSource: Icons.tc,
-      title: `${t("settings.txt3")}`,
+      iconSource: "globe",
+      title: t("settings.txt3"),
       navigation: () => navigation.navigate("TermsAndConditions"),
+      iconType: "feather"
     },
     {
       iconSource: Icons.privacy,
-      title: `${t("settings.txt4")}`,
+      title: t("settings.txt4"),
       navigation: () => navigation.navigate("PrivacyPolicy"),
+      iconType: "image"
     },
     {
       iconSource: Icons.faq,
-      title: `${t("settings.txt5")}`,
+      title: t("settings.txt5"),
       navigation: () => navigation.navigate("FAQ"),
-    },
-    {
-      iconSource: Icons.logout,
-      title: `${t("settings.txt6")}`,
-      redColor: true,
-      navigation: () => {
-        setIsModalVisible2(true);
-      },
-    },
-    {
-      iconSource: Icons.delete,
-      title: `${t("settings.txt7")}`,
-      redColor: true,
-      navigation: () => {
-        setIsModalVisible(true);
-      },
+      iconType: "image"
     },
   ];
 
-  const cancelUserSubscription = async () => {
-    if (!user?.subscriptionId) return false;
-
-    try {
-      const res = await fetch(
-        "https://buez-server-khaki.vercel.app/api/cancel-subscription",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            subscriptionId: user.subscriptionId,
-            planType: currentPlan || "monthly",
-          }),
-        }
-      );
-      const result = await res.json();
-      if (result.success) {
-        console.log("Subscription canceled successfully");
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.log("Error canceling subscription:", err);
-      return false;
-    }
-  };
-
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      {/* Nav */}
       <Nav
         profileImage={profileImgUrl}
         leftLogo={true}
-        navigation={navigation}
-        title={`${t("settings.txt9")}`}
+        gradient
+        gradientColors={[Colors.primary, "#0b1544ff"]}
+        title={t("settings.txt9")}
       />
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.content}>
-          <Text style={[styles.txt, { color: theme.lightGrey }]}>{`${t(
-            "settings.txt8"
-          )}`}</Text>
-          <View style={[styles.wrap, { backgroundColor: theme.border }]} />
+        {/* Section Header */}
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: theme.lightGrey }]}>
+            {t("settings.txt8")}
+          </Text>
+          <View style={[styles.underline, { backgroundColor: theme.primary + "30" }]} />
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[
-            styles.navigationWrap,
-            {
-              marginTop: RFPercentage(3),
-              borderColor: theme.border,
-            },
-          ]}
-        >
-          <View style={styles.content2}>
-            <Image
-              style={styles.img}
-              source={Icons.language}
-              tintColor={theme.heading}
-            />
+        {/* Theme Toggle Card */}
+        <View style={[styles.card, { backgroundColor: theme.mode === 'dark' ? '#16151aff' : '#F8F9FA', borderColor: "#e4e8fbff" }]}>
+          <View style={styles.listItem}>
+            <View style={[styles.iconContainer, { backgroundColor: theme.primary + "15" }]}>
+              <Feather name={theme.mode === 'dark' ? "moon" : "sun"} size={18} color={theme.primary} />
+            </View>
             <Text style={[styles.title, { color: theme.heading }]}>
               {t("settings.txt13")}
             </Text>
-            <View style={{ position: "absolute", right: 0 }}>
-              <ToggleSwitch
-                isOn={theme.mode === "dark"}
-                onColor={Colors.primary}
-                offColor={"rgb(224, 224, 227)"}
-                size="small"
-                onToggle={toggleTheme}
-              />
-            </View>
+            <ToggleSwitch
+              isOn={theme.mode === "dark"}
+              onColor={Colors.primary}
+              offColor={"rgb(224, 224, 227)"}
+              size="small"
+              onToggle={toggleTheme}
+            />
           </View>
-        </TouchableOpacity>
+        </View>
 
-        {/* Navigation List */}
-        {navigationsList
-          .filter((item) => {
-            // Hide "Upgrade Plan" unless it's monthly
-            if (item.title === "Upgrade Plan" && !isMonthlyPlan) {
-              return false;
-            }
-            if(item.title === `${t("settings.txt1")}` && freePlan){
-              return false
-            }
-            return true;
-          })
-          .map((item, i) => (
-            <TouchableOpacity
-              key={i}
-              onPress={item.navigation}
-              activeOpacity={0.8}
-              style={[
-                styles.navigationWrap,
-                {
-                  marginTop: RFPercentage(2.5),
-                  borderColor: theme.border,
-                },
-              ]}
-            >
-              <View style={styles.content2}>
-                {i === 2 ? (
-                  <Feather name="globe" size={24} color={theme.heading} />
-                ) : (
-                  <Image
-                    style={styles.img}
-                    source={item.iconSource}
-                    tintColor={item.redColor ? Colors.red : theme.heading}
-                  />
-                )}
+        {/* General Settings List */}
+        <View style={[styles.card, { backgroundColor: theme.mode === 'dark' ? '#16151aff' : '#ffffffff', borderColor: "#e4e8fbff" }]}>
+          {navigationsList
+            .filter((item) => {
+              if (item.title === "Upgrade Plan" && !isMonthlyPlan) return false;
+              if (item.title === t("settings.txt1") && freePlan) return false;
+              return true;
+            })
+            .map((item, i, filteredList) => (
+              <TouchableOpacity
+                key={i}
+                onPress={item.navigation}
+                activeOpacity={0.7}
+                style={[
+                  styles.listItem,
+                  i !== filteredList.length - 1 && { borderBottomWidth: 1, borderBottomColor: "#e4e8fbff" }
+                ]}
+              >
+                <View style={[styles.iconContainer, { backgroundColor: theme.primary + "15" }]}>
+                  {item.iconType === "feather" ? (
+                    <Feather name={item.iconSource as any} size={18} color={theme.heading} />
+                  ) : (
+                    <Image
+                      style={styles.img}
+                      source={item.iconSource}
+                      tintColor={theme.heading}
+                    />
+                  )}
+                </View>
 
-                <Text
-                  style={[
-                    styles.title,
-                    { color: item.redColor ? Colors.red : theme.heading },
-                  ]}
-                >
+                <Text style={[styles.title, { color: theme.heading }]}>
                   {item.title}
                 </Text>
 
                 <MaterialIcons
                   name="arrow-forward-ios"
-                  style={[
-                    styles.icon,
-                    { color: item.redColor ? Colors.red : theme.heading },
-                  ]}
+                  size={14}
+                  color={theme.lightGrey}
                 />
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))}
+        </View>
       </ScrollView>
-
-      <ConfirmationModal
-        isVisible={isModalVisible}
-        loading={loading} // pass loading to modal
-        onClose={() => setIsModalVisible(false)}
-        onConfirm={async () => {
-          try {
-            setLoading(true); // show loader
-            const password2 = await SecureStore.getItemAsync("password2");
-            await cancelUserSubscription();
-
-            if (provider === "apple.com") {
-              await deleteAppleAccount();
-            } else if (provider === "google.com") {
-              await deleteGoogleAccount();
-            } else {
-              await deleteCurrentUser(password2);
-            }
-
-            await removeCredentials();
-            await SecureStore.deleteItemAsync("appLanguage");
-            await SecureStore.deleteItemAsync("password2");
-            navigation.navigate("OnBoarding");
-            setIsModalVisible(false);
-          } catch (error) {
-            console.log("Error deleting account:", error.message || error);
-            Toast.show({
-              type: "error",
-              text1: "Delete Failed",
-              text2: "Please try again.",
-            });
-          } finally {
-            setLoading(false); // hide loader
-          }
-        }}
-        title={t("settings.txt10")}
-        theme={theme}
-        t={t}
-        message={false}
-      />
-
-      <ConfirmationModal
-        isVisible={isModalVisible2}
-        loading={loading} // pass loading to modal
-        onClose={() => setIsModalVisible2(false)}
-        onConfirm={async () => {
-          try {
-            setLoading(true); // show loader
-            const currentUser = FIREBASE_AUTH.currentUser;
-            if (currentUser) {
-              await updateDoc(doc(FIREBASE_DB, "users", currentUser.uid), {
-                token: deleteField(),
-              });
-            }
-            await removeCredentials();
-            await SecureStore.setItemAsync("loggedOut", "true");
-            setIsModalVisible2(false);
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Login" }],
-            });
-          } catch (error) {
-            console.log("Error logging out and removing token:", error);
-            Toast.show({
-              type: "error",
-              text1: "Logout failed",
-              text2: "Please try again.",
-            });
-          } finally {
-            setLoading(false); // hide loader
-          }
-        }}
-        title={t("settings.txt11")}
-        theme={theme}
-        t={t}
-        message={false}
-      />
     </View>
   );
 }
@@ -330,55 +154,60 @@ function Settings({ navigation }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    backgroundColor: Colors.white,
   },
-  scroll: { width: "100%" },
+  scroll: { 
+    width: "100%" 
+  },
   scrollContent: {
-    width: "100%",
+    paddingBottom: RFPercentage(5),
+    paddingHorizontal: "5%",
+  },
+  sectionHeader: {
+    marginTop: RFPercentage(4),
+    marginBottom: RFPercentage(2),
+    alignItems: 'flex-start',
+  },
+  sectionTitle: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_600SemiBold",
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  underline: {
+    width: 40,
+    height: 3,
+    borderRadius: 2,
+    marginTop: 4,
+  },
+  card: {
+    borderRadius: 20,
+    borderWidth: 0.6,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+    overflow: 'hidden',
+  },
+  listItem: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingBottom: RFPercentage(15),
+    paddingVertical: RFPercentage(1.8),
   },
-  content: {
-    width: "90%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    marginTop: RFPercentage(3.5),
-  },
-  txt: {
-    color: Colors.lightGrey,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  wrap: {
-    width: "75%",
-    height: RFPercentage(0.1),
-    backgroundColor: "#F3F4F6",
-    marginTop: RFPercentage(1.6),
-  },
-  navigationWrap: {
-    height: RFPercentage(6.5),
-    borderRadius: RFPercentage(1),
-    borderColor: Colors.detailsBorder,
-    borderWidth: RFPercentage(0.1),
+  iconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    width: "90%",
   },
-  content2: {
-    width: "90%",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    flexDirection: "row",
+  img: { 
+    width: 20, 
+    height: 20 
   },
-  img: { width: RFPercentage(2.8), height: RFPercentage(2.8) },
   title: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-    marginLeft: RFPercentage(1.6),
+    flex: 1,
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: 15,
   },
-  icon: { position: "absolute", right: 0, fontSize: RFPercentage(1.7) },
 });
 
 export default Settings;

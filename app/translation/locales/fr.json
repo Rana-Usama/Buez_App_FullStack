@@ -13,10 +13,12 @@
     "password": "Mot de passe",
     "name": "Nom",
     "confirm": "Confirmer le mot de passe",
-    "currency": "ex: 90$",
-    "sign": "$",
+    "currency": "p. ex. 90 CHF",
+    "sign": "CHF",
     "gotIt": "Compris",
-    "you": "Vous"
+    "you": "Vous",
+    "version": "Version",
+    "rights": "BUEZ. Tous droits réservés."
   },
   "validations": {
     "inValid": "E-mail invalide",
@@ -65,7 +67,7 @@
       "six": "Impossible de mettre à jour le statut de la demande.",
       "seven": "Demande republiée avec succès"
     },
-   "cancelSubscription": {
+    "cancelSubscription": {
       "one": "Aucun abonnement actif",
       "two": "Vous n'avez aucun abonnement à annuler",
       "three": "Abonnement annulé"
@@ -260,14 +262,19 @@
     "customTaskTitle": "Veuillez spécifier votre type de tâche",
     "pr": "Prix"
   },
-  "messages": {
-    "txt1": "Messages",
-    "txt2": "Tous",
-    "txt3": "Non lus",
-    "txt4": "Aucun message non lu",
-    "txt5": "Aucun message pour l'instant",
-    "txt6": "Dites bonjour à"
-  },
+    "messages": {
+      "txt1": "Messages",
+      "txt2": "Tous",
+      "txt3": "Non lus",
+      "txt4": "Aucun message non lu",
+      "txt5": "Pas encore de messages",
+      "txt6": "Dis bonjour à",
+      "loading": "Chargement des discussions...",
+      "unknownUser": "Utilisateur inconnu",
+      "noResults": "Aucun résultat trouvé",
+      "emptyDescription": "Commencez une conversation en envoyant un message à vos contacts",
+      "photo": "Photo"
+    },
   "chat": {
     "txt1": "Charger les messages précédents",
     "txt2": "Tapez un message",
@@ -289,10 +296,9 @@
     "txt11": "Êtes-vous sûr de vouloir vous déconnecter\nde ce compte ?",
     "txt12": "Changer la langue",
     "txt13": "Thème sombre",
-    "txt14" : "Plan de mise à niveau"
-
+    "txt14": "Plan de mise à niveau"
   },
- "cancelSubscription": {
+  "cancelSubscription": {
     "txt1": "Votre abonnement actuel",
     "txt8": "Vous n'avez pas d'abonnement actif",
     "txt10": "Annuler l'abonnement",

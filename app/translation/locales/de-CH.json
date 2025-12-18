@@ -13,10 +13,12 @@
     "password": "Passwort",
     "name": "Name",
     "confirm": "Passwort bestätige",
-    "currency": "z.B. 90$",
-    "sign": "$",
+    "currency": "z.B. 90.–",
+    "sign": "CHF",
     "gotIt": "Verstande",
-    "you": "Du"
+    "you": "Du",
+    "version": "Version",
+    "rights": "BUEZ. Alli Rächt vorbehalte."
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -65,7 +67,7 @@
       "six": "Cha Aafrog-Status nid aktualisiere.",
       "seven": "Aafrog erfolgriich neu veröffentlicht"
     },
-   "cancelSubscription": {
+    "cancelSubscription": {
       "one": "Kei aktives Abonnemänt",
       "two": "Du hesch kei Abonnemänt zum abbestelle",
       "three": "Abonnemänt abbestellt"
@@ -260,14 +262,19 @@
     "customTaskTitle": "Bitte gib din Ufgabetyp aa",
     "pr": "Priis"
   },
-  "messages": {
-    "txt1": "Nachrichte",
-    "txt2": "Alli",
-    "txt3": "Ungläsene",
-    "txt4": "Kei ungläseni Nachrichte",
-    "txt5": "Nonig kei Nachrichte",
-    "txt6": "Säg hallo zu"
-  },
+   "messages": {
+      "txt1": "Nachrichte",
+      "txt2": "Alli",
+      "txt3": "Ungelesen",
+      "txt4": "Kei ungeleseni Nachrichte",
+      "txt5": "No kei Nachrichte",
+      "txt6": "Sag Hallo zu",
+      "loading": "Chats werde glade...",
+      "unknownUser": "Unbekannter Benutzer",
+      "noResults": "Keine Resultat gfunde",
+      "emptyDescription": "Start e Gespräch, indem du e Nachricht an dini Kontakte schicksch",
+      "photo": "Foto"
+    },
   "chat": {
     "txt1": "Lade früeneri Nachrichte",
     "txt2": "Schrib e Nachricht",
@@ -289,10 +296,9 @@
     "txt11": "Bisch sicher, dass du dich\nvom Account abmelde wotsch?",
     "txt12": "Sprach ändere",
     "txt13": "Dunks Thema",
-    "txt14" : "Upgrade-Plan"
-
+    "txt14": "Upgrade-Plan"
   },
- "cancelSubscription": {
+  "cancelSubscription": {
     "txt1": "Dini aktuell Abonnemänt",
     "txt8": "Du hesch kei aktives Abonnemänt",
     "txt10": "Abonnemänt kündige",

@@ -37,7 +37,7 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const scrollPosition = useRef<number>(0);
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
@@ -47,7 +47,7 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
     setHasMore(true);
     setRefreshing(false);
     setLoadingMore(false);
-    setLoading(true);
+    setLoading(false);
   };
 
   return (

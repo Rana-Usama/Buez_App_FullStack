@@ -329,7 +329,7 @@ const Chat = ({ navigation, route }) => {
             </>
           )}
         </View>
-        <View style={{ marginLeft: RFPercentage(1.5), width:"60%",}}>
+        <View style={{ marginLeft: RFPercentage(1.5), width: "60%" }}>
           <Text
             style={{
               color: theme.heading,
@@ -498,12 +498,14 @@ const Chat = ({ navigation, route }) => {
                       left: {
                         color: theme.black,
                         fontFamily: "Poppins_400Regular",
-                        fontSize: RFPercentage(1.9),
+                        fontSize: RFPercentage(1.8),
+                        lineHeight: RFPercentage(2.5),
                       },
                       right: {
                         color: Colors.white,
                         fontFamily: "Poppins_400Regular",
-                        fontSize: RFPercentage(1.9),
+                        fontSize: RFPercentage(1.8),
+                        lineHeight: RFPercentage(2.5),
                       },
                     }}
                   />

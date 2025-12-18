@@ -165,7 +165,7 @@ const InputField: React.FC<InputFieldProps> = ({
             style={{ position: "absolute", right: RFPercentage(1) }}
           >
             <Ionicons
-              color={Colors.darkGrey2}
+              color={Colors.lightGrey}
               style={{ right: RFPercentage(0.5) }}
               size={RFPercentage(2.7)}
               name={"search-outline"}

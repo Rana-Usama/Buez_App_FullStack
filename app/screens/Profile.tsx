@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { fetchCompletedTasksFromFirebase } from "../services/Review.service";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import CustomNav from "../components/common/CustomNav";
 
 function Profile({ navigation }) {
   const { userData: user } = useUser();
@@ -178,16 +179,7 @@ function Profile({ navigation }) {
     <View
       style={[styles.screen, { backgroundColor: theme.white || "#FFFFFF" }]}
     >
-      {/* Navigation Header */}
-      <Nav
-        dpNull
-        leftLogo={false}
-        profileImage={profileImgUrl}
-        navigation={navigation}
-        title={`${t("profile.txt1")}`}
-        marginTop={RFPercentage(5)}
-      />
-
+      <CustomNav title={`${t("profile.txt1")}`} showBack />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -245,7 +237,7 @@ function Profile({ navigation }) {
                   color={userBadge.color}
                 />
                 <Text style={[styles.badgeText, { color: userBadge.color }]}>
-                  { userBadge.text}
+                  {userBadge.text}
                 </Text>
               </View>
             )}

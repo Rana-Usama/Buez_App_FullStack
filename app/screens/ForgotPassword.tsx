@@ -21,6 +21,7 @@ import { Formik } from "formik";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { BlurView } from "expo-blur";
+import CustomNav from "../components/common/CustomNav";
 
 function ForgotPassword(props: any) {
   const { t } = useTranslation();
@@ -64,28 +65,8 @@ function ForgotPassword(props: any) {
   };
 
   return (
-    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
-      />
-      <View style={styles.container}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => props.navigation.goBack()}
-          style={{ position: "absolute", left: 0 }}
-        >
-          <Ionicons
-            name="chevron-back"
-            style={{ fontSize: RFPercentage(2.5) }}
-            color={theme.heading}
-          />
-        </TouchableOpacity>
-        <Text style={[styles.heading, { color: theme.heading }]}>
-          {`${t("forgetPassword.txt1")}`}
-        </Text>
-      </View>
-
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <CustomNav showBack title={`${t("forgetPassword.txt1")}`} />
       {/* Input field */}
       <Formik
         initialValues={{ email: "" }}
@@ -176,7 +157,7 @@ function ForgotPassword(props: any) {
           </View>
         </BlurView>
       </Modal>
-    </Screen>
+    </View>
   );
 }
 

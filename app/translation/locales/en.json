@@ -16,7 +16,9 @@
     "currency": "e.g; 90$",
     "sign": "$",
     "gotIt": "Got It",
-    "you": "You"
+    "you": "You",
+    "version": "Version",
+    "rights": "BUEZ. All rights reserved."
   },
   "validations": {
     "inValid": "Invalid email",
@@ -274,7 +276,12 @@
     "txt3": "Unread",
     "txt4": "No Unread Messages",
     "txt5": "No Messages Yet",
-    "txt6": "Say hi to"
+    "txt6": "Say hi to",
+    "loading": "Loading chats...",
+    "unknownUser": "Unknown User",
+    "noResults": "No results found",
+    "emptyDescription": "Start a conversation by sending a message to your contacts",
+    "photo": "Photo"
   },
   "chat": {
     "txt1": "Load earlier messages",

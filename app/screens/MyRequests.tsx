@@ -45,6 +45,7 @@ import {
   getCurrencyInfo,
 } from "../utils/currencyChange";
 import { useLocation } from "../utils/useLocation"; // Your location hook
+import { BlurView } from "expo-blur";
 
 type TaskRecord = {
   id?: string;
@@ -310,26 +311,40 @@ function MyRequests({ navigation }) {
       activeOpacity={0.8}
       style={[
         styles.filterButton,
-        { borderColor: isActive ? "transparent" : theme.border },
+        isActive && styles.activeFilterButton,
         isFirst && styles.firstFilterButton,
       ]}
       onPress={() => setActiveFilter(title)}
     >
       {isActive ? (
-        <LinearGradient
-          colors={[Colors.primary, "#4557B0"]}
-          start={{ x: 0, y: 1 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.gradient}
-        >
-          <Text style={styles.filterButtonTextActive}>{title}</Text>
-        </LinearGradient>
+        <View style={styles.neonContainer}>
+          <LinearGradient
+            colors={["#314495ff",  "#14225eff"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.neonGradient}
+          >
+            <Text style={styles.filterButtonTextActive}>{title}</Text>
+          </LinearGradient>
+          <View style={styles.neonGlow} />
+        </View>
       ) : (
-        <Text
-          style={[styles.filterButtonTextInactive, { color: theme.heading }]}
+        <View
+          style={[
+            styles.inactiveButton,
+            {
+              borderColor: theme.border + "80",
+              backgroundColor:
+                theme.mode === "dark" ? theme.white + "05" : "white",
+            },
+          ]}
         >
-          {title}
-        </Text>
+          <Text
+            style={[styles.filterButtonTextInactive, { color: theme.heading }]}
+          >
+            {title}
+          </Text>
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -451,13 +466,15 @@ function MyRequests({ navigation }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
+        barStyle={"light-content"}
+        backgroundColor={"transparent"}
+        translucent
       />
       <Nav
         profileImage={profileImgUrl}
         leftLogo
-        navigation={navigation}
+        gradient
+        gradientColors={[Colors.primary, "#0b1544ff"]}
         title={`${t("myRequests.txt1")}`}
       />
       <ScrollView
@@ -846,43 +863,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: RFPercentage(10),
   },
-  filterButton: {
-    width: RFPercentage(13),
-    height: RFPercentage(4.6),
-    borderRadius: RFPercentage(1),
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: RFPercentage(2),
-    alignSelf: "flex-start",
-    borderWidth: 1,
-  },
-  activeFilterButton: {
-    borderColor: "transparent",
-  },
-  inactiveFilterButton: {
-    borderColor: Colors.border,
-    borderWidth: RFPercentage(0.1),
-  },
-  firstFilterButton: {
-    marginLeft: 0,
-  },
-  gradient: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    height: "100%",
-    borderRadius: RFPercentage(1),
-  },
-  filterButtonTextActive: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_500Medium",
-  },
-  filterButtonTextInactive: {
-    color: Colors.heading,
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_400Regular",
-  },
+
   cartContainer: {
     width: "90%",
     // height: RFPercentage(50),
@@ -1151,5 +1132,61 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
     marginTop: RFPercentage(0.5),
+  },
+
+  filterButton: {
+    marginRight: RFPercentage(1.5),
+    marginVertical: RFPercentage(0.5),
+  },
+  neonContainer: {
+    position: "relative",
+    borderRadius: 25,
+    overflow: "hidden",
+  },
+  neonGradient: {
+    paddingHorizontal: RFPercentage(2.5),
+    paddingVertical: RFPercentage(1.3),
+    borderRadius: 25,
+    position: "relative",
+    zIndex: 2,
+  },
+  neonGlow: {
+    position: "absolute",
+    top: -2,
+    left: -2,
+    right: -2,
+    bottom: -2,
+    borderRadius: 27,
+    backgroundColor: "#243683ff",
+    opacity: 0.5,
+    zIndex: 1,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+  },
+  inactiveButton: {
+    paddingHorizontal: RFPercentage(2.5),
+    paddingVertical: RFPercentage(1.3),
+    borderRadius: 25,
+    borderWidth: 1.5,
+  },
+  filterButtonTextActive: {
+    color: "white",
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_600SemiBold",
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  filterButtonTextInactive: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_500Medium",
+  },
+  activeFilterButton: {
+    transform: [{ scale: 1.05 }],
+  },
+  firstFilterButton: {
+    marginLeft: RFPercentage(2),
   },
 });

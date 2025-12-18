@@ -12,11 +12,13 @@
     "email": "Correo electrónico",
     "password": "Contraseña",
     "name": "Nombre",
-    "confirm": "Confirmar Contraseña",
-    "currency": "ej: 90$",
+    "confirm": "Confirmar contraseña",
+    "currency": "p. ej. 90 $",
     "sign": "$",
     "gotIt": "Entendido",
-    "you": "Tú"
+    "you": "Tú",
+    "version": "Versión",
+    "rights": "BUEZ. Todos los derechos reservados."
   },
   "validations": {
     "inValid": "Correo electrónico inválido",
@@ -266,7 +268,12 @@
     "txt3": "No leídos",
     "txt4": "No hay mensajes no leídos",
     "txt5": "Aún no hay mensajes",
-    "txt6": "Saluda a"
+    "txt6": "Saluda a",
+    "loading": "Cargando chats...",
+    "unknownUser": "Usuario desconocido",
+    "noResults": "No se han encontrado resultados",
+    "emptyDescription": "Inicia una conversación enviando un mensaje a tus contactos",
+    "photo": "Foto"
   },
   "chat": {
     "txt1": "Cargar mensajes anteriores",

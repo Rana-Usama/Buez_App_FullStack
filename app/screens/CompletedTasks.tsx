@@ -20,6 +20,7 @@ import { fetchCompletedTasksFromFirebase } from "../services/Review.service";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import CustomNav from "../components/common/CustomNav";
 
 type Translations = {
   completedTasks: string;
@@ -99,7 +100,6 @@ export default function CompletedTasks({ navigation }: any) {
     }
   };
 
-  
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchCompletedTasks();
@@ -287,16 +287,7 @@ export default function CompletedTasks({ navigation }: any) {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
-      {/* Header */}
-      <View style={[styles.headerContainer, { backgroundColor: theme.white }]}>
-        <Nav
-          dpNull
-          marginTop={RFPercentage(5)}
-          leftLogo={false}
-          navigation={navigation}
-          title={t("profile.txt4")}
-        />
-      </View>
+      <CustomNav title={t("profile.txt4")} showBack />
 
       {/* Stats Overview */}
       {!loading && tasks.length > 0 && (

@@ -22,6 +22,7 @@ import { saveCredentials } from "../services/Auth.service";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useAppTheme } from "../contexts/themeContext";
 import DeviceInfo from "react-native-device-info";
+import { jwtDecode } from "jwt-decode";
 
 const AppleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
@@ -80,14 +81,26 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
             requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
           });
 
-      const { identityToken, nonce, email, fullName, user: appleUserId } =
-        appleAuthResponse;
+      const {
+        identityToken,
+        nonce,
+        email,
+        fullName,
+        user: appleUserId,
+      } = appleAuthResponse;
 
-      if (!identityToken) throw new Error("No identity token from Apple Sign-In");
+      if (!identityToken)
+        throw new Error("No identity token from Apple Sign-In");
 
       const provider = new OAuthProvider("apple.com");
-      const credential = provider.credential({ idToken: identityToken, rawNonce: nonce });
-      const userCredential = await signInWithCredential(FIREBASE_AUTH, credential);
+      const credential = provider.credential({
+        idToken: identityToken,
+        rawNonce: nonce,
+      });
+      const userCredential = await signInWithCredential(
+        FIREBASE_AUTH,
+        credential
+      );
       const user = userCredential.user;
 
       const pushToken = await registerForPushNotificationsAsync();
@@ -95,7 +108,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
-      const finalEmail = email || user.email || `${user.uid}@appleuser.com`;
+      const finalEmail = email || user.email || `buez@appleuser.com`;
       const finalName = fullName
         ? `${fullName.givenName || ""} ${fullName.familyName || ""}`.trim()
         : user.displayName || "Apple User";
@@ -159,8 +172,13 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
         subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
       let isTrialValid = false;
-      if (existingUser.isFreeTrial && existingUser.freeTrialStartedAt?.seconds) {
-        const trialStart = new Date(existingUser.freeTrialStartedAt.seconds * 1000);
+      if (
+        existingUser.isFreeTrial &&
+        existingUser.freeTrialStartedAt?.seconds
+      ) {
+        const trialStart = new Date(
+          existingUser.freeTrialStartedAt.seconds * 1000
+        );
         const trialDays = differenceInDays(now, trialStart);
         isTrialValid = trialDays >= 0 && trialDays <= 14;
       }

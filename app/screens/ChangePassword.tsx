@@ -19,6 +19,7 @@ import InputFieldNew from "../components/common/NewField";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
+import CustomNav from "../components/common/CustomNav";
 
 interface ChangePasswordProps {
   navigation: any;
@@ -74,19 +75,11 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <CustomNav showBack title={`${t("settings.txt2")}`} />
       <ScrollView
         style={{ width: "100%" }}
         contentContainerStyle={{ width: "100%", alignItems: "center" }}
       >
-        {/* Nav */}
-        <Nav
-          dpNull
-          marginTop={RFPercentage(5)}
-          leftLogo={false}
-          navigation={navigation}
-          title={`${t("settings.txt2")}`}
-        />
-
         {/* If Google login → show message + manage account link */}
         {provider === "google.com" || provider === "apple.com" ? (
           <View style={styles.googleContainer}>
@@ -255,7 +248,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#57534E",
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },
   buttonWrapper: {
@@ -275,7 +268,7 @@ const styles = StyleSheet.create({
     left: RFPercentage(0.2),
   },
   googleContainer: {
-    marginTop: RFPercentage(5),
+    marginTop: RFPercentage(10),
     width: "88%",
     alignSelf: "center",
     alignItems: "center",

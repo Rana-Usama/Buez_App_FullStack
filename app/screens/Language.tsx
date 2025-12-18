@@ -19,6 +19,7 @@ import {
   setCurrentLanguage,
   cachedTranslate,
 } from "../utils/cachedTranslations";
+import CustomNav from "../components/common/CustomNav";
 
 const languages = [
   "Swiss German",
@@ -31,7 +32,7 @@ const languages = [
 
 const languageMap = {
   "Swiss German": "de-CH",
-  "German": "de-DE",
+  German: "de-DE",
   French: "fr",
   Italian: "it",
   Spanish: "es",
@@ -75,15 +76,8 @@ function Language({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <CustomNav title={`${t("settings.txt12")}`} showBack />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Nav
-          dpNull
-          marginTop={RFPercentage(5)}
-          leftLogo={false}
-          navigation={navigation}
-          title={`${t("settings.txt12")}`}
-          onPress={() => navigation.navigate("TabNavigator")}
-        />
         <View style={styles.container}>
           {languages.map((lang) => (
             <TouchableOpacity
@@ -144,7 +138,7 @@ const styles = StyleSheet.create({
     // backgroundColor: "#F9FAFB",
   },
   languageText: {
-    fontSize: RFPercentage(1.9),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
     color: "#333",
   },

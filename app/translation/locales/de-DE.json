@@ -13,10 +13,12 @@
     "password": "Passwort",
     "name": "Name",
     "confirm": "Passwort bestätigen",
-    "currency": "z.B. 90$",
+    "currency": "z. B. 90 $",
     "sign": "$",
     "gotIt": "Verstanden",
-    "you": "Du"
+    "you": "Du",
+    "version": "Version",
+    "rights": "BUEZ. Alle Rechte vorbehalten."
   },
   "validations": {
     "inValid": "Ungültige E-Mail",
@@ -65,7 +67,7 @@
       "six": "Anfragestatus konnte nicht aktualisiert werden.",
       "seven": "Anfrage erfolgreich neu veröffentlicht"
     },
-   "cancelSubscription": {
+    "cancelSubscription": {
       "one": "Kein aktives Abonnement",
       "two": "Du hast kein Abonnement zum Kündigen",
       "three": "Abonnement gekündigt"
@@ -266,7 +268,12 @@
     "txt3": "Ungelesen",
     "txt4": "Keine ungelesenen Nachrichten",
     "txt5": "Noch keine Nachrichten",
-    "txt6": "Sag hallo zu"
+    "txt6": "Sag Hallo zu",
+    "loading": "Chats werden geladen...",
+    "unknownUser": "Unbekannter Benutzer",
+    "noResults": "Keine Ergebnisse gefunden",
+    "emptyDescription": "Beginne ein Gespräch, indem du eine Nachricht an deine Kontakte sendest",
+    "photo": "Foto"
   },
   "chat": {
     "txt1": "Frühere Nachrichten laden",
@@ -289,10 +296,9 @@
     "txt11": "Bist du sicher, dass du dich von diesem\nKonto abmelden möchtest?",
     "txt12": "Sprache ändern",
     "txt13": "Dunkles Design",
-    "txt14" : "Upgrade-Plan"
-
+    "txt14": "Upgrade-Plan"
   },
- "cancelSubscription": {
+  "cancelSubscription": {
     "txt1": "Dein aktuelles Abonnement",
     "txt8": "Du hast kein aktives Abonnement",
     "txt10": "Abonnement kündigen",

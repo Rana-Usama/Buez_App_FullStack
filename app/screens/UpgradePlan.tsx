@@ -30,6 +30,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as Localization from "expo-localization";
 import { handlePaymentSheet } from "../services/Subscription.service";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
+import CustomNav from "../components/common/CustomNav";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -434,34 +435,8 @@ function UpgradePlan(props) {
   );
 
   return (
-    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
-      />
-
-      {/* Header */}
-      <View style={[styles.header, { borderBottomColor: theme.border }]}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialCommunityIcons
-            name="keyboard-backspace"
-            style={{ fontSize: RFPercentage(2.9) }}
-            color={theme.grey}
-          />
-        </TouchableOpacity>
-        <View>
-          <Text style={[styles.title, { color: theme.heading }]}>
-            {t("upgradePlan.upgradeYourPlan") || "Upgrade Your Plan"}
-          </Text>
-          {/* <Text style={[styles.subtitle, { color: theme.darkGrey }]}>
-            {t("upgradePlan.getBetterValue") ||
-              "Switch to yearly and save money"}
-          </Text> */}
-        </View>
-      </View>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <CustomNav title={t("upgradePlan.upgradeYourPlan")} showBack />
 
       <ScrollView
         style={styles.container}
@@ -542,7 +517,7 @@ function UpgradePlan(props) {
           />
         </View>
       </ScrollView>
-    </Screen>
+    </View>
   );
 }
 
@@ -768,7 +743,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: RFPercentage(2),
-    zIndex:9999
+    zIndex: 9999,
   },
   upgradeButtonText: {
     color: Colors.white,

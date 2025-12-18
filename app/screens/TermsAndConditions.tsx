@@ -5,6 +5,7 @@ import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import CustomNav from "../components/common/CustomNav";
 
 function TermsAndConditions({ navigation }) {
   const { t } = useTranslation();
@@ -40,20 +41,13 @@ function TermsAndConditions({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <Nav
-        dpNull
-        marginTop={RFPercentage(5)}
-        navigation={navigation}
-        title={`${t("settings.txt3")}`}
-      />
+      <CustomNav title={`${t("settings.txt3")}`} showBack />
 
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Nav */}
-
         <View style={styles.content}>
           <Text style={[styles.text, { color: theme.darkGrey }]}>{`${t(
             "terms.txt1"

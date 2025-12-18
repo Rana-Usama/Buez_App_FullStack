@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  ImageBackground,
   FlatList,
   Dimensions,
   Platform,
+  Animated,
+  StatusBar,
+  SafeAreaView,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
@@ -19,94 +21,209 @@ import {
   addDoc,
   updateDoc,
   doc,
+  onSnapshot,
 } from "firebase/firestore";
-// components
-import Nav from "../components/common/Nav";
-// config
-import Colors from "../config/Colors";
-import MyAppButton from "../components/common/MyAppButton";
+import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
+import { useTranslation } from "react-i18next";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import ImageView from "react-native-image-viewing";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+// Components
+import AcceptanceSuccessModal from "../components/common/AcceptanceSuccessModal";
+
+// Services & Utils
 import { getDateTime } from "../services/Shared.service";
 import { createNewChat } from "../services/Chat.service";
 import { useUser } from "../contexts/user.context";
-import { Icons } from "../config/theme";
-import { useTranslation } from "react-i18next";
-import { FIREBASE_DB } from "../../firebaseConfig";
 import { useAppTheme } from "../contexts/themeContext";
-import { LinearGradient } from "expo-linear-gradient";
 import { cachedTranslate } from "../utils/cachedTranslations";
-import { onSnapshot } from "firebase/firestore";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import AcceptanceSuccessModal from "../components/common/AcceptanceSuccessModal";
 import {
   formatCurrency,
   convertCurrency,
   getCurrencyInfo,
 } from "../utils/currencyChange";
-import { useLocation } from "../utils/useLocation"; // Your location hook
-import ImageView from "react-native-image-viewing";
+import { useLocation } from "../utils/useLocation";
 
-const screenWidth = Dimensions.get("window").width;
+// Config
+import Colors from "../config/Colors";
+import { Icons } from "../config/theme";
+import { FIREBASE_DB } from "../../firebaseConfig";
+import CustomNav from "../components/common/CustomNav";
+
+const { width } = Dimensions.get("window");
+
+// Custom App Button Component
+const CustomAppButton = ({
+  title,
+  onPress,
+  loading = false,
+  disabled = false,
+  backgroundColor = Colors.primary,
+  textColor = "white",
+  icon,
+  style,
+  textStyle,
+  iconColor,
+}) => {
+  const [isPressed, setIsPressed] = useState(false);
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={onPress}
+      disabled={disabled || loading}
+      onPressIn={() => setIsPressed(true)}
+      onPressOut={() => setIsPressed(false)}
+      style={[
+        customButtonStyles.button,
+        {
+          backgroundColor: disabled ? backgroundColor + "80" : backgroundColor,
+          transform: [{ scale: isPressed ? 0.98 : 1 }],
+        },
+        style,
+      ]}
+    >
+      {loading ? (
+        <View style={customButtonStyles.loadingContainer}>
+          <Animated.View style={customButtonStyles.spinner} />
+        </View>
+      ) : (
+        <View style={customButtonStyles.content}>
+          {icon && (
+            <Ionicons
+              name={icon}
+              size={RFPercentage(1.8)}
+              color={iconColor || textColor}
+              style={customButtonStyles.icon}
+            />
+          )}
+          <Text
+            style={[customButtonStyles.text, { color: textColor }, textStyle]}
+          >
+            {title}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+};
+
+const customButtonStyles = StyleSheet.create({
+  button: {
+    flex: 1,
+    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
+    borderRadius: RFPercentage(100),
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  icon: {
+    marginRight: RFPercentage(0.5),
+  },
+  text: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  spinner: {
+    width: RFPercentage(2),
+    height: RFPercentage(2),
+    borderRadius: RFPercentage(1),
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.3)",
+    borderTopColor: "white",
+  },
+});
 
 function OfferDetail({ navigation, route }) {
   const { t } = useTranslation();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [visible, setIsVisible] = useState(false);
-
+  const { theme } = useAppTheme();
   const currentUser = useUser();
   const currentUserId = getAuth().currentUser?.uid;
   const currentUserId2 = getAuth().currentUser;
+  const { location: currentLocation } = useLocation();
+
   const postRequest = route.params?.postRequest;
-  const [showAll, setShowAll] = useState(false);
-  const db = FIREBASE_DB;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [visible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [translatedReviews, setTranslatedReviews] = useState([]);
+  const [showAll, setShowAll] = useState(false);
+  const [isAccepted, setIsAccepted] = useState(!!postRequest?.acceptedBy);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [averageRating, setAverageRating] = useState(null);
+
   const [translatedOffer, setTranslatedOffer] = useState({
     taskType: "",
     description: "",
     otherCompensation: "",
     customTaskTitle: "",
   });
-  const [isAccepted, setIsAccepted] = useState(!!postRequest?.acceptedBy);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const { location: currentLocation } = useLocation();
+
+  const [translatedReviews, setTranslatedReviews] = useState([]);
+  const translationCache = useRef({}).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const db = FIREBASE_DB;
   const imageObjects =
     postRequest?.imageUrls?.map((url) => ({ uri: url })) || [];
 
+  // Animations
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
+  // Currency conversion function
   const getConvertedCompensation = (item) => {
     if (item.compensationType !== "Monitarely") return null;
 
     try {
       const originalAmount = parseFloat(item.monitarily) || 0;
-      // Use currentLocation first, fallback to selectedLocation
-      const locationToUse = currentLocation;
       if (!item.currencyInfo) {
-        return formatCurrency(originalAmount, locationToUse);
+        return formatCurrency(originalAmount, currentLocation);
       }
-      // Get target currency from current location
-      const targetCurrency = getCurrencyInfo(locationToUse).code;
-      // Convert the amount
+
+      const targetCurrency = getCurrencyInfo(currentLocation).code;
       const convertedAmount = convertCurrency(
         originalAmount,
-        item.currencyInfo.code, // Original currency
-        targetCurrency // Target currency (from current location)
+        item.currencyInfo.code,
+        targetCurrency
       );
-      return formatCurrency(convertedAmount, locationToUse);
+      return formatCurrency(convertedAmount, currentLocation);
     } catch (error) {
       console.log("Currency conversion error:", error);
       return formatCurrency(parseFloat(item.monitarily) || 0, currentLocation);
     }
   };
 
-  const handleModalClose = () => {
-    setShowSuccessModal(false);
-    navigation.navigate("TabNavigator");
-  };
-
-  const handleViewRequests = () => {
-    setShowSuccessModal(false);
-    navigation.navigate("TabNavigator", { screen: t("bottomTab.txt1") });
-  };
-
+  // Real-time acceptance status monitoring
   useEffect(() => {
     if (!postRequest?.id) return;
     const taskDocRef = doc(db, "taskRequests", postRequest.id);
@@ -124,17 +241,19 @@ function OfferDetail({ navigation, route }) {
     return () => unsubscribe();
   }, [postRequest?.id]);
 
-  const [loading, setLoading] = useState(false);
-  const visibleReviews = showAll
-    ? translatedReviews
-    : translatedReviews.slice(0, 3);
-  const hiddenCount = translatedReviews.length - 3;
-  const [averageRating, setAverageRating] = useState(null);
-  const { theme } = useAppTheme();
+  // Modal handlers
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    navigation.navigate("TabNavigator");
+  };
 
-  const translationCache = React.useRef({}).current;
+  const handleViewRequests = () => {
+    setShowSuccessModal(false);
+    navigation.navigate("TabNavigator", { screen: t("bottomTab.txt1") });
+  };
 
-  const translateWithCache = async (text: string) => {
+  // Translation function with cache
+  const translateWithCache = async (text) => {
     if (!text) return "";
     if (translationCache[text]) return translationCache[text];
     try {
@@ -147,6 +266,7 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
+  // Translate offer data
   useEffect(() => {
     const translateOfferData = async () => {
       const [
@@ -172,6 +292,7 @@ function OfferDetail({ navigation, route }) {
     }
   }, [postRequest]);
 
+  // Translate reviews and calculate average rating
   useEffect(() => {
     const translateReviews = async () => {
       if (postRequest?.reviews && postRequest.reviews.length > 0) {
@@ -182,6 +303,7 @@ function OfferDetail({ navigation, route }) {
           }))
         );
         setTranslatedReviews(translated);
+
         // Calculate average rating
         const ratings = postRequest.reviews
           .map((r) => r.rating)
@@ -197,6 +319,7 @@ function OfferDetail({ navigation, route }) {
     translateReviews();
   }, [postRequest?.reviews]);
 
+  // Chat handler
   const handleStartChat = async () => {
     const chatId = await createNewChat(currentUserId, postRequest.userId);
     navigation.navigate("Chat", {
@@ -207,6 +330,7 @@ function OfferDetail({ navigation, route }) {
     });
   };
 
+  // Store accepted task
   const storeAcceptedTask = async () => {
     try {
       await addDoc(collection(db, "completedTask"), {
@@ -230,6 +354,7 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
+  // Update request with acceptedBy field
   const updateRequestAcceptedBy = async () => {
     try {
       const taskDocRef = doc(db, "taskRequests", postRequest.id);
@@ -249,6 +374,7 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
+  // Send push notification
   async function sendPushNotification() {
     try {
       const response = await fetch(
@@ -273,6 +399,7 @@ function OfferDetail({ navigation, route }) {
     }
   }
 
+  // Save notification
   const saveNotification = async () => {
     try {
       await addDoc(collection(db, "notifications"), {
@@ -301,8 +428,9 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
+  // Main accept handler
   const handleAccept = async () => {
-    setLoading(true); // show spinner
+    setLoading(true);
     try {
       await sendPushNotification();
       await storeAcceptedTask();
@@ -310,459 +438,676 @@ function OfferDetail({ navigation, route }) {
       await saveNotification();
       setIsAccepted(true);
       setShowSuccessModal(true);
-      // navigation.goBack();
     } catch (error) {
       console.log("Error accepting task:", error);
     } finally {
-      setLoading(false); // hide spinner
+      setLoading(false);
     }
   };
 
+  // Category Icon
+  const getCategoryIcon = (category) => {
+    switch (category?.toLowerCase()) {
+      case "cleaning":
+        return (
+          <MaterialCommunityIcons
+            name="broom"
+            size={RFPercentage(2.5)}
+            color={Colors.white}
+          />
+        );
+      case "moving":
+        return (
+          <FontAwesome5
+            name="truck-moving"
+            size={RFPercentage(2.2)}
+            color={Colors.white}
+          />
+        );
+      case "gardening":
+        return (
+          <FontAwesome5
+            name="seedling"
+            size={RFPercentage(2.2)}
+            color={Colors.white}
+          />
+        );
+      case "gaming":
+        return (
+          <Ionicons
+            name="game-controller"
+            size={RFPercentage(2.5)}
+            color={Colors.white}
+          />
+        );
+      default:
+        return (
+          <MaterialIcons
+            name="compost"
+            size={RFPercentage(2.5)}
+            color={Colors.white}
+          />
+        );
+    }
+  };
+
+  const visibleReviews = showAll
+    ? translatedReviews
+    : translatedReviews.slice(0, 3);
+  const hiddenCount = translatedReviews.length - 3;
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <Nav
-        dpNull
-        leftLogo={false}
-        navigation={navigation}
-        title={`${t("details.txt1")}`}
-        marginTop={RFPercentage(5)}
-      />
-      <ScrollView
+    <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
+      <StatusBar barStyle={"light-content"} translucent />
+
+      <CustomNav title={t("details.txt1")} showBack={true} />
+
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
+        contentContainerStyle={styles.scrollContent}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
       >
-        <View style={{ width: "90%", alignSelf: "center" }}>
-          <View style={{ flexDirection: "row", marginTop: RFPercentage(1) }}>
+        {/* Hero Image Section */}
+        <View style={styles.heroSection}>
+          {postRequest?.imageUrls?.length > 0 ? (
+            <FlatList
+              data={postRequest.imageUrls}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(event) => {
+                const index = Math.round(
+                  event.nativeEvent.contentOffset.x /
+                    event.nativeEvent.layoutMeasurement.width
+                );
+                setActiveIndex(index);
+              }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onPress={() => setIsVisible(true)}
+                  style={styles.imageContainer}
+                >
+                  <Image
+                    source={{ uri: item }}
+                    style={styles.heroImage}
+                    resizeMode="cover"
+                  />
+                  <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.3)"]}
+                    style={styles.imageGradient}
+                  />
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item, index) => index.toString()}
+            />
+          ) : (
+            <View style={styles.noImageContainer}>
+              <LinearGradient
+                colors={[Colors.primary + "20", Colors.primary + "05"]}
+                style={styles.noImageGradient}
+              >
+                <Ionicons
+                  name="images"
+                  size={RFPercentage(6)}
+                  color={Colors.primary + "60"}
+                />
+                <Text
+                  style={[styles.noImageText, { color: Colors.primary + "80" }]}
+                >
+                  {t("details.txt13")}
+                </Text>
+              </LinearGradient>
+            </View>
+          )}
+
+          {/* Image Dots */}
+          {postRequest?.imageUrls?.length > 1 && (
+            <View style={styles.dotsContainer}>
+              {postRequest.imageUrls.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    {
+                      backgroundColor:
+                        index === activeIndex
+                          ? Colors.primary
+                          : "rgba(255,255,255,0.5)",
+                      width:
+                        index === activeIndex
+                          ? RFPercentage(1.5)
+                          : RFPercentage(1),
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+
+          {/* Category Badge */}
+          <View style={styles.categoryBadge}>
             <LinearGradient
               colors={[Colors.primary, "#4557B0"]}
-              start={{ x: 0, y: 1 }}
+              style={styles.categoryGradient}
+              start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={styles.gradient}
             >
-              <Text style={[styles.title, { color: "white" }]}>
+              {getCategoryIcon(postRequest?.category)}
+              <Text style={styles.categoryText}>
                 {postRequest?.taskType === "Other"
                   ? translatedOffer?.customTaskTitle ||
                     translatedOffer?.taskType
                   : translatedOffer?.taskType}
               </Text>
             </LinearGradient>
-            <Image
-              source={Icons.bar}
-              resizeMode="contain"
-              tintColor={Colors.primary}
-              style={styles.img}
-            />
           </View>
         </View>
-        {/* Image Carousel */}
-        <View style={styles.carousal}>
-          <FlatList
-            data={postRequest.imageUrls}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={(event) => {
-              const index = Math.round(
-                event.nativeEvent.contentOffset.x /
-                  event.nativeEvent.layoutMeasurement.width
-              );
-              setActiveIndex(index);
-            }}
-            renderItem={({ item, index }) => (
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={() => {
-                  setActiveIndex(index);
-                  setIsVisible(true);
-                }}
-              >
-                <ImageBackground
-                  style={styles.imageBackground}
-                  imageStyle={styles.image}
-                  source={{ uri: item }}
-                />
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
-        </View>
 
-        {/* Dots */}
-        {postRequest?.imageUrls?.length > 1 && (
-          <View style={styles.dotsContainer}>
-            {postRequest.imageUrls.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  {
-                    backgroundColor:
-                      index === activeIndex ? theme.primary : theme.stroke,
-                  },
-                ]}
-              />
-            ))}
-          </View>
-        )}
-
-        <ImageView
-          images={imageObjects}
-          imageIndex={activeIndex}
-          visible={visible}
-          onRequestClose={() => setIsVisible(false)}
-        />
-
-        <View style={styles.wrap}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View>
-              <Image
-                style={styles.userImage}
-                source={
-                  postRequest?.user?.profileImage
-                    ? { uri: postRequest?.user?.profileImage }
-                    : Icons.dp
+        {/* Main Content */}
+        <Animated.View style={[styles.contentContainer, { opacity: fadeAnim }]}>
+          {/* User Info Card - Light Background */}
+          <View style={styles.userCardContainer}>
+            <BlurView
+              intensity={80}
+              tint={theme.mode === "dark" ? "dark" : "light"}
+              style={styles.blurView}
+            >
+              <LinearGradient
+                colors={
+                  theme.mode === "dark"
+                    ? ["rgba(255,255,255,0.15)", "rgba(255,255,255,0.08)"]
+                    : [Colors.primary + "40", Colors.primary + "20"]
                 }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gradientOverlay}
               />
-            </View>
-            <Text
-              style={[
-                styles.txt,
-                {
-                  color: theme.heading,
-                },
-              ]}
-            >
-              {postRequest?.user?.userName}
-            </Text>
+
+              <View style={styles.userInfo}>
+                <View style={styles.avatarContainer}>
+                  <LinearGradient
+                    colors={[Colors.primary, "#4557B0"]}
+                    style={styles.avatarGradientBorder}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Image
+                      source={
+                        postRequest?.user?.profileImage
+                          ? { uri: postRequest.user.profileImage }
+                          : Icons.dp
+                      }
+                      style={[
+                        styles.userAvatar,
+                        {
+                          borderColor:
+                            theme.mode === "dark"
+                              ? "rgba(255,255,255,0.3)"
+                              : "white",
+                        },
+                      ]}
+                    />
+                  </LinearGradient>
+
+                 
+                </View>
+
+                <View style={styles.userDetails}>
+                  <Text
+                    style={[
+                      styles.userName,
+                      {
+                        color:
+                          theme.mode === "dark" ? Colors.white : theme.primary,
+                      },
+                    ]}
+                  >
+                    {postRequest?.user?.userName}
+                  </Text>
+                  <View style={styles.subtitleRow}>
+                    <Ionicons
+                      name="time-outline"
+                      size={RFPercentage(1.3)}
+                      color={
+                        theme.mode === "dark"
+                          ? Colors.white
+                          : theme.darkGrey
+                      }
+                    />
+                    <Text
+                      style={[
+                        styles.userSubtitle,
+                        {
+                          color:
+                            theme.mode === "dark"
+                              ? Colors.white 
+                              : theme.darkGrey,
+                        },
+                      ]}
+                    >
+                      {t("myRequests.txt4")} •{" "}
+                      {getDateTime(postRequest?.createdAt)}
+                    </Text>
+                  </View>
+                </View>
+
+                {currentUserId !== postRequest?.userId && (
+                  <TouchableOpacity
+                    style={[
+                      styles.messageButton,
+                      {
+                        backgroundColor:
+                          theme.mode === "dark"
+                            ? "rgba(255,255,255,0.15)"
+                            : Colors.primary + "20",
+                      },
+                    ]}
+                    onPress={handleStartChat}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons
+                      name="chatbubble-ellipses"
+                      size={RFPercentage(2.2)}
+                      color={
+                        theme.mode === "dark" ? Colors.white : Colors.primary
+                      }
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </BlurView>
           </View>
-        </View>
 
-        {/* Translated Details */}
-        <View style={styles.detailsContainer}>
-          <View
-            style={[styles.infoContainer, { marginTop: RFPercentage(2.5) }]}
-          >
-            <View
-              style={[
-                styles.wrap2,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? Colors.primary + "40"
-                      : Colors.primary + "15",
-                },
-              ]}
-            >
-              <Image
-                style={styles.icon}
-                source={Icons.bars}
-                tintColor={Colors.primary}
-                resizeMode="contain"
-              />
-            </View>
-
-            <Text style={[styles.infoText, { color: theme.heading }]}>
-              {t("postRequest.txt8")}
-            </Text>
-          </View>
-
-          <Text style={[styles.description, { color: theme.darkGrey }]}>
-            {isExpanded || translatedOffer?.description?.length <= 120
-              ? translatedOffer?.description
-              : translatedOffer?.description.slice(0, 120) + "... "}
-            {translatedOffer?.description?.length > 120 && (
-              <Text
-                onPress={() => setIsExpanded(!isExpanded)}
-                style={[styles.readMoreText, { color: theme.primary }]}
-              >
-                {isExpanded ? ` ${t("details.txt2")}` : `${t("details.txt3")}`}
-              </Text>
-            )}
-          </Text>
-        </View>
-
-        <View style={styles.infoContainer}>
+          {/* Task Description Card - Light Background */}
           <View
             style={[
-              styles.wrap2,
+              styles.detailCard,
               {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? Colors.primary + "40"
-                    : Colors.primary + "15",
+                    ? theme.primary + "30" 
+                    : Colors.primary + "05",
               },
             ]}
           >
-            <Image
-              style={styles.icon}
-              source={Icons.location}
-              tintColor={Colors.primary}
-              resizeMode="contain"
-            />
-          </View>
-
-          <Text style={[styles.infoText, { color: theme.heading }]}>{`${t(
-            "details.txt4"
-          )}`}</Text>
-        </View>
-        <Text style={[styles.txt4, { color: theme.darkGrey }]}>
-          {postRequest.address.name}
-        </Text>
-
-        <View style={styles.infoContainer}>
-          <View
-            style={[
-              styles.wrap2,
-              {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.primary + "40"
-                    : Colors.primary + "15",
-              },
-            ]}
-          >
-            <Image
-              style={styles.icon}
-              source={Icons.cal}
-              tintColor={Colors.primary}
-              resizeMode="contain"
-            />
-          </View>
-
-          <Text style={[styles.infoText, { color: theme.heading }]}>{`${t(
-            "details.txt5"
-          )}`}</Text>
-        </View>
-        <View
-          style={{
-            width: "90%",
-            alignSelf: "center",
-          }}
-        >
-          <Text style={[styles.txt3, { color: theme.darkGrey }]}>
-            {getDateTime(postRequest.createdAt)}
-          </Text>
-        </View>
-
-        <View style={styles.compensationContainer}>
-          <View
-            style={[
-              styles.wrap2,
-              {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.primary + "40"
-                    : Colors.primary + "15",
-              },
-            ]}
-          >
-            <Image
-              style={styles.icon}
-              source={require("../../assets/Images/compensation.png")}
-              tintColor={Colors.primary}
-              resizeMode="contain"
-            />
-          </View>
-
-          <Text style={[styles.infoText, { color: theme.heading }]}>
-            {`${t("details.txt6")}`}
-          </Text>
-        </View>
-        <View style={{ width: "90%", alignSelf: "center" }}>
-          <Text style={[styles.description, { color: theme.darkGrey }]}>
-            {postRequest.compensationType === "Monitarely"
-              ? getConvertedCompensation(postRequest)
-              : translatedOffer.otherCompensation}
-          </Text>
-        </View>
-
-        <View style={styles.inner}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View
-              style={[
-                styles.wrap2,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? Colors.primary + "40"
-                      : Colors.primary + "15",
-                },
-              ]}
-            >
-              <AntDesign
-                name="barschart"
-                size={RFPercentage(1.8)}
+            <View style={styles.sectionHeader}>
+              <Ionicons
+                name="document-text"
+                size={RFPercentage(2.2)}
                 color={Colors.primary}
               />
+              <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                {t("postRequest.txt8")}
+              </Text>
             </View>
-            <Text
+
+            <View
               style={[
-                styles.compensationTitle,
-                { color: theme.heading, marginLeft: RFPercentage(1) },
+                styles.descriptionContainer,
+               
               ]}
             >
-              {t("profile.txt3")}
-            </Text>
-          </View>
-          {averageRating && (
-            <View style={styles.inner2}>
-              <Text style={[styles.rating, { color: theme.heading }]}>
-                {t("details.txt14")}:
-              </Text>
-              <Text
-                style={[
-                  styles.ratingText,
-                  { color: theme.heading, marginLeft: RFPercentage(0.5) },
-                ]}
-              >
-                {averageRating} ⭐
+              <Text style={[styles.taskDescription, { color: theme.darkGrey }]}>
+                {isExpanded || translatedOffer?.description?.length <= 150
+                  ? translatedOffer?.description
+                  : translatedOffer?.description?.substring(0, 150) + "... "}
+                {translatedOffer?.description?.length > 150 && (
+                  <Text
+                    onPress={() => setIsExpanded(!isExpanded)}
+                    style={[styles.readMore, { color: Colors.primary }]}
+                  >
+                    {isExpanded
+                      ? ` ${t("details.txt2")}`
+                      : ` ${t("details.txt3")}`}
+                  </Text>
+                )}
               </Text>
             </View>
-          )}
-        </View>
-        <View style={{ width: "90%" }}>
-          {visibleReviews?.length > 0 ? (
-            <>
-              <FlatList
-                data={visibleReviews}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item, index }) => {
-                  const isLastItem = index === visibleReviews.length - 1;
-                  return (
-                    <View>
-                      <View style={[styles.review]}>
+          </View>
+
+          {/* Task Info Cards - Light Backgrounds */}
+          <View style={styles.infoGrid}>
+            {/* Location Card */}
+            <View
+              style={[
+                styles.infoCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark" ? theme.primary + "30"  : "#E3F2FD",
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: Colors.primary + "20" },
+                ]}
+              >
+                <Ionicons
+                  name="location"
+                  size={RFPercentage(2.2)}
+                  color={Colors.primary}
+                />
+              </View>
+              <Text style={[styles.infoLabel, { color: theme.darkGrey }]}>
+                {t("details.txt4")}
+              </Text>
+              <View style={styles.infoValueContainer}>
+                <Text
+                  style={[styles.infoValue, { color: theme.heading }]}
+                  numberOfLines={2}
+                >
+                  {postRequest?.address?.name || t("details.txt16")}
+                </Text>
+              </View>
+            </View>
+
+            {/* Compensation Card */}
+            <View
+              style={[
+                styles.infoCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark" ? theme.primary + "30"  : "#E8F5E9",
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: "#4CAF50" + "20" },
+                ]}
+              >
+                <Ionicons
+                  name={
+                    postRequest?.compensationType === "Monitarely"
+                      ? "cash"
+                      : "gift"
+                  }
+                  size={RFPercentage(2.2)}
+                  color={
+                    postRequest?.compensationType === "Monitarely"
+                      ? "#4CAF50"
+                      : "#FF9800"
+                  }
+                />
+              </View>
+              <Text style={[styles.infoLabel, { color: theme.darkGrey }]}>
+                {t("home.txt10")}
+              </Text>
+              <View style={styles.infoValueContainer}>
+                <Text
+                  style={[styles.infoValue, { color: Colors.primary }]}
+                  numberOfLines={2}
+                >
+                  {postRequest?.compensationType === "Monitarely"
+                    ? getConvertedCompensation(postRequest)
+                    : translatedOffer.otherCompensation || t("details.txt17")}
+                </Text>
+              </View>
+            </View>
+
+            {/* Date Card */}
+            <View
+              style={[
+                styles.infoCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark" ? theme.primary + "30" : "#efefefff",
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: "#9C27B0" + "20" },
+                ]}
+              >
+                <Ionicons
+                  name="calendar"
+                  size={RFPercentage(2.2)}
+                  color="#9C27B0"
+                />
+              </View>
+              <Text style={[styles.infoLabel, { color: theme.darkGrey }]}>
+                {t("details.txt5")}
+              </Text>
+              <View style={styles.infoValueContainer}>
+                <Text style={[styles.infoValue, { color: theme.heading }]}>
+                  {getDateTime(postRequest?.createdAt)}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Reviews Section - Light Background */}
+          {(translatedReviews.length > 0 || averageRating) && (
+            <View
+              style={[
+                styles.reviewsCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark" ? theme.white + "10" : "#FFF8E1",
+                },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="star"
+                  size={RFPercentage(2.2)}
+                  color="#FFD700"
+                />
+                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                  {t("profile.txt3")}
+                  {averageRating && (
+                    <Text
+                      style={[styles.ratingText, { color: theme.darkGrey }]}
+                    >
+                      {" "}
+                      ({averageRating} ⭐)
+                    </Text>
+                  )}
+                </Text>
+              </View>
+
+              {translatedReviews.length > 0 ? (
+                <>
+                  {visibleReviews.map((review, index) => (
+                    <View
+                      key={review.id || index}
+                      style={[
+                        styles.reviewItem,
+                        {
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? theme.white + "08"
+                              : "rgba(255,255,255,0.7)",
+                        },
+                      ]}
+                    >
+                      <View style={styles.reviewHeader}>
                         <Image
                           source={
-                            item?.reviewer?.profileImage
-                              ? { uri: item?.reviewer?.profileImage }
+                            review?.reviewer?.profileImage
+                              ? { uri: review.reviewer.profileImage }
                               : Icons.dp
                           }
-                          resizeMode="cover"
-                          style={styles.reviewPic}
+                          style={styles.reviewerAvatar}
                         />
-                        <View
-                          style={{
-                            marginLeft: RFPercentage(1),
-                            width: "85%",
-                          }}
-                        >
-                          {/* Reviewer Name + Rating */}
-                          <View style={{ marginTop: RFPercentage(0.7) }}>
-                            <Text
-                              style={[
-                                styles.userName,
-                                {
-                                  color: theme.heading,
-                                },
-                              ]}
-                            >
-                              {item?.reviewer?.userName}
-                            </Text>
-
-                            {item?.createdAt && (
-                              <Text
-                                style={[styles.date, { color: theme.darkGrey }]}
-                              >
-                                {getDateTime(item.createdAt)}
-                              </Text>
-                            )}
-                          </View>
+                        <View style={styles.reviewerInfo}>
+                          <Text
+                            style={[
+                              styles.reviewerName,
+                              { color: theme.heading },
+                            ]}
+                          >
+                            {review?.reviewer?.userName}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.reviewDate,
+                              { color: theme.darkGrey },
+                            ]}
+                          >
+                            {getDateTime(review.createdAt)}
+                          </Text>
                         </View>
-                      </View>
-                      {item?.rating && (
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            marginTop: RFPercentage(0.5),
-                          }}
-                        >
-                          {[1, 2, 3, 4, 5].map((i) => (
-                            <Text
-                              key={i}
-                              style={{
-                                color:
-                                  i <= (item.rating || 0)
-                                    ? Colors.star
-                                    : Colors.stroke,
-                                fontSize: RFPercentage(2),
-                                marginRight: 1,
-                              }}
-                            >
-                              ★
-                            </Text>
+                        <View style={styles.starsContainer}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Ionicons
+                              key={star}
+                              name="star"
+                              size={RFPercentage(1.4)}
+                              color={
+                                star <= (review.rating || 0)
+                                  ? "#FFD700"
+                                  : theme.border
+                              }
+                            />
                           ))}
                         </View>
-                      )}
-
-                      {/* Review Text */}
-                      <Text
+                      </View>
+                      <View
                         style={[
-                          styles.userName2,
+                          styles.reviewTextContainer,
                           {
-                            color: theme.darkGrey,
+                            backgroundColor:
+                              theme.mode === "dark"
+                                ? theme.white + "05"
+                                : "rgba(255,255,255,0.5)",
                           },
                         ]}
                       >
-                        {item?.translatedText}
-                      </Text>
-
-                      {!isLastItem && <View style={styles.last} />}
+                        <Text
+                          style={[styles.reviewText, { color: theme.darkGrey }]}
+                        >
+                          {review.translatedText}
+                        </Text>
+                      </View>
+                      {index < visibleReviews.length - 1 && (
+                        <View
+                          style={[
+                            styles.reviewDivider,
+                            { backgroundColor: theme.border },
+                          ]}
+                        />
+                      )}
                     </View>
-                  );
-                }}
-              />
+                  ))}
 
-              {!showAll && hiddenCount > 0 && (
-                <TouchableOpacity onPress={() => setShowAll(true)}>
-                  <Text style={[styles.reviewCount, { color: theme.primary }]}>
-                    +{hiddenCount} {t("details.txt11")}
+                  {!showAll && hiddenCount > 0 && (
+                    <TouchableOpacity
+                      onPress={() => setShowAll(true)}
+                      style={styles.viewAllButton}
+                    >
+                      <Text
+                        style={[styles.viewAllText, { color: Colors.primary }]}
+                      >
+                        +{hiddenCount} {t("details.txt11")}
+                      </Text>
+                      <Ionicons
+                        name="chevron-down"
+                        size={RFPercentage(1.6)}
+                        color={Colors.primary}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </>
+              ) : (
+                <View
+                  style={[
+                    styles.noReviewsContainer,
+                    {
+                      backgroundColor:
+                        theme.mode === "dark"
+                          ? theme.white + "08"
+                          : "rgba(255,255,255,0.7)",
+                    },
+                  ]}
+                >
+                  <Text style={[styles.noReviews, { color: theme.darkGrey }]}>
+                    {t("details.txt10")}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* Action Buttons */}
+          <View style={styles.actionButtons}>
+            {isAccepted ? (
+              <CustomAppButton
+                title={t("details.txt9")}
+                onPress={handleStartChat}
+                icon="chatbubble-ellipses"
+              />
+            ) : (
+              <>
+                <TouchableOpacity
+                  style={[
+                    styles.secondaryButton,
+                    {
+                      borderColor: theme.lightGrey,
+                      backgroundColor:
+                        theme.mode === "dark"
+                          ? theme.white + "10"
+                          : Colors.primary + "08",
+                    },
+                  ]}
+                  onPress={handleStartChat}
+                  activeOpacity={0.8}
+                  disabled={currentUserId === postRequest.userId}
+                >
+                  <Ionicons
+                    name="chatbubble-ellipses"
+                    size={RFPercentage(1.8)}
+                    color={theme.darkGrey}
+                  />
+                  <Text
+                    style={[
+                      styles.secondaryButtonText,
+                      { color: theme.darkGrey },
+                    ]}
+                  >
+                    {t("details.txt9")}
                   </Text>
                 </TouchableOpacity>
-              )}
-            </>
-          ) : (
-            <>
-              <Text style={[styles.detail, { color: theme.heading }]}>
-                {t("details.txt10")}
-              </Text>
-            </>
-          )}
-        </View>
 
-        {/* Buttons */}
-        <View style={styles.buttonWrapper}>
-          {isAccepted ? (
-            <MyAppButton
-              title={t("details.txt9")}
-              disabled={currentUserId === postRequest.userId}
-              onPress={handleStartChat}
-              marginTop={RFPercentage(0)}
-            />
-          ) : (
-            <>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[styles.chatButton, { borderColor: theme.darkGrey }]}
-                disabled={currentUserId === postRequest.userId}
-                onPress={handleStartChat}
-              >
-                <Text style={[styles.text, { color: theme.darkGrey }]}>
-                  {t("details.txt9")}
-                </Text>
-              </TouchableOpacity>
-              <MyAppButton
-                title={t("details.txt12")}
-                marginTop={RFPercentage(0)}
-                loading={loading}
-                onPress={handleAccept}
-              />
-            </>
-          )}
-        </View>
-      </ScrollView>
+                <CustomAppButton
+                  title={t("details.txt12")}
+                  onPress={handleAccept}
+                  loading={loading}
+                  icon="checkmark-circle"
+                  disabled={currentUserId === postRequest.userId}
+                />
+              </>
+            )}
+          </View>
+        </Animated.View>
+      </Animated.ScrollView>
 
+      {/* Image Viewer */}
+      <ImageView
+        images={imageObjects}
+        imageIndex={activeIndex}
+        visible={visible}
+        onRequestClose={() => setIsVisible(false)}
+        FooterComponent={({ imageIndex }) => (
+          <View style={styles.imageViewerFooter}>
+            <Text style={styles.imageIndexText}>
+              {imageIndex + 1} / {imageObjects.length}
+            </Text>
+          </View>
+        )}
+      />
+
+      {/* Success Modal */}
       <AcceptanceSuccessModal
         visible={showSuccessModal}
         onClose={handleModalClose}
@@ -774,256 +1119,377 @@ function OfferDetail({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  safeArea: {
     flex: 1,
-    justifyContent: "flex-start",
+  },
+  header: {
+    zIndex: 1000,
+    backgroundColor: "rgba(91, 92, 110, 1)",
+    paddingTop: Platform.OS === "ios" ? RFPercentage(6) : 0,
+  },
+  blurHeader: {
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(1.5),
+  },
+  headerContent: {
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.white,
+    justifyContent: "space-between",
+    paddingVertical: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+  },
+  backButton: {
+    width: RFPercentage(3.5),
+    height: RFPercentage(3.5),
+    borderRadius: RFPercentage(2),
+    backgroundColor: "rgba(255,255,255,0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_600SemiBold",
+    color: "white",
+  },
+  headerRight: {
+    width: RFPercentage(4),
   },
   scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: RFPercentage(10),
+  },
+  heroSection: {
+    height: RFPercentage(30),
+    position: "relative",
+  },
+  imageContainer: {
+    width: width,
+    height: "100%",
+  },
+  heroImage: {
     width: "100%",
+    height: "100%",
   },
-  scrollViewContent: {
-    alignItems: "center",
-    paddingBottom: RFPercentage(5),
+  imageGradient: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "30%",
   },
-  carousal: {
-    width: "90%",
+  noImageContainer: {
+    width: "100%",
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: RFPercentage(0.5),
   },
-  imageBackground: {
-    width: screenWidth * 0.9,
-    height: RFPercentage(26),
-    borderRadius: RFPercentage(2),
-    overflow: "hidden",
-    marginTop: RFPercentage(2),
+  noImageGradient: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  image: {
-    borderRadius: RFPercentage(2),
-  },
-  userImage: {
-    width: RFPercentage(6.2),
-    height: RFPercentage(6.2),
-    borderColor: Colors.primary,
-    borderWidth: RFPercentage(0.1),
-    borderRadius: RFPercentage(100),
+  noImageText: {
+    marginTop: RFPercentage(1),
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_500Medium",
   },
   dotsContainer: {
-    flexDirection: "row",
+    position: "absolute",
+    bottom: RFPercentage(2),
     alignSelf: "center",
-    marginTop: RFPercentage(2.5),
-    justifyContent: "center",
+    flexDirection: "row",
+    gap: RFPercentage(0.5),
   },
   dot: {
     height: RFPercentage(1),
-    width: RFPercentage(1),
     borderRadius: RFPercentage(0.5),
-    marginHorizontal: RFPercentage(0.5),
   },
-  activeDot: {
-    backgroundColor: Colors.primary,
+  categoryBadge: {
+    position: "absolute",
+    top: RFPercentage(2),
+    left: RFPercentage(2),
+    borderRadius: RFPercentage(2),
+    overflow: "hidden",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  inactiveDot: {
-    backgroundColor: "#D3D3D3",
-  },
-  detailsContainer: {
-    width: "90%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    marginTop: RFPercentage(0.5),
-  },
-  title: {
-    color: Colors.heading,
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  description: {
-    textAlign: "justify",
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-    width: "100%",
-    marginTop: RFPercentage(0.5),
-  },
-  readMoreText: {
-    color: Colors.primary,
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_500Medium",
-  },
-  infoContainer: {
-    width: "90%",
+  categoryGradient: {
+    flexDirection: "row",
     alignItems: "center",
-    flexDirection: "row",
-    marginTop: RFPercentage(2.1),
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.8),
+    gap: RFPercentage(0.8),
   },
-  icon: {
-    width: RFPercentage(1.8),
-    height: RFPercentage(1.8),
-  },
-  infoText: {
-    marginLeft: RFPercentage(1),
-    color: Colors.heading,
-    fontSize: RFPercentage(1.9),
+  categoryText: {
+    color: "white",
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
-    top: RFPercentage(0.2),
   },
-  infoDetail: {
-    color: Colors.heading,
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_500Medium",
+  contentContainer: {
+    marginTop: -RFPercentage(5),
+    paddingHorizontal: RFPercentage(2),
   },
-  compensationContainer: {
-    width: "90%",
-    marginTop: RFPercentage(2.1),
+  userCard: {
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+
+  detailCard: {
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+  descriptionContainer: {
+  },
+  sectionHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    flexDirection: "row",
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(0.8),
   },
-  reviewCount: {
-    color: Colors.primary,
-    marginTop: RFPercentage(1),
-    fontFamily: "Poppins_500Medium",
-    alignSelf: "flex-start",
-  },
-  detail: {
-    textAlign: "justify",
-    color: Colors.heading,
+  sectionTitle: {
     fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-    width: "100%",
-    marginTop: RFPercentage(0.5),
-  },
-  reviewPic: {
-    width: RFPercentage(5.9),
-    height: RFPercentage(5.9),
-    borderRadius: RFPercentage(100),
-    borderWidth: RFPercentage(0.3),
-    borderColor: Colors.primary,
-  },
-  compensationTitle: {
-    color: Colors.heading,
-    fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_600SemiBold",
   },
-  review: {
-    flexDirection: "row",
-    paddingVertical: RFPercentage(1),
-    marginTop: RFPercentage(1),
+  taskDescription: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2.2),
   },
-  chatButton: {
-    marginRight: RFPercentage(2),
-    backgroundColor: "transparent",
-    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
-    width: Platform.OS === "android" ? RFPercentage(21.5) : RFPercentage(18.5),
-    borderRadius: RFPercentage(100),
-    borderColor: Colors.primary,
-    borderWidth: RFPercentage(0.1),
+  readMore: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_500Medium",
+  },
+  infoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: RFPercentage(1.5),
+    marginBottom: RFPercentage(2),
+  },
+  infoCard: {
+    flex: 1,
+    minWidth: width * 0.42,
+    borderRadius: 16,
+    padding: RFPercentage(1.5),
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+  iconContainer: {
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(2),
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: RFPercentage(1),
   },
-  rating: {
-    fontSize: RFPercentage(1.7),
+  infoLabel: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular",
+    marginBottom: 4,
+  },
+  infoValueContainer: {
+    marginTop: RFPercentage(0.5),
+  },
+  infoValue: {
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
-    color: Colors.heading,
+  },
+  reviewsCard: {
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
   },
   ratingText: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_600SemiBold",
-    color: Colors.darkGrey,
-  },
-  userName: {
-    color: Colors.heading,
-
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  userName2: {
-    marginTop: RFPercentage(0.6),
-    fontFamily: "Poppins_400Regular_Italic",
-    fontSize: RFPercentage(1.6),
-    fontStyle: "italic",
-  },
-  text: {
-    color: Colors.primary,
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_500Medium",
   },
-  buttonWrapper: {
-    // position: "absolute",
-    // bottom: RFPercentage(8),
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+  reviewItem: {
+    borderRadius: 12,
+    padding: RFPercentage(1.5),
+    marginBottom: RFPercentage(1.5),
+  },
+  reviewHeader: {
     flexDirection: "row",
-    marginTop: RFPercentage(4),
-  },
-  gradient: {
-    paddingHorizontal: RFPercentage(4),
-    paddingVertical: 4,
-    justifyContent: "center",
     alignItems: "center",
-    borderTopRightRadius: RFPercentage(3),
-    borderBottomLeftRadius: RFPercentage(3),
-    alignSelf: "flex-start",
+    marginBottom: RFPercentage(1),
   },
-  img: {
-    width: RFPercentage(3.5),
-    height: RFPercentage(3.5),
-    bottom: RFPercentage(1),
-    right: RFPercentage(0.5),
+  reviewerAvatar: {
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(2),
+    marginRight: RFPercentage(1),
   },
-  wrap: {
-    width: "90%",
-    alignSelf: "center",
-    marginTop: RFPercentage(2.5),
+  reviewerInfo: {
+    flex: 1,
   },
-  txt: {
+  reviewerName: {
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.8),
-    marginLeft: RFPercentage(0.6),
+    marginBottom: 2,
   },
-  wrap2: {
-    width: RFPercentage(3),
-    height: RFPercentage(3),
-    borderRadius: RFPercentage(100),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  last: {
-    width: "60%",
-    height: RFPercentage(0.1),
-    backgroundColor: "rgba(226, 226, 226, 0.4)",
-    marginTop: RFPercentage(1),
-  },
-  date: {
-    fontSize: RFPercentage(1.4),
-
+  reviewDate: {
+    fontSize: RFPercentage(1.1),
     fontFamily: "Poppins_400Regular",
-    alignSelf: "flex-start",
   },
-  inner: {
-    width: "90%",
-    alignSelf: "center",
-    marginTop: RFPercentage(2.1),
-    justifyContent: "space-between",
+  starsContainer: {
+    flexDirection: "row",
+    gap: 2,
   },
-  inner2: {
+  reviewTextContainer: {
+    borderRadius: 8,
+    padding: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
+  },
+  reviewText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2),
+  },
+  reviewDivider: {
+    height: 1,
+    marginTop: RFPercentage(1.5),
+  },
+  viewAllButton: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: RFPercentage(1),
+    gap: RFPercentage(0.5),
+  },
+  viewAllText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_500Medium",
+  },
+  noReviewsContainer: {
+    borderRadius: 12,
+    padding: RFPercentage(2),
+    alignItems: "center",
+  },
+  noReviews: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    fontStyle: "italic",
+  },
+  actionButtons: {
+    flexDirection: "row",
+    gap: RFPercentage(1.5),
     marginTop: RFPercentage(1),
+    marginBottom: RFPercentage(4),
   },
-  txt3: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
+  secondaryButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: RFPercentage(1.2),
+    borderRadius: RFPercentage(100),
+    borderWidth: 1,
+    gap: RFPercentage(0.8),
+  },
+  secondaryButtonText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  imageViewerFooter: {
+    padding: RFPercentage(1),
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  imageIndexText: {
+    color: "white",
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_500Medium",
+  },
+
+  userCardContainer: {
+    borderRadius: 20,
+    overflow: "hidden",
+    marginBottom: RFPercentage(2),
+    elevation: 8,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+  },
+  blurView: {
+    padding: RFPercentage(2),
+    borderRadius: 20,
+    position: "relative",
+    overflow: "hidden",
+  },
+  gradientOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  avatarContainer: {
+    position: "relative",
+    marginRight: RFPercentage(1.5),
+  },
+  avatarGradientBorder: {
+    width: RFPercentage(6.5),
+    height: RFPercentage(6.5),
+    borderRadius: RFPercentage(3.25),
+    padding: 2,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  userAvatar: {
     width: "100%",
-    marginTop: RFPercentage(0.5),
+    height: "100%",
+    borderRadius: RFPercentage(3.25),
+    borderWidth: 2,
   },
-  txt4: {
+ 
+  
+  userDetails: {
+    flex: 1,
+  },
+  userName: {
     fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(0.3),
+  },
+  subtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.5),
+  },
+  userSubtitle: {
+    fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_400Regular",
-    alignSelf: "center",
-    width: "90%",
-    marginTop: RFPercentage(0.5),
+  },
+  messageButton: {
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(2.25),
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: RFPercentage(1),
   },
 });
 

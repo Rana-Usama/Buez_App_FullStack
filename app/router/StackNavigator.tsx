@@ -52,6 +52,8 @@ import TopRatedUsers from "../screens/TopRatedUsers";
 import TopRatedUserProfile from "../screens/TopRatedUserProfile";
 import AddReviewToAccepter from "../screens/AddReviewToAccepter";
 import UpgradePlan from "../screens/UpgradePlan";
+// Import the Drawer Navigator
+import DrawerNavigator from "./BottomNavigator";
 
 const Stack = createStackNavigator();
 
@@ -90,7 +92,7 @@ const StackNavigator = () => {
       >
         {/* Auth + Onboarding */}
         <Stack.Screen name="Decider" component={DeciderScreen} />
-        
+
         <Stack.Screen name="OnBoarding" component={Onboarding} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
@@ -99,8 +101,13 @@ const StackNavigator = () => {
         <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
         <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
 
-        {/* App flow */}
+        {/* App flow - Use Drawer as main navigator */}
+        <Stack.Screen name="MainApp" component={DrawerNavigator} />
+
+        {/* Keep TabNavigator if you still need it standalone */}
         <Stack.Screen name="TabNavigator" component={TabNavigator} />
+
+        {/* Other screens */}
         <Stack.Screen name="FreeTrial" component={FreeTrial} />
         <Stack.Screen name="Subscription" component={Subscription} />
         <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
@@ -108,6 +115,8 @@ const StackNavigator = () => {
           name="CancelSubscription"
           component={CancelSubscription}
         />
+        
+
         <Stack.Screen name="OfferDetail" component={OfferDetail} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="EditProfile" component={EditProfile} />
@@ -144,10 +153,7 @@ const StackNavigator = () => {
           name="AddReviewToAccepter"
           component={AddReviewToAccepter}
         />
-         <Stack.Screen
-          name="UpgradePlan"
-          component={UpgradePlan}
-        />
+        <Stack.Screen name="UpgradePlan" component={UpgradePlan} />
       </Stack.Navigator>
     </NavigationContainer>
   );

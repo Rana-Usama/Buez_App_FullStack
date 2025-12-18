@@ -32,6 +32,7 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import CustomNav from "../components/common/CustomNav";
 
 const getTargetLanguage = async () => {
   try {
@@ -670,9 +671,8 @@ export default function Notifications({ navigation }) {
             },
           ]}
         >
-          <FontAwesome5
-            name="calendar-day"
-            size={RFPercentage(1.8)}
+         <MaterialIcons name="brightness-1"
+            size={RFPercentage(0.6)}
             color={theme.primary}
           />
           {/* <MaterialIcons
@@ -691,13 +691,7 @@ export default function Notifications({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-      <Nav
-        marginTop={RFPercentage(5)}
-        leftLogo={false}
-        navigation={navigation}
-        title={tr.notifications || "Notifications"}
-        dpNull
-      />
+    <CustomNav title={tr.notifications} showBack />
 
       <Animated.View style={[styles.container]}>
         {busy ? (
@@ -803,7 +797,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   sectionHeaderText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_600SemiBold",
     marginLeft: RFPercentage(0.5),
   },
