@@ -197,8 +197,6 @@ const Nav: React.FC<NavProps> = ({
     );
   };
 
-
-
   const WaveEffect = () => (
     <Animated.View
       style={[
@@ -309,7 +307,7 @@ const Nav: React.FC<NavProps> = ({
             <TouchableOpacity
               onPress={handleOpenDrawer}
               activeOpacity={0.7}
-              style={styles.menuButton}
+              style={[styles.menuButton, { backgroundColor: Colors.primary }]}
             >
               <Ionicons name="menu" size={RFPercentage(3)} color="white" />
             </TouchableOpacity>
@@ -328,7 +326,7 @@ const Nav: React.FC<NavProps> = ({
           ))}
         {!titleCenter && (
           <Animated.Text
-            style={[styles.title, styles.leftTitle]}
+            style={[styles.title, styles.leftTitle, { color: theme.heading }]}
             numberOfLines={1}
           >
             {title}
@@ -342,6 +340,7 @@ const Nav: React.FC<NavProps> = ({
           <Animated.Text
             style={[
               styles.title,
+              { color: theme.heading },
               {
                 transform: [{ scale: titleScale }],
               },
@@ -382,7 +381,7 @@ const Nav: React.FC<NavProps> = ({
               <TouchableOpacity
                 onPress={handleSearchToggle}
                 activeOpacity={0.7}
-                style={styles.iconButton}
+                style={[styles.iconButton, { backgroundColor: Colors.primary }]}
               >
                 <Ionicons
                   name="search"
@@ -409,7 +408,10 @@ const Nav: React.FC<NavProps> = ({
                 <TouchableOpacity
                   onPress={() => handleNavigate("Notifications")}
                   activeOpacity={0.7}
-                  style={styles.iconButton}
+                  style={[
+                    styles.iconButton,
+                    { backgroundColor: Colors.primary },
+                  ]}
                 >
                   <Ionicons
                     name="notifications-outline"
@@ -431,10 +433,14 @@ const Nav: React.FC<NavProps> = ({
       return (
         <View style={styles.container}>
           <LinearGradient
-            colors={gradientColors}
+            colors={[theme.white, theme.white]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[styles.gradientHeader, curvedBottom && styles.curvedBottom]}
+            style={[
+              styles.gradientHeader,
+              curvedBottom && styles.curvedBottom,
+              { borderBottomColor: "rgba(222, 219, 219, 0.25)" },
+            ]}
           >
             {showWave && <WaveEffect />}
             {isSearchOpen ? <SearchBar /> : <HeaderContent />}
@@ -470,15 +476,16 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   gradientHeader: {
-    paddingTop: Platform.OS === "ios" ? RFPercentage(5) : RFPercentage(3),
+    paddingTop: Platform.OS === "ios" ? RFPercentage(4) : RFPercentage(4),
     paddingBottom: RFPercentage(3),
     paddingHorizontal: RFPercentage(2),
     overflow: "hidden",
     position: "relative",
+    borderBottomWidth: 1,
   },
   plainHeader: {
-    paddingTop: Platform.OS === "ios" ? RFPercentage(5) : RFPercentage(3),
-    paddingBottom: RFPercentage(2),
+    paddingTop: Platform.OS === "ios" ? RFPercentage(5) : RFPercentage(5),
+    // paddingBottom: RFPercentage(2),
     paddingHorizontal: RFPercentage(2),
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0,0,0,0.05)",
@@ -493,7 +500,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     zIndex: 2,
-    paddingTop: RFPercentage(3),
+    paddingTop: RFPercentage(4),
   },
   leftSection: {
     flexDirection: "row",
@@ -515,17 +522,17 @@ const styles = StyleSheet.create({
   menuButton: {
     padding: RFPercentage(0.8),
     borderRadius: RFPercentage(1),
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(174, 179, 200, 1)",
   },
   backButton: {
     padding: RFPercentage(0.8),
     borderRadius: RFPercentage(100),
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(174, 179, 200, 1)",
   },
   title: {
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_700Bold",
-    color: "white",
+    color: Colors.primary,
     letterSpacing: 0.3,
   },
   leftTitle: {
@@ -541,7 +548,7 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: RFPercentage(0.8),
     borderRadius: RFPercentage(1),
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(174, 179, 200, 1)",
     position: "relative",
   },
   postButton: {

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, Text, Platform } from "react-native";
+import { View, StyleSheet, ScrollView, Text, Platform, StatusBar } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
@@ -41,6 +41,11 @@ function TermsAndConditions({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+       <StatusBar
+              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+              backgroundColor={"transparent"}
+              translucent
+            />
       <CustomNav title={`${t("settings.txt3")}`} showBack />
 
       <ScrollView

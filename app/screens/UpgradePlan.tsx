@@ -436,6 +436,11 @@ function UpgradePlan(props) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav title={t("upgradePlan.upgradeYourPlan")} showBack />
 
       <ScrollView

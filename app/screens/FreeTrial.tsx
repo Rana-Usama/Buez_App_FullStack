@@ -16,7 +16,8 @@ const FreeTrial = ({ navigation }: any) => {
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
+        backgroundColor={"transparent"}
+        translucent
       />
       <Image style={styles.logo} source={Icons.logo} />
       <View style={styles.headerContainer}>

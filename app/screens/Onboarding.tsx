@@ -122,7 +122,7 @@ function Onboarding(props) {
 
   useEffect(() => {
     Animated.timing(buttonScale, {
-      toValue: 1 + activeIndex * 0.1, // increase size with index
+      toValue: 1 + activeIndex * 0.1,
       duration: 300,
       useNativeDriver: true,
     }).start();
@@ -130,16 +130,48 @@ function Onboarding(props) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+      {/* Top Left Mesh Gradient */}
+      <LinearGradient
+        colors={[
+          "#7a6bffff",
+          "#4ECDC4",
+          "#45B7D1",
+          "#96CEB4",
+          "#5768feff",
+          "#FF9FF3",
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+        style={styles.meshGradientTopLeft}
+      />
+      
+      {/* Bottom Right Mesh Gradient */}
+      <LinearGradient
+        colors={[
+          "#8bc7ffff",
+          "#796affff",
+          "#238b6eff",
+          "#A18CD1",
+          "#FBC2EB",
+          "#FDA085",
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+        style={styles.meshGradientBottomRight}
+      />
+
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
+        backgroundColor={"transparent"}
+        translucent={true}
       />
       <Image
         style={theme.mode === "dark" ? styles.darkImg : styles.img}
         source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo}
       />
 
-      {/* Body */}
       {/* Body */}
       <Animated.View
         style={{
@@ -151,7 +183,7 @@ function Onboarding(props) {
             {
               scale: fadeAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0.95, 1], // slight zoom in effect
+                outputRange: [0.95, 1],
               }),
             },
           ],
@@ -224,6 +256,27 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: Colors.white,
+    overflow: 'hidden',
+  },
+  meshGradientTopLeft: {
+    position: 'absolute',
+    top: -RFPercentage(28),
+    left: -RFPercentage(20),
+    width: RFPercentage(50),
+    height: RFPercentage(50),
+    borderRadius: RFPercentage(25),
+    opacity: 0.1,
+    transform: [{ rotate: '45deg' }],
+  },
+  meshGradientBottomRight: {
+    position: 'absolute',
+    bottom: -RFPercentage(28),
+    right: -RFPercentage(20),
+    width: RFPercentage(50),
+    height: RFPercentage(50),
+    borderRadius: RFPercentage(25),
+    opacity: 0.1,
+    transform: [{ rotate: '45deg' }],
   },
   nextContainer: {
     width: RFPercentage(8),
@@ -238,12 +291,12 @@ const styles = StyleSheet.create({
   darkImg: {
     width: RFPercentage(20),
     height: RFPercentage(10.6),
-    marginTop: RFPercentage(3),
+    marginTop: Platform.OS === 'ios' ? RFPercentage(3.5) : RFPercentage(9),
   },
   img: {
     width: RFPercentage(6.5),
     height: RFPercentage(9.5),
-    marginTop: RFPercentage(3),
+    marginTop: Platform.OS === 'ios' ? RFPercentage(3.5) : RFPercentage(9),
   },
   wrapper: { width: "90%", justifyContent: "center", alignItems: "center" },
   title: {

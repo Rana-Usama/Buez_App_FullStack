@@ -20,6 +20,7 @@ import {
   cachedTranslate,
 } from "../utils/cachedTranslations";
 import CustomNav from "../components/common/CustomNav";
+import { StatusBar } from "react-native";
 
 const languages = [
   "Swiss German",
@@ -76,6 +77,11 @@ function Language({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav title={`${t("settings.txt12")}`} showBack />
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.container}>

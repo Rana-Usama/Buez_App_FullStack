@@ -319,7 +319,7 @@ function MyRequests({ navigation }) {
       {isActive ? (
         <View style={styles.neonContainer}>
           <LinearGradient
-            colors={["#314495ff",  "#14225eff"]}
+            colors={["#314495ff", "#14225eff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.neonGradient}
@@ -466,7 +466,7 @@ function MyRequests({ navigation }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={"light-content"}
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={"transparent"}
         translucent
       />
@@ -905,7 +905,7 @@ const styles = StyleSheet.create({
     // top: RFPercentage(-9),
   },
   filterScrollContainer: {
-    paddingHorizontal: RFPercentage(2),
+    // paddingHorizontal: RFPercentage(2),
     alignItems: "center",
     marginTop: RFPercentage(3),
   },

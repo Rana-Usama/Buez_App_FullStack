@@ -47,6 +47,7 @@ import Toast from "react-native-toast-message";
 import ConfirmationModal from "../components/common/ConfirmationModal";
 import DeviceInfo from "react-native-device-info";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -62,6 +63,7 @@ const CustomDrawerContent = (props) => {
   const isYearlyPlan = currentPlan === "yearly";
   const isMonthlyPlan = currentPlan === "monthly";
   const freePlan = user?.planType === "free";
+  const [provider, setProvider] = useState<string | null>(null);
 
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
   const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
@@ -69,6 +71,13 @@ const CustomDrawerContent = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [appVersion, setAppVersion] = useState("");
   const [buildNumber, setBuildNumber] = useState("");
+
+  useEffect(() => {
+    const user = FIREBASE_AUTH.currentUser;
+    if (user && user.providerData.length > 0) {
+      setProvider(user.providerData[0].providerId);
+    }
+  }, []);
 
   useEffect(() => {
     // Fetch version & build number dynamically
@@ -193,10 +202,7 @@ const CustomDrawerContent = (props) => {
       await removeCredentials();
       await SecureStore.setItemAsync("loggedOut", "true");
       setIsLogoutModalVisible(false);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Login" }],
-      });
+      navigation.navigate("Login");
     } catch (error) {
       console.log("Error logging out and removing token:", error);
       Toast.show({
@@ -214,8 +220,6 @@ const CustomDrawerContent = (props) => {
       setIsLoading(true);
       const password2 = await SecureStore.getItemAsync("password2");
       await cancelUserSubscription();
-
-      const provider = user?.provider || "email";
       if (provider === "apple.com") {
         await deleteAppleAccount();
       } else if (provider === "google.com") {
@@ -263,40 +267,47 @@ const CustomDrawerContent = (props) => {
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Full Gradient Background */}
+        {/* Gradient Background Base */}
         <LinearGradient
-          colors={[Colors.primary, "#030a29ff"]}
+          colors={[theme.white, theme.white]}
           start={{ x: 0, y: 1 }}
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
         />
+        {/* <BlurView
+          intensity={30}
+          tint="dark"
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.46)", }}
+        /> */}
 
-        {/* Drawer Header */}
+        {/* Drawer Header with Glass Effect */}
         <View
-          style={[
-            styles.drawerHeader,
-            { borderBottomColor: theme.border + "40" },
-          ]}
+          style={[styles.drawerHeader, { borderBottomColor: "transparent" }]}
         >
-          <LinearGradient
-            colors={[Colors.primary, "#142477ff"]}
-            style={styles.avatarGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Image
-              source={
-                user?.profileImage ? { uri: user?.profileImage } : Icons.dp
-              }
-              style={styles.userImage}
-            />
-          </LinearGradient>
-          <Text style={[styles.userName, { color: Colors.white }]}>
-            {user?.userName || "Guest User"}
-          </Text>
-          <Text style={[styles.userEmail, { color: theme.detailsText }]}>
-            {user?.email || "guest@example.com"}
-          </Text>
+          <View style={styles.headerContent}>
+            {/* Avatar with Glass Border */}
+            <View style={styles.avatarWrapper}>
+              <BlurView
+                intensity={40}
+                tint="light"
+                style={styles.avatarGlassBorder}
+              >
+                <Image
+                  source={
+                    user?.profileImage ? { uri: user?.profileImage } : Icons.dp
+                  }
+                  style={styles.userImage}
+                />
+              </BlurView>
+            </View>
+
+            <Text style={[styles.userName, { color: theme.primary }]}>
+              {user?.userName || "Guest User"}
+            </Text>
+            <Text style={[styles.userEmail, { color: theme.heading }]}>
+              {user?.email || "guest@example.com"}
+            </Text>
+          </View>
         </View>
 
         {/* Drawer Items */}
@@ -307,40 +318,70 @@ const CustomDrawerContent = (props) => {
               ? Colors.red
               : isActive
               ? "white"
-              : Colors.white;
+              : theme.heading;
 
             return (
               <TouchableOpacity
                 key={index}
-                style={[styles.drawerItem, isActive && styles.activeDrawerItem]}
+                style={[styles.drawerItem]}
                 onPress={() => handleItemPress(item)}
                 activeOpacity={0.8}
               >
                 {isActive ? (
-                  <LinearGradient
-                    colors={[Colors.primary, "#4557B0"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.activeItemGradient}
+                  <BlurView
+                    intensity={60}
+                    tint="light"
+                    style={styles.activeItemGlass}
                   >
-                    <View style={styles.iconContainer}>
-                      {renderIcon(item.icon, item.iconType, itemColor)}
-                    </View>
-                    <Text
-                      style={[
-                        styles.drawerItemText,
-                        {
-                          color: itemColor,
-                          fontFamily: "Poppins_600SemiBold",
-                        },
+                    <LinearGradient
+                      colors={[
+                        "rgba(69, 87, 176, 0.4)",
+                        "rgba(69, 87, 176, 0.2)",
                       ]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.activeItemGradient}
                     >
-                      {item.label}
-                    </Text>
-                    <View style={styles.activeIndicator} />
-                  </LinearGradient>
+                      <View style={styles.iconContainer}>
+                        {renderIcon(item.icon, item.iconType, itemColor)}
+                      </View>
+                      <Text
+                        style={[
+                          styles.drawerItemText,
+                          {
+                            color: itemColor,
+                            fontFamily: "Poppins_600SemiBold",
+                          },
+                        ]}
+                      >
+                        {item.label}
+                      </Text>
+                      <View
+                        style={[
+                          styles.activeIndicator,
+                          {
+                            backgroundColor: "rgba(255,255,255,0.8)",
+                            shadowColor: "#fff",
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowOpacity: 0.5,
+                            shadowRadius: 4,
+                          },
+                        ]}
+                      />
+                    </LinearGradient>
+                  </BlurView>
                 ) : (
-                  <>
+                  <View
+                    style={[
+                      styles.inactiveItemContainer,
+                      {
+                        backgroundColor:
+                          theme.mode === "dark"
+                            ? "rgba(255, 255, 255, 0.09)"
+                            : "rgba(214, 214, 214, 0.17)",
+                      },
+                    ]}
+                  >
                     <View style={styles.iconContainer}>
                       {renderIcon(item.icon, item.iconType, itemColor)}
                     </View>
@@ -355,23 +396,35 @@ const CustomDrawerContent = (props) => {
                     >
                       {item.label}
                     </Text>
-                  </>
+                  </View>
                 )}
               </TouchableOpacity>
             );
           })}
         </View>
 
-        {/* Drawer Footer */}
-        <View
-          style={[styles.drawerFooter, { borderTopColor: theme.border + "30" }]}
-        >
-          <Text style={[styles.versionText, { color: Colors.white }]}>
-            {t("common.version")} {appVersion}
-          </Text>
-          <Text style={[styles.copyrightText, { color: Colors.white }]}>
-            © {new Date().getFullYear()} {t("common.rights")}
-          </Text>
+        {/* Drawer Footer with Glass Effect */}
+        <View style={[styles.drawerFooter]}>
+          <BlurView
+            intensity={20}
+            tint={theme.mode}
+            style={[
+              styles.footerGlass,
+              {
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.09)"
+                    : "rgba(206, 206, 206, 0.17)",
+              },
+            ]}
+          >
+            <Text style={[styles.versionText, { color: theme.heading }]}>
+              {t("common.version")} {appVersion}
+            </Text>
+            <Text style={[styles.copyrightText, { color: theme.heading }]}>
+              © {new Date().getFullYear()} {t("common.rights")}
+            </Text>
+          </BlurView>
         </View>
       </DrawerContentScrollView>
 
@@ -386,7 +439,6 @@ const CustomDrawerContent = (props) => {
         message={false}
       />
 
-      {/* Delete Account Confirmation Modal */}
       <ConfirmationModal
         isVisible={isDeleteAccountModalVisible}
         loading={isLoading}
@@ -698,119 +750,122 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
-  activeItemGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: RFPercentage(1.5),
-    paddingHorizontal: RFPercentage(2),
-    borderRadius: 12,
-  },
-  activeIndicator: {
-    position: "absolute",
-    right: RFPercentage(2),
-    width: RFPercentage(0.8),
-    height: RFPercentage(0.8),
-    borderRadius: RFPercentage(0.4),
-    backgroundColor: "rgba(255,255,255,0.8)",
-  },
 
   // Option 3 Glassmorphism Styles
   avatarGlassContainer: {
     marginBottom: RFPercentage(1),
   },
+
+  drawerHeader: {
+    paddingBottom: 20,
+  },
+  glassContainer: {
+    borderRadius: 20,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  headerContent: {
+    padding: 20,
+    alignItems: "center",
+  },
+  avatarWrapper: {
+    marginBottom: 10,
+  },
   avatarGlassBorder: {
-    width: RFPercentage(8),
-    height: RFPercentage(8),
-    borderRadius: RFPercentage(4),
-    padding: 2,
+    width: 90,
+    height: 90,
+    borderRadius: 100,
+    padding: 3,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "rgba(12, 16, 60, 0.06)",
+    backgroundColor: "rgba(12, 16, 60, 0.28)",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.5)",
   },
-  drawerItemContainer: {
-    marginHorizontal: RFPercentage(1),
-    marginVertical: RFPercentage(0.5),
+  userImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  userName: {
+    fontSize: 18,
+    marginTop: 4,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  userEmail: {
+    fontSize: 13,
+    marginTop: 4,
+  },
+  drawerItemsContainer: {
+    flex: 1,
+    paddingHorizontal: 15,
+  },
+  drawerItem: {
+    marginBottom: 8,
     borderRadius: 12,
     overflow: "hidden",
   },
-  activeGlassItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: RFPercentage(1.5),
-    paddingHorizontal: RFPercentage(2),
+  activeItemGlass: {
     borderRadius: 12,
-    elevation: 6,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.61)",
   },
-  inactiveGlassItem: {
+  activeItemGradient: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: RFPercentage(1.5),
-    paddingHorizontal: RFPercentage(2),
-    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
-
-  // Original Styles (keep these)
-  drawerHeader: {
-    paddingVertical: RFPercentage(3),
-    paddingHorizontal: RFPercentage(2),
-    borderBottomWidth: 1,
-  },
-  userImage: {
-    width: RFPercentage(8),
-    height: RFPercentage(8),
-    borderRadius: RFPercentage(100),
-    borderWidth: 2,
-    borderColor: "white",
-  },
-  userName: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_600SemiBold",
-    marginTop: RFPercentage(1),
-  },
-  userEmail: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_400Regular",
-    marginTop: RFPercentage(0.5),
-  },
-  drawerItemsContainer: {
-    paddingVertical: RFPercentage(1),
-  },
-  drawerItem: {
+  inactiveItemContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: RFPercentage(1.5),
-    paddingHorizontal: RFPercentage(2),
-    // marginHorizontal: RFPercentage(1),
-    marginVertical: RFPercentage(0.5),
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.09)",
     borderRadius: 12,
   },
   iconContainer: {
-    width: RFPercentage(3),
-    marginRight: RFPercentage(1.5),
+    width: 24,
+    height: 24,
+    marginRight: 12,
+    justifyContent: "center",
+    alignItems: "center",
   },
   drawerItemText: {
-    fontSize: RFPercentage(1.6),
     flex: 1,
+    fontSize: 15,
+  },
+  activeIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginLeft: 8,
   },
   drawerFooter: {
-    padding: RFPercentage(2),
-    borderTopWidth: 1,
-    marginTop: "auto",
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    paddingTop: 20,
+  },
+  footerGlass: {
+    borderRadius: 15,
+    padding: 15,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    alignItems: "center",
   },
   versionText: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-    marginBottom: RFPercentage(0.5),
+    fontSize: 12,
+    marginBottom: 5,
   },
   copyrightText: {
-    fontSize: RFPercentage(1),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
+    fontSize: 11,
   },
 });

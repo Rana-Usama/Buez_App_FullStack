@@ -40,6 +40,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig"; // adjust path
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AppleLoginButton from "../utils/appleLogin";
+import { LinearGradient } from "expo-linear-gradient";
 
 function Login({ navigation }) {
   const [indicator, showIndicator] = useState(false);
@@ -79,6 +80,7 @@ function Login({ navigation }) {
       const user = await signInWithEmail(email, password);
       await SecureStore.setItemAsync("loggedOut", "false");
       await SecureStore.setItemAsync("password2", password);
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       if (remember) {
         await saveCredentials(email, password);
@@ -99,10 +101,7 @@ function Login({ navigation }) {
         text1: t("toast.login.one"),
         text2: t("toast.login.two"),
       });
-      navigation.reset({
-        index: 0,
-        routes: [{ name: nextRoute }],
-      });
+      navigation.navigate(nextRoute);
     } catch (error) {
       Toast.show({
         type: "error",
@@ -128,9 +127,38 @@ function Login({ navigation }) {
     >
       <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
         <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+          <LinearGradient
+            colors={[
+              "#7a6bffff",
+              "#4ECDC4",
+              "#45B7D1",
+              "#96CEB4",
+              "#5768feff",
+              "#FF9FF3",
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+            style={styles.meshGradientTopLeft}
+          />
+          <LinearGradient
+            colors={[
+              "#8bc7ffff",
+              "#796affff",
+              "#238b6eff",
+              "#A18CD1",
+              "#FBC2EB",
+              "#FDA085",
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+            style={styles.meshGradientBottomRight}
+          />
           <StatusBar
             barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
             backgroundColor={theme.white}
+            translucent={true}
           />
 
           <ScrollView
@@ -362,6 +390,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+
+  meshGradientTopLeft: {
+    position: "absolute",
+    top: -RFPercentage(30),
+    right: -RFPercentage(20),
+    width: RFPercentage(50),
+    height: RFPercentage(50),
+    borderRadius: RFPercentage(25),
+    opacity: 0.1,
+    transform: [{ rotate: "45deg" }],
+  },
+  meshGradientBottomRight: {
+    position: "absolute",
+    bottom: -RFPercentage(30),
+    left: -RFPercentage(28),
+    width: RFPercentage(50),
+    height: RFPercentage(50),
+    borderRadius: RFPercentage(25),
+    opacity: 0.1,
+    transform: [{ rotate: "45deg" }],
+  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "flex-start",
@@ -390,12 +439,12 @@ const styles = StyleSheet.create({
   logo: {
     width: RFPercentage(6.5),
     height: RFPercentage(9.5),
-    marginTop: RFPercentage(3),
+    marginTop: Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(9),
   },
   darkImg: {
     width: RFPercentage(20),
     height: RFPercentage(10.6),
-    marginTop: RFPercentage(3),
+    marginTop: Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(9),
   },
 
   crown: {

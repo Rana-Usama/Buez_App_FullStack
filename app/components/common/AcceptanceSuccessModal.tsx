@@ -13,7 +13,6 @@ import { Octicons, MaterialIcons } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
 import { useTranslation } from "react-i18next";
 
-
 const AcceptanceSuccessModal = ({
   visible,
   onClose,
@@ -22,7 +21,7 @@ const AcceptanceSuccessModal = ({
 }) => {
   const [fadeAnim] = React.useState(new Animated.Value(0));
   const [slideAnim] = React.useState(new Animated.Value(300));
-  const {t} = useTranslation()
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (visible) {
@@ -113,7 +112,7 @@ const AcceptanceSuccessModal = ({
           <View style={styles.modalIconContainer}>
             <Octicons
               name="check-circle"
-              size={RFPercentage(8)}
+              size={RFPercentage(6)}
               color={Colors.primary}
             />
           </View>
@@ -130,26 +129,26 @@ const AcceptanceSuccessModal = ({
           >
             <InfoRow
               icon="message"
-              title= {t("modal.txt2")}
-              description= {t("modal.txt3")}
+              title={t("modal.txt2")}
+              description={t("modal.txt3")}
             />
 
             <InfoRow
               icon="folder-special"
-              title= {t("modal.txt4")}
-              description= {t("modal.txt5")}
+              title={t("modal.txt4")}
+              description={t("modal.txt5")}
             />
 
             <InfoRow
               icon="notifications"
-              title= {t("modal.txt6")}
-              description= {t("modal.txt7")}
+              title={t("modal.txt6")}
+              description={t("modal.txt7")}
             />
 
             <InfoRow
               icon="schedule"
-              title= {t("modal.txt8")}
-              description= {t("modal.txt9")}
+              title={t("modal.txt8")}
+              description={t("modal.txt9")}
             />
           </ScrollView>
 
@@ -163,10 +162,12 @@ const AcceptanceSuccessModal = ({
               ]}
               onPress={onClose}
             >
-              <Text style={styles.primaryModalButtonText}> {t("modal.txt10")}</Text>
+              <Text style={styles.primaryModalButtonText}>
+                {t("modal.txt10")}
+              </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               activeOpacity={0.8}
               style={[
                 styles.secondaryModalButton,
@@ -182,7 +183,7 @@ const AcceptanceSuccessModal = ({
               >
                  {t("modal.txt11")}
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </Animated.View>
       </View>
@@ -226,7 +227,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   modalTitle: {
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.1),
     fontFamily: "Poppins_600SemiBold",
     textAlign: "center",
     marginBottom: RFPercentage(2),
@@ -250,12 +251,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoRowTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(0.5),
   },
   infoRowDescription: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2),
   },

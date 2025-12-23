@@ -3,6 +3,7 @@ import { differenceInDays } from "date-fns";
 export const decideUserRoute = (userData) => {
   const now = new Date();
 
+  console.log("decideUserRoute..............", userData);
   if (!userData) return "OnBoarding";
 
   const {
@@ -13,18 +14,31 @@ export const decideUserRoute = (userData) => {
     freeTrialStartedAt,
   } = userData;
 
-  // 1️⃣ No sub + no trial
+  // Helper function to parse Firestore timestamps
+  const parseFirestoreTimestamp = (timestamp) => {
+    if (!timestamp) return null;
+    if (timestamp.seconds) return new Date(timestamp.seconds * 1000);
+    if (typeof timestamp === "string") return new Date(timestamp);
+    return null;
+  };
+
+  // 1️⃣ No sub + no trial (handle null as false)
   if (!isSubscribed && !isFreeTrial) {
     return "FreeTrial";
   }
 
   // 2️⃣ Active subscription
-  const subStartDate = subscriptionStart ? new Date(subscriptionStart) : null;
-  const subEndDate = subscriptionEnd ? new Date(subscriptionEnd) : null;
+  const subStartDate = parseFirestoreTimestamp(subscriptionStart);
+  const subEndDate = parseFirestoreTimestamp(subscriptionEnd);
+
   const isWithinPaidPeriod =
     subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
   if (isSubscribed && isWithinPaidPeriod) {
+    console.log("✅ Valid subscription, going to TabNavigator");
+    console.log("Subscription start:", subStartDate);
+    console.log("Subscription end:", subEndDate);
+    console.log("Current date:", now);
     return "TabNavigator";
   }
 
@@ -38,6 +52,17 @@ export const decideUserRoute = (userData) => {
     else return "Subscription"; // trial expired
   }
 
-  // 4️⃣ Fallback
+  // 4️⃣ Fallback - if subscribed but not within paid period
+  if (isSubscribed && !isWithinPaidPeriod) {
+    console.log("⚠️ Subscription exists but not within paid period");
+    console.log("Subscription start:", subStartDate);
+    console.log("Subscription end:", subEndDate);
+    console.log("Current date:", now);
+    console.log("Is within paid period:", isWithinPaidPeriod);
+    return "Subscription"; // Show subscription screen to renew
+  }
+
+  // 5️⃣ Fallback
+  console.log("❌ No conditions met, defaulting to OnBoarding");
   return "OnBoarding";
 };

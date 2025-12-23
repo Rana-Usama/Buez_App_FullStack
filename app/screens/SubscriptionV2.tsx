@@ -473,10 +473,11 @@ function SubscriptionV2(props) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
-      />
+       <StatusBar
+              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+              backgroundColor={"transparent"}
+              translucent
+            />
 
       <ScrollView
         style={styles.container}

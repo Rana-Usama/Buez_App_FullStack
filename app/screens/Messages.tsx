@@ -434,9 +434,9 @@ function Messages({ navigation }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={"light-content"}
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={"transparent"}
-        translucent={true}
+        translucent
       />
       <Nav
         profileImage={profileImgUrl}

@@ -7,6 +7,7 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
@@ -287,6 +288,11 @@ export default function CompletedTasks({ navigation }: any) {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav title={t("profile.txt4")} showBack />
 
       {/* Stats Overview */}

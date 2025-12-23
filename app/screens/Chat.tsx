@@ -295,6 +295,11 @@ const Chat = ({ navigation, route }) => {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <View
         style={[styles.profileContainer, { borderBottomColor: Colors.white5 }]}
       >
@@ -341,7 +346,6 @@ const Chat = ({ navigation, route }) => {
           </Text>
         </View>
       </View>
-
       <View style={styles.messageContainer}>
         <ImageBackground
           source={theme.mode === "dark" ? Icons.dark : Icons.light}
@@ -652,7 +656,8 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: RFPercentage(2.5),
     fontFamily: "Poppins_500Medium",
-    lineHeight: RFPercentage(2.8),
+    lineHeight: RFPercentage(2.6),
+    top: 3,
   },
   profile: {
     width: RFPercentage(7),
@@ -668,7 +673,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(8.6),
     borderBottomWidth: 1,
     borderBottomColor: Colors.lightGrey,
-    marginTop: Platform.OS === "android" ? 0 : RFPercentage(3),
+    marginTop: Platform.OS === "android" ? RFPercentage(5) : RFPercentage(3),
     paddingHorizontal: RFPercentage(2),
   },
   modalOverlay: {

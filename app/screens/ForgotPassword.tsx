@@ -66,6 +66,11 @@ function ForgotPassword(props: any) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav showBack title={`${t("forgetPassword.txt1")}`} />
       {/* Input field */}
       <Formik
@@ -107,7 +112,7 @@ function ForgotPassword(props: any) {
             {/* Reset Button */}
             <MyAppButton
               title={`${t("forgetPassword.txt2")}`}
-              marginTop={RFPercentage(5.2)}
+              marginTop={RFPercentage(8)}
               onPress={() => handleSubmit()}
               loading={loader}
               disabled={loader}
@@ -177,6 +182,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "88%",
+    marginTop: 50,
   },
   errorContainer: { width: "100%", marginTop: RFPercentage(0.5) },
   errorText: {

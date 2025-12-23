@@ -10,6 +10,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Animated,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -27,7 +28,6 @@ import {
   where,
 } from "firebase/firestore";
 import moment from "moment";
-import Nav from "../components/common/Nav";
 import MyAppButton from "../components/common/MyAppButton";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
@@ -64,6 +64,7 @@ type Translations = {
   taskCompleted: string;
   writeReview: string;
   characters: string;
+  tap: string;
 };
 
 interface ParamsType {
@@ -206,6 +207,7 @@ function AddReviewToAccepter() {
         taskCompleted: "Your Task Completed By",
         writeReview: "Write your review",
         characters: "characters",
+        tap: "Tap to rate",
       };
       const vals = await Promise.all(
         Object.values(phrases).map((txt) => cachedTranslate(txt))
@@ -321,6 +323,11 @@ function AddReviewToAccepter() {
       style={[styles.container, { backgroundColor: theme.white }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav title={tr.addReview || "Add Review"} showBack />
 
       <ScrollView
@@ -440,7 +447,7 @@ function AddReviewToAccepter() {
               ))}
             </View>
             <Text style={[styles.ratingHint, { color: theme.lightGrey }]}>
-              Tap to rate {rating.filter(Boolean).length}/5
+              {tr.tap} {rating.filter(Boolean).length}/5
             </Text>
           </View>
 

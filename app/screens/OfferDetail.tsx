@@ -498,8 +498,11 @@ function OfferDetail({ navigation, route }) {
 
   return (
     <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
-      <StatusBar barStyle={"light-content"} translucent />
-
+ <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav title={t("details.txt1")} showBack={true} />
 
       <Animated.ScrollView
@@ -1445,6 +1448,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     zIndex: 1,
+    // backgroundColor:"red"
   },
   avatarContainer: {
     position: "relative",

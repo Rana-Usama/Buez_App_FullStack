@@ -6,10 +6,10 @@ import {
   Platform,
   ScrollView,
   Linking,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "../components/common/MyAppButton";
-import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { updatePassword } from "../services/Auth.service";
 import Toast from "react-native-toast-message";
@@ -75,6 +75,11 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav showBack title={`${t("settings.txt2")}`} />
       <ScrollView
         style={{ width: "100%" }}

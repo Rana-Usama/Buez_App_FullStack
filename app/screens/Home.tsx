@@ -396,7 +396,7 @@ function Home({ navigation }) {
   return (
     <View style={{ backgroundColor: theme.white, flex: 1 }}>
       <StatusBar
-        barStyle={"light-content"}
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={"transparent"}
         translucent
       />
@@ -623,13 +623,13 @@ function Home({ navigation }) {
                       const getGradientColors = () => {
                         switch (item.category) {
                           case "Top Rated":
-                            return ["#e2ce5dff", "#ffffffff", "#d39345ff"];
+                            return ["#e2ce5dff", "#efeaceff", "#d39345ff"];
                           case "Rising Talent":
-                            return ["#6A11CB", "#ffffffff", "#A8CABA"]; // Blue/Purple Mesh
+                            return ["#6A11CB", "#cdafecff", "#A8CABA"]; // Blue/Purple Mesh
                           case "Beginner":
-                            return ["#00B09B", "#ffffffff", "#50C878"]; // Green Mesh
+                            return ["#00B09B", "#bceee8ff", "#50C878"]; // Green Mesh
                           default:
-                            return ["#7c8cdd", "#ffffffff", "#4c669f"];
+                            return ["#7c8cdd", "#b4bde9ff", "#4c669f"];
                         }
                       };
 
@@ -1071,13 +1071,13 @@ const styles = StyleSheet.create({
   },
   filterButtonsContainer: {
     marginTop: RFPercentage(1.4),
-    gap: 20,
+    gap: 26,
     paddingHorizontal: RFPercentage(2),
     // backgroundColor: "red",
   },
   filterButton: {
     // width: RFPercentage(11.5),
-    height: RFPercentage(4.8),
+    height: RFPercentage(5),
     borderRadius: RFPercentage(1),
     justifyContent: "center",
     alignItems: "center",
@@ -1098,8 +1098,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: RFPercentage(100),
-    height: RFPercentage(6.5),
-    width: RFPercentage(6.5),
+    height: RFPercentage(7),
+    width: RFPercentage(7),
   },
 
   filterButtonTextActive: {
@@ -1438,8 +1438,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    height: RFPercentage(6.5),
-    width: RFPercentage(6.5),
+    height: RFPercentage(7),
+    width: RFPercentage(7),
   },
 
   filterButtonWithIcon: {

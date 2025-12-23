@@ -6,6 +6,7 @@ import {
   Platform,
   Text,
   Alert,
+  StatusBar,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
@@ -34,32 +35,32 @@ export default function Location({ navigation, route }) {
   // Function to extract country code from Google Geocoding response
   const extractCountryCode = (addressComponents) => {
     if (!addressComponents) return null;
-    
-    const countryComponent = addressComponents.find(component =>
+
+    const countryComponent = addressComponents.find((component) =>
       component.types.includes("country")
     );
-    
+
     if (countryComponent) {
       return countryComponent.short_name; // Returns ISO 3166-1 alpha-2 country code (e.g., "US", "DE", "FR")
     }
-    
+
     return null;
   };
 
   // Function to extract address components
   const extractAddressInfo = (addressComponents) => {
     if (!addressComponents) return {};
-    
-    const countryComponent = addressComponents.find(component =>
+
+    const countryComponent = addressComponents.find((component) =>
       component.types.includes("country")
     );
-    const localityComponent = addressComponents.find(component =>
+    const localityComponent = addressComponents.find((component) =>
       component.types.includes("locality")
     );
-    const administrativeAreaComponent = addressComponents.find(component =>
+    const administrativeAreaComponent = addressComponents.find((component) =>
       component.types.includes("administrative_area_level_1")
     );
-    
+
     return {
       countryCode: countryComponent?.short_name || null,
       country: countryComponent?.long_name || null,
@@ -79,7 +80,7 @@ export default function Location({ navigation, route }) {
           const results = response.data.results;
           const address = results[0]?.formatted_address || "Current Location";
           const addressComponents = results[0]?.address_components;
-          
+
           const addressInfo = extractAddressInfo(addressComponents);
 
           setMarker(loc);
@@ -137,7 +138,7 @@ export default function Location({ navigation, route }) {
       const results = response.data.results;
       const address = results[0]?.formatted_address || "Selected Location";
       const addressComponents = results[0]?.address_components;
-      
+
       const addressInfo = extractAddressInfo(addressComponents);
 
       const locationData = {
@@ -170,7 +171,7 @@ export default function Location({ navigation, route }) {
     if (!selectedLocation) {
       return;
     }
-    
+
     // Prepare location data for dispatch
     const locationData = {
       latitude: selectedLocation.latitude,
@@ -187,7 +188,7 @@ export default function Location({ navigation, route }) {
     } else {
       dispatch(setLocation(locationData));
     }
-    
+
     console.log("📍 Dispatching location:", locationData);
     navigation.goBack();
   };
@@ -195,17 +196,17 @@ export default function Location({ navigation, route }) {
   // Handle Google Places selection with country code extraction
   const handlePlaceSelect = async (data, details = null) => {
     const location = details.geometry.location;
-    
+
     try {
       // Get detailed address information using reverse geocoding
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${key}`
       );
-      
+
       const results = response.data.results;
       const address = data.description;
       const addressComponents = results[0]?.address_components;
-      
+
       const addressInfo = extractAddressInfo(addressComponents);
 
       const coordinate = {
@@ -226,7 +227,7 @@ export default function Location({ navigation, route }) {
 
       setMarker(coordinate);
       setSelectedLocation(coordinate);
-      
+
       console.log("📍 Place selected:", coordinate);
     } catch (error) {
       // Fallback if reverse geocoding fails
@@ -239,7 +240,7 @@ export default function Location({ navigation, route }) {
         city: null,
         state: null,
       };
-      
+
       mapRef.current.animateToRegion({
         ...coordinate,
         latitudeDelta: 0.01,
@@ -253,6 +254,11 @@ export default function Location({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       {/* Top Row */}
       <View style={styles.topRow}>
         <TouchableOpacity
@@ -330,7 +336,7 @@ export default function Location({ navigation, route }) {
           >
             <Text style={styles.applyButtonText}>{t("location.apply")}</Text>
           </TouchableOpacity>
-          
+
           {/* Show location details for debugging */}
           {selectedLocation.countryCode && (
             <Text style={[styles.locationDetails, { color: theme.darkGrey }]}>
@@ -383,13 +389,13 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
-    lineHeight : RFPercentage(2)
+    lineHeight: RFPercentage(2),
   },
   locationDetails: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
     opacity: 1,
-    width:"90%",
+    width: "90%",
   },
 });

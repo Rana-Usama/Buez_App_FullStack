@@ -175,13 +175,13 @@ const TopRatedUsers = ({ navigation }: any) => {
     const getGradientColors = () => {
       switch (badge.text) {
         case "PRO BUEZER":
-          return ["#cfc486ff", "#d39345ff"];
+          return ["#888cadff", "#9e9cf4ff"];
         case "BUEZER":
-          return ["#8053b1ff", "#986bc8ff"];
+          return ["#888cadff", "#9e9cf4ff"];
         case "MINI BUEZER":
-          return ["#37948aff", "#50C878"];
+          return ["#888cadff", "#9e9cf4ff"];
         default:
-          return ["#7c8cdd", "#4c669f"];
+          return ["#888cadff", "#9e9cf4ff"];
       }
     };
 
@@ -209,7 +209,10 @@ const TopRatedUsers = ({ navigation }: any) => {
             user: user.originalData || user,
           })
         }
-        style={[styles.cardContainer, { borderColor: gr[1] }]}
+        style={[
+          styles.cardContainer,
+          { borderColor: theme.mode === "dark" ? gr2[1] : gr[1] },
+        ]}
       >
         <LinearGradient
           colors={
@@ -220,7 +223,12 @@ const TopRatedUsers = ({ navigation }: any) => {
           style={styles.gradientWrapper}
         >
           <LinearGradient
-            colors={[theme.mode === 'dark' ?  "rgba(57, 51, 51, 0.4)" : "rgba(255, 255, 255, 0.4)", "transparent"]}
+            colors={[
+              theme.mode === "dark"
+                ? "rgba(57, 51, 51, 0.4)"
+                : "rgba(255, 255, 255, 0.18)",
+              "transparent",
+            ]}
             style={[
               StyleSheet.absoluteFill,
               { transform: [{ rotate: "45deg" }], top: -50 },
@@ -253,12 +261,12 @@ const TopRatedUsers = ({ navigation }: any) => {
                 <View
                   style={[
                     styles.badgeTag,
-                    { backgroundColor: "rgba(255,255,255,0.2)" },
+                    { backgroundColor: "rgba(255, 255, 255, 0.2)" },
                   ]}
                 >
                   <Ionicons name={badge.icon as any} size={10} color="#fff" />
                   <Text style={[styles.badgeText, { color: "#fff" }]}>
-                    {` `}
+                    {`  `}
                     {badge.text}
                   </Text>
                 </View>
@@ -306,9 +314,11 @@ const TopRatedUsers = ({ navigation }: any) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
-      <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-      />
+       <StatusBar
+              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+              backgroundColor={"transparent"}
+              translucent
+            />
 
       <CustomNav title={t("profileRank.txt1")} showBack={true} />
 

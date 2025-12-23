@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -179,6 +180,11 @@ function Profile({ navigation }) {
     <View
       style={[styles.screen, { backgroundColor: theme.white || "#FFFFFF" }]}
     >
+       <StatusBar
+              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+              backgroundColor={"transparent"}
+              translucent
+            />
       <CustomNav title={`${t("profile.txt1")}`} showBack />
       <ScrollView
         style={styles.scroll}

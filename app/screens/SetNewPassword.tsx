@@ -34,6 +34,7 @@ function SetNewPassword(props: any) {
 
   return (
     <Screen style={styles.screen}>
+      
       <View style={styles.content}>
         <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={{ position: "absolute", left: 0 }}>
           <Ionicons name="chevron-back" style={styles.arrow} color={Colors.heading} />

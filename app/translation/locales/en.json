@@ -200,7 +200,7 @@
     "txt2": "Upgrade to Premium to unlock full access.",
     "txt3": "Checkout",
     "renewSubscription": "BUEZ Subscription",
-    "choosePlanToContinue": "Choose a plan to continue enjoying premium\nfeatures on BUEZ",
+    "choosePlanToContinue": "Choose a plan to continue enjoying\npremium features on BUEZ",
     "renewWith": "Start with",
     "securePayment": "Secure payment processing",
     "cancelAnytime": "Cancel anytime"
@@ -312,7 +312,7 @@
     "txt10": "Cancel Subscription",
     "monthlyPlan": "MONTHLY PLAN",
     "yearlyPlan": "YEARLY PLAN",
-    "save36": "Saving 36%",
+    "save36": "Saving",
     "cancellationNote": "Cancellation Details",
     "monthlyCancellation": "If you cancel your monthly subscription now, it will stay active until the end of your current billing period. You won’t be charged again.",
     "yearlyCancellation": "If you cancel your yearly subscription now, it will remain active until the end of your current billing cycle. No refunds will be issued for unused time.",

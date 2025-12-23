@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Linking,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons, FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -202,6 +203,11 @@ function FAQ({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav showBack title={`${t("settings.txt5")}`} />
 
       <ScrollView

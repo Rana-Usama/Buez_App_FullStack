@@ -27,6 +27,7 @@ export const addUser = async (
     isSubscribed,
     token,
     isFreeTrial,
+    createdAt,
   }
 ) => {
   try {
@@ -39,6 +40,7 @@ export const addUser = async (
       isSubscribed,
       token,
       isFreeTrial,
+      createdAt,
       userId: id,
     };
 
@@ -238,8 +240,8 @@ export const fetchUserDetailedProfile = async (userId) => {
     let successRate = calculateSuccessRate(reviews, completedTasks, totalTasks);
 
     // Get member since date
-    const memberSince = userData?.freeTrialStartedAt
-      ? new Date(userData.freeTrialStartedAt.seconds * 1000).toLocaleDateString(
+    const memberSince = userData?.createdAt
+      ? new Date(userData?.createdAt.seconds * 1000).toLocaleDateString(
           "en-US",
           {
             year: "numeric",

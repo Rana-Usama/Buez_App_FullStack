@@ -9,6 +9,7 @@ import {
   query,
   where,
   getDocs,
+  serverTimestamp,
 } from "firebase/firestore";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import Toast from "react-native-toast-message";
@@ -64,6 +65,16 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
     }
   };
 
+  // Helper function to parse dates consistently
+  const parseFirestoreTimestamp = (timestamp: any) => {
+    if (!timestamp) return null;
+    if (timestamp.seconds) return new Date(timestamp.seconds * 1000);
+    if (timestamp._seconds) return new Date(timestamp._seconds * 1000); // Sometimes it's _seconds
+    if (typeof timestamp === "string") return new Date(timestamp);
+    if (timestamp instanceof Date) return timestamp;
+    return null;
+  };
+
   const handleGoogleLogin = async () => {
     if (!deviceId) {
       Toast.show({
@@ -94,77 +105,126 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
+      // Get current user data or create new
       if (userSnap.exists()) {
+        const existingData = userSnap.data();
         await setDoc(
           userRef,
           {
-            userName: user.displayName,
-            profileImage: user.photoURL,
+            userName: user.displayName || existingData.userName,
+            profileImage: user.photoURL || existingData.profileImage,
             token: pushToken,
-            phoneNumber: user.phoneNumber,
-            email: user.email,
-            isSubscribed: userSnap.data()?.isSubscribed ?? false,
-            isFreeTrial: userSnap.data()?.isFreeTrial ?? false,
+            phoneNumber: user.phoneNumber || existingData.phoneNumber,
+            email: user.email || existingData.email,
+            isSubscribed: existingData.isSubscribed ?? false,
+            isFreeTrial: existingData.isFreeTrial ?? false,
+            // Preserve existing subscription dates if they exist
+            subscriptionStart: existingData.subscriptionStart || null,
+            subscriptionEnd: existingData.subscriptionEnd || null,
+            freeTrialStartedAt: existingData.freeTrialStartedAt || null,
+            webhook: existingData.webhook ?? true,
+            updatedAt: serverTimestamp(),
+            createdAt: existingData.createdAt || serverTimestamp(),
           },
           { merge: true }
         );
       } else {
+        // New user
         await setDoc(userRef, {
-          userName: user.displayName,
-          email: user.email,
-          profileImage: user.photoURL,
-          phoneNumber: user.phoneNumber,
+          userId: user.uid,
+          userName: user.displayName || "",
+          email: user.email || "",
+          profileImage: user.photoURL || "",
+          phoneNumber: user.phoneNumber || "",
           token: pushToken,
           isSubscribed: false,
           isFreeTrial: false,
+          subscriptionStart: null,
+          subscriptionEnd: null,
+          freeTrialStartedAt: null,
+          webhook: true,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
       }
 
+      // Save credentials and clear logged out flag
       await saveCredentials(user.email, "123456");
       await SecureStore.setItemAsync("loggedOut", "false");
 
+      // Give Firestore a moment to update
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Get updated user data
       const updatedSnap = await getDoc(userRef);
       const existingUser = updatedSnap.data();
+
+      if (!existingUser) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Failed to retrieve user data",
+        });
+        return;
+      }
+
       const now = new Date();
 
-      // Check subscription validity
-      const parseDate = (date) => {
-        if (!date) return null;
-        if (date.seconds) return new Date(date.seconds * 1000);
-        if (typeof date === "string") return new Date(date);
-        return null;
-      };
+      // Parse subscription dates
+      const subStartDate = parseFirestoreTimestamp(
+        existingUser.subscriptionStart
+      );
+      const subEndDate = parseFirestoreTimestamp(existingUser.subscriptionEnd);
 
-      const subStartDate = parseDate(existingUser.subscriptionStart);
-      const subEndDate = parseDate(existingUser.subscriptionEnd);
+      // Debug logs
+      console.log("🔍 Google Login - Subscription Check:");
+      console.log("isSubscribed:", existingUser.isSubscribed);
+      console.log("subscriptionStart:", existingUser.subscriptionStart);
+      console.log("subscriptionEnd:", existingUser.subscriptionEnd);
+      console.log("Parsed start:", subStartDate);
+      console.log("Parsed end:", subEndDate);
+      console.log("Current date:", now);
+
       const isWithinPaidPeriod =
         subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
+      console.log("Is within paid period:", isWithinPaidPeriod);
+
       // Check trial validity
       let isTrialValid = false;
-      if (
-        existingUser.isFreeTrial &&
-        existingUser.freeTrialStartedAt?.seconds
-      ) {
-        const trialStart = new Date(
-          existingUser.freeTrialStartedAt.seconds * 1000
-        );
-        const trialDays = differenceInDays(now, trialStart);
+      const trialStartDate = parseFirestoreTimestamp(
+        existingUser.freeTrialStartedAt
+      );
+      if (existingUser.isFreeTrial && trialStartDate) {
+        const trialDays = differenceInDays(now, trialStartDate);
+        console.log("Trial days:", trialDays);
         isTrialValid = trialDays >= 0 && trialDays <= 14;
+        console.log("Is trial valid:", isTrialValid);
       }
 
       // Check if device has already used free trial
       const deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
+      console.log("Device used trial:", deviceUsedTrial);
 
-      // Navigation logic
-      if (existingUser.isSubscribed || isWithinPaidPeriod) {
-        navigation.reset({ index: 0, routes: [{ name: "TabNavigator" }] });
+      // Navigation logic - prioritize in this order:
+      // 1. Active paid subscription
+      // 2. Active free trial
+      // 3. Device hasn't used trial → FreeTrial
+      // 4. Device used trial → Subscription
+
+      console.log("🎯 Navigation Decision:");
+      if (existingUser?.isSubscribed && isWithinPaidPeriod) {
+        console.log("✅ Navigating to TabNavigator (paid subscription)");
+        navigation.replace("TabNavigator");
       } else if (isTrialValid) {
-        navigation.reset({ index: 0, routes: [{ name: "TabNavigator" }] });
-      } else if (deviceUsedTrial) {
-        navigation.reset({ index: 0, routes: [{ name: "Subscription" }] });
+        console.log("✅ Navigating to TabNavigator (active trial)");
+        navigation.replace("TabNavigator");
+      } else if (!deviceUsedTrial) {
+        console.log("✅ Navigating to FreeTrial (new device)");
+        navigation.replace("FreeTrial");
       } else {
-        navigation.reset({ index: 0, routes: [{ name: "FreeTrial" }] });
+        console.log("✅ Navigating to Subscription (device used trial)");
+        navigation.replace("Subscription");
       }
 
       Toast.show({
@@ -172,8 +232,11 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
         text1: `${t("toast.login.one")}`,
         text2: `${t("toast.login.two")}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log("Google Sign-In Error:", error);
+      console.log("Error code:", error.code);
+      console.log("Error message:", error.message);
+
       Toast.show({
         type: "error",
         text1: `${t("toast.login.three")}`,

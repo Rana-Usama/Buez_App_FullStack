@@ -10,6 +10,7 @@ import {
   Animated,
   Easing,
   RefreshControl,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
@@ -163,7 +164,7 @@ export default function Notifications({ navigation }) {
     init();
   }, [currentUserId]);
 
-// Fetching Notifications------
+  // Fetching Notifications------
   const fetchNotifications = async () => {
     if (!currentUserId) return;
     setBusy(true);
@@ -671,7 +672,8 @@ export default function Notifications({ navigation }) {
             },
           ]}
         >
-         <MaterialIcons name="brightness-1"
+          <MaterialIcons
+            name="brightness-1"
             size={RFPercentage(0.6)}
             color={theme.primary}
           />
@@ -691,7 +693,12 @@ export default function Notifications({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-    <CustomNav title={tr.notifications} showBack />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
+      <CustomNav title={tr.notifications} showBack />
 
       <Animated.View style={[styles.container]}>
         {busy ? (

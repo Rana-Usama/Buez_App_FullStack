@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
@@ -25,7 +26,8 @@ function Settings({ navigation }) {
   useExitAppOnBack();
 
   const profileImgUrl = user?.profileImage || "";
-  const currentPlan = user?.planType || user?.subscription?.planInterval || "free";
+  const currentPlan =
+    user?.planType || user?.subscription?.planInterval || "free";
   const isMonthlyPlan = currentPlan === "monthly";
   const freePlan = user?.planType === "free";
 
@@ -34,36 +36,41 @@ function Settings({ navigation }) {
       iconSource: Icons.privacy,
       title: t("settings.txt2"),
       navigation: () => navigation.navigate("ChangePassword"),
-      iconType: "image"
+      iconType: "image",
     },
     {
       iconSource: Icons.language,
       title: t("settings.txt12"),
       navigation: () => navigation.navigate("Language"),
-      iconType: "image"
+      iconType: "image",
     },
     {
       iconSource: "globe",
       title: t("settings.txt3"),
       navigation: () => navigation.navigate("TermsAndConditions"),
-      iconType: "feather"
+      iconType: "feather",
     },
     {
       iconSource: Icons.privacy,
       title: t("settings.txt4"),
       navigation: () => navigation.navigate("PrivacyPolicy"),
-      iconType: "image"
+      iconType: "image",
     },
     {
       iconSource: Icons.faq,
       title: t("settings.txt5"),
       navigation: () => navigation.navigate("FAQ"),
-      iconType: "image"
+      iconType: "image",
     },
   ];
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <Nav
         profileImage={profileImgUrl}
         leftLogo={true}
@@ -82,14 +89,36 @@ function Settings({ navigation }) {
           <Text style={[styles.sectionTitle, { color: theme.lightGrey }]}>
             {t("settings.txt8")}
           </Text>
-          <View style={[styles.underline, { backgroundColor: theme.primary + "30" }]} />
+          <View
+            style={[
+              styles.underline,
+              { backgroundColor: theme.primary + "30" },
+            ]}
+          />
         </View>
 
         {/* Theme Toggle Card */}
-        <View style={[styles.card, { backgroundColor: theme.mode === 'dark' ? '#16151aff' : '#F8F9FA', borderColor: "#e4e8fbff" }]}>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.mode === "dark" ? "#050505ff" : "#F8F9FA",
+              borderColor: "#e4e8fbff",
+            },
+          ]}
+        >
           <View style={styles.listItem}>
-            <View style={[styles.iconContainer, { backgroundColor: theme.primary + "15" }]}>
-              <Feather name={theme.mode === 'dark' ? "moon" : "sun"} size={18} color={theme.primary} />
+            <View
+              style={[
+                styles.iconContainer,
+                { backgroundColor: theme.primary + "15" },
+              ]}
+            >
+              <Feather
+                name={theme.mode === "dark" ? "moon" : "sun"}
+                size={18}
+                color={theme.primary}
+              />
             </View>
             <Text style={[styles.title, { color: theme.heading }]}>
               {t("settings.txt13")}
@@ -105,7 +134,16 @@ function Settings({ navigation }) {
         </View>
 
         {/* General Settings List */}
-        <View style={[styles.card, { backgroundColor: theme.mode === 'dark' ? '#16151aff' : '#ffffffff', borderColor: "#e4e8fbff" }]}>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor:
+                theme.mode === "dark" ? "#050505ff" : "#ffffffff",
+              borderColor: "#e4e8fbff",
+            },
+          ]}
+        >
           {navigationsList
             .filter((item) => {
               if (item.title === "Upgrade Plan" && !isMonthlyPlan) return false;
@@ -119,12 +157,24 @@ function Settings({ navigation }) {
                 activeOpacity={0.7}
                 style={[
                   styles.listItem,
-                  i !== filteredList.length - 1 && { borderBottomWidth: 1, borderBottomColor: "#e4e8fbff" }
+                  i !== filteredList.length - 1 && {
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#e4e8fbff",
+                  },
                 ]}
               >
-                <View style={[styles.iconContainer, { backgroundColor: theme.primary + "15" }]}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: theme.primary + "15" },
+                  ]}
+                >
                   {item.iconType === "feather" ? (
-                    <Feather name={item.iconSource as any} size={18} color={theme.heading} />
+                    <Feather
+                      name={item.iconSource as any}
+                      size={18}
+                      color={theme.heading}
+                    />
                   ) : (
                     <Image
                       style={styles.img}
@@ -155,8 +205,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  scroll: { 
-    width: "100%" 
+  scroll: {
+    width: "100%",
   },
   scrollContent: {
     paddingBottom: RFPercentage(5),
@@ -165,16 +215,16 @@ const styles = StyleSheet.create({
   sectionHeader: {
     marginTop: RFPercentage(4),
     marginBottom: RFPercentage(2),
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
   },
   sectionTitle: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1,
   },
   underline: {
-    width: 40,
+    width: 90,
     height: 3,
     borderRadius: 2,
     marginTop: 4,
@@ -184,7 +234,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.6,
     paddingHorizontal: 15,
     marginBottom: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   listItem: {
     flexDirection: "row",
@@ -194,17 +244,17 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 38,
     height: 38,
-    borderRadius: 12,
+    borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
   },
-  img: { 
-    width: 20, 
-    height: 20 
+  img: {
+    width: 20,
+    height: 20,
   },
   title: {
     flex: 1,
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
     marginLeft: 15,
   },

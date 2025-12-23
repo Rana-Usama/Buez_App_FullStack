@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Colors from "../../config/Colors"; // Adjust path to your config
+import { useAppTheme } from "../../contexts/themeContext";
 
 interface NavProps {
   title: string;
@@ -20,12 +21,10 @@ interface NavProps {
 
 const CustomNav = ({ title, showBack = true }: NavProps) => {
   const navigation = useNavigation();
+  const { theme } = useAppTheme();
 
   return (
-    <View style={styles.container}>
-      {/* Optional: Ensures status bar text matches the theme */}
-      <StatusBar barStyle="light-content" />
-
+    <View style={[styles.container, { backgroundColor: theme.white }]}>
       <View style={styles.content}>
         {/* Left Action: Back Button */}
         <View style={styles.actionContainer}>
@@ -33,7 +32,13 @@ const CustomNav = ({ title, showBack = true }: NavProps) => {
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => navigation.goBack()}
-              style={styles.backButton}
+              style={[
+                styles.backButton,
+                {
+                  backgroundColor:
+                   Colors.primary,
+                },
+              ]}
             >
               <Ionicons name="chevron-back" size={20} color="#FFF" />
             </TouchableOpacity>
@@ -42,7 +47,10 @@ const CustomNav = ({ title, showBack = true }: NavProps) => {
 
         {/* Center: Screen Name */}
         <View style={styles.titleContainer}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text
+            style={[styles.title, { color: theme.heading }]}
+            numberOfLines={1}
+          >
             {title}
           </Text>
         </View>
@@ -58,9 +66,11 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     // Extra height for iOS safe areas
-    paddingTop: Platform.OS === "ios" ? 55 : StatusBar.currentHeight,
+    paddingTop: Platform.OS === "ios" ? 55 : 55,
     backgroundColor: Colors.primary,
-    height:RFPercentage(14)
+    height: RFPercentage(14),
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(161, 156, 156, 0.25)",
   },
   gradient: {
     height: RFPercentage(7),
@@ -73,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    marginTop:RFPercentage(2)
+    marginTop: RFPercentage(2),
   },
   actionContainer: {
     width: 40, // Fixed width to ensure title stays centered

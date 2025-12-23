@@ -8,6 +8,7 @@ import {
   RefreshControl,
   SectionList,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
@@ -293,6 +294,11 @@ export default function Reviews({ navigation }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav title={`${t("profile.txt3")}`} showBack />
 
       {/* Rating Overview */}

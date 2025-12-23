@@ -10,6 +10,7 @@ import {
   Platform,
   TextInput,
   Alert,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as ImagePicker from "expo-image-picker";
@@ -257,6 +258,11 @@ function EditProfile({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={[styles.keyboard, { backgroundColor: theme.white }]}
     >
+       <StatusBar
+              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+              backgroundColor={"transparent"}
+              translucent
+            />
       <View style={[styles.screen, { backgroundColor: theme.white }]}>
         <CustomNav title={`${t("profile.txt2")}`} showBack />
 

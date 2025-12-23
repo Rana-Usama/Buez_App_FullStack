@@ -326,10 +326,11 @@ function Subscription(props) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-      <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
-      />
+       <StatusBar
+              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+              backgroundColor={"transparent"}
+              translucent
+            />
 
       <ScrollView
         style={styles.container}
@@ -409,7 +410,7 @@ function Subscription(props) {
           width={"100%"}
           loading={loading}
           marginTop={RFPercentage(1.5)}
-          height={RFPercentage(6)}
+          height={Platform.OS === "ios" ? RFPercentage(6.5) : RFPercentage(7)}
         />
       </View>
     </Screen>
@@ -443,10 +444,10 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   subtitle: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
-    lineHeight: RFPercentage(1.9),
+    lineHeight: RFPercentage(2.2),
   },
   cardsContainer: {
     marginTop: RFPercentage(6),

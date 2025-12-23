@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Image, View, StatusBar } from "react-native";
+import { StyleSheet, View, StatusBar, Animated, Easing } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
 import { differenceInDays } from "date-fns";
@@ -28,7 +28,100 @@ const DeciderScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [deviceId, setDeviceId] = useState("");
 
+  // Animated values
+  const [spinValue] = useState(new Animated.Value(0));
+  const [scaleValue] = useState(new Animated.Value(0.8));
+  const [dotOpacity1] = useState(new Animated.Value(0.3));
+  const [dotOpacity2] = useState(new Animated.Value(0.3));
+  const [dotOpacity3] = useState(new Animated.Value(0.3));
+
   const db = getFirestore();
+
+  // Spinning animation for the loader
+  useEffect(() => {
+    const spinAnimation = Animated.loop(
+      Animated.timing(spinValue, {
+        toValue: 1,
+        duration: 1500,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+
+    const scaleAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleValue, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleValue, {
+          toValue: 0.8,
+          duration: 800,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    // Sequential dot animation for "Loading..."
+    const dotAnimation = Animated.loop(
+      Animated.stagger(200, [
+        Animated.sequence([
+          Animated.timing(dotOpacity1, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dotOpacity1, {
+            toValue: 0.3,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(dotOpacity2, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dotOpacity2, {
+            toValue: 0.3,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(dotOpacity3, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dotOpacity3, {
+            toValue: 0.3,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    );
+
+    spinAnimation.start();
+    scaleAnimation.start();
+    dotAnimation.start();
+
+    return () => {
+      spinAnimation.stop();
+      scaleAnimation.stop();
+      dotAnimation.stop();
+    };
+  }, []);
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
 
   // Fetch device unique ID
   useEffect(() => {
@@ -119,7 +212,7 @@ const DeciderScreen = () => {
           now <= subEndDate;
 
         // 🔥 1) Active subscription → TabNavigator (skip trial logic)
-        if (isSubscribed && isWithinPaidPeriod && email) {
+        if (isSubscribed && isWithinPaidPeriod) {
           setInitialRoute("TabNavigator");
           setIsLoading(false);
           return;
@@ -175,10 +268,7 @@ const DeciderScreen = () => {
   // 🚀 Navigate once route is determined
   useEffect(() => {
     if (!isLoading && initialRoute) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: initialRoute }],
-      });
+      navigation.navigate(initialRoute);
     }
   }, [isLoading, initialRoute]);
 
@@ -186,9 +276,70 @@ const DeciderScreen = () => {
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
+        backgroundColor={"transparent"}
+        translucent
       />
-      <Image style={styles.img} source={Icons.logo} resizeMode="contain" />
+
+      {/* Animated Loading Indicator */}
+      <View style={styles.loaderContainer}>
+        {/* Outer spinning circle */}
+        <Animated.View
+          style={[
+            styles.spinnerOuter,
+            {
+              borderColor: theme.primary,
+              borderBottomColor: theme.primary, // Explicitly set these
+              borderLeftColor: theme.primary,
+              transform: [{ rotate: spin }, { scale: scaleValue }],
+            },
+          ]}
+        />
+
+        {/* Inner spinning circle */}
+        <Animated.View
+          style={[
+            styles.spinnerInner,
+            {
+              borderColor: theme.primary,
+              transform: [
+                {
+                  rotate: spinValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ["360deg", "0deg"],
+                  }),
+                },
+              ],
+            },
+          ]}
+        />
+
+        {/* Center dot */}
+        <View style={[styles.centerDot, { backgroundColor: theme.primary }]} />
+      </View>
+
+      {/* Loading Text with animated dots */}
+      <View style={styles.loadingTextContainer}>
+        <Animated.Text style={[styles.loadingText, { color: theme.heading }]}>
+          Loading
+        </Animated.Text>
+        <View style={styles.dotsContainer}>
+          <Animated.Text
+            style={[styles.dot, { color: theme.heading, opacity: dotOpacity1 }]}
+          >
+            .
+          </Animated.Text>
+          <Animated.Text
+            style={[styles.dot, { color: theme.heading, opacity: dotOpacity2 }]}
+          >
+            .
+          </Animated.Text>
+          <Animated.Text
+            style={[styles.dot, { color: theme.heading, opacity: dotOpacity3 }]}
+          >
+            .
+          </Animated.Text>
+        </View>
+      </View>
     </View>
   );
 };
@@ -199,9 +350,52 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  img: {
-    width: RFPercentage(16),
-    height: RFPercentage(16),
+  loaderContainer: {
+    width: RFPercentage(15),
+    height: RFPercentage(15),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  spinnerOuter: {
+    position: "absolute",
+    width: RFPercentage(12),
+    height: RFPercentage(12),
+    borderRadius: RFPercentage(6),
+    borderWidth: RFPercentage(0.4),
+    borderColor: "rgba(0,0,0,0.1)", // Add base color
+    borderTopColor: "transparent",
+    borderRightColor: "transparent",
+  },
+  spinnerInner: {
+    position: "absolute",
+    width: RFPercentage(8),
+    height: RFPercentage(8),
+    borderRadius: RFPercentage(4),
+    borderWidth: RFPercentage(0.3),
+    borderBottomColor: "transparent",
+    borderLeftColor: "transparent",
+  },
+  centerDot: {
+    width: RFPercentage(1.5),
+    height: RFPercentage(1.5),
+    borderRadius: RFPercentage(0.75),
+  },
+  loadingTextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: RFPercentage(3),
+  },
+  loadingText: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_500Medium",
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    marginLeft: RFPercentage(0.2),
+  },
+  dot: {
+    fontSize: RFPercentage(2.5),
+    fontFamily: "Poppins_700Bold",
   },
 });
 

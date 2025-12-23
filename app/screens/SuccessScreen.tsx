@@ -33,7 +33,7 @@ function SuccessScreen({ navigation }) {
     >
       <MaterialIcons
         name={icon}
-        size={RFPercentage(3.5)}
+        size={RFPercentage(3)}
         color={theme.mode === "dark" ? Colors.primary : Colors.white}
         style={styles.infoIcon}
       />
@@ -74,7 +74,7 @@ function SuccessScreen({ navigation }) {
       end={{ x: 0, y: 1 }}
       style={styles.container}
     >
-      <StatusBar backgroundColor={theme.white} barStyle={"light-content"} />
+      <StatusBar backgroundColor={"transparent"} barStyle={"light-content"} translucent />
 
       {/* Success Icon */}
       <View style={styles.iconContainer}>
@@ -142,7 +142,7 @@ function SuccessScreen({ navigation }) {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[
             styles.primaryButton,
             {
@@ -161,7 +161,7 @@ function SuccessScreen({ navigation }) {
           >
             {t("successScreen.txt2")}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={[
@@ -182,7 +182,7 @@ function SuccessScreen({ navigation }) {
               { color: theme.mode === "dark" ? Colors.primary : Colors.white },
             ]}
           >
-            {t("successScreen.txt12")}
+            {t("successScreen.txt2")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -197,20 +197,20 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     alignItems: "center",
-    marginTop: Platform.OS === "android" ? RFPercentage(5) : RFPercentage(9),
+    marginTop: Platform.OS === "android" ? RFPercentage(7) : RFPercentage(9),
     marginBottom: RFPercentage(2),
   },
   icon: {
     fontSize: RFPercentage(8),
   },
   successTitle: {
-    fontSize: RFPercentage(3),
+    fontSize: RFPercentage(2.5),
     fontFamily: "Poppins_600SemiBold",
     textAlign: "center",
     marginBottom: RFPercentage(1),
   },
   subtitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
     marginBottom: RFPercentage(4),
@@ -240,12 +240,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(0.5),
   },
   infoDescription: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2.2),
   },
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(6),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: RFPercentage(1.5),
+    borderRadius: RFPercentage(100),
     borderWidth: 2,
     backgroundColor: "transparent",
   },

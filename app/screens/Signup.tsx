@@ -38,8 +38,10 @@ import {
   query,
   where,
   getDocs,
+  serverTimestamp
 } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
+import { LinearGradient } from "expo-linear-gradient";
 
 function Signup({ navigation }: any) {
   const { t } = useTranslation();
@@ -82,7 +84,7 @@ function Signup({ navigation }: any) {
         where("freeTrial", "==", true)
       );
       const snapshot = await getDocs(q);
-      console.log("snapppppp..................",snapshot)
+      console.log("snapppppp..................", snapshot);
       // If snapshot is NOT empty → device already used a free trial
       return !snapshot.empty;
     } catch (error) {
@@ -130,6 +132,7 @@ function Signup({ navigation }: any) {
           isSubscribed: false,
           token: expoPushToken || null,
           isFreeTrial: false,
+          createdAt : serverTimestamp()
         };
         await addUser(user?.uid, userData);
         await saveCredentials(email, password);
@@ -140,7 +143,7 @@ function Signup({ navigation }: any) {
         text2: `${t("toast.signup.two")}`,
       });
       const alreadyUsed = await hasDeviceAvailedFreeTrial(deviceId);
-      console.log("alreadyUsed............",alreadyUsed)
+      console.log("alreadyUsed............", alreadyUsed);
       if (alreadyUsed) {
         navigation.navigate("Subscription");
       } else {
@@ -161,8 +164,38 @@ function Signup({ navigation }: any) {
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={theme.white}
+        backgroundColor={"transparent"}
+        translucent
       />
+      <LinearGradient
+        colors={[
+          "#7a6bffff",
+          "#4ECDC4",
+          "#45B7D1",
+          "#96CEB4",
+          "#5768feff",
+          "#FF9FF3",
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+        style={styles.meshGradientTopLeft}
+      />
+      <LinearGradient
+        colors={[
+          "#8bc7ffff",
+          "#796affff",
+          "#238b6eff",
+          "#A18CD1",
+          "#FBC2EB",
+          "#FDA085",
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+        style={styles.meshGradientBottomRight}
+      />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
@@ -407,6 +440,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.white,
   },
+  meshGradientTopLeft: {
+    position: "absolute",
+    top: -RFPercentage(30),
+    left: -RFPercentage(20),
+    width: RFPercentage(50),
+    height: RFPercentage(50),
+    borderRadius: RFPercentage(25),
+    opacity: 0.1,
+    transform: [{ rotate: "45deg" }],
+  },
+  meshGradientBottomRight: {
+    position: "absolute",
+    bottom: -RFPercentage(30),
+    right: -RFPercentage(28),
+    width: RFPercentage(50),
+    height: RFPercentage(50),
+    borderRadius: RFPercentage(25),
+    opacity: 0.1,
+    transform: [{ rotate: "45deg" }],
+  },
   scrollView: {
     width: "100%",
   },
@@ -437,12 +490,12 @@ const styles = StyleSheet.create({
   logo: {
     width: RFPercentage(6.5),
     height: RFPercentage(9.5),
-    marginTop: RFPercentage(3),
+    marginTop: Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(9),
   },
   darkImg: {
     width: RFPercentage(20),
     height: RFPercentage(10.6),
-    marginTop: RFPercentage(3),
+    marginTop: Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(9),
   },
 
   welcomeText: {

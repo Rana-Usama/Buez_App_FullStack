@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, StatusBar } from "react-native";
 import React from "react";
 import { useAppTheme } from "../contexts/themeContext";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -8,11 +8,22 @@ const InitialScreen = () => {
   const { theme } = useAppTheme();
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
-      <Image style={styles.image} source={Icons.notActive} resizeMode="contain" />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
+      <Image
+        style={styles.image}
+        source={Icons.notActive}
+        resizeMode="contain"
+      />
       <Text style={[styles.title, { color: theme.darkGrey }]}>
         Checking for Active Subscription
       </Text>
-      <Text style={[styles.subtitle, { color: theme.darkGrey }]}>Loading...</Text>
+      <Text style={[styles.subtitle, { color: theme.darkGrey }]}>
+        Loading...
+      </Text>
     </View>
   );
 };
@@ -28,7 +39,6 @@ const styles = StyleSheet.create({
   image: {
     width: RFPercentage(60),
     height: RFPercentage(30),
-    
   },
   title: {
     textAlign: "center",

@@ -12,7 +12,6 @@ import {
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
-import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import Colors from "../config/Colors";
@@ -127,7 +126,7 @@ function CancelSubscription({ navigation }: any) {
     prices.yearly[userCurrency]
   );
 
-  const savingsLabel = `Saving ${savingsPercent}%`;
+  const savingsLabel = `${t("cancelSubscription.save36")} ${savingsPercent}%`;
 
   const planDetails = {
     monthly: {
@@ -148,6 +147,11 @@ function CancelSubscription({ navigation }: any) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
+       <StatusBar
+              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+              backgroundColor={"transparent"}
+              translucent
+            />
       <CustomNav showBack title={t("cancelSubscription.txt1")} />
       <ScrollView
         style={styles.container}
