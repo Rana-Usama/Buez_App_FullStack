@@ -18,7 +18,13 @@
     "gotIt": "Compris",
     "you": "Vous",
     "version": "Version",
-    "rights": "BUEZ. Tous droits réservés."
+    "rights": "BUEZ. Tous droits réservés.",
+    "error": "Erreur",
+    "noDescription": "Pas de description",
+    "task": "Tâche",
+"bulk": "Tâche collective avec plusieurs aides",
+"helper": "aide",
+"helpers": "aides"
   },
   "validations": {
     "inValid": "E-mail invalide",
@@ -227,6 +233,29 @@
     "txt13": "Catégorie",
     "txt14": "Note moyenne"
   },
+  "offerDetail": {
+    "helpersNeeded": "Aides nécessaires",
+    "totalHelpers": "Total d'aides nécessaires",
+    "confirmed": "Confirmé",
+    "applications": "Candidatures",
+    "pending": "En attente",
+    "slotsAvailable": "{{count}} places disponibles",
+    "full": "Toutes les places sont remplies",
+    "confirmedStatus": "{{confirmed}} sur {{total}} aides confirmées",
+    "viewApplications": "Voir les candidatures",
+    "applied": "Postulé",
+    "waitingConfirmation": "En attente de confirmation",
+    "imAvailable": "Je suis disponible",
+    "cannotApply": "Impossible de postuler",
+    "applicationSent": "Candidature envoyée",
+    "waitForConfirmation": "En attente de confirmation du demandeur",
+    "newApplication": "a postulé à votre demande",
+    "confirmedOn": "Confirmé le",
+    "youAreConfirmed": "Vous êtes confirmé",
+    "cnf": "Confirmer candidat",
+    "slt": "places occupées",
+    "lft": "restantes"
+  },
   "myRequests": {
     "txt1": "Mes demandes",
     "txt2": "Actives",
@@ -242,7 +271,13 @@
     "txt12": "Demande acceptée annulée avec succès.",
     "txt13": "Chargement de vos demandes...",
     "repostSuccess": "Demande republiée !",
-    "repostAvailable": "Votre demande a été republiée et est maintenant disponible pour que d'autres utilisateurs l'acceptent."
+    "repostAvailable": "Votre demande a été republiée et est maintenant disponible pour que d'autres utilisateurs l'acceptent.",
+    "noCompletedTasks": "Aucune tâche terminée",
+    "noCompletedTasksDesc": "Les tâches que vous terminez apparaîtront ici",
+    "noReviews": "Aucun avis pour le moment",
+    "noReviewsDesc": "Les avis des propriétaires des tâches apparaîtront ici",
+    "view": "Voir les candidats"
+
   },
   "postRequest": {
     "txt1": "Publier une demande",
@@ -260,21 +295,23 @@
     "txt13": "Modifier",
     "txt14": "Publier",
     "customTaskTitle": "Veuillez spécifier votre type de tâche",
-    "pr": "Prix"
+    "pr": "Prix",
+    "numberOfWorkers": "Nombre d'aides nécessaires",
+    "workersHelperText": "Sélectionnez le nombre d'aides nécessaires (1-{{max}})"
   },
-    "messages": {
-      "txt1": "Messages",
-      "txt2": "Tous",
-      "txt3": "Non lus",
-      "txt4": "Aucun message non lu",
-      "txt5": "Pas encore de messages",
-      "txt6": "Dis bonjour à",
-      "loading": "Chargement des discussions...",
-      "unknownUser": "Utilisateur inconnu",
-      "noResults": "Aucun résultat trouvé",
-      "emptyDescription": "Commencez une conversation en envoyant un message à vos contacts",
-      "photo": "Photo"
-    },
+  "messages": {
+    "txt1": "Messages",
+    "txt2": "Tous",
+    "txt3": "Non lus",
+    "txt4": "Aucun message non lu",
+    "txt5": "Pas encore de messages",
+    "txt6": "Dis bonjour à",
+    "loading": "Chargement des discussions...",
+    "unknownUser": "Utilisateur inconnu",
+    "noResults": "Aucun résultat trouvé",
+    "emptyDescription": "Commencez une conversation en envoyant un message à vos contacts",
+    "photo": "Photo"
+  },
   "chat": {
     "txt1": "Charger les messages précédents",
     "txt2": "Tapez un message",
@@ -374,7 +411,11 @@
     "txt1": "Profil",
     "txt2": "Modifier le profil",
     "txt3": "Notes et avis",
-    "txt4": "Tâches terminées"
+    "txt4": "Tâches terminées",
+    "applicantProfile": "Profil du candidat",
+    "confirmApplicant": "Confirmer",
+    "confirmed": "Confirmé",
+    "confirmedOn": "Confirmé le"
   },
   "editProfile": {
     "txt1": "Entrez votre nom",
@@ -620,5 +661,85 @@
     "saveMoney": "Économisez 36% par rapport au paiement mensuel",
     "oneTimePayment": "Paiement unique, pas de tracas mensuel",
     "exclusiveFeatures": "Accès à des fonctionnalités exclusives"
+  },
+  "taskApplicants": {
+    "title": "Candidats à la tâche",
+    "loading": "Chargement des détails de la tâche...",
+
+    "helpersNeeded": "Aides nécessaires",
+    "confirmed": "Confirmés",
+    "applicants": "Candidats",
+    "progress": "aides confirmées",
+    "applicantsTab": "Candidats",
+    "confirmedTab": "Confirmés",
+
+    "noEmail": "Aucun email",
+    "confirmedTime": "Confirmé",
+
+    "confirm": "Confirmer",
+    "remove": "Retirer",
+    "profile": "Profil",
+
+    "confirmDialog": {
+      "title": "Confirmer l'aide",
+      "message": "Êtes-vous sûr de vouloir confirmer {{name}} pour cette tâche ?",
+      "cancel": "Annuler",
+      "confirm": "Confirmer"
+    },
+
+    "removeDialog": {
+      "title": "Retirer l'aide",
+      "message": "Êtes-vous sûr de vouloir retirer {{name}} des aides confirmées ?",
+      "cancel": "Annuler",
+      "remove": "Retirer"
+    },
+
+    "toast": {
+      "error": {
+        "taskNotFound": "Tâche non trouvée",
+        "loadFailed": "Échec du chargement des données de la tâche",
+        "confirmFailed": "Échec de la confirmation de l'aide",
+        "removeFailed": "Échec du retrait de l'aide"
+      },
+      "success": {
+        "helperConfirmed": "Aide confirmée",
+        "confirmedMessage": "{{name}} a été confirmé(e) pour votre tâche"
+      },
+      "info": {
+        "helperRemoved": "Aide retirée",
+        "removedMessage": "{{name}} a été retiré(e) des aides confirmées"
+      }
+    },
+
+    "empty": {
+      "applicants": "Aucun candidat pour l'instant",
+      "confirmed": "Aucune aide confirmée pour l'instant"
+    },
+
+    "help": {
+      "applicants": "Appuyez sur 'Confirmer' pour ajouter des aides à votre équipe. Appuyez sur 'Profil' pour voir leurs détails.",
+      "confirmed": "Appuyez sur 'Retirer' pour annuler la confirmation d'une aide. Elle retournera dans la liste des candidats."
+    },
+    "limitReached": {
+      "title": "Limite atteinte",
+      "message": "Vous avez déjà confirmé les {{count}} aides nécessaires pour cette tâche."
+    },
+
+    "cannotConfirm": {
+      "title": "Impossible de confirmer plus d'aides",
+      "message": "Cette tâche ne nécessite que {{required}} aides. Vous en avez déjà confirmé {{confirmed}}."
+    },
+
+    "alreadyConfirmed": {
+      "title": "Déjà confirmé",
+      "message": "{{name}} est déjà confirmé(e) pour cette tâche."
+    },
+
+    "noDescription": "Aucune description",
+    "full": "Complet",
+    "spotsLeft": "Encore {{spots}} places disponibles",
+    "status": "Statut",
+    "allHelpersConfirmed": "Toutes les aides confirmées ! Vous pouvez marquer la tâche comme terminée.",
+    "allSlotsFilled": "Toutes les places occupées"
   }
 }

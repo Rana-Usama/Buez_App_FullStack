@@ -124,7 +124,6 @@ const Chat = ({ navigation, route }) => {
       // if (chatCache.data[chatId]) return;
       try {
         setLoader(true);
-
         const q = query(
           collection(FIREBASE_DB, `chats/${chatId}/messages`),
           orderBy("timestamp", "desc"),
@@ -229,18 +228,15 @@ const Chat = ({ navigation, route }) => {
 
   const deleteMessage = async (messageId) => {
     try {
-      // 1. Delete the message
       const messageRef = doc(
         FIREBASE_DB,
         `chats/${chatId}/messages`,
         messageId
       );
       await deleteDoc(messageRef);
-      // 2. Optimistically update local state
       setMessages((prevMessages) =>
         prevMessages.filter((msg) => msg._id !== messageId)
       );
-      // 3. Find latest message (after deletion)
       const q = query(
         collection(FIREBASE_DB, `chats/${chatId}/messages`),
         orderBy("timestamp", "desc"),
@@ -249,10 +245,8 @@ const Chat = ({ navigation, route }) => {
       const snapshot = await getDocs(q);
       const chatRef = doc(FIREBASE_DB, "chats", chatId);
       if (!snapshot.empty) {
-        // Chat still has messages → update lastMessage
         const latestDoc = snapshot.docs[0];
         const latestMsg = latestDoc.data();
-
         await updateDoc(chatRef, {
           lastMessage: {
             text: latestMsg.text,
@@ -264,14 +258,13 @@ const Chat = ({ navigation, route }) => {
           lastMessageTimestamp: latestMsg.timestamp,
         });
       } else {
-        // No messages left → clear lastMessage
         await updateDoc(chatRef, {
           lastMessage: null,
           lastMessageTimestamp: null,
         });
       }
     } catch (error) {
-      console.error("Failed to delete message:", error);
+      console.log("Failed to delete message:", error);
     }
   };
 
@@ -590,6 +583,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingTop: Platform.OS === "android" ? RFPercentage(2) : RFPercentage(4),
+  },
+  txt2: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.8),
+    lineHeight: RFPercentage(2.5),
   },
   messageContainer: {
     flex: 1,

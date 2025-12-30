@@ -22,6 +22,7 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import {OnboardingGradients} from "../config/Gradients";
 
 function Onboarding(props) {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -132,30 +133,16 @@ function Onboarding(props) {
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
       {/* Top Left Mesh Gradient */}
       <LinearGradient
-        colors={[
-          "#7a6bffff",
-          "#4ECDC4",
-          "#45B7D1",
-          "#96CEB4",
-          "#5768feff",
-          "#FF9FF3",
-        ]}
+        colors={OnboardingGradients.meshTopLeft}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
         style={styles.meshGradientTopLeft}
       />
-      
+
       {/* Bottom Right Mesh Gradient */}
       <LinearGradient
-        colors={[
-          "#8bc7ffff",
-          "#796affff",
-          "#238b6eff",
-          "#A18CD1",
-          "#FBC2EB",
-          "#FDA085",
-        ]}
+        colors={OnboardingGradients.meshBottomRight}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
@@ -256,27 +243,27 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: Colors.white,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   meshGradientTopLeft: {
-    position: 'absolute',
+    position: "absolute",
     top: -RFPercentage(28),
     left: -RFPercentage(20),
     width: RFPercentage(50),
     height: RFPercentage(50),
     borderRadius: RFPercentage(25),
     opacity: 0.1,
-    transform: [{ rotate: '45deg' }],
+    transform: [{ rotate: "45deg" }],
   },
   meshGradientBottomRight: {
-    position: 'absolute',
+    position: "absolute",
     bottom: -RFPercentage(28),
     right: -RFPercentage(20),
     width: RFPercentage(50),
     height: RFPercentage(50),
     borderRadius: RFPercentage(25),
     opacity: 0.1,
-    transform: [{ rotate: '45deg' }],
+    transform: [{ rotate: "45deg" }],
   },
   nextContainer: {
     width: RFPercentage(8),
@@ -291,12 +278,12 @@ const styles = StyleSheet.create({
   darkImg: {
     width: RFPercentage(20),
     height: RFPercentage(10.6),
-    marginTop: Platform.OS === 'ios' ? RFPercentage(3.5) : RFPercentage(9),
+    marginTop: Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(9),
   },
   img: {
     width: RFPercentage(6.5),
     height: RFPercentage(9.5),
-    marginTop: Platform.OS === 'ios' ? RFPercentage(3.5) : RFPercentage(9),
+    marginTop: Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(9),
   },
   wrapper: { width: "90%", justifyContent: "center", alignItems: "center" },
   title: {

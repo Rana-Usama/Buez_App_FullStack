@@ -18,7 +18,13 @@
     "gotIt": "Verstande",
     "you": "Du",
     "version": "Version",
-    "rights": "BUEZ. Alli Rächt vorbehalte."
+    "rights": "BUEZ. Alli Rächt vorbehalte.",
+    "error": "Fähler",
+    "noDescription": "Kei Beschriibig",
+    "task": "Ufgab",
+"bulk": "Gruppeuftrag mit mehrere Helfer",
+"helper": "Helfer",
+"helpers": "Helfer"
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -227,6 +233,29 @@
     "txt13": "Kategorie",
     "txt14": "Durchschnittsbewertig"
   },
+  "offerDetail": {
+    "helpersNeeded": "Hilfe bruucht",
+    "totalHelpers": "Total Hilf bruucht",
+    "confirmed": "Bestätigt",
+    "applications": "Bewerbige",
+    "pending": "In Wartig",
+    "slotsAvailable": "{{count}} Plätz verfüegbar",
+    "full": "Alli Plätz sind belegt",
+    "confirmedStatus": "{{confirmed}} vo {{total}} Helfer bestätigt",
+    "viewApplications": "Bewerbige aluege",
+    "applied": "Beworbe",
+    "waitingConfirmation": "Warte uf Bestätigung",
+    "imAvailable": "Ich bi verfüegbar",
+    "cannotApply": "Cha mich nid bewerbe",
+    "applicationSent": "Bewerbig gschickt",
+    "waitForConfirmation": "Warte uf Bestätigung vom Auftraggeber",
+    "newApplication": "het sich für dini Ufrag beworbe",
+    "confirmedOn": "Bestätigt am",
+    "youAreConfirmed": "Du bisch bestätigt",
+    "cnf": "Bewerber bestätige",
+"slt": "Plätz besetzt",
+"lft": "übrig"
+  },
   "myRequests": {
     "txt1": "Mini Afroge",
     "txt2": "Aktiv",
@@ -242,7 +271,13 @@
     "txt12": "Akzeptierti Aafrog erfolgriich abbroche.",
     "txt13": "Lade vo dine Afroge...",
     "repostSuccess": "Aafrog neu veröffentlicht!",
-    "repostAvailable": "Dini Aafrog isch neu veröffentlicht worde und isch jetzt für anderi Benutzer verfüegbar zum akzeptiere."
+    "repostAvailable": "Dini Aafrog isch neu veröffentlicht worde und isch jetzt für anderi Benutzer verfüegbar zum akzeptiere.",
+    "noCompletedTasks": "Kei fertigi Ufträg",
+    "noCompletedTasksDesc": "Dini erledigte Ufträg werde do aazeigt",
+    "noReviews": "No kei Bewertige",
+    "noReviewsDesc": "Bewertige vo de Uftraggeber werde do aazeigt",
+    "view": "Bewerber aaluege"
+
   },
   "postRequest": {
     "txt1": "Aafrog veröffentliche",
@@ -260,21 +295,23 @@
     "txt13": "Bearbeite",
     "txt14": "Veröffentliche",
     "customTaskTitle": "Bitte gib din Ufgabetyp aa",
-    "pr": "Priis"
+    "pr": "Priis",
+    "numberOfWorkers": "Aazahl Hilf bruucht",
+    "workersHelperText": "Wähl d Aazahl Hilf wo bruucht wird (1-{{max}})"
   },
-   "messages": {
-      "txt1": "Nachrichte",
-      "txt2": "Alli",
-      "txt3": "Ungelesen",
-      "txt4": "Kei ungeleseni Nachrichte",
-      "txt5": "No kei Nachrichte",
-      "txt6": "Sag Hallo zu",
-      "loading": "Chats werde glade...",
-      "unknownUser": "Unbekannter Benutzer",
-      "noResults": "Keine Resultat gfunde",
-      "emptyDescription": "Start e Gespräch, indem du e Nachricht an dini Kontakte schicksch",
-      "photo": "Foto"
-    },
+  "messages": {
+    "txt1": "Nachrichte",
+    "txt2": "Alli",
+    "txt3": "Ungelesen",
+    "txt4": "Kei ungeleseni Nachrichte",
+    "txt5": "No kei Nachrichte",
+    "txt6": "Sag Hallo zu",
+    "loading": "Chats werde glade...",
+    "unknownUser": "Unbekannter Benutzer",
+    "noResults": "Keine Resultat gfunde",
+    "emptyDescription": "Start e Gespräch, indem du e Nachricht an dini Kontakte schicksch",
+    "photo": "Foto"
+  },
   "chat": {
     "txt1": "Lade früeneri Nachrichte",
     "txt2": "Schrib e Nachricht",
@@ -374,7 +411,11 @@
     "txt1": "Profil",
     "txt2": "Profil bearbeite",
     "txt3": "Bewertig & Rezensionä",
-    "txt4": "Abgschlosseni Ufgabe"
+    "txt4": "Abgschlosseni Ufgabe",
+    "applicantProfile": "Bewerberprofil",
+    "confirmApplicant": "Bestätige",
+    "confirmed": "Bestätigt",
+    "confirmedOn": "Bestätigt am"
   },
   "editProfile": {
     "txt1": "Gib din Name ii",
@@ -620,5 +661,85 @@
     "saveMoney": "Spar 36% vergliche mit monätlicher Abrechnig",
     "oneTimePayment": "Einmali Zahlig, kei monätlich Ufwand",
     "exclusiveFeatures": "Zugriff uf exklusivi Funktionä"
+  },
+  "taskApplicants": {
+    "title": "Aufgabe Bewerber",
+    "loading": "Lade Aufgabedetails...",
+
+    "helpersNeeded": "Helfer benötigt",
+    "confirmed": "Bestätigt",
+    "applicants": "Bewerber",
+    "progress": "Helfer bestätigt",
+    "applicantsTab": "Bewerber",
+    "confirmedTab": "Bestätigt",
+
+    "noEmail": "Kei E-Mail",
+    "confirmedTime": "Bestätigt",
+
+    "confirm": "Bestätige",
+    "remove": "Entferne",
+    "profile": "Profil",
+
+    "confirmDialog": {
+      "title": "Helfer bestätige",
+      "message": "Bisch sicher, dass du {{name}} für d'Ufgab bestätige wetsch?",
+      "cancel": "Abbräche",
+      "confirm": "Bestätige"
+    },
+
+    "removeDialog": {
+      "title": "Helfer entferne",
+      "message": "Bisch sicher, dass du {{name}} us de bestätigte Helfer entferne wetsch?",
+      "cancel": "Abbräche",
+      "remove": "Entferne"
+    },
+
+    "toast": {
+      "error": {
+        "taskNotFound": "Ufgab nöd gfunde",
+        "loadFailed": "Lade vo de Ufragedate isch gscheteret",
+        "confirmFailed": "Bestätigung vom Helfer isch gscheteret",
+        "removeFailed": "Entferne vom Helfer isch gscheteret"
+      },
+      "success": {
+        "helperConfirmed": "Helfer bestätigt",
+        "confirmedMessage": "{{name}} isch für dini Ufgab bestätigt worde"
+      },
+      "info": {
+        "helperRemoved": "Helfer entfernt",
+        "removedMessage": "{{name}} isch us de bestätigte Helfer entfernt worde"
+      }
+    },
+
+    "empty": {
+      "applicants": "No kei Bewerber",
+      "confirmed": "No kei bestätigti Helfer"
+    },
+
+    "help": {
+      "applicants": "Drück uf 'Bestätige' zum Helfer zum Team z'füege. Drück uf 'Profil' zum ihri Details z'gseh.",
+      "confirmed": "Drück uf 'Entferne' zum e Helfer z'debestätige. Si chömed zrugg i d'Bewerberliste."
+    },
+    "limitReached": {
+      "title": "Limit erreicht",
+      "message": "Du hesch scho alli {{count}} benötigti Helfer bestätigt."
+    },
+
+    "cannotConfirm": {
+      "title": "Chasch nüme meh Helfer bestätige",
+      "message": "Die Ufgab brucht nur {{required}} Helfer. Du hesch scho {{confirmed}} bestätigt."
+    },
+
+    "alreadyConfirmed": {
+      "title": "Schono bestätigt",
+      "message": "{{name}} isch scho für die Ufgab bestätigt."
+    },
+
+    "noDescription": "Kei Beschriibig",
+    "full": "Voll",
+    "spotsLeft": "No {{spots}} Plätz frei",
+    "status": "Status",
+    "allHelpersConfirmed": "Alli Helfer bestätigt! Du chasch d'Ufgab als abgschlosse markiere.",
+    "allSlotsFilled": "Alli Plätz besetzt"
   }
 }

@@ -91,11 +91,9 @@ function AddReviewToAccepter() {
     task?.createdAt?.toDate?.() ?? task?.createdAt ?? new Date()
   ).format("MMM D, YYYY");
   const { t } = useTranslation();
-
   const [lang, setLang] = useState("en");
   const [tr, setTr] = useState<Partial<Translations>>({});
   const [taskDesc, setTaskDesc] = useState(originalDesc);
-
   const [rating, setRating] = useState([false, false, false, false, false]);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -104,6 +102,7 @@ function AddReviewToAccepter() {
       .fill(null)
       .map(() => new Animated.Value(1))
   );
+
 
   // Rating Star Animation
   const animateStar = (index: number) => {
@@ -155,6 +154,7 @@ function AddReviewToAccepter() {
       console.log("Error saving review notification:", err);
     }
   };
+
 
   // Sending Push Notification
   const sendReviewPushNotification = async () => {
@@ -236,13 +236,13 @@ function AddReviewToAccepter() {
   const toggleStar = (idx: number) => {
     const newRating = rating.map((_, i) => i <= idx);
     setRating(newRating);
-    // Animate all stars up to the selected one
     newRating.forEach((selected, index) => {
       if (selected && index <= idx) {
         animateStar(index);
       }
     });
   };
+
 
   // Review Submission
   const submitReview = async () => {
@@ -329,16 +329,13 @@ function AddReviewToAccepter() {
         translucent
       />
       <CustomNav title={tr.addReview || "Add Review"} showBack />
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Main Content */}
         <View style={styles.content}>
-          {/* User Card */}
           <View
             style={[
               styles.userCard,

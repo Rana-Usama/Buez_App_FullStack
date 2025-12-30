@@ -367,7 +367,6 @@ const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
     left: RFPercentage(0),
-    // top: Platform.OS === "ios" ? RFPercentage(6) : RFPercentage(4),
   },
   subscriptionImage: {
     width: RFPercentage(50),

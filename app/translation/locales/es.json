@@ -18,7 +18,13 @@
     "gotIt": "Entendido",
     "you": "Tú",
     "version": "Versión",
-    "rights": "BUEZ. Todos los derechos reservados."
+    "rights": "BUEZ. Todos los derechos reservados.",
+    "error": "Error",
+    "noDescription": "Sin descripción",
+    "task": "Tarea",
+"bulk": "Tarea grupal con múltiples ayudantes",
+"helper": "ayudante",
+"helpers": "ayudantes"
   },
   "validations": {
     "inValid": "Correo electrónico inválido",
@@ -227,6 +233,29 @@
     "txt13": "Categoría",
     "txt14": "Calificación promedio"
   },
+  "offerDetail": {
+    "helpersNeeded": "Ayudantes necesarios",
+    "totalHelpers": "Total de ayudantes necesarios",
+    "confirmed": "Confirmado",
+    "applications": "Solicitudes",
+    "pending": "Pendiente",
+    "slotsAvailable": "{{count}} plazas disponibles",
+    "full": "Todas las plazas están ocupadas",
+    "confirmedStatus": "{{confirmed}} de {{total}} ayudantes confirmados",
+    "viewApplications": "Ver solicitudes",
+    "applied": "Solicitado",
+    "waitingConfirmation": "Esperando confirmación",
+    "imAvailable": "Estoy disponible",
+    "cannotApply": "No puedo solicitar",
+    "applicationSent": "Solicitud enviada",
+    "waitForConfirmation": "Esperando confirmación del solicitante",
+    "newApplication": "ha solicitado tu petición",
+    "confirmedOn": "Confirmado el",
+    "youAreConfirmed": "Estás confirmado",
+    "cnf": "Confirmar solicitante",
+    "slt": "plazas ocupadas",
+    "lft": "restantes"
+  },
   "myRequests": {
     "txt1": "Mis solicitudes",
     "txt2": "Activas",
@@ -242,7 +271,13 @@
     "txt12": "Solicitud aceptada cancelada exitosamente.",
     "txt13": "Cargando tus solicitudes...",
     "repostSuccess": "¡Solicitud republicada!",
-    "repostAvailable": "Tu solicitud ha sido republicada y ahora está disponible para que otros usuarios la acepten."
+    "repostAvailable": "Tu solicitud ha sido republicada y ahora está disponible para que otros usuarios la acepten.",
+    "noCompletedTasks": "No hay tareas completadas",
+    "noCompletedTasksDesc": "Las tareas que completes aparecerán aquí",
+    "noReviews": "Aún no hay reseñas",
+    "noReviewsDesc": "Las reseñas de los propietarios de las tareas aparecerán aquí",
+    "view": "Ver solicitantes"
+
   },
   "postRequest": {
     "txt1": "Publicar solicitud",
@@ -260,7 +295,9 @@
     "txt13": "Editar",
     "txt14": "Publicar",
     "customTaskTitle": "Por favor, especifica tu tipo de tarea",
-    "pr": "Precio"
+    "pr": "Precio",
+    "numberOfWorkers": "Número de ayudantes necesarios",
+    "workersHelperText": "Selecciona el número de ayudantes necesarios (1-{{max}})"
   },
   "messages": {
     "txt1": "Mensajes",
@@ -374,7 +411,11 @@
     "txt1": "Perfil",
     "txt2": "Editar perfil",
     "txt3": "Calificación y reseñas",
-    "txt4": "Tareas completadas"
+    "txt4": "Tareas completadas",
+    "applicantProfile": "Perfil del solicitante",
+    "confirmApplicant": "Confirmar",
+    "confirmed": "Confirmado",
+    "confirmedOn": "Confirmado el"
   },
   "editProfile": {
     "txt1": "Ingresa tu nombre",
@@ -620,5 +661,85 @@
     "saveMoney": "Ahorra 36% comparado con facturación mensual",
     "oneTimePayment": "Pago único, sin molestias mensuales",
     "exclusiveFeatures": "Acceso a funciones exclusivas"
+  },
+  "taskApplicants": {
+    "title": "Solicitantes de tarea",
+    "loading": "Cargando detalles de la tarea...",
+
+    "helpersNeeded": "Ayudantes necesarios",
+    "confirmed": "Confirmados",
+    "applicants": "Solicitantes",
+    "progress": "ayudantes confirmados",
+    "applicantsTab": "Solicitantes",
+    "confirmedTab": "Confirmados",
+
+    "noEmail": "Sin correo",
+    "confirmedTime": "Confirmado",
+
+    "confirm": "Confirmar",
+    "remove": "Eliminar",
+    "profile": "Perfil",
+
+    "confirmDialog": {
+      "title": "Confirmar ayudante",
+      "message": "¿Estás seguro de que quieres confirmar a {{name}} para esta tarea?",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar"
+    },
+
+    "removeDialog": {
+      "title": "Eliminar ayudante",
+      "message": "¿Estás seguro de que quieres eliminar a {{name}} de los ayudantes confirmados?",
+      "cancel": "Cancelar",
+      "remove": "Eliminar"
+    },
+
+    "toast": {
+      "error": {
+        "taskNotFound": "Tarea no encontrada",
+        "loadFailed": "Error al cargar datos de la tarea",
+        "confirmFailed": "Error al confirmar ayudante",
+        "removeFailed": "Error al eliminar ayudante"
+      },
+      "success": {
+        "helperConfirmed": "Ayudante confirmado",
+        "confirmedMessage": "{{name}} ha sido confirmado para tu tarea"
+      },
+      "info": {
+        "helperRemoved": "Ayudante eliminado",
+        "removedMessage": "{{name}} ha sido eliminado de los ayudantes confirmados"
+      }
+    },
+
+    "empty": {
+      "applicants": "Aún no hay solicitantes",
+      "confirmed": "Aún no hay ayudantes confirmados"
+    },
+
+    "help": {
+      "applicants": "Toca 'Confirmar' para agregar ayudantes a tu equipo. Toca 'Perfil' para ver sus detalles.",
+      "confirmed": "Toca 'Eliminar' para anular la confirmación de un ayudante. Volverá a la lista de solicitantes."
+    },
+    "limitReached": {
+      "title": "Límite alcanzado",
+      "message": "Ya has confirmado todos los {{count}} ayudantes necesarios para esta tarea."
+    },
+
+    "cannotConfirm": {
+      "title": "No se pueden confirmar más ayudantes",
+      "message": "Esta tarea solo requiere {{required}} ayudantes. Ya has confirmado {{confirmed}}."
+    },
+
+    "alreadyConfirmed": {
+      "title": "Ya confirmado",
+      "message": "{{name}} ya está confirmado para esta tarea."
+    },
+
+    "noDescription": "Sin descripción",
+    "full": "Completo",
+    "spotsLeft": "Quedan {{spots}} plazas",
+    "status": "Estado",
+    "allHelpersConfirmed": "¡Todos los ayudantes confirmados! Puedes marcar la tarea como completada.",
+    "allSlotsFilled": "Todas las plazas ocupadas"
   }
 }

@@ -9,10 +9,10 @@ const NetworkError: React.FC = () => {
   return (
     <View style={[styles.networkContainer, { backgroundColor: theme.white }]}>
       <StatusBar
-             barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-             backgroundColor={"transparent"}
-             translucent
-           />
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <Feather name="wifi-off" size={RFPercentage(6)} color={theme.darkGrey} />
       <Text style={[styles.networkText, { color: theme.darkGrey }]}>
         No Internet Connection

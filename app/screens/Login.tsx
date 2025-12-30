@@ -38,7 +38,6 @@ import { BlurView } from "expo-blur";
 import { decideUserRoute } from "../utils/decideLoginRoute";
 import { doc, getDoc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig"; // adjust path
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AppleLoginButton from "../utils/appleLogin";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -141,20 +140,7 @@ function Login({ navigation }) {
             locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
             style={styles.meshGradientTopLeft}
           />
-          <LinearGradient
-            colors={[
-              "#8bc7ffff",
-              "#796affff",
-              "#238b6eff",
-              "#A18CD1",
-              "#FBC2EB",
-              "#FDA085",
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
-            style={styles.meshGradientBottomRight}
-          />
+       
           <StatusBar
             barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
             backgroundColor={theme.white}

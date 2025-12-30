@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,11 @@ import Colors from "../config/Colors";
 import Nav from "../components/common/Nav";
 import { getMyReuqests, updateReqestStatus } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
-import { getFormatedDate } from "../services/Shared.service";
+import {
+  getFormatedDate,
+  getFormatedConfirmedDate,
+  getRelativeConfirmedTime,
+} from "../services/Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
@@ -35,7 +39,10 @@ import { cachedTranslate } from "../utils/cachedTranslations";
 import { createNewChat } from "../services/Chat.service";
 const { width: screenWidth } = Dimensions.get("window");
 import { getAuth } from "firebase/auth";
-import { fetchActiveTasksFromFirebase } from "../services/Review.service";
+import {
+  fetchActiveTasksFromFirebase,
+  fetchAllConfirmedTasksAsWorker,
+} from "../services/Review.service";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import RepostSuccessModal from "../components/common/RepostModal";
 import { Ionicons } from "@expo/vector-icons";
@@ -44,8 +51,7 @@ import {
   convertCurrency,
   getCurrencyInfo,
 } from "../utils/currencyChange";
-import { useLocation } from "../utils/useLocation"; // Your location hook
-import { BlurView } from "expo-blur";
+import { useLocation } from "../utils/useLocation";
 
 type TaskRecord = {
   id?: string;
@@ -58,12 +64,21 @@ type TaskRecord = {
   monitarily?: string;
   currencyInfo?: any;
   acceptedBy?: any;
+  confirmedWorkers?: any[];
+  appliedWorkers?: any[];
+  numberOfWorkers?: number;
+  isBulkRequest?: boolean;
   user?: any;
   status?: string;
   imageUrls?: string[];
   createdAt?: any;
   reviewedAccepter?: boolean;
-  taskDetails?: any; // for nested structures from Firebase
+  taskDetails?: any;
+  isWorkerConfirmed?: boolean;
+  workerStatus?: string;
+  confirmedAt?: string;
+  userId?: string;
+  completedTaskId?: string;
 };
 
 function MyRequests({ navigation }) {
@@ -81,28 +96,28 @@ function MyRequests({ navigation }) {
   const [selectedRequestIndex, setSelectedRequestIndex] = useState(null);
   const [selectedRequestItem, setSelectedRequestItem] = useState(null);
   const [activeIndices, setActiveIndices] = useState({});
-  const { location: currentLocation } = useLocation(); // Add this
+  const { location: currentLocation } = useLocation();
   useExitAppOnBack();
   const { theme } = useAppTheme();
   const [markLoaderIndex, setMarkLoaderIndex] = useState(null);
   const [cancelLoaderIndex, setCancelLoaderIndex] = useState(null);
 
+  const currentUserId = getAuth().currentUser?.uid;
+  const db = getFirestore();
+
   const getConvertedCompensation = (item) => {
     if (item.compensationType !== "Monitarely") return null;
     try {
       const originalAmount = parseFloat(item.monitarily) || 0;
-      // Use currentLocation first, fallback to selectedLocation
       const locationToUse = currentLocation;
       if (!item.currencyInfo) {
         return formatCurrency(originalAmount, locationToUse);
       }
-      // Get target currency from current location
       const targetCurrency = getCurrencyInfo(locationToUse).code;
-      // Convert the amount
       const convertedAmount = convertCurrency(
         originalAmount,
-        item.currencyInfo.code, // Original currency
-        targetCurrency // Target currency (from current location)
+        item.currencyInfo.code,
+        targetCurrency
       );
       return formatCurrency(convertedAmount, locationToUse);
     } catch (error) {
@@ -118,48 +133,83 @@ function MyRequests({ navigation }) {
       ? REQUEST_STATUS.Completed
       : activeFilter === `${t("myRequests.txt8")}`
       ? REQUEST_STATUS.Cancelled
-      : null; // 👈 Accepted will be handled separately
+      : null;
 
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [repostingIndex, setRepostingIndex] = useState(null);
   const [repostModalVisible, setRepostModalVisible] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      setInitialLoadDone(false); // reset when param changes
-      setTaskRecords([]);
-      setLastVisiblePost(null);
-      fetchRequests(null).then(() => setInitialLoadDone(true));
-    }, [param])
-  );
+  // Helper function to check if user is confirmed in bulk request
+  const checkUserConfirmedStatus = (task) => {
+    if (!task || !currentUserId) return false;
+    if (task.confirmedWorkers && Array.isArray(task.confirmedWorkers)) {
+      return task.confirmedWorkers.some(
+        (worker) => worker && worker.userId === currentUserId
+      );
+    }
+    return false;
+  };
 
+  // Helper function to check if user has applied
+  const checkUserAppliedStatus = (task) => {
+    if (!task || !currentUserId) return false;
+    if (task.appliedWorkers && Array.isArray(task.appliedWorkers)) {
+      return task.appliedWorkers.some(
+        (worker) => worker && worker.userId === currentUserId
+      );
+    }
+    return false;
+  };
+
+  // Enhanced fetch function that includes confirmed worker tasks
   const fetchRequests = async (islastVisiblePost = null) => {
     setLoading(true);
 
     try {
       let newRecords = [];
       let lastVisible;
-
-      // ✅ Completed requests (example: your "Completed" filter)
       if (activeFilter === `${t("myRequests.txt10")}`) {
-        newRecords = await fetchActiveTasksFromFirebase();
-        console.log("newRecords.........", newRecords);
-        newRecords = (newRecords as any[]).map((item) => ({
-          ...item.taskDetails,
-          acceptedBy: item.acceptedBy,
-          status: item.status,
-          completedTaskId: item.id,
-        })) as TaskRecord[];
-      }
+        const acceptedTasks = await fetchActiveTasksFromFirebase();
+        const confirmedWorkerTasks = await fetchAllConfirmedTasksAsWorker(
+          currentUserId
+        );
 
-      // ✅ All other filters (My own tasks: Active, Cancelled, etc.)
-      else {
+        // Combine both with proper mapping
+        const singleAcceptedMapped = acceptedTasks.map((item) => ({
+          ...item.taskDetails,
+          acceptedBy: item?.acceptedBy,
+          status: item?.status,
+          completedTaskId: item.id,
+          isWorkerConfirmed: false,
+          isBulkRequest: false,
+          workerStatus: "accepted",
+        })) as TaskRecord[];
+
+        const bulkConfirmedMapped = confirmedWorkerTasks.map((item) => ({
+          ...item,
+          user: item.user || item.requester || { userName: "Unknown User" },
+          isWorkerConfirmed: true,
+          workerStatus: "confirmed",
+          isBulkRequest: true,
+          acceptedBy: null,
+          confirmedAt: item.userConfirmation?.confirmedAt || item.createdAt,
+          userId: item.userId || item.requester?.userId,
+        })) as TaskRecord[];
+        newRecords = [...singleAcceptedMapped, ...bulkConfirmedMapped];
+      } else {
         const { tasksArray, lastVisible: lv } = await getMyReuqests(
           param,
           islastVisiblePost
         );
         newRecords = tasksArray;
         lastVisible = lv;
+        // For tasks where user is the requester, check if they have confirmed workers
+        newRecords = newRecords.map((task) => ({
+          ...task,
+          isWorkerConfirmed: false,
+          workerStatus: "owner",
+          isBulkRequest: task.numberOfWorkers > 1,
+        }));
       }
 
       // 🔹 Translate fields
@@ -186,17 +236,26 @@ function MyRequests({ navigation }) {
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
     } catch (error) {
-      console.error("Error loading posts:", error);
+      console.log("Error loading posts:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      setInitialLoadDone(false);
+      setTaskRecords([]);
+      setLastVisiblePost(null);
+      fetchRequests(null).then(() => setInitialLoadDone(true));
+    }, [param])
+  );
+
   const refreshRequests = async () => {
     setRefreshing(true);
-    setLastVisiblePost(null); // reset cursor
-    setTaskRecords([]); // clear old data
-    await fetchRequests(null); // explicitly fetch from start
+    setLastVisiblePost(null);
+    setTaskRecords([]);
+    await fetchRequests(null);
     setRefreshing(false);
   };
 
@@ -208,7 +267,6 @@ function MyRequests({ navigation }) {
         param,
         lastVisiblePost
       );
-
       const translatedRecords = await Promise.all(
         (newRecords as TaskRecord[]).map(async (item) => ({
           ...item,
@@ -221,7 +279,6 @@ function MyRequests({ navigation }) {
           ),
         }))
       );
-
       setTaskRecords([...taskRecords, ...translatedRecords]);
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
@@ -239,6 +296,107 @@ function MyRequests({ navigation }) {
 
   const [loader, setLoader] = useState(false);
 
+  // Add this function to send notifications to all confirmed helpers
+  const sendBulkTaskCompletionNotification = async (task) => {
+    try {
+      // Check if this is a bulk request with confirmed helpers
+      const isBulkRequest = task.numberOfWorkers > 1 || task.isBulkRequest;
+      const hasConfirmedHelpers =
+        task.confirmedWorkers && task.confirmedWorkers.length > 0;
+      if (!isBulkRequest || !hasConfirmedHelpers) {
+        // For single requests, use the existing notification logic
+        if (task.acceptedBy) {
+          await sendTaskCompletionPushNotification(task);
+          await saveTaskCompletionNotification(task);
+        }
+        return;
+      }
+      // For bulk requests, send notifications to all confirmed helpers
+      const notificationPromises = [];
+      // Send push notifications to each confirmed helper
+      task?.confirmedWorkers.forEach((worker) => {
+        if (worker && worker.token) {
+          notificationPromises.push(
+            fetch(
+              "https://buez-server-khaki.vercel.app/api/send-notification",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  fcmToken: worker.token,
+                  title:
+                    t("pushNotifications.bulkTaskCompleted.title") ||
+                    "Task Completed!",
+                  body:
+                    t("pushNotifications.bulkTaskCompleted.body", {
+                      taskName: task.taskType,
+                      requesterName: task.user?.userName || "The requester",
+                    }) ||
+                    `The task "${
+                      task.taskType
+                    }" has been marked as completed by ${
+                      task.user?.userName || "the requester"
+                    }`,
+                  data: {
+                    type: "bulk_task_completion",
+                    taskId: task.id,
+                    taskType: task.taskType,
+                  },
+                }),
+              }
+            )
+          );
+        }
+      });
+
+      // Save notifications to Firestore for each helper
+      task?.confirmedWorkers.forEach((worker) => {
+        if (worker && worker.userId) {
+          notificationPromises.push(
+            addDoc(collection(db, "notifications"), {
+              sender: {
+                userId: task.userId,
+                userName: task.user?.userName,
+                email: task.user?.email,
+                profileImage: task.user?.profileImage || null,
+                token: task.user?.token,
+              },
+              receiver: {
+                userId: worker.userId,
+                userName: worker.userName,
+                email: worker.email,
+                token: worker.token,
+              },
+              task: {
+                taskId: task.id,
+                taskType: task.taskType,
+                description: task.description,
+              },
+              type: "bulk_task_completion",
+              title:
+                t("pushNotifications.bulkTaskCompleted.title") ||
+                "Task Completed",
+              message:
+                t("pushNotifications.bulkTaskCompleted.message", {
+                  taskName: task.taskType,
+                }) ||
+                `The task "${task.taskType}" has been marked as completed`,
+              timestamp: new Date().toISOString(),
+              isRead: false,
+            })
+          );
+        }
+      });
+      // Execute all notification promises
+      await Promise.all(notificationPromises);
+    } catch (error) {
+      console.log("Error sending bulk task completion notifications:", error);
+    }
+  };
+
+  // Update the changeReqestStatus function to use the new notification logic
   const changeReqestStatus = async (i, status, item) => {
     setLoader(true);
     try {
@@ -252,7 +410,9 @@ function MyRequests({ navigation }) {
       let action;
       if (status === REQUEST_STATUS.Completed) {
         action = `${t("toast.myRequests.three")}`;
-        if (item.acceptedBy) {
+        if (item.numberOfWorkers > 1 || item.isBulkRequest) {
+          await sendBulkTaskCompletionNotification(item);
+        } else if (item.acceptedBy) {
           await sendTaskCompletionNotification(item);
         }
       } else if (status === REQUEST_STATUS.Cancelled) {
@@ -278,7 +438,7 @@ function MyRequests({ navigation }) {
   };
 
   const repostRequest = async (index, item) => {
-    setRepostingIndex(index); // mark the current request as reposting
+    setRepostingIndex(index);
     try {
       const updatedData = {
         ...item,
@@ -302,7 +462,7 @@ function MyRequests({ navigation }) {
         text2: t("toast.myRequests.six"),
       });
     } finally {
-      setRepostingIndex(null); // reset when done
+      setRepostingIndex(null);
     }
   };
 
@@ -366,7 +526,6 @@ function MyRequests({ navigation }) {
     }));
   };
 
-  const currentUserId = getAuth().currentUser?.uid;
   const currentUser = useUser();
 
   const handleStartChat = useCallback(
@@ -385,6 +544,13 @@ function MyRequests({ navigation }) {
     },
     [currentUserId, currentUser?.userData?.userName]
   );
+
+  // Navigate to Task Applicants Screen
+  const navigateToApplicantsScreen = (taskId) => {
+    navigation.navigate("TaskApplicantsScreen", {
+      taskId: taskId,
+    });
+  };
 
   // Function to send push notification to task accepter
   async function sendTaskCompletionPushNotification(task) {
@@ -442,7 +608,6 @@ function MyRequests({ navigation }) {
         timestamp: new Date().toISOString(),
         isRead: false,
       });
-      console.log("Task completion notification saved successfully.");
     } catch (error) {
       console.log("Error saving task completion notification:", error);
     }
@@ -451,13 +616,8 @@ function MyRequests({ navigation }) {
   // Main function to handle task completion notifications
   const sendTaskCompletionNotification = async (task) => {
     try {
-      // Send push notification
       await sendTaskCompletionPushNotification(task);
-      // Save notification to database
       await saveTaskCompletionNotification(task);
-      console.log(
-        "Task completion notification process completed successfully."
-      );
     } catch (error) {
       console.log("Error in task completion notification process:", error);
     }
@@ -511,201 +671,344 @@ function MyRequests({ navigation }) {
         </ScrollView>
 
         {/* Cards */}
-        {taskRecords.map((cart, index) => (
-          <View
-            key={index}
-            style={[styles.cartContainer, { borderColor: theme.border }]}
-          >
-            <FlatList
-              data={cart.imageUrls}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onScroll={(event) => handleImageScroll(event, index)}
-              scrollEventThrottle={16}
-              onEndReached={handleLoadMore}
-              renderItem={({ item }) => (
-                <ImageBackground
-                  style={styles.cartImageBackground}
-                  imageStyle={styles.cartImage}
-                  source={{ uri: item }}
-                  resizeMode="cover"
-                >
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryText}>
-                      {cart?.taskType === "Other"
-                        ? cart.customTaskTitle
-                        : cart?.taskType}
-                    </Text>
-                  </View>
-                  {cart.status === REQUEST_STATUS.Active && (
-                    <View style={styles.cartWrapper}>
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => postEditHandler(cart)}
-                      >
-                        <Image style={styles.edit} source={Icons.editRequest} />
-                      </TouchableOpacity>
+        {taskRecords.map((cart, index) => {
+          const isConfirmedWorker = checkUserConfirmedStatus(cart);
+          const isAppliedWorker = checkUserAppliedStatus(cart);
+          const isTaskOwner = cart.userId === currentUserId;
+          const isBulkRequest = cart.isBulkRequest || cart.numberOfWorkers > 1;
+          const totalApplicants =
+            (cart.appliedWorkers?.length || 0) +
+            (cart.confirmedWorkers?.length || 0);
+          const hasApplicants = totalApplicants > 0;
+
+          return (
+            <View
+              key={index}
+              style={[styles.cartContainer, { borderColor: theme.border }]}
+            >
+              <FlatList
+                data={cart.imageUrls}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={(event) => handleImageScroll(event, index)}
+                scrollEventThrottle={16}
+                onEndReached={handleLoadMore}
+                renderItem={({ item }) => (
+                  <ImageBackground
+                    style={styles.cartImageBackground}
+                    imageStyle={styles.cartImage}
+                    source={{ uri: item }}
+                    resizeMode="cover"
+                  >
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryText}>
+                        {cart?.taskType === "Other"
+                          ? cart.customTaskTitle
+                          : cart?.taskType}
+                      </Text>
                     </View>
-                  )}
-                </ImageBackground>
-              )}
-              keyExtractor={(item, index) => index.toString()}
-            />
-            {cart.imageUrls.length > 1 && (
-              <View style={styles.dotsContainer}>
-                {cart.imageUrls.map((_, imageIndex) => (
-                  <View
-                    key={imageIndex}
-                    style={[
-                      styles.dot,
-                      {
-                        backgroundColor:
-                          (activeIndices[index] ?? 0) === imageIndex
-                            ? theme.primary
-                            : theme.border,
-                      },
-                    ]}
-                  />
-                ))}
-              </View>
-            )}
-            {/* User Info */}
-            <View style={styles.cartInfoContainer}>
-              <TouchableOpacity activeOpacity={0.8}>
-                <Image
-                  style={styles.userImage}
-                  source={
-                    cart?.user?.profileImage
-                      ? { uri: cart?.user?.profileImage }
-                      : Icons.dp
-                  }
-                />
-              </TouchableOpacity>
-              <Text style={[styles.userName, { color: theme.heading }]}>
-                {cart?.user?.userName?.substr(0, 10) +
-                  (cart?.user?.userName?.length > 10 ? "..." : "")}
-              </Text>
-              <Text style={[styles.postDate, { color: theme.darkGrey }]}>{`${t(
-                "myRequests.txt4"
-              )} ${getFormatedDate(cart?.createdAt)}`}</Text>
-            </View>
 
-            {/* Description */}
-            <View style={styles.taskInfoContainer}>
-              <Text style={[styles.taskText, { color: theme.darkGrey }]}>
-                {cart?.description?.substr(0, 34) +
-                  (cart?.description?.length > 34 ? "..." : "")}
-              </Text>
-            </View>
+                    {/* Worker Status Badge - Only for Accepted tab where user is worker */}
+                    {activeFilter === `${t("myRequests.txt10")}` &&
+                      (isConfirmedWorker || isAppliedWorker) && (
+                        <View
+                          style={[
+                            styles.workerStatusBadge,
+                            {
+                              backgroundColor: isConfirmedWorker
+                                ? "#4CAF50" + "20"
+                                : Colors.primary + "20",
+                            },
+                          ]}
+                        >
+                          <Ionicons
+                            name={
+                              isConfirmedWorker
+                                ? "checkmark-circle"
+                                : "time-outline"
+                            }
+                            size={RFPercentage(1.5)}
+                            color={
+                              isConfirmedWorker ? "#4CAF50" : Colors.primary
+                            }
+                            style={{ marginRight: RFPercentage(0.3) }}
+                          />
+                          <Text
+                            style={[
+                              styles.workerStatusText,
+                              {
+                                color: isConfirmedWorker
+                                  ? "#4CAF50"
+                                  : Colors.primary,
+                              },
+                            ]}
+                          >
+                            {isConfirmedWorker
+                              ? t("offerDetail.confirmed") || "Confirmed"
+                              : t("offerDetail.applied") || "Applied"}
+                          </Text>
+                        </View>
+                      )}
 
-            {/* Compensation + Repost */}
-            <View style={styles.taskInfoContainer}>
-              <Text style={[styles.compensation, { color: theme.heading }]}>
-                {`${t("home.txt10")}`}:{" "}
-                <Text
-                  style={[styles.compensationAmount, { color: theme.primary }]}
-                >
-                  {cart.compensationType === "Monitarely"
-                    ? getConvertedCompensation(cart)
-                    : cart.otherCompensation?.substr(0, 15) +
-                      (cart.otherCompensation?.length > 15 ? "..." : "")}
-                </Text>
-              </Text>
+                    {cart.status === REQUEST_STATUS.Active &&
+                      !isConfirmedWorker &&
+                      !isAppliedWorker &&
+                      isTaskOwner && (
+                        <View style={styles.cartWrapper}>
+                          <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => postEditHandler(cart)}
+                          >
+                            <Image
+                              style={styles.edit}
+                              source={Icons.editRequest}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                  </ImageBackground>
+                )}
+                keyExtractor={(item, index) => index.toString()}
+              />
 
-              {/* Repost only for Completed or Cancelled filter and active after someone accepted */}
-              {(activeFilter === `${t("myRequests.txt3")}` ||
-                activeFilter === `${t("myRequests.txt8")}` ||
-                (activeFilter === `${t("myRequests.txt2")}` &&
-                  cart?.acceptedBy)) &&
-                (repostingIndex === index ? (
-                  <View style={styles.repostWrap}>
-                    <ActivityIndicator size="small" color={theme.heading} />
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    onPress={() => repostRequest(index, cart)}
-                    activeOpacity={0.8}
-                    style={styles.repostInner}
-                    disabled={markLoaderIndex === index}
-                  >
-                    <Text style={styles.txt}>{t("myRequests.txt9")}</Text>
-                    <Feather
-                      name="repeat"
-                      size={RFPercentage(1.3)}
-                      color={Colors.white}
-                    />
-                  </TouchableOpacity>
-                ))}
-            </View>
-            {cart?.acceptedBy && (
-              <>
-                <View
-                  style={[styles.liner, { backgroundColor: theme.border }]}
-                ></View>
-
-                <View style={styles.wrap2}>
-                  <Text
-                    style={[
-                      styles.compensation,
-                      { color: theme.heading, marginTop: 0 },
-                    ]}
-                  >
-                    {t("myRequests.txt11")}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.taskText,
-                      { color: theme.darkGrey, marginLeft: RFPercentage(0.6) },
-                    ]}
-                  >
-                    {activeFilter === `${t("myRequests.txt10")}`
-                      ? `${t("common.you")}`
-                      : cart?.acceptedBy?.userName?.substr(0, 12) +
-                        (cart?.acceptedBy?.userName?.length > 12 ? "..." : "")}
-                  </Text>
-                  {activeFilter === `${t("myRequests.txt3")}` ? (
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      disabled={cart?.reviewedAccepter}
-                      onPress={() =>
-                        navigation.navigate("AddReviewToAccepter", {
-                          task: cart,
-                        })
-                      }
+              {cart.imageUrls?.length > 1 && (
+                <View style={styles.dotsContainer}>
+                  {cart.imageUrls.map((_, imageIndex) => (
+                    <View
+                      key={imageIndex}
                       style={[
-                        styles.press,
+                        styles.dot,
                         {
                           backgroundColor:
-                            theme.mode === "dark"
-                              ? Colors.primary + "40"
-                              : Colors.primary + "15",
+                            (activeIndices[index] ?? 0) === imageIndex
+                              ? theme.primary
+                              : theme.border,
                         },
+                      ]}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {/* User Info */}
+              <View style={styles.cartInfoContainer}>
+                <TouchableOpacity activeOpacity={0.8}>
+                  <Image
+                    style={styles.userImage}
+                    source={
+                      cart?.user?.profileImage
+                        ? { uri: cart?.user?.profileImage }
+                        : Icons.dp
+                    }
+                  />
+                </TouchableOpacity>
+                <Text style={[styles.userName, { color: theme.heading }]}>
+                  {cart?.user?.userName?.substr(0, 10) +
+                    (cart?.user?.userName?.length > 10 ? "..." : "")}
+                </Text>
+                {activeFilter === `${t("myRequests.txt10")}` ? (
+                  <Text style={[styles.postDate, { color: theme.darkGrey }]}>
+                    {isConfirmedWorker && cart?.confirmedAt && (
+                      <Text
+                        style={{
+                          color: "#4CAF50",
+                          fontSize: RFPercentage(1.2),
+                        }}
+                      >
+                        {" "}
+                        • {t("offerDetail.confirmedOn")}{" "}
+                        {getRelativeConfirmedTime(cart?.confirmedAt)}
+                      </Text>
+                    )}
+                  </Text>
+                ) : (
+                  <Text style={[styles.postDate, { color: theme.darkGrey }]}>
+                    {`${t("myRequests.txt4")} ${getFormatedDate(
+                      cart?.createdAt
+                    )}`}
+                  </Text>
+                )}
+              </View>
+
+              {/* Description */}
+              <View style={styles.taskInfoContainer}>
+                <Text style={[styles.taskText, { color: theme.darkGrey }]}>
+                  {cart?.description?.substr(0, 34) +
+                    (cart?.description?.length > 34 ? "..." : "")}
+                </Text>
+              </View>
+
+              {/* Bulk Request Info */}
+              {isBulkRequest && (
+                <View
+                  style={[
+                    styles.bulkRequestInfo,
+                    {
+                      backgroundColor:
+                        theme.mode === "dark"
+                          ? theme.white + "10"
+                          : Colors.primary + "08",
+                    },
+                  ]}
+                >
+                  <View style={styles.bulkInfoRow}>
+                    <Ionicons
+                      name="people"
+                      size={RFPercentage(1.5)}
+                      color={theme.darkGrey}
+                    />
+                    <Text
+                      style={[styles.bulkInfoText, { color: theme.darkGrey }]}
+                    >
+                      {t("offerDetail.helpersNeeded") || "Helpers needed"}:{" "}
+                      {cart.numberOfWorkers || 1}
+                    </Text>
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={RFPercentage(1.5)}
+                      color="#4CAF50"
+                      style={{ marginLeft: RFPercentage(1) }}
+                    />
+                    <Text style={[styles.bulkInfoText, { color: "#4CAF50" }]}>
+                      {t("offerDetail.confirmed") || "Confirmed"}:{" "}
+                      {cart.confirmedWorkers?.length || 0}
+                    </Text>
+                  </View>
+                  {isConfirmedWorker && (
+                    <View
+                      style={[
+                        styles.confirmedBadge,
+                        { backgroundColor: "#4CAF50" + "20" },
                       ]}
                     >
                       <Ionicons
-                        name="star"
-                        size={RFPercentage(1.8)}
-                        color={Colors.primary}
+                        name="checkmark-circle"
+                        size={RFPercentage(1.3)}
+                        color="#4CAF50"
                       />
-                      <Text style={styles.txt3}>
-                        {cart?.reviewedAccepter
-                          ? `${t("profileRank.txt50")}`
-                          : `${t("profileRank.txt49")}`}
+                      <Text
+                        style={[styles.confirmedText, { color: "#4CAF50" }]}
+                      >
+                        {t("offerDetail.youAreConfirmed") ||
+                          "You are confirmed"}
                       </Text>
-                    </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {/* Applications Badge */}
+                  {isTaskOwner &&
+                    hasApplicants &&
+                    activeFilter === `${t("myRequests.txt2")}` && (
+                      <View style={styles.applicantsBadge}>
+                        <Ionicons
+                          name="person-add"
+                          size={RFPercentage(1.3)}
+                          color={Colors.primary}
+                        />
+                        <Text style={styles.applicantsText}>
+                          {totalApplicants}{" "}
+                          {totalApplicants === 1 ? "applicant" : "applicants"}
+                        </Text>
+                      </View>
+                    )}
+                </View>
+              )}
+
+              {/* View Applicants Button (only for bulk requests with applicants) */}
+              {isBulkRequest &&
+                isTaskOwner &&
+                hasApplicants &&
+                activeFilter === `${t("myRequests.txt2")}` && (
+                  <TouchableOpacity
+                    style={styles.viewApplicantsButton}
+                    onPress={() => navigateToApplicantsScreen(cart.id)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons
+                      name="people"
+                      size={RFPercentage(1.4)}
+                      color="#FFF"
+                    />
+                    <Text style={styles.viewApplicantsText}>
+                      {t("myRequests.view")}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+              {/* Compensation + Repost + View Applicants Button */}
+              <View style={styles.taskInfoContainer}>
+                <Text style={[styles.compensation, { color: theme.heading }]}>
+                  {`${t("home.txt10")}`}:{" "}
+                  <Text
+                    style={[
+                      styles.compensationAmount,
+                      { color: theme.primary },
+                    ]}
+                  >
+                    {cart.compensationType === "Monitarely"
+                      ? getConvertedCompensation(cart)
+                      : cart.otherCompensation?.substr(0, 15) +
+                        (cart.otherCompensation?.length > 15 ? "..." : "")}
+                  </Text>
+                </Text>
+
+                {/* Repost only for Completed or Cancelled filter and active after someone accepted */}
+                {(activeFilter === `${t("myRequests.txt3")}` ||
+                  activeFilter === `${t("myRequests.txt8")}` ||
+                  (activeFilter === `${t("myRequests.txt2")}` &&
+                    cart?.acceptedBy)) &&
+                  !isConfirmedWorker && // Workers can't repost
+                  !isAppliedWorker && // Applied workers can't repost
+                  (repostingIndex === index ? (
+                    <View style={styles.repostWrap}>
+                      <ActivityIndicator size="small" color={theme.heading} />
+                    </View>
                   ) : (
+                    <TouchableOpacity
+                      onPress={() => repostRequest(index, cart)}
+                      activeOpacity={0.8}
+                      style={styles.repostInner}
+                      disabled={markLoaderIndex === index}
+                    >
+                      <Text style={styles.txt}>{t("myRequests.txt9")}</Text>
+                      <Feather
+                        name="repeat"
+                        size={RFPercentage(1.3)}
+                        color={Colors.white}
+                      />
+                    </TouchableOpacity>
+                  ))}
+              </View>
+
+              {/* For Accepted Tab - Show user's role */}
+              {(cart?.acceptedBy || isConfirmedWorker) && (
+                <>
+                  <View
+                    style={[styles.liner, { backgroundColor: theme.border }]}
+                  ></View>
+                  <View style={styles.wrap2}>
+                    <Text
+                      style={[
+                        styles.compensation,
+                        { color: theme.heading, marginTop: 0 },
+                      ]}
+                    >
+                      {isConfirmedWorker
+                        ? t("offerDetail.youAreConfirmed") ||
+                          "You are confirmed"
+                        : `${t("myRequests.txt11")} ${
+                            cart?.acceptedBy?.userName || t("common.you")
+                          }`}
+                    </Text>
+
                     <TouchableOpacity
                       activeOpacity={0.8}
                       disabled={
                         markLoaderIndex === index || repostingIndex === index
                       }
                       onPress={() => {
-                        if (activeFilter === `${t("myRequests.txt10")}`) {
-                          handleStartChat(cart?.user);
-                        } else {
-                          handleStartChat(cart?.acceptedBy);
-                        }
+                        handleStartChat(cart.user);
                       }}
                       style={styles.abs}
                     >
@@ -719,90 +1022,97 @@ function MyRequests({ navigation }) {
                       />
                       <Text style={styles.txt4}>{t("details.txt9")}</Text>
                     </TouchableOpacity>
-                  )}
-                </View>
-              </>
-            )}
-
-            {/* Actions (only when Active filter is selected) */}
-            {activeFilter === `${t("myRequests.txt2")}` &&
-              cart?.status === REQUEST_STATUS.Active && (
-                <View style={styles.cartContainer2}>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    disabled={
-                      markLoaderIndex === index || repostingIndex === index
-                    }
-                    style={[
-                      styles.markButton,
-                      {
-                        opacity:
-                          markLoaderIndex === index || repostingIndex === index
-                            ? 0.5
-                            : 1,
-                      },
-                    ]}
-                    onPress={async () => {
-                      setMarkLoaderIndex(index);
-                      await changeReqestStatus(
-                        index,
-                        REQUEST_STATUS.Completed,
-                        cart
-                      );
-                      setMarkLoaderIndex(null);
-                    }}
-                  >
-                    {markLoaderIndex === index ? (
-                      <ActivityIndicator size="small" color={Colors.white} />
-                    ) : (
-                      <Text style={styles.text2}>{t("myRequests.txt5")}</Text>
-                    )}
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    disabled={
-                      cancelLoaderIndex === index || repostingIndex === index
-                    }
-                    onPress={async () => {
-                      setCancelLoaderIndex(index); // start loader for this button
-                      setSelectedRequestIndex(index);
-                      setSelectedRequestItem(cart);
-                      setIsModalVisible(true); // modal will handle the cancel
-                      setCancelLoaderIndex(null); // stop loader after action (or after modal confirm)
-                    }}
-                    style={[
-                      styles.cancel,
-                      {
-                        borderColor:
-                          theme.mode === "dark"
-                            ? theme.lightGrey
-                            : theme.lightGrey,
-                      },
-                    ]}
-                  >
-                    {cancelLoaderIndex === index ? (
-                      <ActivityIndicator size="small" color={theme.lightGrey} />
-                    ) : (
-                      <Text
-                        style={[
-                          styles.text3,
-                          {
-                            color:
-                              theme.mode === "dark"
-                                ? theme.lightGrey
-                                : theme.lightGrey,
-                          },
-                        ]}
-                      >
-                        {t("myRequests.txt6")}
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                </>
               )}
-          </View>
-        ))}
+
+              {/* Actions (only when Active filter is selected AND user is the owner) */}
+              {activeFilter === `${t("myRequests.txt2")}` &&
+                cart?.status === REQUEST_STATUS.Active &&
+                isTaskOwner && // Only show actions to owner
+                !isConfirmedWorker && // Not a confirmed worker
+                !isAppliedWorker && ( // Not an applied worker
+                  <View style={styles.cartContainer2}>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      disabled={
+                        markLoaderIndex === index || repostingIndex === index
+                      }
+                      style={[
+                        styles.markButton,
+                        {
+                          opacity:
+                            markLoaderIndex === index ||
+                            repostingIndex === index
+                              ? 0.5
+                              : 1,
+                        },
+                      ]}
+                      onPress={async () => {
+                        setMarkLoaderIndex(index);
+                        await changeReqestStatus(
+                          index,
+                          REQUEST_STATUS.Completed,
+                          cart
+                        );
+                        setMarkLoaderIndex(null);
+                      }}
+                    >
+                      {markLoaderIndex === index ? (
+                        <ActivityIndicator size="small" color={Colors.white} />
+                      ) : (
+                        <Text style={styles.text2}>{t("myRequests.txt5")}</Text>
+                      )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      disabled={
+                        cancelLoaderIndex === index || repostingIndex === index
+                      }
+                      onPress={async () => {
+                        setCancelLoaderIndex(index);
+                        setSelectedRequestIndex(index);
+                        setSelectedRequestItem(cart);
+                        setIsModalVisible(true);
+                        setCancelLoaderIndex(null);
+                      }}
+                      style={[
+                        styles.cancel,
+                        {
+                          borderColor:
+                            theme.mode === "dark"
+                              ? theme.lightGrey
+                              : theme.lightGrey,
+                        },
+                      ]}
+                    >
+                      {cancelLoaderIndex === index ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={theme.lightGrey}
+                        />
+                      ) : (
+                        <Text
+                          style={[
+                            styles.text3,
+                            {
+                              color:
+                                theme.mode === "dark"
+                                  ? theme.lightGrey
+                                  : theme.lightGrey,
+                            },
+                          ]}
+                        >
+                          {t("myRequests.txt6")}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+            </View>
+          );
+        })}
 
         {(loading || loadingMore) && (
           <View style={{ marginTop: RFPercentage(28) }}>
@@ -835,6 +1145,7 @@ function MyRequests({ navigation }) {
         theme={theme}
         t={t}
         loading={loader}
+        message={''}
       />
 
       <RepostSuccessModal
@@ -866,7 +1177,6 @@ const styles = StyleSheet.create({
 
   cartContainer: {
     width: "90%",
-    // height: RFPercentage(50),
     borderColor: Colors.border,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(2),
@@ -875,6 +1185,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     paddingBottom: RFPercentage(2),
     marginTop: RFPercentage(3.6),
+    position: "relative",
   },
   cartImageBackground: {
     width: screenWidth * 0.9,
@@ -899,13 +1210,72 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
   },
+  workerStatusBadge: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    borderBottomRightRadius: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.6),
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  workerStatusText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  bulkRequestInfo: {
+    width: "92%",
+    marginVertical: RFPercentage(1),
+    padding: RFPercentage(1),
+    borderRadius: RFPercentage(1),
+  },
+  bulkInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.5),
+  },
+  bulkInfoText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: RFPercentage(0.5),
+  },
+  confirmedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
+  },
+  confirmedText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
+    marginLeft: RFPercentage(0.5),
+  },
+  applicantsBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: Colors.primary + "20",
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(1),
+    marginTop: RFPercentage(0.5),
+    gap: RFPercentage(0.3),
+  },
+  applicantsText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.primary,
+  },
   dotsContainer: {
     flexDirection: "row",
     alignSelf: "center",
-    // top: RFPercentage(-9),
+    marginTop: RFPercentage(1),
   },
   filterScrollContainer: {
-    // paddingHorizontal: RFPercentage(2),
     alignItems: "center",
     marginTop: RFPercentage(3),
   },
@@ -924,7 +1294,6 @@ const styles = StyleSheet.create({
     width: RFPercentage(0.9),
     borderRadius: RFPercentage(0.5),
     margin: RFPercentage(0.5),
-    marginTop: RFPercentage(3),
   },
 
   cartInfoContainer: {
@@ -933,7 +1302,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     marginVertical: RFPercentage(2),
-    // top: RFPercentage(-7),
+    marginTop: RFPercentage(1),
   },
   userImage: {
     width: RFPercentage(4.9),
@@ -954,7 +1323,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   postDate: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.4),
     position: "absolute",
     right: 0,
     fontFamily: "Poppins_400Regular",
@@ -964,7 +1333,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     flexDirection: "row",
-    // top: RFPercentage(-5),
+    marginTop: RFPercentage(0.5),
   },
   taskText: {
     fontSize: RFPercentage(1.6),
@@ -1111,7 +1480,6 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: "row",
     alignItems: "center",
-
     padding: RFPercentage(1),
     borderRadius: RFPercentage(1),
   },
@@ -1132,6 +1500,31 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
     marginTop: RFPercentage(0.5),
+  },
+
+  // New styles for View Applicants button
+  viewApplicantsButton: {
+    // position: "absolute",
+    // right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primary,
+    borderRadius: RFPercentage(100),
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.8),
+    gap: RFPercentage(0.5),
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+    alignSelf: "flex-start",
+    marginLeft: RFPercentage(2),
+  },
+  viewApplicantsText: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
   },
 
   filterButton: {

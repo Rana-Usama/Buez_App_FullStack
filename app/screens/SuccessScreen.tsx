@@ -74,7 +74,11 @@ function SuccessScreen({ navigation }) {
       end={{ x: 0, y: 1 }}
       style={styles.container}
     >
-      <StatusBar backgroundColor={"transparent"} barStyle={"light-content"} translucent />
+      <StatusBar
+        backgroundColor={"transparent"}
+        barStyle={"light-content"}
+        translucent
+      />
 
       {/* Success Icon */}
       <View style={styles.iconContainer}>
@@ -142,7 +146,7 @@ function SuccessScreen({ navigation }) {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        {/* <TouchableOpacity
+        <TouchableOpacity
           style={[
             styles.primaryButton,
             {
@@ -161,7 +165,7 @@ function SuccessScreen({ navigation }) {
           >
             {t("successScreen.txt2")}
           </Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={[
@@ -173,7 +177,12 @@ function SuccessScreen({ navigation }) {
           ]}
           activeOpacity={0.8}
           onPress={() =>
-            navigation.navigate("TabNavigator", { screen: t("bottomTab.txt1") })
+            navigation.navigate("MainApp", {
+              screen: "MainTabs",
+              params: {
+                screen: t("bottomTab.txt1"),
+              },
+            })
           }
         >
           <Text
@@ -182,7 +191,7 @@ function SuccessScreen({ navigation }) {
               { color: theme.mode === "dark" ? Colors.primary : Colors.white },
             ]}
           >
-            {t("successScreen.txt2")}
+            {t("successScreen.txt12")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -279,12 +288,12 @@ const styles = StyleSheet.create({
     height: RFPercentage(6),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: RFPercentage(100),
+    borderRadius: RFPercentage(1.5),
     borderWidth: 2,
     backgroundColor: "transparent",
   },
   secondaryButtonText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_500Medium",
   },
 });

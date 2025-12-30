@@ -6,6 +6,7 @@ import {
   getDocs,
   doc,
   getDoc,
+  getFirestore,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
@@ -29,24 +30,183 @@ export const fetchMyReviewsFromFirebase = async () => {
   }
 };
 
+
 export const fetchCompletedTasksFromFirebase = async () => {
   const currentUserId = getAuth().currentUser?.uid;
   if (!currentUserId) return [];
 
   try {
-    const q = query(
+    // 1. Fetch tasks from completedTask collection
+    const completedTaskQuery = query(
       collection(FIREBASE_DB, "completedTask"),
       where("acceptedBy.userId", "==", currentUserId),
       where("status", "==", "Completed")
     );
 
-    const snap = await getDocs(q);
-    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const completedTaskSnap = await getDocs(completedTaskQuery);
+
+    // 2. Fetch bulk tasks from taskRequests
+    const bulkTaskQuery = query(
+      collection(FIREBASE_DB, "taskRequests"),
+      where("status", "==", "Completed"),
+      where("confirmedWorkers", "array-contains", {
+        userId: currentUserId,
+      })
+    );
+
+    const bulkTaskSnap = await getDocs(bulkTaskQuery);
+
+    // Process completedTask collection results
+    const completedTasks = completedTaskSnap.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        isBulkTask: data.isBulkTask || false,
+        isConfirmedHelper: data.isConfirmedHelper || false,
+        completedAt: data.completedAt || data.acceptedAt || new Date().toISOString(),
+        taskDetails: {
+          ...data.taskDetails,
+          id: data.taskId || data.taskDetails?.id,
+          user: data.taskDetails?.user ||
+            data.taskDetails?.requester || { 
+              userId: data.taskOwnerId || data.taskDetails?.userId,
+              userName: "Unknown User" 
+            },
+          isBulkRequest:
+            data.taskDetails?.numberOfWorkers > 1 ||
+            data.taskDetails?.isBulkRequest,
+        },
+      };
+    });
+
+    // Process bulk tasks
+    const bulkTasks = bulkTaskSnap.docs.map((doc) => {
+      const data = doc.data();
+      const userConfirmation = data.confirmedWorkers?.find(
+        (worker) => worker && worker.userId === currentUserId
+      );
+
+      return {
+        id: doc.id,
+        taskId: doc.id,
+        acceptedBy: {
+          userId: currentUserId,
+          name: userConfirmation?.userName || userConfirmation?.name || "Worker",
+          email: userConfirmation?.email || "",
+          image: userConfirmation?.profileImage || userConfirmation?.image || null,
+        },
+        completedAt: data.completedAt ||
+          userConfirmation?.confirmedAt ||
+          new Date().toISOString(),
+        status: "Completed",
+        taskDetails: {
+          ...data,
+          id: doc.id,
+          user: data.user || data.requester || { 
+            userId: data.userId,
+            userName: "Unknown User" 
+          },
+          isBulkRequest: true,
+          numberOfWorkers: data.numberOfWorkers || 1,
+          confirmedWorkers: data.confirmedWorkers || [],
+          appliedWorkers: data.appliedWorkers || [],
+        },
+        isBulkTask: true,
+        isConfirmedHelper: true,
+        userConfirmation: userConfirmation,
+      };
+    });
+
+    // Combine and deduplicate
+    let allTasks = [...completedTasks, ...bulkTasks];
+    const uniqueTasks = [];
+    const seenTaskIds = new Set();
+
+    allTasks.forEach((task) => {
+      const taskId = task.taskId || task.id;
+      if (!seenTaskIds.has(taskId)) {
+        seenTaskIds.add(taskId);
+        uniqueTasks.push(task);
+      }
+    });
+
+    // Fetch personal review status for each task
+    const tasksWithReviewStatus = await Promise.all(
+      uniqueTasks.map(async (task) => {
+        const taskId = task.taskId || task.id;
+        const taskOwnerId = task.taskDetails?.user?.userId;
+        
+        // Check if this specific helper has reviewed this specific task owner for this task
+        const reviewQuery = query(
+          collection(FIREBASE_DB, "reviews"),
+          where("reviewer.userId", "==", currentUserId),
+          where("taskId", "==", taskId),
+          where("taskOwnerId", "==", taskOwnerId)
+        );
+
+        const reviewSnap = await getDocs(reviewQuery);
+        
+        if (!reviewSnap.empty) {
+          // User has reviewed this task owner for this task
+          const reviewData = reviewSnap.docs[0].data();
+          return {
+            ...task,
+            reviewed: true,
+            rating: reviewData.rating || 0,
+            reviewText: reviewData.reviewText || "",
+            reviewId: reviewSnap.docs[0].id,
+            // Mark that this is the user's personal review
+            isPersonalReview: true
+          };
+        }
+        
+        // Also check helperReviews collection
+        const helperReviewQuery = query(
+          collection(FIREBASE_DB, "helperReviews"),
+          where("helperId", "==", currentUserId),
+          where("taskId", "==", taskId),
+          where("taskOwnerId", "==", taskOwnerId)
+        );
+
+        const helperReviewSnap = await getDocs(helperReviewQuery);
+        
+        if (!helperReviewSnap.empty) {
+          const helperReviewData = helperReviewSnap.docs[0].data();
+          return {
+            ...task,
+            reviewed: true,
+            rating: helperReviewData.reviewData?.rating || 0,
+            reviewText: helperReviewData.reviewData?.reviewText || "",
+            reviewId: helperReviewSnap.docs[0].id,
+            isPersonalReview: true
+          };
+        }
+        
+        // No review found for this helper
+        return {
+          ...task,
+          reviewed: false,
+          rating: undefined,
+          reviewText: undefined,
+          isPersonalReview: false
+        };
+      })
+    );
+
+    // Sort by completion date
+    return tasksWithReviewStatus.sort((a, b) => {
+      const dateA = new Date(a.completedAt || 0).getTime();
+      const dateB = new Date(b.completedAt || 0).getTime();
+      return dateB - dateA;
+    });
   } catch (err) {
     console.error("Error fetching completed tasks:", err);
     return [];
   }
 };
+
+
 
 export const fetchActiveTasksFromFirebase = async () => {
   const currentUserId = getAuth().currentUser?.uid;
@@ -256,6 +416,87 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
     return usersArray;
   } catch (err) {
     console.log("Error fetching user stats:", err);
+    return [];
+  }
+};
+
+export const fetchConfirmedTasksAsWorker = async (userId) => {
+  try {
+    const db = getFirestore();
+    const taskRequestsRef = collection(db, "taskRequests");
+    // Query tasks where user is in confirmedWorkers array
+    const q = query(
+      taskRequestsRef,
+      where("confirmedWorkers", "array-contains", { userId: userId })
+    );
+
+    const querySnapshot = await getDocs(q);
+    const tasks = [];
+
+    querySnapshot.forEach((doc) => {
+      const taskData = doc.data();
+      // Check if user is actually in confirmedWorkers (exact match)
+      const userConfirmed = taskData.confirmedWorkers?.some(
+        (worker) => worker.userId === userId
+      );
+
+      if (userConfirmed) {
+        tasks.push({
+          id: doc.id,
+          ...taskData,
+          isBulkRequest: true,
+          workerConfirmed: true,
+          // Get the user's confirmation details
+          userConfirmation: taskData.confirmedWorkers.find(
+            (worker) => worker.userId === userId
+          ),
+        });
+      }
+    });
+
+    return tasks;
+  } catch (error) {
+    console.error("Error fetching confirmed worker tasks:", error);
+    return [];
+  }
+};
+
+// Alternative approach: Fetch all tasks and filter in memory
+export const fetchAllConfirmedTasksAsWorker = async (userId) => {
+  try {
+    const db = getFirestore();
+    const taskRequestsRef = collection(db, "taskRequests");
+
+    // Get all task requests (since array-contains doesn't work with complex objects)
+    const querySnapshot = await getDocs(taskRequestsRef);
+    const tasks = [];
+
+    querySnapshot.forEach((doc) => {
+      const taskData = doc.data();
+      const taskId = doc.id;
+
+      // Check if user is in confirmedWorkers
+      const confirmedWorkers = taskData.confirmedWorkers || [];
+      const userConfirmed = confirmedWorkers.some(
+        (worker) => worker && worker.userId === userId
+      );
+
+      if (userConfirmed) {
+        tasks.push({
+          id: taskId,
+          ...taskData,
+          isBulkRequest: true,
+          workerConfirmed: true,
+          userConfirmation: confirmedWorkers.find(
+            (worker) => worker.userId === userId
+          ),
+        });
+      }
+    });
+
+    return tasks;
+  } catch (error) {
+    console.error("Error fetching all confirmed worker tasks:", error);
     return [];
   }
 };

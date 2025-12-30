@@ -3,16 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   StatusBar,
   Modal,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { Ionicons } from "@expo/vector-icons";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { sendPasswordResetEmail } from "firebase/auth";
-import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
 import InputFieldNew from "../components/common/NewField";
 import Colors from "../config/Colors";
@@ -49,7 +46,6 @@ function ForgotPassword(props: any) {
         where("email", "==", values.email)
       );
       const querySnapshot = await getDocs(q);
-
       if (querySnapshot.empty) {
         setErrorMessage(t("forgetPassword.txt6"));
         return;

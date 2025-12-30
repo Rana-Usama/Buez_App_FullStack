@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
   RefreshControl,
   StatusBar,
+  TouchableOpacity,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
-import Nav from "../components/common/Nav";
 import MyAppButton from "../components/common/MyAppButton";
 import NotFound from "../components/common/NotFound";
 import Colors from "../config/Colors";
@@ -22,6 +22,17 @@ import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import CustomNav from "../components/common/CustomNav";
+import { Ionicons, Feather } from "@expo/vector-icons";
+import {
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  query,
+  where,
+} from "firebase/firestore";
+import { FIREBASE_DB } from "../../firebaseConfig";
+import { getAuth } from "firebase/auth";
 
 type Translations = {
   completedTasks: string;
@@ -31,6 +42,14 @@ type Translations = {
   reviewed: string;
   noTasks: string;
   translating: string;
+  helpers: string;
+  confirmedHelpers: string;
+  youWereConfirmed: string;
+  bulkTask: string;
+  viewHelpers: string;
+  alreadyReviewed: string;
+  reviewAdded: string;
+  cnf: string;
 };
 
 export default function CompletedTasks({ navigation }: any) {
@@ -43,6 +62,9 @@ export default function CompletedTasks({ navigation }: any) {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const { theme } = useAppTheme();
+  const [userReviews, setUserReviews] = useState<Set<string>>(new Set());
+
+  const currentUserId = getAuth().currentUser?.uid;
 
   // Translations-----
   useEffect(() => {
@@ -55,6 +77,14 @@ export default function CompletedTasks({ navigation }: any) {
         reviewed: "Reviewed",
         noTasks: "No completed tasks",
         translating: "Translating...",
+        helpers: "Helpers",
+        confirmedHelpers: "Confirmed Helpers",
+        youWereConfirmed: "You were confirmed as a helper",
+        bulkTask: "Bulk Task",
+        viewHelpers: "View Helpers",
+        alreadyReviewed: "Review Pending",
+        reviewAdded: "Review Added",
+        cnf: "You were a confirmed helper in this bulk task",
       };
       const vals = await Promise.all(
         Object.values(base).map((txt) => cachedTranslate(txt))
@@ -68,24 +98,46 @@ export default function CompletedTasks({ navigation }: any) {
     })();
   }, []);
 
+  // Fetch user's reviews to check what they've already reviewed
+  const fetchUserReviews = async () => {
+    if (!currentUserId) return new Set();
+    try {
+      const reviewsQuery = query(
+        collection(FIREBASE_DB, "reviews"),
+        where("reviewer.userId", "==", currentUserId)
+      );
+      const querySnapshot = await getDocs(reviewsQuery);
+      const reviewedTaskIds = new Set<string>();
+      querySnapshot.forEach((doc) => {
+        const reviewData = doc.data();
+        if (reviewData.taskId) {
+          reviewedTaskIds.add(reviewData.taskId);
+        }
+      });
+      return reviewedTaskIds;
+    } catch (error) {
+      console.log("Error fetching user reviews:", error);
+      return new Set();
+    }
+  };
+
   // Fetching Completed Tasks-------------
   const fetchCompletedTasks = async () => {
     setLoading(true);
     try {
       const records = await fetchCompletedTasksFromFirebase();
+      const userReviewedTasks = await fetchUserReviews();
+      setUserReviews(userReviewedTasks);
       const newCache = { ...cache };
       await Promise.all(
         records.map(async (task: any) => {
           if (newCache[task.id]) return;
-
           const originalDesc = task.taskDetails?.description || "";
           const originalCat = task.taskDetails?.taskType || "";
-
           const [descTr, catTr] = await Promise.all([
             originalDesc ? cachedTranslate(originalDesc) : "",
             originalCat ? cachedTranslate(originalCat) : "",
           ]);
-
           newCache[task.id] = {
             desc: descTr || originalDesc,
             category: catTr || originalCat,
@@ -118,6 +170,7 @@ export default function CompletedTasks({ navigation }: any) {
       <View style={styles.starRow}>
         {[1, 2, 3, 4, 5].map((i) => (
           <Text
+            key={i}
             style={{
               color: i <= rating ? Colors.star : Colors.stroke,
               fontSize: RFPercentage(1.8),
@@ -130,6 +183,24 @@ export default function CompletedTasks({ navigation }: any) {
     );
   };
 
+  const hasUserReviewedTask = (taskId: string, task: any) => {
+    if (task.isPersonalReview) return true;
+    if (task.reviewed) {
+      if (task.reviewer?.userId === currentUserId) {
+        return true;
+      }
+      if (
+        task.taskDetails?.isBulkRequest &&
+        task.taskOwnerId === task.taskDetails?.user?.userId
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+
+
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     const details = item.taskDetails || {};
     const owner = details.user || {};
@@ -140,6 +211,10 @@ export default function CompletedTasks({ navigation }: any) {
       | undefined;
     const desc = cached?.desc ?? tr.translating;
     const catName = cached?.category ?? tr.translating;
+    const isBulkTask = details.numberOfWorkers > 1 || details.isBulkRequest;
+    const taskId = item.taskId || item.id;
+    const hasReviewed = hasUserReviewedTask(taskId, item);
+    const userIsConfirmedHelper = isBulkTask && item.isConfirmedHelper;
 
     return (
       <View
@@ -152,6 +227,27 @@ export default function CompletedTasks({ navigation }: any) {
           },
         ]}
       >
+        {/* Bulk Task Info Banner */}
+        {isBulkTask && userIsConfirmedHelper && (
+          <View
+            style={[
+              styles.bulkTaskBanner,
+              { backgroundColor: Colors.primary + "05" },
+            ]}
+          >
+            <Ionicons
+              name="people"
+              size={RFPercentage(1.6)}
+              color={Colors.lightGrey}
+            />
+            <Text
+              style={[styles.bulkTaskBannerText, { color: Colors.lightGrey }]}
+            >
+              {tr.cnf}
+            </Text>
+          </View>
+        )}
+
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.userInfo}>
@@ -179,9 +275,7 @@ export default function CompletedTasks({ navigation }: any) {
                 <Text
                   style={[
                     styles.categoryText,
-                    {
-                      color: item.reviewed ? Colors.success2 : Colors.success2,
-                    },
+                    { color: hasReviewed ? Colors.success2 : Colors.success2 },
                   ]}
                 >
                   {catName}
@@ -189,20 +283,20 @@ export default function CompletedTasks({ navigation }: any) {
               </View>
             </View>
           </View>
+
+          {/* Review Status */}
           <View
             style={[
               styles.statusIndicator,
               {
-                backgroundColor: item.reviewed
-                  ? Colors.success2
-                  : Colors.primary,
+                backgroundColor: hasReviewed ? Colors.success2 : Colors.primary,
               },
             ]}
           >
             <Text style={styles.statusText}>
-              {item.reviewed
-                ? `${t("completed.txt1")}`
-                : `${t("completed.txt2")}`}
+              {hasReviewed
+                ? tr.reviewAdded || "Review Added"
+                : tr.alreadyReviewed || "Review Pending"}
             </Text>
           </View>
         </View>
@@ -213,6 +307,49 @@ export default function CompletedTasks({ navigation }: any) {
             {desc}
           </Text>
         </View>
+
+        {/* Bulk Task Stats */}
+        {isBulkTask && (
+          <View
+            style={[
+              styles.bulkStatsContainer,
+              {
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? Colors.primary + "20"
+                    : Colors.primary + "10",
+              },
+            ]}
+          >
+            <View style={styles.bulkStatItem}>
+              <Ionicons
+                name="people"
+                size={RFPercentage(1.6)}
+                color={theme.darkGrey}
+              />
+              <Text style={[styles.bulkStatText, { color: theme.darkGrey }]}>
+                {details?.numberOfWorkers || 1} {t("common.helpers")}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.bulkStatDivider,
+                { backgroundColor: theme.border },
+              ]}
+            />
+            <View style={styles.bulkStatItem}>
+              <Ionicons
+                name="checkmark-circle"
+                size={RFPercentage(1.6)}
+                color="#4CAF50"
+              />
+              <Text style={[styles.bulkStatText, { color: "#4CAF50" }]}>
+                {details.confirmedWorkers?.length || 0}{" "}
+                {t("offerDetail.confirmed")}
+              </Text>
+            </View>
+          </View>
+        )}
 
         {/* Date Section */}
         <View
@@ -244,7 +381,7 @@ export default function CompletedTasks({ navigation }: any) {
             },
           ]}
         >
-          {item.reviewed ? (
+          {hasReviewed ? (
             <View style={styles.reviewSection}>
               <View style={styles.reviewHeader}>
                 <Text style={styles.reviewTitle}>{`${t(
@@ -275,9 +412,15 @@ export default function CompletedTasks({ navigation }: any) {
               <MyAppButton
                 title={tr.review || "Add Review"}
                 height={RFPercentage(5)}
-                // width={RFPercentage(20)}
                 marginTop={0}
-                onPress={() => navigation.navigate("AddReview", { task: item })}
+                onPress={() =>
+                  navigation.navigate("AddReview", {
+                    task: item,
+                    isBulkTask: isBulkTask,
+                    taskOwner: owner,
+                    isConfirmedHelper: userIsConfirmedHelper,
+                  })
+                }
               />
             </View>
           )}
@@ -296,7 +439,7 @@ export default function CompletedTasks({ navigation }: any) {
       <CustomNav title={t("profile.txt4")} showBack />
 
       {/* Stats Overview */}
-      {!loading && tasks.length > 0 && (
+      {!loading && tasks?.length > 0 && (
         <View
           style={[
             styles.statsContainer,
@@ -307,7 +450,7 @@ export default function CompletedTasks({ navigation }: any) {
           ]}
         >
           <View style={[styles.statItem]}>
-            <Text style={styles.statNumber}>{tasks.length}</Text>
+            <Text style={styles.statNumber}>{tasks?.length}</Text>
             <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
               {`${t("completed.txt4")}`}
             </Text>
@@ -315,7 +458,11 @@ export default function CompletedTasks({ navigation }: any) {
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>
-              {tasks.filter((task) => task.reviewed).length}
+              {
+                tasks.filter((task) =>
+                  hasUserReviewedTask(task.taskId || task.id, task)
+                ).length
+              }
             </Text>
             <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
               {`${t("completed.txt5")}`}
@@ -324,7 +471,11 @@ export default function CompletedTasks({ navigation }: any) {
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>
-              {tasks.filter((task) => !task.reviewed).length}
+              {
+                tasks.filter(
+                  (task) => !hasUserReviewedTask(task.taskId || task.id, task)
+                ).length
+              }
             </Text>
             <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
               {`${t("completed.txt6")}`}
@@ -357,6 +508,11 @@ export default function CompletedTasks({ navigation }: any) {
             }
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            getItemLayout={(data, index) => ({
+              length: RFPercentage(25),
+              offset: RFPercentage(25) * index,
+              index,
+            })}
           />
         )}
       </View>
@@ -392,13 +548,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statNumber: {
-    fontSize: RFPercentage(3),
+    fontSize: RFPercentage(2.1),
     fontFamily: "Poppins_700Bold",
     color: Colors.primary,
     marginBottom: RFPercentage(0.5),
   },
   statLabel: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
     color: Colors.darkGrey,
     textAlign: "center",
@@ -407,6 +563,20 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: Colors.border,
     marginHorizontal: RFPercentage(1),
+  },
+  selectedTaskHeader: {
+    marginHorizontal: RFPercentage(2),
+    padding: RFPercentage(1.5),
+    borderRadius: RFPercentage(1),
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(1),
+    gap: RFPercentage(1),
+  },
+  selectedTaskText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_500Medium",
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -425,6 +595,18 @@ const styles = StyleSheet.create({
   listContent: {
     padding: RFPercentage(2),
     paddingTop: RFPercentage(1),
+  },
+  scrollToNotice: {
+    marginBottom: RFPercentage(1),
+    padding: RFPercentage(1),
+    backgroundColor: Colors.primary + "10",
+    borderRadius: RFPercentage(1),
+  },
+  scrollToText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    fontStyle: "italic",
   },
   taskCard: {
     backgroundColor: Colors.white,
@@ -476,6 +658,11 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
   },
+  bulkIndicator: {
+    padding: RFPercentage(0.5),
+    borderRadius: RFPercentage(0.8),
+    marginRight: RFPercentage(0.5),
+  },
   statusIndicator: {
     paddingHorizontal: RFPercentage(1),
     paddingVertical: RFPercentage(0.5),
@@ -490,10 +677,75 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.5),
   },
   description: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
     color: Colors.heading,
     lineHeight: RFPercentage(2.2),
+  },
+  bulkTaskContainer: {
+    marginBottom: RFPercentage(1.5),
+    padding: RFPercentage(1.5),
+    borderRadius: RFPercentage(1.2),
+  },
+  bulkHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(1),
+    gap: RFPercentage(0.5),
+  },
+  bulkTitle: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  bulkStats: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.8),
+  },
+  bulkStat: {
+    flex: 1,
+    alignItems: "center",
+  },
+  bulkStatLabel: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular",
+    marginBottom: RFPercentage(0.2),
+    textAlign: "center",
+  },
+  bulkStatValue: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_700Bold",
+  },
+
+  confirmedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(0.8),
+    marginTop: RFPercentage(0.5),
+    gap: RFPercentage(0.3),
+  },
+  confirmedText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  viewHelpersButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primary,
+    alignSelf: "flex-start",
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.6),
+    borderRadius: RFPercentage(0.8),
+    marginTop: RFPercentage(1),
+    gap: RFPercentage(0.3),
+  },
+  viewHelpersText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.white,
   },
   dateContainer: {
     flexDirection: "row",
@@ -560,5 +812,38 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: RFPercentage(0.2),
+  },
+  // Add to your styles:
+  bulkTaskBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: RFPercentage(1),
+    borderRadius: RFPercentage(0.8),
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(0.5),
+  },
+  bulkTaskBannerText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_500Medium",
+  },
+  bulkStatsContainer: {
+    flexDirection: "row",
+    padding: RFPercentage(1),
+    borderRadius: RFPercentage(1),
+    marginBottom: RFPercentage(1.5),
+    justifyContent: "space-around",
+  },
+  bulkStatItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.5),
+  },
+  bulkStatText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_500Medium",
+  },
+  bulkStatDivider: {
+    width: 1,
+    height: "100%",
   },
 });

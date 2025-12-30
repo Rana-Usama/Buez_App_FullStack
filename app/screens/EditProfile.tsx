@@ -17,7 +17,6 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { MaterialIcons } from "@expo/vector-icons";
 import MyAppButton from "../components/common/MyAppButton";
-import Nav from "../components/common/Nav";
 import InputField from "../components/common/InputField";
 import { useUser } from "../contexts/user.context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -112,7 +111,6 @@ function EditProfile({ navigation }) {
         });
       } catch (error) {
         console.log("Error translating texts:", error);
-        // Set fallback texts
         setTranslatedTexts({
           biographyTitle: "Biography",
           biographyPlaceholder:
@@ -193,8 +191,6 @@ function EditProfile({ navigation }) {
       setOriginalData({ name, biography: bio, imageUri: image });
       setImageUri(image);
       setBiography(bio);
-
-      // Translate only if bio exists
       if (bio.trim()) {
         setIsTranslating(true);
         try {
@@ -258,11 +254,11 @@ function EditProfile({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={[styles.keyboard, { backgroundColor: theme.white }]}
     >
-       <StatusBar
-              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-              backgroundColor={"transparent"}
-              translucent
-            />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <View style={[styles.screen, { backgroundColor: theme.white }]}>
         <CustomNav title={`${t("profile.txt2")}`} showBack />
 

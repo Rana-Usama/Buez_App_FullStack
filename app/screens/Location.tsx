@@ -32,25 +32,9 @@ export default function Location({ navigation, route }) {
   const { location: currentLocation, getCurrentLocation } = useLocation();
   const key = process.env.EXPO_PUBLIC_LOCATION_NAME;
 
-  // Function to extract country code from Google Geocoding response
-  const extractCountryCode = (addressComponents) => {
-    if (!addressComponents) return null;
-
-    const countryComponent = addressComponents.find((component) =>
-      component.types.includes("country")
-    );
-
-    if (countryComponent) {
-      return countryComponent.short_name; // Returns ISO 3166-1 alpha-2 country code (e.g., "US", "DE", "FR")
-    }
-
-    return null;
-  };
-
   // Function to extract address components
   const extractAddressInfo = (addressComponents) => {
     if (!addressComponents) return {};
-
     const countryComponent = addressComponents.find((component) =>
       component.types.includes("country")
     );
@@ -121,10 +105,8 @@ export default function Location({ navigation, route }) {
 
   const handleMapPress = async (event) => {
     const coordinate = event.nativeEvent.coordinate;
-    console.log("🖱️ Map Pressed at:", coordinate);
-
+    console.log("Map Pressed at:", coordinate);
     setMarker(coordinate);
-
     mapRef.current.animateToRegion({
       ...coordinate,
       latitudeDelta: 0.01,
@@ -138,9 +120,7 @@ export default function Location({ navigation, route }) {
       const results = response.data.results;
       const address = results[0]?.formatted_address || "Selected Location";
       const addressComponents = results[0]?.address_components;
-
       const addressInfo = extractAddressInfo(addressComponents);
-
       const locationData = {
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
@@ -150,9 +130,7 @@ export default function Location({ navigation, route }) {
         city: addressInfo.city,
         state: addressInfo.state,
       };
-
       setSelectedLocation(locationData);
-
       console.log("📍 Selected Location:", locationData);
     } catch (error) {
       setSelectedLocation({
@@ -171,7 +149,6 @@ export default function Location({ navigation, route }) {
     if (!selectedLocation) {
       return;
     }
-
     // Prepare location data for dispatch
     const locationData = {
       latitude: selectedLocation.latitude,
@@ -188,7 +165,6 @@ export default function Location({ navigation, route }) {
     } else {
       dispatch(setLocation(locationData));
     }
-
     console.log("📍 Dispatching location:", locationData);
     navigation.goBack();
   };
@@ -198,7 +174,6 @@ export default function Location({ navigation, route }) {
     const location = details.geometry.location;
 
     try {
-      // Get detailed address information using reverse geocoding
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${key}`
       );

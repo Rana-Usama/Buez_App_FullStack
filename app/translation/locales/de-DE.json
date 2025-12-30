@@ -18,7 +18,13 @@
     "gotIt": "Verstanden",
     "you": "Du",
     "version": "Version",
-    "rights": "BUEZ. Alle Rechte vorbehalten."
+    "rights": "BUEZ. Alle Rechte vorbehalten.",
+    "error": "Fehler",
+    "noDescription": "Keine Beschreibung",
+    "task": "Aufgabe",
+"bulk": "Gruppenaufgabe mit mehreren Helfern",
+"helper": "Helfer",
+"helpers": "Helfer"
   },
   "validations": {
     "inValid": "Ungültige E-Mail",
@@ -227,6 +233,29 @@
     "txt13": "Kategorie",
     "txt14": "Durchschnittsbewertung"
   },
+  "offerDetail": {
+    "helpersNeeded": "Helfer benötigt",
+    "totalHelpers": "Gesamtheffer benötigt",
+    "confirmed": "Bestätigt",
+    "applications": "Bewerbungen",
+    "pending": "Ausstehend",
+    "slotsAvailable": "{{count}} Plätze verfügbar",
+    "full": "Alle Plätze belegt",
+    "confirmedStatus": "{{confirmed}} von {{total}} Helfern bestätigt",
+    "viewApplications": "Bewerbungen anzeigen",
+    "applied": "Beworben",
+    "waitingConfirmation": "Warte auf Bestätigung",
+    "imAvailable": "Ich bin verfügbar",
+    "cannotApply": "Kann mich nicht bewerben",
+    "applicationSent": "Bewerbung gesendet",
+    "waitForConfirmation": "Warte auf Bestätigung des Auftraggebers",
+    "newApplication": "hat sich auf Ihre Anfrage beworben",
+    "confirmedOn": "Bestätigt am",
+    "youAreConfirmed": "Sie sind bestätigt",
+    "cnf": "Bewerber bestätigen",
+    "slt": "Plätze belegt",
+    "lft": "übrig"
+  },
   "myRequests": {
     "txt1": "Meine Anfragen",
     "txt2": "Aktiv",
@@ -242,7 +271,13 @@
     "txt12": "Akzeptierte Anfrage erfolgreich storniert.",
     "txt13": "Lade deine Anfragen...",
     "repostSuccess": "Anfrage erneut veröffentlicht!",
-    "repostAvailable": "Deine Anfrage wurde erneut veröffentlicht und ist jetzt für andere Benutzer zur Annahme verfügbar."
+    "repostAvailable": "Deine Anfrage wurde erneut veröffentlicht und ist jetzt für andere Benutzer zur Annahme verfügbar.",
+    "noCompletedTasks": "Keine abgeschlossenen Aufgaben",
+    "noCompletedTasksDesc": "Abgeschlossene Aufgaben werden hier angezeigt",
+    "noReviews": "Noch keine Bewertungen",
+    "noReviewsDesc": "Bewertungen von Auftraggebern werden hier angezeigt",
+    "view": "Bewerber anzeigen"
+
   },
   "postRequest": {
     "txt1": "Anfrage veröffentlichen",
@@ -260,7 +295,9 @@
     "txt13": "Bearbeiten",
     "txt14": "Veröffentlichen",
     "customTaskTitle": "Bitte gib deinen Aufgabentyp an",
-    "pr": "Preis"
+    "pr": "Preis",
+    "numberOfWorkers": "Anzahl der benötigten Helfer",
+    "workersHelperText": "Anzahl der benötigten Helfer auswählen (1-{{max}})"
   },
   "messages": {
     "txt1": "Nachrichten",
@@ -374,7 +411,11 @@
     "txt1": "Profil",
     "txt2": "Profil bearbeiten",
     "txt3": "Bewertungen & Rezensionen",
-    "txt4": "Abgeschlossene Aufgaben"
+    "txt4": "Abgeschlossene Aufgaben",
+    "applicantProfile": "Bewerberprofil",
+    "confirmApplicant": "Bestätigen",
+    "confirmed": "Bestätigt",
+    "confirmedOn": "Bestätigt am"
   },
   "editProfile": {
     "txt1": "Deinen Namen eingeben",
@@ -620,5 +661,85 @@
     "saveMoney": "Spare 36% im Vergleich zur monatlichen Abrechnung",
     "oneTimePayment": "Einmalige Zahlung, kein monatlicher Aufwand",
     "exclusiveFeatures": "Zugang zu exklusiven Funktionen"
+  },
+  "taskApplicants": {
+    "title": "Aufgabenbewerber",
+    "loading": "Lade Aufgabendetails...",
+
+    "helpersNeeded": "Helfer benötigt",
+    "confirmed": "Bestätigt",
+    "applicants": "Bewerber",
+    "progress": "Helfer bestätigt",
+    "applicantsTab": "Bewerber",
+    "confirmedTab": "Bestätigt",
+
+    "noEmail": "Keine E-Mail",
+    "confirmedTime": "Bestätigt",
+
+    "confirm": "Bestätigen",
+    "remove": "Entfernen",
+    "profile": "Profil",
+
+    "confirmDialog": {
+      "title": "Helfer bestätigen",
+      "message": "Sind Sie sicher, dass Sie {{name}} für diese Aufgabe bestätigen möchten?",
+      "cancel": "Abbrechen",
+      "confirm": "Bestätigen"
+    },
+
+    "removeDialog": {
+      "title": "Helfer entfernen",
+      "message": "Sind Sie sicher, dass Sie {{name}} von den bestätigten Helfern entfernen möchten?",
+      "cancel": "Abbrechen",
+      "remove": "Entfernen"
+    },
+
+    "toast": {
+      "error": {
+        "taskNotFound": "Aufgabe nicht gefunden",
+        "loadFailed": "Laden der Aufgabendaten fehlgeschlagen",
+        "confirmFailed": "Bestätigung des Helfers fehlgeschlagen",
+        "removeFailed": "Entfernen des Helfers fehlgeschlagen"
+      },
+      "success": {
+        "helperConfirmed": "Helfer bestätigt",
+        "confirmedMessage": "{{name}} wurde für Ihre Aufgabe bestätigt"
+      },
+      "info": {
+        "helperRemoved": "Helfer entfernt",
+        "removedMessage": "{{name}} wurde von den bestätigten Helfern entfernt"
+      }
+    },
+
+    "empty": {
+      "applicants": "Noch keine Bewerber",
+      "confirmed": "Noch keine bestätigten Helfer"
+    },
+
+    "help": {
+      "applicants": "Tippen Sie auf 'Bestätigen', um Helfer zu Ihrem Team hinzuzufügen. Tippen Sie auf 'Profil', um deren Details anzuzeigen.",
+      "confirmed": "Tippen Sie auf 'Entfernen', um einen Helfer zu deaktivieren. Er wird in die Bewerberliste zurückversetzt."
+    },
+    "limitReached": {
+      "title": "Limit erreicht",
+      "message": "Sie haben bereits alle {{count}} benötigten Helfer bestätigt."
+    },
+
+    "cannotConfirm": {
+      "title": "Keine weiteren Helfer bestätigen",
+      "message": "Diese Aufgabe benötigt nur {{required}} Helfer. Sie haben bereits {{confirmed}} bestätigt."
+    },
+
+    "alreadyConfirmed": {
+      "title": "Bereits bestätigt",
+      "message": "{{name}} ist bereits für diese Aufgabe bestätigt."
+    },
+
+    "noDescription": "Keine Beschreibung",
+    "full": "Voll",
+    "spotsLeft": "Noch {{spots}} Plätze frei",
+    "status": "Status",
+    "allHelpersConfirmed": "Alle Helfer bestätigt! Sie können die Aufgabe als abgeschlossen markieren.",
+    "allSlotsFilled": "Alle Plätze belegt"
   }
 }

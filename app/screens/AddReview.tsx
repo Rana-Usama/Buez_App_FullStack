@@ -64,7 +64,7 @@ type Translations = {
   taskCompleted: string;
   writeReview: string;
   characters: string;
-  tap:string
+  tap: string;
 };
 
 interface ParamsType {
@@ -91,11 +91,9 @@ function AddReview() {
     task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()
   ).format("MMM D, YYYY");
   const { t } = useTranslation();
-
   const [lang, setLang] = useState("en");
   const [tr, setTr] = useState<Partial<Translations>>({});
   const [taskDesc, setTaskDesc] = useState(originalDesc);
-
   const [rating, setRating] = useState([false, false, false, false, false]);
   const [reviewText, setReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -206,7 +204,7 @@ function AddReview() {
         taskCompleted: "Task Completed",
         writeReview: "Write your review",
         characters: "characters",
-        tap:"Tap to rate"
+        tap: "Tap to rate",
       };
       const vals = await Promise.all(
         Object.values(phrases).map((txt) => cachedTranslate(txt))
@@ -236,7 +234,6 @@ function AddReview() {
   const toggleStar = (idx: number) => {
     const newRating = rating.map((_, i) => i <= idx);
     setRating(newRating);
-    // Animate all stars up to the selected one
     newRating.forEach((selected, index) => {
       if (selected && index <= idx) {
         animateStar(index);
@@ -244,65 +241,99 @@ function AddReview() {
     });
   };
 
-  // Submitting Review
-  const submitReview = async () => {
-    const stars = rating.filter(Boolean).length;
-    if (reviewText.trim() === "") {
+
+const submitReview = async () => {
+  const stars = rating.filter(Boolean).length;
+  if (reviewText.trim() === "") {
+    Toast.show({
+      type: "info",
+      text1: tr.addingReview || "Adding Review",
+      text2: tr.pleaseWrite || "Please write a review.",
+    });
+    return;
+  }
+  try {
+    setSubmitting(true);
+    const currentUser = getAuth().currentUser;
+    const currentUserId = currentUser?.uid;
+    const isBulkTask = task?.isBulkTask || false;
+    const taskOwnerId = recipientUser?.userId;
+    const reviewKey = `${currentUserId}_${taskId}_${taskOwnerId}`;
+    const existingReviewQuery = query(
+      collection(FIREBASE_DB, "reviews"),
+      where("reviewKey", "==", reviewKey)
+    );
+    const existingReviewSnap = await getDocs(existingReviewQuery);
+
+    if (!existingReviewSnap.empty) {
       Toast.show({
         type: "info",
-        text1: tr.addingReview || "Adding Review",
-        text2: tr.pleaseWrite || "Please write a review.",
+        text1: "Already Reviewed",
+        text2: "You have already reviewed this task owner.",
       });
+      setSubmitting(false);
       return;
     }
-    try {
-      setSubmitting(true);
-      const currentUser = getAuth().currentUser;
-      await addDoc(collection(FIREBASE_DB, "reviews"), {
-        reviewer: {
-          userId: currentUser?.uid || "",
-          userName: userData?.userName || "Anonymous",
-          profileImage: userData?.profileImage || null,
+    // Create review data
+    const reviewData = {
+      reviewer: {
+        userId: currentUserId || "",
+        userName: userData?.userName || "Anonymous",
+        profileImage: userData?.profileImage || null,
+      },
+      recipient: recipientUser,
+      taskId,
+      rating: stars || 0,
+      reviewText: reviewText.trim() || "",
+      createdAt: serverTimestamp(),
+      isBulkTask: isBulkTask,
+      taskOwnerId: taskOwnerId,
+      reviewedByHelper: task?.isConfirmedHelper || false,
+      reviewKey: reviewKey,
+      helperId: currentUserId,
+      helperInfo: isBulkTask && task?.isConfirmedHelper ? {
+        userId: currentUserId,
+        userName: userData?.userName,
+        wasConfirmed: true
+      } : null,
+    };
+
+    await addDoc(collection(FIREBASE_DB, "reviews"), reviewData);
+    if (isBulkTask && currentUserId) {
+      await addDoc(collection(FIREBASE_DB, "helperReviews"), {
+        helperId: currentUserId,
+        taskId: taskId,
+        taskOwnerId: taskOwnerId,
+        reviewed: true,
+        reviewData: {
+          rating: stars,
+          reviewText: reviewText.trim(),
+          createdAt: serverTimestamp(),
         },
-        recipient: recipientUser,
-        taskId,
-        rating: stars,
-        reviewText: reviewText.trim(),
-        createdAt: serverTimestamp(),
-        taskOwnerId: task?.taskOwnerId,
+        reviewKey: reviewKey
       });
-      const q = query(
-        collection(FIREBASE_DB, "completedTask"),
-        where("taskId", "==", taskId)
-      );
-      const snap = await getDocs(q);
-      await Promise.all(
-        snap.docs.map((d) =>
-          updateDoc(doc(FIREBASE_DB, "completedTask", d.id), {
-            reviewed: true,
-            reviewText: reviewText.trim(),
-            rating: stars,
-          })
-        )
-      );
-      await sendReviewPushNotification();
-      await saveReviewNotification();
-      Toast.show({
-        type: "success",
-        text1: tr.success || "Success",
-        text2: tr.reviewSubmitted || "Review submitted!",
-      });
-      navigation.goBack();
-    } catch (e) {
-      Toast.show({
-        type: "error",
-        text1: tr.error || "Error",
-        text2: tr.couldNotSubmit || "Could not submit review.",
-      });
-    } finally {
-      setSubmitting(false);
     }
-  };
+
+    await sendReviewPushNotification();
+    await saveReviewNotification();
+
+    Toast.show({
+      type: "success",
+      text1: tr.success || "Success",
+      text2: tr.reviewSubmitted || "Review submitted!",
+    });
+    navigation.goBack();
+  } catch (e) {
+    console.log("Review submission error:", e);
+    Toast.show({
+      type: "error",
+      text1: tr.error || "Error",
+      text2: tr.couldNotSubmit || "Could not submit review.",
+    });
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   // Star Color
   const getStarColor = (selected: boolean) => {
@@ -318,22 +349,19 @@ function AddReview() {
       style={[styles.container, { backgroundColor: theme.white }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-       <StatusBar
-              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-              backgroundColor={"transparent"}
-              translucent
-            />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav title={tr.addReview || "Add Review"} showBack />
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Main Content */}
         <View style={styles.content}>
-          {/* User Card */}
           <View
             style={[
               styles.userCard,

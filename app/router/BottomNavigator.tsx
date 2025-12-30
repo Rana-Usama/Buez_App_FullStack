@@ -462,7 +462,7 @@ function DrawerNavigator() {
         headerShown: false,
         drawerStyle: {
           backgroundColor: "white",
-          width: RFPercentage(35),
+          width: RFPercentage(38),
         },
         drawerType: "front",
         swipeEnabled: true,

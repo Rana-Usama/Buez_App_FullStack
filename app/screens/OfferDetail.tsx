@@ -47,8 +47,9 @@ import {
   getCurrencyInfo,
 } from "../utils/currencyChange";
 import { useLocation } from "../utils/useLocation";
-
+import Toast from "react-native-toast-message";
 // Config
+
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { FIREBASE_DB } from "../../firebaseConfig";
@@ -56,8 +57,23 @@ import CustomNav from "../components/common/CustomNav";
 
 const { width } = Dimensions.get("window");
 
+import { StyleProp, ViewStyle, TextStyle } from "react-native";
+
+interface CustomAppButtonProps {
+  title: string;
+  onPress: () => void | Promise<void>;
+  loading?: boolean;
+  disabled?: boolean;
+  backgroundColor?: string;
+  textColor?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  iconColor?: string;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+}
+
 // Custom App Button Component
-const CustomAppButton = ({
+const CustomAppButton: React.FC<CustomAppButtonProps> = ({
   title,
   onPress,
   loading = false,
@@ -181,6 +197,14 @@ function OfferDetail({ navigation, route }) {
   const scrollY = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
+  const [isBulkRequest, setIsBulkRequest] = useState(false);
+  const [numberOfWorkers, setNumberOfWorkers] = useState(1);
+  const [appliedWorkers, setAppliedWorkers] = useState([]);
+  const [confirmedWorkers, setConfirmedWorkers] = useState([]);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [isWorker, setIsWorker] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+
   const db = FIREBASE_DB;
   const imageObjects =
     postRequest?.imageUrls?.map((url) => ({ uri: url })) || [];
@@ -194,22 +218,91 @@ function OfferDetail({ navigation, route }) {
     }).start();
   }, []);
 
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [1, 0],
-    extrapolate: "clamp",
-  });
+  useEffect(() => {
+    // Initialize bulk request data
+    if (postRequest) {
+      const workerCount = postRequest.numberOfWorkers || 1;
+      setNumberOfWorkers(workerCount);
+      setIsBulkRequest(workerCount > 1);
+      setAppliedWorkers(postRequest.appliedWorkers || []);
+      setConfirmedWorkers(postRequest.confirmedWorkers || []);
+      // Check if current user has already applied
+      if (currentUserId) {
+        const userApplied = (postRequest.appliedWorkers || []).some(
+          (worker) => worker.userId === currentUserId
+        );
+
+        const confirmed = (postRequest.confirmedWorkers || []).some(
+          (worker) => worker.userId === currentUserId
+        );
+        setConfirmed(confirmed);
+        setHasApplied(userApplied);
+        // Check if current user is the worker (not the requester)
+        setIsWorker(currentUserId !== postRequest.userId);
+      }
+    }
+  }, [postRequest, currentUserId]);
+
+  
+  // Check if user can apply
+  const canApply = () => {
+    if (!isWorker) return false; // Not a worker
+    if (isAccepted) return false; // Already accepted
+    if (hasApplied) return false; // Already applied
+    if (confirmed) return false;
+
+    // Check if there are available slots
+    const confirmedCount = confirmedWorkers.length;
+    return confirmedCount < numberOfWorkers;
+  };
+
+  // Calculate remaining slots
+  const getRemainingSlots = () => {
+    const confirmedCount = confirmedWorkers.length;
+    return numberOfWorkers - confirmedCount;
+  };
+
+  // Get slot status text
+  const getSlotStatusText = () => {
+    const remaining = getRemainingSlots();
+    if (remaining <= 0) {
+      return t("offerDetail.full") || "All slots filled";
+    }
+    return (
+      t("offerDetail.slotsAvailable", { count: remaining }) ||
+      `${remaining} slots available`
+    );
+  };
+
+  // Get requester status text
+  const getRequesterStatusText = () => {
+    const confirmedCount = confirmedWorkers.length;
+    return (
+      t("offerDetail.confirmedStatus", {
+        confirmed: confirmedCount,
+        total: numberOfWorkers,
+      }) || `${confirmedCount} of ${numberOfWorkers} helpers confirmed`
+    );
+  };
+
+  // Check if chat is enabled for bulk requests
+  const isChatEnabled = () => {
+    if (!isBulkRequest) return true; // Single requests always have chat
+    if (currentUserId === postRequest?.userId) {
+      return confirmedWorkers.length > 0;
+    } else {
+      return confirmedWorkers.some((worker) => worker.userId === currentUserId);
+    }
+  };
 
   // Currency conversion function
   const getConvertedCompensation = (item) => {
     if (item.compensationType !== "Monitarely") return null;
-
     try {
       const originalAmount = parseFloat(item.monitarily) || 0;
       if (!item.currencyInfo) {
         return formatCurrency(originalAmount, currentLocation);
       }
-
       const targetCurrency = getCurrencyInfo(currentLocation).code;
       const convertedAmount = convertCurrency(
         originalAmount,
@@ -399,9 +492,30 @@ function OfferDetail({ navigation, route }) {
     }
   }
 
-  // Save notification
+  // Save notification (for single requests)
   const saveNotification = async () => {
     try {
+      const postData = {
+        id: postRequest?.id,
+        taskType: postRequest?.taskType || "",
+        description: postRequest?.description || "",
+        compensationType: postRequest?.compensationType || "",
+        monitarily: postRequest?.monitarily || "0",
+        address: postRequest?.address || { name: "" },
+        userId: postRequest?.userId || "",
+        user: postRequest?.user || { userName: "" },
+        imageUrls: postRequest?.imageUrls || [],
+        createdAt: postRequest?.createdAt || new Date().toISOString(),
+        status: postRequest?.status || "active",
+        currencyInfo: postRequest?.currencyInfo || {
+          code: "USD",
+          symbol: "$",
+          locale: "en-US",
+        },
+        isBulkRequest: false,
+        numberOfWorkers: 1,
+      };
+
       await addDoc(collection(db, "notifications"), {
         sender: {
           userId: currentUserId,
@@ -414,15 +528,22 @@ function OfferDetail({ navigation, route }) {
           userId: postRequest?.userId,
           name: postRequest?.user?.userName,
           email: postRequest?.user?.email,
+          token: postRequest?.user?.token,
         },
-        task: {
-          postRequest,
-        },
+        task: postData,
         type: "task_acceptance",
         timestamp: new Date().toISOString(),
         isRead: false,
+        message: `${
+          currentUser?.userData?.userName || "Someone"
+        } has accepted your task request`,
+        metadata: {
+          postId: postRequest?.id,
+          taskType: postRequest?.taskType,
+          isBulkRequest: false,
+        },
       });
-      console.log("Notification saved in notifications collection.");
+      console.log("Task acceptance notification saved.");
     } catch (error) {
       console.log("Error saving notification:", error);
     }
@@ -458,8 +579,8 @@ function OfferDetail({ navigation, route }) {
         );
       case "moving":
         return (
-          <FontAwesome5
-            name="truck-moving"
+          <MaterialIcons
+            name="video-library"
             size={RFPercentage(2.2)}
             color={Colors.white}
           />
@@ -496,9 +617,218 @@ function OfferDetail({ navigation, route }) {
     : translatedReviews.slice(0, 3);
   const hiddenCount = translatedReviews.length - 3;
 
+  // Handle worker applying to bulk request
+  const handleApply = async () => {
+    if (!canApply()) return;
+    setLoading(true);
+    try {
+      const userData = currentUser?.userData;
+      const application = {
+        userId: currentUserId || "",
+        userName: userData?.userName || "Unknown User",
+        profileImage: userData?.profileImage || "",
+        email: currentUserId2?.email || "",
+        phone: userData?.phone || "",
+        token: userData?.token || "",
+        appliedAt: new Date().toISOString(),
+        status: "pending",
+        userRating: userData?.rating || 0,
+        completedTasks: userData?.completedTasks || 0,
+      };
+
+      const cleanApplication = Object.keys(application).reduce((acc, key) => {
+        acc[key] = application[key] === undefined ? "" : application[key];
+        return acc;
+      }, {});
+
+      const currentAppliedWorkers = Array.isArray(appliedWorkers)
+        ? appliedWorkers
+        : [];
+      const updatedAppliedWorkers = [
+        ...currentAppliedWorkers,
+        cleanApplication,
+      ];
+
+      const taskDocRef = doc(db, "taskRequests", postRequest.id);
+      const updateData = {
+        appliedWorkers: updatedAppliedWorkers,
+      };
+      await saveApplicationNotification(cleanApplication);
+      await updateDoc(taskDocRef, updateData);
+      await sendApplicationNotification();
+      setAppliedWorkers(updatedAppliedWorkers);
+      setHasApplied(true);
+
+      Toast.show({
+        type: "success",
+        text1: t("offerDetail.applicationSent") || "Application Sent",
+        text2:
+          t("offerDetail.waitForConfirmation") ||
+          "Waiting for confirmation from requester",
+      });
+    } catch (error) {
+      console.log("Error applying:", error);
+      console.log("Error details:", error.message, error.stack);
+
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: error.message || "Failed to submit application",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Save notification for bulk request application with complete post data
+  const saveApplicationNotification = async (application) => {
+    try {
+      const postData = {
+        // Basic identification
+        id: postRequest?.id,
+        postId: postRequest?.id,
+        // Task details
+        taskType: postRequest?.taskType || "",
+        customTaskTitle: postRequest?.customTaskTitle || "",
+        description: postRequest?.description || "",
+        compensationType: postRequest?.compensationType || "",
+        otherCompensation: postRequest?.otherCompensation || "",
+        monitarily: postRequest?.monitarily || "0",
+        // Bulk request specific fields
+        numberOfWorkers: numberOfWorkers || 1,
+        isBulkRequest: isBulkRequest,
+        appliedWorkers: appliedWorkers || [],
+        confirmedWorkers: confirmedWorkers || [],
+        slotsAvailable: getRemainingSlots(),
+        // Location
+        address: postRequest?.address || {
+          name: "",
+          latitude: 0,
+          longitude: 0,
+        },
+        // User info (requester)
+        userId: postRequest?.userId || "",
+        user: postRequest?.user || {
+          userName: "",
+          email: "",
+          profileImage: "",
+          token: "",
+        },
+        imageUrls: postRequest?.imageUrls || [],
+        createdAt: postRequest?.createdAt || new Date().toISOString(),
+        status: postRequest?.status || "active",
+        currencyInfo: postRequest?.currencyInfo || {
+          code: "USD",
+          symbol: "$",
+          locale: "en-US",
+        },
+        reviews: postRequest?.reviews || [],
+        isEditable: false,
+        isOwner: false,
+      };
+
+      const notificationData = {
+        sender: {
+          userId: currentUserId,
+          userName: currentUser?.userData?.userName || "Unknown User",
+          email: currentUserId2?.email || "",
+          profileImage: currentUser?.userData?.profileImage || "",
+          token: currentUser?.userData?.token || "",
+        },
+        receiver: {
+          userId: postRequest?.userId,
+          name: postRequest?.user?.userName || "Requester",
+          email: postRequest?.user?.email || "",
+          token: postRequest?.user?.token || "",
+        },
+        task: postData, // Use the complete postData object
+        application: {
+          appliedAt: new Date().toISOString(),
+          status: "pending",
+          workerName: currentUser?.userData?.userName || "Unknown User",
+          workerId: currentUserId,
+          workerProfileImage: currentUser?.userData?.profileImage || "",
+          workerEmail: currentUserId2?.email || "",
+        },
+        type: "bulk_request_application",
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        notificationType: "application",
+        message: `${
+          currentUser?.userData?.userName || "Someone"
+        } has applied to your "${
+          postRequest?.taskType === "Other"
+            ? postRequest?.customTaskTitle
+            : postRequest?.taskType
+        }" request`,
+        metadata: {
+          postId: postRequest?.id,
+          workerId: currentUserId,
+          taskTitle:
+            postRequest?.taskType === "Other"
+              ? postRequest?.customTaskTitle
+              : postRequest?.taskType,
+          isBulkRequest: true,
+          actionRequired: true,
+        },
+      };
+      // Clean any undefined values
+      const cleanNotificationData = Object.keys(notificationData).reduce(
+        (acc, key) => {
+          if (notificationData[key] === undefined) {
+            if (
+              typeof notificationData[key] === "object" &&
+              notificationData[key] !== null
+            ) {
+              acc[key] = {};
+            } else {
+              acc[key] = "";
+            }
+          } else {
+            acc[key] = notificationData[key];
+          }
+          return acc;
+        },
+        {}
+      );
+      await addDoc(collection(db, "notifications"), cleanNotificationData);
+    } catch (error) {
+      console.log("Error saving application notification:", error);
+    }
+  };
+
+  // Send notification to requester for application
+  const sendApplicationNotification = async () => {
+    try {
+      const response = await fetch(
+        "https://buez-server-khaki.vercel.app/api/send-notification",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fcmToken: postRequest?.user?.token,
+            title: "New Application",
+            body: `${
+              currentUser?.userData?.userName || "Someone"
+            } has applied to your "${
+              postRequest?.taskType === "Other"
+                ? postRequest?.customTaskTitle
+                : postRequest?.taskType
+            }" request`,
+          }),
+        }
+      );
+      return response.text();
+    } catch (error) {
+      console.log("Notification error:", error);
+    }
+  };
+
   return (
     <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
- <StatusBar
+      <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={"transparent"}
         translucent
@@ -657,8 +987,6 @@ function OfferDetail({ navigation, route }) {
                       ]}
                     />
                   </LinearGradient>
-
-                 
                 </View>
 
                 <View style={styles.userDetails}>
@@ -678,9 +1006,7 @@ function OfferDetail({ navigation, route }) {
                       name="time-outline"
                       size={RFPercentage(1.3)}
                       color={
-                        theme.mode === "dark"
-                          ? Colors.white
-                          : theme.darkGrey
+                        theme.mode === "dark" ? Colors.white : theme.darkGrey
                       }
                     />
                     <Text
@@ -689,7 +1015,7 @@ function OfferDetail({ navigation, route }) {
                         {
                           color:
                             theme.mode === "dark"
-                              ? Colors.white 
+                              ? Colors.white
                               : theme.darkGrey,
                         },
                       ]}
@@ -734,7 +1060,7 @@ function OfferDetail({ navigation, route }) {
               {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? theme.primary + "30" 
+                    ? theme.primary + "30"
                     : Colors.primary + "05",
               },
             ]}
@@ -750,12 +1076,7 @@ function OfferDetail({ navigation, route }) {
               </Text>
             </View>
 
-            <View
-              style={[
-                styles.descriptionContainer,
-               
-              ]}
-            >
+            <View style={[styles.descriptionContainer]}>
               <Text style={[styles.taskDescription, { color: theme.darkGrey }]}>
                 {isExpanded || translatedOffer?.description?.length <= 150
                   ? translatedOffer?.description
@@ -774,6 +1095,224 @@ function OfferDetail({ navigation, route }) {
             </View>
           </View>
 
+          {/* Workers Information Section - Only show for bulk requests */}
+          {isBulkRequest && (
+            <View
+              style={[
+                styles.workersCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? theme.primary + "30"
+                      : Colors.primary + "05",
+                },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="people"
+                  size={RFPercentage(2.2)}
+                  color={Colors.primary}
+                />
+                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                  {t("offerDetail.helpersNeeded") || "Helpers Needed"}
+                </Text>
+              </View>
+
+              <View style={styles.workersInfoContainer}>
+                {/* Total Workers Needed */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-around",
+                    width: "100%",
+                  }}
+                >
+                  <View style={styles.workersStat}>
+                    <View
+                      style={[
+                        styles.workersIconContainer,
+                        { backgroundColor: Colors.primary + "20" },
+                      ]}
+                    >
+                      <Ionicons
+                        name="people-outline"
+                        size={RFPercentage(2)}
+                        color={Colors.primary}
+                      />
+                    </View>
+                    <View style={styles.workersTextContainer}>
+                      <Text
+                        style={[styles.workersLabel, { color: theme.darkGrey }]}
+                      >
+                        {t("offerDetail.totalHelpers") ||
+                          "Total Helpers Needed"}
+                      </Text>
+                      <Text
+                        style={[styles.workersValue, { color: theme.heading }]}
+                      >
+                        {numberOfWorkers}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Confirmed Workers */}
+                  <View style={[styles.workersStat]}>
+                    <View
+                      style={[
+                        styles.workersIconContainer,
+                        { backgroundColor: "#4CAF50" + "20" },
+                      ]}
+                    >
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={RFPercentage(2)}
+                        color="#4CAF50"
+                      />
+                    </View>
+                    <View style={styles.workersTextContainer}>
+                      <Text
+                        style={[styles.workersLabel, { color: theme.darkGrey }]}
+                      >
+                        {t("offerDetail.confirmed") || "Confirmed"}
+                      </Text>
+                      <Text style={[styles.workersValue, { color: "#4CAF50" }]}>
+                        {confirmedWorkers?.length}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                {/* Status Display */}
+                <View style={styles.statusContainer}>
+                  {currentUserId === postRequest?.userId ? (
+                    // Requester view
+                    <View style={styles.statusBadge}>
+                      <Ionicons
+                        name="information-circle"
+                        size={RFPercentage(1.6)}
+                        color={Colors.primary}
+                      />
+                      <Text
+                        style={[styles.statusText, { color: Colors.primary }]}
+                      >
+                        {getRequesterStatusText()}
+                      </Text>
+                    </View>
+                  ) : (
+                    // Worker view
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        getRemainingSlots() <= 0 && {
+                          backgroundColor: Colors.red + "20",
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name={
+                          getRemainingSlots() <= 0
+                            ? "alert-circle"
+                            : "information-circle"
+                        }
+                        size={RFPercentage(1.6)}
+                        color={
+                          getRemainingSlots() <= 0 ? Colors.red : Colors.primary
+                        }
+                      />
+                      <Text
+                        style={[
+                          styles.statusText,
+                          {
+                            color:
+                              getRemainingSlots() <= 0
+                                ? Colors.red
+                                : Colors.primary,
+                          },
+                        ]}
+                      >
+                        {getSlotStatusText()}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+              {/* Applied Workers List (Visible to Requester Only) */}
+              {currentUserId === postRequest?.userId &&
+                appliedWorkers.length > 0 && (
+                  <View style={styles.appliedWorkersContainer}>
+                    <Text
+                      style={[styles.appliedTitle, { color: theme.darkGrey }]}
+                    >
+                      {t("offerDetail.applications") || "Applications"} (
+                      {appliedWorkers.length})
+                    </Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.appliedScrollView}
+                    >
+                      {appliedWorkers.map((worker, index) => {
+                        const isConfirmed = confirmedWorkers.some(
+                          (w) => w.userId === worker.userId
+                        );
+                        return (
+                          <View
+                            key={worker.userId || index}
+                            style={styles.appliedWorkerCard}
+                          >
+                            <Image
+                              source={
+                                worker.profileImage
+                                  ? { uri: worker.profileImage }
+                                  : Icons.dp
+                              }
+                              style={styles.appliedWorkerAvatar}
+                            />
+                            <Text
+                              style={[
+                                styles.appliedWorkerName,
+                                { color: theme.heading },
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {worker.userName}
+                            </Text>
+                            <View
+                              style={[
+                                styles.confirmationBadge,
+                                {
+                                  backgroundColor: isConfirmed
+                                    ? "#4CAF50" + "20"
+                                    : Colors.primary + "20",
+                                },
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.confirmationText,
+                                  {
+                                    color: isConfirmed
+                                      ? "#4CAF50"
+                                      : Colors.primary,
+                                  },
+                                ]}
+                              >
+                                {isConfirmed
+                                  ? t("offerDetail.confirmed") || "Confirmed"
+                                  : t("offerDetail.pending") || "Pending"}
+                              </Text>
+                            </View>
+                          </View>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
+            </View>
+          )}
+
           {/* Task Info Cards - Light Backgrounds */}
           <View style={styles.infoGrid}>
             {/* Location Card */}
@@ -782,7 +1321,7 @@ function OfferDetail({ navigation, route }) {
                 styles.infoCard,
                 {
                   backgroundColor:
-                    theme.mode === "dark" ? theme.primary + "30"  : "#E3F2FD",
+                    theme.mode === "dark" ? theme.primary + "30" : "#E3F2FD",
                 },
               ]}
             >
@@ -817,7 +1356,7 @@ function OfferDetail({ navigation, route }) {
                 styles.infoCard,
                 {
                   backgroundColor:
-                    theme.mode === "dark" ? theme.primary + "30"  : "#E8F5E9",
+                    theme.mode === "dark" ? theme.primary + "30" : "#E8F5E9",
                 },
               ]}
             >
@@ -890,7 +1429,7 @@ function OfferDetail({ navigation, route }) {
           </View>
 
           {/* Reviews Section - Light Background */}
-          {(translatedReviews.length > 0 || averageRating) && (
+          {(translatedReviews?.length > 0 || averageRating) && (
             <View
               style={[
                 styles.reviewsCard,
@@ -919,7 +1458,7 @@ function OfferDetail({ navigation, route }) {
                 </Text>
               </View>
 
-              {translatedReviews.length > 0 ? (
+              {translatedReviews?.length > 0 ? (
                 <>
                   {visibleReviews.map((review, index) => (
                     <View
@@ -1049,7 +1588,101 @@ function OfferDetail({ navigation, route }) {
                 title={t("details.txt9")}
                 onPress={handleStartChat}
                 icon="chatbubble-ellipses"
+                disabled={!isChatEnabled()}
               />
+            ) : isBulkRequest ? (
+              <>
+                {/* Chat Button - Conditionally Enabled */}
+                <TouchableOpacity
+                  style={[
+                    styles.secondaryButton,
+                    {
+                      borderColor: theme.lightGrey,
+                      backgroundColor: !isChatEnabled()
+                        ? theme.lightGrey + "30"
+                        : theme.mode === "dark"
+                        ? theme.white + "10"
+                        : Colors.primary + "08",
+                      opacity: isChatEnabled() ? 1 : 0.5,
+                    },
+                  ]}
+                  onPress={handleStartChat}
+                  activeOpacity={0.8}
+                  disabled={!isChatEnabled()}
+                >
+                  <Ionicons
+                    name="chatbubble-ellipses"
+                    size={RFPercentage(1.8)}
+                    color={isChatEnabled() ? theme.darkGrey : theme.lightGrey}
+                  />
+                  <Text
+                    style={[
+                      styles.secondaryButtonText,
+                      {
+                        color: isChatEnabled()
+                          ? theme.darkGrey
+                          : theme.lightGrey,
+                      },
+                    ]}
+                  >
+                    {t("details.txt9")}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Apply/Accept Button */}
+                {currentUserId === postRequest?.userId ? (
+                  <CustomAppButton
+                    title={
+                      t("offerDetail.viewApplications") || "View Applications"
+                    }
+                    onPress={() =>
+                      navigation.navigate("ApplicationsScreen", {
+                        postId: postRequest.id,
+                        appliedWorkers,
+                        confirmedWorkers,
+                        numberOfWorkers,
+                      })
+                    }
+                    icon="list"
+                    disabled={appliedWorkers.length === 0}
+                  />
+                ) : // Worker - Apply Button
+                hasApplied || confirmed ? (
+                  <View style={styles.appliedStatusContainer}>
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={RFPercentage(2.5)}
+                      color="#4CAF50"
+                    />
+                    <Text style={[styles.appliedText, { color: "#4CAF50" }]}>
+                      {confirmed
+                        ? t("offerDetail.confirmed")
+                        : t("offerDetail.applied")}
+                    </Text>
+                  </View>
+                ) : canApply() ? (
+                  <CustomAppButton
+                    title={t("offerDetail.imAvailable") || "I'm available"}
+                    onPress={handleApply}
+                    loading={loading}
+                    icon="add-circle"
+                    iconColor="white"
+                  />
+                ) : (
+                  <View style={styles.disabledApplyContainer}>
+                    <Ionicons
+                      name="close-circle"
+                      size={RFPercentage(2.5)}
+                      color={Colors.red}
+                    />
+                    <Text style={[styles.disabledText, { color: Colors.red }]}>
+                      {getRemainingSlots() <= 0
+                        ? t("offerDetail.full") || "All slots filled"
+                        : t("offerDetail.cannotApply") || "Cannot apply"}
+                    </Text>
+                  </View>
+                )}
+              </>
             ) : (
               <>
                 <TouchableOpacity
@@ -1257,8 +1890,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
   },
-  descriptionContainer: {
-  },
+  descriptionContainer: {},
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -1468,8 +2100,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(3.25),
     borderWidth: 2,
   },
- 
-  
+
   userDetails: {
     flex: 1,
   },
@@ -1494,6 +2125,135 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginLeft: RFPercentage(1),
+  },
+
+  workersCard: {
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(2),
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+  workersInfoContainer: {
+    // flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: RFPercentage(1),
+    // height:120
+  },
+  workersStat: {
+    alignItems: "center",
+
+    // backgroundColor:"blue"
+  },
+  workersIconContainer: {
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(2),
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.5),
+  },
+  workersTextContainer: {
+    alignItems: "center",
+  },
+  workersLabel: {
+    fontSize: RFPercentage(1.1),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+  },
+  workersValue: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  statusContainer: {
+    marginTop: RFPercentage(2),
+    width: "100%",
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.primary + "10",
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: RFPercentage(2),
+    gap: RFPercentage(0.5),
+  },
+  statusText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_500Medium",
+  },
+  appliedWorkersContainer: {
+    marginTop: RFPercentage(1.5),
+  },
+  appliedTitle: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(1),
+  },
+  appliedScrollView: {
+    flexGrow: 0,
+  },
+  appliedWorkerCard: {
+    alignItems: "center",
+    marginRight: RFPercentage(1.5),
+    width: RFPercentage(8),
+  },
+  appliedWorkerAvatar: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(2.5),
+    marginBottom: RFPercentage(0.5),
+  },
+  appliedWorkerName: {
+    fontSize: RFPercentage(1.1),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    width: "100%",
+  },
+  confirmationBadge: {
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.3),
+    borderRadius: RFPercentage(1),
+    marginTop: RFPercentage(0.3),
+  },
+  confirmationText: {
+    fontSize: RFPercentage(0.9),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  appliedStatusContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: RFPercentage(1.5),
+    borderRadius: RFPercentage(100),
+    backgroundColor: "#4CAF50" + "10",
+    gap: RFPercentage(0.5),
+    flexDirection: "row",
+  },
+  appliedText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  waitingText: {
+    fontSize: RFPercentage(1.1),
+    fontFamily: "Poppins_400Regular",
+    fontStyle: "italic",
+  },
+  disabledApplyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: RFPercentage(1.6),
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.red + "10",
+    gap: RFPercentage(0.5),
+    flexDirection: "row",
+  },
+  disabledText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_600SemiBold",
   },
 });
 

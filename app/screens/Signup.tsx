@@ -181,20 +181,7 @@ function Signup({ navigation }: any) {
         locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
         style={styles.meshGradientTopLeft}
       />
-      <LinearGradient
-        colors={[
-          "#8bc7ffff",
-          "#796affff",
-          "#238b6eff",
-          "#A18CD1",
-          "#FBC2EB",
-          "#FDA085",
-        ]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
-        style={styles.meshGradientBottomRight}
-      />
+     
 
       <ScrollView
         style={styles.scrollView}
@@ -450,16 +437,7 @@ const styles = StyleSheet.create({
     opacity: 0.1,
     transform: [{ rotate: "45deg" }],
   },
-  meshGradientBottomRight: {
-    position: "absolute",
-    bottom: -RFPercentage(30),
-    right: -RFPercentage(28),
-    width: RFPercentage(50),
-    height: RFPercentage(50),
-    borderRadius: RFPercentage(25),
-    opacity: 0.1,
-    transform: [{ rotate: "45deg" }],
-  },
+
   scrollView: {
     width: "100%",
   },

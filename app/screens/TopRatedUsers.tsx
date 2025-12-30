@@ -19,8 +19,6 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import {
   Ionicons,
-  MaterialIcons,
-  FontAwesome5,
   Feather,
   AntDesign,
 } from "@expo/vector-icons";
@@ -28,6 +26,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectLocation } from "../redux/Actions";
 import CustomNav from "../components/common/CustomNav";
 import { LinearGradient } from "expo-linear-gradient";
+import { TopRatedUserGradients } from "../config/Gradients";
 
 type ApiUser = {
   userId: string;
@@ -172,34 +171,25 @@ const TopRatedUsers = ({ navigation }: any) => {
 
   const UserCard = ({ user }) => {
     const badge = getBadgeInfo(user.type);
-    const getGradientColors = () => {
-      switch (badge.text) {
-        case "PRO BUEZER":
-          return ["#888cadff", "#9e9cf4ff"];
-        case "BUEZER":
-          return ["#888cadff", "#9e9cf4ff"];
-        case "MINI BUEZER":
-          return ["#888cadff", "#9e9cf4ff"];
+    const getUserCardGradient = (
+      type: "pro" | "rising" | "beginner",
+      isDark: boolean
+    ) => {
+      const mode = isDark ? "dark" : "light";
+
+      switch (type) {
+        case "pro":
+          return TopRatedUserGradients.pro[mode];
+        case "rising":
+          return TopRatedUserGradients.rising[mode];
+        case "beginner":
+          return TopRatedUserGradients.beginner[mode];
         default:
-          return ["#888cadff", "#9e9cf4ff"];
+          return TopRatedUserGradients.default[mode];
       }
     };
 
-    const getGradientColors2 = () => {
-      switch (badge.text) {
-        case "PRO BUEZER":
-          return ["#585546ff", "#4f3617ff"];
-        case "BUEZER":
-          return ["#372d41ff", "#240d3dff"];
-        case "MINI BUEZER":
-          return ["#2c403eff", "#104521ff"];
-        default:
-          return ["#313445ff", "#0f1f43ff"];
-      }
-    };
-
-    const gr = getGradientColors();
-    const gr2 = getGradientColors2();
+    const cardGradient = getUserCardGradient(user.type, theme.mode === "dark");
 
     return (
       <TouchableOpacity
@@ -207,17 +197,14 @@ const TopRatedUsers = ({ navigation }: any) => {
         onPress={() =>
           navigation.navigate("TopRatedUserProfile", {
             user: user.originalData || user,
+            applier: false,
+            postRequest: {},
           })
         }
-        style={[
-          styles.cardContainer,
-          { borderColor: theme.mode === "dark" ? gr2[1] : gr[1] },
-        ]}
+        style={[styles.cardContainer, { borderColor: cardGradient[1] }]}
       >
         <LinearGradient
-          colors={
-            theme.mode === "dark" ? getGradientColors2() : getGradientColors()
-          }
+          colors={cardGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.gradientWrapper}
@@ -314,11 +301,11 @@ const TopRatedUsers = ({ navigation }: any) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
-       <StatusBar
-              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-              backgroundColor={"transparent"}
-              translucent
-            />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
 
       <CustomNav title={t("profileRank.txt1")} showBack={true} />
 

@@ -18,7 +18,13 @@
     "gotIt": "Got It",
     "you": "You",
     "version": "Version",
-    "rights": "BUEZ. All rights reserved."
+    "rights": "BUEZ. All rights reserved.",
+    "error": "Error",
+    "noDescription": "No description",
+    "task" : "Task",
+    "bulk" : "Bulk Task with multiple helpers",
+    "helper" : "helper",
+    "helpers" : "helpers"
   },
   "validations": {
     "inValid": "Invalid email",
@@ -235,6 +241,29 @@
     "txt13": "Category",
     "txt14": "Avg Rating"
   },
+  "offerDetail": {
+    "helpersNeeded": "Helpers Needed",
+    "totalHelpers": "Total Helpers Needed",
+    "confirmed": "Confirmed",
+    "applications": "Applications",
+    "pending": "Pending",
+    "slotsAvailable": "{{count}} slots available",
+    "full": "All slots filled",
+    "confirmedStatus": "{{confirmed}} of {{total}} helpers confirmed",
+    "viewApplications": "View Applications",
+    "applied": "Applied",
+    "waitingConfirmation": "Waiting for confirmation",
+    "imAvailable": "I'm available",
+    "cannotApply": "Cannot apply",
+    "applicationSent": "Application Sent",
+    "waitForConfirmation": "Waiting for confirmation from requester",
+    "newApplication": "has applied to your request",
+    "confirmedOn": "Confirmed on",
+    "youAreConfirmed": "You are confirmed",
+    "cnf": "Confirm Applicant",
+    "slt": "slots filled",
+    "lft": "left"
+  },
   "myRequests": {
     "txt1": "My Requests",
     "txt2": "Active",
@@ -250,7 +279,12 @@
     "txt12": "Accepted request cancelled successfully.",
     "txt13": "Loading Your Requests...",
     "repostSuccess": "Request Reposted!",
-    "repostAvailable": "Your request has been reposted and is now available for other users to accept."
+    "repostAvailable": "Your request has been reposted and is now available for other users to accept.",
+    "noCompletedTasks": "No Completed Tasks",
+    "noCompletedTasksDesc": "Tasks you complete will appear here",
+    "noReviews": "No Reviews Yet",
+    "noReviewsDesc": "Reviews from task owners will appear here",
+    "view" : "View Applicants"
   },
   "postRequest": {
     "txt1": "Post Request",
@@ -268,7 +302,9 @@
     "txt13": "Edit",
     "txt14": "Post",
     "customTaskTitle": "Please specify your task type",
-    "pr": "Price"
+    "pr": "Price",
+    "numberOfWorkers": "Number of helpers needed",
+    "workersHelperText": "Select number of helpers needed (1-{{max}})"
   },
   "messages": {
     "txt1": "Messages",
@@ -382,7 +418,11 @@
     "txt1": "Profile",
     "txt2": "Edit Profile",
     "txt3": "Rating & Reviews",
-    "txt4": "Completed Tasks"
+    "txt4": "Completed Tasks",
+    "applicantProfile": "Applicant Profile",
+    "confirmApplicant": "Confirm",
+    "confirmed": "Confirmed",
+    "confirmedOn": "Confirmed on"
   },
   "editProfile": {
     "txt1": "Enter your name",
@@ -444,7 +484,12 @@
     "txt6": "Task Follow-up!",
     "txt7": "This is a reminder about your recent task posting. Please review your progress and update the status if completed.",
     "txt8": "⏰ Free Trial Ending Soon",
-    "txt9": "Your free trial ends in 4 days. Stay subscribed to maintain full access."
+    "txt9": "Your free trial ends in 4 days. Stay subscribed to maintain full access.",
+    "bulkTaskCompleted": {
+      "title": "Task Completed!",
+      "body": "The task \"{{taskName}}\" has been marked as completed by {{requesterName}}",
+      "message": "The task \"{{taskName}}\" has been marked as completed"
+    }
   },
   "modal": {
     "txt1": "Task Accepted Successfully!",
@@ -628,5 +673,86 @@
     "saveMoney": "Save 36% compared to monthly billing",
     "oneTimePayment": "One-time payment, no monthly hassle",
     "exclusiveFeatures": "Access to exclusive features"
+  },
+
+  "taskApplicants": {
+    "title": "Task Applicants",
+    "loading": "Loading task details...",
+
+    "helpersNeeded": "Helpers Needed",
+    "confirmed": "Confirmed",
+    "applicants": "Applicants",
+    "progress": "helpers confirmed",
+    "applicantsTab": "Applicants",
+    "confirmedTab": "Confirmed",
+
+    "noEmail": "No email",
+    "confirmedTime": "Confirmed",
+
+    "confirm": "Confirm",
+    "remove": "Remove",
+    "profile": "Profile",
+
+    "confirmDialog": {
+      "title": "Confirm Helper",
+      "message": "Are you sure you want to confirm {{name}} for this task?",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+
+    "removeDialog": {
+      "title": "Remove Helper",
+      "message": "Are you sure you want to remove {{name}} from confirmed helpers?",
+      "cancel": "Cancel",
+      "remove": "Remove"
+    },
+
+    "toast": {
+      "error": {
+        "taskNotFound": "Task not found",
+        "loadFailed": "Failed to load task data",
+        "confirmFailed": "Failed to confirm helper",
+        "removeFailed": "Failed to remove helper"
+      },
+      "success": {
+        "helperConfirmed": "Helper Confirmed",
+        "confirmedMessage": "{{name}} has been confirmed for your task"
+      },
+      "info": {
+        "helperRemoved": "Helper Removed",
+        "removedMessage": "{{name}} has been removed from confirmed helpers"
+      }
+    },
+
+    "empty": {
+      "applicants": "No applicants yet",
+      "confirmed": "No confirmed helpers yet"
+    },
+
+    "help": {
+      "applicants": "Tap 'Confirm' to add helpers to your team. Tap 'Profile' to view their details.",
+      "confirmed": "Tap 'Remove' to unconfirm a helper. They'll be moved back to applicants list."
+    },
+    "limitReached": {
+      "title": "Limit Reached",
+      "message": "You have already confirmed all {{count}} helpers needed for this task."
+    },
+
+    "cannotConfirm": {
+      "title": "Cannot Confirm More Helpers",
+      "message": "This task only requires {{required}} helpers. You have already confirmed {{confirmed}}."
+    },
+
+    "alreadyConfirmed": {
+      "title": "Already Confirmed",
+      "message": "{{name}} is already confirmed for this task."
+    },
+
+    "noDescription": "No description",
+    "full": "Full",
+    "spotsLeft": "{{spots}} spots left",
+    "status": "Status",
+    "allHelpersConfirmed": "All helpers confirmed! You can mark the task as completed.",
+    "allSlotsFilled": "All Slots Filled"
   }
 }

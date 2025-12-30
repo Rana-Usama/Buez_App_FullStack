@@ -5,10 +5,8 @@ import { useNavigation } from "@react-navigation/native";
 import { differenceInDays } from "date-fns";
 import * as SecureStore from "expo-secure-store";
 import DeviceInfo from "react-native-device-info";
-
 import { useAppTheme } from "../contexts/themeContext";
 import { useUser } from "../contexts/user.context";
-import { Icons } from "../config/theme";
 import { getCredentials } from "../services/Auth.service";
 import {
   getFirestore,
@@ -17,7 +15,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { FIREBASE_DB } from "../../firebaseConfig";
+
 
 const DeciderScreen = () => {
   const { theme } = useAppTheme();
@@ -150,12 +148,10 @@ const DeciderScreen = () => {
   };
 
   useEffect(() => {
-    if (!deviceId) return; // wait for deviceId
-
+    if (!deviceId) return; 
     const decideInitialRoute = async () => {
       try {
         if (userLoading) return;
-
         const creds = await getCredentials();
         const loggedOut = await SecureStore.getItemAsync("loggedOut");
         const { email } = creds || {};
@@ -211,27 +207,27 @@ const DeciderScreen = () => {
           now >= subStartDate &&
           now <= subEndDate;
 
-        // 🔥 1) Active subscription → TabNavigator (skip trial logic)
+        // Active subscription → TabNavigator (skip trial logic)
         if (isSubscribed && isWithinPaidPeriod) {
           setInitialRoute("TabNavigator");
           setIsLoading(false);
           return;
         }
 
-        // 🔥 2) Check free trial
+        //Check free trial
         let deviceUsedTrial = false;
         if (deviceId) {
           deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
         }
 
-        // 🎯 Case: New user, device not used trial → FreeTrial
+        //Case: New user, device not used trial → FreeTrial
         if (!isSubscribed && !isFreeTrial && !deviceUsedTrial) {
           setInitialRoute("FreeTrial");
           setIsLoading(false);
           return;
         }
 
-        // 🎯 Case: Active free trial (within 14 days)
+        //Case: Active free trial (within 14 days)
         let isTrialValid = false;
         if (isFreeTrial && freeTrialStartedAt?.seconds) {
           const trialStart = new Date(freeTrialStartedAt.seconds * 1000);
@@ -245,14 +241,14 @@ const DeciderScreen = () => {
           return;
         }
 
-        // 🎯 Case: Trial expired or device already used trial → Subscription
+        //Case: Trial expired or device already used trial → Subscription
         if (!isSubscribed) {
           setInitialRoute("Subscription");
           setIsLoading(false);
           return;
         }
 
-        // 💤 Fallback → OnBoarding
+        //Fallback → OnBoarding
         setInitialRoute("OnBoarding");
         setIsLoading(false);
       } catch (error) {
@@ -265,7 +261,7 @@ const DeciderScreen = () => {
     decideInitialRoute();
   }, [userData, userLoading, deviceId]);
 
-  // 🚀 Navigate once route is determined
+  //Navigate once route is determined
   useEffect(() => {
     if (!isLoading && initialRoute) {
       navigation.navigate(initialRoute);
@@ -288,7 +284,7 @@ const DeciderScreen = () => {
             styles.spinnerOuter,
             {
               borderColor: theme.primary,
-              borderBottomColor: theme.primary, // Explicitly set these
+              borderBottomColor: theme.primary,
               borderLeftColor: theme.primary,
               transform: [{ rotate: spin }, { scale: scaleValue }],
             },

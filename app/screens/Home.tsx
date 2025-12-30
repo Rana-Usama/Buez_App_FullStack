@@ -40,7 +40,6 @@ import {
   formatCurrency,
   getCurrencyInfo,
   convertCurrency,
-  getLiveExchangeRates, // Add this import
 } from "../utils/currencyChange";
 import { fetchUsersWithTaskStats } from "../services/Review.service";
 import { updateUserLocation } from "../services/User.service";
@@ -52,13 +51,13 @@ import {
   FontAwesome6,
 } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { HomeGradients } from "../config/Gradients";
 
 const { width } = Dimensions.get("window");
 
 function Home({ navigation }) {
   const { t } = useTranslation();
   const { userData: user } = useUser();
-  const profileImgUrl = user?.profileImage || "";
   const dispatch = useDispatch();
   const { location: currentLocation, getCurrentLocation } = useLocation();
   const { theme } = useAppTheme();
@@ -108,7 +107,6 @@ function Home({ navigation }) {
     if (currentLocation && user?.userId) {
       updateUserLocationInDB(currentLocation);
     }
-    // getLiveExchangeRates()
   }, [currentLocation, user?.userId]);
 
   const translateTask = async (task) => ({
@@ -212,7 +210,7 @@ function Home({ navigation }) {
     setSearchQuery(text);
   };
 
-  // Tasks To Dispaly
+  //---------------- Tasks To Dispaly
   const displayTasks = allTasks.filter((task) => {
     // Category filter
     if (filterMap[activeFilter] !== "All") {
@@ -253,18 +251,13 @@ function Home({ navigation }) {
   // Top Rated Users
   const [users, setUsers] = useState([]);
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchUsers = async () => {
-        const res = await fetchUsersWithTaskStats();
-        setUsers(res);
-      };
-      fetchUsers();
-      return () => {
-        setUsers([]);
-      };
-    }, [])
-  );
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const res = await fetchUsersWithTaskStats();
+      setUsers(res);
+    };
+    fetchUsers();
+  }, []);
 
   // Compensation Conversion - Only use currentLocation
   const getConvertedCompensation = (item: any) => {
@@ -293,105 +286,6 @@ function Home({ navigation }) {
         : `$${parseFloat(item.monitarily) || 0}`;
     }
   };
-
-  const users2 = [
-    {
-      id: 1,
-      name: "Alex Johnson",
-      username: "alexj",
-      profileImage: "https://randomuser.me/api/portraits/men/32.jpg",
-      category: "Top Rated",
-      activeCount: 12,
-      completedCount: 47,
-      isOnline: true,
-      rating: 4.9,
-      description: "Expert in home services with 5 years experience",
-    },
-    {
-      id: 2,
-      name: "Sarah Miller",
-      username: "sarahm",
-      profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
-      category: "Rising Talent",
-      activeCount: 8,
-      completedCount: 23,
-      isOnline: false,
-      rating: 4.7,
-      description: "Quick learner with excellent customer service",
-    },
-    {
-      id: 3,
-      name: "David Chen",
-      username: "davidc",
-      profileImage: "https://randomuser.me/api/portraits/men/67.jpg",
-      category: "Beginner",
-      activeCount: 3,
-      completedCount: 5,
-      isOnline: true,
-      rating: 4.5,
-      description: "New but highly motivated professional",
-    },
-    {
-      id: 4,
-      name: "Emily Wilson",
-      username: "emilyw",
-      profileImage: "https://randomuser.me/api/portraits/women/68.jpg",
-      category: "Top Rated",
-      activeCount: 15,
-      completedCount: 89,
-      isOnline: true,
-      rating: 4.9,
-      description: "Top performer with 100+ completed tasks",
-    },
-    {
-      id: 5,
-      name: "Michael Brown",
-      username: "michaelb",
-      profileImage: "https://randomuser.me/api/portraits/men/75.jpg",
-      category: "Rising Talent",
-      activeCount: 6,
-      completedCount: 18,
-      isOnline: false,
-      rating: 4.6,
-      description: "Specializes in gardening and outdoor services",
-    },
-    {
-      id: 6,
-      name: "Jessica Lee",
-      username: "jessical",
-      profileImage: "https://randomuser.me/api/portraits/women/26.jpg",
-      category: "Beginner",
-      activeCount: 2,
-      completedCount: 4,
-      isOnline: true,
-      rating: 4.4,
-      description: "Dedicated and reliable service provider",
-    },
-    {
-      id: 7,
-      name: "Daniel Martinez",
-      username: "danielm",
-      profileImage: "https://randomuser.me/api/portraits/men/81.jpg",
-      category: "Top Rated",
-      activeCount: 10,
-      completedCount: 65,
-      isOnline: false,
-      rating: 4.8,
-      description: "Professional mover with specialized equipment",
-    },
-    {
-      id: 8,
-      name: "Sophia Garcia",
-      username: "sophiag",
-      profileImage: "https://randomuser.me/api/portraits/women/33.jpg",
-      category: "Rising Talent",
-      activeCount: 7,
-      completedCount: 21,
-      isOnline: true,
-      rating: 4.7,
-      description: "Creative problem solver and organizer",
-    },
-  ];
 
   return (
     <View style={{ backgroundColor: theme.white, flex: 1 }}>
@@ -468,7 +362,6 @@ function Home({ navigation }) {
               contentContainerStyle={styles.filterButtonsContainer}
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => {
-                // Get icon based on original English category (use filterMap to map back)
                 const getIcon = (filterText) => {
                   const originalCategory = filterMap[filterText] || filterText;
 
@@ -620,31 +513,36 @@ function Home({ navigation }) {
                     contentContainerStyle={styles.topRatedContainer}
                     showsHorizontalScrollIndicator={false}
                     renderItem={({ item, index }) => {
-                      const getGradientColors = () => {
-                        switch (item.category) {
+                      const getCardGradient = (
+                        category: string,
+                        dark: boolean
+                      ) => {
+                        switch (category) {
                           case "Top Rated":
-                            return ["#e2ce5dff", "#efeaceff", "#d39345ff"];
-                          case "Rising Talent":
-                            return ["#6A11CB", "#cdafecff", "#A8CABA"]; // Blue/Purple Mesh
-                          case "Beginner":
-                            return ["#00B09B", "#bceee8ff", "#50C878"]; // Green Mesh
-                          default:
-                            return ["#7c8cdd", "#b4bde9ff", "#4c669f"];
-                        }
-                      };
+                            return dark
+                              ? HomeGradients.topRatedDark
+                              : HomeGradients.topRated;
 
-                      const getGradientColors2 = () => {
-                        switch (item.category) {
-                          case "Top Rated":
-                            return ["#e2ce5dff", "#1b1919ff", "#d39345ff"];
                           case "Rising Talent":
-                            return ["#6A11CB", "#1b1919ff", "#A8CABA"]; // Blue/Purple Mesh
+                            return dark
+                              ? HomeGradients.risingTalentDark
+                              : HomeGradients.risingTalent;
+
                           case "Beginner":
-                            return ["#00B09B", "#1b1919ff", "#50C878"]; // Green Mesh
+                            return dark
+                              ? HomeGradients.beginnerDark
+                              : HomeGradients.beginner;
+
                           default:
-                            return ["#7c8cdd", "#1b1919ff", "#4c669f"];
+                            return dark
+                              ? HomeGradients.defaultCardDark
+                              : HomeGradients.defaultCard;
                         }
                       };
+                      const cardGradient = getCardGradient(
+                        item.category,
+                        theme.mode === "dark"
+                      );
 
                       const getCategoryIcon = () => {
                         const icons = {
@@ -668,29 +566,24 @@ function Home({ navigation }) {
                         );
                       };
 
-                      const gradientColors = getGradientColors();
-                      const gradientColors2 = getGradientColors2();
-
                       return (
                         <TouchableOpacity
                           activeOpacity={0.9}
                           onPress={() =>
                             navigation.navigate("TopRatedUserProfile", {
                               user: item,
+                              applier: false,
+                              postRequest: {},
                             })
                           }
                           style={[
                             styles.cardWrapper,
-                            { borderColor: gradientColors[0] },
+                            { borderColor: cardGradient[0] },
                           ]}
                         >
                           {/* BASE GRADIENT LAYER */}
                           <LinearGradient
-                            colors={
-                              theme.mode === "dark"
-                                ? gradientColors2
-                                : gradientColors
-                            }
+                            colors={cardGradient}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
                             style={styles.topRatedCard}
@@ -765,6 +658,8 @@ function Home({ navigation }) {
                                 onPress={() =>
                                   navigation.navigate("TopRatedUserProfile", {
                                     user: item,
+                                    applier: false,
+                                    postRequest: {},
                                   })
                                 }
                               >
@@ -919,25 +814,6 @@ function Home({ navigation }) {
                           />
                         )}
                       />
-
-                      {/* {item?.imageUrls?.length > 1 && (
-                    <View style={styles.dotsContainer}>
-                      {item.imageUrls.map((_, imageIndex) => (
-                        <View
-                          key={imageIndex}
-                          style={[
-                            styles.dot,
-                            {
-                              backgroundColor:
-                                imageIndex === activeIndices[index]
-                                  ? theme.primary
-                                  : theme.stroke,
-                            },
-                          ]}
-                        />
-                      ))}
-                    </View>
-                  )} */}
 
                       <View style={styles.infoWrapper}>
                         <View style={styles.cartInfoContainer}>

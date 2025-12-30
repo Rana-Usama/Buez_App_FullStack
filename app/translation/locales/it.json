@@ -18,7 +18,13 @@
     "gotIt": "Ho capito",
     "you": "Tu",
     "version": "Versione",
-    "rights": "BUEZ. Tutti i diritti riservati."
+    "rights": "BUEZ. Tutti i diritti riservati.",
+    "error": "Errore",
+    "noDescription": "Nessuna descrizione",
+    "task": "Attività",
+"bulk": "Attività collettiva con più aiutanti",
+"helper": "aiutante",
+"helpers": "aiutanti"
   },
   "validations": {
     "inValid": "Email non valida",
@@ -227,6 +233,29 @@
     "txt13": "Categoria",
     "txt14": "Valutazione media"
   },
+  "offerDetail": {
+    "helpersNeeded": "Aiuto richiesto",
+    "totalHelpers": "Totale aiuto richiesto",
+    "confirmed": "Confermato",
+    "applications": "Candidature",
+    "pending": "In attesa",
+    "slotsAvailable": "{{count}} posti disponibili",
+    "full": "Tutti i posti sono occupati",
+    "confirmedStatus": "{{confirmed}} di {{total}} aiutanti confermati",
+    "viewApplications": "Vedi candidature",
+    "applied": "Candidato",
+    "waitingConfirmation": "In attesa di conferma",
+    "imAvailable": "Sono disponibile",
+    "cannotApply": "Non posso candidarmi",
+    "applicationSent": "Candidatura inviata",
+    "waitForConfirmation": "In attesa di conferma dal richiedente",
+    "newApplication": "ha fatto domanda per la tua richiesta",
+    "confirmedOn": "Confermato il",
+    "youAreConfirmed": "Sei confermato",
+    "cnf": "Conferma candidato",
+    "slt": "posti occupati",
+    "lft": "rimanenti"
+  },
   "myRequests": {
     "txt1": "Le mie richieste",
     "txt2": "Attive",
@@ -242,7 +271,13 @@
     "txt12": "Richiesta accettata annullata con successo.",
     "txt13": "Caricamento delle tue richieste...",
     "repostSuccess": "Richiesta ripubblicata!",
-    "repostAvailable": "La tua richiesta è stata ripubblicata ed è ora disponibile per essere accettata da altri utenti."
+    "repostAvailable": "La tua richiesta è stata ripubblicata ed è ora disponibile per essere accettata da altri utenti.",
+    "noCompletedTasks": "Nessun compito completato",
+    "noCompletedTasksDesc": "I compiti che completi appariranno qui",
+    "noReviews": "Nessuna recensione ancora",
+    "noReviewsDesc": "Le recensioni dei proprietari dei compiti appariranno qui",
+    "view": "Visualizza candidati"
+
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",
@@ -260,7 +295,9 @@
     "txt13": "Modifica",
     "txt14": "Pubblica",
     "customTaskTitle": "Specifica il tipo di attività",
-    "pr": "Prezzo"
+    "pr": "Prezzo",
+    "numberOfWorkers": "Numero di aiutanti necessari",
+    "workersHelperText": "Seleziona il numero di aiutanti necessari (1-{{max}})"
   },
   "messages": {
     "txt1": "Messaggi",
@@ -374,7 +411,11 @@
     "txt1": "Profilo",
     "txt2": "Modifica profilo",
     "txt3": "Valutazioni e recensioni",
-    "txt4": "Attività completate"
+    "txt4": "Attività completate",
+    "applicantProfile": "Profilo del candidato",
+    "confirmApplicant": "Confermare",
+    "confirmed": "Confermato",
+    "confirmedOn": "Confermato il"
   },
   "editProfile": {
     "txt1": "Inserisci il tuo nome",
@@ -620,5 +661,85 @@
     "saveMoney": "Risparmia il 36% rispetto al mensile",
     "oneTimePayment": "Pagamento una tantum, nessuna seccatura mensile",
     "exclusiveFeatures": "Accesso a funzionalità esclusive"
+  },
+  "taskApplicants": {
+    "title": "Candidati per l'attività",
+    "loading": "Caricamento dettagli attività...",
+
+    "helpersNeeded": "Aiutanti necessari",
+    "confirmed": "Confermati",
+    "applicants": "Candidati",
+    "progress": "aiutanti confermati",
+    "applicantsTab": "Candidati",
+    "confirmedTab": "Confermati",
+
+    "noEmail": "Nessuna email",
+    "confirmedTime": "Confermato",
+
+    "confirm": "Conferma",
+    "remove": "Rimuovi",
+    "profile": "Profilo",
+
+    "confirmDialog": {
+      "title": "Conferma aiutante",
+      "message": "Sei sicuro di voler confermare {{name}} per questa attività?",
+      "cancel": "Annulla",
+      "confirm": "Conferma"
+    },
+
+    "removeDialog": {
+      "title": "Rimuovi aiutante",
+      "message": "Sei sicuro di voler rimuovere {{name}} dagli aiutanti confermati?",
+      "cancel": "Annulla",
+      "remove": "Rimuovi"
+    },
+
+    "toast": {
+      "error": {
+        "taskNotFound": "Attività non trovata",
+        "loadFailed": "Caricamento dati attività fallito",
+        "confirmFailed": "Conferma aiutante fallita",
+        "removeFailed": "Rimozione aiutante fallita"
+      },
+      "success": {
+        "helperConfirmed": "Aiutante confermato",
+        "confirmedMessage": "{{name}} è stato confermato per la tua attività"
+      },
+      "info": {
+        "helperRemoved": "Aiutante rimosso",
+        "removedMessage": "{{name}} è stato rimosso dagli aiutanti confermati"
+      }
+    },
+
+    "empty": {
+      "applicants": "Nessun candidato ancora",
+      "confirmed": "Nessun aiutante confermato ancora"
+    },
+
+    "help": {
+      "applicants": "Tocca 'Conferma' per aggiungere aiutanti al tuo team. Tocca 'Profilo' per vedere i loro dettagli.",
+      "confirmed": "Tocca 'Rimuovi' per annullare la conferma di un aiutante. Tornerà nella lista dei candidati."
+    },
+    "limitReached": {
+      "title": "Limite raggiunto",
+      "message": "Hai già confermato tutti i {{count}} aiutanti necessari per questa attività."
+    },
+
+    "cannotConfirm": {
+      "title": "Non puoi confermare più aiutanti",
+      "message": "Questa attività richiede solo {{required}} aiutanti. Ne hai già confermati {{confirmed}}."
+    },
+
+    "alreadyConfirmed": {
+      "title": "Già confermato",
+      "message": "{{name}} è già confermato per questa attività."
+    },
+
+    "noDescription": "Nessuna descrizione",
+    "full": "Completo",
+    "spotsLeft": "Ancora {{spots}} posti liberi",
+    "status": "Stato",
+    "allHelpersConfirmed": "Tutti gli aiutanti confermati! Puoi segnare l'attività come completata.",
+    "allSlotsFilled": "Tutti i posti occupati"
   }
 }

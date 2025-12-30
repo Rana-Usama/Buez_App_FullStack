@@ -16,7 +16,6 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { createNewChat } from "../services/Chat.service";
-import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { FIREBASE_DB } from "../../firebaseConfig";
@@ -79,6 +78,13 @@ interface Translations {
   pullToRefresh: string;
   taskCompleted: string;
   viewTask: string;
+  bulkApplication: string;
+  bulkConfirmation: string;
+  viewApplications: string;
+  viewPost: string;
+  helpersNeeded: string;
+  bulkTaskCompleted: string;
+  bulkTaskCompletedMessage: string;
 }
 
 export default function Notifications({ navigation }) {
@@ -99,6 +105,13 @@ export default function Notifications({ navigation }) {
     pullToRefresh: "",
     taskCompleted: "",
     viewTask: "",
+    bulkApplication: "",
+    bulkConfirmation: "",
+    viewApplications: "",
+    viewPost: "",
+    helpersNeeded: "",
+    bulkTaskCompleted: "",
+    bulkTaskCompletedMessage: "",
   });
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -120,11 +133,9 @@ export default function Notifications({ navigation }) {
 
   useEffect(() => {
     const init = async () => {
-      setBusy(true); // busy starts true
-      // 1️⃣ Get language
+      setBusy(true);
       const l = await getTargetLanguage();
       setLang(l);
-      // 2️⃣ Translation
       const phrases = {
         today: "Today",
         yesterday: "Yesterday",
@@ -141,6 +152,13 @@ export default function Notifications({ navigation }) {
         pullToRefresh: "Pull to refresh",
         taskCompleted: "marked your accepted task as completed!",
         viewTask: "View Task",
+        bulkApplication: "has applied to your",
+        bulkConfirmation: "You have been confirmed for",
+        viewApplications: "View Applicant",
+        viewPost: "View Post",
+        helpersNeeded: "Helpers needed",
+        bulkTaskCompleted: "marked the bulk task as completed!",
+        bulkTaskCompletedMessage: "All confirmed helpers have been notified",
       };
 
       const translatedVals = await Promise.all(
@@ -154,11 +172,8 @@ export default function Notifications({ navigation }) {
         {} as Translations
       );
       setTr(mapped);
-
-      // 3️⃣ Fetch notifications
       await fetchNotifications();
-
-      setBusy(false); // busy ends only after both translation and notifications are done
+      setBusy(false); 
     };
 
     init();
@@ -287,10 +302,34 @@ export default function Notifications({ navigation }) {
         return (
           <Ionicons name="star" size={RFPercentage(2.2)} color={iconColor} />
         );
-      case "task_completion": // Add this case
+      case "task_completion":
         return (
           <Ionicons
             name="checkmark-done-circle"
+            size={RFPercentage(2.2)}
+            color={iconColor}
+          />
+        );
+      case "bulk_task_completion":
+        return (
+          <Ionicons
+            name="checkmark-done-circle"
+            size={RFPercentage(2.2)}
+            color={iconColor}
+          />
+        );
+      case "bulk_request_application":
+        return (
+          <Ionicons
+            name="person-add"
+            size={RFPercentage(2.2)}
+            color={iconColor}
+          />
+        );
+      case "bulk_request_confirmation":
+        return (
+          <Ionicons
+            name="checkmark-circle-outline"
             size={RFPercentage(2.2)}
             color={iconColor}
           />
@@ -408,20 +447,39 @@ export default function Notifications({ navigation }) {
 
     let mainText = "";
     let previewText = "";
+    let actionType = "";
+    let showHelpersInfo = false;
 
     if (item.type === "task_acceptance") {
       mainText = `${senderName} ${tr.accepted}`;
       previewText = shortText;
+      actionType = "chat";
     } else if (item.type === "review_added") {
       mainText = `${senderName} ${tr.leftReview}`;
       previewText = shortText;
+      actionType = "view_reviews";
     } else if (item.type === "task_completion") {
-      // Add this case
       mainText = `${senderName} ${tr.taskCompleted}`;
       previewText = shortText;
+      actionType = "view_completed";
+    } else if (item.type === "bulk_task_completion") {
+      mainText = `${senderName} ${tr.bulkTaskCompleted || "marked the bulk task as completed!"}`;
+      previewText = item.message || tr.bulkTaskCompletedMessage || "All confirmed helpers have been notified";
+      actionType = "view_completed";
+      showHelpersInfo = true;
+    } else if (item.type === "bulk_request_application") {
+      const taskTitle = item.task?.description;
+      mainText = `${senderName} ${tr.bulkApplication} ${item.task?.title || item?.task?.customTaskTitle} task request`;
+      previewText = taskTitle;
+      actionType = "view_applications";
+    } else if (item.type === "bulk_request_confirmation") {
+      mainText = `${tr.bulkConfirmation} ${item.task?.title || item?.task?.customTaskTitle} Task`;
+      previewText = item.message || "";
+      actionType = "view_post";
     } else {
       mainText = `${senderName} ${tr.sentNotification}`;
       previewText = shortText;
+      actionType = "chat";
     }
 
     const postedTime = new Date(item.timestamp).toLocaleTimeString(lang, {
@@ -498,25 +556,13 @@ export default function Notifications({ navigation }) {
                       color: !item.isRead ? theme.primary : theme.heading,
                       fontFamily: !item.isRead
                         ? "Poppins_600SemiBold"
-                        : "Poppins_500Medium",
+                        : "Poppins_400Regular",
                     },
                   ]}
                   numberOfLines={2}
                 >
                   {mainText}
                 </Text>
-
-                {!isExpanded && !!previewText && (
-                  <Text
-                    style={[
-                      styles.sub,
-                      { marginTop: RFPercentage(0.3), color: theme.grey },
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {previewText}
-                  </Text>
-                )}
               </View>
 
               <View style={styles.timeContainer}>
@@ -574,14 +620,50 @@ export default function Notifications({ navigation }) {
                       </Text>
                     </View>
                   ) : (
-                    <Text
-                      style={[styles.description, { color: theme.darkGrey }]}
-                      numberOfLines={1}
-                    >
-                      {translatedText.length > 50
-                        ? `${translatedText.substring(0, 50)}…`
-                        : translatedText}
-                    </Text>
+                    <>
+                      <Text
+                        style={[styles.description, { color: theme.darkGrey }]}
+                        numberOfLines={item.type === "bulk_task_completion" ? 3 : 1}
+                      >
+                        {item.type === "bulk_task_completion" ? (
+                          <>
+                            {item.message || tr.bulkTaskCompletedMessage || "All confirmed helpers have been notified"}
+                            {"\n\n"}
+                            <Text style={{ fontFamily: "Poppins_600SemiBold" }}>
+                              {t("common.task")} {item.task?.taskType || item.task?.description || "Unknown task"}
+                            </Text>
+                          </>
+                        ) : (
+                          translatedText.length > 50
+                            ? `${translatedText.substring(0, 50)}…`
+                            : translatedText
+                        )}
+                      </Text>
+
+                      {/* Show bulk task helpers info */}
+                      {showHelpersInfo && item.task?.isBulkRequest && (
+                        <View style={[
+                          styles.bulkTaskInfo,
+                          { backgroundColor: Colors.primary + "10" }
+                        ]}>
+                          <View style={styles.bulkInfoRow}>
+                            <Ionicons
+                              name="people"
+                              size={RFPercentage(1.4)}
+                              color={Colors.primary}
+                            />
+                            <Text style={[styles.bulkInfoText, { color: Colors.primary }]}>
+                              {t("common.bulk")}
+                            </Text>
+                          </View>
+                          {item.task?.totalHelpers > 0 && (
+                            <Text style={[styles.bulkInfoDetail, { color: theme.darkGrey }]}>
+                              {item.task?.totalHelpers} {item.task?.totalHelpers === 1 ? t("common.helper") : t("common.helpers")} {t("offerDetail.confirmed")}
+                            </Text>
+                          )}
+                        </View>
+                      )}
+                    </>
                   )}
 
                   <View style={styles.footer}>
@@ -599,9 +681,37 @@ export default function Notifications({ navigation }) {
                       onPress={() => {
                         if (item.type === "review_added") {
                           navigation.navigate("Reviews");
-                        } else if (item.type === "task_completion") {
-                          // Navigate to completed tasks or task details
-                          navigation.navigate("CompletedTasks");
+                        } else if (item.type === "task_completion" || item.type === "bulk_task_completion") {
+                          navigation.navigate("CompletedTasks", {
+                            taskId: item.task?.taskId,
+                            isBulk: item.type === "bulk_task_completion",
+                          });
+                        } else if (item.type === "bulk_request_application") {
+                          navigation.navigate("TopRatedUserProfile", {
+                            user: item.sender,
+                            applier: true,
+                            postRequest: item.task || {
+                              id: item.task?.id,
+                              taskType: item.task?.taskType,
+                              description: item.task?.description,
+                              numberOfWorkers: item.task?.numberOfWorkers || 1,
+                              confirmedWorkers:
+                                item.task?.confirmedWorkers || [],
+                              appliedWorkers: item.task?.appliedWorkers || [],
+                              compensationType: item.task?.compensationType,
+                              address: item.task?.address,
+                              userId: item.receiver?.userId,
+                              user: item.receiver,
+                              isBulkRequest: true,
+                            },
+                          });
+                        } else if (item.type === "bulk_request_confirmation") {
+                          navigation.navigate("MainApp", {
+                            screen: "MainTabs",
+                            params: {
+                              screen: t("bottomTab.txt1"),
+                            },
+                          });
                         } else {
                           handleStartChat(item.sender);
                         }
@@ -618,7 +728,7 @@ export default function Notifications({ navigation }) {
                             {tr.view || "View"}
                           </Text>
                         </>
-                      ) : item.type === "task_completion" ? (
+                      ) : item.type === "task_completion" || item.type === "bulk_task_completion" ? (
                         <>
                           <Feather
                             name="check-circle"
@@ -627,6 +737,28 @@ export default function Notifications({ navigation }) {
                           />
                           <Text style={styles.actionButtonText}>
                             {tr.viewTask || "View Task"}
+                          </Text>
+                        </>
+                      ) : item.type === "bulk_request_application" ? (
+                        <>
+                          <Ionicons
+                            name="people"
+                            size={RFPercentage(1.8)}
+                            color={Colors.primary}
+                          />
+                          <Text style={styles.actionButtonText}>
+                            {tr.viewApplications || "View Applications"}
+                          </Text>
+                        </>
+                      ) : item.type === "bulk_request_confirmation" ? (
+                        <>
+                          <Feather
+                            name="external-link"
+                            size={RFPercentage(1.8)}
+                            color={Colors.primary}
+                          />
+                          <Text style={styles.actionButtonText}>
+                            {tr.viewPost || "View Post"}
                           </Text>
                         </>
                       ) : (
@@ -677,12 +809,6 @@ export default function Notifications({ navigation }) {
             size={RFPercentage(0.6)}
             color={theme.primary}
           />
-          {/* <MaterialIcons
-            name="tips-and-updates"
-            size={RFPercentage(2)}
-            color={theme.primary}
-          /> */}
-
           <Text style={[styles.sectionHeaderText, { color: theme.primary }]}>
             {show}
           </Text>
@@ -819,7 +945,7 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
   },
   headerLeft: {
     position: "relative",
@@ -847,7 +973,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
-    lineHeight: RFPercentage(2.2),
+    lineHeight: RFPercentage(2),
   },
   sub: {
     color: Colors.grey,
@@ -914,6 +1040,27 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2),
     marginBottom: RFPercentage(1),
+  },
+  bulkTaskInfo: {
+    marginVertical: RFPercentage(0.5),
+    padding: RFPercentage(1),
+    borderRadius: RFPercentage(0.8),
+    marginBottom: RFPercentage(1),
+  },
+  bulkInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.3),
+  },
+  bulkInfoText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
+    marginLeft: RFPercentage(0.5),
+  },
+  bulkInfoDetail: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular",
+    marginLeft: RFPercentage(1.8),
   },
   footer: {
     flexDirection: "row",

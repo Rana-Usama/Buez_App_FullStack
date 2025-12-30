@@ -25,7 +25,8 @@ const Colors: { [key: string]: string } = {
   star : "#F3CF2C",
   success2 : "#4557B0",
   switch : "rgb(224, 224, 227)",
-  white5 : "rgba(218, 218, 218, 1)"
+  white5 : "rgba(218, 218, 218, 1)",
+  
 };
 
 export default Colors;

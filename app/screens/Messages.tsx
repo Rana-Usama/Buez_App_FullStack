@@ -27,7 +27,6 @@ import {
   doc,
 } from "firebase/firestore";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
 import Nav from "../components/common/Nav";
 import { FIREBASE_DB } from "../../firebaseConfig";
@@ -39,9 +38,8 @@ import { useExitAppOnBack } from "../utils/appBack";
 import { useAppTheme } from "../contexts/themeContext";
 import { formatChatTimestamp } from "../services/Shared.service";
 import { cachedTranslate } from "../utils/cachedTranslations";
-import { Feather, MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 
-const { width } = Dimensions.get("window");
 
 function Messages({ navigation }) {
   const { t } = useTranslation();
@@ -56,7 +54,6 @@ function Messages({ navigation }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState(t("messages.txt2"));
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(20))[0];
   const pageSize = 10;
@@ -84,14 +81,6 @@ function Messages({ navigation }) {
     return () => unsubscribe && unsubscribe();
   }, []);
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-  };
-
-  // Handle search close
-  const handleSearchClose = () => {
-    setSearchQuery("");
-  };
 
   const getChatData = async (d: any) => {
     const chatData = d.data();
@@ -295,14 +284,6 @@ function Messages({ navigation }) {
                   : Icons.dp
               }
             />
-            {item.user?.isOnline && (
-              <View
-                style={[
-                  styles.onlineIndicator,
-                  { backgroundColor: theme.success },
-                ]}
-              />
-            )}
           </View>
 
           {/* Chat Content */}
@@ -379,20 +360,7 @@ function Messages({ navigation }) {
         chat.lastMessage &&
         chat.lastMessage.text &&
         chat.lastMessage.text.trim() !== ""
-    );
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      validChats = validChats.filter(
-        (chat) =>
-          chat.user?.userName
-            ?.toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          chat.lastMessage?.text
-            ?.toLowerCase()
-            .includes(searchQuery.toLowerCase())
-      );
-    }
+    );   
 
     // Apply unread filter
     if (activeFilter === t("messages.txt3")) {
@@ -402,7 +370,7 @@ function Messages({ navigation }) {
     }
 
     return validChats;
-  }, [chats, activeFilter, searchQuery]);
+  }, [chats, activeFilter]);
 
   const EmptyState = () => (
     <View style={styles.emptyContainer}>

@@ -54,6 +54,7 @@ import AddReviewToAccepter from "../screens/AddReviewToAccepter";
 import UpgradePlan from "../screens/UpgradePlan";
 // Import the Drawer Navigator
 import DrawerNavigator from "./BottomNavigator";
+import TaskApplicantsScreen from "../screens/TaskApplicantsScreen";
 
 const Stack = createStackNavigator();
 
@@ -100,6 +101,7 @@ const StackNavigator = () => {
         <Stack.Screen name="OTPInput" component={OTPInput} />
         <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
         <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
+        <Stack.Screen name="TaskApplicantsScreen" component={TaskApplicantsScreen} />
 
         {/* App flow - Use Drawer as main navigator */}
         <Stack.Screen name="MainApp" component={DrawerNavigator} />
