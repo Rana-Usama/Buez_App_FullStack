@@ -80,6 +80,7 @@ interface Translations {
   viewTask: string;
   bulkApplication: string;
   bulkConfirmation: string;
+  bulkview : string;
   viewApplications: string;
   viewPost: string;
   helpersNeeded: string;
@@ -107,6 +108,7 @@ export default function Notifications({ navigation }) {
     viewTask: "",
     bulkApplication: "",
     bulkConfirmation: "",
+    bulkview:"",
     viewApplications: "",
     viewPost: "",
     helpersNeeded: "",
@@ -154,6 +156,7 @@ export default function Notifications({ navigation }) {
         viewTask: "View Task",
         bulkApplication: "has applied to your",
         bulkConfirmation: "You have been confirmed for",
+        bulkview : "You can view the task in My Req Accepted tab",
         viewApplications: "View Applicant",
         viewPost: "View Post",
         helpersNeeded: "Helpers needed",
@@ -473,7 +476,7 @@ export default function Notifications({ navigation }) {
       previewText = taskTitle;
       actionType = "view_applications";
     } else if (item.type === "bulk_request_confirmation") {
-      mainText = `${tr.bulkConfirmation} ${item.task?.title || item?.task?.customTaskTitle} Task`;
+      mainText = `${tr.bulkConfirmation} ${item.task?.title || item?.task?.customTaskTitle} Task, ${tr.bulkview}`;
       previewText = item.message || "";
       actionType = "view_post";
     } else {
@@ -559,7 +562,7 @@ export default function Notifications({ navigation }) {
                         : "Poppins_400Regular",
                     },
                   ]}
-                  numberOfLines={2}
+                  numberOfLines={3}
                 >
                   {mainText}
                 </Text>

@@ -798,7 +798,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="remove"
                       size={RFPercentage(2)}
-                      color={theme.white}
+                      color={theme.pureWhite}
                     />
                   </TouchableOpacity>
 
@@ -841,7 +841,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="add"
                       size={RFPercentage(2)}
-                      color={theme.white}
+                      color={theme.pureWhite}
                     />
                   </TouchableOpacity>
                 </View>

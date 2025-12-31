@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 
   badgeText: { fontSize: 9, fontFamily: "Poppins_700Bold" },
-  memberSince: { fontSize: 11, fontFamily: "Poppins_400Regular", marginTop: 2 },
+  memberSince: { fontSize: 11, fontFamily: "Poppins_400Regular", marginTop: 5 },
 
   statsIsland: {
     flexDirection: "row",

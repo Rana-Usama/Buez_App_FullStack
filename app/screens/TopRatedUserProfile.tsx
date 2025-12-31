@@ -820,11 +820,10 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   color={theme.grey}
                 />
                 <Text style={[styles.emptyTitle, { color: theme.heading }]}>
-                  {t("myRequests.noCompletedTasks") || "No Completed Tasks"}
+                  {t("myRequests.noCompletedTasks")}
                 </Text>
                 <Text style={[styles.emptySubtitle, { color: theme.grey }]}>
-                  {t("myRequests.noCompletedTasksDesc") ||
-                    "Tasks you complete will appear here"}
+                  {t("myRequests.noCompletedTasksDesc")}
                 </Text>
               </View>
             )
@@ -878,11 +877,10 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 color={theme.grey}
               />
               <Text style={[styles.emptyTitle, { color: theme.heading }]}>
-                {t("myRequests.noReviews") || "No Reviews Yet"}
+                {t("myRequests.noReviews")}
               </Text>
               <Text style={[styles.emptySubtitle, { color: theme.grey }]}>
-                {t("myRequests.noReviewsDesc") ||
-                  "Reviews from task owners will appear here"}
+                {t("myRequests.noReviewsDesc") }
               </Text>
             </View>
           )}

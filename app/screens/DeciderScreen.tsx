@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, View, StatusBar, Animated, Easing } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { 
+  StyleSheet, 
+  View, 
+  StatusBar, 
+  Animated, 
+  Easing,
+  Platform 
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
 import { differenceInDays } from "date-fns";
@@ -16,29 +23,37 @@ import {
   getDocs,
 } from "firebase/firestore";
 
-
 const DeciderScreen = () => {
   const { theme } = useAppTheme();
   const navigation = useNavigation<any>();
   const { userData, loading: userLoading } = useUser();
 
-  const [initialRoute, setInitialRoute] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [deviceId, setDeviceId] = useState("");
+  const hasNavigated = useRef(false); // Prevent multiple navigations
 
   // Animated values
-  const [spinValue] = useState(new Animated.Value(0));
-  const [scaleValue] = useState(new Animated.Value(0.8));
-  const [dotOpacity1] = useState(new Animated.Value(0.3));
-  const [dotOpacity2] = useState(new Animated.Value(0.3));
-  const [dotOpacity3] = useState(new Animated.Value(0.3));
+  const outerSpinValue = useRef(new Animated.Value(0)).current;
+  const innerSpinValue = useRef(new Animated.Value(0)).current;
+  const scaleValue = useRef(new Animated.Value(0.8)).current;
+  const dotOpacity1 = useRef(new Animated.Value(0.3)).current;
+  const dotOpacity2 = useRef(new Animated.Value(0.3)).current;
+  const dotOpacity3 = useRef(new Animated.Value(0.3)).current;
 
   const db = getFirestore();
 
-  // Spinning animation for the loader
+  // Spinning animation
   useEffect(() => {
-    const spinAnimation = Animated.loop(
-      Animated.timing(spinValue, {
+    const outerSpinAnimation = Animated.loop(
+      Animated.timing(outerSpinValue, {
+        toValue: 1,
+        duration: 2000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+
+    const innerSpinAnimation = Animated.loop(
+      Animated.timing(innerSpinValue, {
         toValue: 1,
         duration: 1500,
         easing: Easing.linear,
@@ -50,75 +65,87 @@ const DeciderScreen = () => {
       Animated.sequence([
         Animated.timing(scaleValue, {
           toValue: 1,
-          duration: 800,
+          duration: 1000,
           easing: Easing.ease,
           useNativeDriver: true,
         }),
         Animated.timing(scaleValue, {
           toValue: 0.8,
-          duration: 800,
+          duration: 1000,
           easing: Easing.ease,
           useNativeDriver: true,
         }),
       ])
     );
 
-    // Sequential dot animation for "Loading..."
     const dotAnimation = Animated.loop(
-      Animated.stagger(200, [
+      Animated.stagger(300, [
         Animated.sequence([
           Animated.timing(dotOpacity1, {
             toValue: 1,
-            duration: 300,
+            duration: 400,
             useNativeDriver: true,
           }),
           Animated.timing(dotOpacity1, {
             toValue: 0.3,
-            duration: 300,
+            duration: 400,
             useNativeDriver: true,
           }),
         ]),
         Animated.sequence([
           Animated.timing(dotOpacity2, {
             toValue: 1,
-            duration: 300,
+            duration: 400,
             useNativeDriver: true,
           }),
           Animated.timing(dotOpacity2, {
             toValue: 0.3,
-            duration: 300,
+            duration: 400,
             useNativeDriver: true,
           }),
         ]),
         Animated.sequence([
           Animated.timing(dotOpacity3, {
             toValue: 1,
-            duration: 300,
+            duration: 400,
             useNativeDriver: true,
           }),
           Animated.timing(dotOpacity3, {
             toValue: 0.3,
-            duration: 300,
+            duration: 400,
             useNativeDriver: true,
           }),
         ]),
       ])
     );
 
-    spinAnimation.start();
+    outerSpinAnimation.start();
+    innerSpinAnimation.start();
     scaleAnimation.start();
     dotAnimation.start();
 
     return () => {
-      spinAnimation.stop();
+      outerSpinAnimation.stop();
+      innerSpinAnimation.stop();
       scaleAnimation.stop();
       dotAnimation.stop();
     };
   }, []);
 
-  const spin = spinValue.interpolate({
+  // Interpolate spin values
+  const outerSpin = outerSpinValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
+    outputRange: ['0deg', '360deg']
+  });
+
+  const innerSpin = innerSpinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['360deg', '0deg']
+  });
+
+  const scale = scaleValue.interpolate({
+    inputRange: [0.8, 1],
+    outputRange: [0.8, 1]
   });
 
   // Fetch device unique ID
@@ -147,38 +174,46 @@ const DeciderScreen = () => {
     }
   };
 
+  // Main decision logic with immediate navigation
   useEffect(() => {
-    if (!deviceId) return; 
-    const decideInitialRoute = async () => {
+    if (!deviceId || hasNavigated.current) return;
+
+    const decideAndNavigate = async () => {
       try {
+        // Wait for user loading to complete
         if (userLoading) return;
+
         const creds = await getCredentials();
         const loggedOut = await SecureStore.getItemAsync("loggedOut");
         const { email } = creds || {};
         const now = new Date();
 
+        console.log("creds-----------------",creds)
+
         // 🔒 Logged out → Login
         if (loggedOut === "true") {
-          setInitialRoute("Login");
-          setIsLoading(false);
+          hasNavigated.current = true;
+          navigation.replace("Login");
           return;
         }
 
         // Wait for Firestore userData if creds exist
         if ((email || creds?.password) && !userData) {
-          setTimeout(() => {
-            if (!userData && !userLoading) {
-              setInitialRoute("OnBoarding");
-              setIsLoading(false);
+          // Add a timeout to prevent infinite waiting
+          const timeout = setTimeout(() => {
+            if (!userData && !userLoading && !hasNavigated.current) {
+              hasNavigated.current = true;
+              navigation.replace("OnBoarding");
             }
-          }, 2000);
-          return;
+          }, 3000); // Increased to 3 seconds for better reliability
+
+          return () => clearTimeout(timeout);
         }
 
         // No user → OnBoarding
         if (!userData) {
-          setInitialRoute("OnBoarding");
-          setIsLoading(false);
+          hasNavigated.current = true;
+          navigation.replace("OnBoarding");
           return;
         }
 
@@ -207,27 +242,27 @@ const DeciderScreen = () => {
           now >= subStartDate &&
           now <= subEndDate;
 
-        // Active subscription → TabNavigator (skip trial logic)
+        // Active subscription → TabNavigator
         if (isSubscribed && isWithinPaidPeriod) {
-          setInitialRoute("TabNavigator");
-          setIsLoading(false);
+          hasNavigated.current = true;
+          navigation.replace("TabNavigator");
           return;
         }
 
-        //Check free trial
+        // Check free trial
         let deviceUsedTrial = false;
         if (deviceId) {
           deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
         }
 
-        //Case: New user, device not used trial → FreeTrial
+        // Case: New user, device not used trial → FreeTrial
         if (!isSubscribed && !isFreeTrial && !deviceUsedTrial) {
-          setInitialRoute("FreeTrial");
-          setIsLoading(false);
+          hasNavigated.current = true;
+          navigation.replace("FreeTrial");
           return;
         }
 
-        //Case: Active free trial (within 14 days)
+        // Case: Active free trial (within 14 days)
         let isTrialValid = false;
         if (isFreeTrial && freeTrialStartedAt?.seconds) {
           const trialStart = new Date(freeTrialStartedAt.seconds * 1000);
@@ -236,37 +271,32 @@ const DeciderScreen = () => {
         }
 
         if (isTrialValid) {
-          setInitialRoute("TabNavigator");
-          setIsLoading(false);
+          hasNavigated.current = true;
+          navigation.replace("TabNavigator");
           return;
         }
 
-        //Case: Trial expired or device already used trial → Subscription
+        // Case: Trial expired or device already used trial → Subscription
         if (!isSubscribed) {
-          setInitialRoute("Subscription");
-          setIsLoading(false);
+          hasNavigated.current = true;
+          navigation.replace("Subscription");
           return;
         }
 
-        //Fallback → OnBoarding
-        setInitialRoute("OnBoarding");
-        setIsLoading(false);
+        // Fallback → OnBoarding
+        hasNavigated.current = true;
+        navigation.replace("OnBoarding");
       } catch (error) {
         console.log("Error deciding initial route:", error);
-        setInitialRoute("OnBoarding");
-        setIsLoading(false);
+        if (!hasNavigated.current) {
+          hasNavigated.current = true;
+          navigation.replace("OnBoarding");
+        }
       }
     };
 
-    decideInitialRoute();
-  }, [userData, userLoading, deviceId]);
-
-  //Navigate once route is determined
-  useEffect(() => {
-    if (!isLoading && initialRoute) {
-      navigation.navigate(initialRoute);
-    }
-  }, [isLoading, initialRoute]);
+    decideAndNavigate();
+  }, [userData, userLoading, deviceId, navigation]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
@@ -278,38 +308,30 @@ const DeciderScreen = () => {
 
       {/* Animated Loading Indicator */}
       <View style={styles.loaderContainer}>
-        {/* Outer spinning circle */}
+        <View style={[styles.outerCircle, { borderColor: theme.primary + '20' }]} />
+        
         <Animated.View
           style={[
             styles.spinnerOuter,
             {
               borderColor: theme.primary,
-              borderBottomColor: theme.primary,
-              borderLeftColor: theme.primary,
-              transform: [{ rotate: spin }, { scale: scaleValue }],
+              transform: [{ rotate: outerSpin }, { scale }],
             },
           ]}
         />
 
-        {/* Inner spinning circle */}
+        <View style={[styles.innerCircle, { borderColor: theme.primary + '30' }]} />
+        
         <Animated.View
           style={[
             styles.spinnerInner,
             {
               borderColor: theme.primary,
-              transform: [
-                {
-                  rotate: spinValue.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ["360deg", "0deg"],
-                  }),
-                },
-              ],
+              transform: [{ rotate: innerSpin }],
             },
           ]}
         />
 
-        {/* Center dot */}
         <View style={[styles.centerDot, { backgroundColor: theme.primary }]} />
       </View>
 
@@ -347,39 +369,72 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loaderContainer: {
-    width: RFPercentage(15),
-    height: RFPercentage(15),
+    width: RFPercentage(20),
+    height: RFPercentage(20),
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
+  },
+  outerCircle: {
+    position: "absolute",
+    width: RFPercentage(15),
+    height: RFPercentage(15),
+    borderRadius: RFPercentage(7.5),
+    borderWidth: RFPercentage(0.4),
+    opacity: 0.3,
   },
   spinnerOuter: {
     position: "absolute",
-    width: RFPercentage(12),
-    height: RFPercentage(12),
-    borderRadius: RFPercentage(6),
+    width: RFPercentage(15),
+    height: RFPercentage(15),
+    borderRadius: RFPercentage(7.5),
     borderWidth: RFPercentage(0.4),
-    borderColor: "rgba(0,0,0,0.1)", // Add base color
-    borderTopColor: "transparent",
-    borderRightColor: "transparent",
+    ...Platform.select({
+      ios: {
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+      },
+      android: {
+        borderLeftColor: 'rgba(255,255,255,0.1)',
+        borderRightColor: 'rgba(255,255,255,0.1)',
+        borderTopColor: 'transparent',
+      }
+    }),
+  },
+  innerCircle: {
+    position: "absolute",
+    width: RFPercentage(10),
+    height: RFPercentage(10),
+    borderRadius: RFPercentage(5),
+    borderWidth: RFPercentage(0.3),
+    opacity: 0.3,
   },
   spinnerInner: {
     position: "absolute",
-    width: RFPercentage(8),
-    height: RFPercentage(8),
-    borderRadius: RFPercentage(4),
+    width: RFPercentage(10),
+    height: RFPercentage(10),
+    borderRadius: RFPercentage(5),
     borderWidth: RFPercentage(0.3),
-    borderBottomColor: "transparent",
-    borderLeftColor: "transparent",
+    ...Platform.select({
+      ios: {
+        borderTopColor: 'transparent',
+        borderBottomColor: 'transparent',
+      },
+      android: {
+        borderTopColor: 'rgba(255,255,255,0.1)',
+        borderBottomColor: 'rgba(255,255,255,0.1)',
+      }
+    }),
   },
   centerDot: {
-    width: RFPercentage(1.5),
-    height: RFPercentage(1.5),
-    borderRadius: RFPercentage(0.75),
+    width: RFPercentage(2),
+    height: RFPercentage(2),
+    borderRadius: RFPercentage(1),
   },
   loadingTextContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(4),
   },
   loadingText: {
     fontSize: RFPercentage(2.2),

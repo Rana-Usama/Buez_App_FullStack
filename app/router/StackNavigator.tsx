@@ -59,8 +59,6 @@ import TaskApplicantsScreen from "../screens/TaskApplicantsScreen";
 const Stack = createStackNavigator();
 
 const StackNavigator = () => {
-  const { userData, loading: userLoading } = useUser();
-  const { initialRoute, isLoading } = useInitialRoute(userData, userLoading);
   const { theme } = useAppTheme();
   const [isConnected, setIsConnected] = useState(true);
 
@@ -74,9 +72,9 @@ const StackNavigator = () => {
   // Network error handling
   if (!isConnected) return <NetworkError />;
 
-  if (isLoading || userLoading || !initialRoute) {
-    return <InitialScreen />;
-  }
+  // if (isLoading || userLoading || !initialRoute) {
+  //   return <InitialScreen />;
+  // }
 
   return (
     <NavigationContainer>

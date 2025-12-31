@@ -30,7 +30,6 @@ export const fetchMyReviewsFromFirebase = async () => {
   }
 };
 
-
 export const fetchCompletedTasksFromFirebase = async () => {
   const currentUserId = getAuth().currentUser?.uid;
   if (!currentUserId) return [];
@@ -64,14 +63,15 @@ export const fetchCompletedTasksFromFirebase = async () => {
         ...data,
         isBulkTask: data.isBulkTask || false,
         isConfirmedHelper: data.isConfirmedHelper || false,
-        completedAt: data.completedAt || data.acceptedAt || new Date().toISOString(),
+        completedAt:
+          data.completedAt || data.acceptedAt || new Date().toISOString(),
         taskDetails: {
           ...data.taskDetails,
           id: data.taskId || data.taskDetails?.id,
           user: data.taskDetails?.user ||
-            data.taskDetails?.requester || { 
+            data.taskDetails?.requester || {
               userId: data.taskOwnerId || data.taskDetails?.userId,
-              userName: "Unknown User" 
+              userName: "Unknown User",
             },
           isBulkRequest:
             data.taskDetails?.numberOfWorkers > 1 ||
@@ -92,21 +92,25 @@ export const fetchCompletedTasksFromFirebase = async () => {
         taskId: doc.id,
         acceptedBy: {
           userId: currentUserId,
-          name: userConfirmation?.userName || userConfirmation?.name || "Worker",
+          name:
+            userConfirmation?.userName || userConfirmation?.name || "Worker",
           email: userConfirmation?.email || "",
-          image: userConfirmation?.profileImage || userConfirmation?.image || null,
+          image:
+            userConfirmation?.profileImage || userConfirmation?.image || null,
         },
-        completedAt: data.completedAt ||
+        completedAt:
+          data.completedAt ||
           userConfirmation?.confirmedAt ||
           new Date().toISOString(),
         status: "Completed",
         taskDetails: {
           ...data,
           id: doc.id,
-          user: data.user || data.requester || { 
-            userId: data.userId,
-            userName: "Unknown User" 
-          },
+          user: data.user ||
+            data.requester || {
+              userId: data.userId,
+              userName: "Unknown User",
+            },
           isBulkRequest: true,
           numberOfWorkers: data.numberOfWorkers || 1,
           confirmedWorkers: data.confirmedWorkers || [],
@@ -136,7 +140,7 @@ export const fetchCompletedTasksFromFirebase = async () => {
       uniqueTasks.map(async (task) => {
         const taskId = task.taskId || task.id;
         const taskOwnerId = task.taskDetails?.user?.userId;
-        
+
         // Check if this specific helper has reviewed this specific task owner for this task
         const reviewQuery = query(
           collection(FIREBASE_DB, "reviews"),
@@ -146,7 +150,7 @@ export const fetchCompletedTasksFromFirebase = async () => {
         );
 
         const reviewSnap = await getDocs(reviewQuery);
-        
+
         if (!reviewSnap.empty) {
           // User has reviewed this task owner for this task
           const reviewData = reviewSnap.docs[0].data();
@@ -157,10 +161,10 @@ export const fetchCompletedTasksFromFirebase = async () => {
             reviewText: reviewData.reviewText || "",
             reviewId: reviewSnap.docs[0].id,
             // Mark that this is the user's personal review
-            isPersonalReview: true
+            isPersonalReview: true,
           };
         }
-        
+
         // Also check helperReviews collection
         const helperReviewQuery = query(
           collection(FIREBASE_DB, "helperReviews"),
@@ -170,7 +174,7 @@ export const fetchCompletedTasksFromFirebase = async () => {
         );
 
         const helperReviewSnap = await getDocs(helperReviewQuery);
-        
+
         if (!helperReviewSnap.empty) {
           const helperReviewData = helperReviewSnap.docs[0].data();
           return {
@@ -179,17 +183,17 @@ export const fetchCompletedTasksFromFirebase = async () => {
             rating: helperReviewData.reviewData?.rating || 0,
             reviewText: helperReviewData.reviewData?.reviewText || "",
             reviewId: helperReviewSnap.docs[0].id,
-            isPersonalReview: true
+            isPersonalReview: true,
           };
         }
-        
+
         // No review found for this helper
         return {
           ...task,
           reviewed: false,
           rating: undefined,
           reviewText: undefined,
-          isPersonalReview: false
+          isPersonalReview: false,
         };
       })
     );
@@ -205,8 +209,6 @@ export const fetchCompletedTasksFromFirebase = async () => {
     return [];
   }
 };
-
-
 
 export const fetchActiveTasksFromFirebase = async () => {
   const currentUserId = getAuth().currentUser?.uid;
@@ -312,14 +314,15 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
         freeTrialStartedAt: userData.freeTrialStartedAt,
         latitude: userData.latitude || null,
         longitude: userData.longitude || null,
-        memberSince: userData?.freeTrialStartedAt
-          ? new Date(
-              userData.freeTrialStartedAt.seconds * 1000
-            ).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })
+        memberSince: userData?.createdAt
+          ? new Date(userData?.createdAt.seconds * 1000).toLocaleDateString(
+              "en-US",
+              {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }
+            )
           : "Recently",
       };
     });

@@ -1039,6 +1039,7 @@ function OfferDetail({ navigation, route }) {
                     ]}
                     onPress={handleStartChat}
                     activeOpacity={0.7}
+                    disabled={!isAccepted}
                   >
                     <Ionicons
                       name="chatbubble-ellipses"
@@ -1060,7 +1061,7 @@ function OfferDetail({ navigation, route }) {
               {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? theme.primary + "30"
+                    ? theme.lightGrey + "20"
                     : Colors.primary + "05",
               },
             ]}
@@ -1103,7 +1104,7 @@ function OfferDetail({ navigation, route }) {
                 {
                   backgroundColor:
                     theme.mode === "dark"
-                      ? theme.primary + "30"
+                    ? theme.lightGrey + "20"
                       : Colors.primary + "05",
                 },
               ]}
@@ -1321,7 +1322,7 @@ function OfferDetail({ navigation, route }) {
                 styles.infoCard,
                 {
                   backgroundColor:
-                    theme.mode === "dark" ? theme.primary + "30" : "#E3F2FD",
+                    theme.mode === "dark" ? theme.lightGrey + "20" : "#E3F2FD",
                 },
               ]}
             >
@@ -1356,7 +1357,7 @@ function OfferDetail({ navigation, route }) {
                 styles.infoCard,
                 {
                   backgroundColor:
-                    theme.mode === "dark" ? theme.primary + "30" : "#E8F5E9",
+                    theme.mode === "dark" ? theme.lightGrey + "20" : "#E8F5E9",
                 },
               ]}
             >
@@ -1401,7 +1402,7 @@ function OfferDetail({ navigation, route }) {
                 styles.infoCard,
                 {
                   backgroundColor:
-                    theme.mode === "dark" ? theme.primary + "30" : "#efefefff",
+                    theme.mode === "dark" ? theme.lightGrey + "20" : "#efefefff",
                 },
               ]}
             >
