@@ -99,25 +99,25 @@ export default function CompletedTasks({ navigation }: any) {
   }, []);
 
   // Fetch user's reviews to check what they've already reviewed
-  const fetchUserReviews = async () => {
-    if (!currentUserId) return new Set();
+  const fetchUserReviews = async (): Promise<Set<string>> => {
+    if (!currentUserId) return new Set<string>();
     try {
       const reviewsQuery = query(
         collection(FIREBASE_DB, "reviews"),
         where("reviewer.userId", "==", currentUserId)
       );
       const querySnapshot = await getDocs(reviewsQuery);
-      const reviewedTaskIds = new Set<string>();
+      const reviewedTaskIds: Set<string> = new Set();
       querySnapshot.forEach((doc) => {
         const reviewData = doc.data();
         if (reviewData.taskId) {
-          reviewedTaskIds.add(reviewData.taskId);
+          reviewedTaskIds.add(reviewData.taskId as string);
         }
       });
       return reviewedTaskIds;
     } catch (error) {
       console.log("Error fetching user reviews:", error);
-      return new Set();
+      return new Set<string>();
     }
   };
 
@@ -198,8 +198,6 @@ export default function CompletedTasks({ navigation }: any) {
     }
     return false;
   };
-
-
 
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     const details = item.taskDetails || {};

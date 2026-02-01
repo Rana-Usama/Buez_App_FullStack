@@ -12,20 +12,37 @@ import { getAuth } from "firebase/auth";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import haversine from "haversine";
 
+// services/ReviewService.js
 export const fetchMyReviewsFromFirebase = async () => {
   try {
-    const currentUserId = getAuth().currentUser?.uid;
+    const currentUserId = FIREBASE_AUTH.currentUser?.uid;
     if (!currentUserId) return [];
 
+    // Query reviews where recipient.userId is the current user
     const q = query(
       collection(FIREBASE_DB, "reviews"),
-      where("taskOwnerId", "==", currentUserId)
+      where("recipient.userId", "==", currentUserId)
     );
 
     const snap = await getDocs(q);
-    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const reviews = [];
+    
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      reviews.push({ 
+        id: doc.id, 
+        ...data,
+        // Map recipient data for consistent access
+        ...(data.recipient && {
+          userName: data.recipient.userName,
+          profileImage: data.recipient.profileImage
+        })
+      });
+    }
+    
+    return reviews;
   } catch (error) {
-    console.error("Error fetching reviews:", error);
+    console.log("Error fetching reviews:", error);
     return [];
   }
 };

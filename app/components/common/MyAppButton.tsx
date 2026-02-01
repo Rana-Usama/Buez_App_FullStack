@@ -1,5 +1,11 @@
 import React from "react";
-import { TouchableOpacity, Text, ActivityIndicator, GestureResponderEvent, Platform } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  GestureResponderEvent,
+  Platform,
+} from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -22,8 +28,8 @@ interface MyAppButtonProps {
 const MyAppButton: React.FC<MyAppButtonProps> = ({
   loading = false,
   disabled = false,
-  height = Platform.OS === 'android' ?  RFPercentage(6.2) : RFPercentage(5.5),
-  width = Platform.OS === 'android' ?  RFPercentage(21.5) : RFPercentage(18.5),
+  height = Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
+  width = Platform.OS === "android" ? RFPercentage(21.5) : RFPercentage(18.5),
   marginTop = RFPercentage(5),
   title = "Login",
   onPress,
@@ -51,19 +57,19 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          
         }}
       >
         {loading ? (
           <ActivityIndicator size="small" color={Colors.white} />
         ) : (
           <Text
+            numberOfLines={1}
             style={{
               color: Colors.white,
               fontSize: RFPercentage(1.7),
               fontFamily: "Poppins_600SemiBold",
               textAlign: "center",
-              marginHorizontal:5
+              marginHorizontal: 5,
             }}
           >
             {title}

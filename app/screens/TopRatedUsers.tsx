@@ -201,7 +201,7 @@ const TopRatedUsers = ({ navigation }: any) => {
             postRequest: {},
           })
         }
-        style={[styles.cardContainer, { borderColor: cardGradient[1] }]}
+        style={[styles.cardContainer, {shadowColor:cardGradient[1]}]}
       >
         <LinearGradient
           colors={cardGradient}
@@ -213,7 +213,7 @@ const TopRatedUsers = ({ navigation }: any) => {
             colors={[
               theme.mode === "dark"
                 ? "rgba(57, 51, 51, 0.4)"
-                : "rgba(255, 255, 255, 0.18)",
+                : "rgba(255, 255, 255, 0.6)",
               "transparent",
             ]}
             style={[
@@ -248,7 +248,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                 <View
                   style={[
                     styles.badgeTag,
-                    { backgroundColor: "rgba(255, 255, 255, 0.2)" },
+                    { backgroundColor: "rgba(0,0,0,0.15)" },
                   ]}
                 >
                   <Ionicons name={badge.icon as any} size={10} color="#fff" />
@@ -259,7 +259,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                 </View>
               </View>
               <Text
-                style={[styles.memberSince, { color: "rgba(255,255,255,0.8)" }]}
+                style={[styles.memberSince, { color: "rgba(100, 97, 97, 0.8)" }]}
               >
                 {t("profileRank.txt9")} {user.memberSince}
               </Text>
@@ -267,13 +267,13 @@ const TopRatedUsers = ({ navigation }: any) => {
             <Feather name="chevron-right" size={20} color="#fff" />
           </View>
 
-          <View style={styles.statsIslandMesh}>
+          <View style={[styles.statsIslandMesh]}>
             <View style={styles.statBox}>
               <Text style={styles.statValMesh}>{user.activeTasks}</Text>
               <Text style={styles.statLabMesh}>{t("profileRank.txt6")}</Text>
             </View>
             <View
-              style={[styles.divider, { backgroundColor: "rgba(0,0,0,0.05)" }]}
+              style={[styles.divider]}
             />
             <View style={styles.statBox}>
               <Text style={styles.statValMesh}>{user.completedTasks}</Text>
@@ -580,13 +580,12 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginBottom: 15,
     borderRadius: 16,
-    overflow: "hidden", // Required for gradient border radius
     elevation: 5,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.5,
     shadowRadius: 4,
-    borderWidth: 1,
+    overflow:"hidden"
   },
   gradientWrapper: {
     padding: 16,
@@ -609,7 +608,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 12,
     marginTop: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.25)", // Semi-transparent "Glass" effect
+    backgroundColor: "rgba(144, 144, 144, 0.25)", // Semi-transparent "Glass" effect
   },
   statValMesh: {
     fontSize: 15,

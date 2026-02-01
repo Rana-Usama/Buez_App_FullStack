@@ -69,7 +69,6 @@ function EditProfile({ navigation }) {
   ]);
 
   const [biography, setBiography] = useState("");
-  const [translatedBiography, setTranslatedBiography] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
 
   // Translate static texts
@@ -191,18 +190,6 @@ function EditProfile({ navigation }) {
       setOriginalData({ name, biography: bio, imageUri: image });
       setImageUri(image);
       setBiography(bio);
-      if (bio.trim()) {
-        setIsTranslating(true);
-        try {
-          const translated = await cachedTranslate(bio);
-          setTranslatedBiography(translated);
-        } catch (error) {
-          console.log("Error translating biography:", error);
-          setTranslatedBiography(bio); // fallback
-        } finally {
-          setIsTranslating(false);
-        }
-      }
     }
   };
 

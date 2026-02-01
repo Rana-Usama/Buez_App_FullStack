@@ -274,11 +274,7 @@ const CustomDrawerContent = (props) => {
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
         />
-        {/* <BlurView
-          intensity={30}
-          tint="dark"
-          style={{ backgroundColor: "rgba(255, 255, 255, 0.46)", }}
-        /> */}
+        
 
         {/* Drawer Header with Glass Effect */}
         <View
@@ -377,7 +373,7 @@ const CustomDrawerContent = (props) => {
                       {
                         backgroundColor:
                           theme.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.09)"
+                            ? "rgba(87, 89, 109, 0.09)"
                             : "rgba(214, 214, 214, 0.17)",
                       },
                     ]}
@@ -407,13 +403,12 @@ const CustomDrawerContent = (props) => {
         <View style={[styles.drawerFooter]}>
           <BlurView
             intensity={20}
-            tint={theme.mode}
             style={[
               styles.footerGlass,
               {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.09)"
+                    ? "rgba(28, 30, 48, 0.13)"
                     : "rgba(206, 206, 206, 0.17)",
               },
             ]}
@@ -854,7 +849,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   footerGlass: {
-    borderRadius: 15,
+    borderRadius: 10,
     padding: 15,
     overflow: "hidden",
     borderWidth: 1,

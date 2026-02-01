@@ -38,8 +38,6 @@ function CancelSubscription({ navigation }: any) {
     userData?.planType || userData?.subscription?.planInterval || "monthly"; // Default to monthly if not specified
   const isYearlyPlan = currentPlan === "yearly";
 
-  console.log(userData?.planType);
-
   const locale = Localization.locale;
   const userCurrency = getCurrencyFromLocale(locale);
 
@@ -147,27 +145,19 @@ function CancelSubscription({ navigation }: any) {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
-       <StatusBar
-              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-              backgroundColor={"transparent"}
-              translucent
-            />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
       <CustomNav showBack title={t("cancelSubscription.txt1")} />
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* <Image style={styles.logo} source={Icons.logo} /> */}
-
         {!userData?.isCancelled && userData?.planType != "free" ? (
           <>
-            {/* <Image
-              style={styles.subscriptionImage}
-              source={Icons.notActive}
-              resizeMode="contain"
-            /> */}
-
             {/* Current Plan Badge */}
             <View style={styles.planBadgeContainer}>
               <View

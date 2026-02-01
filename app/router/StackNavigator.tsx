@@ -55,6 +55,7 @@ import UpgradePlan from "../screens/UpgradePlan";
 // Import the Drawer Navigator
 import DrawerNavigator from "./BottomNavigator";
 import TaskApplicantsScreen from "../screens/TaskApplicantsScreen";
+import ConfirmedHelpers from "../screens/ConfirmedHelpers";
 
 const Stack = createStackNavigator();
 
@@ -154,6 +155,8 @@ const StackNavigator = () => {
           component={AddReviewToAccepter}
         />
         <Stack.Screen name="UpgradePlan" component={UpgradePlan} />
+        <Stack.Screen name="ConfirmedHelpers" component={ConfirmedHelpers} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

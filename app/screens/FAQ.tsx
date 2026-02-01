@@ -8,18 +8,16 @@ import {
   UIManager,
   TouchableOpacity,
   ScrollView,
-  Linking,
   StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons, FontAwesome5, Ionicons } from "@expo/vector-icons";
-import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import CustomNav from "../components/common/CustomNav";
 
-function FAQ({ navigation }) {
+function FAQ() {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
 

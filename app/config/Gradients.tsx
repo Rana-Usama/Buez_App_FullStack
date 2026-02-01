@@ -39,39 +39,39 @@ export const HomeGradients = {
 
   /* -------- Top Rated Cards -------- */
   topRated: [
-    "#E2CE5D",
+    "#eeede4ff",
     "#EFEACE",
-    "#D39345",
+    "#967852ff",
   ] as const,
 
   topRatedDark: [
-    "#E2CE5D",
+    "#e2d9a6ff",
     "#1B1919",
-    "#D39345",
+    "#84643cff",
   ] as const,
 
   risingTalent: [
-    "#6A11CB",
-    "#CDAFEC",
+    "#e8dff0ff",
+    "#c0aed2ff",
     "#A8CABA",
   ] as const,
 
   risingTalentDark: [
-    "#6A11CB",
+    "#8357b1ff",
     "#1B1919",
-    "#A8CABA",
+    "#99d9bbff",
   ] as const,
 
   beginner: [
-    "#00B09B",
-    "#BCEEE8",
-    "#50C878",
+    "#ebf9f7ff",
+    "#98d3ccff",
+    "#57a872ff",
   ] as const,
 
   beginnerDark: [
-    "#00B09B",
+    "#79b7b0ff",
     "#1B1919",
-    "#50C878",
+    "#3f6a4dff",
   ] as const,
 
   defaultCard: [
@@ -93,19 +93,19 @@ export const HomeGradients = {
 ========================================================= */
 export const TopRatedUserGradients = {
   pro: {
-    light: ["#888CAD", "#9E9CF4"] as const,
-    dark: ["#585546", "#4F3617"] as const,
+     light: ["#FFF8E1", "#FFECB3"] as const,
+    dark: ["#747267ff", "#3c3022ff"] as const,
   },
   rising: {
-    light: ["#888CAD", "#9E9CF4"] as const,
-    dark: ["#372D41", "#240D3D"] as const,
+    light: ["#E8F5E9", "#C8E6C9"] as const, // Mint to Teal - for rising talent
+    dark: ["#434047ff", "#312143ff"] as const,
   },
   beginner: {
-    light: ["#888CAD", "#9E9CF4"] as const,
-    dark: ["#2C403E", "#104521"] as const,
+   light: ["#F3E5F5", "#E1BEE7"] as const, // Light purple to violet - for beginners
+    dark: ["#3a4847ff", "#364e3eff"] as const,
   },
   default: {
-    light: ["#888CAD", "#9E9CF4"] as const,
+   light: ["#F5F5F5", "#EEEEEE"] as const, // Light blue to blue - default
     dark: ["#313445", "#0F1F43"] as const,
   },
 };

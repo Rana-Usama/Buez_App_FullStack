@@ -352,15 +352,17 @@ const Chat = ({ navigation, route }) => {
               _id: currentUserId,
               name: senderName,
             }}
-            listViewProps={{
-              removeClippedSubviews: false,
-              keyboardShouldPersistTaps: "handled",
-              showsVerticalScrollIndicator: true,
-              maintainVisibleContentPosition: {
-                minIndexForVisible: 0,
-                autoscrollToTopThreshold: 10,
-              },
-            }}
+            listViewProps={
+              {
+                removeClippedSubviews: false,
+                keyboardShouldPersistTaps: "handled",
+                showsVerticalScrollIndicator: true,
+                maintainVisibleContentPosition: {
+                  minIndexForVisible: 0,
+                  autoscrollToTopThreshold: 10,
+                },
+              } as any
+            }
             renderInputToolbar={(props) => (
               <View
                 style={[

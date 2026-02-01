@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    marginTop: RFPercentage(2),
+    marginTop: RFPercentage(3),
   },
   actionContainer: {
     width: 40, // Fixed width to ensure title stays centered

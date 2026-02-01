@@ -43,7 +43,14 @@ import {
   fetchActiveTasksFromFirebase,
   fetchAllConfirmedTasksAsWorker,
 } from "../services/Review.service";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  where,
+  getDocs,
+  query,
+} from "firebase/firestore";
 import RepostSuccessModal from "../components/common/RepostModal";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -101,6 +108,9 @@ function MyRequests({ navigation }) {
   const { theme } = useAppTheme();
   const [markLoaderIndex, setMarkLoaderIndex] = useState(null);
   const [cancelLoaderIndex, setCancelLoaderIndex] = useState(null);
+  const [reviewedSingleTasks, setReviewedSingleTasks] = useState<
+    Record<string, boolean>
+  >({});
 
   const currentUserId = getAuth().currentUser?.uid;
   const db = getFirestore();
@@ -117,7 +127,7 @@ function MyRequests({ navigation }) {
       const convertedAmount = convertCurrency(
         originalAmount,
         item.currencyInfo.code,
-        targetCurrency
+        targetCurrency,
       );
       return formatCurrency(convertedAmount, locationToUse);
     } catch (error) {
@@ -130,10 +140,10 @@ function MyRequests({ navigation }) {
     activeFilter === `${t("myRequests.txt2")}`
       ? REQUEST_STATUS.Active
       : activeFilter === `${t("myRequests.txt3")}`
-      ? REQUEST_STATUS.Completed
-      : activeFilter === `${t("myRequests.txt8")}`
-      ? REQUEST_STATUS.Cancelled
-      : null;
+        ? REQUEST_STATUS.Completed
+        : activeFilter === `${t("myRequests.txt8")}`
+          ? REQUEST_STATUS.Cancelled
+          : null;
 
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [repostingIndex, setRepostingIndex] = useState(null);
@@ -144,7 +154,7 @@ function MyRequests({ navigation }) {
     if (!task || !currentUserId) return false;
     if (task.confirmedWorkers && Array.isArray(task.confirmedWorkers)) {
       return task.confirmedWorkers.some(
-        (worker) => worker && worker.userId === currentUserId
+        (worker) => worker && worker.userId === currentUserId,
       );
     }
     return false;
@@ -155,7 +165,7 @@ function MyRequests({ navigation }) {
     if (!task || !currentUserId) return false;
     if (task.appliedWorkers && Array.isArray(task.appliedWorkers)) {
       return task.appliedWorkers.some(
-        (worker) => worker && worker.userId === currentUserId
+        (worker) => worker && worker.userId === currentUserId,
       );
     }
     return false;
@@ -170,9 +180,8 @@ function MyRequests({ navigation }) {
       let lastVisible;
       if (activeFilter === `${t("myRequests.txt10")}`) {
         const acceptedTasks = await fetchActiveTasksFromFirebase();
-        const confirmedWorkerTasks = await fetchAllConfirmedTasksAsWorker(
-          currentUserId
-        );
+        const confirmedWorkerTasks =
+          await fetchAllConfirmedTasksAsWorker(currentUserId);
 
         // Combine both with proper mapping
         const singleAcceptedMapped = acceptedTasks.map((item) => ({
@@ -199,7 +208,7 @@ function MyRequests({ navigation }) {
       } else {
         const { tasksArray, lastVisible: lv } = await getMyReuqests(
           param,
-          islastVisiblePost
+          islastVisiblePost,
         );
         newRecords = tasksArray;
         lastVisible = lv;
@@ -221,9 +230,9 @@ function MyRequests({ navigation }) {
           taskType: await cachedTranslate(item?.taskType || ""),
           customTaskTitle: await cachedTranslate(item?.customTaskTitle || ""),
           otherCompensation: await cachedTranslate(
-            item?.otherCompensation || ""
+            item?.otherCompensation || "",
           ),
-        }))
+        })),
       );
 
       // 🔹 Append or replace list
@@ -231,6 +240,11 @@ function MyRequests({ navigation }) {
         setTaskRecords((prev) => [...prev, ...translatedRecords]);
       } else {
         setTaskRecords(translatedRecords);
+        translatedRecords.forEach((task) => {
+          if (task.acceptedBy && !task.isBulkRequest) {
+            checkIfSingleTaskReviewed(task);
+          }
+        });
       }
 
       setLastVisiblePost(lastVisible);
@@ -248,7 +262,7 @@ function MyRequests({ navigation }) {
       setTaskRecords([]);
       setLastVisiblePost(null);
       fetchRequests(null).then(() => setInitialLoadDone(true));
-    }, [param])
+    }, [param]),
   );
 
   const refreshRequests = async () => {
@@ -265,7 +279,7 @@ function MyRequests({ navigation }) {
     try {
       const { tasksArray: newRecords, lastVisible } = await getMyReuqests(
         param,
-        lastVisiblePost
+        lastVisiblePost,
       );
       const translatedRecords = await Promise.all(
         (newRecords as TaskRecord[]).map(async (item) => ({
@@ -275,9 +289,9 @@ function MyRequests({ navigation }) {
           taskType: await cachedTranslate(item?.taskType || ""),
           customTaskTitle: await cachedTranslate(item?.customTaskTitle || ""),
           otherCompensation: await cachedTranslate(
-            item?.otherCompensation || ""
+            item?.otherCompensation || "",
           ),
-        }))
+        })),
       );
       setTaskRecords([...taskRecords, ...translatedRecords]);
       setLastVisiblePost(lastVisible);
@@ -299,21 +313,17 @@ function MyRequests({ navigation }) {
   // Add this function to send notifications to all confirmed helpers
   const sendBulkTaskCompletionNotification = async (task) => {
     try {
-      // Check if this is a bulk request with confirmed helpers
       const isBulkRequest = task.numberOfWorkers > 1 || task.isBulkRequest;
       const hasConfirmedHelpers =
         task.confirmedWorkers && task.confirmedWorkers.length > 0;
       if (!isBulkRequest || !hasConfirmedHelpers) {
-        // For single requests, use the existing notification logic
         if (task.acceptedBy) {
           await sendTaskCompletionPushNotification(task);
           await saveTaskCompletionNotification(task);
         }
         return;
       }
-      // For bulk requests, send notifications to all confirmed helpers
       const notificationPromises = [];
-      // Send push notifications to each confirmed helper
       task?.confirmedWorkers.forEach((worker) => {
         if (worker && worker.token) {
           notificationPromises.push(
@@ -345,8 +355,8 @@ function MyRequests({ navigation }) {
                     taskType: task.taskType,
                   },
                 }),
-              }
-            )
+              },
+            ),
           );
         }
       });
@@ -385,11 +395,10 @@ function MyRequests({ navigation }) {
                 `The task "${task.taskType}" has been marked as completed`,
               timestamp: new Date().toISOString(),
               isRead: false,
-            })
+            }),
           );
         }
       });
-      // Execute all notification promises
       await Promise.all(notificationPromises);
     } catch (error) {
       console.log("Error sending bulk task completion notifications:", error);
@@ -484,7 +493,7 @@ function MyRequests({ navigation }) {
             end={{ x: 1, y: 1 }}
             style={styles.neonGradient}
           >
-            <Text style={styles.filterButtonTextActive}>{title}</Text>
+            <Text numberOfLines={1} style={styles.filterButtonTextActive}>{title}</Text>
           </LinearGradient>
           <View style={styles.neonGlow} />
         </View>
@@ -500,6 +509,7 @@ function MyRequests({ navigation }) {
           ]}
         >
           <Text
+          numberOfLines={1}
             style={[styles.filterButtonTextInactive, { color: theme.heading }]}
           >
             {title}
@@ -542,7 +552,7 @@ function MyRequests({ navigation }) {
         console.log("Chat start error:", err);
       }
     },
-    [currentUserId, currentUser?.userData?.userName]
+    [currentUserId, currentUser?.userData?.userName],
   );
 
   // Navigate to Task Applicants Screen
@@ -566,10 +576,10 @@ function MyRequests({ navigation }) {
             fcmToken: task.acceptedBy?.token,
             title: t("pushNotifications.txt3"),
             body: `${t("pushNotifications.txt4")} "${task.taskType}" ${t(
-              "pushNotifications.txt5"
+              "pushNotifications.txt5",
             )} ${task.user?.userName}`,
           }),
-        }
+        },
       );
       const data = await response.text();
       return data;
@@ -620,6 +630,42 @@ function MyRequests({ navigation }) {
       await saveTaskCompletionNotification(task);
     } catch (error) {
       console.log("Error in task completion notification process:", error);
+    }
+  };
+
+  const navigateToConfirmedHelpers = (task) => {
+    navigation.navigate("ConfirmedHelpers", {
+      task: task,
+    });
+  };
+
+  const checkIfSingleTaskReviewed = async (task) => {
+    try {
+      if (
+        !task ||
+        task.isBulkRequest ||
+        !task.acceptedBy?.userId ||
+        !currentUserId
+      ) {
+        return;
+      }
+
+      const reviewsRef = collection(db, "reviews");
+      const reviewQuery = query(
+        reviewsRef,
+        where("taskId", "==", task.id),
+        where("reviewedUserId", "==", task.acceptedBy.userId),
+        where("reviewerId", "==", currentUserId),
+      );
+
+      const snapshot = await getDocs(reviewQuery);
+
+      setReviewedSingleTasks((prev) => ({
+        ...prev,
+        [task.id]: !snapshot.empty,
+      }));
+    } catch (error) {
+      console.log("Error checking single task review:", error);
     }
   };
 
@@ -702,7 +748,7 @@ function MyRequests({ navigation }) {
                     resizeMode="cover"
                   >
                     <View style={styles.categoryBadge}>
-                      <Text style={styles.categoryText}>
+                      <Text style={styles.categoryText} numberOfLines={1}>
                         {cart?.taskType === "Other"
                           ? cart.customTaskTitle
                           : cart?.taskType}
@@ -825,7 +871,7 @@ function MyRequests({ navigation }) {
                 ) : (
                   <Text style={[styles.postDate, { color: theme.darkGrey }]}>
                     {`${t("myRequests.txt4")} ${getFormatedDate(
-                      cart?.createdAt
+                      cart?.createdAt,
                     )}`}
                   </Text>
                 )}
@@ -936,6 +982,82 @@ function MyRequests({ navigation }) {
                   </TouchableOpacity>
                 )}
 
+              {activeFilter === `${t("myRequests.txt3")}` && // Completed filter
+                cart.status === REQUEST_STATUS.Completed &&
+                isTaskOwner && (
+                  <View style={styles.completedActionsContainer}>
+                    {/* For single accepted tasks */}
+                    {cart.acceptedBy &&
+                      !cart.isBulkRequest &&
+                      (cart.reviewedAccepter ? (
+                        /* ✅ ALREADY REVIEWED */
+                        <View
+                          style={[styles.addReviewButton]}
+                        >
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={RFPercentage(1.5)}
+                            color="#4CAF50"
+                          />
+                          <Text
+                            style={[styles.addReviewText, { color: "#4CAF50" }]}
+                          >
+                            {t("myRequests.reviewed") || "Reviewed"}
+                          </Text>
+                        </View>
+                      ) : (
+                        /* ➕ ADD REVIEW */
+                        <TouchableOpacity
+                          style={styles.addReviewButton}
+                          onPress={() =>
+                            navigation.navigate("AddReviewToAccepter", {
+                              task: cart,
+                            })
+                          }
+                          activeOpacity={0.8}
+                        >
+                          <Ionicons
+                            name="star"
+                            size={RFPercentage(1.5)}
+                            color={Colors.primary}
+                          />
+                          <Text style={styles.addReviewText}>
+                            {t("myRequests.addReview") || "Add Review"}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+
+                    {/* For bulk tasks with confirmed helpers */}
+                    {(cart.confirmedWorkers?.length > 0 ||
+                      (cart.isBulkRequest &&
+                        cart.confirmedWorkers?.length > 0)) && (
+                      <TouchableOpacity
+                        style={[
+                          styles.viewConfirmedHelpersButton,
+                          { backgroundColor: Colors.primary + "20" },
+                        ]}
+                        onPress={() => navigateToConfirmedHelpers(cart)}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons
+                          name="people"
+                          size={RFPercentage(1.5)}
+                          color={Colors.primary}
+                        />
+                        <Text
+                          style={[
+                            styles.viewConfirmedHelpersText,
+                            { color: Colors.primary },
+                          ]}
+                        >
+                          {t("myRequests.viewConfirmedHelpers") ||
+                            "View Helpers"}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+
               {/* Compensation + Repost + View Applicants Button */}
               <View style={styles.taskInfoContainer}>
                 <Text style={[styles.compensation, { color: theme.heading }]}>
@@ -1026,12 +1148,11 @@ function MyRequests({ navigation }) {
                 </>
               )}
 
-              {/* Actions (only when Active filter is selected AND user is the owner) */}
               {activeFilter === `${t("myRequests.txt2")}` &&
                 cart?.status === REQUEST_STATUS.Active &&
-                isTaskOwner && // Only show actions to owner
-                !isConfirmedWorker && // Not a confirmed worker
-                !isAppliedWorker && ( // Not an applied worker
+                isTaskOwner && 
+                !isConfirmedWorker && 
+                !isAppliedWorker && ( 
                   <View style={styles.cartContainer2}>
                     <TouchableOpacity
                       activeOpacity={0.8}
@@ -1053,7 +1174,7 @@ function MyRequests({ navigation }) {
                         await changeReqestStatus(
                           index,
                           REQUEST_STATUS.Completed,
-                          cart
+                          cart,
                         );
                         setMarkLoaderIndex(null);
                       }}
@@ -1136,7 +1257,7 @@ function MyRequests({ navigation }) {
             changeReqestStatus(
               selectedRequestIndex,
               REQUEST_STATUS.Cancelled,
-              selectedRequestItem
+              selectedRequestItem,
             );
             setIsModalVisible(false);
           }
@@ -1145,7 +1266,7 @@ function MyRequests({ navigation }) {
         theme={theme}
         t={t}
         loading={loader}
-        message={''}
+        message={""}
       />
 
       <RepostSuccessModal
@@ -1173,6 +1294,43 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     alignItems: "center",
     paddingBottom: RFPercentage(10),
+  },
+  // Add to your existing styles
+  completedActionsContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    gap: RFPercentage(1),
+    // marginTop: RFPercentage(1),
+    paddingHorizontal: RFPercentage(2),
+    alignSelf: "flex-start",
+  },
+  addReviewButton: {
+    flexDirection: "row",
+    alignItems: "center",backgroundColor: Colors.primary + "20"
+    ,
+    borderRadius: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1),
+    gap: RFPercentage(0.5),
+    marginTop: RFPercentage(1),
+  },
+  addReviewText: {
+    color: Colors.primary,
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  viewConfirmedHelpersButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1),
+    gap: RFPercentage(0.5),
+  },
+  viewConfirmedHelpersText: {
+    color: Colors.white,
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
   },
 
   cartContainer: {
@@ -1581,5 +1739,20 @@ const styles = StyleSheet.create({
   },
   firstFilterButton: {
     marginLeft: RFPercentage(2),
+  },
+  reviewedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: RFPercentage(0.8),
+    paddingHorizontal: RFPercentage(1.5),
+    backgroundColor: "#4CAF50" + "20",
+    borderRadius: RFPercentage(1),
+  },
+
+  reviewedText: {
+    marginLeft: RFPercentage(0.5),
+    color: "#4CAF50",
+    fontSize: RFPercentage(1.3),
+    fontWeight: "500",
   },
 });

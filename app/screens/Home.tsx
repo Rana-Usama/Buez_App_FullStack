@@ -1,757 +1,296 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
-  Image,
   FlatList,
   RefreshControl,
   ActivityIndicator,
-  Platform,
-  Dimensions,
   StatusBar,
   TouchableWithoutFeedback,
   Keyboard,
+  Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
+
+// Components
 import Nav from "../components/common/Nav";
 import InputField from "../components/common/AuthInputField";
-import Colors from "../config/Colors";
-import { useUser } from "../contexts/user.context";
-import { getRequestList } from "../services/Post.service";
-import { useFocusEffect } from "@react-navigation/native";
-import { getFormatedDate } from "../services/Shared.service";
-import { usePostContext } from "../contexts/PostContext";
-import { Icons } from "../config/theme";
 import NotFound from "../components/common/NotFound";
-import { useTranslation } from "react-i18next";
+import FilterButtons from "../components/common/FilterButtons";
+import TopRatedUserCard from "../components/common/TopRatedUserCard";
+import TaskCard from "../components/common/TaskCard";
+import TopRatedExplore from "../components/common/TopRatedExplore";
+// Hooks & Context
+import { useHomeScreen } from "../hooks/useHomeScreen";
 import { useExitAppOnBack } from "../utils/appBack";
-import { useAppTheme } from "../contexts/themeContext";
-import haversine from "haversine";
-import { useDispatch, useSelector } from "react-redux";
-import { AntDesign } from "@expo/vector-icons";
-import { selectLocation } from "../redux/Actions";
-import { cachedTranslate } from "../utils/cachedTranslations";
-import { useLocation } from "../utils/useLocation";
+import { usePostContext } from "../contexts/PostContext";
+
+// Utils & Config
 import {
   formatCurrency,
   getCurrencyInfo,
   convertCurrency,
 } from "../utils/currencyChange";
-import { fetchUsersWithTaskStats } from "../services/Review.service";
-import { updateUserLocation } from "../services/User.service";
-import {
-  Ionicons,
-  MaterialIcons,
-  FontAwesome5,
-  MaterialCommunityIcons,
-  FontAwesome6,
-} from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
-import { HomeGradients } from "../config/Gradients";
+import Colors from "../config/Colors";
 
-const { width } = Dimensions.get("window");
-
-function Home({ navigation }) {
-  const { t } = useTranslation();
-  const { userData: user } = useUser();
-  const dispatch = useDispatch();
-  const { location: currentLocation, getCurrentLocation } = useLocation();
-  const { theme } = useAppTheme();
-  const selectedLocation = useSelector((state: any) => state.location);
+const HomeScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
+  const { refreshing } = usePostContext();
   useExitAppOnBack();
-  const [filterOptions, setFilterOptions] = useState([]);
-  const [filterMap, setFilterMap] = useState({});
-  const [activeFilter, setActiveFilter] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [inputField, SetInputField] = useState([
-    { placeholder: t("home.txt2"), value: "" },
-  ]);
 
   const {
-    taskRecords,
-    setTaskRecords,
-    lastVisiblePost,
-    setLastVisiblePost,
-    hasMore,
-    setHasMore,
+    t,
+    theme,
+    filterOptions,
+    activeFilter,
+    searchQuery,
+    setSearchQuery,
+    setActiveFilter,
+    topRatedUsers,
+    displayTasks,
+    activeIndices,
+    setActiveIndices,
+    selectedLocation,
     loading,
-    setLoading,
-    refreshing,
-    setRefreshing,
-    scrollPosition,
-  } = usePostContext();
+    handleRefresh,
+    handleClearLocation,
+    currentLocation,
+  } = useHomeScreen();
 
-  const [allTasks, setAllTasks] = useState([]);
-  const [activeIndices, setActiveIndices] = useState({});
-  const unsubscribeRef = useRef(null);
+  // Memoized currency conversion function
+  const getConvertedCompensation = useCallback(
+    (task: any) => {
+      if (task.compensationType !== "Monitarely") return null;
 
-  const updateUserLocationInDB = async (location) => {
-    try {
-      if (!location || !location.latitude || !location.longitude) return;
-      const locationData = {
-        latitude: location.latitude,
-        longitude: location.longitude,
-      };
-      await updateUserLocation(locationData);
-    } catch (error) {
-      console.log("Error updating user location:", error);
-    }
-  };
+      try {
+        const originalAmount = parseFloat(task.monitarily) || 0;
 
-  // Update location when currentLocation changes
-  useEffect(() => {
-    if (currentLocation && user?.userId) {
-      updateUserLocationInDB(currentLocation);
-    }
-  }, [currentLocation, user?.userId]);
+        if (!currentLocation) {
+          return task.currencyInfo
+            ? `${task.currencyInfo.symbol}${originalAmount.toLocaleString()}`
+            : `$${originalAmount.toLocaleString()}`;
+        }
 
-  const translateTask = async (task) => ({
-    ...task,
-    description: await cachedTranslate(task.description || ""),
-    otherCompensation: await cachedTranslate(task.otherCompensation || ""),
-    taskType: await cachedTranslate(task.taskType || ""),
-  });
+        if (!task.currencyInfo) {
+          return formatCurrency(originalAmount, currentLocation);
+        }
 
-  // Translate filter buttons once
-  useFocusEffect(
-    useCallback(() => {
-      const originalFilters = [
-        "All",
-        "Cleaning",
-        "Moving",
-        "Gardening",
-        "Gaming",
-        "Other",
-      ];
-      const loadFilters = async () => {
-        const tr = await Promise.all(originalFilters.map(cachedTranslate));
-        const map = {};
-        originalFilters.forEach((o, i) => (map[tr[i]] = o));
-        setFilterOptions(tr);
-        setFilterMap(map);
-        setActiveFilter(tr[0]);
-      };
-      loadFilters();
-    }, [])
+        const targetCurrency = getCurrencyInfo(currentLocation).code;
+        const convertedAmount = convertCurrency(
+          originalAmount,
+          task.currencyInfo.code,
+          targetCurrency
+        );
+
+        return formatCurrency(convertedAmount, currentLocation);
+      } catch (error) {
+        console.error("Currency conversion error:", error);
+        return task.currencyInfo
+          ? `${task.currencyInfo.symbol}${parseFloat(task.monitarily) || 0}`
+          : `$${parseFloat(task.monitarily) || 0}`;
+      }
+    },
+    [currentLocation]
   );
 
-  // Tasks By Location ----------------
-  useEffect(() => {
-    if (!currentLocation) return;
-    let unsubscribe;
-    let mounted = true;
-    const startListening = async () => {
-      setLoading(true);
-      const refLoc =
-        selectedLocation?.latitude2 && selectedLocation?.longitude2
-          ? {
-              latitude: selectedLocation.latitude2,
-              longitude: selectedLocation.longitude2,
-            }
-          : currentLocation;
-      if (unsubscribeRef.current) unsubscribeRef.current();
-      unsubscribe = getRequestList(
-        filterMap[activeFilter] || "",
-        searchQuery,
-        null,
-        async ({ tasksArray, lastVisible }) => {
-          if (!mounted) return;
-          const filtered = tasksArray.filter((task) => {
-            const loc = task?.address;
-            if (!loc?.latitude || !loc?.longitude) return false;
-            return (
-              haversine(
-                refLoc,
-                { latitude: loc.latitude, longitude: loc.longitude },
-                { unit: "km" }
-              ) <= 100
-            );
-          });
-          const translated = await Promise.all(filtered.map(translateTask));
-          // Only update if changed
-          setAllTasks((prev) => {
-            const prevIds = prev.map((t) => t.id).join(",");
-            const newIds = translated.map((t) => t.id).join(",");
-            if (prevIds !== newIds) {
-              setTaskRecords(translated);
-              setLastVisiblePost(lastVisible);
-              setHasMore(translated.length > 0);
-            }
-            return translated;
-          });
-          setLoading(false);
-        },
-        (err) => console.log("GET_POSTS_LIST Error:", err)
-      );
-      unsubscribeRef.current = unsubscribe;
-    };
-    startListening();
-    return () => {
-      mounted = false;
-      if (unsubscribeRef.current) unsubscribeRef.current();
-    };
-  }, [activeFilter, searchQuery, selectedLocation, filterMap, currentLocation]);
+  // Handle task press
+  const handleTaskPress = useCallback(
+    (task: any) => {
+      navigation.navigate("OfferDetail", { postRequest: task });
+    },
+    [navigation]
+  );
 
-  const refreshRequests = async () => {
-    setRefreshing(true);
-    // just restart listener
-    if (unsubscribeRef.current) unsubscribeRef.current();
-    setRefreshing(false);
-  };
+  // Handle top rated user press
+  const handleUserPress = useCallback(
+    (user: any) => {
+      navigation.navigate("TopRatedUserProfile", {
+        user,
+        applier: false,
+        postRequest: {},
+      });
+    },
+    [navigation]
+  );
 
-  const handleChange = (text, i) => {
-    const tmp = [...inputField];
-    tmp[i].value = text;
-    SetInputField(tmp);
-    setSearchQuery(text);
-  };
-
-  //---------------- Tasks To Dispaly
-  const displayTasks = allTasks.filter((task) => {
-    // Category filter
-    if (filterMap[activeFilter] !== "All") {
-      if (
-        task.taskType?.toLowerCase() !== filterMap[activeFilter]?.toLowerCase()
-      )
-        return false;
-    }
-    // Search filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const descriptionMatch = (task.description || "")
-        .toLowerCase()
-        .includes(q);
-      const userNameMatch = (task.user?.userName || "")
-        .toLowerCase()
-        .includes(q);
-      const taskTypeMatch = (task.taskType || "").toLowerCase().includes(q);
-      // For "Other" tasks, also check customTaskTitle
-      const customTitleMatch =
-        task.taskType?.toLowerCase() === "other"
-          ? (task.customTaskTitle || "").toLowerCase().includes(q)
-          : false;
-      return (
-        descriptionMatch || userNameMatch || taskTypeMatch || customTitleMatch
-      );
-    }
-    return true;
-  });
-
-  useEffect(() => {
-    if (displayTasks?.length === Object.keys(activeIndices).length) return;
-    const idx = {};
-    displayTasks.forEach((_, i) => (idx[i] = 0));
-    setActiveIndices(idx);
-  }, [displayTasks?.length]);
-
-  // Top Rated Users
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const res = await fetchUsersWithTaskStats();
-      setUsers(res);
-    };
-    fetchUsers();
+  // Handle image scroll
+  const handleImageScroll = useCallback((index: number, slideIndex: number) => {
+    setActiveIndices((prev) => ({ ...prev, [index]: slideIndex }));
   }, []);
 
-  // Compensation Conversion - Only use currentLocation
-  const getConvertedCompensation = (item: any) => {
-    if (item.compensationType !== "Monitarely") return null;
-    try {
-      const originalAmount = parseFloat(item.monitarily) || 0;
-      if (!currentLocation) {
-        return item.currencyInfo
-          ? `${item.currencyInfo.symbol}${originalAmount.toLocaleString()}`
-          : `$${originalAmount.toLocaleString()}`;
+  // Render loading state
+  const renderLoading = () => (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color={theme.primary} />
+      <Text style={[styles.loadingText, { color: theme.primary }]}>
+        {t("home.txt12")}
+      </Text>
+    </View>
+  );
+
+  // Render task list
+  const renderTaskList = () => (
+    <FlatList
+      data={displayTasks}
+      keyExtractor={(item, index) => `${item.id}-${index}`}
+      scrollEventThrottle={16}
+      renderItem={({ item, index }) => (
+        <TaskCard
+          task={item}
+          index={index}
+          onPress={handleTaskPress}
+          activeIndex={activeIndices[index] || 0}
+          onImageScroll={handleImageScroll}
+          getConvertedCompensation={getConvertedCompensation}
+          theme={theme}
+          t={t}
+        />
+      )}
+      ListEmptyComponent={
+        !loading && (
+          <View style={styles.notFoundContainer}>
+            <NotFound title={t("home.txt11")} />
+          </View>
+        )
       }
-      if (!item.currencyInfo) {
-        return formatCurrency(originalAmount, currentLocation);
-      }
-      const targetCurrency = getCurrencyInfo(currentLocation).code;
-      const convertedAmount = convertCurrency(
-        originalAmount,
-        item.currencyInfo.code,
-        targetCurrency
-      );
-      return formatCurrency(convertedAmount, currentLocation);
-    } catch (error) {
-      console.log("Currency conversion error:", error);
-      return item.currencyInfo
-        ? `${item.currencyInfo.symbol}${parseFloat(item.monitarily) || 0}`
-        : `$${parseFloat(item.monitarily) || 0}`;
-    }
-  };
+    />
+  );
 
   return (
     <View style={{ backgroundColor: theme.white, flex: 1 }}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={"transparent"}
+        backgroundColor="transparent"
         translucent
       />
-      {/* Nav */}
+
+      {/* Navigation Header */}
       <Nav
         gradient
         gradientColors={[Colors.primary, "#0b1544ff"]}
-        title={`${t("home.txt1")}`}
+        title={t("home.txt1")}
       />
+
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
-          onScroll={(e) =>
-            (scrollPosition.current = e.nativeEvent.contentOffset.y)
-          }
           style={[styles.scrollView, { backgroundColor: theme.white }]}
-          nestedScrollEnabled={true}
+          nestedScrollEnabled
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="always"
-          contentContainerStyle={[
-            styles.scrollViewContent,
-            { backgroundColor: theme.white },
-          ]}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={refreshRequests}
+              onRefresh={handleRefresh}
               colors={[Colors.primary]}
               tintColor={Colors.primary}
             />
           }
         >
           <View style={[styles.screen, { backgroundColor: theme.white }]}>
-            <View style={styles.inputFieldContainer}>
-              {inputField?.map((item, i) => (
-                <View key={i} style={styles.inputFieldWrapper}>
-                  <InputField
-                    placeholder={item.placeholder}
-                    placeholderColor={theme.grey}
-                    height={RFPercentage(6)}
-                    backgroundColor={
-                      theme.mode === "dark" ? "#131214ff" : "#F1F3F5"
-                    }
-                    borderWidth={0}
-                    borderRadius={10}
-                    color={theme.heading}
-                    handleFeild={(text) => handleChange(text, i)}
-                    value={item.value}
-                    icon={true}
-                    fontSize={RFPercentage(1.7)}
-                    width={"97%"}
-                  />
-                </View>
-              ))}
+            {/* Search Input */}
+            <View style={styles.searchContainer}>
+              <InputField
+                placeholder={t("home.txt2")}
+                placeholderColor={theme.grey}
+                height={RFPercentage(6)}
+                backgroundColor={
+                  theme.mode === "dark" ? "#131214ff" : "#F1F3F5"
+                }
+                borderWidth={0}
+                borderRadius={10}
+                color={theme.heading}
+                handleFeild={setSearchQuery}
+                value={searchQuery}
+                icon={true}
+                fontSize={RFPercentage(1.7)}
+                width="97%"
+              />
             </View>
 
-            <View style={styles.categoriesContainer}>
-              <Text
-                style={[styles.categoriesText, { color: theme.heading }]}
-              >{`${t("home.txt3")}`}</Text>
-              <View></View>
+            {/* Categories Section */}
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                {t("home.txt3")}
+              </Text>
             </View>
 
             {/* Filter Buttons */}
-            <FlatList
-              horizontal
-              data={filterOptions}
-              keyExtractor={(item) => item}
-              keyboardShouldPersistTaps="always"
-              contentContainerStyle={styles.filterButtonsContainer}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => {
-                const getIcon = (filterText) => {
-                  const originalCategory = filterMap[filterText] || filterText;
-
-                  switch (originalCategory) {
-                    case "All":
-                      return (
-                        <Ionicons
-                          name="apps"
-                          size={RFPercentage(2)}
-                          color={
-                            activeFilter === item ? "white" : Colors.lightGrey
-                          }
-                        />
-                      );
-                    case "Cleaning":
-                      return (
-                        <MaterialCommunityIcons
-                          name="broom"
-                          size={RFPercentage(3)}
-                          color={
-                            activeFilter === item ? "white" : Colors.lightGrey
-                          }
-                        />
-                      );
-                    case "Moving":
-                      return (
-                        <MaterialIcons
-                          name="video-library"
-                          size={RFPercentage(2.5)}
-                          color={
-                            activeFilter === item ? "white" : Colors.lightGrey
-                          }
-                        />
-                      );
-                    case "Gardening":
-                      return (
-                        <FontAwesome5
-                          name="seedling"
-                          size={RFPercentage(2.4)}
-                          color={
-                            activeFilter === item ? "white" : Colors.lightGrey
-                          }
-                        />
-                      );
-                    case "Gaming":
-                      return (
-                        <Ionicons
-                          name="game-controller"
-                          size={RFPercentage(2.5)}
-                          color={
-                            activeFilter === item ? "white" : Colors.lightGrey
-                          }
-                        />
-                      );
-                    case "Other":
-                      return (
-                        <MaterialIcons
-                          name="category"
-                          size={RFPercentage(2.5)}
-                          color={
-                            activeFilter === item ? "white" : Colors.lightGrey
-                          }
-                        />
-                      );
-                    default:
-                      return (
-                        <MaterialIcons
-                          name="category"
-                          size={RFPercentage(2)}
-                          color={
-                            activeFilter === item ? "white" : Colors.lightGrey
-                          }
-                        />
-                      );
-                  }
-                };
-
-                return (
-                  <TouchableOpacity onPress={() => setActiveFilter(item)}>
-                    <>
-                      {activeFilter === item ? (
-                        <LinearGradient
-                          colors={[Colors.primary, "#4557B0"]}
-                          style={[styles.gradient, styles.filterButtonWithIcon]}
-                        >
-                          {getIcon(item)}
-                        </LinearGradient>
-                      ) : (
-                        <View
-                          style={[
-                            styles.nonGradient,
-                            styles.filterButtonWithIcon,
-                            { borderColor: theme.border },
-                          ]}
-                        >
-                          {getIcon(item)}
-                        </View>
-                      )}
-                      <Text
-                        style={{
-                          fontFamily: "Poppins_500Medium",
-                          color:
-                            activeFilter === item
-                              ? Colors.primary
-                              : Colors.lightGrey,
-                          fontSize: RFPercentage(1.5),
-                          textAlign: "center",
-                          marginTop: RFPercentage(0.7),
-                        }}
-                      >
-                        {item.length > 6 ? `${item.substring(0, 6)}..` : item}
-                      </Text>
-                    </>
-                  </TouchableOpacity>
-                );
-              }}
+            <FilterButtons
+              filters={filterOptions}
+              activeFilter={activeFilter}
+              onFilterPress={setActiveFilter}
+              theme={theme}
             />
-            {users?.length > 0 ? (
+
+            {/* Top Rated Users Section */}
+            {topRatedUsers.length > 0 ? (
               <>
-                <View style={styles.wrap}>
-                  <Text
-                    style={[styles.categoriesText, { color: theme.heading }]}
-                  >
+                <View style={styles.sectionHeader}>
+                  <Text style={[styles.sectionTitle, { color: theme.heading }]}>
                     {t("profileRank.txt1")}
                   </Text>
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={() => navigation.navigate("TopRatedUsers")}
                   >
-                    <Text
-                      style={[
-                        styles.categoriesText,
-                        {
-                          color: theme.primary,
-                          fontSize: RFPercentage(1.7),
-                          fontFamily: "Poppins_600SemiBold",
-                        },
-                      ]}
-                    >
+                    <Text style={[styles.seeAllText, { color: theme.primary }]}>
                       {t("profileRank.txt2")}
                     </Text>
                   </TouchableOpacity>
                 </View>
-                <View style={{ width: "100%", alignSelf: "flex-start" }}>
-                  <FlatList
-                    horizontal
-                    data={users}
-                    keyExtractor={(item, index) => index.toString()}
-                    contentContainerStyle={styles.topRatedContainer}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({ item, index }) => {
-                      const getCardGradient = (
-                        category: string,
-                        dark: boolean
-                      ) => {
-                        switch (category) {
-                          case "Top Rated":
-                            return dark
-                              ? HomeGradients.topRatedDark
-                              : HomeGradients.topRated;
 
-                          case "Rising Talent":
-                            return dark
-                              ? HomeGradients.risingTalentDark
-                              : HomeGradients.risingTalent;
-
-                          case "Beginner":
-                            return dark
-                              ? HomeGradients.beginnerDark
-                              : HomeGradients.beginner;
-
-                          default:
-                            return dark
-                              ? HomeGradients.defaultCardDark
-                              : HomeGradients.defaultCard;
-                        }
-                      };
-                      const cardGradient = getCardGradient(
-                        item.category,
-                        theme.mode === "dark"
-                      );
-
-                      const getCategoryIcon = () => {
-                        const icons = {
-                          "Top Rated": { name: "trophy", color: "#FFD700" },
-                          "Rising Talent": {
-                            name: "trending-up",
-                            color: "#FF9800",
-                          },
-                          Beginner: { name: "leaf", color: "#4CAF50" },
-                        };
-                        const icon = icons[item.category] || {
-                          name: "person",
-                          color: "#FFF",
-                        };
-                        return (
-                          <Ionicons
-                            name={icon.name as any}
-                            size={RFPercentage(1.8)}
-                            color={icon.color}
-                          />
-                        );
-                      };
-
-                      return (
-                        <TouchableOpacity
-                          activeOpacity={0.9}
-                          onPress={() =>
-                            navigation.navigate("TopRatedUserProfile", {
-                              user: item,
-                              applier: false,
-                              postRequest: {},
-                            })
-                          }
-                          style={[
-                            styles.cardWrapper,
-                            { borderColor: cardGradient[0] },
-                          ]}
-                        >
-                          {/* BASE GRADIENT LAYER */}
-                          <LinearGradient
-                            colors={cardGradient}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.topRatedCard}
-                          >
-                            {/* MESH OVERLAY 1 (Highlight) */}
-                            <LinearGradient
-                              colors={["rgba(255,255,255,0.4)", "transparent"]}
-                              style={[
-                                StyleSheet.absoluteFill,
-                                { transform: [{ rotate: "45deg" }], top: -50 },
-                              ]}
-                              start={{ x: 0.5, y: 0 }}
-                              end={{ x: 0.5, y: 1 }}
-                            />
-
-                            {/* MESH OVERLAY 2 (Shadow Depth) */}
-                            <LinearGradient
-                              colors={["transparent", "rgba(0,0,0,0.15)"]}
-                              style={StyleSheet.absoluteFill}
-                              start={{ x: 1, y: 0 }}
-                              end={{ x: 0, y: 1 }}
-                            />
-
-                            <View style={styles.cardContent}>
-                              {/* CATEGORY BADGE */}
-                              <View style={styles.categoryBadgeContainer}>
-                                <BlurView
-                                  intensity={40}
-                                  tint="light"
-                                  style={styles.blurBadge}
-                                >
-                                  <View style={styles.badgeInner}>
-                                    {getCategoryIcon()}
-                                    <Text style={styles.categoryText}>
-                                      {item.category === "Top Rated"
-                                        ? t("profileRank.txt5")
-                                        : item.category === "Rising Talent"
-                                        ? t("profileRank.txt4")
-                                        : t("profileRank.txt3")}
-                                    </Text>
-                                  </View>
-                                </BlurView>
-                              </View>
-
-                              {/* AVATAR WITH GLOW */}
-                              <View style={styles.avatarWrapper}>
-                                <View style={styles.avatarShadow}>
-                                  <Image
-                                    source={
-                                      item?.profileImage
-                                        ? { uri: item.profileImage }
-                                        : Icons.dp
-                                    }
-                                    style={styles.avatar}
-                                  />
-                                </View>
-                              </View>
-
-                              {/* NAME & HANDLE */}
-                              <View style={styles.nameContainer}>
-                                <Text style={styles.userName} numberOfLines={1}>
-                                  {item.name || "User"}
-                                </Text>
-                                <Text style={styles.userHandle}>
-                                  @{item?.name?.split(" ")[0] || "user"}
-                                </Text>
-                              </View>
-
-                              {/* GLASS BUTTON */}
-                              <TouchableOpacity
-                                style={styles.viewProfileButton}
-                                onPress={() =>
-                                  navigation.navigate("TopRatedUserProfile", {
-                                    user: item,
-                                    applier: false,
-                                    postRequest: {},
-                                  })
-                                }
-                              >
-                                <BlurView
-                                  intensity={60}
-                                  tint="light"
-                                  style={styles.buttonBlur}
-                                >
-                                  <Text style={styles.viewProfileText}>
-                                    {t("profileRank.txt8")}
-                                  </Text>
-                                  <Ionicons
-                                    name="chevron-forward-circle"
-                                    size={18}
-                                    color="#FFF"
-                                  />
-                                </BlurView>
-                              </TouchableOpacity>
-                            </View>
-                          </LinearGradient>
-                        </TouchableOpacity>
-                      );
-                    }}
-                  />
-                </View>
+                <FlatList
+                  horizontal
+                  data={topRatedUsers}
+                  keyExtractor={(item, index) => `${item.userId}-${index}`}
+                  contentContainerStyle={styles.topRatedContainer}
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <TopRatedUserCard
+                      user={item}
+                      onPress={() => handleUserPress(item)}
+                      darkMode={theme.mode === "dark"}
+                      t={t}
+                    />
+                  )}
+                />
               </>
             ) : (
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate("TopRatedUsers")}
-                style={styles.exploreContainer}
-              >
-                <View style={styles.exploreContent}>
-                  <Text style={[styles.exploreText, { color: Colors.primary }]}>
-                    {`${t("profileRank.txt45")}`}
-                  </Text>
-                  <FontAwesome6
-                    name="arrow-right"
-                    size={RFPercentage(1.8)}
-                    color={Colors.primary}
-                  />
-                </View>
-              </TouchableOpacity>
+              <TopRatedExplore t={t} navigation={navigation} />
             )}
 
-            <View
-              style={[
-                styles.categoriesContainer,
-                styles.recentRequestsContainer,
-              ]}
-            >
-              <Text
-                style={[styles.categoriesText, { color: theme.heading }]}
-              >{`${t("home.txt9")}`}</Text>
+            {/* Recent Requests Section */}
+            <View style={[styles.sectionHeader, styles.recentRequestsHeader]}>
+              <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                {t("home.txt9")}
+              </Text>
 
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={styles.locationContainer}>
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() =>
                     navigation.navigate("Location", { home: true })
                   }
                 >
-                  <Text
-                    style={[
-                      styles.categoriesText,
-                      {
-                        color: theme.primary,
-                        fontFamily: "Poppins_600SemiBold",
-                        fontSize: RFPercentage(1.8),
-                      },
-                    ]}
-                  >
+                  <Text style={[styles.locationText, { color: theme.primary }]}>
                     {selectedLocation.name2
                       ? selectedLocation.name2.length > 15
                         ? `${selectedLocation.name2.slice(0, 15)}...`
                         : selectedLocation.name2
-                      : `${t("location.by")}`}
+                      : t("location.by")}
                   </Text>
                 </TouchableOpacity>
 
-                {/* Show cross icon only if location is selected */}
                 {selectedLocation.name2 && (
                   <TouchableOpacity
                     activeOpacity={0.8}
-                    style={{
-                      marginLeft: RFPercentage(1),
-                      bottom: RFPercentage(0.3),
-                    }}
-                    onPress={async () => {
-                      dispatch(selectLocation(null)); // clears redux
-                      await getCurrentLocation(); // refresh GPS
-                    }}
+                    style={styles.clearLocationButton}
+                    onPress={handleClearLocation}
                   >
                     <AntDesign
                       name="closecircle"
@@ -763,691 +302,79 @@ function Home({ navigation }) {
               </View>
             </View>
 
-            {/* Carts */}
-            {loading ? (
-              <View style={{ marginTop: RFPercentage(18) }}>
-                <ActivityIndicator size="large" color={theme.primary} />
-                <Text style={styles.txt}>{t("home.txt12")}</Text>
-              </View>
-            ) : (
-              <>
-                <FlatList
-                  data={displayTasks}
-                  keyExtractor={(item, index) => index.toString()}
-                  scrollEventThrottle={16}
-                  nestedScrollEnabled={true}
-                  renderItem={({ item, index }) => (
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate("OfferDetail", {
-                          postRequest: item,
-                        })
-                      }
-                      activeOpacity={0.8}
-                      style={[
-                        styles.cartContainer,
-                        { borderColor: theme.border },
-                      ]}
-                    >
-                      <FlatList
-                        data={item.imageUrls}
-                        keyExtractor={(_, imgIndex) => imgIndex.toString()}
-                        horizontal
-                        pagingEnabled
-                        showsHorizontalScrollIndicator={false}
-                        scrollEnabled={true}
-                        nestedScrollEnabled={true}
-                        onScroll={(e) => {
-                          const slideIndex = Math.round(
-                            e.nativeEvent.contentOffset.x / (width * 0.9)
-                          );
-                          setActiveIndices((prev) => ({
-                            ...prev,
-                            [index]: slideIndex,
-                          }));
-                        }}
-                        renderItem={({ item: imageUrl }) => (
-                          <Image
-                            resizeMode="cover"
-                            source={{ uri: imageUrl }}
-                            style={styles.img}
-                          />
-                        )}
-                      />
+            {/* Tasks List */}
+            {loading ? renderLoading() : renderTaskList()}
 
-                      <View style={styles.infoWrapper}>
-                        <View style={styles.cartInfoContainer}>
-                          <View>
-                            <Image
-                              style={styles.userImage}
-                              source={
-                                item?.user?.profileImage
-                                  ? { uri: item?.user?.profileImage }
-                                  : Icons.dp
-                              }
-                            />
-                          </View>
-                          <Text
-                            style={[
-                              styles.userName,
-                              {
-                                color: theme.heading,
-                                marginLeft: RFPercentage(2),
-                              },
-                            ]}
-                          >
-                            {item?.user?.userName?.length > 12
-                              ? `${item?.user?.userName.substring(0, 12)}...`
-                              : item?.user?.userName}
-                          </Text>
-                          <Text
-                            style={[styles.postDate, { color: theme.darkGrey }]}
-                          >
-                            {t("myRequests.txt4")}{" "}
-                            <Text style={{ fontFamily: "Poppins_400Regular" }}>
-                              {" "}
-                              {getFormatedDate(item.createdAt)}
-                            </Text>
-                          </Text>
-                        </View>
-
-                        <View style={styles.taskInfoContainer}>
-                          <Text
-                            style={[
-                              styles.taskText,
-                              { color: theme.darkGrey2 },
-                            ]}
-                          >
-                            {item.description?.substr(0, 90) +
-                              (item.description?.length > 90 ? "..." : "")}
-                          </Text>
-                          <View style={styles.compensationWrapper}>
-                            <Image
-                              tintColor={theme.darkGrey}
-                              style={styles.compansationIcon}
-                              source={require("../../assets/Images/compensation.png")}
-                            />
-                            <Text
-                              style={[
-                                styles.compensationText,
-                                { color: theme.darkGrey2 },
-                              ]}
-                            >
-                              {`${t("home.txt10")}`}:{" "}
-                              <Text
-                                style={[
-                                  styles.compensationAmount,
-                                  { color: theme.primary },
-                                ]}
-                              >
-                                {item.compensationType === "Monitarely"
-                                  ? getConvertedCompensation(item)
-                                  : item.otherCompensation?.substr(0, 20) +
-                                    (item.otherCompensation?.length > 20
-                                      ? "..."
-                                      : "")}
-                              </Text>
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  )}
-                />
-              </>
-            )}
-
-            {!loading && displayTasks?.length === 0 && (
-              <View style={{ bottom: RFPercentage(10) }}>
-                <NotFound title={`${t("home.txt11")}`} />
-              </View>
-            )}
             <View style={styles.bottomSpacing} />
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
-    backgroundColor: Colors.white,
   },
   scrollView: {
     width: "100%",
   },
-  scrollViewContent: {
-    alignItems: "center",
-    paddingBottom: RFPercentage(13),
-  },
-  inputFieldContainer: {
-    justifyContent: "center",
-    alignItems: "center",
+  searchContainer: {
     width: "100%",
-  },
-  inputFieldWrapper: {
+    alignItems: "center",
     marginTop: RFPercentage(2),
   },
-  categoriesContainer: {
+  sectionHeader: {
     width: "90%",
+    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    flexDirection: "row",
     marginTop: RFPercentage(2),
-    // backgroundColor:'red'
   },
-  categoriesText: {
-    color: Colors.primary,
+  recentRequestsHeader: {
+    marginTop: RFPercentage(2.5),
+  },
+  sectionTitle: {
     fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_600SemiBold",
   },
-  filterButtonsContainer: {
-    marginTop: RFPercentage(1.4),
-    gap: 26,
-    paddingHorizontal: RFPercentage(2),
-    // backgroundColor: "red",
-  },
-  filterButton: {
-    // width: RFPercentage(11.5),
-    height: RFPercentage(5),
-    borderRadius: RFPercentage(1),
-    justifyContent: "center",
-    alignItems: "center",
-    // marginLeft: RFPercentage(2),
-    paddingHorizontal: RFPercentage(2),
-  },
-  activeFilterButton: {
-    borderColor: "transparent",
-  },
-  inactiveFilterButton: {
-    borderColor: Colors.border,
-    borderWidth: RFPercentage(0.1),
-  },
-  firstFilterButton: {
-    marginLeft: 0,
-  },
-  gradient: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: RFPercentage(100),
-    height: RFPercentage(7),
-    width: RFPercentage(7),
-  },
-
-  filterButtonTextActive: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  filterButtonTextInactive: {
-    color: Colors.heading,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  recentRequestsContainer: {
-    marginTop: RFPercentage(2.5),
-  },
-  cartContainer: {
-    width: width * 0.9,
-    borderColor: Colors.border,
-    borderWidth: RFPercentage(0.1),
-    borderRadius: RFPercentage(1),
-    paddingBottom: RFPercentage(2),
-    marginTop: 20,
-  },
-  img: {
-    width: width * 0.895,
-    height: RFPercentage(25),
-    borderTopLeftRadius: RFPercentage(1),
-    borderTopRightRadius: RFPercentage(1),
-  },
-  cartImageBackground: {
-    width: "100%",
-    height: RFPercentage(28.5),
-    backgroundColor: "yellow",
-  },
-  cartImage: {
-    borderTopLeftRadius: RFPercentage(2),
-    borderTopRightRadius: RFPercentage(2),
-  },
-
-  dotsContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    // backgroundColor: "red",
-    height: 20,
-    top: 10,
-  },
-
-  dot: {
-    width: RFPercentage(1),
-    height: RFPercentage(1),
-    borderRadius: RFPercentage(0.5),
-    marginHorizontal: RFPercentage(0.3),
-  },
-
-  activeDot: {
-    backgroundColor: Colors.primary,
-  },
-
-  inactiveDot: {
-    backgroundColor: "#D1D5DB",
-  },
-
-  cartInfoContainer: {
-    width: "92%",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    flexDirection: "row",
-    // top: RFPercentage(-6),
-    // backgroundColor:'red',
-    marginVertical: RFPercentage(2),
-  },
-  userImage: {
-    width: RFPercentage(6.2),
-    height: RFPercentage(6.2),
-    borderColor: Colors.primary,
-    borderWidth: RFPercentage(0.1),
-    borderRadius: RFPercentage(100),
-  },
-
-  postDate: {
-    fontSize: RFPercentage(1.3),
-    position: "absolute",
-    right: 0,
-    fontFamily: "Poppins_600SemiBold",
-  },
-  taskInfoContainer: {
-    width: "92%",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-  },
-  taskText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Regular",
-    color: Colors.darkGrey2,
-    width: "100%",
-  },
-  compensationText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_500Medium",
-    color: Colors.darkGrey2,
-    marginLeft: RFPercentage(1),
-  },
-  compensationAmount: {
-    color: Colors.primary,
-    fontFamily: "Poppins_700Bold",
-    fontSize: RFPercentage(1.6),
-  },
-  bottomSpacing: {
-    marginBottom: RFPercentage(6),
-  },
-  infoWrapper: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  compensationWrapper: {
-    marginTop: RFPercentage(1),
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  compansationIcon: { width: RFPercentage(2.3), height: RFPercentage(2.3) },
-  notFoundWrapper: {
-    marginTop: RFPercentage(16),
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  notFoundImg: {
-    borderRadius: RFPercentage(1),
-    width: RFPercentage(16),
-    height: RFPercentage(16),
-    marginBottom: RFPercentage(2),
-  },
-  notFoundText: {
-    color: Colors.darkGrey,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-
-  avatarContainer: {
-    position: "relative",
-    marginBottom: RFPercentage(1),
-    marginTop: RFPercentage(2),
-  },
-
-  onlineStatus: {
-    position: "absolute",
-    bottom: RFPercentage(0.5),
-    right: RFPercentage(0.5),
-    width: RFPercentage(1.5),
-    height: RFPercentage(1.5),
-    borderRadius: RFPercentage(0.75),
-    backgroundColor: "#45B356",
-    borderWidth: 2,
-  },
-  userName2: {
-    textAlign: "center",
-    fontFamily: "Poppins_700Bold",
+  seeAllText: {
     fontSize: RFPercentage(1.7),
-    marginBottom: RFPercentage(0.3),
-  },
-  userTitle: {
-    textAlign: "center",
-    fontFamily: "Poppins_500Medium",
-    fontSize: RFPercentage(1.5),
-    marginBottom: RFPercentage(1.5),
-    opacity: 0.8,
-  },
-
-  statColumn: {
-    flex: 1,
-    alignItems: "center",
-  },
-
-  statIcon: {
-    width: RFPercentage(3.5),
-    height: RFPercentage(3.5),
-    borderRadius: RFPercentage(1),
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: RFPercentage(0.5),
-  },
-
-  successRateContainer: {
-    paddingHorizontal: RFPercentage(1.2),
-    paddingVertical: RFPercentage(0.6),
-    borderRadius: RFPercentage(1),
-    marginBottom: RFPercentage(1.5),
-  },
-  successRateText: {
-    fontSize: RFPercentage(1.1),
     fontFamily: "Poppins_600SemiBold",
-  },
-
-  risingTalentBadge: {
-    position: "absolute",
-    top: RFPercentage(1),
-    right: RFPercentage(1),
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 107, 53, 0.15)", // Orange background
-    paddingHorizontal: RFPercentage(0.8),
-    paddingVertical: RFPercentage(0.3),
-    borderRadius: RFPercentage(1),
-    borderWidth: 1,
-    borderColor: "rgba(255, 107, 53, 0.3)",
-  },
-  risingTalentText: {
-    color: "#FF6B35",
-    fontSize: RFPercentage(1),
-    fontFamily: "Poppins_700Bold",
-    marginLeft: RFPercentage(0.3),
-  },
-
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.3),
-    borderRadius: RFPercentage(1),
-    marginLeft: RFPercentage(0.5),
-    justifyContent: "center",
-  },
-
-  // Beginner Badge
-  beginnerBadge: {
-    backgroundColor: "rgba(47, 255, 0, 0.15)",
-    borderWidth: 1,
-    borderColor: "#4CAF50",
-    position: "absolute",
-    right: 8,
-    top: 8,
-  },
-  beginnerText: {
-    color: "#2E7D32",
-    fontSize: RFPercentage(1),
-    fontFamily: "Poppins_700Bold",
-    marginLeft: RFPercentage(0.3),
-    lineHeight: RFPercentage(1.2),
-  },
-
-  // Rising Talent Badge
-  risingBadge: {
-    backgroundColor: "#FFF3E0",
-    borderWidth: 1,
-    borderColor: "#FF9800",
-    position: "absolute",
-    right: 8,
-    top: 8,
-  },
-  risingText: {
-    color: "#FF9800",
-    fontSize: RFPercentage(1),
-    fontFamily: "Poppins_700Bold",
-    marginLeft: RFPercentage(0.3),
-    lineHeight: RFPercentage(1.2),
-  },
-
-  // Top Rated Badge
-  topRatedBadge: {
-    backgroundColor: "rgba(255, 215, 0, 0.15)",
-    borderWidth: 1,
-    borderColor: "#FFD700",
-    position: "absolute",
-    right: 8,
-    top: 8,
-  },
-  topRatedText: {
-    color: "#cdb114ff",
-    fontSize: RFPercentage(1),
-    fontFamily: "Poppins_700Bold",
-    marginLeft: RFPercentage(0.3),
-    lineHeight: RFPercentage(1.2),
-  },
-
-  // Premium Badge (existing)
-  premiumBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFDE7",
-    paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.3),
-    borderRadius: RFPercentage(1),
-    borderWidth: 1,
-    borderColor: "#FFD700",
-    marginLeft: RFPercentage(0.5),
-  },
-  premiumText: {
-    color: "#F57F17",
-    fontSize: RFPercentage(1),
-    fontWeight: "bold",
-    marginLeft: RFPercentage(0.3),
-    lineHeight: RFPercentage(1),
-  },
-  exploreContainer: {
-    marginTop: RFPercentage(2),
-    width: "90%",
-    alignSelf: "flex-start",
-    marginLeft: RFPercentage(2.2),
-  },
-  exploreContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: RFPercentage(1.5),
-    paddingHorizontal: RFPercentage(2),
-    borderColor: Colors.primary + "30",
-    borderRadius: RFPercentage(1),
-    backgroundColor: Colors.primary + "08",
-  },
-  exploreText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.6),
-    marginRight: RFPercentage(1),
-  },
-  txt: {
-    color: Colors.primary,
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_500Medium",
-    marginTop: RFPercentage(0.5),
-  },
-  wrap: {
-    width: "90%",
-    alignSelf: "center",
-    justifyContent: "space-between",
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: RFPercentage(3),
-    marginBottom: RFPercentage(1),
-  },
-
-  nonGradient: {
-    borderRadius: 100,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    height: RFPercentage(7),
-    width: RFPercentage(7),
-  },
-
-  filterButtonWithIcon: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  cardWrapper: {
-    width: RFPercentage(22), // Adjust based on your layout
-    marginRight: 15,
-    borderRadius: 24,
-    overflow: "hidden",
-    borderWidth: RFPercentage(0.1),
-  },
-  topRatedCard: {
-    height: RFPercentage(30),
-    padding: 15,
-    borderRadius: 24,
-    position: "relative",
-    overflow: "hidden",
-  },
-  cardContent: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "space-between",
-    zIndex: 10,
-  },
-  categoryBadgeContainer: {
-    alignSelf: "flex-start",
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  blurBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  badgeInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  categoryText: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_600SemiBold",
-    color: "#FFF",
-    textShadowColor: "rgba(0, 0, 0, 0.1)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  avatarWrapper: {
-    marginVertical: 10,
-  },
-  avatarShadow: {
-    padding: 3,
-    backgroundColor: "rgba(255,255,255,0.3)",
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.5)",
-  },
-  avatar: {
-    width: RFPercentage(8),
-    height: RFPercentage(8),
-    borderRadius: RFPercentage(4),
-  },
-  nameContainer: {
-    alignItems: "center",
-  },
-  userName: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_700Bold",
-    color: "#FFF",
-  },
-  userHandle: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.8)",
-    textTransform: "lowercase",
-  },
-  viewProfileButton: {
-    width: "100%",
-    borderRadius: 15,
-    overflow: "hidden",
-    marginTop: 10,
-  },
-  buttonBlur: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    gap: 5,
-    backgroundColor: "rgba(255,255,255,0.15)",
-  },
-  viewProfileText: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_600SemiBold",
-    color: "#FFF",
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    position: "absolute",
-    top: RFPercentage(1),
-    right: RFPercentage(1),
-    gap: 1,
-  },
-  rankBadge: {
-    position: "absolute",
-    top: -RFPercentage(0.8),
-    left: -RFPercentage(0.8),
-    borderRadius: RFPercentage(1.5),
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  rankGradient: {
-    width: RFPercentage(3),
-    height: RFPercentage(3),
-    borderRadius: RFPercentage(1.5),
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  rankText: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_800ExtraBold",
-    color: "#333",
   },
   topRatedContainer: {
     paddingHorizontal: RFPercentage(2),
     paddingVertical: RFPercentage(1),
   },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  locationText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.8),
+  },
+  clearLocationButton: {
+    marginLeft: RFPercentage(1),
+  },
+  loadingContainer: {
+    marginTop: RFPercentage(18),
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_500Medium",
+    marginTop: RFPercentage(0.5),
+  },
+  notFoundContainer: {
+    bottom: RFPercentage(9),
+  },
+  bottomSpacing: {
+    marginBottom: RFPercentage(6),
+  },
 });
 
-export default Home;
+export default HomeScreen;

@@ -66,6 +66,22 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
   const db = FIREBASE_DB;
 
+  const INITIAL_COUNT = 3;
+  const { userBasic, stats, tasks, reviews } = userDetailedData || {};
+
+  const [showAllCompleted, setShowAllCompleted] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const completedTasks = tasks?.completed || [];
+  const reviewsList = reviews || [];
+
+  const visibleCompletedTasks = showAllCompleted
+    ? completedTasks
+    : completedTasks.slice(0, INITIAL_COUNT);
+
+  const visibleReviews = showAllReviews
+    ? reviewsList
+    : reviewsList.slice(0, INITIAL_COUNT);
+
   // Fetch latest task data and update slot info
   const fetchTaskData = async () => {
     if (!postRequest?.id) return;
@@ -137,7 +153,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
         // Check if current user is confirmed
         const confirmed = confirmedWorkers.some(
-          (worker) => worker?.userId === user.userId
+          (worker) => worker?.userId === user.userId,
         );
         setIsConfirmed(confirmed);
       }
@@ -186,7 +202,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       Alert.alert(
         "All Slots Filled",
         `You have already confirmed all ${slotInfo.total} helpers needed for this task.`,
-        [{ text: "OK", style: "default" }]
+        [{ text: "OK", style: "default" }],
       );
       return;
     }
@@ -206,13 +222,13 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
           Alert.alert(
             "All Slots Filled",
             `You have already confirmed all ${requiredWorkers} helpers needed for this task.`,
-            [{ text: "OK", style: "default" }]
+            [{ text: "OK", style: "default" }],
           );
           return;
         }
 
         const alreadyConfirmed = latestData.confirmedWorkers?.some(
-          (worker) => worker.userId === user.userId
+          (worker) => worker.userId === user.userId,
         );
 
         if (alreadyConfirmed) {
@@ -268,7 +284,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         return;
       }
       const currentConfirmed = Array.isArray(
-        latestData?.confirmedWorkers || postRequest.confirmedWorkers
+        latestData?.confirmedWorkers || postRequest.confirmedWorkers,
       )
         ? latestData?.confirmedWorkers || postRequest.confirmedWorkers
         : [];
@@ -292,7 +308,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       };
       const updatedConfirmed = [...currentConfirmed, confirmationData];
       const updatedApplied = currentApplied.filter(
-        (app) => app && app.userId !== user.userId
+        (app) => app && app.userId !== user.userId,
       );
       await updateDoc(taskDocRef, {
         confirmedWorkers: updatedConfirmed,
@@ -339,7 +355,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               postId: postRequest.id,
             },
           }),
-        }
+        },
       );
       return await response.text();
     } catch (error) {
@@ -392,7 +408,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     try {
       const chatId = await createNewChat(
         currentUserId,
-        userDetailedData.userBasic.userId
+        userDetailedData.userBasic.userId,
       );
       navigation.navigate("Chat", {
         chatId: chatId,
@@ -453,20 +469,19 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     );
   }
 
-  const { userBasic, stats, tasks, reviews } = userDetailedData || {};
   const rank = getRankData(stats?.completedTasks || 0);
 
-  const light = ["#9090bb48", "#50497ec7", "#3c6954c9"];
+
+  const light = ["#a5a5bd48", "#6183a9c7", "#3c6954c9"];
   const dark = ["#1f22388f", "#3a2850ff", "#9db7abff"];
 
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={ "light-content"}
+        barStyle={"light-content"}
         backgroundColor={"transparent"}
         translucent
       />
-     
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -634,8 +649,9 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                           { color: theme.darkGrey },
                         ]}
                       >
-                        {slotInfo.filled}/{slotInfo.total} {t("offerDetail.slt")} •{" "}
-                        {slotInfo.remaining} {t("offerDetail.lft")}
+                        {slotInfo.filled}/{slotInfo.total}{" "}
+                        {t("offerDetail.slt")} • {slotInfo.remaining}{" "}
+                        {t("offerDetail.lft")}
                       </Text>
                     </>
                   )}
@@ -654,7 +670,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                         backgroundColor:
                           theme.mode === "dark"
                             ? "rgba(255, 255, 255, 0.3)"
-                            : "rgba(148, 146, 193, 0.79)",
+                            : "rgba(112, 112, 120, 0.13)",
                       },
                     ]}
                   >
@@ -775,43 +791,64 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         <View style={styles.contentSection}>
           {activeTab === "completed" ? (
             tasks?.completed && tasks?.completed?.length > 0 ? (
-              tasks?.completed.map((item, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.taskCard,
-                    { backgroundColor: theme.white, borderColor: theme.border },
-                  ]}
-                >
-                  <Image
-                    source={{ uri: item.taskDetails.imageUrls?.[0] }}
-                    style={styles.taskImg}
-                  />
-                  <BlurView
-                    intensity={80}
-                    tint="dark"
-                    style={styles.taskOverlay}
+              <>
+                {visibleCompletedTasks.map((item, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.taskCard,
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: theme.border,
+                      },
+                    ]}
                   >
-                    <Text style={styles.taskType}>
-                      {item.taskDetails.taskType}
-                    </Text>
-                  </BlurView>
-                  <View style={styles.taskInfo}>
-                    <Text
-                      style={[styles.taskTitle, { color: theme.heading }]}
-                      numberOfLines={2}
+                    <Image
+                      source={{ uri: item.taskDetails.imageUrls?.[0] }}
+                      style={styles.taskImg}
+                    />
+                    <BlurView
+                      intensity={80}
+                      tint="dark"
+                      style={styles.taskOverlay}
                     >
-                      {item.taskDetails.description}
-                    </Text>
-                    <Text style={[styles.taskDate, { color: theme.grey }]}>
-                      {t("myRequests.txt3")}{" "}
-                      {moment(item.completedAt?.seconds * 1000).format(
-                        "MMM DD, YYYY"
-                      )}
-                    </Text>
+                      <Text style={styles.taskType}>
+                        {item.taskDetails.taskType}
+                      </Text>
+                    </BlurView>
+
+                    <View style={styles.taskInfo}>
+                      <Text
+                        style={[styles.taskTitle, { color: theme.heading }]}
+                        numberOfLines={2}
+                      >
+                        {item.taskDetails.description}
+                      </Text>
+
+                      <Text style={[styles.taskDate, { color: theme.grey }]}>
+                        {t("myRequests.txt3")}{" "}
+                        {moment(
+                          item.completedAt?.seconds
+                            ? item.completedAt.seconds * 1000
+                            : item.completedAt,
+                        ).format("MMM DD, YYYY")}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              ))
+                ))}
+
+                {/*SHOW MORE COMPLETED */}
+                {tasks.completed.length > 3 && !showAllCompleted && (
+                  <TouchableOpacity
+                    onPress={() => setShowAllCompleted(true)}
+                    style={styles.showMoreBtn}
+                  >
+                    <Text style={styles.showMoreText}>
+                      +{tasks.completed.length - 3} more
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </>
             ) : (
               <View style={styles.emptyContainer}>
                 <MaterialCommunityIcons
@@ -827,48 +864,77 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 </Text>
               </View>
             )
-          ) : reviews && reviews.length > 0 ? (
-            reviews.map((item, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.reviewCard,
-                  {
-                    backgroundColor: theme.mode === "dark" ? "#1A1A1A" : "#FFF",
-                    borderColor: theme.border,
-                  },
-                ]}
-              >
-                <View style={styles.reviewHeader}>
-                  <Image
-                    source={
-                      item.reviewer.profileImage
-                        ? { uri: item.reviewer.profileImage }
-                        : Icons.dp
-                    }
-                    style={styles.revAvatar}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.revName, { color: theme.heading }]}>
-                      {item.reviewer.userName}
-                    </Text>
-                    <View style={styles.starRow}>
-                      {[...Array(5)].map((_, i) => (
-                        <Ionicons
-                          key={i}
-                          name="star"
-                          size={RFPercentage(1.5)}
-                          color={i < item.rating ? "#FFD700" : "#DDD"}
-                        />
-                      ))}
+          ) : reviews && reviews?.length > 0 ? (
+            <>
+              {visibleReviews.map((item, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.reviewCard,
+                    {
+                      backgroundColor:
+                        theme.mode === "dark" ? "#0a090cff" : "#FFF",
+                      borderColor: theme.border,
+                    },
+                  ]}
+                >
+                  <View style={styles.reviewHeader}>
+                    <Image
+                      source={
+                        item?.reviewer?.profileImage
+                          ? { uri: item?.reviewer?.profileImage }
+                          : Icons.dp
+                      }
+                      style={styles.revAvatar}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.revName, { color: theme.heading }]}>
+                        {item?.reviewer?.userName}
+                      </Text>
+                      <View style={styles.starRow}>
+                        {[...Array(5)].map((_, i) => (
+                          <Ionicons
+                            key={i}
+                            name="star"
+                            size={RFPercentage(1.5)}
+                            color={i < item?.rating ? "#FFD700" : "#DDD"}
+                          />
+                        ))}
+                      </View>
+                    </View>
+                    <View>
+                      <Text
+                        style={[
+                          styles.revName,
+                          {
+                            color: Colors.primary,
+                            fontFamily: "Poppins_400Regular",
+                            fontSize: 12,
+                          },
+                        ]}
+                      >
+                        {moment(item.createdAt.seconds * 1000).format(
+                          "DD MMMM YYYY",
+                        )}
+                      </Text>
                     </View>
                   </View>
+                  <Text style={[styles.revText, { color: theme.darkGrey }]}>
+                    "{item?.reviewText}"
+                  </Text>
                 </View>
-                <Text style={[styles.revText, { color: theme.darkGrey }]}>
-                  "{item.reviewText}"
-                </Text>
-              </View>
-            ))
+              ))}
+              {reviews.length > 3 && !showAllReviews && (
+                <TouchableOpacity
+                  onPress={() => setShowAllReviews(true)}
+                  style={styles.showMoreBtn}
+                >
+                  <Text style={styles.showMoreText}>
+                   +{reviews.length - 3} more
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
           ) : (
             <View style={styles.emptyContainer}>
               <MaterialCommunityIcons
@@ -880,7 +946,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                 {t("myRequests.noReviews")}
               </Text>
               <Text style={[styles.emptySubtitle, { color: theme.grey }]}>
-                {t("myRequests.noReviewsDesc") }
+                {t("myRequests.noReviewsDesc")}
               </Text>
             </View>
           )}
@@ -1391,7 +1457,7 @@ const styles = StyleSheet.create({
   starRow: {
     flexDirection: "row",
     gap: RFPercentage(0.2),
-    marginTop: RFPercentage(0.2),
+    marginTop: RFPercentage(0.5),
   },
   revText: {
     fontSize: RFPercentage(1.4),
@@ -1418,6 +1484,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: RFPercentage(2),
     fontFamily: "Poppins_400Regular",
+  },
+  showMoreBtn: {
+    alignSelf: "center",
+    marginVertical: RFPercentage(1.5),
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: Colors.primary + "20",
+  },
+  showMoreText: {
+    color: Colors.primary,
+    fontSize: 13,
+    fontFamily: "Poppins_500Medium",
   },
 });
 

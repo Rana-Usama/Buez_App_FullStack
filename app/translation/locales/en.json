@@ -21,10 +21,10 @@
     "rights": "BUEZ. All rights reserved.",
     "error": "Error",
     "noDescription": "No description",
-    "task" : "Task",
-    "bulk" : "Bulk Task with multiple helpers",
-    "helper" : "helper",
-    "helpers" : "helpers"
+    "task": "Task",
+    "bulk": "Bulk Task with multiple helpers",
+    "helper": "helper",
+    "helpers": "helpers"
   },
   "validations": {
     "inValid": "Invalid email",
@@ -262,7 +262,8 @@
     "youAreConfirmed": "You are confirmed",
     "cnf": "Confirm Applicant",
     "slt": "slots filled",
-    "lft": "left"
+    "lft": "left",
+    "avl": "Available Slots"
   },
   "myRequests": {
     "txt1": "My Requests",
@@ -284,7 +285,11 @@
     "noCompletedTasksDesc": "Tasks you complete will appear here",
     "noReviews": "No Reviews Yet",
     "noReviewsDesc": "Reviews from task owners will appear here",
-    "view" : "View Applicants"
+    "view": "View Applicants",
+    "viewConfirmedHelpers": "View Confirmed Helpers",
+    "confirmedHelpers": "Confirmed Helpers",
+    "addReview": "Add Review",
+    "reviewed": "Reviewed"
   },
   "postRequest": {
     "txt1": "Post Request",

@@ -28,7 +28,7 @@ export const addUser = async (
     token,
     isFreeTrial,
     createdAt,
-  }
+  },
 ) => {
   try {
     console.log("ADD_USER");
@@ -141,133 +141,184 @@ export const updateUserToken = async (userId: string, token: string) => {
   }
 };
 
+type Review = {
+  id: string;
+  rating: number;
+  reviewText?: string;
+  createdAt?: any;
+  reviewer?: {
+    userId: string;
+    userName: string;
+    profileImage?: string;
+  };
+};
+
 // Top Rated User Profile Data
 export const fetchUserDetailedProfile = async (userId) => {
-  console.log(userId);
   try {
-    // Fetch user basic info
+    /* ----------------------------------
+       1. USER BASIC INFO
+    ---------------------------------- */
     const userDocRef = doc(FIREBASE_DB, "users", userId);
     const userDocSnap = await getDoc(userDocRef);
-    let userData = null;
-    if (userDocSnap.exists()) {
-      userData = userDocSnap.data();
-      console.log("User data found:", userData);
-    } else {
-      console.log("No user found with ID:", userId);
-    }
-    console.log("............", userDocSnap);
+    const userData = userDocSnap.exists() ? userDocSnap.data() : null;
 
-    // Fetch user's tasks from completedTask collection
-    const tasksQuery = query(
+    /* ----------------------------------
+       2. NORMAL TASKS (single tasks)
+    ---------------------------------- */
+    const normalTasksQuery = query(
       collection(FIREBASE_DB, "completedTask"),
-      where("acceptedBy.userId", "==", userId)
+      where("acceptedBy.userId", "==", userId),
     );
-    const tasksSnap = await getDocs(tasksQuery);
+    const normalTasksSnap = await getDocs(normalTasksQuery);
+
+    /* ----------------------------------
+       3. BULK TASKS (taskRequests)
+    ---------------------------------- */
+    const bulkCompletedQuery = query(
+      collection(FIREBASE_DB, "taskRequests"),
+      where("status", "==", "Completed"),
+      where("confirmedWorkers", "array-contains", { userId }),
+    );
+
+    const bulkActiveQuery = query(
+      collection(FIREBASE_DB, "taskRequests"),
+      where("status", "in", ["pending", "Active"]),
+      where("confirmedWorkers", "array-contains", { userId }),
+    );
+
+    const [bulkCompletedSnap, bulkActiveSnap] = await Promise.all([
+      getDocs(bulkCompletedQuery),
+      getDocs(bulkActiveQuery),
+    ]);
+
+    /* ----------------------------------
+       4. REVIEWS
+    ---------------------------------- */
     const reviewsQuery = query(
       collection(FIREBASE_DB, "reviews"),
-      where("taskOwnerId", "==", userId)
+      where("recipient.userId", "==", userId),
     );
     const reviewsSnap = await getDocs(reviewsQuery);
 
+    /* ----------------------------------
+       5. NORMALIZE BULK TASK
+    ---------------------------------- */
+    const normalizeBulkTask = (doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        isBulk: true,
+        status: data.status,
+        taskDetails: {
+          taskType: data.taskType,
+          description: data.description,
+          imageUrls: data.images || [],
+        },
+        completedAt: data.completedAt || data.updatedAt,
+        raw: data,
+      };
+    };
+
+    /* ----------------------------------
+       6. MERGE TASKS
+    ---------------------------------- */
     let completedTasks = [];
     let activeTasks = [];
     let totalEarnings = 0;
-    let reviews = [];
 
-    tasksSnap.docs.forEach((doc) => {
-      const taskData = doc.data();
-      if (taskData.status === "Completed") {
-        completedTasks.push(taskData);
-        // Calculate earnings if you have compensation field
-        if (taskData.compensation) {
-          totalEarnings +=
-            parseFloat(taskData.compensation.replace("$", "")) || 0;
-        }
-      } else if (taskData.status === "pending") {
-        activeTasks.push(taskData);
+    // Normal tasks
+    normalTasksSnap.docs.forEach((doc) => {
+      const data = doc.data();
+
+      if (data.status === "Completed") {
+        completedTasks.push({ ...data, isBulk: false });
+      } else if (data.status === "pending") {
+        activeTasks.push({ ...data, isBulk: false });
+      }
+
+      if (data.compensation) {
+        totalEarnings += parseFloat(data.compensation.replace("$", "")) || 0;
       }
     });
 
-    reviewsSnap.docs.forEach((doc) => {
-      const reviewData = doc.data();
-      reviews.push({
-        id: doc.id,
-        ...reviewData,
-      });
+    // Bulk completed tasks
+    bulkCompletedSnap.docs.forEach((doc) => {
+      completedTasks.push(normalizeBulkTask(doc));
     });
+
+    // Bulk active tasks
+    bulkActiveSnap.docs.forEach((doc) => {
+      activeTasks.push(normalizeBulkTask(doc));
+    });
+
+    /* ----------------------------------
+       7. REVIEWS DATA
+    ---------------------------------- */
+    const reviews: Review[] = reviewsSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Review, "id">),
+    }));
 
     const averageRating =
       reviews.length > 0
-        ? reviews.reduce((sum, review) => sum + (review.rating || 0), 0) /
-          reviews.length
+        ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
         : 0;
 
-    // Calculate success rate
+    /* ----------------------------------
+       8. SUCCESS RATE
+    ---------------------------------- */
     const totalTasks = completedTasks.length + activeTasks.length;
 
-    const calculateSuccessRate = (reviews, completedTasks, totalTasks) => {
-      // If no tasks at all, success rate is 0
-      if (totalTasks === 0) {
-        return 0;
-      }
-      // If user has reviews, use Bayesian average
-      if (reviews.length > 0) {
-        const platformAverageRating = 4.0; // Assume platform average is 4 stars
-        const platformWeight = 5; // Number of "virtual" platform reviews for smoothing
-        const userTotalRating = reviews.reduce(
-          (sum, review) => sum + review.rating,
-          0
-        );
-        const userReviewCount = reviews.length;
-        // Bayesian calculation: (user_rating * user_reviews + platform_avg * platform_weight) / (user_reviews + platform_weight)
-        const bayesianRating =
-          (userTotalRating + platformAverageRating * platformWeight) /
-          (userReviewCount + platformWeight);
-        // Convert to percentage (5 stars = 100%, 4 stars = 80%, etc.)
-        const successRate = Math.min(
-          100,
-          Math.round((bayesianRating / 5) * 100)
-        );
-        return successRate;
-      }
-      const completionRate = completedTasks.length / totalTasks;
-      const newUserPenalty = 0.7; // 30% penalty for users without reviews
-      const adjustedRate = Math.round(completionRate * newUserPenalty * 100);
+    const calculateSuccessRate = () => {
+      if (totalTasks === 0) return 0;
 
-      return Math.max(0, Math.min(100, adjustedRate));
+      if (reviews.length > 0) {
+        const platformAvg = 4;
+        const weight = 5;
+        const totalRating = reviews.reduce((s, r) => s + r?.rating, 0);
+
+        const bayesian =
+          (totalRating + platformAvg * weight) / (reviews.length + weight);
+
+        return Math.min(100, Math.round((bayesian / 5) * 100));
+      }
+
+      return Math.round((completedTasks.length / totalTasks) * 70);
     };
 
-    let successRate = calculateSuccessRate(reviews, completedTasks, totalTasks);
+    const successRate = calculateSuccessRate();
 
-    // Get member since date
+    /* ----------------------------------
+       9. MEMBER SINCE
+    ---------------------------------- */
     const memberSince = userData?.createdAt
-      ? new Date(userData?.createdAt.seconds * 1000).toLocaleDateString(
+      ? new Date(userData.createdAt.seconds * 1000).toLocaleDateString(
           "en-US",
-          {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }
+          { year: "numeric", month: "long", day: "numeric" },
         )
       : "Recently";
 
+    /* ----------------------------------
+       10. FINAL RESPONSE
+    ---------------------------------- */
     return {
       userBasic: userData,
       stats: {
         activeTasks: activeTasks.length,
         completedTasks: completedTasks.length,
-        successRate: successRate,
-        totalEarnings: totalEarnings,
-        memberSince: memberSince,
-        totalTasks: totalTasks,
+        successRate,
+        totalEarnings,
+        memberSince,
+        totalTasks,
         totalReviews: reviews.length,
         averageRating: Math.round(averageRating * 10) / 10,
       },
       tasks: {
-        completed: completedTasks,
         active: activeTasks,
+        completed: completedTasks,
       },
-      reviews: reviews,
+      reviews,
     };
   } catch (error) {
     console.error("Error fetching user detailed profile:", error);

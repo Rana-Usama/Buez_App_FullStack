@@ -517,9 +517,7 @@ export default function Notifications({ navigation }) {
                 backgroundColor: theme.white,
                 borderLeftWidth: !item.isRead ? RFPercentage(0.5) : 1,
                 borderWidth: 1,
-                borderColor: !item.isRead
-                  ? Colors.primary
-                  : "rgba(224, 223, 232, 0.6)",
+                borderColor:  "rgba(224, 223, 232, 0.6)",
                 borderLeftColor: !item.isRead
                   ? Colors.primary
                   : "rgba(224, 223, 232, 1)",
@@ -562,7 +560,7 @@ export default function Notifications({ navigation }) {
                         : "Poppins_400Regular",
                     },
                   ]}
-                  numberOfLines={3}
+                  numberOfLines={2}
                 >
                   {mainText}
                 </Text>
@@ -810,9 +808,9 @@ export default function Notifications({ navigation }) {
           <MaterialIcons
             name="brightness-1"
             size={RFPercentage(0.6)}
-            color={theme.primary}
+            color={theme.lightGrey}
           />
-          <Text style={[styles.sectionHeaderText, { color: theme.primary }]}>
+          <Text style={[styles.sectionHeaderText, { color: theme.heading }]}>
             {show}
           </Text>
         </View>

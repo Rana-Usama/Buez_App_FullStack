@@ -1,3 +1,4 @@
+// screens/AddReviewToAccepter.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -65,10 +66,42 @@ type Translations = {
   writeReview: string;
   characters: string;
   tap: string;
+  bulk:string
 };
 
 interface ParamsType {
   task?: any;
+}
+
+interface NotificationData {
+  sender: {
+    userId: string | undefined;
+    userName: string | undefined;
+    email: string | null;
+    profileImage: string | null;
+    token: string | null;
+  };
+  receiver: {
+    userId: string | undefined;
+    name: string | undefined;
+    email: string | null;
+    profileImage: string | null;
+    token: string | null;
+  };
+  task: {
+    taskId: string;
+    description: string;
+    taskType: string;
+  };
+  review: {
+    text: string;
+    rating: number;
+  };
+  type: string;
+  timestamp: string;
+  isRead: boolean;
+  isBulkTask?: boolean;
+  bulkWorkerId?: string;
 }
 
 function AddReviewToAccepter() {
@@ -78,6 +111,7 @@ function AddReviewToAccepter() {
   const { theme } = useAppTheme();
   const typedParams = params as ParamsType;
   const task = typedParams.task || {};
+  console.log("task.......", task);
   const recipientUser = task?.acceptedBy ?? {
     userId: "",
     userName: "User",
@@ -103,7 +137,6 @@ function AddReviewToAccepter() {
       .map(() => new Animated.Value(1))
   );
 
-
   // Rating Star Animation
   const animateStar = (index: number) => {
     Animated.sequence([
@@ -120,10 +153,12 @@ function AddReviewToAccepter() {
     ]).start();
   };
 
+  console.log("recipientUser.......", recipientUser?.token);
+
   // Saving Review In Notifications DB
   const saveReviewNotification = async () => {
     try {
-      await addDoc(collection(FIREBASE_DB, "notifications"), {
+      const notificationData: NotificationData = {
         sender: {
           userId: userData?.userId,
           userName: userData?.userName,
@@ -141,6 +176,7 @@ function AddReviewToAccepter() {
         task: {
           taskId,
           description: originalDesc,
+          taskType: task.taskType || "Task",
         },
         review: {
           text: reviewText,
@@ -149,16 +185,27 @@ function AddReviewToAccepter() {
         type: "review_added",
         timestamp: new Date().toISOString(),
         isRead: false,
-      });
+      };
+
+      if (task.isBulkRequest) {
+        notificationData.isBulkTask = true;
+        notificationData.bulkWorkerId = task.bulkWorkerId;
+      }
+
+      await addDoc(collection(FIREBASE_DB, "notifications"), notificationData);
+      console.log("Review notification saved to database");
     } catch (err) {
       console.log("Error saving review notification:", err);
     }
   };
 
-
-  // Sending Push Notification
+  // Sending Push Notification with proper error handling
   const sendReviewPushNotification = async () => {
-    if (!recipientUser?.token) return;
+    if (!recipientUser?.token) {
+      console.log("No FCM token available for recipient");
+      return;
+    }
+
     try {
       const translatedReview = reviewText
         ? await cachedTranslate(reviewText)
@@ -168,22 +215,48 @@ function AddReviewToAccepter() {
         translatedReview.length > 50
           ? translatedReview.substring(0, 50) + "..."
           : translatedReview;
+
+      console.log("Sending review notification...");
+
       const response = await fetch(
         "https://buez-server-khaki.vercel.app/api/send-notification",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
           body: JSON.stringify({
             fcmToken: recipientUser?.token,
-            title: `${userData?.userName} left you a review on his completed task!`,
+            title: `${userData?.userName} left you a review!`,
             body: `${previewText}`,
+            data: {
+              type: "review_added",
+              taskId: taskId,
+              reviewerName: userData?.userName,
+              reviewRating: rating.filter(Boolean).length,
+            },
           }),
         }
       );
+
+      console.log("Response status:", response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("Server error response:", errorText);
+        if (response.status === 500 && errorText.includes("not found")) {
+          console.log(
+            "FCM token is invalid. User may have uninstalled the app."
+          );
+        }
+        return;
+      }
+
       const data = await response.text();
       console.log("Push notification sent:", data);
     } catch (error) {
-      console.log("sendReviewPushNotification error:", error);
+      console.log("sendReviewPushNotification fetch error:", error);
     }
   };
 
@@ -208,6 +281,7 @@ function AddReviewToAccepter() {
         writeReview: "Write your review",
         characters: "characters",
         tap: "Tap to rate",
+        bulk :"Bulk Task Helper"
       };
       const vals = await Promise.all(
         Object.values(phrases).map((txt) => cachedTranslate(txt))
@@ -243,8 +317,7 @@ function AddReviewToAccepter() {
     });
   };
 
-
-  // Review Submission
+  // Review Submission with improved error handling
   const submitReview = async () => {
     const stars = rating.filter(Boolean).length;
     if (reviewText.trim() === "") {
@@ -255,55 +328,140 @@ function AddReviewToAccepter() {
       });
       return;
     }
+
     try {
       setSubmitting(true);
       const currentUser = getAuth().currentUser;
-      await addDoc(collection(FIREBASE_DB, "reviews"), {
-        reviewer: {
-          userId: currentUser?.uid || "",
-          userName: userData?.userName || "Anonymous",
-          profileImage: userData?.profileImage || null,
-        },
-        recipient: recipientUser,
+      const currentUserId = currentUser?.uid;
+
+      if (!currentUserId) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "You must be logged in to submit a review.",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // For bulk tasks: use the specific worker ID
+      const reviewedUserId =
+        task.isBulkRequest && task.bulkWorkerId
+          ? task.bulkWorkerId
+          : recipientUser.userId;
+
+      // Validate we have a valid user to review
+      if (!reviewedUserId) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Cannot submit review: Invalid user.",
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      // 1. Save review to database
+      const reviewData = {
+        reviewerId: currentUserId,
+        reviewerName: userData?.userName || "Anonymous",
+        reviewerProfileImage: userData?.profileImage || null,
+        reviewedUserId: reviewedUserId,
+        reviewedUserName: recipientUser.userName,
+        reviewedUserProfileImage: recipientUser.profileImage,
         taskId,
+        taskTitle: task.taskType || task.title || "Task",
+        taskDescription: task.description || "",
         rating: stars,
         reviewText: reviewText.trim(),
         createdAt: serverTimestamp(),
-        taskOwnerId: task?.acceptedBy?.userId,
-      });
-      const q = query(
-        collection(FIREBASE_DB, "completedTask"),
-        where("taskId", "==", taskId)
+        taskOwnerId: task.userId,
+        isBulkTask: task.isBulkRequest || false,
+        bulkWorkerId: task.bulkWorkerId || null,
+      };
+      const reviewRef = await addDoc(
+        collection(FIREBASE_DB, "reviews"),
+        reviewData
       );
-      const snap = await getDocs(q);
-      await Promise.all(
-        snap.docs.map((d) =>
-          updateDoc(doc(FIREBASE_DB, "completedTask", d.id), {
-            reviewed: true,
-            reviewText: reviewText.trim(),
-            rating: stars,
-          })
-        )
-      );
-      const taskDocRef = doc(FIREBASE_DB, "taskRequests", task.id);
-      await updateDoc(taskDocRef, {
-        reviewedAccepter: true,
-      });
+      const reviewId = reviewRef.id;
+      console.log("Review saved with ID:", reviewId);
 
-      await sendReviewPushNotification();
-      await saveReviewNotification();
+      // 2. Update task reviewed status
+      try {
+        if (task.isBulkRequest && task.confirmedWorkers) {
+          // Check if all helpers have been reviewed
+          const reviewsRef = collection(FIREBASE_DB, "reviews");
+          const reviewQuery = query(
+            reviewsRef,
+            where("taskId", "==", task.id),
+            where("reviewerId", "==", currentUserId)
+          );
+          const reviewSnapshot = await getDocs(reviewQuery);
+
+          const reviewedWorkers = new Set(
+            reviewSnapshot.docs.map((doc) => doc.data().reviewedUserId)
+          );
+
+          const allConfirmedWorkersReviewed = task.confirmedWorkers.every(
+            (worker) => reviewedWorkers.has(worker.userId)
+          );
+
+          if (allConfirmedWorkersReviewed) {
+            const taskDocRef = doc(FIREBASE_DB, "taskRequests", task.id);
+            await updateDoc(taskDocRef, {
+              reviewedAccepter: true,
+              lastReviewUpdate: serverTimestamp(),
+            });
+          }
+        } else {
+          // For single tasks
+          const taskDocRef = doc(FIREBASE_DB, "taskRequests", task.id);
+          await updateDoc(taskDocRef, {
+            reviewedAccepter: true,
+            reviewedAt: serverTimestamp(),
+          });
+          console.log("Single task marked as reviewed");
+        }
+      } catch (updateError) {
+        console.log("Error updating task status (non-critical):", updateError);
+      }
+
+      // 3. Save notification to database
+      try {
+        await saveReviewNotification();
+      } catch (notificationSaveError) {
+        console.log(
+          "Error saving notification (non-critical):",
+          notificationSaveError
+        );
+      }
+
+      // 4. Try to send push notification (but don't fail if it doesn't work)
+      try {
+        await sendReviewPushNotification();
+      } catch (notificationError) {
+        console.log(
+          "Push notification failed (non-critical):",
+          notificationError
+        );
+      }
+
       Toast.show({
         type: "success",
         text1: tr.success || "Success",
-        text2: tr.reviewSubmitted || "Review submitted!",
+        text2: `${tr.reviewSubmitted || "Review submitted successfully!"}`,
       });
-      navigation.goBack();
+
+      // Navigate back after a delay
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1500);
     } catch (e) {
-      console.log(e);
+      console.log("Review submission error:", e);
       Toast.show({
         type: "error",
         text1: tr.error || "Error",
-        text2: tr.couldNotSubmit || "Could not submit review.",
+        text2: e.message || tr.couldNotSubmit || "Could not submit review.",
       });
     } finally {
       setSubmitting(false);
@@ -362,18 +520,12 @@ function AddReviewToAccepter() {
                 <Text style={[styles.userName, { color: theme.heading }]}>
                   {recipientUser.userName}
                 </Text>
-                {/* <View style={styles.locationRow}>
-                  <FontAwesome
-                    name="map-marker"
-                    size={RFPercentage(1.8)}
-                    color={theme.darkGrey}
-                  />
-                  <Text
-                    style={[styles.locationText, { color: theme.darkGrey }]}
-                  >
-                    {task?.address?.name || "Location not specified"}
-                  </Text>
-                </View> */}
+                {/* Task type badge */}
+                {task.isBulkRequest && (
+                  <View style={styles.bulkBadge}>
+                    <Text style={styles.bulkBadgeText}>{tr.bulk}</Text>
+                  </View>
+                )}
               </View>
             </View>
 
@@ -555,6 +707,19 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(0.5),
+  },
+  bulkBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: Colors.primary + "20",
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.3),
+    borderRadius: RFPercentage(0.5),
+    marginTop: RFPercentage(0.3),
+  },
+  bulkBadgeText: {
+    fontSize: RFPercentage(1),
+    fontFamily: "Poppins_500Medium",
+    color: Colors.primary,
   },
   locationRow: {
     flexDirection: "row",

@@ -34,6 +34,7 @@ import ImageView from "react-native-image-viewing";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 // Components
 import AcceptanceSuccessModal from "../components/common/AcceptanceSuccessModal";
+import Feather from "@expo/vector-icons/Feather";
 
 // Services & Utils
 import { getDateTime } from "../services/Shared.service";
@@ -229,11 +230,11 @@ function OfferDetail({ navigation, route }) {
       // Check if current user has already applied
       if (currentUserId) {
         const userApplied = (postRequest.appliedWorkers || []).some(
-          (worker) => worker.userId === currentUserId
+          (worker) => worker.userId === currentUserId,
         );
 
         const confirmed = (postRequest.confirmedWorkers || []).some(
-          (worker) => worker.userId === currentUserId
+          (worker) => worker.userId === currentUserId,
         );
         setConfirmed(confirmed);
         setHasApplied(userApplied);
@@ -243,7 +244,6 @@ function OfferDetail({ navigation, route }) {
     }
   }, [postRequest, currentUserId]);
 
-  
   // Check if user can apply
   const canApply = () => {
     if (!isWorker) return false; // Not a worker
@@ -307,7 +307,7 @@ function OfferDetail({ navigation, route }) {
       const convertedAmount = convertCurrency(
         originalAmount,
         item.currencyInfo.code,
-        targetCurrency
+        targetCurrency,
       );
       return formatCurrency(convertedAmount, currentLocation);
     } catch (error) {
@@ -385,20 +385,26 @@ function OfferDetail({ navigation, route }) {
     }
   }, [postRequest]);
 
+  console.log("postRequest?.reviews......", postRequest?.reviews);
   // Translate reviews and calculate average rating
   useEffect(() => {
     const translateReviews = async () => {
       if (postRequest?.reviews && postRequest.reviews.length > 0) {
+        const taskOwnerId = postRequest?.userId;
+        const reviewsAboutTaskOwner = postRequest.reviews.filter((review) => {
+          return review.recipient?.userId === taskOwnerId;
+        });
+
         const translated = await Promise.all(
-          postRequest.reviews.map(async (review) => ({
+          reviewsAboutTaskOwner.map(async (review) => ({
             ...review,
             translatedText: await translateWithCache(review.reviewText || ""),
-          }))
+          })),
         );
         setTranslatedReviews(translated);
 
-        // Calculate average rating
-        const ratings = postRequest.reviews
+        // Calculate average rating from filtered reviews
+        const ratings = reviewsAboutTaskOwner
           .map((r) => r.rating)
           .filter(Boolean);
         if (ratings.length > 0) {
@@ -482,7 +488,7 @@ function OfferDetail({ navigation, route }) {
             title: currentUser?.userData?.userName,
             body: t("pushNotifications.txt1"),
           }),
-        }
+        },
       );
       const data = await response.text();
       return data;
@@ -789,7 +795,7 @@ function OfferDetail({ navigation, route }) {
           }
           return acc;
         },
-        {}
+        {},
       );
       await addDoc(collection(db, "notifications"), cleanNotificationData);
     } catch (error) {
@@ -818,7 +824,7 @@ function OfferDetail({ navigation, route }) {
                 : postRequest?.taskType
             }" request`,
           }),
-        }
+        },
       );
       return response.text();
     } catch (error) {
@@ -833,7 +839,7 @@ function OfferDetail({ navigation, route }) {
         backgroundColor={"transparent"}
         translucent
       />
-      <CustomNav title={t("details.txt1")} showBack={true} />
+      {/* <CustomNav title={t("details.txt1")} showBack={true} /> */}
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -841,7 +847,7 @@ function OfferDetail({ navigation, route }) {
         contentContainerStyle={styles.scrollContent}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
+          { useNativeDriver: true },
         )}
         scrollEventThrottle={16}
       >
@@ -856,7 +862,7 @@ function OfferDetail({ navigation, route }) {
               onMomentumScrollEnd={(event) => {
                 const index = Math.round(
                   event.nativeEvent.contentOffset.x /
-                    event.nativeEvent.layoutMeasurement.width
+                    event.nativeEvent.layoutMeasurement.width,
                 );
                 setActiveIndex(index);
               }}
@@ -922,6 +928,14 @@ function OfferDetail({ navigation, route }) {
               ))}
             </View>
           )}
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.goBack()}
+            style={styles.back}
+          >
+            <Feather name="arrow-left" color="white" size={RFPercentage(2.4)} />
+          </TouchableOpacity>
 
           {/* Category Badge */}
           <View style={styles.categoryBadge}>
@@ -1039,7 +1053,7 @@ function OfferDetail({ navigation, route }) {
                     ]}
                     onPress={handleStartChat}
                     activeOpacity={0.7}
-                    disabled={!isAccepted}
+                    disabled={!isAccepted && isBulkRequest}
                   >
                     <Ionicons
                       name="chatbubble-ellipses"
@@ -1061,7 +1075,7 @@ function OfferDetail({ navigation, route }) {
               {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? theme.lightGrey + "20"
+                    ? Colors.lightGrey + "10"
                     : Colors.primary + "05",
               },
             ]}
@@ -1104,7 +1118,7 @@ function OfferDetail({ navigation, route }) {
                 {
                   backgroundColor:
                     theme.mode === "dark"
-                    ? theme.lightGrey + "20"
+                      ? Colors.lightGrey + "10"
                       : Colors.primary + "05",
                 },
               ]}
@@ -1241,22 +1255,22 @@ function OfferDetail({ navigation, route }) {
 
               {/* Applied Workers List (Visible to Requester Only) */}
               {currentUserId === postRequest?.userId &&
-                appliedWorkers.length > 0 && (
+                appliedWorkers?.length > 0 && (
                   <View style={styles.appliedWorkersContainer}>
                     <Text
                       style={[styles.appliedTitle, { color: theme.darkGrey }]}
                     >
                       {t("offerDetail.applications") || "Applications"} (
-                      {appliedWorkers.length})
+                      {appliedWorkers?.length})
                     </Text>
                     <ScrollView
                       horizontal
                       showsHorizontalScrollIndicator={false}
                       style={styles.appliedScrollView}
                     >
-                      {appliedWorkers.map((worker, index) => {
+                      {appliedWorkers?.map((worker, index) => {
                         const isConfirmed = confirmedWorkers.some(
-                          (w) => w.userId === worker.userId
+                          (w) => w.userId === worker.userId,
                         );
                         return (
                           <View
@@ -1322,7 +1336,7 @@ function OfferDetail({ navigation, route }) {
                 styles.infoCard,
                 {
                   backgroundColor:
-                    theme.mode === "dark" ? theme.lightGrey + "20" : "#E3F2FD",
+                    theme.mode === "dark" ? Colors.lightGrey + "10" : "#E3F2FD",
                 },
               ]}
             >
@@ -1357,7 +1371,7 @@ function OfferDetail({ navigation, route }) {
                 styles.infoCard,
                 {
                   backgroundColor:
-                    theme.mode === "dark" ? theme.lightGrey + "20" : "#E8F5E9",
+                    theme.mode === "dark" ? Colors.lightGrey + "10" : "#E8F5E9",
                 },
               ]}
             >
@@ -1402,7 +1416,9 @@ function OfferDetail({ navigation, route }) {
                 styles.infoCard,
                 {
                   backgroundColor:
-                    theme.mode === "dark" ? theme.lightGrey + "20" : "#efefefff",
+                    theme.mode === "dark"
+                      ? Colors.lightGrey + "10"
+                      : "#efefefff",
                 },
               ]}
             >
@@ -1602,8 +1618,8 @@ function OfferDetail({ navigation, route }) {
                       backgroundColor: !isChatEnabled()
                         ? theme.lightGrey + "30"
                         : theme.mode === "dark"
-                        ? theme.white + "10"
-                        : Colors.primary + "08",
+                          ? theme.white + "10"
+                          : Colors.primary + "08",
                       opacity: isChatEnabled() ? 1 : 0.5,
                     },
                   ]}
@@ -1802,7 +1818,7 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(10),
   },
   heroSection: {
-    height: RFPercentage(30),
+    height: RFPercentage(40),
     position: "relative",
   },
   imageContainer: {
@@ -1850,8 +1866,8 @@ const styles = StyleSheet.create({
   },
   categoryBadge: {
     position: "absolute",
-    top: RFPercentage(2),
-    left: RFPercentage(2),
+    top: RFPercentage(6),
+    right: RFPercentage(2),
     borderRadius: RFPercentage(2),
     overflow: "hidden",
     elevation: 4,
@@ -2255,6 +2271,17 @@ const styles = StyleSheet.create({
   disabledText: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
+  },
+  back: {
+    position: "absolute",
+    top: RFPercentage(6),
+    left: RFPercentage(2),
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(100),
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
 });
 
