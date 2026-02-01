@@ -65,29 +65,5 @@ target 'Buez' do
         end
       end
     end
-
-    # Fix for iOS 26 SDK - AssetsLibrary removal
-    installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        # Set minimum deployment target
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
-        
-        # Exclude AssetsLibrary framework for iOS 26+
-        config.build_settings['OTHER_LDFLAGS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_LDFLAGS'] << '-weak_framework AssetsLibrary'
-        
-        # Use legacy build system compatibility
-        config.build_settings['SWIFT_VERSION'] = '5.0'
-      end
-    end
-
-    # Fix for generated projects (Xcode 16+)
-    installer.generated_projects.each do |project|
-      project.targets.each do |target|
-        target.build_configurations.each do |config|
-          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
-        end
-      end
-    end
   end
 end
