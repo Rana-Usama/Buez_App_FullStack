@@ -14,10 +14,15 @@ import { Octicons, MaterialIcons } from "@expo/vector-icons";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { ShareButton } from "../job-sharing/ShareButton";
+import { useRoute } from "@react-navigation/native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 function SuccessScreen({ navigation }) {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
+  const route = useRoute();
+  const taskData = route.params?.taskData || null;
 
   const InfoCard = ({ icon, title, description }) => (
     <View
@@ -113,6 +118,54 @@ function SuccessScreen({ navigation }) {
         {t("successScreen.txt3")}
       </Text>
 
+      {/* Share Card - Prominent CTA */}
+      <View style={styles.shareCard}>
+        <View style={styles.shareIconContainer}>
+          <Ionicons
+            name="share-outline"
+            size={RFPercentage(3)}
+            color={theme.mode === "dark" ? Colors.primary : Colors.white}
+          />
+        </View>
+
+        <View style={styles.shareContent}>
+          <Text
+            style={[
+              styles.shareTitle,
+              { color: theme.mode === "dark" ? Colors.primary : Colors.white },
+            ]}
+          >
+            {t("successScreen.shareTitle") || "Share Your Task"}
+          </Text>
+
+          <Text
+            style={[
+              styles.shareDescription,
+              {
+                color:
+                  theme.mode === "dark"
+                    ? "rgba(255,255,255,0.8)"
+                    : "rgba(255,255,255,0.9)",
+              },
+            ]}
+          >
+            {t("successScreen.shareDescription") ||
+              "Share this opportunity with friends and family to find helpers faster!"}
+          </Text>
+
+          <ShareButton
+            jobId={taskData?.id || ""}
+            jobTitle={taskData?.taskType || "New Task"}
+            jobDescription={taskData?.description || ""}
+            companyName="Buez"
+            style={styles.shareButton}
+            showLabel={true}
+            iconOnly={false}
+            variant="light"
+          />
+        </View>
+      </View>
+
       {/* Information Cards */}
       <ScrollView
         style={styles.infoContainer}
@@ -158,6 +211,7 @@ function SuccessScreen({ navigation }) {
           onPress={() => navigation.navigate("TabNavigator")}
         >
           <Text
+            numberOfLines={1}
             style={[
               styles.primaryButtonText,
               { color: theme.mode === "dark" ? Colors.white : Colors.primary },
@@ -186,6 +240,7 @@ function SuccessScreen({ navigation }) {
           }
         >
           <Text
+            numberOfLines={1}
             style={[
               styles.secondaryButtonText,
               { color: theme.mode === "dark" ? Colors.primary : Colors.white },
@@ -222,8 +277,47 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
-    marginBottom: RFPercentage(4),
+    marginBottom: RFPercentage(3),
     marginHorizontal: RFPercentage(2),
+  },
+  shareCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: RFPercentage(2),
+    borderRadius: RFPercentage(2),
+    marginBottom: RFPercentage(3),
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    marginHorizontal: RFPercentage(1),
+  },
+  shareIconContainer: {
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+    borderRadius: RFPercentage(3),
+    backgroundColor: "rgba(255,255,255,0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: RFPercentage(2),
+  },
+  shareContent: {
+    flex: 1,
+  },
+  shareTitle: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(0.5),
+  },
+  shareDescription: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2),
+    marginBottom: RFPercentage(1.5),
+  },
+  shareButton: {
+    alignSelf: "flex-start",
+    minWidth: RFPercentage(12),
+    // backgroundColor:"white"
   },
   infoContainer: {
     flex: 1,
@@ -262,14 +356,16 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(3),
     paddingHorizontal: RFPercentage(2),
     paddingTop: RFPercentage(1),
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   primaryButton: {
-    width: "100%",
+    width: "40%",
     height: RFPercentage(6),
     justifyContent: "center",
     alignItems: "center",
     borderRadius: RFPercentage(1.5),
-    marginBottom: RFPercentage(2),
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -284,12 +380,12 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   secondaryButton: {
-    width: "100%",
+    width: "58%",
     height: RFPercentage(6),
     justifyContent: "center",
     alignItems: "center",
     borderRadius: RFPercentage(1.5),
-    borderWidth: 2,
+    borderWidth: RFPercentage(0.15),
     backgroundColor: "transparent",
   },
   secondaryButtonText: {

@@ -59,6 +59,7 @@ import CustomNav from "../components/common/CustomNav";
 const { width } = Dimensions.get("window");
 
 import { StyleProp, ViewStyle, TextStyle } from "react-native";
+import { ShareButton } from "../job-sharing/ShareButton";
 
 interface CustomAppButtonProps {
   title: string;
@@ -176,7 +177,16 @@ function OfferDetail({ navigation, route }) {
   const currentUserId2 = getAuth().currentUser;
   const { location: currentLocation } = useLocation();
 
-  const postRequest = route.params?.postRequest;
+  const jobId = route.params?.jobId;
+  const initialPostRequest = route.params?.postRequest;
+
+  const [postRequest, setPostRequest] = useState<any>(
+    initialPostRequest ?? null,
+  );
+  const [isLoadingTask, setIsLoadingTask] = useState(
+    !initialPostRequest && !!jobId,
+  );
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [visible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -209,6 +219,33 @@ function OfferDetail({ navigation, route }) {
   const db = FIREBASE_DB;
   const imageObjects =
     postRequest?.imageUrls?.map((url) => ({ uri: url })) || [];
+
+  useEffect(() => {
+    if (initialPostRequest) return; // already have full object
+    if (!jobId) return;
+
+    setIsLoadingTask(true);
+    const taskDocRef = doc(db, "taskRequests", jobId);
+
+    const unsubscribe = onSnapshot(
+      taskDocRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setPostRequest({ id: docSnap.id, ...data });
+        } else {
+          setPostRequest(null);
+        }
+        setIsLoadingTask(false);
+      },
+      (err) => {
+        console.log("Error loading task:", err);
+        setIsLoadingTask(false);
+      },
+    );
+
+    return unsubscribe;
+  }, [jobId, initialPostRequest]);
 
   // Animations
   useEffect(() => {
@@ -385,7 +422,6 @@ function OfferDetail({ navigation, route }) {
     }
   }, [postRequest]);
 
-  console.log("postRequest?.reviews......", postRequest?.reviews);
   // Translate reviews and calculate average rating
   useEffect(() => {
     const translateReviews = async () => {
@@ -832,6 +868,35 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
+
+
+
+
+
+   if (isLoadingTask) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.white }}>
+        <Text style={{ color: theme.darkGrey }}>{t("common.loading") || "Loading..."}</Text>
+      </View>
+    );
+  }
+
+  if (!postRequest) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.white }}>
+        <Text style={{ color: theme.darkGrey }}>
+          {t("offerDetail.notFound") || "This task is no longer available."}
+        </Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 12 }}>
+          <Text style={{ color: theme.primary }}>{t("common.goBack") || "Go back"}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+
+  
+
   return (
     <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -959,6 +1024,7 @@ function OfferDetail({ navigation, route }) {
         {/* Main Content */}
         <Animated.View style={[styles.contentContainer, { opacity: fadeAnim }]}>
           {/* User Info Card - Light Background */}
+          {/* User Info Card - Light Background */}
           <View style={styles.userCardContainer}>
             <BlurView
               intensity={80}
@@ -1040,30 +1106,23 @@ function OfferDetail({ navigation, route }) {
                   </View>
                 </View>
 
-                {currentUserId !== postRequest?.userId && (
-                  <TouchableOpacity
-                    style={[
-                      styles.messageButton,
-                      {
-                        backgroundColor:
-                          theme.mode === "dark"
-                            ? "rgba(255,255,255,0.15)"
-                            : Colors.primary + "20",
-                      },
-                    ]}
-                    onPress={handleStartChat}
-                    activeOpacity={0.7}
-                    disabled={!isAccepted && isBulkRequest}
-                  >
-                    <Ionicons
-                      name="chatbubble-ellipses"
-                      size={RFPercentage(2.2)}
-                      color={
-                        theme.mode === "dark" ? Colors.white : Colors.primary
-                      }
-                    />
-                  </TouchableOpacity>
-                )}
+                {/* Share Button (Replaces the chat button) */}
+                <ShareButton
+                  jobId={postRequest?.id}
+                  jobTitle={
+                    postRequest?.taskType === "Other"
+                      ? postRequest?.customTaskTitle || postRequest?.taskType
+                      : postRequest?.taskType
+                  }
+                  jobDescription={postRequest?.description}
+                  companyName="Buez"
+                  style={[
+                    styles.shareButton,
+                    {
+                      backgroundColor: Colors.primary + "30",
+                    },
+                  ]}
+                />
               </View>
             </BlurView>
           </View>
@@ -2282,6 +2341,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  shareButton: {
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: RFPercentage(2.25),
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

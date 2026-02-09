@@ -126,7 +126,7 @@ function PostRequest({ navigation, route }) {
 
   const currencyInfo = getCurrencyInfo(getLocationForCurrency());
   const currentCurrencySymbol = getCurrencySymbolFromLocation(
-    getLocationForCurrency()
+    getLocationForCurrency(),
   );
 
   useEffect(() => {
@@ -175,7 +175,7 @@ function PostRequest({ navigation, route }) {
           taskOptions.map(async (option) => ({
             ...option,
             name: await cachedTranslate(option.name),
-          }))
+          })),
         );
         setTranslatedTaskOptions(translatedTasks);
 
@@ -183,7 +183,7 @@ function PostRequest({ navigation, route }) {
           compensationOptions.map(async (option) => ({
             ...option,
             type: await cachedTranslate(option.type),
-          }))
+          })),
         );
         setTranslatedCompensationOptions(translatedCompensations);
 
@@ -192,15 +192,15 @@ function PostRequest({ navigation, route }) {
           setSelectedTask(await cachedTranslate(currentPostRequest.taskType));
           setOriginalCompensationType(currentPostRequest.compensationType);
           setSelectedCompensation(
-            await cachedTranslate(currentPostRequest.compensationType)
+            await cachedTranslate(currentPostRequest.compensationType),
           );
           setLocation(currentPostRequest.address);
           setCompensation(
-            await cachedTranslate(currentPostRequest.otherCompensation)
+            await cachedTranslate(currentPostRequest.otherCompensation),
           );
           if (currentPostRequest.monitarily) {
             const numericValue = extractNumericValue(
-              currentPostRequest.monitarily.toString()
+              currentPostRequest.monitarily.toString(),
             );
             setNumericBudget(numericValue.toString());
             setBudget(formatCurrency(numericValue, selectedLocation));
@@ -218,7 +218,7 @@ function PostRequest({ navigation, route }) {
         }
       };
       translateAndSet();
-    }, [route.params?.postRequest])
+    }, [route.params?.postRequest]),
   );
 
   const toggleDropdown = (dropdownType) => {
@@ -263,7 +263,7 @@ function PostRequest({ navigation, route }) {
         {
           compress: 0.2,
           format: ImageManipulator.SaveFormat.JPEG,
-        }
+        },
       );
       let tempImageUris = [...imageUris];
       tempImageUris[index] = compressedImage.uri;
@@ -432,20 +432,41 @@ function PostRequest({ navigation, route }) {
           const compressed = await ImageManipulator.manipulateAsync(
             localFile,
             [],
-            { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG }
+            { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG },
           );
           imgs.push(compressed.uri);
         }
       }
       if (!isEditing) {
         const savedPost = await savePost(data, imgs);
+        console.log("savedPost...............", savedPost);
+        const taskDataForSuccess = {
+          id: savedPost.id,
+          taskType:
+            originalTaskType === "Other" ? customTaskTitle : originalTaskType,
+          description: description,
+          compensationType: originalCompensationType,
+          monitarily: numericBudget || "0",
+          currencyInfo: currencyInfo,
+          otherCompensation: compensation,
+          address: selectedLocation,
+          numberOfWorkers: numberOfWorkers,
+          isBulkRequest: numberOfWorkers > 1,
+          imageUrls: savedPost.imageUrls || [],
+          createdAt: savedPost.createdAt || new Date().toISOString(),
+          user: user?.userData || {},
+        };
+
+        // Navigate with task data
+        navigation.navigate("SuccessScreen", {
+          taskData: taskDataForSuccess,
+        });
         if (user?.token) {
           await scheduleTaskReminder(savedPost?.id, user?.token);
         }
       } else {
         await updatePost(currentPostRequest.id, data, imgs);
       }
-      navigation.navigate("SuccessScreen");
     } catch (error) {
       console.log("Error stack:", error?.stack);
       Toast.show({
@@ -481,516 +502,144 @@ function PostRequest({ navigation, route }) {
       )}
       <TouchableWithoutFeedback
         onPress={() => {
-          Keyboard.dismiss(),
+          (Keyboard.dismiss(),
             setShowTaskDropdown(false),
-            setShowCompensationDropdown(false);
+            setShowCompensationDropdown(false));
         }}
       >
-          <ScrollView
-            style={[styles.screen, { backgroundColor: theme.white }]}
-            contentContainerStyle={styles.scrollViewContent}
-            keyboardShouldPersistTaps="always"
-            showsVerticalScrollIndicator={false}
-
+        <ScrollView
+          style={[styles.screen, { backgroundColor: theme.white }]}
+          contentContainerStyle={styles.scrollViewContent}
+          keyboardShouldPersistTaps="always"
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View
+            style={[
+              styles.formContainer,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
           >
-            <Animated.View
-              style={[
-                styles.formContainer,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ translateY: slideAnim }],
-                },
-              ]}
-            >
-              {/* Task Type */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="category"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {t("postRequest.txt3")}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  activeOpacity={0.7}
+            {/* Task Type */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
                   style={[
-                    styles.selectField,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: showTaskDropdown
-                        ? theme.primary
-                        : theme.border,
-                      borderWidth: showTaskDropdown ? 1.5 : 1,
-                    },
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
                   ]}
-                  onPress={() => toggleDropdown("task")}
                 >
-                  <View style={styles.selectFieldContent}>
-                    {selectedTask ? (
-                      <View style={styles.selectedOption}>
-                        <FontAwesome5
-                          name={
-                            taskOptions.find((t) => t.name === originalTaskType)
-                              ?.icon || "tasks"
-                          }
-                          size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
-                          style={styles.optionIcon}
-                        />
-                        <Text
-                          style={[styles.selectedText, { color: theme.black }]}
-                        >
-                          {selectedTask}
-                        </Text>
-                      </View>
-                    ) : (
-                      <Text
-                        style={[
-                          styles.placeholderText,
-                          { color: theme.heading },
-                        ]}
-                      >
-                        {t("postRequest.txt3")}
-                      </Text>
-                    )}
-                  </View>
                   <MaterialIcons
-                    name={
-                      showTaskDropdown
-                        ? "keyboard-arrow-up"
-                        : "keyboard-arrow-down"
-                    }
-                    size={RFPercentage(2.5)}
+                    name="category"
+                    size={RFPercentage(2)}
                     color={theme.primary}
                   />
-                </TouchableOpacity>
-
-                {showTaskDropdown && (
-                  <View
-                    style={[
-                      styles.dropdownContainer,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        shadowColor: theme.black,
-                      },
-                    ]}
-                  >
-                    {translatedTaskOptions.map((item) => (
-                      <TouchableOpacity
-                        key={item.id}
-                        onPress={() => selectTask(item)}
-                        style={[
-                          styles.optionItem,
-                          selectedTask === item.name && {
-                            backgroundColor: `${theme.primary}10`,
-                          },
-                        ]}
-                      >
-                        <FontAwesome5
-                          name={
-                            taskOptions.find((t) => t.id === item.id)?.icon ||
-                            "circle"
-                          }
-                          size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
-                        />
-                        <Text
-                          style={[styles.optionText, { color: theme.darkGrey }]}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-
-                {originalTaskType === "Other" && (
-                  <View style={styles.customTaskContainer}>
-                    <InputFieldNew
-                      placeholder={t("postRequest.customTaskTitle")}
-                      value={customTaskTitle}
-                      onChangeText={setCustomTaskTitle}
-                      maxLength={20}
-                      customStyle={{
-                        width: "100%",
-                        borderRadius: RFPercentage(1.2),
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        height: RFPercentage(6),
-                        marginTop: 0,
-                      }}
-                    />
-                  </View>
-                )}
-              </View>
-
-              {/* Compensation Type */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="attach-money"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {t("postRequest.txt7")}
-                  </Text>
                 </View>
-
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={[
-                    styles.selectField,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: showCompensationDropdown
-                        ? theme.primary
-                        : theme.border,
-                      borderWidth: showCompensationDropdown ? 1.5 : 1,
-                    },
-                  ]}
-                  onPress={() => toggleDropdown("compensation")}
-                >
-                  <View style={styles.selectFieldContent}>
-                    {selectedCompensation ? (
-                      <View style={styles.selectedOption}>
-                        <FontAwesome5
-                          name={
-                            compensationOptions.find(
-                              (c) => c.type === originalCompensationType
-                            )?.icon || "dollar-sign"
-                          }
-                          size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
-                          style={styles.optionIcon}
-                        />
-                        <Text
-                          style={[styles.selectedText, { color: theme.black }]}
-                        >
-                          {selectedCompensation}
-                        </Text>
-                      </View>
-                    ) : (
-                      <Text
-                        style={[
-                          styles.placeholderText,
-                          { color: theme.heading },
-                        ]}
-                      >
-                        {t("postRequest.txt7")}
-                      </Text>
-                    )}
-                  </View>
-                  <MaterialIcons
-                    name={
-                      showCompensationDropdown
-                        ? "keyboard-arrow-up"
-                        : "keyboard-arrow-down"
-                    }
-                    size={RFPercentage(2.5)}
-                    color={theme.primary}
-                  />
-                </TouchableOpacity>
-
-                {showCompensationDropdown && (
-                  <View
-                    style={[
-                      styles.dropdownContainer,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        shadowColor: theme.black,
-                      },
-                    ]}
-                  >
-                    {translatedCompensationOptions.map((item) => (
-                      <TouchableOpacity
-                        key={item.id}
-                        onPress={() => selectCompensation(item)}
-                        style={[
-                          styles.optionItem,
-                          selectedCompensation === item.type && {
-                            backgroundColor: `${theme.primary}10`,
-                          },
-                        ]}
-                      >
-                        <FontAwesome5
-                          name={
-                            compensationOptions.find((c) => c.id === item.id)
-                              ?.icon || "circle"
-                          }
-                          size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
-                        />
-                        <Text
-                          style={[styles.optionText, { color: theme.darkGrey }]}
-                        >
-                          {item.type}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              {/* Number of Workers */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="people"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {t("postRequest.numberOfWorkers") ||
-                      "Number of helpers needed"}
-                  </Text>
-                </View>
-
-                <View style={styles.numberInputContainer}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (numberOfWorkers > 1) {
-                        setNumberOfWorkers(numberOfWorkers - 1);
-                      }
-                    }}
-                    style={[
-                      styles.numberButton,
-                      {
-                        backgroundColor: theme.primary,
-                        opacity: numberOfWorkers <= 1 ? 0.5 : 1,
-                      },
-                    ]}
-                    disabled={numberOfWorkers <= 1}
-                  >
-                    <MaterialIcons
-                      name="remove"
-                      size={RFPercentage(2)}
-                      color={theme.pureWhite}
-                    />
-                  </TouchableOpacity>
-
-                  <TextInput
-                    style={[
-                      styles.numberInput,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        color: theme.black,
-                      },
-                    ]}
-                    value={numberOfWorkers.toString()}
-                    onChangeText={(text) => {
-                      const num = parseInt(text.replace(/[^\d]/g, "")) || 1;
-                      if (num >= 1 && num <= MAX_WORKERS) {
-                        setNumberOfWorkers(num);
-                      }
-                    }}
-                    keyboardType="numeric"
-                    maxLength={2}
-                    textAlign="center"
-                  />
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (numberOfWorkers < MAX_WORKERS) {
-                        setNumberOfWorkers(numberOfWorkers + 1);
-                      }
-                    }}
-                    style={[
-                      styles.numberButton,
-                      {
-                        backgroundColor: theme.primary,
-                        opacity: numberOfWorkers >= MAX_WORKERS ? 0.5 : 1,
-                      },
-                    ]}
-                    disabled={numberOfWorkers >= MAX_WORKERS}
-                  >
-                    <MaterialIcons
-                      name="add"
-                      size={RFPercentage(2)}
-                      color={theme.pureWhite}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <Text style={[styles.helperText, { color: theme.darkGrey }]}>
-                  {t("postRequest.workersHelperText", { max: MAX_WORKERS }) ||
-                    `Select number of helpers needed (1-${MAX_WORKERS})`}
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.txt3")}
                 </Text>
               </View>
 
-              {/* Description */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="description"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {t("postRequest.txt8")}
-                  </Text>
-                </View>
-
-                <Pressable
-                  onPress={() => inputRef.current?.focus()}
-                  style={[
-                    styles.descriptionContainer,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
-                  <TextInput
-                    ref={inputRef}
-                    placeholder={t("postRequest.txt8")}
-                    placeholderTextColor={theme.heading}
-                    value={description}
-                    multiline
-                    onChangeText={setDescription}
-                    maxLength={250}
-                    style={[styles.desc, { color: theme.black }]}
-                  />
-                  <View style={styles.charCountContainer}>
-                    <Text style={[styles.charCount, { color: theme.darkGrey }]}>
-                      {description.length}/250
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
-
-              {/* Location */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="location-on"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {"Location"}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("Location", { home: false })
-                  }
-                  activeOpacity={0.7}
-                  style={[
-                    styles.locationField,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
-                  <View style={styles.locationContent}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.selectField,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: showTaskDropdown
+                      ? theme.primary
+                      : theme.border,
+                    borderWidth: showTaskDropdown ? 1.5 : 1,
+                  },
+                ]}
+                onPress={() => toggleDropdown("task")}
+              >
+                <View style={styles.selectFieldContent}>
+                  {selectedTask ? (
+                    <View style={styles.selectedOption}>
+                      <FontAwesome5
+                        name={
+                          taskOptions.find((t) => t.name === originalTaskType)
+                            ?.icon || "tasks"
+                        }
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                        style={styles.optionIcon}
+                      />
+                      <Text
+                        style={[styles.selectedText, { color: theme.black }]}
+                      >
+                        {selectedTask}
+                      </Text>
+                    </View>
+                  ) : (
                     <Text
+                      style={[styles.placeholderText, { color: theme.heading }]}
+                    >
+                      {t("postRequest.txt3")}
+                    </Text>
+                  )}
+                </View>
+                <MaterialIcons
+                  name={
+                    showTaskDropdown
+                      ? "keyboard-arrow-up"
+                      : "keyboard-arrow-down"
+                  }
+                  size={RFPercentage(2.5)}
+                  color={theme.primary}
+                />
+              </TouchableOpacity>
+
+              {showTaskDropdown && (
+                <View
+                  style={[
+                    styles.dropdownContainer,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      shadowColor: theme.black,
+                    },
+                  ]}
+                >
+                  {translatedTaskOptions.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => selectTask(item)}
                       style={[
-                        styles.locationText,
-                        {
-                          color:
-                            location?.name || selectedLocation?.name
-                              ? theme.black
-                              : theme.heading,
+                        styles.optionItem,
+                        selectedTask === item.name && {
+                          backgroundColor: `${theme.primary}10`,
                         },
                       ]}
                     >
-                      {location?.name ||
-                        selectedLocation?.name ||
-                        t("postRequest.txt9")}
-                    </Text>
-                  </View>
-                  <MaterialIcons
-                    name="chevron-right"
-                    size={RFPercentage(2.5)}
-                    color={theme.darkGrey}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              {/* Budget/Compensation */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="monetization-on"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {originalCompensationType === "Other"
-                      ? `Compensation Details`
-                      : t("postRequest.pr")}
-                  </Text>
+                      <FontAwesome5
+                        name={
+                          taskOptions.find((t) => t.id === item.id)?.icon ||
+                          "circle"
+                        }
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                      />
+                      <Text
+                        style={[styles.optionText, { color: theme.darkGrey }]}
+                      >
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
+              )}
 
-                {originalCompensationType === "Other" ? (
+              {originalTaskType === "Other" && (
+                <View style={styles.customTaskContainer}>
                   <InputFieldNew
-                    placeholder={t("postRequest.txt10")}
-                    value={compensation}
-                    onChangeText={setCompensation}
+                    placeholder={t("postRequest.customTaskTitle")}
+                    value={customTaskTitle}
+                    onChangeText={setCustomTaskTitle}
+                    maxLength={20}
                     customStyle={{
                       width: "100%",
                       borderRadius: RFPercentage(1.2),
@@ -1000,147 +649,497 @@ function PostRequest({ navigation, route }) {
                       marginTop: 0,
                     }}
                   />
-                ) : (
-                  <>
-                    <InputFieldNew
-                      placeholder={t("postRequest.pr")}
-                      value={budget}
-                      onChangeText={handleBudgetChange}
-                      customStyle={{
-                        width: "100%",
-                        borderRadius: RFPercentage(1.2),
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        height: RFPercentage(6),
-                        marginTop: 0,
-                      }}
-                      keyboardType="numeric"
-                    />
-                    {selectedLocation?.name && (
-                      <Text
-                        style={[styles.currencyNote, { color: theme.primary }]}
-                      >
-                        {`${t("profileRank.txt46")}`} {currentCurrencySymbol} (
-                        {currencyInfo.code}){`${t("profileRank.txt47")}`}{" "}
-                        {selectedLocation.name}
-                      </Text>
-                    )}
-                  </>
-                )}
+                </View>
+              )}
+            </View>
+
+            {/* Compensation Type */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="attach-money"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.txt7")}
+                </Text>
               </View>
 
-              {/* Images */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="photo-library"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {`Upload Photos`}
-                  </Text>
-                  <Text style={[styles.optionalText, { color: theme.heading }]}>
-                    ({`Optional`})
-                  </Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.selectField,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: showCompensationDropdown
+                      ? theme.primary
+                      : theme.border,
+                    borderWidth: showCompensationDropdown ? 1.5 : 1,
+                  },
+                ]}
+                onPress={() => toggleDropdown("compensation")}
+              >
+                <View style={styles.selectFieldContent}>
+                  {selectedCompensation ? (
+                    <View style={styles.selectedOption}>
+                      <FontAwesome5
+                        name={
+                          compensationOptions.find(
+                            (c) => c.type === originalCompensationType,
+                          )?.icon || "dollar-sign"
+                        }
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                        style={styles.optionIcon}
+                      />
+                      <Text
+                        style={[styles.selectedText, { color: theme.black }]}
+                      >
+                        {selectedCompensation}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text
+                      style={[styles.placeholderText, { color: theme.heading }]}
+                    >
+                      {t("postRequest.txt7")}
+                    </Text>
+                  )}
                 </View>
+                <MaterialIcons
+                  name={
+                    showCompensationDropdown
+                      ? "keyboard-arrow-up"
+                      : "keyboard-arrow-down"
+                  }
+                  size={RFPercentage(2.5)}
+                  color={theme.primary}
+                />
+              </TouchableOpacity>
 
-                <View style={styles.imageGrid}>
-                  {[0, 1, 2].map((index) => (
+              {showCompensationDropdown && (
+                <View
+                  style={[
+                    styles.dropdownContainer,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      shadowColor: theme.black,
+                    },
+                  ]}
+                >
+                  {translatedCompensationOptions.map((item) => (
                     <TouchableOpacity
-                      key={index}
-                      activeOpacity={0.7}
-                      onPress={() => pickImage(index)}
+                      key={item.id}
+                      onPress={() => selectCompensation(item)}
                       style={[
-                        styles.imageContainer,
-                        {
-                          backgroundColor: theme.white,
-                          borderColor: imageUris[index]
-                            ? theme.primary
-                            : theme.border,
-                          borderWidth: imageUris[index] ? 1.5 : 1,
+                        styles.optionItem,
+                        selectedCompensation === item.type && {
+                          backgroundColor: `${theme.primary}10`,
                         },
                       ]}
                     >
-                      {imageUris[index] ? (
-                        <>
-                          <Image
-                            style={styles.selectedImage}
-                            source={{ uri: imageUris[index] }}
-                          />
-                          <TouchableOpacity
-                            onPress={() => deleteImage(index)}
-                            style={[
-                              styles.deleteButton,
-                              { backgroundColor: Colors.red },
-                            ]}
-                          >
-                            <MaterialIcons
-                              name="close"
-                              size={RFPercentage(1.8)}
-                              color={theme.white}
-                            />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            onPress={() => pickImage(index)}
-                            style={[
-                              styles.editButton,
-                              { backgroundColor: theme.primary },
-                            ]}
-                          >
-                            <MaterialIcons
-                              name="edit"
-                              size={RFPercentage(1.5)}
-                              color={theme.white}
-                            />
-                          </TouchableOpacity>
-                        </>
-                      ) : (
-                        <View style={styles.imagePlaceholder}>
-                          <MaterialIcons
-                            name="add-a-photo"
-                            size={RFPercentage(3)}
-                            color={theme.heading}
-                          />
-                          <Text
-                            style={[
-                              styles.addPhotoText,
-                              { color: theme.heading },
-                            ]}
-                          >
-                            {`Add Photo`}
-                          </Text>
-                        </View>
-                      )}
+                      <FontAwesome5
+                        name={
+                          compensationOptions.find((c) => c.id === item.id)
+                            ?.icon || "circle"
+                        }
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                      />
+                      <Text
+                        style={[styles.optionText, { color: theme.darkGrey }]}
+                      >
+                        {item.type}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
+              )}
+            </View>
+
+            {/* Number of Workers */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="people"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.numberOfWorkers") ||
+                    "Number of helpers needed"}
+                </Text>
               </View>
 
-              {/* Submit Button */}
-              <View style={{ alignItems: "center" }}>
-                <MyAppButton
-                  disabled={indicator}
-                  loading={indicator}
-                  title={
-                    isEditing ? t("postRequest.txt13") : t("postRequest.txt14")
-                  }
-                  marginTop={RFPercentage(4)}
-                  onPress={submitPostData}
+              <View style={styles.numberInputContainer}>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (numberOfWorkers > 1) {
+                      setNumberOfWorkers(numberOfWorkers - 1);
+                    }
+                  }}
+                  style={[
+                    styles.numberButton,
+                    {
+                      backgroundColor: theme.primary,
+                      opacity: numberOfWorkers <= 1 ? 0.5 : 1,
+                    },
+                  ]}
+                  disabled={numberOfWorkers <= 1}
+                >
+                  <MaterialIcons
+                    name="remove"
+                    size={RFPercentage(2)}
+                    color={theme.pureWhite}
+                  />
+                </TouchableOpacity>
+
+                <TextInput
+                  style={[
+                    styles.numberInput,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      color: theme.black,
+                    },
+                  ]}
+                  value={numberOfWorkers.toString()}
+                  onChangeText={(text) => {
+                    const num = parseInt(text.replace(/[^\d]/g, "")) || 1;
+                    if (num >= 1 && num <= MAX_WORKERS) {
+                      setNumberOfWorkers(num);
+                    }
+                  }}
+                  keyboardType="numeric"
+                  maxLength={2}
+                  textAlign="center"
                 />
+
+                <TouchableOpacity
+                  onPress={() => {
+                    if (numberOfWorkers < MAX_WORKERS) {
+                      setNumberOfWorkers(numberOfWorkers + 1);
+                    }
+                  }}
+                  style={[
+                    styles.numberButton,
+                    {
+                      backgroundColor: theme.primary,
+                      opacity: numberOfWorkers >= MAX_WORKERS ? 0.5 : 1,
+                    },
+                  ]}
+                  disabled={numberOfWorkers >= MAX_WORKERS}
+                >
+                  <MaterialIcons
+                    name="add"
+                    size={RFPercentage(2)}
+                    color={theme.pureWhite}
+                  />
+                </TouchableOpacity>
               </View>
-              <View style={styles.bottomSpace} />
-            </Animated.View>
-          </ScrollView>
+
+              <Text style={[styles.helperText, { color: theme.darkGrey }]}>
+                {t("postRequest.workersHelperText", { max: MAX_WORKERS }) ||
+                  `Select number of helpers needed (1-${MAX_WORKERS})`}
+              </Text>
+            </View>
+
+            {/* Description */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="description"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.txt8")}
+                </Text>
+              </View>
+
+              <Pressable
+                onPress={() => inputRef.current?.focus()}
+                style={[
+                  styles.descriptionContainer,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <TextInput
+                  ref={inputRef}
+                  placeholder={t("postRequest.txt8")}
+                  placeholderTextColor={theme.heading}
+                  value={description}
+                  multiline
+                  onChangeText={setDescription}
+                  maxLength={250}
+                  style={[styles.desc, { color: theme.black }]}
+                />
+                <View style={styles.charCountContainer}>
+                  <Text style={[styles.charCount, { color: theme.darkGrey }]}>
+                    {description.length}/250
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+
+            {/* Location */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="location-on"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {"Location"}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Location", { home: false })}
+                activeOpacity={0.7}
+                style={[
+                  styles.locationField,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <View style={styles.locationContent}>
+                  <Text
+                  numberOfLines={1}
+                    style={[
+                      styles.locationText,
+                      {
+                        color:
+                          location?.name || selectedLocation?.name
+                            ? theme.black
+                            : theme.heading,
+                      },
+                    ]}
+                  >
+                    {location?.name ||
+                      selectedLocation?.name ||
+                      t("postRequest.txt9")}
+                  </Text>
+                </View>
+                <MaterialIcons
+                  name="chevron-right"
+                  size={RFPercentage(2.5)}
+                  color={theme.darkGrey}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Budget/Compensation */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="monetization-on"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {originalCompensationType === "Other"
+                    ? `Compensation Details`
+                    : t("postRequest.pr")}
+                </Text>
+              </View>
+
+              {originalCompensationType === "Other" ? (
+                <InputFieldNew
+                  placeholder={t("postRequest.txt10")}
+                  value={compensation}
+                  onChangeText={setCompensation}
+                  customStyle={{
+                    width: "100%",
+                    borderRadius: RFPercentage(1.2),
+                    backgroundColor: theme.white,
+                    borderColor: theme.border,
+                    height: RFPercentage(6),
+                    marginTop: 0,
+                  }}
+                />
+              ) : (
+                <>
+                  <InputFieldNew
+                    placeholder={t("postRequest.pr")}
+                    value={budget}
+                    onChangeText={handleBudgetChange}
+                    customStyle={{
+                      width: "100%",
+                      borderRadius: RFPercentage(1.2),
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      height: RFPercentage(6),
+                      marginTop: 0,
+                    }}
+                    keyboardType="numeric"
+                  />
+                  {selectedLocation?.name && (
+                    <Text
+                      style={[styles.currencyNote, { color: theme.primary }]}
+                    >
+                      {`${t("profileRank.txt46")}`} {currentCurrencySymbol} (
+                      {currencyInfo.code}){`${t("profileRank.txt47")}`}{" "}
+                      {selectedLocation.name}
+                    </Text>
+                  )}
+                </>
+              )}
+            </View>
+
+            {/* Images */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="photo-library"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {`Upload Photos`}
+                </Text>
+                <Text style={[styles.optionalText, { color: theme.heading }]}>
+                  ({`Optional`})
+                </Text>
+              </View>
+
+              <View style={styles.imageGrid}>
+                {[0, 1, 2].map((index) => (
+                  <TouchableOpacity
+                    key={index}
+                    activeOpacity={0.7}
+                    onPress={() => pickImage(index)}
+                    style={[
+                      styles.imageContainer,
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: imageUris[index]
+                          ? theme.primary
+                          : theme.border,
+                        borderWidth: imageUris[index] ? 1.5 : 1,
+                      },
+                    ]}
+                  >
+                    {imageUris[index] ? (
+                      <>
+                        <Image
+                          style={styles.selectedImage}
+                          source={{ uri: imageUris[index] }}
+                        />
+                        <TouchableOpacity
+                          onPress={() => deleteImage(index)}
+                          style={[
+                            styles.deleteButton,
+                            { backgroundColor: Colors.red },
+                          ]}
+                        >
+                          <MaterialIcons
+                            name="close"
+                            size={RFPercentage(1.8)}
+                            color={theme.white}
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => pickImage(index)}
+                          style={[
+                            styles.editButton,
+                            { backgroundColor: theme.primary },
+                          ]}
+                        >
+                          <MaterialIcons
+                            name="edit"
+                            size={RFPercentage(1.5)}
+                            color={theme.white}
+                          />
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <View style={styles.imagePlaceholder}>
+                        <MaterialIcons
+                          name="add-a-photo"
+                          size={RFPercentage(3)}
+                          color={theme.heading}
+                        />
+                        <Text
+                          style={[
+                            styles.addPhotoText,
+                            { color: theme.heading },
+                          ]}
+                        >
+                          {`Add Photo`}
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Submit Button */}
+            <View style={{ alignItems: "center" }}>
+              <MyAppButton
+                disabled={indicator}
+                loading={indicator}
+                title={
+                  isEditing ? t("postRequest.txt13") : t("postRequest.txt14")
+                }
+                marginTop={RFPercentage(4)}
+                onPress={submitPostData}
+              />
+            </View>
+            <View style={styles.bottomSpace} />
+          </Animated.View>
+        </ScrollView>
       </TouchableWithoutFeedback>
     </>
   );
@@ -1345,7 +1344,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    marginLeft: RFPercentage(1.2),
+    // marginLeft: RFPercentage(1.2),
     flex: 1,
   },
   currencySymbol: {

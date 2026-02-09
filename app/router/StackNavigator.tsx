@@ -56,6 +56,8 @@ import UpgradePlan from "../screens/UpgradePlan";
 import DrawerNavigator from "./BottomNavigator";
 import TaskApplicantsScreen from "../screens/TaskApplicantsScreen";
 import ConfirmedHelpers from "../screens/ConfirmedHelpers";
+import { navigationRef } from "./navigationRef";
+
 
 const Stack = createStackNavigator();
 
@@ -78,7 +80,7 @@ const StackNavigator = () => {
   // }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         id={undefined}
         initialRouteName={"Decider"}

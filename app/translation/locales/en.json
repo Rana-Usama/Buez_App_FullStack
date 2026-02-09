@@ -263,7 +263,8 @@
     "cnf": "Confirm Applicant",
     "slt": "slots filled",
     "lft": "left",
-    "avl": "Available Slots"
+    "avl": "Available Slots",
+     "share": "Share"
   },
   "myRequests": {
     "txt1": "My Requests",
@@ -417,7 +418,10 @@
     "txt9": "If no deal is made, repost it from 'My Req' under 'Active'.",
     "txt10": "Stay Updated",
     "txt11": "You'll get notifications when someone’s interested or sends an offer.",
-    "txt12": "View My Requests"
+    "txt12": "View My Requests",
+     "shareTitle": "Share Your Task",
+    "shareDescription": "Share this opportunity with friends and family to find helpers faster!",
+    "shareButton": "Share Now"
   },
   "profile": {
     "txt1": "Profile",

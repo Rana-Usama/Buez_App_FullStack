@@ -35,24 +35,32 @@ export const savePost = async (data: any, imageUris: any) => {
         if (uri && !uri?.startsWith("http")) {
           return uploadImage(uri);
         }
-
         return uri;
-      })
+      }),
     );
+
     const userId = getAuth().currentUser?.uid;
     const userRef = doc(db, "users", userId);
     const userSnap = await getDoc(userRef);
     const userData = userSnap.exists() ? userSnap.data() : {};
-    await addDoc(collection(db, "taskRequests"), {
+
+    // 👇 create document
+    const docRef = await addDoc(collection(db, "taskRequests"), {
       ...data,
       status: "Active",
       imageUrls,
       createdAt: Timestamp.now(),
-      userId: userId,
+      userId,
       user: { ...userData },
     });
 
-    return true;
+    //fetch created document
+    const newDocSnap = await getDoc(docRef);
+
+    return {
+      id: docRef.id,
+      ...(newDocSnap.exists() ? newDocSnap.data() : {}),
+    };
   } catch (error) {
     console.error("Error_saving_post: ", error);
     throw error;
@@ -78,7 +86,7 @@ export const updatePost = async (id: any, data: any, imageUris: any) => {
           return uploadImage(uri);
         }
         return uri;
-      })
+      }),
     );
     const userId = getAuth().currentUser?.uid;
     const userRef = doc(db, "taskRequests", id);
@@ -99,7 +107,7 @@ export const updatePost = async (id: any, data: any, imageUris: any) => {
 export const getMyReuqests = async (
   postStatus,
   lastVisiblePost = null,
-  pageSize = PAGE_SIZE
+  pageSize = PAGE_SIZE,
 ) => {
   try {
     const userId = getAuth().currentUser?.uid;
@@ -110,7 +118,7 @@ export const getMyReuqests = async (
       where("status", "==", postStatus),
       where("userId", "==", userId),
       orderBy("createdAt", "desc"),
-      limit(pageSize)
+      limit(pageSize),
     );
 
     if (lastVisiblePost) {
@@ -120,7 +128,7 @@ export const getMyReuqests = async (
         where("userId", "==", userId),
         orderBy("createdAt", "desc"),
         startAfter(lastVisiblePost),
-        limit(pageSize)
+        limit(pageSize),
       );
     }
 
@@ -134,7 +142,7 @@ export const getMyReuqests = async (
         const userDoc = await getDoc(userRef);
         const userData = userDoc.exists() ? userDoc.data() : null;
         return { id: docSnapshot.id, ...postData, user: userData };
-      })
+      }),
     );
 
     const lastVisible = snapshot.docs[snapshot.docs.length - 1];
@@ -151,7 +159,7 @@ export const getRequestList = (
   searchQuery = "",
   lastVisiblePost = null,
   callback,
-  errorCallback
+  errorCallback,
 ) => {
   try {
     const userId = getAuth().currentUser?.uid;
@@ -162,7 +170,7 @@ export const getRequestList = (
       where("status", "==", "Active"),
       where("userId", "!=", userId),
       where("acceptedBy", "==", null),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
     );
 
     if (lastVisiblePost) q = query(q, startAfter(lastVisiblePost));
@@ -183,7 +191,7 @@ export const getRequestList = (
             (task) =>
               (task?.description || "").toLowerCase().includes(qLower) ||
               (task?.user?.userName || "").toLowerCase().includes(qLower) ||
-              (task?.taskType || "").toLowerCase().includes(qLower)
+              (task?.taskType || "").toLowerCase().includes(qLower),
           );
         }
 
@@ -196,7 +204,7 @@ export const getRequestList = (
       (err) => {
         console.log("GET_POSTS_LIST (onSnapshot):", err);
         errorCallback && errorCallback(err);
-      }
+      },
     );
 
     return unsubscribe;
@@ -278,7 +286,7 @@ export const createCompletedTaskForWorkers = async (taskId, taskData) => {
 
     await batch.commit();
     console.log(
-      `Created completedTask entries for ${confirmedWorkers.length} workers`
+      `Created completedTask entries for ${confirmedWorkers.length} workers`,
     );
   } catch (error) {
     console.error("Error creating completed tasks for workers:", error);
@@ -316,7 +324,7 @@ export const updateReqestStatus = async (taskId, status, taskData) => {
         const completedTaskQuery = query(
           collection(db, "completedTask"),
           where("taskId", "==", taskId),
-          where("acceptedBy.userId", "==", task.acceptedBy.userId)
+          where("acceptedBy.userId", "==", task.acceptedBy.userId),
         );
 
         const completedTasks = await getDocs(completedTaskQuery);

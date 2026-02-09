@@ -111,7 +111,6 @@ function AddReviewToAccepter() {
   const { theme } = useAppTheme();
   const typedParams = params as ParamsType;
   const task = typedParams.task || {};
-  console.log("task.......", task);
   const recipientUser = task?.acceptedBy ?? {
     userId: "",
     userName: "User",

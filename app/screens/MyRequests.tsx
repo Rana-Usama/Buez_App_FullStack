@@ -59,6 +59,7 @@ import {
   getCurrencyInfo,
 } from "../utils/currencyChange";
 import { useLocation } from "../utils/useLocation";
+import { ShareButton } from "../job-sharing/ShareButton";
 
 type TaskRecord = {
   id?: string;
@@ -493,7 +494,9 @@ function MyRequests({ navigation }) {
             end={{ x: 1, y: 1 }}
             style={styles.neonGradient}
           >
-            <Text numberOfLines={1} style={styles.filterButtonTextActive}>{title}</Text>
+            <Text numberOfLines={1} style={styles.filterButtonTextActive}>
+              {title}
+            </Text>
           </LinearGradient>
           <View style={styles.neonGlow} />
         </View>
@@ -509,7 +512,7 @@ function MyRequests({ navigation }) {
           ]}
         >
           <Text
-          numberOfLines={1}
+            numberOfLines={1}
             style={[styles.filterButtonTextInactive, { color: theme.heading }]}
           >
             {title}
@@ -991,9 +994,7 @@ function MyRequests({ navigation }) {
                       !cart.isBulkRequest &&
                       (cart.reviewedAccepter ? (
                         /* ✅ ALREADY REVIEWED */
-                        <View
-                          style={[styles.addReviewButton]}
-                        >
+                        <View style={[styles.addReviewButton]}>
                           <Ionicons
                             name="checkmark-circle"
                             size={RFPercentage(1.5)}
@@ -1113,7 +1114,7 @@ function MyRequests({ navigation }) {
                     <Text
                       style={[
                         styles.compensation,
-                        { color: theme.heading, marginTop: 0 },
+                        { color: theme.heading, marginTop: 0 , width:"45%"},
                       ]}
                     >
                       {isConfirmedWorker
@@ -1124,35 +1125,79 @@ function MyRequests({ navigation }) {
                           }`}
                     </Text>
 
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      disabled={
-                        markLoaderIndex === index || repostingIndex === index
-                      }
-                      onPress={() => {
-                        handleStartChat(cart.user);
-                      }}
-                      style={styles.abs}
-                    >
-                      <Image
-                        source={Icons.messages}
-                        resizeMode="contain"
-                        style={{
-                          width: RFPercentage(2.3),
-                          height: RFPercentage(2.3),
+                    <View style={styles.acceptedActions}>
+                      {/* Share Button for Accepted Tasks */}
+
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        disabled={
+                          markLoaderIndex === index || repostingIndex === index
+                        }
+                        onPress={() => {
+                          handleStartChat(cart.user);
                         }}
+                        style={[
+                          styles.abs,
+                          {
+                            backgroundColor:
+                              theme.mode === "dark"
+                                ? "rgba(255,255,255,0.1)"
+                                : Colors.primary + "15",
+                            borderWidth: 1,
+                            borderColor:
+                              theme.mode === "dark"
+                                ? "rgba(255,255,255,0.2)"
+                                : Colors.primary + "30",
+                          },
+                        ]}
+                      >
+                        <Image
+                          source={Icons.messages}
+                          resizeMode="contain"
+                          style={{
+                            width: RFPercentage(2.3),
+                            height: RFPercentage(2.3),
+                          }}
+                        />
+                        <Text style={styles.txt4}>{t("details.txt9")}</Text>
+                      </TouchableOpacity>
+
+                      <ShareButton
+                        jobId={cart.id}
+                        jobTitle={
+                          cart.taskType === "Other"
+                            ? cart.customTaskTitle
+                            : cart.taskType
+                        }
+                        jobDescription={cart.description}
+                        companyName="Buez"
+                        style={[
+                          styles.shareButtonSmall,
+                          {
+                            backgroundColor:
+                              theme.mode === "dark"
+                                ? "rgba(255,255,255,0.1)"
+                                : Colors.primary + "15",
+                            borderWidth: 1,
+                            borderColor:
+                              theme.mode === "dark"
+                                ? "rgba(255,255,255,0.2)"
+                                : Colors.primary + "30",
+                          },
+                        ]}
+                        showLabel={false}
+                        iconOnly={true}
                       />
-                      <Text style={styles.txt4}>{t("details.txt9")}</Text>
-                    </TouchableOpacity>
+                    </View>
                   </View>
                 </>
               )}
 
               {activeFilter === `${t("myRequests.txt2")}` &&
                 cart?.status === REQUEST_STATUS.Active &&
-                isTaskOwner && 
-                !isConfirmedWorker && 
-                !isAppliedWorker && ( 
+                isTaskOwner &&
+                !isConfirmedWorker &&
+                !isAppliedWorker && (
                   <View style={styles.cartContainer2}>
                     <TouchableOpacity
                       activeOpacity={0.8}
@@ -1182,7 +1227,9 @@ function MyRequests({ navigation }) {
                       {markLoaderIndex === index ? (
                         <ActivityIndicator size="small" color={Colors.white} />
                       ) : (
-                        <Text style={styles.text2}>{t("myRequests.txt5")}</Text>
+                        <Text numberOfLines={1} style={styles.text2}>
+                          {t("myRequests.txt5")}
+                        </Text>
                       )}
                     </TouchableOpacity>
 
@@ -1215,6 +1262,7 @@ function MyRequests({ navigation }) {
                         />
                       ) : (
                         <Text
+                          numberOfLines={1}
                           style={[
                             styles.text3,
                             {
@@ -1229,6 +1277,32 @@ function MyRequests({ navigation }) {
                         </Text>
                       )}
                     </TouchableOpacity>
+                    <ShareButton
+                      jobId={cart.id}
+                      jobTitle={
+                        cart.taskType === "Other"
+                          ? cart.customTaskTitle
+                          : cart.taskType
+                      }
+                      jobDescription={cart.description}
+                      companyName="Buez"
+                      style={[
+                        styles.shareButtonSmall,
+                        {
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? "rgba(255,255,255,0.1)"
+                              : Colors.primary + "10",
+                          borderWidth: 1,
+                          borderColor:
+                            theme.mode === "dark"
+                              ? "rgba(255,255,255,0.2)"
+                              : Colors.primary + "20",
+                        },
+                      ]}
+                      showLabel={false}
+                      iconOnly={true}
+                    />
                   </View>
                 )}
             </View>
@@ -1306,8 +1380,8 @@ const styles = StyleSheet.create({
   },
   addReviewButton: {
     flexDirection: "row",
-    alignItems: "center",backgroundColor: Colors.primary + "20"
-    ,
+    alignItems: "center",
+    backgroundColor: Colors.primary + "20",
     borderRadius: RFPercentage(1),
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(1),
@@ -1528,25 +1602,25 @@ const styles = StyleSheet.create({
     top: RFPercentage(2),
   },
   markButton: {
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(2),
     height: RFPercentage(5),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary,
-    width: "45%",
+    width: "38%",
     paddingVertical: RFPercentage(1),
   },
   cancel: {
-    borderRadius: RFPercentage(1),
-    width: "45%",
+    borderRadius: RFPercentage(2),
+    width: "38%",
     height: RFPercentage(5),
-    borderWidth: 1.5,
+    borderWidth: RFPercentage(0.15),
     justifyContent: "center",
     alignItems: "center",
-    position: "absolute",
-    right: 0,
+    // position: "absolute",
+    // right: 0,
     backgroundColor: "transparent",
   },
   notFoundWrapper: {
@@ -1565,13 +1639,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
   },
-  cartContainer2: {
-    width: "92%",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    marginTop: RFPercentage(2),
-  },
+
   text3: {
     color: Colors.white,
     fontFamily: "Poppins_500Medium",
@@ -1626,6 +1694,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent:"space-between"
   },
   txt3: {
     color: Colors.primary,
@@ -1642,10 +1711,13 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1),
   },
   abs: {
-    position: "absolute",
-    right: 0,
+    // position: "absolute",
+    // right: 0,
     flexDirection: "row",
     alignItems: "center",
+    padding:RFPercentage(1.2),
+    borderRadius:RFPercentage(100),
+    marginRight:RFPercentage(0.6)
   },
   txt4: {
     color: Colors.primary,
@@ -1754,5 +1826,28 @@ const styles = StyleSheet.create({
     color: "#4CAF50",
     fontSize: RFPercentage(1.3),
     fontWeight: "500",
+  },
+
+  shareButtonSmall: {
+    marginRight: RFPercentage(1),
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+  },
+
+  cartContainer2: {
+    width: "92%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: RFPercentage(2),
+  },
+
+  acceptedActions: {
+    // position: "absolute",
+    // right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf:"flex-end"
+    // backgroundColor: "red",
   },
 });

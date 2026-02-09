@@ -28,6 +28,8 @@ import store from "./app/redux/store";
 import * as SplashScreen from "expo-splash-screen";
 import { UnreadMessagesProvider } from "./app/contexts/unread-messages.context";
 import messaging from "@react-native-firebase/messaging";
+import { useDeepLinking } from "./app/job-sharing/useDeepLinking";
+import { navigate } from "./app/router/navigationRef";
 
 LogBox.ignoreAllLogs();
 
@@ -133,6 +135,10 @@ export default function App() {
   useEffect(() => {
     console.log(i18n.isInitialized);
   }, []);
+
+   useDeepLinking((jobId) => {
+    navigate("OfferDetail", { jobId });
+  });
 
   return (
     <ThemeProvider>

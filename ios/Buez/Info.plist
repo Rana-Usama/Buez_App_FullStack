@@ -137,6 +137,19 @@
 				<string>fb716889610970681</string>
 			</array>
 		</dict>
+
+
+		<dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>com.adamburg.Buez</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>buez</string>
+        </array>
+    </dict>
+
 	</array>
 
 	<!-- Facebook App Queries -->

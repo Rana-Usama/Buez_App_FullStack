@@ -53,7 +53,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   const compensation = getConvertedCompensation(task);
 
-  console.log("task.......", task);
 
   // Check if it's a bulk request
   const isBulkRequest =
