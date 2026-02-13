@@ -56,7 +56,7 @@ function CancelSubscription({ navigation }: any) {
 
   const formattedPrice = formatCurrency(
     prices[currentPlan][userCurrency],
-    userCurrency
+    userCurrency,
   );
 
   const cancelSubscription = async () => {
@@ -79,7 +79,7 @@ function CancelSubscription({ navigation }: any) {
             subscriptionId: userData?.subscriptionId,
             planType: currentPlan,
           }),
-        }
+        },
       );
       const text = await res.text();
       try {
@@ -121,7 +121,7 @@ function CancelSubscription({ navigation }: any) {
 
   const savingsPercent = getSavingsPercent(
     prices.monthly[userCurrency],
-    prices.yearly[userCurrency]
+    prices.yearly[userCurrency],
   );
 
   const savingsLabel = `${t("cancelSubscription.save36")} ${savingsPercent}%`;
@@ -288,22 +288,6 @@ function CancelSubscription({ navigation }: any) {
           </>
         ) : (
           <>
-            <View style={styles.premiumInfo}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
-              >
-                <MaterialCommunityIcons
-                  name="keyboard-backspace"
-                  style={{ fontSize: RFPercentage(2.8) }}
-                  color={theme.heading}
-                />
-              </TouchableOpacity>
-              <Text style={[styles.premiumText, { color: theme.heading }]}>
-                {t("cancelSubscription.txt1")}
-              </Text>
-            </View>
             <Image
               style={styles.vector}
               source={Icons.notActive}
@@ -365,7 +349,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   vector: {
-    marginTop: RFPercentage(18),
+    marginTop: RFPercentage(10),
     width: RFPercentage(34),
     height: RFPercentage(34),
     alignSelf: "center",

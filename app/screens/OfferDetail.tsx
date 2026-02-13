@@ -385,7 +385,6 @@ function OfferDetail({ navigation, route }) {
     }
   }, [postRequest]);
 
-  console.log("postRequest?.reviews......", postRequest?.reviews);
   // Translate reviews and calculate average rating
   useEffect(() => {
     const translateReviews = async () => {
@@ -1053,7 +1052,7 @@ function OfferDetail({ navigation, route }) {
                     ]}
                     onPress={handleStartChat}
                     activeOpacity={0.7}
-                    disabled={!isAccepted && isBulkRequest}
+                    disabled={!isChatEnabled()}
                   >
                     <Ionicons
                       name="chatbubble-ellipses"

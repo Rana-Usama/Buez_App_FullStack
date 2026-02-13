@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     justifyContent: "center",
     textAlignVertical: "top",
-    top: 0,
+    // top: 0,
     lineHeight: RFPercentage(2.7),
     // backgroundColor:"red"
   },
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
   },
   cancel: {
     borderRadius: RFPercentage(100),
-    width: RFPercentage(17),
+    width: RFPercentage(15.5),
     height: RFPercentage(5.2),
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary,
-    width: RFPercentage(17.5),
+    width: RFPercentage(15.5),
   },
   wrap: {
     minHeight: RFPercentage(10),
