@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,9 @@ import {
   RefreshControl,
   ActivityIndicator,
   StatusBar,
+  Animated,
+  LayoutAnimation,
+  UIManager,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -53,12 +56,21 @@ import {
 } from "firebase/firestore";
 import RepostSuccessModal from "../components/common/RepostModal";
 import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import {
   formatCurrency,
   convertCurrency,
   getCurrencyInfo,
 } from "../utils/currencyChange";
 import { useLocation } from "../utils/useLocation";
+
+// Enable LayoutAnimation for Android
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 type TaskRecord = {
   id?: string;
@@ -86,6 +98,10 @@ type TaskRecord = {
   confirmedAt?: string;
   userId?: string;
   completedTaskId?: string;
+  selectedSubTasks?: any[];
+  scheduledDateTime?: string;
+  estimatedDuration?: string;
+  durationLabel?: string;
 };
 
 function MyRequests({ navigation }) {
@@ -103,6 +119,12 @@ function MyRequests({ navigation }) {
   const [selectedRequestIndex, setSelectedRequestIndex] = useState(null);
   const [selectedRequestItem, setSelectedRequestItem] = useState(null);
   const [activeIndices, setActiveIndices] = useState({});
+  const [expandedCards, setExpandedCards] = useState({});
+  const [showAllSubTasks, setShowAllSubTasks] = useState({});
+
+  // Animation values for each card
+  const rotateAnims = useRef<{ [key: number]: Animated.Value }>({}).current;
+
   const { location: currentLocation } = useLocation();
   useExitAppOnBack();
   const { theme } = useAppTheme();
@@ -114,6 +136,45 @@ function MyRequests({ navigation }) {
 
   const currentUserId = getAuth().currentUser?.uid;
   const db = getFirestore();
+
+  // Initialize animation values for new cards
+  useEffect(() => {
+    taskRecords.forEach((_, index) => {
+      if (!rotateAnims[index]) {
+        rotateAnims[index] = new Animated.Value(0);
+      }
+    });
+  }, [taskRecords.length]);
+
+  const toggleExpand = (index: number, event?: any) => {
+    // Stop propagation to prevent navigation when clicking expand button
+    if (event) {
+      event.stopPropagation();
+    }
+
+    // Toggle expanded state
+    const newExpandedState = !expandedCards[index];
+    setExpandedCards((prev) => ({ ...prev, [index]: newExpandedState }));
+
+    // Animate chevron rotation
+    if (rotateAnims[index]) {
+      Animated.timing(rotateAnims[index], {
+        toValue: newExpandedState ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+
+    // Use LayoutAnimation for smooth height transition
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
+
+  const toggleSubTasks = (index: number, event?: any) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    setShowAllSubTasks((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
 
   const getConvertedCompensation = (item) => {
     if (item.compensationType !== "Monitarely") return null;
@@ -148,6 +209,44 @@ function MyRequests({ navigation }) {
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [repostingIndex, setRepostingIndex] = useState(null);
   const [repostModalVisible, setRepostModalVisible] = useState(false);
+
+  // Format scheduled date and time
+  const formatScheduledDateTime = (task) => {
+    if (task?.scheduledDateTime) {
+      const date = new Date(task.scheduledDateTime);
+      return date.toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    return null;
+  };
+
+  // Get duration label
+  const getDurationLabel = (task) => {
+    if (task?.durationLabel) {
+      return task.durationLabel;
+    }
+    if (task?.estimatedDuration) {
+      const durationOptions = [
+        { value: "less_than_1", label: "< 1 hour" },
+        { value: "1_2_hours", label: "1-2 hours" },
+        { value: "2_4_hours", label: "2-4 hours" },
+        { value: "4_6_hours", label: "4-6 hours" },
+        { value: "6_8_hours", label: "6-8 hours" },
+        { value: "full_day", label: "Full day" },
+        { value: "multiple_days", label: "Multiple days" },
+      ];
+      const duration = durationOptions.find(
+        (d) => d.value === task.estimatedDuration,
+      );
+      return duration?.label || "Duration not specified";
+    }
+    return null;
+  };
 
   // Helper function to check if user is confirmed in bulk request
   const checkUserConfirmedStatus = (task) => {
@@ -261,6 +360,7 @@ function MyRequests({ navigation }) {
       setInitialLoadDone(false);
       setTaskRecords([]);
       setLastVisiblePost(null);
+      setExpandedCards({});
       fetchRequests(null).then(() => setInitialLoadDone(true));
     }, [param]),
   );
@@ -269,6 +369,7 @@ function MyRequests({ navigation }) {
     setRefreshing(true);
     setLastVisiblePost(null);
     setTaskRecords([]);
+    setExpandedCards({});
     await fetchRequests(null);
     setRefreshing(false);
   };
@@ -493,7 +594,9 @@ function MyRequests({ navigation }) {
             end={{ x: 1, y: 1 }}
             style={styles.neonGradient}
           >
-            <Text numberOfLines={1} style={styles.filterButtonTextActive}>{title}</Text>
+            <Text numberOfLines={1} style={styles.filterButtonTextActive}>
+              {title}
+            </Text>
           </LinearGradient>
           <View style={styles.neonGlow} />
         </View>
@@ -509,7 +612,7 @@ function MyRequests({ navigation }) {
           ]}
         >
           <Text
-          numberOfLines={1}
+            numberOfLines={1}
             style={[styles.filterButtonTextInactive, { color: theme.heading }]}
           >
             {title}
@@ -519,7 +622,10 @@ function MyRequests({ navigation }) {
     </TouchableOpacity>
   );
 
-  const postEditHandler = (cart) => {
+  const postEditHandler = (cart, event) => {
+    if (event) {
+      event.stopPropagation();
+    }
     navigation.navigate("PostRequest", {
       title: "Edit Request",
       postRequest: cart,
@@ -539,7 +645,10 @@ function MyRequests({ navigation }) {
   const currentUser = useUser();
 
   const handleStartChat = useCallback(
-    async (receiverUser) => {
+    async (receiverUser, event) => {
+      if (event) {
+        event.stopPropagation();
+      }
       try {
         const chatId = await createNewChat(currentUserId, receiverUser.userId);
         navigation.navigate("Chat", {
@@ -556,7 +665,10 @@ function MyRequests({ navigation }) {
   );
 
   // Navigate to Task Applicants Screen
-  const navigateToApplicantsScreen = (taskId) => {
+  const navigateToApplicantsScreen = (taskId, event) => {
+    if (event) {
+      event.stopPropagation();
+    }
     navigation.navigate("TaskApplicantsScreen", {
       taskId: taskId,
     });
@@ -633,7 +745,10 @@ function MyRequests({ navigation }) {
     }
   };
 
-  const navigateToConfirmedHelpers = (task) => {
+  const navigateToConfirmedHelpers = (task, event) => {
+    if (event) {
+      event.stopPropagation();
+    }
     navigation.navigate("ConfirmedHelpers", {
       task: task,
     });
@@ -667,6 +782,12 @@ function MyRequests({ navigation }) {
     } catch (error) {
       console.log("Error checking single task review:", error);
     }
+  };
+
+  const navigateToOfferDetail = (task) => {
+    navigation.navigate("OfferDetail", {
+      postRequest: task,
+    });
   };
 
   return (
@@ -727,8 +848,25 @@ function MyRequests({ navigation }) {
             (cart.confirmedWorkers?.length || 0);
           const hasApplicants = totalApplicants > 0;
 
+          const scheduledDateTime = formatScheduledDateTime(cart);
+          const durationLabel = getDurationLabel(cart);
+          const selectedSubTasks = cart.selectedSubTasks || [];
+          const displaySubTasks = showAllSubTasks[index]
+            ? selectedSubTasks
+            : selectedSubTasks.slice(0, 3);
+          const hasMoreSubTasks = selectedSubTasks.length > 3;
+
+          // Chevron rotation interpolation
+          const rotate =
+            rotateAnims[index]?.interpolate({
+              inputRange: [0, 1],
+              outputRange: ["0deg", "180deg"],
+            }) || "0deg";
+
           return (
-            <View
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => navigateToOfferDetail(cart)}
               key={index}
               style={[styles.cartContainer, { borderColor: theme.border }]}
             >
@@ -804,7 +942,7 @@ function MyRequests({ navigation }) {
                         <View style={styles.cartWrapper}>
                           <TouchableOpacity
                             activeOpacity={0.8}
-                            onPress={() => postEditHandler(cart)}
+                            onPress={(event) => postEditHandler(cart, event)}
                           >
                             <Image
                               style={styles.edit}
@@ -837,7 +975,7 @@ function MyRequests({ navigation }) {
                 </View>
               )}
 
-              {/* User Info */}
+              {/* User Info with Expand/Collapse Button */}
               <View style={styles.cartInfoContainer}>
                 <TouchableOpacity activeOpacity={0.8}>
                   <Image
@@ -849,7 +987,10 @@ function MyRequests({ navigation }) {
                     }
                   />
                 </TouchableOpacity>
-                <Text style={[styles.userName, { color: theme.heading }]}>
+                <Text
+                  style={[styles.userName, { color: theme.heading }]}
+                  numberOfLines={1}
+                >
                   {cart?.user?.userName?.substr(0, 10) +
                     (cart?.user?.userName?.length > 10 ? "..." : "")}
                 </Text>
@@ -875,89 +1016,223 @@ function MyRequests({ navigation }) {
                     )}`}
                   </Text>
                 )}
+
+                {/* Expand/Collapse Button */}
+                <TouchableOpacity
+                  onPress={(event) => toggleExpand(index, event)}
+                  style={[styles.expandButton, { backgroundColor: theme.mode === "light" ? "rgba(215, 215, 215, 0.48)" : "rgba(52, 51, 51, 0.48)",}]}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Animated.View style={{ transform: [{ rotate }] }}>
+                    <Ionicons
+                      name="chevron-down"
+                      size={RFPercentage(2.2)}
+                      color={theme.primary}
+                    />
+                  </Animated.View>
+                </TouchableOpacity>
               </View>
 
-              {/* Description */}
-              <View style={styles.taskInfoContainer}>
-                <Text style={[styles.taskText, { color: theme.darkGrey }]}>
-                  {cart?.description?.substr(0, 34) +
-                    (cart?.description?.length > 34 ? "..." : "")}
+              {/* Always Visible - Brief Description */}
+              <View style={styles.briefDescriptionContainer}>
+                <Text
+                  style={[styles.briefDescription, { color: theme.darkGrey }]}
+                >
+                  {cart?.description?.substr(0, 60)}
+                  {cart?.description?.length > 60 ? "..." : ""}
                 </Text>
               </View>
 
-              {/* Bulk Request Info */}
-              {isBulkRequest && (
-                <View
-                  style={[
-                    styles.bulkRequestInfo,
-                    {
-                      backgroundColor:
-                        theme.mode === "dark"
-                          ? theme.white + "10"
-                          : Colors.primary + "08",
-                    },
-                  ]}
-                >
-                  <View style={styles.bulkInfoRow}>
-                    <Ionicons
-                      name="people"
-                      size={RFPercentage(1.5)}
-                      color={theme.darkGrey}
-                    />
-                    <Text
-                      style={[styles.bulkInfoText, { color: theme.darkGrey }]}
-                    >
-                      {t("offerDetail.helpersNeeded") || "Helpers needed"}:{" "}
-                      {cart.numberOfWorkers || 1}
-                    </Text>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={RFPercentage(1.5)}
-                      color="#4CAF50"
-                      style={{ marginLeft: RFPercentage(1) }}
-                    />
-                    <Text style={[styles.bulkInfoText, { color: "#4CAF50" }]}>
-                      {t("offerDetail.confirmed") || "Confirmed"}:{" "}
-                      {cart.confirmedWorkers?.length || 0}
-                    </Text>
-                  </View>
-                  {isConfirmedWorker && (
-                    <View
-                      style={[
-                        styles.confirmedBadge,
-                        { backgroundColor: "#4CAF50" + "20" },
-                      ]}
-                    >
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={RFPercentage(1.3)}
-                        color="#4CAF50"
-                      />
-                      <Text
-                        style={[styles.confirmedText, { color: "#4CAF50" }]}
-                      >
-                        {t("offerDetail.youAreConfirmed") ||
-                          "You are confirmed"}
-                      </Text>
+              {/* Expandable Content */}
+              {expandedCards[index] && (
+                <View style={styles.expandableContent}>
+                  {/* Scheduled Date & Time */}
+                  {(scheduledDateTime || durationLabel) && (
+                    <View style={styles.scheduledSection}>
+                      {scheduledDateTime && (
+                        <View style={styles.scheduledItem}>
+                          <Ionicons
+                            name="calendar-outline"
+                            size={RFPercentage(1.5)}
+                            color={theme.primary}
+                          />
+                          <Text
+                            style={[
+                              styles.scheduledText,
+                              { color: theme.darkGrey },
+                            ]}
+                          >
+                            {scheduledDateTime}
+                          </Text>
+                        </View>
+                      )}
+                      {durationLabel && (
+                        <View style={styles.scheduledItem}>
+                          <Ionicons
+                            name="time-outline"
+                            size={RFPercentage(1.5)}
+                            color={theme.primary}
+                          />
+                          <Text
+                            style={[
+                              styles.scheduledText,
+                              { color: theme.darkGrey },
+                            ]}
+                          >
+                            {durationLabel}
+                          </Text>
+                        </View>
+                      )}
                     </View>
                   )}
 
-                  {/* Applications Badge */}
-                  {isTaskOwner &&
-                    hasApplicants &&
-                    activeFilter === `${t("myRequests.txt2")}` && (
-                      <View style={styles.applicantsBadge}>
+                  {/* Sub-Tasks */}
+                  {selectedSubTasks?.length > 0 && (
+                    <View style={styles.subTasksSection}>
+                      <View style={styles.subTasksHeader}>
                         <Ionicons
-                          name="person-add"
-                          size={RFPercentage(1.3)}
-                          color={Colors.primary}
+                          name="list"
+                          size={RFPercentage(1.5)}
+                          color={theme.primary}
                         />
-                        <Text style={styles.applicantsText}>
-                          {totalApplicants}{" "}
-                          {totalApplicants === 1 ? "applicant" : "applicants"}
+                        <Text
+                          style={[
+                            styles.subTasksTitle,
+                            { color: theme.darkGrey },
+                          ]}
+                        >
+                          { "Sub-tasks"}:
                         </Text>
                       </View>
-                    )}
+                      <View style={styles.subTasksList}>
+                        {displaySubTasks.map((subTask, idx) => (
+                          <View
+                            key={subTask.id || idx}
+                            style={[
+                              styles.subTaskTag,
+                              { backgroundColor: `${Colors.primary}15` },
+                            ]}
+                          >
+                            <FontAwesome5
+                              name={subTask.icon || "tag"}
+                              size={RFPercentage(1.1)}
+                              color={Colors.primary}
+                            />
+                            <Text
+                              style={[
+                                styles.subTaskText,
+                                { color: Colors.primary },
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {subTask.name}
+                            </Text>
+                          </View>
+                        ))}
+                        {hasMoreSubTasks && !showAllSubTasks[index] && (
+                          <TouchableOpacity
+                            onPress={(event) => toggleSubTasks(index, event)}
+                            style={[
+                              styles.subTaskTag,
+                              { backgroundColor: theme.darkGrey + "10" },
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.subTaskText,
+                                { color: theme.darkGrey },
+                              ]}
+                            >
+                              +{selectedSubTasks.length - 3} more
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Bulk Request Info */}
+                  {isBulkRequest && (
+                    <View
+                      style={[
+                        styles.bulkRequestInfo,
+                        {
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? theme.white + "10"
+                              : Colors.primary + "08",
+                        },
+                      ]}
+                    >
+                      <View style={styles.bulkInfoRow}>
+                        <Ionicons
+                          name="people"
+                          size={RFPercentage(1.5)}
+                          color={theme.darkGrey}
+                        />
+                        <Text
+                          style={[
+                            styles.bulkInfoText,
+                            { color: theme.darkGrey },
+                          ]}
+                        >
+                          {t("offerDetail.helpersNeeded") || "Helpers needed"}:{" "}
+                          {cart.numberOfWorkers || 1}
+                        </Text>
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={RFPercentage(1.5)}
+                          color="#4CAF50"
+                          style={{ marginLeft: RFPercentage(1) }}
+                        />
+                        <Text
+                          style={[styles.bulkInfoText, { color: "#4CAF50" }]}
+                        >
+                          {t("offerDetail.confirmed") || "Confirmed"}:{" "}
+                          {cart.confirmedWorkers?.length || 0}
+                        </Text>
+                      </View>
+                      {isConfirmedWorker && (
+                        <View
+                          style={[
+                            styles.confirmedBadge,
+                            { backgroundColor: "#4CAF50" + "20" },
+                          ]}
+                        >
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={RFPercentage(1.3)}
+                            color="#4CAF50"
+                          />
+                          <Text
+                            style={[styles.confirmedText, { color: "#4CAF50" }]}
+                          >
+                            {t("offerDetail.youAreConfirmed") ||
+                              "You are confirmed"}
+                          </Text>
+                        </View>
+                      )}
+
+                      {/* Applications Badge */}
+                      {isTaskOwner &&
+                        hasApplicants &&
+                        activeFilter === `${t("myRequests.txt2")}` && (
+                          <View style={styles.applicantsBadge}>
+                            <Ionicons
+                              name="person-add"
+                              size={RFPercentage(1.3)}
+                              color={Colors.primary}
+                            />
+                            <Text style={styles.applicantsText}>
+                              {totalApplicants}{" "}
+                              {totalApplicants === 1
+                                ? "applicant"
+                                : "applicants"}
+                            </Text>
+                          </View>
+                        )}
+                    </View>
+                  )}
                 </View>
               )}
 
@@ -968,7 +1243,9 @@ function MyRequests({ navigation }) {
                 activeFilter === `${t("myRequests.txt2")}` && (
                   <TouchableOpacity
                     style={styles.viewApplicantsButton}
-                    onPress={() => navigateToApplicantsScreen(cart.id)}
+                    onPress={(event) =>
+                      navigateToApplicantsScreen(cart.id, event)
+                    }
                     activeOpacity={0.8}
                   >
                     <Ionicons
@@ -991,9 +1268,7 @@ function MyRequests({ navigation }) {
                       !cart.isBulkRequest &&
                       (cart.reviewedAccepter ? (
                         /* ✅ ALREADY REVIEWED */
-                        <View
-                          style={[styles.addReviewButton]}
-                        >
+                        <View style={[styles.addReviewButton]}>
                           <Ionicons
                             name="checkmark-circle"
                             size={RFPercentage(1.5)}
@@ -1009,11 +1284,12 @@ function MyRequests({ navigation }) {
                         /* ➕ ADD REVIEW */
                         <TouchableOpacity
                           style={styles.addReviewButton}
-                          onPress={() =>
+                          onPress={(event) => {
+                            event.stopPropagation();
                             navigation.navigate("AddReviewToAccepter", {
                               task: cart,
-                            })
-                          }
+                            });
+                          }}
                           activeOpacity={0.8}
                         >
                           <Ionicons
@@ -1036,7 +1312,9 @@ function MyRequests({ navigation }) {
                           styles.viewConfirmedHelpersButton,
                           { backgroundColor: Colors.primary + "20" },
                         ]}
-                        onPress={() => navigateToConfirmedHelpers(cart)}
+                        onPress={(event) =>
+                          navigateToConfirmedHelpers(cart, event)
+                        }
                         activeOpacity={0.8}
                       >
                         <Ionicons
@@ -1088,7 +1366,10 @@ function MyRequests({ navigation }) {
                     </View>
                   ) : (
                     <TouchableOpacity
-                      onPress={() => repostRequest(index, cart)}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        repostRequest(index, cart);
+                      }}
                       activeOpacity={0.8}
                       style={styles.repostInner}
                       disabled={markLoaderIndex === index}
@@ -1129,8 +1410,8 @@ function MyRequests({ navigation }) {
                       disabled={
                         markLoaderIndex === index || repostingIndex === index
                       }
-                      onPress={() => {
-                        handleStartChat(cart.user);
+                      onPress={(event) => {
+                        handleStartChat(cart.user, event);
                       }}
                       style={styles.abs}
                     >
@@ -1150,9 +1431,9 @@ function MyRequests({ navigation }) {
 
               {activeFilter === `${t("myRequests.txt2")}` &&
                 cart?.status === REQUEST_STATUS.Active &&
-                isTaskOwner && 
-                !isConfirmedWorker && 
-                !isAppliedWorker && ( 
+                isTaskOwner &&
+                !isConfirmedWorker &&
+                !isAppliedWorker && (
                   <View style={styles.cartContainer2}>
                     <TouchableOpacity
                       activeOpacity={0.8}
@@ -1169,7 +1450,8 @@ function MyRequests({ navigation }) {
                               : 1,
                         },
                       ]}
-                      onPress={async () => {
+                      onPress={async (event) => {
+                        event.stopPropagation();
                         setMarkLoaderIndex(index);
                         await changeReqestStatus(
                           index,
@@ -1191,7 +1473,8 @@ function MyRequests({ navigation }) {
                       disabled={
                         cancelLoaderIndex === index || repostingIndex === index
                       }
-                      onPress={async () => {
+                      onPress={async (event) => {
+                        event.stopPropagation();
                         setCancelLoaderIndex(index);
                         setSelectedRequestIndex(index);
                         setSelectedRequestItem(cart);
@@ -1231,7 +1514,7 @@ function MyRequests({ navigation }) {
                     </TouchableOpacity>
                   </View>
                 )}
-            </View>
+            </TouchableOpacity>
           );
         })}
 
@@ -1306,8 +1589,8 @@ const styles = StyleSheet.create({
   },
   addReviewButton: {
     flexDirection: "row",
-    alignItems: "center",backgroundColor: Colors.primary + "20"
-    ,
+    alignItems: "center",
+    backgroundColor: Colors.primary + "20",
     borderRadius: RFPercentage(1),
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(1),
@@ -1383,7 +1666,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   bulkRequestInfo: {
-    width: "92%",
+    width: "100%",
     marginVertical: RFPercentage(1),
     padding: RFPercentage(1),
     borderRadius: RFPercentage(1),
@@ -1392,6 +1675,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: RFPercentage(0.5),
+    flexWrap: "wrap",
   },
   bulkInfoText: {
     fontSize: RFPercentage(1.2),
@@ -1473,6 +1757,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(1.4),
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_500Medium",
+    flex: 1,
   },
   text2: {
     color: Colors.white,
@@ -1481,10 +1766,81 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   postDate: {
-    fontSize: RFPercentage(1.4),
-    position: "absolute",
-    right: 0,
+    fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_400Regular",
+    marginRight: RFPercentage(1),
+  },
+  expandButton: {
+    padding: RFPercentage(0.2),
+    backgroundColor: "rgba(215, 215, 215, 0.48)",
+    borderRadius: RFPercentage(100),
+  },
+  briefDescriptionContainer: {
+    width: "92%",
+    marginBottom: RFPercentage(0.3),
+    paddingHorizontal: RFPercentage(0.5),
+  },
+  briefDescription: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+  },
+  expandableContent: {
+    width: "92%",
+    marginTop: RFPercentage(1),
+  },
+  scheduledSection: {
+    marginBottom: RFPercentage(1.5),
+  },
+  scheduledItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.5),
+  },
+  scheduledText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+    marginLeft: RFPercentage(0.8),
+    flex: 1,
+  },
+  subTasksSection: {
+    marginBottom: RFPercentage(1.5),
+  },
+  subTasksHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.8),
+  },
+  subTasksTitle: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: RFPercentage(0.5),
+  },
+  subTasksList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
+  subTaskTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: RFPercentage(1.2),
+    marginRight: RFPercentage(0.8),
+    marginBottom: RFPercentage(0.5),
+  },
+  subTaskText: {
+    fontSize: RFPercentage(1.1),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: RFPercentage(0.4),
+  },
+  fullDescriptionContainer: {
+    marginBottom: RFPercentage(1.5),
+  },
+  fullDescription: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2),
   },
   taskInfoContainer: {
     width: "92%",
@@ -1662,8 +2018,6 @@ const styles = StyleSheet.create({
 
   // New styles for View Applicants button
   viewApplicantsButton: {
-    // position: "absolute",
-    // right: 0,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: Colors.primary,
@@ -1678,6 +2032,7 @@ const styles = StyleSheet.create({
     elevation: 4,
     alignSelf: "flex-start",
     marginLeft: RFPercentage(2),
+    marginBottom: RFPercentage(1),
   },
   viewApplicantsText: {
     color: Colors.white,

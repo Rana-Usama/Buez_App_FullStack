@@ -22,9 +22,9 @@
     "error": "Fehler",
     "noDescription": "Keine Beschreibung",
     "task": "Aufgabe",
-"bulk": "Gruppenaufgabe mit mehreren Helfern",
-"helper": "Helfer",
-"helpers": "Helfer"
+    "bulk": "Gruppenaufgabe mit mehreren Helfern",
+    "helper": "Helfer",
+    "helpers": "Helfer"
   },
   "validations": {
     "inValid": "Ungültige E-Mail",
@@ -277,7 +277,6 @@
     "noReviews": "Noch keine Bewertungen",
     "noReviewsDesc": "Bewertungen von Auftraggebern werden hier angezeigt",
     "view": "Bewerber anzeigen"
-
   },
   "postRequest": {
     "txt1": "Anfrage veröffentlichen",
@@ -297,7 +296,17 @@
     "customTaskTitle": "Bitte gib deinen Aufgabentyp an",
     "pr": "Preis",
     "numberOfWorkers": "Anzahl der benötigten Helfer",
-    "workersHelperText": "Anzahl der benötigten Helfer auswählen (1-{{max}})"
+    "workersHelperText": "Anzahl der benötigten Helfer auswählen (1-{{max}})",
+    "sub-task": "Unteraufgaben (Alle zutreffenden auswählen)",
+    "sub-2": "Unteraufgaben auswählen...",
+    "sub-3": "Benutzerdefinierte Unteraufgabe hinzufügen...",
+    "date": "Aufgabendatum planen",
+    "time": "Aufgabenzeit planen",
+    "duration": "Geschätzte Dauer der Aufgabe",
+    "duration-1": "Geschätzte Dauer auswählen",
+    "photo": "Foto hinzufügen",
+    "photo-1": "Fotos hochladen",
+    "photo-2": "Optional"
   },
   "messages": {
     "txt1": "Nachrichten",

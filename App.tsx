@@ -28,6 +28,10 @@ import store from "./app/redux/store";
 import * as SplashScreen from "expo-splash-screen";
 import { UnreadMessagesProvider } from "./app/contexts/unread-messages.context";
 import messaging from "@react-native-firebase/messaging";
+import LanguageOnboardingModal, {
+  useLanguageOnboarding,
+} from "./app/translation/OnBoardingSelection";
+import { initializeLanguage } from "./app/utils/cachedTranslations";
 
 LogBox.ignoreAllLogs();
 
@@ -105,6 +109,7 @@ export default function App() {
     Poppins_900Black,
     Poppins_400Regular_Italic,
   });
+  const { showModal, checked, handleDone } = useLanguageOnboarding();
 
   useEffect(() => {
     getFCMToken().then((token) => {
@@ -131,8 +136,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const setupLanguage = async () => {
+      await initializeLanguage();
+    };
+    setupLanguage();
+  }, []);
+
+  useEffect(() => {
     console.log(i18n.isInitialized);
   }, []);
+  if (!checked || !fontsLoaded) return null;
 
   return (
     <ThemeProvider>
@@ -143,6 +156,10 @@ export default function App() {
               <ExpoStripeProvider>
                 <Provider store={store}>
                   <MainApp />
+                  <LanguageOnboardingModal
+                    visible={showModal}
+                    onDone={handleDone}
+                  />
                 </Provider>
                 <Toast config={toastConfig} />
               </ExpoStripeProvider>

@@ -22,9 +22,9 @@
     "error": "Fähler",
     "noDescription": "Kei Beschriibig",
     "task": "Ufgab",
-"bulk": "Gruppeuftrag mit mehrere Helfer",
-"helper": "Helfer",
-"helpers": "Helfer"
+    "bulk": "Gruppeuftrag mit mehrere Helfer",
+    "helper": "Helfer",
+    "helpers": "Helfer"
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -253,8 +253,8 @@
     "confirmedOn": "Bestätigt am",
     "youAreConfirmed": "Du bisch bestätigt",
     "cnf": "Bewerber bestätige",
-"slt": "Plätz besetzt",
-"lft": "übrig"
+    "slt": "Plätz besetzt",
+    "lft": "übrig"
   },
   "myRequests": {
     "txt1": "Mini Afroge",
@@ -277,7 +277,6 @@
     "noReviews": "No kei Bewertige",
     "noReviewsDesc": "Bewertige vo de Uftraggeber werde do aazeigt",
     "view": "Bewerber aaluege"
-
   },
   "postRequest": {
     "txt1": "Aafrog veröffentliche",
@@ -297,7 +296,17 @@
     "customTaskTitle": "Bitte gib din Ufgabetyp aa",
     "pr": "Priis",
     "numberOfWorkers": "Aazahl Hilf bruucht",
-    "workersHelperText": "Wähl d Aazahl Hilf wo bruucht wird (1-{{max}})"
+    "workersHelperText": "Wähl d Aazahl Hilf wo bruucht wird (1-{{max}})",
+    "sub-task": "Unterufgabe (alli zutreffende usähle)",
+    "sub-2": "Unterufgabe usähle...",
+    "sub-3": "Eigeti Unterufgabe hinzuefüege...",
+    "date": "Uftragsdatum plane",
+    "time": "Uftragsziit plane",
+    "duration": "Gschätzti Dauer vom Uftrag",
+    "duration-1": "Gschätzti Dauer usähle",
+    "photo": "Foto hinzuefüege",
+    "photo-1": "Fotos uflade",
+    "photo-2": "Optional"
   },
   "messages": {
     "txt1": "Nachrichte",

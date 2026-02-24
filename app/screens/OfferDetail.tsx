@@ -185,6 +185,7 @@ function OfferDetail({ navigation, route }) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
+  const [showAllSubTasks, setShowAllSubTasks] = useState(false);
 
   const [translatedOffer, setTranslatedOffer] = useState({
     taskType: "",
@@ -209,6 +210,65 @@ function OfferDetail({ navigation, route }) {
   const db = FIREBASE_DB;
   const imageObjects =
     postRequest?.imageUrls?.map((url) => ({ uri: url })) || [];
+
+  // Format scheduled date and time
+  const formatScheduledDateTime = () => {
+    if (postRequest?.scheduledDateTime) {
+      const date = new Date(postRequest.scheduledDateTime);
+      return date.toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else if (postRequest?.selectedDate && postRequest?.selectedTime) {
+      const date = new Date(postRequest.selectedDate);
+      const time = new Date(postRequest.selectedTime);
+      date.setHours(time.getHours(), time.getMinutes());
+      return date.toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    return null;
+  };
+
+  // Get duration label
+  const getDurationLabel = () => {
+    if (postRequest?.durationLabel) {
+      return postRequest.durationLabel;
+    }
+    if (postRequest?.estimatedDuration) {
+      const durationOptions = [
+        { value: "less_than_1", label: "< 1 hour" },
+        { value: "1_2_hours", label: "1-2 hours" },
+        { value: "2_4_hours", label: "2-4 hours" },
+        { value: "4_6_hours", label: "4-6 hours" },
+        { value: "6_8_hours", label: "6-8 hours" },
+        { value: "full_day", label: "Full day" },
+        { value: "multiple_days", label: "Multiple days" },
+      ];
+      const duration = durationOptions.find(
+        (d) => d.value === postRequest.estimatedDuration,
+      );
+      return duration?.label || "Duration not specified";
+    }
+    return null;
+  };
+
+  // Get sub-tasks to display
+  const selectedSubTasks = postRequest?.selectedSubTasks || [];
+  const displaySubTasks = showAllSubTasks
+    ? selectedSubTasks
+    : selectedSubTasks.slice(0, 5);
+  const hasMoreSubTasks = selectedSubTasks.length > 5;
+
+  const scheduledDateTime = formatScheduledDateTime();
+  const durationLabel = getDurationLabel();
 
   // Animations
   useEffect(() => {
@@ -384,6 +444,18 @@ function OfferDetail({ navigation, route }) {
       translateOfferData();
     }
   }, [postRequest]);
+
+  // Translate sub-tasks if needed
+  const translateSubTasks = async (subTasks) => {
+    if (!subTasks || subTasks.length === 0) return [];
+    const translated = await Promise.all(
+      subTasks.map(async (subTask) => ({
+        ...subTask,
+        name: await translateWithCache(subTask.name || ""),
+      })),
+    );
+    return translated;
+  };
 
   // Translate reviews and calculate average rating
   useEffect(() => {
@@ -831,6 +903,8 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
+  const isPostOwner = currentUserId === postRequest?.userId;
+
   return (
     <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -838,7 +912,6 @@ function OfferDetail({ navigation, route }) {
         backgroundColor={"transparent"}
         translucent
       />
-      {/* <CustomNav title={t("details.txt1")} showBack={true} /> */}
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -1067,7 +1140,130 @@ function OfferDetail({ navigation, route }) {
             </BlurView>
           </View>
 
-          {/* Task Description Card - Light Background */}
+          {/* Scheduled Date & Time Card */}
+          {(scheduledDateTime || durationLabel) && (
+            <View
+              style={[
+                styles.detailCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? Colors.lightGrey + "10"
+                      : Colors.primary + "05",
+                },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="calendar"
+                  size={RFPercentage(2.2)}
+                  color={Colors.primary}
+                />
+                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                  {"Scheduled Date & Time"}
+                </Text>
+              </View>
+
+              <View style={styles.scheduledContainer}>
+                {scheduledDateTime && (
+                  <View style={styles.scheduledItem}>
+                    <Ionicons
+                      name="calendar-outline"
+                      size={RFPercentage(2)}
+                      color={Colors.primary}
+                    />
+                    <Text
+                      style={[styles.scheduledText, { color: theme.darkGrey }]}
+                    >
+                      {scheduledDateTime}
+                    </Text>
+                  </View>
+                )}
+
+                {durationLabel && (
+                  <View style={styles.scheduledItem}>
+                    <Ionicons
+                      name="time-outline"
+                      size={RFPercentage(2)}
+                      color={Colors.primary}
+                    />
+                    <Text
+                      style={[styles.scheduledText, { color: theme.darkGrey }]}
+                    >
+                      {durationLabel}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Sub-Tasks Section */}
+          {selectedSubTasks.length > 0 && (
+            <View
+              style={[
+                styles.detailCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? Colors.lightGrey + "10"
+                      : Colors.primary + "05",
+                },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="list"
+                  size={RFPercentage(2.2)}
+                  color={Colors.primary}
+                />
+                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                  {"Sub-tasks"}
+                </Text>
+              </View>
+
+              <View style={styles.subTasksList}>
+                {displaySubTasks.map((subTask, idx) => (
+                  <View
+                    key={subTask.id || idx}
+                    style={[
+                      styles.subTaskTag,
+                      { backgroundColor: `${Colors.primary}15` },
+                    ]}
+                  >
+                    <FontAwesome5
+                      name={subTask.icon || "tag"}
+                      size={RFPercentage(1.2)}
+                      color={Colors.primary}
+                    />
+                    <Text
+                      style={[styles.subTaskText, { color: Colors.primary }]}
+                      numberOfLines={1}
+                    >
+                      {subTask.name}
+                    </Text>
+                  </View>
+                ))}
+                {hasMoreSubTasks && !showAllSubTasks && (
+                  <TouchableOpacity
+                    onPress={() => setShowAllSubTasks(true)}
+                    style={[
+                      styles.subTaskTag,
+                      { backgroundColor: theme.darkGrey + "10" },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.subTaskText, { color: theme.darkGrey }]}
+                    >
+                      +{selectedSubTasks.length - 5} more
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Task Description Card */}
           <View
             style={[
               styles.detailCard,
@@ -1327,7 +1523,7 @@ function OfferDetail({ navigation, route }) {
             </View>
           )}
 
-          {/* Task Info Cards - Light Backgrounds */}
+          {/* Task Info Cards */}
           <View style={styles.infoGrid}>
             {/* Location Card */}
             <View
@@ -1409,7 +1605,7 @@ function OfferDetail({ navigation, route }) {
               </View>
             </View>
 
-            {/* Date Card */}
+            {/* Created Date Card */}
             <View
               style={[
                 styles.infoCard,
@@ -1428,13 +1624,13 @@ function OfferDetail({ navigation, route }) {
                 ]}
               >
                 <Ionicons
-                  name="calendar"
+                  name="create"
                   size={RFPercentage(2.2)}
                   color="#9C27B0"
                 />
               </View>
               <Text style={[styles.infoLabel, { color: theme.darkGrey }]}>
-                {t("details.txt5")}
+                {t("myRequests.txt4") || "Posted"}
               </Text>
               <View style={styles.infoValueContainer}>
                 <Text style={[styles.infoValue, { color: theme.heading }]}>
@@ -1444,7 +1640,7 @@ function OfferDetail({ navigation, route }) {
             </View>
           </View>
 
-          {/* Reviews Section - Light Background */}
+          {/* Reviews Section */}
           {(translatedReviews?.length > 0 || averageRating) && (
             <View
               style={[
@@ -1600,50 +1796,56 @@ function OfferDetail({ navigation, route }) {
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
             {isAccepted ? (
-              <CustomAppButton
-                title={t("details.txt9")}
-                onPress={handleStartChat}
-                icon="chatbubble-ellipses"
-                disabled={!isChatEnabled()}
-              />
+              <>
+                {!isPostOwner && (
+                  <CustomAppButton
+                    title={t("details.txt9")}
+                    onPress={handleStartChat}
+                    icon="chatbubble-ellipses"
+                    disabled={!isChatEnabled()}
+                  />
+                )}
+              </>
             ) : isBulkRequest ? (
               <>
-                {/* Chat Button - Conditionally Enabled */}
-                <TouchableOpacity
-                  style={[
-                    styles.secondaryButton,
-                    {
-                      borderColor: theme.lightGrey,
-                      backgroundColor: !isChatEnabled()
-                        ? theme.lightGrey + "30"
-                        : theme.mode === "dark"
-                          ? theme.white + "10"
-                          : Colors.primary + "08",
-                      opacity: isChatEnabled() ? 1 : 0.5,
-                    },
-                  ]}
-                  onPress={handleStartChat}
-                  activeOpacity={0.8}
-                  disabled={!isChatEnabled()}
-                >
-                  <Ionicons
-                    name="chatbubble-ellipses"
-                    size={RFPercentage(1.8)}
-                    color={isChatEnabled() ? theme.darkGrey : theme.lightGrey}
-                  />
-                  <Text
+                {/* Chat Button - Only show if not post owner */}
+                {!isPostOwner && (
+                  <TouchableOpacity
                     style={[
-                      styles.secondaryButtonText,
+                      styles.secondaryButton,
                       {
-                        color: isChatEnabled()
-                          ? theme.darkGrey
-                          : theme.lightGrey,
+                        borderColor: theme.lightGrey,
+                        backgroundColor: !isChatEnabled()
+                          ? theme.lightGrey + "30"
+                          : theme.mode === "dark"
+                            ? theme.white + "10"
+                            : Colors.primary + "08",
+                        opacity: isChatEnabled() ? 1 : 0.5,
                       },
                     ]}
+                    onPress={handleStartChat}
+                    activeOpacity={0.8}
+                    disabled={!isChatEnabled()}
                   >
-                    {t("details.txt9")}
-                  </Text>
-                </TouchableOpacity>
+                    <Ionicons
+                      name="chatbubble-ellipses"
+                      size={RFPercentage(1.8)}
+                      color={isChatEnabled() ? theme.darkGrey : theme.lightGrey}
+                    />
+                    <Text
+                      style={[
+                        styles.secondaryButtonText,
+                        {
+                          color: isChatEnabled()
+                            ? theme.darkGrey
+                            : theme.lightGrey,
+                        },
+                      ]}
+                    >
+                      {t("details.txt9")}
+                    </Text>
+                  </TouchableOpacity>
+                )}
 
                 {/* Apply/Accept Button */}
                 {currentUserId === postRequest?.userId ? (
@@ -1652,15 +1854,11 @@ function OfferDetail({ navigation, route }) {
                       t("offerDetail.viewApplications") || "View Applications"
                     }
                     onPress={() =>
-                      navigation.navigate("ApplicationsScreen", {
-                        postId: postRequest.id,
-                        appliedWorkers,
-                        confirmedWorkers,
-                        numberOfWorkers,
+                      navigation.navigate("TaskApplicantsScreen", {
+                        taskId: postRequest?.id,
                       })
                     }
                     icon="list"
-                    disabled={appliedWorkers.length === 0}
                   />
                 ) : // Worker - Apply Button
                 hasApplied || confirmed ? (
@@ -1701,35 +1899,44 @@ function OfferDetail({ navigation, route }) {
               </>
             ) : (
               <>
-                <TouchableOpacity
-                  style={[
-                    styles.secondaryButton,
-                    {
-                      borderColor: theme.lightGrey,
-                      backgroundColor:
-                        theme.mode === "dark"
-                          ? theme.white + "10"
-                          : Colors.primary + "08",
-                    },
-                  ]}
-                  onPress={handleStartChat}
-                  activeOpacity={0.8}
-                  disabled={currentUserId === postRequest.userId}
-                >
-                  <Ionicons
-                    name="chatbubble-ellipses"
-                    size={RFPercentage(1.8)}
-                    color={theme.darkGrey}
-                  />
-                  <Text
+                {/* Chat Button - Only show if not post owner */}
+                {!isPostOwner && (
+                  <TouchableOpacity
                     style={[
-                      styles.secondaryButtonText,
-                      { color: theme.darkGrey },
+                      styles.secondaryButton,
+                      {
+                        borderColor: theme.lightGrey,
+                        backgroundColor: !isChatEnabled()
+                          ? theme.lightGrey + "30"
+                          : theme.mode === "dark"
+                            ? theme.white + "10"
+                            : Colors.primary + "08",
+                        opacity: isChatEnabled() ? 1 : 0.5,
+                      },
                     ]}
+                    onPress={handleStartChat}
+                    activeOpacity={0.8}
+                    disabled={!isChatEnabled()}
                   >
-                    {t("details.txt9")}
-                  </Text>
-                </TouchableOpacity>
+                    <Ionicons
+                      name="chatbubble-ellipses"
+                      size={RFPercentage(1.8)}
+                      color={isChatEnabled() ? theme.darkGrey : theme.lightGrey}
+                    />
+                    <Text
+                      style={[
+                        styles.secondaryButtonText,
+                        {
+                          color: isChatEnabled()
+                            ? theme.darkGrey
+                            : theme.lightGrey,
+                        },
+                      ]}
+                    >
+                      {t("details.txt9")}
+                    </Text>
+                  </TouchableOpacity>
+                )}
 
                 <CustomAppButton
                   title={t("details.txt12")}
@@ -1898,7 +2105,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
   },
-
   detailCard: {
     borderRadius: 16,
     padding: RFPercentage(2),
@@ -2281,6 +2487,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  scheduledContainer: {
+    width: "100%",
+  },
+  scheduledItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(1),
+  },
+  scheduledText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    marginLeft: RFPercentage(1),
+    flex: 1,
+  },
+  subTasksList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
+  subTaskTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(1.5),
+    marginRight: RFPercentage(1),
+    marginBottom: RFPercentage(0.8),
+  },
+  subTaskText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: RFPercentage(0.5),
   },
 });
 

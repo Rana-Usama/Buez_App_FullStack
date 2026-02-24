@@ -51,7 +51,26 @@ import {
 import { useLocation } from "../utils/useLocation";
 import CustomNav from "../components/common/CustomNav";
 
+import DateTimePicker from "@react-native-community/datetimepicker";
+
 const { width } = Dimensions.get("window");
+
+const TASK_IMAGE_KEYS: Record<string, string> = {
+  "Pet Care": "Pet",
+  "Event Setup": "Event",
+  "Cleaning": "Cleaning",
+  "Moving": "Moving",
+  "Gardening": "Gardening",
+  "Gaming": "Gaming",
+  "Plumbing": "Plumbing",
+  "Electrical": "Electrical",
+  "Carpentry": "Carpentry",
+  "Painting": "Painting",
+  "Delivery": "Delivery",
+  "Tutoring": "Tutoring",
+  "Photography": "Photography",
+  "Other": "Other",
+};
 
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
@@ -76,6 +95,215 @@ function PostRequest({ navigation, route }) {
   const inputRef = useRef(null);
   const [customTaskTitle, setCustomTaskTitle] = useState("");
 
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [estimatedDuration, setEstimatedDuration] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState("date");
+  const [formattedDate, setFormattedDate] = useState("");
+  const [formattedTime, setFormattedTime] = useState("");
+
+  // New state for sub-tasks
+  const [selectedSubTasks, setSelectedSubTasks] = useState([]);
+  const [showSubTaskDropdown, setShowSubTaskDropdown] = useState(false);
+  const [customSubTask, setCustomSubTask] = useState("");
+
+  const [translatedTaskOptions, setTranslatedTaskOptions] = useState([]);
+  const [translatedCompensationOptions, setTranslatedCompensationOptions] =
+    useState([]);
+  const [originalTaskType, setOriginalTaskType] = useState("");
+  const [originalCompensationType, setOriginalCompensationType] = useState("");
+
+  const [showDurationDropdown, setShowDurationDropdown] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState("");
+  const [translatedSubTasks, setTranslatedSubTasks] = useState([]);
+  const [translatedDurationOptions, setTranslatedDurationOptions] = useState(
+    [],
+  );
+
+  const durationOptions = [
+    { label: "Less than 1 hour", value: "less_than_1" },
+    { label: "1-2 hours", value: "1_2_hours" },
+    { label: "2-4 hours", value: "2_4_hours" },
+    { label: "4-6 hours", value: "4_6_hours" },
+    { label: "6-8 hours", value: "6_8_hours" },
+    { label: "Full day (8+ hours)", value: "full_day" },
+    { label: "Multiple days", value: "multiple_days" },
+  ];
+
+  // Expanded task options with icons
+  const taskOptions = [
+    { id: 1, name: "Cleaning", icon: "broom" },
+    { id: 2, name: "Moving", icon: "truck" },
+    { id: 3, name: "Gardening", icon: "seedling" },
+    { id: 4, name: "Gaming", icon: "gamepad" },
+    { id: 5, name: "Plumbing", icon: "wrench" },
+    { id: 6, name: "Electrical", icon: "bolt" },
+    { id: 7, name: "Carpentry", icon: "hammer" },
+    { id: 8, name: "Painting", icon: "paint-brush" },
+    { id: 9, name: "Delivery", icon: "shipping-fast" },
+    { id: 10, name: "Tutoring", icon: "chalkboard-teacher" },
+    { id: 11, name: "Event Setup", icon: "calendar-alt" },
+    { id: 12, name: "Photography", icon: "camera" },
+    { id: 13, name: "Pet Care", icon: "paw" },
+    { id: 14, name: "Other", icon: "ellipsis-h" },
+  ];
+
+  // Sub-tasks by task type
+  const subTaskOptions = {
+    Cleaning: [
+      { id: "clean_1", name: "Deep Clean", icon: "broom" },
+      { id: "clean_2", name: "Dusting", icon: "feather" },
+      { id: "clean_3", name: "Vacuuming", icon: "wind" },
+      { id: "clean_4", name: "Mopping", icon: "bucket" },
+      { id: "clean_5", name: "Window Cleaning", icon: "window-maximize" },
+      { id: "clean_6", name: "Carpet Cleaning", icon: "square" },
+      { id: "clean_7", name: "Bathroom Cleaning", icon: "toilet" },
+      { id: "clean_8", name: "Kitchen Cleaning", icon: "kitchen-set" },
+    ],
+    Moving: [
+      { id: "move_1", name: "Packing", icon: "box" },
+      { id: "move_2", name: "Loading", icon: "truck-loading" },
+      { id: "move_3", name: "Unloading", icon: "truck" },
+      { id: "move_4", name: "Furniture Assembly", icon: "tools" },
+      { id: "move_5", name: "Furniture Disassembly", icon: "hammer" },
+      { id: "move_6", name: "Heavy Lifting", icon: "dumbbell" },
+      { id: "move_7", name: "Transport", icon: "shipping-fast" },
+      { id: "move_8", name: "Piano Moving", icon: "music" },
+    ],
+    Gardening: [
+      { id: "garden_1", name: "Planting", icon: "seedling" },
+      { id: "garden_2", name: "Weeding", icon: "leaf" },
+      { id: "garden_3", name: "Lawn Mowing", icon: "cut" },
+      { id: "garden_4", name: "Trimming", icon: "scissors" },
+      { id: "garden_5", name: "Pruning", icon: "cut" },
+      { id: "garden_6", name: "Hedge Trimming", icon: "scissors" },
+      { id: "garden_7", name: "Leaf Blowing", icon: "wind" },
+      { id: "garden_8", name: "Tree Planting", icon: "tree" },
+      { id: "garden_9", name: "Mulching", icon: "mound" },
+      { id: "garden_10", name: "Fertilizing", icon: "flask" },
+    ],
+    Gaming: [
+      { id: "game_1", name: "Game Testing", icon: "gamepad" },
+      { id: "game_2", name: "Streaming Setup", icon: "video" },
+      { id: "game_3", name: "Tournament", icon: "trophy" },
+      { id: "game_4", name: "LAN Party Setup", icon: "network-wired" },
+    ],
+    Plumbing: [
+      { id: "plumb_1", name: "Leak Repair", icon: "water" },
+      { id: "plumb_2", name: "Pipe Installation", icon: "pipe" },
+      { id: "plumb_3", name: "Drain Cleaning", icon: "bath" },
+      { id: "plumb_4", name: "Fixture Installation", icon: "faucet" },
+      { id: "plumb_5", name: "Water Heater", icon: "water" },
+      { id: "plumb_6", name: "Toilet Repair", icon: "toilet" },
+    ],
+    Electrical: [
+      { id: "elec_1", name: "Light Installation", icon: "lightbulb" },
+      { id: "elec_2", name: "Outlet Repair", icon: "plug" },
+      { id: "elec_3", name: "Ceiling Fan", icon: "fan" },
+      { id: "elec_4", name: "Switch Replacement", icon: "toggle-on" },
+      { id: "elec_5", name: "Circuit Breaker", icon: "bolt" },
+    ],
+    Carpentry: [
+      { id: "carp_1", name: "Furniture Repair", icon: "chair" },
+      { id: "carp_2", name: "Cabinet Installation", icon: "cabinet" },
+      { id: "carp_3", name: "Shelving", icon: "books" },
+      { id: "carp_4", name: "Deck Repair", icon: "home" },
+    ],
+    Painting: [
+      { id: "paint_1", name: "Wall Painting", icon: "paint-roller" },
+      { id: "paint_2", name: "Ceiling Painting", icon: "arrow-up" },
+      { id: "paint_3", name: "Trim Painting", icon: "border" },
+      { id: "paint_4", name: "Cabinet Painting", icon: "cabinet" },
+      { id: "paint_5", name: "Touch-ups", icon: "brush" },
+    ],
+    Delivery: [
+      { id: "del_1", name: "Package Delivery", icon: "box" },
+      { id: "del_2", name: "Food Delivery", icon: "pizza" },
+      { id: "del_3", name: "Grocery Delivery", icon: "shopping-bag" },
+      { id: "del_4", name: "Furniture Delivery", icon: "couch" },
+    ],
+    Tutoring: [
+      { id: "tutor_1", name: "Math", icon: "calculator" },
+      { id: "tutor_2", name: "Science", icon: "flask" },
+      { id: "tutor_3", name: "English", icon: "book" },
+      { id: "tutor_4", name: "Languages", icon: "language" },
+      { id: "tutor_5", name: "Test Prep", icon: "graduation-cap" },
+    ],
+    "Event Setup": [
+      { id: "event_1", name: "Table Setup", icon: "table" },
+      { id: "event_2", name: "Chair Setup", icon: "chair" },
+      { id: "event_3", name: "Decoration", icon: "star-of-david" },
+      { id: "event_4", name: "Lighting", icon: "lightbulb" },
+      { id: "event_5", name: "Sound System", icon: "volume-up" },
+      { id: "event_6", name: "Cleanup", icon: "broom" },
+    ],
+    Photography: [
+      { id: "photo_1", name: "Event Photography", icon: "camera" },
+      { id: "photo_2", name: "Portrait", icon: "portrait" },
+      { id: "photo_3", name: "Product", icon: "box" },
+      { id: "photo_4", name: "Editing", icon: "pencil" },
+    ],
+    "Pet Care": [
+      { id: "pet_1", name: "Dog Walking", icon: "dog" },
+      { id: "pet_2", name: "Pet Sitting", icon: "cat" },
+      { id: "pet_3", name: "Grooming", icon: "cut" },
+      { id: "pet_4", name: "Feeding", icon: "bowl-food" },
+    ],
+
+    Other: [],
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const translateSubTasks = async () => {
+      if (!originalTaskType || originalTaskType === "Other") {
+        setTranslatedSubTasks([]);
+        return;
+      }
+      const subs = subTaskOptions?.[originalTaskType] || [];
+      const translated = await Promise.all(
+        subs.map(async (st) => ({
+          ...st,
+          originalName: st.name, // keep original
+          name: await cachedTranslate(st.name), // translated for UI
+        })),
+      );
+
+      if (isMounted) setTranslatedSubTasks(translated);
+    };
+    translateSubTasks();
+    return () => {
+      isMounted = false;
+    };
+  }, [originalTaskType]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const translateDurations = async () => {
+      const translated = await Promise.all(
+        durationOptions.map(async (d) => ({
+          ...d,
+          originalLabel: d.label, // keep original
+          label: await cachedTranslate(d.label), // translated for UI
+        })),
+      );
+
+      if (isMounted) setTranslatedDurationOptions(translated);
+    };
+    translateDurations();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const compensationOptions = [
+    { id: 1, type: "Monitarely", icon: "money-bill-wave" },
+    { id: 2, type: "Other", icon: "exchange-alt" },
+  ];
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -85,19 +313,6 @@ function PostRequest({ navigation, route }) {
   const currentPostRequest = route.params?.postRequest;
   const [numberOfWorkers, setNumberOfWorkers] = useState(1);
   const MAX_WORKERS = 10;
-
-  const taskOptions = [
-    { id: 1, name: "Cleaning", icon: "broom" },
-    { id: 2, name: "Moving", icon: "dot-circle" },
-    { id: 3, name: "Gardening", icon: "seedling" },
-    { id: 4, name: "Gaming", icon: "gamepad" },
-    { id: 5, name: "Other", icon: "ellipsis-h" },
-  ];
-
-  const compensationOptions = [
-    { id: 1, type: "Monitarely", icon: "money-bill-wave" },
-    { id: 2, type: "Other", icon: "exchange-alt" },
-  ];
 
   useEffect(() => {
     Animated.parallel([
@@ -114,11 +329,33 @@ function PostRequest({ navigation, route }) {
     ]).start();
   }, []);
 
-  const [translatedTaskOptions, setTranslatedTaskOptions] = useState([]);
-  const [translatedCompensationOptions, setTranslatedCompensationOptions] =
-    useState([]);
-  const [originalTaskType, setOriginalTaskType] = useState("");
-  const [originalCompensationType, setOriginalCompensationType] = useState("");
+  useEffect(() => {
+    if (selectedDate) {
+      const dateStr = selectedDate.toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+      setFormattedDate(dateStr);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (selectedTime) {
+      const timeStr = selectedTime.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      setFormattedTime(timeStr);
+    }
+  }, [selectedTime]);
+
+  // Clear sub-tasks when task type changes
+  useEffect(() => {
+    setSelectedSubTasks([]);
+    setCustomSubTask("");
+  }, [originalTaskType]);
 
   const getLocationForCurrency = () => {
     return selectedLocation?.name ? selectedLocation : currentLocation;
@@ -126,7 +363,7 @@ function PostRequest({ navigation, route }) {
 
   const currencyInfo = getCurrencyInfo(getLocationForCurrency());
   const currentCurrencySymbol = getCurrencySymbolFromLocation(
-    getLocationForCurrency()
+    getLocationForCurrency(),
   );
 
   useEffect(() => {
@@ -175,7 +412,7 @@ function PostRequest({ navigation, route }) {
           taskOptions.map(async (option) => ({
             ...option,
             name: await cachedTranslate(option.name),
-          }))
+          })),
         );
         setTranslatedTaskOptions(translatedTasks);
 
@@ -183,7 +420,7 @@ function PostRequest({ navigation, route }) {
           compensationOptions.map(async (option) => ({
             ...option,
             type: await cachedTranslate(option.type),
-          }))
+          })),
         );
         setTranslatedCompensationOptions(translatedCompensations);
 
@@ -192,21 +429,45 @@ function PostRequest({ navigation, route }) {
           setSelectedTask(await cachedTranslate(currentPostRequest.taskType));
           setOriginalCompensationType(currentPostRequest.compensationType);
           setSelectedCompensation(
-            await cachedTranslate(currentPostRequest.compensationType)
+            await cachedTranslate(currentPostRequest.compensationType),
           );
           setLocation(currentPostRequest.address);
           setCompensation(
-            await cachedTranslate(currentPostRequest.otherCompensation)
+            await cachedTranslate(currentPostRequest.otherCompensation),
           );
           if (currentPostRequest.monitarily) {
             const numericValue = extractNumericValue(
-              currentPostRequest.monitarily.toString()
+              currentPostRequest.monitarily.toString(),
             );
             setNumericBudget(numericValue.toString());
             setBudget(formatCurrency(numericValue, selectedLocation));
           }
           if (currentPostRequest.taskType === "Other") {
             setCustomTaskTitle(currentPostRequest.customTaskTitle || "");
+          }
+
+          // Load sub-tasks if they exist
+          if (currentPostRequest.selectedSubTasks) {
+            const hydrated = await Promise.all(
+              currentPostRequest.selectedSubTasks.map(async (st) => ({
+                ...st,
+                originalName: st.originalName || st.name,
+                translatedName: st.isCustom
+                  ? st.name
+                  : await cachedTranslate(st.name),
+              })),
+            );
+            setSelectedSubTasks(hydrated);
+          }
+
+          if (currentPostRequest.selectedDate) {
+            setSelectedDate(new Date(currentPostRequest.selectedDate));
+          }
+          if (currentPostRequest.selectedTime) {
+            setSelectedTime(new Date(currentPostRequest.selectedTime));
+          }
+          if (currentPostRequest.estimatedDuration) {
+            setSelectedDuration(currentPostRequest.estimatedDuration);
           }
           const temp = [...imageUris];
           currentPostRequest.imageUrls.forEach((imgUrl, i) => {
@@ -218,16 +479,30 @@ function PostRequest({ navigation, route }) {
         }
       };
       translateAndSet();
-    }, [route.params?.postRequest])
+    }, [route.params?.postRequest]),
   );
 
   const toggleDropdown = (dropdownType) => {
     if (dropdownType === "task") {
       setShowTaskDropdown(!showTaskDropdown);
       if (showCompensationDropdown) setShowCompensationDropdown(false);
-    } else {
+      setShowDurationDropdown(false);
+      setShowSubTaskDropdown(false);
+    } else if (dropdownType === "compensation") {
       setShowCompensationDropdown(!showCompensationDropdown);
       if (showTaskDropdown) setShowTaskDropdown(false);
+      setShowDurationDropdown(false);
+      setShowSubTaskDropdown(false);
+    } else if (dropdownType === "duration") {
+      setShowDurationDropdown(!showDurationDropdown);
+      if (showTaskDropdown) setShowTaskDropdown(false);
+      if (showCompensationDropdown) setShowCompensationDropdown(false);
+      setShowSubTaskDropdown(false);
+    } else if (dropdownType === "subtask") {
+      setShowSubTaskDropdown(!showSubTaskDropdown);
+      if (showTaskDropdown) setShowTaskDropdown(false);
+      if (showCompensationDropdown) setShowCompensationDropdown(false);
+      if (showDurationDropdown) setShowDurationDropdown(false);
     }
   };
 
@@ -241,11 +516,58 @@ function PostRequest({ navigation, route }) {
     setShowTaskDropdown(false);
   };
 
+  const toggleSubTask = (subTask) => {
+    setSelectedSubTasks((prev) => {
+      const exists = prev.find((st) => st.id === subTask.id);
+      if (exists) {
+        return prev.filter((st) => st.id !== subTask.id);
+      } else {
+        return [...prev, subTask];
+      }
+    });
+  };
+
+  const addCustomSubTask = () => {
+    if (customSubTask.trim()) {
+      const newSubTask = {
+        id: `custom_${Date.now()}`,
+        name: customSubTask.trim(),
+        icon: "tag",
+        isCustom: true,
+      };
+      setSelectedSubTasks((prev) => [...prev, newSubTask]);
+      setCustomSubTask("");
+    }
+  };
+
+  const removeSubTask = (subTaskId) => {
+    setSelectedSubTasks((prev) => prev.filter((st) => st.id !== subTaskId));
+  };
+
   const selectCompensation = (type) => {
     setSelectedCompensation(type.type);
     const original = compensationOptions.find((c) => c.id === type.id)?.type;
     setOriginalCompensationType(original);
     setShowCompensationDropdown(false);
+  };
+
+  const selectDuration = (duration) => {
+    setSelectedDuration(duration.value);
+    setShowDurationDropdown(false);
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    setShowDatePicker(Platform.OS === "ios");
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+    }
+  };
+
+  const onTimeChange = (event, selectedTime) => {
+    setShowTimePicker(Platform.OS === "ios");
+    if (selectedTime) {
+      setSelectedTime(selectedTime);
+    }
   };
 
   const pickImage = async (index) => {
@@ -263,7 +585,7 @@ function PostRequest({ navigation, route }) {
         {
           compress: 0.2,
           format: ImageManipulator.SaveFormat.JPEG,
-        }
+        },
       );
       let tempImageUris = [...imageUris];
       tempImageUris[index] = compressedImage.uri;
@@ -313,16 +635,66 @@ function PostRequest({ navigation, route }) {
       "https://images.unsplash.com/photo-1584304474795-74fb0b42e66a?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
     Moving: [
-      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1514899706957-d22ee867a77b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1615986201152-7686a4867f30?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1600660792241-240f01455c6f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1485095329183-d0797cdc5676?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1643208589889-0735ad7218f0?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1608170825938-a8ea0305d46c?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1600518464441-9154a4dea21b?q=80&w=3775&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1614359835514-92f8ba196357?q=80&w=3544&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1714647211902-bb711d643a17?q=80&w=3732&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1580709839515-54b8991e2813?q=80&w=3829&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Plumbing: [
+      "https://plus.unsplash.com/premium_photo-1661884973994-d7625e52631a?q=80&w=3571&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1663045495725-89f23b57cfc5?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1674726253061-baba094ad8c7?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1676210134188-4c05dd172f89?q=80&w=3774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Electrical: [
+      "https://plus.unsplash.com/premium_photo-1661960643553-ccfbf7d921f6?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1682148175448-8e418fcfbaa7?q=80&w=3544&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1770121696405-cd23f3c0cf22?q=80&w=2560&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1621905251918-48416bd8575a?q=80&w=3569&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Carpentry: [
+      "https://plus.unsplash.com/premium_photo-1683140664559-f6b9372a7a0a?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1723867252384-9e4809c2fdd5?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1605125626499-e2c7efbd1ab3?q=80&w=3732&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1645651964715-d200ce0939cc?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+
+    Painting: [
+      "https://plus.unsplash.com/premium_photo-1664013263421-91e3a8101259?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1579783928621-7a13d66a62d1?q=80&w=3690&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1678812165213-12dc8d1f3e19?q=80&w=3584&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=3449&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Delivery: [
+      "https://plus.unsplash.com/premium_photo-1682146662576-900a71864a11?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1661342486992-2a08d4b466ef?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1548695607-9c73430ba065?q=80&w=3725&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1695654390723-479197a8c4a3?q=80&w=3608&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Tutoring: [
+      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1620919235663-61eb4a25bb51?q=80&w=2768&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1562564055-71e051d33c19?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Event: [
+      "https://plus.unsplash.com/premium_photo-1722168614154-60badae538c1?q=80&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1711061959382-0de7a4bddccf?q=80&w=3732&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1681841713733-7b5d6cb95137?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1759306221569-028a35bc8c66?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Photography: [
+      "https://plus.unsplash.com/premium_photo-1674389991678-0836ca77c7f7?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1682097066897-209d0d9e9ae5?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1471341971476-ae15ff5dd4ea?q=80&w=3732&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1554048612-b6a482bc67e5?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Pet: [
+      "https://plus.unsplash.com/premium_photo-1663040477032-0cb4ee5402bc?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1625321150203-cea4bee44b54?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1663047910718-c8758a6785e9?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1663011219208-418276022b35?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
     Other: [
       "https://images.unsplash.com/photo-1461595520627-42e3c83019bc?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -336,12 +708,13 @@ function PostRequest({ navigation, route }) {
     ],
   };
 
-  function getRandomImage(taskType) {
-    const defaultType = t("postRequest.txt6");
-    const images = DEFAULT_IMAGES?.[taskType] || DEFAULT_IMAGES?.[defaultType];
-    if (!Array.isArray(images) || images.length === 0) {
-      return null;
-    }
+  
+
+  function getRandomImage(taskType: string) {
+    const defaultType = t("postRequest.txt6"); 
+    const key = TASK_IMAGE_KEYS[taskType] || TASK_IMAGE_KEYS[defaultType];
+    const images = DEFAULT_IMAGES?.[key];
+    if (!Array.isArray(images) || images.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * images.length);
     return images[randomIndex];
   }
@@ -370,12 +743,15 @@ function PostRequest({ navigation, route }) {
       !description ||
       !location ||
       (!compensation && !budget) ||
-      (originalTaskType === "Other" && !customTaskTitle)
+      (originalTaskType === "Other" && !customTaskTitle) ||
+      !selectedDate ||
+      !selectedTime ||
+      !selectedDuration
     ) {
       Toast.show({
         type: "info",
         text1: `Error`,
-        text2: `Fill all fields`,
+        text2: `Please fill all fields including date, time, and estimated duration`,
       });
       return;
     }
@@ -391,6 +767,15 @@ function PostRequest({ navigation, route }) {
     try {
       showIndicator(true);
       const keywords = description.toLowerCase().split(" ");
+
+      const scheduledDateTime = new Date(selectedDate);
+      scheduledDateTime.setHours(
+        selectedTime.getHours(),
+        selectedTime.getMinutes(),
+        0,
+        0,
+      );
+
       const data = {
         taskType: originalTaskType,
         compensationType: originalCompensationType,
@@ -414,10 +799,25 @@ function PostRequest({ navigation, route }) {
           locale: currencyInfo.locale,
         },
         numberOfWorkers: numberOfWorkers,
-        slotsAvailable: numberOfWorkers, // Track remaining slots
-        confirmedWorkers: [], // Array to store confirmed workers
-        appliedWorkers: [], // Array to store applicants
+        slotsAvailable: numberOfWorkers,
+        confirmedWorkers: [],
+        appliedWorkers: [],
         isBulkRequest: numberOfWorkers > 1,
+
+        // New fields for sub-tasks
+        selectedSubTasks: selectedSubTasks.map((st) => ({
+          id: st.id,
+          name: st.name,
+          isCustom: st.isCustom || false,
+        })),
+
+        scheduledDate: selectedDate.toISOString(),
+        scheduledTime: selectedTime.toISOString(),
+        scheduledDateTime: scheduledDateTime.toISOString(),
+        estimatedDuration: selectedDuration,
+        durationLabel:
+          durationOptions.find((d) => d.value === selectedDuration)?.label ||
+          "",
       };
       const imgs = imageUris?.filter((img) => Boolean(img));
       if (imgs?.length === 0) {
@@ -432,7 +832,7 @@ function PostRequest({ navigation, route }) {
           const compressed = await ImageManipulator.manipulateAsync(
             localFile,
             [],
-            { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG }
+            { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG },
           );
           imgs.push(compressed.uri);
         }
@@ -458,6 +858,11 @@ function PostRequest({ navigation, route }) {
     }
   };
 
+  // Get current sub-tasks based on selected task
+  const currentSubTasks = originalTaskType
+    ? subTaskOptions[originalTaskType] || []
+    : [];
+
   return (
     <>
       <StatusBar
@@ -481,114 +886,112 @@ function PostRequest({ navigation, route }) {
       )}
       <TouchableWithoutFeedback
         onPress={() => {
-          Keyboard.dismiss(),
+          (Keyboard.dismiss(),
             setShowTaskDropdown(false),
-            setShowCompensationDropdown(false);
+            setShowCompensationDropdown(false),
+            setShowDurationDropdown(false),
+            setShowSubTaskDropdown(false));
         }}
       >
-          <ScrollView
-            style={[styles.screen, { backgroundColor: theme.white }]}
-            contentContainerStyle={styles.scrollViewContent}
-            keyboardShouldPersistTaps="always"
-            showsVerticalScrollIndicator={false}
-
+        <ScrollView
+          style={[styles.screen, { backgroundColor: theme.white }]}
+          contentContainerStyle={styles.scrollViewContent}
+          keyboardShouldPersistTaps="always"
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View
+            style={[
+              styles.formContainer,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
           >
-            <Animated.View
-              style={[
-                styles.formContainer,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ translateY: slideAnim }],
-                },
-              ]}
-            >
-              {/* Task Type */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="category"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {t("postRequest.txt3")}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  activeOpacity={0.7}
+            {/* Task Type */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
                   style={[
-                    styles.selectField,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: showTaskDropdown
-                        ? theme.primary
-                        : theme.border,
-                      borderWidth: showTaskDropdown ? 1.5 : 1,
-                    },
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
                   ]}
-                  onPress={() => toggleDropdown("task")}
                 >
-                  <View style={styles.selectFieldContent}>
-                    {selectedTask ? (
-                      <View style={styles.selectedOption}>
-                        <FontAwesome5
-                          name={
-                            taskOptions.find((t) => t.name === originalTaskType)
-                              ?.icon || "tasks"
-                          }
-                          size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
-                          style={styles.optionIcon}
-                        />
-                        <Text
-                          style={[styles.selectedText, { color: theme.black }]}
-                        >
-                          {selectedTask}
-                        </Text>
-                      </View>
-                    ) : (
-                      <Text
-                        style={[
-                          styles.placeholderText,
-                          { color: theme.heading },
-                        ]}
-                      >
-                        {t("postRequest.txt3")}
-                      </Text>
-                    )}
-                  </View>
                   <MaterialIcons
-                    name={
-                      showTaskDropdown
-                        ? "keyboard-arrow-up"
-                        : "keyboard-arrow-down"
-                    }
-                    size={RFPercentage(2.5)}
+                    name="category"
+                    size={RFPercentage(2)}
                     color={theme.primary}
                   />
-                </TouchableOpacity>
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.txt3")}
+                </Text>
+              </View>
 
-                {showTaskDropdown && (
-                  <View
-                    style={[
-                      styles.dropdownContainer,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        shadowColor: theme.black,
-                      },
-                    ]}
-                  >
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.selectField,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: showTaskDropdown
+                      ? theme.primary
+                      : theme.border,
+                    borderWidth: showTaskDropdown ? 1.5 : 1,
+                  },
+                ]}
+                onPress={() => toggleDropdown("task")}
+              >
+                <View style={styles.selectFieldContent}>
+                  {selectedTask ? (
+                    <View style={styles.selectedOption}>
+                      <FontAwesome5
+                        name={
+                          taskOptions.find((t) => t.name === originalTaskType)
+                            ?.icon || "tasks"
+                        }
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                        style={styles.optionIcon}
+                      />
+                      <Text
+                        style={[styles.selectedText, { color: theme.black }]}
+                      >
+                        {selectedTask}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text
+                      style={[styles.placeholderText, { color: theme.heading }]}
+                    >
+                      {t("postRequest.txt3")}
+                    </Text>
+                  )}
+                </View>
+                <MaterialIcons
+                  name={
+                    showTaskDropdown
+                      ? "keyboard-arrow-up"
+                      : "keyboard-arrow-down"
+                  }
+                  size={RFPercentage(2.5)}
+                  color={theme.primary}
+                />
+              </TouchableOpacity>
+
+              {showTaskDropdown && (
+                <View
+                  style={[
+                    styles.dropdownContainer,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      shadowColor: theme.black,
+                      maxHeight: RFPercentage(38),
+                    },
+                  ]}
+                >
+                  <ScrollView showsVerticalScrollIndicator={false}>
                     {translatedTaskOptions.map((item) => (
                       <TouchableOpacity
                         key={item.id}
@@ -615,382 +1018,17 @@ function PostRequest({ navigation, route }) {
                         </Text>
                       </TouchableOpacity>
                     ))}
-                  </View>
-                )}
-
-                {originalTaskType === "Other" && (
-                  <View style={styles.customTaskContainer}>
-                    <InputFieldNew
-                      placeholder={t("postRequest.customTaskTitle")}
-                      value={customTaskTitle}
-                      onChangeText={setCustomTaskTitle}
-                      maxLength={20}
-                      customStyle={{
-                        width: "100%",
-                        borderRadius: RFPercentage(1.2),
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        height: RFPercentage(6),
-                        marginTop: 0,
-                      }}
-                    />
-                  </View>
-                )}
-              </View>
-
-              {/* Compensation Type */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="attach-money"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {t("postRequest.txt7")}
-                  </Text>
+                  </ScrollView>
                 </View>
+              )}
 
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  style={[
-                    styles.selectField,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: showCompensationDropdown
-                        ? theme.primary
-                        : theme.border,
-                      borderWidth: showCompensationDropdown ? 1.5 : 1,
-                    },
-                  ]}
-                  onPress={() => toggleDropdown("compensation")}
-                >
-                  <View style={styles.selectFieldContent}>
-                    {selectedCompensation ? (
-                      <View style={styles.selectedOption}>
-                        <FontAwesome5
-                          name={
-                            compensationOptions.find(
-                              (c) => c.type === originalCompensationType
-                            )?.icon || "dollar-sign"
-                          }
-                          size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
-                          style={styles.optionIcon}
-                        />
-                        <Text
-                          style={[styles.selectedText, { color: theme.black }]}
-                        >
-                          {selectedCompensation}
-                        </Text>
-                      </View>
-                    ) : (
-                      <Text
-                        style={[
-                          styles.placeholderText,
-                          { color: theme.heading },
-                        ]}
-                      >
-                        {t("postRequest.txt7")}
-                      </Text>
-                    )}
-                  </View>
-                  <MaterialIcons
-                    name={
-                      showCompensationDropdown
-                        ? "keyboard-arrow-up"
-                        : "keyboard-arrow-down"
-                    }
-                    size={RFPercentage(2.5)}
-                    color={theme.primary}
-                  />
-                </TouchableOpacity>
-
-                {showCompensationDropdown && (
-                  <View
-                    style={[
-                      styles.dropdownContainer,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        shadowColor: theme.black,
-                      },
-                    ]}
-                  >
-                    {translatedCompensationOptions.map((item) => (
-                      <TouchableOpacity
-                        key={item.id}
-                        onPress={() => selectCompensation(item)}
-                        style={[
-                          styles.optionItem,
-                          selectedCompensation === item.type && {
-                            backgroundColor: `${theme.primary}10`,
-                          },
-                        ]}
-                      >
-                        <FontAwesome5
-                          name={
-                            compensationOptions.find((c) => c.id === item.id)
-                              ?.icon || "circle"
-                          }
-                          size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
-                        />
-                        <Text
-                          style={[styles.optionText, { color: theme.darkGrey }]}
-                        >
-                          {item.type}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              {/* Number of Workers */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="people"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {t("postRequest.numberOfWorkers") ||
-                      "Number of helpers needed"}
-                  </Text>
-                </View>
-
-                <View style={styles.numberInputContainer}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (numberOfWorkers > 1) {
-                        setNumberOfWorkers(numberOfWorkers - 1);
-                      }
-                    }}
-                    style={[
-                      styles.numberButton,
-                      {
-                        backgroundColor: theme.primary,
-                        opacity: numberOfWorkers <= 1 ? 0.5 : 1,
-                      },
-                    ]}
-                    disabled={numberOfWorkers <= 1}
-                  >
-                    <MaterialIcons
-                      name="remove"
-                      size={RFPercentage(2)}
-                      color={theme.pureWhite}
-                    />
-                  </TouchableOpacity>
-
-                  <TextInput
-                    style={[
-                      styles.numberInput,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        color: theme.black,
-                      },
-                    ]}
-                    value={numberOfWorkers.toString()}
-                    onChangeText={(text) => {
-                      const num = parseInt(text.replace(/[^\d]/g, "")) || 1;
-                      if (num >= 1 && num <= MAX_WORKERS) {
-                        setNumberOfWorkers(num);
-                      }
-                    }}
-                    keyboardType="numeric"
-                    maxLength={2}
-                    textAlign="center"
-                  />
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (numberOfWorkers < MAX_WORKERS) {
-                        setNumberOfWorkers(numberOfWorkers + 1);
-                      }
-                    }}
-                    style={[
-                      styles.numberButton,
-                      {
-                        backgroundColor: theme.primary,
-                        opacity: numberOfWorkers >= MAX_WORKERS ? 0.5 : 1,
-                      },
-                    ]}
-                    disabled={numberOfWorkers >= MAX_WORKERS}
-                  >
-                    <MaterialIcons
-                      name="add"
-                      size={RFPercentage(2)}
-                      color={theme.pureWhite}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <Text style={[styles.helperText, { color: theme.darkGrey }]}>
-                  {t("postRequest.workersHelperText", { max: MAX_WORKERS }) ||
-                    `Select number of helpers needed (1-${MAX_WORKERS})`}
-                </Text>
-              </View>
-
-              {/* Description */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="description"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {t("postRequest.txt8")}
-                  </Text>
-                </View>
-
-                <Pressable
-                  onPress={() => inputRef.current?.focus()}
-                  style={[
-                    styles.descriptionContainer,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
-                  <TextInput
-                    ref={inputRef}
-                    placeholder={t("postRequest.txt8")}
-                    placeholderTextColor={theme.heading}
-                    value={description}
-                    multiline
-                    onChangeText={setDescription}
-                    maxLength={250}
-                    style={[styles.desc, { color: theme.black }]}
-                  />
-                  <View style={styles.charCountContainer}>
-                    <Text style={[styles.charCount, { color: theme.darkGrey }]}>
-                      {description.length}/250
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
-
-              {/* Location */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="location-on"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {"Location"}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("Location", { home: false })
-                  }
-                  activeOpacity={0.7}
-                  style={[
-                    styles.locationField,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
-                  <View style={styles.locationContent}>
-                    <Text
-                      style={[
-                        styles.locationText,
-                        {
-                          color:
-                            location?.name || selectedLocation?.name
-                              ? theme.black
-                              : theme.heading,
-                        },
-                      ]}
-                    >
-                      {location?.name ||
-                        selectedLocation?.name ||
-                        t("postRequest.txt9")}
-                    </Text>
-                  </View>
-                  <MaterialIcons
-                    name="chevron-right"
-                    size={RFPercentage(2.5)}
-                    color={theme.darkGrey}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              {/* Budget/Compensation */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="monetization-on"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {originalCompensationType === "Other"
-                      ? `Compensation Details`
-                      : t("postRequest.pr")}
-                  </Text>
-                </View>
-
-                {originalCompensationType === "Other" ? (
+              {originalTaskType === "Other" && (
+                <View style={styles.customTaskContainer}>
                   <InputFieldNew
-                    placeholder={t("postRequest.txt10")}
-                    value={compensation}
-                    onChangeText={setCompensation}
+                    placeholder={t("postRequest.customTaskTitle")}
+                    value={customTaskTitle}
+                    onChangeText={setCustomTaskTitle}
+                    maxLength={20}
                     customStyle={{
                       width: "100%",
                       borderRadius: RFPercentage(1.2),
@@ -1000,147 +1038,858 @@ function PostRequest({ navigation, route }) {
                       marginTop: 0,
                     }}
                   />
-                ) : (
-                  <>
-                    <InputFieldNew
-                      placeholder={t("postRequest.pr")}
-                      value={budget}
-                      onChangeText={handleBudgetChange}
-                      customStyle={{
-                        width: "100%",
-                        borderRadius: RFPercentage(1.2),
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                        height: RFPercentage(6),
-                        marginTop: 0,
-                      }}
-                      keyboardType="numeric"
-                    />
-                    {selectedLocation?.name && (
-                      <Text
-                        style={[styles.currencyNote, { color: theme.primary }]}
-                      >
-                        {`${t("profileRank.txt46")}`} {currentCurrencySymbol} (
-                        {currencyInfo.code}){`${t("profileRank.txt47")}`}{" "}
-                        {selectedLocation.name}
-                      </Text>
-                    )}
-                  </>
-                )}
-              </View>
-
-              {/* Images */}
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: `${theme.primary}15` },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name="photo-library"
-                      size={RFPercentage(2)}
-                      color={theme.primary}
-                    />
-                  </View>
-                  <Text
-                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                  >
-                    {`Upload Photos`}
-                  </Text>
-                  <Text style={[styles.optionalText, { color: theme.heading }]}>
-                    ({`Optional`})
-                  </Text>
                 </View>
+              )}
+            </View>
 
-                <View style={styles.imageGrid}>
-                  {[0, 1, 2].map((index) => (
-                    <TouchableOpacity
-                      key={index}
-                      activeOpacity={0.7}
-                      onPress={() => pickImage(index)}
+            {/* Sub-Tasks Section */}
+            {originalTaskType &&
+              originalTaskType !== "Other" &&
+              currentSubTasks.length > 0 && (
+                <View style={styles.section}>
+                  <View style={styles.sectionHeader}>
+                    <View
                       style={[
-                        styles.imageContainer,
-                        {
-                          backgroundColor: theme.white,
-                          borderColor: imageUris[index]
-                            ? theme.primary
-                            : theme.border,
-                          borderWidth: imageUris[index] ? 1.5 : 1,
-                        },
+                        styles.iconContainer,
+                        { backgroundColor: `${theme.primary}15` },
                       ]}
                     >
-                      {imageUris[index] ? (
-                        <>
-                          <Image
-                            style={styles.selectedImage}
-                            source={{ uri: imageUris[index] }}
-                          />
-                          <TouchableOpacity
-                            onPress={() => deleteImage(index)}
-                            style={[
-                              styles.deleteButton,
-                              { backgroundColor: Colors.red },
-                            ]}
-                          >
-                            <MaterialIcons
-                              name="close"
-                              size={RFPercentage(1.8)}
-                              color={theme.white}
-                            />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            onPress={() => pickImage(index)}
-                            style={[
-                              styles.editButton,
-                              { backgroundColor: theme.primary },
-                            ]}
-                          >
-                            <MaterialIcons
-                              name="edit"
-                              size={RFPercentage(1.5)}
-                              color={theme.white}
-                            />
-                          </TouchableOpacity>
-                        </>
-                      ) : (
-                        <View style={styles.imagePlaceholder}>
-                          <MaterialIcons
-                            name="add-a-photo"
-                            size={RFPercentage(3)}
-                            color={theme.heading}
+                      <MaterialIcons
+                        name="list"
+                        size={RFPercentage(2)}
+                        color={theme.primary}
+                      />
+                    </View>
+                    <Text
+                      style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                    >
+                      {t("postRequest.sub-task")}
+                    </Text>
+                  </View>
+
+                  {/* Selected sub-tags display */}
+                  {selectedSubTasks.length > 0 && (
+                    <View style={styles.selectedTagsContainer}>
+                      {selectedSubTasks.map((subTask) => (
+                        <View
+                          key={subTask.id}
+                          style={[
+                            styles.selectedTag,
+                            { backgroundColor: `${theme.primary}15` },
+                          ]}
+                        >
+                          <FontAwesome5
+                            name={subTask.icon || "tag"}
+                            size={RFPercentage(1.2)}
+                            color={theme.primary}
                           />
                           <Text
                             style={[
-                              styles.addPhotoText,
-                              { color: theme.heading },
+                              styles.selectedTagText,
+                              { color: theme.primary },
                             ]}
                           >
-                            {`Add Photo`}
+                            {subTask.name}
                           </Text>
+                          <TouchableOpacity
+                            onPress={() => removeSubTask(subTask.id)}
+                            style={styles.removeTagButton}
+                          >
+                            <MaterialIcons
+                              name="close"
+                              size={RFPercentage(1.2)}
+                              color={theme.primary}
+                            />
+                          </TouchableOpacity>
                         </View>
-                      )}
+                      ))}
+                    </View>
+                  )}
+
+                  {/* Sub-tasks dropdown */}
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    style={[
+                      styles.selectField,
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: showSubTaskDropdown
+                          ? theme.primary
+                          : theme.border,
+                        borderWidth: showSubTaskDropdown ? 1.5 : 1,
+                        marginBottom: RFPercentage(1),
+                      },
+                    ]}
+                    onPress={() => toggleDropdown("subtask")}
+                  >
+                    <View style={styles.selectFieldContent}>
+                      <Text
+                        style={[
+                          styles.placeholderText,
+                          { color: theme.heading },
+                        ]}
+                      >
+                        {t("postRequest.sub-2")}
+                      </Text>
+                    </View>
+                    <MaterialIcons
+                      name={
+                        showSubTaskDropdown
+                          ? "keyboard-arrow-up"
+                          : "keyboard-arrow-down"
+                      }
+                      size={RFPercentage(2.5)}
+                      color={theme.primary}
+                    />
+                  </TouchableOpacity>
+
+                  {showSubTaskDropdown && (
+                    <View
+                      style={[
+                        styles.dropdownContainer,
+                        {
+                          backgroundColor: theme.white,
+                          borderColor: theme.border,
+                          shadowColor: theme.black,
+                          maxHeight: RFPercentage(30),
+                          position: "relative",
+                          top: 0,
+                          marginBottom: RFPercentage(2),
+                        },
+                      ]}
+                    >
+                      <ScrollView showsVerticalScrollIndicator={false}>
+                        {translatedSubTasks.map((subTask) => {
+                          const isSelected = selectedSubTasks.find(
+                            (st) => st.id === subTask.id,
+                          );
+                          return (
+                            <TouchableOpacity
+                              key={subTask.id}
+                              onPress={() => toggleSubTask(subTask)}
+                              style={[
+                                styles.optionItem,
+                                isSelected && {
+                                  backgroundColor: `${theme.primary}10`,
+                                },
+                              ]}
+                            >
+                              <FontAwesome5
+                                name={subTask.icon}
+                                size={RFPercentage(1.8)}
+                                color={
+                                  isSelected ? theme.primary : theme.lightGrey
+                                }
+                              />
+                              <Text
+                                style={[
+                                  styles.optionText,
+                                  {
+                                    color: isSelected
+                                      ? theme.primary
+                                      : theme.darkGrey,
+                                    fontWeight: isSelected ? "600" : "400",
+                                  },
+                                ]}
+                              >
+                                {subTask.name}
+                              </Text>
+                              {isSelected && (
+                                <MaterialIcons
+                                  name="check"
+                                  size={RFPercentage(1.8)}
+                                  color={theme.primary}
+                                  style={styles.checkIcon}
+                                />
+                              )}
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </ScrollView>
+                    </View>
+                  )}
+
+                  {/* Custom sub-task input */}
+                  <View style={styles.customSubTaskContainer}>
+                    <TextInput
+                      style={[
+                        styles.customSubTaskInput,
+                        {
+                          backgroundColor: theme.white,
+                          borderColor: theme.border,
+                          color: theme.black,
+                        },
+                      ]}
+                      placeholder={t("postRequest.sub-3")}
+                      placeholderTextColor={theme.heading}
+                      value={customSubTask}
+                      onChangeText={setCustomSubTask}
+                      onSubmitEditing={addCustomSubTask}
+                      returnKeyType="done"
+                    />
+                    <TouchableOpacity
+                      onPress={addCustomSubTask}
+                      style={[
+                        styles.addCustomButton,
+                        { backgroundColor: theme.primary },
+                      ]}
+                      disabled={!customSubTask.trim()}
+                    >
+                      <MaterialIcons
+                        name="add"
+                        size={RFPercentage(2)}
+                        color={theme.white}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+            {/* Compensation Type */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="attach-money"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.txt7")}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.selectField,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: showCompensationDropdown
+                      ? theme.primary
+                      : theme.border,
+                    borderWidth: showCompensationDropdown ? 1.5 : 1,
+                  },
+                ]}
+                onPress={() => toggleDropdown("compensation")}
+              >
+                <View style={styles.selectFieldContent}>
+                  {selectedCompensation ? (
+                    <View style={styles.selectedOption}>
+                      <FontAwesome5
+                        name={
+                          compensationOptions.find(
+                            (c) => c.type === originalCompensationType,
+                          )?.icon || "dollar-sign"
+                        }
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                        style={styles.optionIcon}
+                      />
+                      <Text
+                        style={[styles.selectedText, { color: theme.black }]}
+                      >
+                        {selectedCompensation}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text
+                      style={[styles.placeholderText, { color: theme.heading }]}
+                    >
+                      {t("postRequest.txt7")}
+                    </Text>
+                  )}
+                </View>
+                <MaterialIcons
+                  name={
+                    showCompensationDropdown
+                      ? "keyboard-arrow-up"
+                      : "keyboard-arrow-down"
+                  }
+                  size={RFPercentage(2.5)}
+                  color={theme.primary}
+                />
+              </TouchableOpacity>
+
+              {showCompensationDropdown && (
+                <View
+                  style={[
+                    styles.dropdownContainer,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      shadowColor: theme.black,
+                    },
+                  ]}
+                >
+                  {translatedCompensationOptions.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => selectCompensation(item)}
+                      style={[
+                        styles.optionItem,
+                        selectedCompensation === item.type && {
+                          backgroundColor: `${theme.primary}10`,
+                        },
+                      ]}
+                    >
+                      <FontAwesome5
+                        name={
+                          compensationOptions.find((c) => c.id === item.id)
+                            ?.icon || "circle"
+                        }
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                      />
+                      <Text
+                        style={[styles.optionText, { color: theme.darkGrey }]}
+                      >
+                        {item.type}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
+              )}
+            </View>
+
+            {/* Number of Workers */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="people"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.numberOfWorkers")}
+                </Text>
               </View>
 
-              {/* Submit Button */}
-              <View style={{ alignItems: "center" }}>
-                <MyAppButton
-                  disabled={indicator}
-                  loading={indicator}
-                  title={
-                    isEditing ? t("postRequest.txt13") : t("postRequest.txt14")
-                  }
-                  marginTop={RFPercentage(4)}
-                  onPress={submitPostData}
+              <View style={styles.numberInputContainer}>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (numberOfWorkers > 1) {
+                      setNumberOfWorkers(numberOfWorkers - 1);
+                    }
+                  }}
+                  style={[
+                    styles.numberButton,
+                    {
+                      backgroundColor: theme.primary,
+                      opacity: numberOfWorkers <= 1 ? 0.5 : 1,
+                    },
+                  ]}
+                  disabled={numberOfWorkers <= 1}
+                >
+                  <MaterialIcons
+                    name="remove"
+                    size={RFPercentage(2)}
+                    color={theme.pureWhite}
+                  />
+                </TouchableOpacity>
+
+                <TextInput
+                  style={[
+                    styles.numberInput,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      color: theme.black,
+                    },
+                  ]}
+                  value={numberOfWorkers.toString()}
+                  onChangeText={(text) => {
+                    const num = parseInt(text.replace(/[^\d]/g, "")) || 1;
+                    if (num >= 1 && num <= MAX_WORKERS) {
+                      setNumberOfWorkers(num);
+                    }
+                  }}
+                  keyboardType="numeric"
+                  maxLength={2}
+                  textAlign="center"
                 />
+
+                <TouchableOpacity
+                  onPress={() => {
+                    if (numberOfWorkers < MAX_WORKERS) {
+                      setNumberOfWorkers(numberOfWorkers + 1);
+                    }
+                  }}
+                  style={[
+                    styles.numberButton,
+                    {
+                      backgroundColor: theme.primary,
+                      opacity: numberOfWorkers >= MAX_WORKERS ? 0.5 : 1,
+                    },
+                  ]}
+                  disabled={numberOfWorkers >= MAX_WORKERS}
+                >
+                  <MaterialIcons
+                    name="add"
+                    size={RFPercentage(2)}
+                    color={theme.pureWhite}
+                  />
+                </TouchableOpacity>
               </View>
-              <View style={styles.bottomSpace} />
-            </Animated.View>
-          </ScrollView>
+
+              <Text style={[styles.helperText, { color: theme.darkGrey }]}>
+                {t("postRequest.workersHelperText", { max: MAX_WORKERS }) ||
+                  `Select number of helpers needed (1-${MAX_WORKERS})`}
+              </Text>
+            </View>
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="date-range"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.date")}
+                </Text>
+              </View>
+
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                onChange={onDateChange}
+                minimumDate={new Date()}
+                accentColor={Colors.primary}
+                themeVariant={theme.mode === "dark" ? "dark" : "light"}
+              />
+            </View>
+
+            {/* Time Selection */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="access-time"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.time")}
+                </Text>
+              </View>
+
+              <DateTimePicker
+                value={selectedTime}
+                mode="time"
+                onChange={onTimeChange}
+                minuteInterval={5}
+                accentColor={Colors.primary}
+                themeVariant={theme.mode === "dark" ? "dark" : "light"}
+              />
+            </View>
+
+            {/* Estimated Duration */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="hourglass-empty"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.duration")}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.selectField,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: showDurationDropdown
+                      ? theme.primary
+                      : theme.border,
+                    borderWidth: showDurationDropdown ? 1.5 : 1,
+                  },
+                ]}
+                onPress={() => toggleDropdown("duration")}
+              >
+                <View style={styles.selectFieldContent}>
+                  {selectedDuration ? (
+                    <Text style={[styles.selectedText, { color: theme.black }]}>
+                      {
+                        translatedDurationOptions.find(
+                          (d) => d.value === selectedDuration,
+                        )?.label
+                      }
+                    </Text>
+                  ) : (
+                    <Text
+                      style={[styles.placeholderText, { color: theme.heading }]}
+                    >
+                      {t("postRequest.duration-1")}
+                    </Text>
+                  )}
+                </View>
+                <MaterialIcons
+                  name={
+                    showDurationDropdown
+                      ? "keyboard-arrow-up"
+                      : "keyboard-arrow-down"
+                  }
+                  size={RFPercentage(2.5)}
+                  color={theme.primary}
+                />
+              </TouchableOpacity>
+
+              {showDurationDropdown && (
+                <View
+                  style={[
+                    styles.dropdownContainer,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      shadowColor: theme.black,
+                      maxHeight: RFPercentage(38),
+                    },
+                  ]}
+                >
+                  {translatedDurationOptions.map((item) => (
+                    <TouchableOpacity
+                      key={item.value}
+                      onPress={() => selectDuration(item)}
+                      style={[
+                        styles.optionItem,
+                        selectedDuration === item.value && {
+                          backgroundColor: `${theme.primary}10`,
+                        },
+                      ]}
+                    >
+                      <FontAwesome5
+                        name="clock"
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                      />
+                      <Text
+                        style={[styles.optionText, { color: theme.darkGrey }]}
+                      >
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* Description */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="description"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.txt8")}
+                </Text>
+              </View>
+
+              <Pressable
+                onPress={() => inputRef.current?.focus()}
+                style={[
+                  styles.descriptionContainer,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <TextInput
+                  ref={inputRef}
+                  placeholder={t("postRequest.txt8")}
+                  placeholderTextColor={theme.heading}
+                  value={description}
+                  multiline
+                  onChangeText={setDescription}
+                  maxLength={250}
+                  style={[styles.desc, { color: theme.black }]}
+                />
+                <View style={styles.charCountContainer}>
+                  <Text style={[styles.charCount, { color: theme.darkGrey }]}>
+                    {description.length}/250
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+
+            {/* Location */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="location-on"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {"Location"}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Location", { home: false })}
+                activeOpacity={0.7}
+                style={[
+                  styles.locationField,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: theme.border,
+                  },
+                ]}
+              >
+                <View style={styles.locationContent}>
+                  <Text
+                    style={[
+                      styles.locationText,
+                      {
+                        color:
+                          location?.name || selectedLocation?.name
+                            ? theme.black
+                            : theme.heading,
+                      },
+                    ]}
+                  >
+                    {location?.name ||
+                      selectedLocation?.name ||
+                      t("postRequest.txt9")}
+                  </Text>
+                </View>
+                <MaterialIcons
+                  name="chevron-right"
+                  size={RFPercentage(2.5)}
+                  color={theme.darkGrey}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Budget/Compensation */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="monetization-on"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {originalCompensationType === "Other"
+                    ? `Compensation Details`
+                    : t("postRequest.pr")}
+                </Text>
+              </View>
+
+              {originalCompensationType === "Other" ? (
+                <InputFieldNew
+                  placeholder={t("postRequest.txt10")}
+                  value={compensation}
+                  onChangeText={setCompensation}
+                  customStyle={{
+                    width: "100%",
+                    borderRadius: RFPercentage(1.2),
+                    backgroundColor: theme.white,
+                    borderColor: theme.border,
+                    height: RFPercentage(6),
+                    marginTop: 0,
+                  }}
+                />
+              ) : (
+                <>
+                  <InputFieldNew
+                    placeholder={t("postRequest.pr")}
+                    value={budget}
+                    onChangeText={handleBudgetChange}
+                    customStyle={{
+                      width: "100%",
+                      borderRadius: RFPercentage(1.2),
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      height: RFPercentage(6),
+                      marginTop: 0,
+                    }}
+                    keyboardType="numeric"
+                  />
+                  {selectedLocation?.name && (
+                    <Text
+                      style={[styles.currencyNote, { color: theme.primary }]}
+                    >
+                      {`${t("profileRank.txt46")}`} {currentCurrencySymbol} (
+                      {currencyInfo.code}){`${t("profileRank.txt47")}`}{" "}
+                      {selectedLocation.name}
+                    </Text>
+                  )}
+                </>
+              )}
+            </View>
+
+            {/* Images */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="photo-library"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.photo-1")}
+                </Text>
+                <Text style={[styles.optionalText, { color: theme.heading }]}>
+                  ({t("postRequest.photo-2")})
+                </Text>
+              </View>
+
+              <View style={styles.imageGrid}>
+                {[0, 1, 2].map((index) => (
+                  <TouchableOpacity
+                    key={index}
+                    activeOpacity={0.7}
+                    onPress={() => pickImage(index)}
+                    style={[
+                      styles.imageContainer,
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: imageUris[index]
+                          ? theme.primary
+                          : theme.border,
+                        borderWidth: imageUris[index] ? 1.5 : 1,
+                      },
+                    ]}
+                  >
+                    {imageUris[index] ? (
+                      <>
+                        <Image
+                          style={styles.selectedImage}
+                          source={{ uri: imageUris[index] }}
+                        />
+                        <TouchableOpacity
+                          onPress={() => deleteImage(index)}
+                          style={[
+                            styles.deleteButton,
+                            { backgroundColor: Colors.red },
+                          ]}
+                        >
+                          <MaterialIcons
+                            name="close"
+                            size={RFPercentage(1.8)}
+                            color={theme.white}
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => pickImage(index)}
+                          style={[
+                            styles.editButton,
+                            { backgroundColor: theme.primary },
+                          ]}
+                        >
+                          <MaterialIcons
+                            name="edit"
+                            size={RFPercentage(1.5)}
+                            color={theme.white}
+                          />
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <View style={styles.imagePlaceholder}>
+                        <MaterialIcons
+                          name="add-a-photo"
+                          size={RFPercentage(3)}
+                          color={theme.heading}
+                        />
+                        <Text
+                          style={[
+                            styles.addPhotoText,
+                            { color: theme.heading },
+                          ]}
+                        >
+                          {t("postRequest.photo")}
+                        </Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Submit Button */}
+            <View style={{ alignItems: "center" }}>
+              <MyAppButton
+                disabled={indicator}
+                loading={indicator}
+                title={
+                  isEditing ? t("postRequest.txt13") : t("postRequest.txt14")
+                }
+                marginTop={RFPercentage(4)}
+                onPress={submitPostData}
+              />
+            </View>
+            <View style={styles.bottomSpace} />
+          </Animated.View>
+        </ScrollView>
       </TouchableWithoutFeedback>
     </>
   );
@@ -1301,9 +2050,58 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
     marginLeft: RFPercentage(1.2),
+    flex: 1,
+  },
+  checkIcon: {
+    marginLeft: "auto",
   },
   customTaskContainer: {
     marginTop: RFPercentage(2),
+  },
+  selectedTagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: RFPercentage(1.5),
+  },
+  selectedTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.6),
+    borderRadius: RFPercentage(1.5),
+    marginRight: RFPercentage(1),
+    marginBottom: RFPercentage(1),
+  },
+  selectedTagText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: RFPercentage(0.6),
+    marginRight: RFPercentage(0.3),
+  },
+  removeTagButton: {
+    marginLeft: RFPercentage(0.3),
+  },
+  customSubTaskContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: RFPercentage(1),
+  },
+  customSubTaskInput: {
+    flex: 1,
+    height: RFPercentage(5.5),
+    borderWidth: 1,
+    borderRadius: RFPercentage(1.2),
+    paddingHorizontal: RFPercentage(2),
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    marginRight: RFPercentage(1),
+  },
+  addCustomButton: {
+    width: RFPercentage(5.5),
+    height: RFPercentage(5.5),
+    borderRadius: RFPercentage(1.2),
+    justifyContent: "center",
+    alignItems: "center",
   },
   descriptionContainer: {
     width: "100%",

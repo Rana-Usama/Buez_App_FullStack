@@ -22,9 +22,9 @@
     "error": "Error",
     "noDescription": "Sin descripción",
     "task": "Tarea",
-"bulk": "Tarea grupal con múltiples ayudantes",
-"helper": "ayudante",
-"helpers": "ayudantes"
+    "bulk": "Tarea grupal con múltiples ayudantes",
+    "helper": "ayudante",
+    "helpers": "ayudantes"
   },
   "validations": {
     "inValid": "Correo electrónico inválido",
@@ -277,7 +277,6 @@
     "noReviews": "Aún no hay reseñas",
     "noReviewsDesc": "Las reseñas de los propietarios de las tareas aparecerán aquí",
     "view": "Ver solicitantes"
-
   },
   "postRequest": {
     "txt1": "Publicar solicitud",
@@ -297,7 +296,17 @@
     "customTaskTitle": "Por favor, especifica tu tipo de tarea",
     "pr": "Precio",
     "numberOfWorkers": "Número de ayudantes necesarios",
-    "workersHelperText": "Selecciona el número de ayudantes necesarios (1-{{max}})"
+    "workersHelperText": "Selecciona el número de ayudantes necesarios (1-{{max}})",
+    "sub-task": "Subtareas (Selecciona todas las que correspondan)",
+    "sub-2": "Seleccionar subtareas...",
+    "sub-3": "Agregar subtarea personalizada...",
+    "date": "Programar fecha de la tarea",
+    "time": "Programar hora de la tarea",
+    "duration": "Duración estimada de la tarea",
+    "duration-1": "Seleccionar duración estimada",
+    "photo": "Agregar foto",
+    "photo-1": "Subir fotos",
+    "photo-2": "Opcional"
   },
   "messages": {
     "txt1": "Mensajes",

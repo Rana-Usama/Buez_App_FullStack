@@ -297,7 +297,17 @@
     "customTaskTitle": "Veuillez spécifier votre type de tâche",
     "pr": "Prix",
     "numberOfWorkers": "Nombre d'aides nécessaires",
-    "workersHelperText": "Sélectionnez le nombre d'aides nécessaires (1-{{max}})"
+    "workersHelperText": "Sélectionnez le nombre d'aides nécessaires (1-{{max}})",
+     "sub-task": "Sous-tâches (Sélectionnez toutes les options applicables)",
+  "sub-2": "Sélectionner des sous-tâches...",
+  "sub-3": "Ajouter une sous-tâche personnalisée...",
+  "date": "Planifier la date de la tâche",
+  "time": "Planifier l’heure de la tâche",
+  "duration": "Durée estimée de la tâche",
+  "duration-1": "Sélectionner la durée estimée",
+  "photo": "Ajouter une photo",
+  "photo-1": "Télécharger des photos",
+  "photo-2": "Optionnel"
   },
   "messages": {
     "txt1": "Messages",

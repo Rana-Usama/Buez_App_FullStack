@@ -309,7 +309,17 @@
     "customTaskTitle": "Please specify your task type",
     "pr": "Price",
     "numberOfWorkers": "Number of helpers needed",
-    "workersHelperText": "Select number of helpers needed (1-{{max}})"
+    "workersHelperText": "Select number of helpers needed (1-{{max}})",
+    "sub-task": "Sub-Tasks (Select all that apply)",
+    "sub-2": "Select sub-tasks...",
+    "sub-3": "Add custom sub-task...",
+    "date": "Schedule Task Date",
+    "time": "Schedule Task Time",
+    "duration": "Estimated Duration Of Task",
+    "duration-1": "Select estimated duration",
+    "photo": "Add Photo",
+    "photo-1": "Upload Photos",
+    "photo-2": "Optional"
   },
   "messages": {
     "txt1": "Messages",

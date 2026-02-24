@@ -471,7 +471,6 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
   const rank = getRankData(stats?.completedTasks || 0);
 
-
   const light = ["#a5a5bd48", "#6183a9c7", "#3c6954c9"];
   const dark = ["#1f22388f", "#3a2850ff", "#9db7abff"];
 
@@ -767,6 +766,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   styles.tabText,
                   { color: activeTab === "completed" ? "#FFF" : theme.grey },
                 ]}
+                numberOfLines={1}
               >
                 {t("profileRank.txt34")} ({tasks?.completed?.length || 0})
               </Text>
@@ -780,6 +780,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   styles.tabText,
                   { color: activeTab === "reviews" ? "#FFF" : theme.grey },
                 ]}
+                numberOfLines={1}
               >
                 {t("profileRank.txt35")} ({reviews?.length || 0})
               </Text>
@@ -930,7 +931,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   style={styles.showMoreBtn}
                 >
                   <Text style={styles.showMoreText}>
-                   +{reviews.length - 3} more
+                    +{reviews.length - 3} more
                   </Text>
                 </TouchableOpacity>
               )}
@@ -1372,6 +1373,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
+    paddingHorizontal:10
   },
   tabText: {
     fontSize: RFPercentage(1.4),

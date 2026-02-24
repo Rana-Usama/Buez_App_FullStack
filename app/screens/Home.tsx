@@ -228,7 +228,7 @@ const HomeScreen: React.FC = () => {
             />
 
             {/* Top Rated Users Section */}
-            {topRatedUsers.length > 0 ? (
+            {topRatedUsers?.length > 0 ? (
               <>
                 <View style={styles.sectionHeader}>
                   <Text style={[styles.sectionTitle, { color: theme.heading }]}>

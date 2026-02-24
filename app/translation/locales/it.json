@@ -297,7 +297,17 @@
     "customTaskTitle": "Specifica il tipo di attività",
     "pr": "Prezzo",
     "numberOfWorkers": "Numero di aiutanti necessari",
-    "workersHelperText": "Seleziona il numero di aiutanti necessari (1-{{max}})"
+    "workersHelperText": "Seleziona il numero di aiutanti necessari (1-{{max}})",
+      "sub-task": "Sotto-attività (Seleziona tutte le opzioni applicabili)",
+  "sub-2": "Seleziona sotto-attività...",
+  "sub-3": "Aggiungi sotto-attività personalizzata...",
+  "date": "Pianifica la data dell’attività",
+  "time": "Pianifica l’orario dell’attività",
+  "duration": "Durata stimata dell’attività",
+  "duration-1": "Seleziona la durata stimata",
+  "photo": "Aggiungi foto",
+  "photo-1": "Carica foto",
+  "photo-2": "Facoltativo"
   },
   "messages": {
     "txt1": "Messaggi",
