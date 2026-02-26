@@ -55,7 +55,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       const q = query(
         collection(FIREBASE_DB, "freeTrials"),
         where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true)
+        where("freeTrial", "==", true),
       );
       const snapshot = await getDocs(q);
       return !snapshot.empty;
@@ -95,7 +95,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(
         FIREBASE_AUTH,
-        googleCredential
+        googleCredential,
       );
       const user = userCredential.user;
 
@@ -125,8 +125,9 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
             webhook: existingData.webhook ?? true,
             updatedAt: serverTimestamp(),
             createdAt: existingData.createdAt || serverTimestamp(),
+            emailVerified: true,
           },
-          { merge: true }
+          { merge: true },
         );
       } else {
         // New user
@@ -145,6 +146,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
           webhook: true,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+          emailVerified: true,
         });
       }
 
@@ -172,7 +174,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
 
       // Parse subscription dates
       const subStartDate = parseFirestoreTimestamp(
-        existingUser.subscriptionStart
+        existingUser.subscriptionStart,
       );
       const subEndDate = parseFirestoreTimestamp(existingUser.subscriptionEnd);
 
@@ -193,7 +195,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       // Check trial validity
       let isTrialValid = false;
       const trialStartDate = parseFirestoreTimestamp(
-        existingUser.freeTrialStartedAt
+        existingUser.freeTrialStartedAt,
       );
       if (existingUser.isFreeTrial && trialStartDate) {
         const trialDays = differenceInDays(now, trialStartDate);

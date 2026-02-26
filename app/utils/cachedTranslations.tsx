@@ -24,7 +24,7 @@ export const cachedTranslate = async (text) => {
     return translationCache[cacheKey];
   }
 
-  console.log("currentLang........", currentLang);
+  // console.log("currentLang........", currentLang);
 
   const translated = await translateText(text, currentLang);
   translationCache[cacheKey] = translated;

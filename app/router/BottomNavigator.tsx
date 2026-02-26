@@ -510,7 +510,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { theme } = useAppTheme();
-  const { unreadCount } = useUnreadMessages();
+  const { totalUnreadCount } = useUnreadMessages();
 
   useEffect(() => {
     const backAction = () => {
@@ -603,11 +603,11 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     style={styles.imgStyle}
                     resizeMode="contain"
                   />
-                  {unreadCount > 0 && (
+                  {totalUnreadCount > 0 && (
                     <View
                       style={[
                         styles.count,
-                        unreadCount > 9 && {
+                        totalUnreadCount > 9 && {
                           paddingHorizontal: RFPercentage(0.5),
                           minWidth: RFPercentage(2.8),
                         },
@@ -620,7 +620,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                           fontFamily: "Poppins_400Regular",
                         }}
                       >
-                        {unreadCount > 9 ? "9+" : unreadCount}
+                        {totalUnreadCount > 9 ? "9+" : totalUnreadCount}
                       </Text>
                     </View>
                   )}

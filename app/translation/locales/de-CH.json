@@ -689,6 +689,14 @@
     "remove": "Entferne",
     "profile": "Profil",
 
+    "group": "Ufgab-Broadcast",
+    "member": "Mitglieder",
+    "helper": "Hälfer",
+    "owner": "Bsitzer",
+    "joined": "Biitrete",
+    "task": "Ufgab-Bsitzer",
+    "exp": "Tippe uf s'Chat-Symbol näbe emne Mitglied, zum e private Chat mit ihm starte.",
+
     "confirmDialog": {
       "title": "Helfer bestätige",
       "message": "Bisch sicher, dass du {{name}} für d'Ufgab bestätige wetsch?",
@@ -750,5 +758,45 @@
     "status": "Status",
     "allHelpersConfirmed": "Alli Helfer bestätigt! Du chasch d'Ufgab als abgschlosse markiere.",
     "allSlotsFilled": "Alli Plätz besetzt"
-  }
+  },
+  "interestSelection": {
+    "personalizeExperience": "Personalisier Dini Erfahrung",
+    "whatAreYouInterested": "Für was interessiersch du dich?",
+    "pickYourFavorites": "Wähl dini Lieblingsdienste us und mir passe Buez für di aa.",
+    "selectInterestsPrompt": "Wähl 3 Interessen zum witer mache",
+    "selectedInterests": "{{total}} usgwehlt ✓",
+    "addCustomInterestTitle": "Eigenes Interesse hinzufüege",
+    "addCustomInterestSubtitle": "Nöd gfunde was du bruchsch? Füg es da zue.",
+    "customInterestPlaceholder": "z.B. Poolreinigung, Yoga...",
+    "alreadyAdded": "Schon derzue gfüegt!",
+    "alreadyAddedDesc": "\"{interest}\" isch scho in dinere List.",
+    "pickAFewMore": "Wähl no e paar meh!",
+    "minSelectionDesc": "Wähl mindestens {{min}} Interessen zum witer mache.",
+    "saving": "Am Spichere...",
+    "continueCTA": "Witer zu Buez",
+    "selectMoreCTA": "Wähl no {{remaining}} meh",
+    "skipForNow": "Fürs Erste überspringe"
+  },
+  "emailVerification": {
+  "title": "Bestätige dini E-Mail",
+  "subtitle": "Mir hend en Bestätigungslink gschickt a:",
+  "hint": "Klick uf de Link i de E-Mail, zum dis Konto z aktiviere. Lueg au i dim Spam-Ordner, falls du ihn nöd gsehsch.",
+
+  "verifiedSuccessTitle": "E-Mail bestätigt!",
+  "verifiedSuccessDesc": "Willkomme a Bord 🎉",
+
+  "notVerifiedTitle": "No nöd bestätigt",
+  "notVerifiedDesc": "Bitte klick uf de Link i dim E-Mail.",
+
+  "emailSentTitle": "E-Mail gschickt!",
+  "emailSentDesc": "Bestätigungs-E-Mail isch nomol gschickt worde.",
+
+  "resendFailedTitle": "Nomol sende fehlgschlage",
+  "resendFailedDesc": "Bitte versuech's spöter nomol.",
+
+  "verifiedButton": "Ich ha mini E-Mail bestätigt",
+  "resendButton": "E-Mail nomol sende",
+  "resendCooldown": "Nomol sende i {{seconds}}s",
+  "backToLogin": "Zurück zum Login"
+}
 }

@@ -55,6 +55,7 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import CustomNav from "../components/common/CustomNav";
+import { groupChatExists } from "../services/GroupChat.service";
 
 const { width } = Dimensions.get("window");
 
@@ -206,6 +207,7 @@ function OfferDetail({ navigation, route }) {
   const [hasApplied, setHasApplied] = useState(false);
   const [isWorker, setIsWorker] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [hasGroupChat, setHasGroupChat] = useState(false);
 
   const db = FIREBASE_DB;
   const imageObjects =
@@ -236,6 +238,18 @@ function OfferDetail({ navigation, route }) {
     }
     return null;
   };
+
+  useEffect(() => {
+    const checkGroupChat = async () => {
+      if (postRequest?.id && confirmedWorkers.length > 0) {
+        const exists = await groupChatExists(postRequest.id);
+        setHasGroupChat(exists);
+      } else {
+        setHasGroupChat(false);
+      }
+    };
+    checkGroupChat();
+  }, [confirmedWorkers, postRequest?.id]);
 
   // Get duration label
   const getDurationLabel = () => {
@@ -490,13 +504,25 @@ function OfferDetail({ navigation, route }) {
   }, [postRequest?.reviews]);
 
   // Chat handler
+  // 1:1 chat with task owner (non-bulk or non-confirmed workers)
   const handleStartChat = async () => {
     const chatId = await createNewChat(currentUserId, postRequest.userId);
     navigation.navigate("Chat", {
-      chatId: chatId,
+      chatId,
       senderId: currentUserId,
       senderName: currentUser.userData.userName,
       receiver: postRequest.user,
+    });
+  };
+
+  // Group chat for confirmed workers and owner
+  const handleOpenGroupChat = () => {
+    navigation.navigate("GroupChat", {
+      groupChatId: postRequest.id,
+      currentUserId,
+      currentUserName: currentUser?.userData?.userName,
+      taskType: postRequest?.taskType,
+      customTaskTitle: postRequest?.customTaskTitle,
     });
   };
 
@@ -904,6 +930,8 @@ function OfferDetail({ navigation, route }) {
   };
 
   const isPostOwner = currentUserId === postRequest?.userId;
+
+  // console.log("hasApplied...........",hasApplied)
 
   return (
     <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
@@ -1809,43 +1837,55 @@ function OfferDetail({ navigation, route }) {
             ) : isBulkRequest ? (
               <>
                 {/* Chat Button - Only show if not post owner */}
-                {!isPostOwner && (
+                {
                   <TouchableOpacity
                     style={[
                       styles.secondaryButton,
                       {
-                        borderColor: theme.lightGrey,
-                        backgroundColor: !isChatEnabled()
-                          ? theme.lightGrey + "30"
-                          : theme.mode === "dark"
-                            ? theme.white + "10"
-                            : Colors.primary + "08",
-                        opacity: isChatEnabled() ? 1 : 0.5,
+                        borderColor:
+                          hasGroupChat && (confirmed || isPostOwner)
+                            ? theme.secondary
+                            : theme.lightGrey + "30",
+                        backgroundColor:
+                          hasGroupChat && (confirmed || isPostOwner)
+                            ? theme.secondary
+                            : theme.lightGrey + "30",
+                        opacity:
+                          hasGroupChat && (confirmed || isPostOwner) ? 1 : 0.5,
                       },
                     ]}
-                    onPress={handleStartChat}
+                    onPress={
+                      hasGroupChat && (confirmed || isPostOwner)
+                        ? handleOpenGroupChat
+                        : undefined
+                    }
                     activeOpacity={0.8}
-                    disabled={!isChatEnabled()}
+                    disabled={!(hasGroupChat && (confirmed || isPostOwner))}
                   >
                     <Ionicons
-                      name="chatbubble-ellipses"
+                      name="chatbubbles"
                       size={RFPercentage(1.8)}
-                      color={isChatEnabled() ? theme.darkGrey : theme.lightGrey}
+                      color={
+                        hasGroupChat && (confirmed || isPostOwner)
+                          ? Colors.white
+                          : theme.lightGrey
+                      }
                     />
                     <Text
                       style={[
                         styles.secondaryButtonText,
                         {
-                          color: isChatEnabled()
-                            ? theme.darkGrey
-                            : theme.lightGrey,
+                          color:
+                            hasGroupChat && (confirmed || isPostOwner)
+                              ? Colors.white
+                              : theme.lightGrey,
                         },
                       ]}
                     >
-                      {t("details.txt9")}
+                      {t("taskApplicants.group")}
                     </Text>
                   </TouchableOpacity>
-                )}
+                }
 
                 {/* Apply/Accept Button */}
                 {currentUserId === postRequest?.userId ? (

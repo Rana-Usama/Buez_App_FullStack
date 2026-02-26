@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { 
-  StyleSheet, 
-  View, 
-  StatusBar, 
-  Animated, 
+import {
+  StyleSheet,
+  View,
+  StatusBar,
+  Animated,
   Easing,
-  Platform 
+  Platform,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
@@ -22,6 +22,8 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { FIREBASE_AUTH } from "../../firebaseConfig";
+import { reload } from "firebase/auth";
 
 const DeciderScreen = () => {
   const { theme } = useAppTheme();
@@ -49,7 +51,7 @@ const DeciderScreen = () => {
         duration: 2000,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     );
 
     const innerSpinAnimation = Animated.loop(
@@ -58,7 +60,7 @@ const DeciderScreen = () => {
         duration: 1500,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     );
 
     const scaleAnimation = Animated.loop(
@@ -75,7 +77,7 @@ const DeciderScreen = () => {
           easing: Easing.ease,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     );
 
     const dotAnimation = Animated.loop(
@@ -116,7 +118,7 @@ const DeciderScreen = () => {
             useNativeDriver: true,
           }),
         ]),
-      ])
+      ]),
     );
 
     outerSpinAnimation.start();
@@ -135,17 +137,17 @@ const DeciderScreen = () => {
   // Interpolate spin values
   const outerSpin = outerSpinValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg']
+    outputRange: ["0deg", "360deg"],
   });
 
   const innerSpin = innerSpinValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['360deg', '0deg']
+    outputRange: ["360deg", "0deg"],
   });
 
   const scale = scaleValue.interpolate({
     inputRange: [0.8, 1],
-    outputRange: [0.8, 1]
+    outputRange: [0.8, 1],
   });
 
   // Fetch device unique ID
@@ -164,7 +166,7 @@ const DeciderScreen = () => {
       const q = query(
         collection(db, "freeTrials"),
         where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true)
+        where("freeTrial", "==", true),
       );
       const snapshot = await getDocs(q);
       return !snapshot.empty;
@@ -188,7 +190,7 @@ const DeciderScreen = () => {
         const { email } = creds || {};
         const now = new Date();
 
-        console.log("creds-----------------",creds)
+        console.log("creds-----------------", creds);
 
         // 🔒 Logged out → Login
         if (loggedOut === "true") {
@@ -215,6 +217,19 @@ const DeciderScreen = () => {
           hasNavigated.current = true;
           navigation.replace("OnBoarding");
           return;
+        }
+
+        const currentUser = FIREBASE_AUTH.currentUser;
+        if (currentUser) {
+          await reload(currentUser); 
+          if (!currentUser.emailVerified) {
+            hasNavigated.current = true;
+            navigation.replace("EmailVerification", {
+              email: currentUser.email,
+              deviceId,
+            });
+            return;
+          }
         }
 
         const {
@@ -308,8 +323,10 @@ const DeciderScreen = () => {
 
       {/* Animated Loading Indicator */}
       <View style={styles.loaderContainer}>
-        <View style={[styles.outerCircle, { borderColor: theme.primary + '20' }]} />
-        
+        <View
+          style={[styles.outerCircle, { borderColor: theme.primary + "20" }]}
+        />
+
         <Animated.View
           style={[
             styles.spinnerOuter,
@@ -320,8 +337,10 @@ const DeciderScreen = () => {
           ]}
         />
 
-        <View style={[styles.innerCircle, { borderColor: theme.primary + '30' }]} />
-        
+        <View
+          style={[styles.innerCircle, { borderColor: theme.primary + "30" }]}
+        />
+
         <Animated.View
           style={[
             styles.spinnerInner,
@@ -391,14 +410,14 @@ const styles = StyleSheet.create({
     borderWidth: RFPercentage(0.4),
     ...Platform.select({
       ios: {
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
+        borderLeftColor: "transparent",
+        borderRightColor: "transparent",
       },
       android: {
-        borderLeftColor: 'rgba(255,255,255,0.1)',
-        borderRightColor: 'rgba(255,255,255,0.1)',
-        borderTopColor: 'transparent',
-      }
+        borderLeftColor: "rgba(255,255,255,0.1)",
+        borderRightColor: "rgba(255,255,255,0.1)",
+        borderTopColor: "transparent",
+      },
     }),
   },
   innerCircle: {
@@ -417,13 +436,13 @@ const styles = StyleSheet.create({
     borderWidth: RFPercentage(0.3),
     ...Platform.select({
       ios: {
-        borderTopColor: 'transparent',
-        borderBottomColor: 'transparent',
+        borderTopColor: "transparent",
+        borderBottomColor: "transparent",
       },
       android: {
-        borderTopColor: 'rgba(255,255,255,0.1)',
-        borderBottomColor: 'rgba(255,255,255,0.1)',
-      }
+        borderTopColor: "rgba(255,255,255,0.1)",
+        borderBottomColor: "rgba(255,255,255,0.1)",
+      },
     }),
   },
   centerDot: {

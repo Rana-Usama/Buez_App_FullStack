@@ -22,9 +22,9 @@
     "error": "Errore",
     "noDescription": "Nessuna descrizione",
     "task": "Attività",
-"bulk": "Attività collettiva con più aiutanti",
-"helper": "aiutante",
-"helpers": "aiutanti"
+    "bulk": "Attività collettiva con più aiutanti",
+    "helper": "aiutante",
+    "helpers": "aiutanti"
   },
   "validations": {
     "inValid": "Email non valida",
@@ -277,7 +277,6 @@
     "noReviews": "Nessuna recensione ancora",
     "noReviewsDesc": "Le recensioni dei proprietari dei compiti appariranno qui",
     "view": "Visualizza candidati"
-
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",
@@ -298,16 +297,16 @@
     "pr": "Prezzo",
     "numberOfWorkers": "Numero di aiutanti necessari",
     "workersHelperText": "Seleziona il numero di aiutanti necessari (1-{{max}})",
-      "sub-task": "Sotto-attività (Seleziona tutte le opzioni applicabili)",
-  "sub-2": "Seleziona sotto-attività...",
-  "sub-3": "Aggiungi sotto-attività personalizzata...",
-  "date": "Pianifica la data dell’attività",
-  "time": "Pianifica l’orario dell’attività",
-  "duration": "Durata stimata dell’attività",
-  "duration-1": "Seleziona la durata stimata",
-  "photo": "Aggiungi foto",
-  "photo-1": "Carica foto",
-  "photo-2": "Facoltativo"
+    "sub-task": "Sotto-attività (Seleziona tutte le opzioni applicabili)",
+    "sub-2": "Seleziona sotto-attività...",
+    "sub-3": "Aggiungi sotto-attività personalizzata...",
+    "date": "Pianifica la data dell’attività",
+    "time": "Pianifica l’orario dell’attività",
+    "duration": "Durata stimata dell’attività",
+    "duration-1": "Seleziona la durata stimata",
+    "photo": "Aggiungi foto",
+    "photo-1": "Carica foto",
+    "photo-2": "Facoltativo"
   },
   "messages": {
     "txt1": "Messaggi",
@@ -690,6 +689,14 @@
     "remove": "Rimuovi",
     "profile": "Profilo",
 
+    "group": "Trasmissione attività",
+    "member": "Membri",
+    "helper": "Aiutanti",
+    "owner": "Proprietario",
+    "joined": "Iscritto",
+    "task": "Proprietario dell'attività",
+    "exp": "Tocca l'icona della chat accanto a un membro per avviare una conversazione privata.",
+
     "confirmDialog": {
       "title": "Conferma aiutante",
       "message": "Sei sicuro di voler confermare {{name}} per questa attività?",
@@ -751,5 +758,45 @@
     "status": "Stato",
     "allHelpersConfirmed": "Tutti gli aiutanti confermati! Puoi segnare l'attività come completata.",
     "allSlotsFilled": "Tutti i posti occupati"
-  }
+  },
+  "interestSelection": {
+    "personalizeExperience": "Personalizza la tua esperienza",
+    "whatAreYouInterested": "A cosa sei interessato?",
+    "pickYourFavorites": "Seleziona i tuoi servizi preferiti e adatteremo Buez per te.",
+    "selectInterestsPrompt": "Seleziona 3 interessi per continuare",
+    "selectedInterests": "{{total}} selezionati ✓",
+    "addCustomInterestTitle": "Aggiungi un interesse personalizzato",
+    "addCustomInterestSubtitle": "Non trovi quello che ti serve? Aggiungilo qui.",
+    "customInterestPlaceholder": "es. Pulizia piscina, Yoga...",
+    "alreadyAdded": "Già aggiunto!",
+    "alreadyAddedDesc": "\"{interest}\" è già nella tua lista.",
+    "pickAFewMore": "Seleziona ancora qualche interesse!",
+    "minSelectionDesc": "Seleziona almeno {{min}} interessi per continuare.",
+    "saving": "Salvataggio...",
+    "continueCTA": "Continua su Buez",
+    "selectMoreCTA": "Seleziona ancora {{remaining}}",
+    "skipForNow": "Salta per ora"
+  },
+  "emailVerification": {
+  "title": "Verifica la tua email",
+  "subtitle": "Abbiamo inviato un link di verifica a:",
+  "hint": "Clicca sul link nell'email per attivare il tuo account. Controlla la cartella spam se non lo vedi.",
+
+  "verifiedSuccessTitle": "Email verificata!",
+  "verifiedSuccessDesc": "Benvenuto a bordo 🎉",
+
+  "notVerifiedTitle": "Non ancora verificata",
+  "notVerifiedDesc": "Clicca sul link nella tua email.",
+
+  "emailSentTitle": "Email inviata!",
+  "emailSentDesc": "Email di verifica reinviata con successo.",
+
+  "resendFailedTitle": "Invio non riuscito",
+  "resendFailedDesc": "Riprova più tardi.",
+
+  "verifiedButton": "Ho verificato la mia email",
+  "resendButton": "Invia di nuovo",
+  "resendCooldown": "Invia di nuovo tra {{seconds}}s",
+  "backToLogin": "Torna al login"
+}
 }

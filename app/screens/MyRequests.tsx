@@ -63,6 +63,7 @@ import {
   getCurrencyInfo,
 } from "../utils/currencyChange";
 import { useLocation } from "../utils/useLocation";
+import { groupChatExists } from "../services/GroupChat.service";
 
 // Enable LayoutAnimation for Android
 if (
@@ -121,7 +122,7 @@ function MyRequests({ navigation }) {
   const [activeIndices, setActiveIndices] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
   const [showAllSubTasks, setShowAllSubTasks] = useState({});
-
+  const [groupChatMap, setGroupChatMap] = useState<Record<string, boolean>>({});
   // Animation values for each card
   const rotateAnims = useRef<{ [key: number]: Animated.Value }>({}).current;
 
@@ -348,6 +349,7 @@ function MyRequests({ navigation }) {
 
       setLastVisiblePost(lastVisible);
       setHasMore(newRecords.length > 0);
+      return translatedRecords;
     } catch (error) {
       console.log("Error loading posts:", error);
     } finally {
@@ -361,7 +363,22 @@ function MyRequests({ navigation }) {
       setTaskRecords([]);
       setLastVisiblePost(null);
       setExpandedCards({});
-      fetchRequests(null).then(() => setInitialLoadDone(true));
+      setGroupChatMap({});
+      fetchRequests(null).then(async (records) => {
+        setInitialLoadDone(true);
+        // Check group chat existence for confirmed bulk tasks in Accepted tab
+        if (activeFilter === `${t("myRequests.txt10")}`) {
+          const map: Record<string, boolean> = {};
+          await Promise.all(
+            (records || []).map(async (task: TaskRecord) => {
+              if (task.isBulkRequest && task.id) {
+                map[task.id] = await groupChatExists(task.id);
+              }
+            }),
+          );
+          setGroupChatMap(map);
+        }
+      });
     }, [param]),
   );
 
@@ -660,6 +677,20 @@ function MyRequests({ navigation }) {
       } catch (err) {
         console.log("Chat start error:", err);
       }
+    },
+    [currentUserId, currentUser?.userData?.userName],
+  );
+
+  const handleOpenGroupChat = useCallback(
+    (task: TaskRecord, event?: any) => {
+      if (event) event.stopPropagation();
+      navigation.navigate("GroupChat", {
+        groupChatId: task.id,
+        currentUserId,
+        currentUserName: currentUser?.userData?.userName,
+        taskType: task.taskType,
+        customTaskTitle: task.customTaskTitle,
+      });
     },
     [currentUserId, currentUser?.userData?.userName],
   );
@@ -1020,7 +1051,15 @@ function MyRequests({ navigation }) {
                 {/* Expand/Collapse Button */}
                 <TouchableOpacity
                   onPress={(event) => toggleExpand(index, event)}
-                  style={[styles.expandButton, { backgroundColor: theme.mode === "light" ? "rgba(215, 215, 215, 0.48)" : "rgba(52, 51, 51, 0.48)",}]}
+                  style={[
+                    styles.expandButton,
+                    {
+                      backgroundColor:
+                        theme.mode === "light"
+                          ? "rgba(215, 215, 215, 0.48)"
+                          : "rgba(52, 51, 51, 0.48)",
+                    },
+                  ]}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <Animated.View style={{ transform: [{ rotate }] }}>
@@ -1101,7 +1140,7 @@ function MyRequests({ navigation }) {
                             { color: theme.darkGrey },
                           ]}
                         >
-                          { "Sub-tasks"}:
+                          {"Sub-tasks"}:
                         </Text>
                       </View>
                       <View style={styles.subTasksList}>
@@ -1389,7 +1428,7 @@ function MyRequests({ navigation }) {
                 <>
                   <View
                     style={[styles.liner, { backgroundColor: theme.border }]}
-                  ></View>
+                  />
                   <View style={styles.wrap2}>
                     <Text
                       style={[
@@ -1405,26 +1444,47 @@ function MyRequests({ navigation }) {
                           }`}
                     </Text>
 
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      disabled={
-                        markLoaderIndex === index || repostingIndex === index
-                      }
-                      onPress={(event) => {
-                        handleStartChat(cart.user, event);
-                      }}
-                      style={styles.abs}
-                    >
-                      <Image
-                        source={Icons.messages}
-                        resizeMode="contain"
-                        style={{
-                          width: RFPercentage(2.3),
-                          height: RFPercentage(2.3),
-                        }}
-                      />
-                      <Text style={styles.txt4}>{t("details.txt9")}</Text>
-                    </TouchableOpacity>
+                    {/* ── Group Chat for confirmed bulk workers, 1:1 chat for single tasks ── */}
+                    {isBulkRequest &&
+                    isConfirmedWorker &&
+                    groupChatMap[cart.id] ? (
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        disabled={
+                          markLoaderIndex === index || repostingIndex === index
+                        }
+                        onPress={(event) => handleOpenGroupChat(cart, event)}
+                        style={styles.abs}
+                      >
+                        <Ionicons
+                          name="people"
+                          size={RFPercentage(2.3)}
+                          color={Colors.primary}
+                        />
+                        <Text style={styles.txt4}>
+                          {t("taskApplicants.group") || "Group Chat"}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        disabled={
+                          markLoaderIndex === index || repostingIndex === index
+                        }
+                        onPress={(event) => handleStartChat(cart.user, event)}
+                        style={styles.abs}
+                      >
+                        <Image
+                          source={Icons.messages}
+                          resizeMode="contain"
+                          style={{
+                            width: RFPercentage(2.3),
+                            height: RFPercentage(2.3),
+                          }}
+                        />
+                        <Text style={styles.txt4}>{t("details.txt9")}</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </>
               )}

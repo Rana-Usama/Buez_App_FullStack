@@ -118,7 +118,7 @@ function SubscriptionV2(props) {
       });
       console.log("res.........", result);
       if (result.success) {
-        props.navigation.navigate("TabNavigator");
+        props.navigation.navigate("InterestSelection");
       } else {
         setModalVisible2(true);
       }
@@ -150,7 +150,7 @@ function SubscriptionV2(props) {
       });
       await scheduleFreeTrialNotification(10);
       setFreeTrialModalVisible(false); // Close modal
-      props.navigation.navigate("TabNavigator");
+      props.navigation.navigate("InterestSelection");
     } catch (error) {
       Toast.show({
         type: "error",
@@ -196,7 +196,7 @@ function SubscriptionV2(props) {
         userId,
         deviceId,
       });
-      props.navigation.navigate("TabNavigator");
+      props.navigation.navigate("InterestSelection");
     } catch (error) {
       console.log(error);
       Toast.show({

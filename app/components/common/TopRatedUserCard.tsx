@@ -164,10 +164,11 @@ const styles = StyleSheet.create({
     marginRight: 15,
     borderRadius: 15,
     // overflow: "hidden",
-    
+
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 6,
+    // alignSelf: "flex-start",
 
     // borderWidth: RFPercentage(0.1),
   },

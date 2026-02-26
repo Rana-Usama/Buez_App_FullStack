@@ -44,7 +44,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       const q = query(
         collection(FIREBASE_DB, "freeTrials"),
         where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true)
+        where("freeTrial", "==", true),
       );
       const snapshot = await getDocs(q);
       return !snapshot.empty;
@@ -73,7 +73,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       });
       return;
     }
-    
+
     if (!deviceId) {
       Toast.show({
         type: "info",
@@ -87,7 +87,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
     try {
       // Apple auth request
       let appleAuthResponse;
-      
+
       if (!appleAuth.isSupported) {
         console.log("⚠️ Apple Auth not supported, using simulator");
         // Simulator mode for testing
@@ -122,10 +122,10 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
         idToken: identityToken,
         rawNonce: nonce,
       });
-      
+
       const userCredential = await signInWithCredential(
         FIREBASE_AUTH,
-        credential
+        credential,
       );
       const user = userCredential.user;
 
@@ -134,7 +134,8 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
-      const finalEmail = email || user.email || `appleuser_${user.uid}@appleid.com`;
+      const finalEmail =
+        email || user.email || `appleuser_${user.uid}@appleid.com`;
       const finalName = fullName
         ? `${fullName.givenName || ""} ${fullName.familyName || ""}`.trim()
         : user.displayName || "Apple User";
@@ -160,11 +161,13 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
             planType: existingData.planType || null,
             freeTrialStartedAt: existingData.freeTrialStartedAt || null,
             webhook: existingData.webhook ?? true,
-            lastLocationUpdate: existingData.lastLocationUpdate || serverTimestamp(),
+            lastLocationUpdate:
+              existingData.lastLocationUpdate || serverTimestamp(),
             updatedAt: serverTimestamp(),
             createdAt: existingData.createdAt || serverTimestamp(),
+            emailVerified: true,
           },
-          { merge: true }
+          { merge: true },
         );
       } else {
         // New user
@@ -187,20 +190,21 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
           webhook: true,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+          emailVerified: true,
         });
       }
 
       // Save credentials
       await saveCredentials(finalEmail, appleUserId);
       await SecureStore.setItemAsync("loggedOut", "false");
-      
+
       // Give Firestore time to update
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Get updated user data
       const updatedSnap = await getDoc(userRef);
       const existingUser = updatedSnap.data();
-      
+
       if (!existingUser) {
         Toast.show({
           type: "error",
@@ -213,9 +217,11 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       const now = new Date();
 
       // Parse subscription dates using helper
-      const subStartDate = parseFirestoreTimestamp(existingUser.subscriptionStart);
+      const subStartDate = parseFirestoreTimestamp(
+        existingUser.subscriptionStart,
+      );
       const subEndDate = parseFirestoreTimestamp(existingUser.subscriptionEnd);
-      
+
       // Debug logs
       console.log("🍎 Apple Login - Subscription Check:");
       console.log("isSubscribed:", existingUser.isSubscribed);
@@ -224,15 +230,17 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       console.log("Parsed start:", subStartDate);
       console.log("Parsed end:", subEndDate);
       console.log("Current date:", now);
-      
+
       const isWithinPaidPeriod =
         subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
-      
+
       console.log("Is within paid period:", isWithinPaidPeriod);
 
       // Check trial validity
       let isTrialValid = false;
-      const trialStartDate = parseFirestoreTimestamp(existingUser.freeTrialStartedAt);
+      const trialStartDate = parseFirestoreTimestamp(
+        existingUser.freeTrialStartedAt,
+      );
       if (existingUser.isFreeTrial && trialStartDate) {
         const trialDays = differenceInDays(now, trialStartDate);
         console.log("Trial days:", trialDays);
@@ -246,7 +254,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
 
       // Navigation logic - same order as Google login
       console.log("🎯 Apple Navigation Decision:");
-      
+
       if (existingUser.isSubscribed && isWithinPaidPeriod) {
         console.log("✅ Navigating to TabNavigator (paid subscription)");
         navigation.reset({
@@ -282,18 +290,20 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       console.log("Apple Sign-In Error:", error);
       console.log("Error code:", error.code);
       console.log("Error message:", error.message);
-      
+
       let errorMessage = `${t("toast.login.four")}`;
-      
+
       // More specific error messages
-      if (error.code === 'auth/operation-not-allowed') {
+      if (error.code === "auth/operation-not-allowed") {
         errorMessage = "Apple Sign-In is not enabled in Firebase";
-      } else if (error.code === 'auth/invalid-credential') {
+      } else if (error.code === "auth/invalid-credential") {
         errorMessage = "Invalid Apple credentials";
-      } else if (error.code === 'auth/account-exists-with-different-credential') {
+      } else if (
+        error.code === "auth/account-exists-with-different-credential"
+      ) {
         errorMessage = "Account already exists with different credentials";
       }
-      
+
       Toast.show({
         type: "error",
         text1: `${t("toast.login.three")}`,

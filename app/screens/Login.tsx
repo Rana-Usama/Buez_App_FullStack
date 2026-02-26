@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as SecureStore from "expo-secure-store";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, reload } from "firebase/auth";
 import { saveCredentials } from "../services/Auth.service";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import Screen from "../components/Screen";
@@ -40,6 +40,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig"; // adjust path
 import AppleLoginButton from "../utils/appleLogin";
 import { LinearGradient } from "expo-linear-gradient";
+import DeviceInfo from "react-native-device-info";
 
 function Login({ navigation }) {
   const [indicator, showIndicator] = useState(false);
@@ -57,14 +58,39 @@ function Login({ navigation }) {
     password: yup.string().required(t("validations.passwordReq")),
   });
 
+  const [deviceId, setDeviceId] = useState("");
+
+  useEffect(() => {
+    const fetchId = async () => {
+      const id = await DeviceInfo.getUniqueId();
+      setDeviceId(id);
+      console.log("Device ID:", id);
+    };
+    fetchId();
+  }, []);
+
   const signInWithEmail = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
         FIREBASE_AUTH,
         email,
-        password
+        password,
       );
-      return userCredential.user;
+      const user = userCredential.user;
+
+      await reload(user);
+
+      if (!user.emailVerified) {
+        Toast.show({
+          type: "error",
+          text1: "Email Not Verified",
+          text2: "Please verify your email before logging in.",
+        });
+        navigation.navigate("EmailVerification", { email, password, deviceId });
+        return null;
+      }
+
+      return user;
     } catch (error) {
       console.log("user...........", error);
       throw error;
@@ -140,7 +166,7 @@ function Login({ navigation }) {
             locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
             style={styles.meshGradientTopLeft}
           />
-       
+
           <StatusBar
             barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
             backgroundColor={theme.white}

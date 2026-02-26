@@ -185,8 +185,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
     outputRange: ["0deg", "180deg"],
   });
 
-  console.log(task);
-
   return (
     <TouchableOpacity
       onPress={() => onPress(task)}

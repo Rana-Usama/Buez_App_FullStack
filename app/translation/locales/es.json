@@ -689,6 +689,14 @@
     "remove": "Eliminar",
     "profile": "Perfil",
 
+    "group": "Difusión de tarea",
+    "member": "Miembros",
+    "helper": "Ayudantes",
+    "owner": "Propietario",
+    "joined": "Unido",
+    "task": "Propietario de la tarea",
+    "exp": "Toca el ícono de chat junto a cualquier miembro para iniciar una conversación privada.",
+
     "confirmDialog": {
       "title": "Confirmar ayudante",
       "message": "¿Estás seguro de que quieres confirmar a {{name}} para esta tarea?",
@@ -750,5 +758,45 @@
     "status": "Estado",
     "allHelpersConfirmed": "¡Todos los ayudantes confirmados! Puedes marcar la tarea como completada.",
     "allSlotsFilled": "Todas las plazas ocupadas"
-  }
+  },
+  "interestSelection": {
+    "personalizeExperience": "Personaliza tu experiencia",
+    "whatAreYouInterested": "¿Qué te interesa?",
+    "pickYourFavorites": "Elige tus servicios favoritos y adaptaremos Buez para ti.",
+    "selectInterestsPrompt": "Selecciona 3 intereses para continuar",
+    "selectedInterests": "{{total}} seleccionado(s) ✓",
+    "addCustomInterestTitle": "Agregar interés personalizado",
+    "addCustomInterestSubtitle": "¿No ves lo que necesitas? Agrégalo aquí.",
+    "customInterestPlaceholder": "ej. Limpieza de piscinas, Yoga...",
+    "alreadyAdded": "¡Ya agregado!",
+    "alreadyAddedDesc": "\"{interest}\" ya está en tu lista.",
+    "pickAFewMore": "¡Elige unos cuantos más!",
+    "minSelectionDesc": "Selecciona al menos {{min}} intereses para continuar.",
+    "saving": "Guardando...",
+    "continueCTA": "Continuar en Buez",
+    "selectMoreCTA": "Selecciona {{remaining}} más",
+    "skipForNow": "Omitir por ahora"
+  },
+  "emailVerification": {
+  "title": "Verifica tu correo electrónico",
+  "subtitle": "Hemos enviado un enlace de verificación a:",
+  "hint": "Haz clic en el enlace del correo para activar tu cuenta. Revisa tu carpeta de spam si no lo ves.",
+
+  "verifiedSuccessTitle": "¡Correo verificado!",
+  "verifiedSuccessDesc": "Bienvenido a bordo 🎉",
+
+  "notVerifiedTitle": "Aún no verificado",
+  "notVerifiedDesc": "Haz clic en el enlace de tu correo.",
+
+  "emailSentTitle": "¡Correo enviado!",
+  "emailSentDesc": "Correo de verificación reenviado con éxito.",
+
+  "resendFailedTitle": "Error al reenviar",
+  "resendFailedDesc": "Por favor intenta más tarde.",
+
+  "verifiedButton": "He verificado mi correo",
+  "resendButton": "Reenviar correo",
+  "resendCooldown": "Reenviar en {{seconds}}s",
+  "backToLogin": "Volver al inicio de sesión"
+}
 }

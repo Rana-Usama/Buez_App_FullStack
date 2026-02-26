@@ -294,6 +294,7 @@ export const useHomeScreen = () => {
     const loadTopRatedUsers = async () => {
       try {
         const users = await fetchUsersWithTaskStats();
+        console.log("users...........",users)
         setTopRatedUsers(users);
       } catch (error) {
         console.error("Error loading top rated users:", error);

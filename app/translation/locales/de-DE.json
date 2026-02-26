@@ -689,6 +689,13 @@
     "remove": "Entfernen",
     "profile": "Profil",
 
+    "group": "Aufgaben-Broadcast",
+    "member": "Mitglieder",
+    "helper": "Helfer",
+    "owner": "Besitzer",
+    "joined": "Beigetreten",
+    "task": "Aufgabenbesitzer",
+    "exp": "Tippen Sie auf das Chat-Symbol neben einem Mitglied, um eine private Unterhaltung zu starten.",
     "confirmDialog": {
       "title": "Helfer bestätigen",
       "message": "Sind Sie sicher, dass Sie {{name}} für diese Aufgabe bestätigen möchten?",
@@ -750,5 +757,45 @@
     "status": "Status",
     "allHelpersConfirmed": "Alle Helfer bestätigt! Sie können die Aufgabe als abgeschlossen markieren.",
     "allSlotsFilled": "Alle Plätze belegt"
-  }
+  },
+  "interestSelection": {
+  "personalizeExperience": "Personalisieren Sie Ihr Erlebnis",
+  "whatAreYouInterested": "Wofür interessieren Sie sich?",
+  "pickYourFavorites": "Wählen Sie Ihre bevorzugten Dienste aus und wir passen Buez für Sie an.",
+  "selectInterestsPrompt": "Wählen Sie 3 Interessen, um fortzufahren",
+  "selectedInterests": "{{total}} ausgewählt ✓",
+  "addCustomInterestTitle": "Eigenes Interesse hinzufügen",
+  "addCustomInterestSubtitle": "Sehen Sie nicht, was Sie brauchen? Fügen Sie es hier hinzu.",
+  "customInterestPlaceholder": "z.B. Poolreinigung, Yoga...",
+  "alreadyAdded": "Bereits hinzugefügt!",
+  "alreadyAddedDesc": "\"{interest}\" ist bereits in Ihrer Liste.",
+  "pickAFewMore": "Wählen Sie noch ein paar aus!",
+  "minSelectionDesc": "Wählen Sie mindestens {{min}} Interessen, um fortzufahren.",
+  "saving": "Speichert...",
+  "continueCTA": "Weiter zu Buez",
+  "selectMoreCTA": "Wählen Sie noch {{remaining}} aus",
+  "skipForNow": "Für jetzt überspringen"
+},
+"emailVerification": {
+  "title": "Bestätigen Sie Ihre E-Mail",
+  "subtitle": "Wir haben einen Bestätigungslink gesendet an:",
+  "hint": "Klicken Sie auf den Link in der E-Mail, um Ihr Konto zu aktivieren. Überprüfen Sie Ihren Spam-Ordner, falls Sie ihn nicht sehen.",
+
+  "verifiedSuccessTitle": "E-Mail bestätigt!",
+  "verifiedSuccessDesc": "Willkommen an Bord 🎉",
+
+  "notVerifiedTitle": "Noch nicht bestätigt",
+  "notVerifiedDesc": "Bitte klicken Sie auf den Link in Ihrer E-Mail.",
+
+  "emailSentTitle": "E-Mail gesendet!",
+  "emailSentDesc": "Bestätigungs-E-Mail wurde erneut gesendet.",
+
+  "resendFailedTitle": "Erneutes Senden fehlgeschlagen",
+  "resendFailedDesc": "Bitte versuchen Sie es später erneut.",
+
+  "verifiedButton": "Ich habe meine E-Mail bestätigt",
+  "resendButton": "E-Mail erneut senden",
+  "resendCooldown": "Erneut senden in {{seconds}}s",
+  "backToLogin": "Zurück zum Login"
+}
 }
