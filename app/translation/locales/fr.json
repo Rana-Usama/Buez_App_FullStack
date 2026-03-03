@@ -191,7 +191,10 @@
     "skipForNow": "Passer pour l'instant",
     "info1": "Ajouter une carte maintenant assure un service sans interruption après l'essai",
     "info2": "Votre carte ne sera pas débitée avant 14 jours",
-    "info3": "Vous pouvez annuler à tout moment pendant la période d'essai"
+    "info3": "Vous pouvez annuler à tout moment pendant la période d'essai",
+    "importantNote": "Commencez votre aventure Premium",
+  "automaticSubscription": "Profitez d’un accès Premium complet pendant 14 jours gratuitement ! Après votre période d’essai, votre abonnement mensuel se poursuivra automatiquement si vous ajoutez une carte, afin que vous ne perdiez jamais vos avantages Premium."
+
   },
   "subscription": {
     "txt1": "Votre essai gratuit de 14 jours est terminé.",
@@ -306,7 +309,9 @@
     "duration-1": "Sélectionner la durée estimée",
     "photo": "Ajouter une photo",
     "photo-1": "Télécharger des photos",
-    "photo-2": "Optionnel"
+    "photo-2": "Optionnel",
+      "date1": "Définir la date",
+  "time1": "Définir l'heure"
   },
   "messages": {
     "txt1": "Messages",
@@ -466,7 +471,8 @@
   "notifications": {
     "txt1": "Chargement des notifications...",
     "txt2": "Lorsque vous recevrez des notifications, elles apparaîtront ici",
-    "txt3": "Note :"
+    "txt3": "Note :",
+     "txt4": "Notifications"
   },
   "completed": {
     "txt1": "NOTÉ",

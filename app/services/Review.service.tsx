@@ -423,7 +423,7 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
       .map((u) => {
         const completedCount = Number(u.completedCount) || 0;
 
-        if (completedCount >= 3) u.category = "Top Rated";
+        if (completedCount >= 6) u.category = "Top Rated";
         else if (completedCount >= 2) u.category = "Rising Talent";
 
         return u;

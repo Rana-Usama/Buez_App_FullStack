@@ -173,7 +173,7 @@ const ChatItem = memo(({ item, userId, theme, onPress, t }: any) => {
     (item.unread || item.unreadCount > 0) &&
     (item.type === "group"
       ? item.lastMessage?.senderId !== userId // group:
-      : item.lastMessage?.senderId !== userId); // 1:1
+      : item?.senderId !== userId); // 1:1
   const lastMessageTime = formatChatTimestamp(item.lastMessage?.createdAt);
   return (
     <TouchableOpacity
@@ -262,9 +262,7 @@ const ChatItem = memo(({ item, userId, theme, onPress, t }: any) => {
                     styles.unreadBadge,
                     { backgroundColor: theme.primary },
                   ]}
-                >
-                 
-                </View>
+                ></View>
               )}
             </View>
           )}
@@ -478,12 +476,21 @@ function Messages({ navigation }: any) {
     return () => unsubscribeRef.current?.();
   }, []);
   const filteredChats = useMemo(() => {
-    const visibleChats = chats.filter((c) => c.lastMessage); // only chats with messages
+    const visibleChats = chats.filter((c) => c.lastMessage);
+
     if (activeFilter === t("messages.txt3")) {
-      return visibleChats.filter(
-        (c) => (c.unreadCount > 0 || c.unread) && c.lastMessage.senderId !== userId,
-      );
+      return visibleChats.filter((c) => {
+        if (c.type === "group") {
+          return c.unreadCount > 0 && c.lastMessage?.senderId !== userId;
+        } else {
+          return (
+            (c.unread === true) &&
+            c?.senderId !== userId
+          );
+        }
+      });
     }
+
     return visibleChats;
   }, [chats, activeFilter, userId, t]);
 
@@ -669,10 +676,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  userName: { fontSize: RFPercentage(2) },
-  timeText: { fontSize: RFPercentage(1.5) },
-  messagePreview: { flexDirection: "row", alignItems: "center", marginTop: 2 },
-  messageText: { fontSize: RFPercentage(1.7) },
+  userName: { fontSize: RFPercentage(2), fontFamily: "Poppins_400Regular" },
+  timeText: { fontSize: RFPercentage(1.5), fontFamily: "Poppins_400Regular" },
+  messagePreview: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2,
+    fontFamily: "Poppins_400Regular",
+  },
+  messageText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_400Regular",
+  },
   unreadBadge: {
     minWidth: RFPercentage(1),
     height: RFPercentage(1),
@@ -716,7 +731,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.6),
     textAlign: "center",
     marginTop: RFPercentage(1),
-    width:"80%"
+    width: "80%",
   },
 });
 

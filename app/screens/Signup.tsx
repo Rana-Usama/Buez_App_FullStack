@@ -123,7 +123,7 @@ function Signup({ navigation }: any) {
     showIndicator(true);
     try {
       const userName = values.name.trim();
-      const email = values.email.trim();
+      const email = values.email.trim().toLowerCase();
       const password = values.password.trim();
       const user = await createAccountWithEmail(email, password);
       await SecureStore.setItemAsync("loggedOut", "false");

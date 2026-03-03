@@ -17,7 +17,12 @@ import {
   Animated,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { MaterialIcons, Feather, FontAwesome5 } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  Feather,
+  FontAwesome5,
+  Ionicons,
+} from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as Notifications from "expo-notifications";
@@ -58,18 +63,18 @@ const { width } = Dimensions.get("window");
 const TASK_IMAGE_KEYS: Record<string, string> = {
   "Pet Care": "Pet",
   "Event Setup": "Event",
-  "Cleaning": "Cleaning",
-  "Moving": "Moving",
-  "Gardening": "Gardening",
-  "Gaming": "Gaming",
-  "Plumbing": "Plumbing",
-  "Electrical": "Electrical",
-  "Carpentry": "Carpentry",
-  "Painting": "Painting",
-  "Delivery": "Delivery",
-  "Tutoring": "Tutoring",
-  "Photography": "Photography",
-  "Other": "Other",
+  Cleaning: "Cleaning",
+  Moving: "Moving",
+  Gardening: "Gardening",
+  Gaming: "Gaming",
+  Plumbing: "Plumbing",
+  Electrical: "Electrical",
+  Carpentry: "Carpentry",
+  Painting: "Painting",
+  Delivery: "Delivery",
+  Tutoring: "Tutoring",
+  Photography: "Photography",
+  Other: "Other",
 };
 
 function PostRequest({ navigation, route }) {
@@ -121,7 +126,8 @@ function PostRequest({ navigation, route }) {
   const [translatedDurationOptions, setTranslatedDurationOptions] = useState(
     [],
   );
-
+  const [tempTime, setTempTime] = useState<Date>(new Date());
+  const [tempDate, setTempDate] = useState<Date>(new Date());
   const durationOptions = [
     { label: "Less than 1 hour", value: "less_than_1" },
     { label: "1-2 hours", value: "1_2_hours" },
@@ -156,11 +162,11 @@ function PostRequest({ navigation, route }) {
       { id: "clean_1", name: "Deep Clean", icon: "broom" },
       { id: "clean_2", name: "Dusting", icon: "feather" },
       { id: "clean_3", name: "Vacuuming", icon: "wind" },
-      { id: "clean_4", name: "Mopping", icon: "bucket" },
+      { id: "clean_4", name: "Mopping", icon: "bitbucket" },
       { id: "clean_5", name: "Window Cleaning", icon: "window-maximize" },
       { id: "clean_6", name: "Carpet Cleaning", icon: "square" },
       { id: "clean_7", name: "Bathroom Cleaning", icon: "toilet" },
-      { id: "clean_8", name: "Kitchen Cleaning", icon: "kitchen-set" },
+      { id: "clean_8", name: "Kitchen Cleaning", icon: "glass-cheers" },
     ],
     Moving: [
       { id: "move_1", name: "Packing", icon: "box" },
@@ -176,12 +182,12 @@ function PostRequest({ navigation, route }) {
       { id: "garden_1", name: "Planting", icon: "seedling" },
       { id: "garden_2", name: "Weeding", icon: "leaf" },
       { id: "garden_3", name: "Lawn Mowing", icon: "cut" },
-      { id: "garden_4", name: "Trimming", icon: "scissors" },
+      { id: "garden_4", name: "Trimming", icon: "cut" },
       { id: "garden_5", name: "Pruning", icon: "cut" },
-      { id: "garden_6", name: "Hedge Trimming", icon: "scissors" },
+      { id: "garden_6", name: "Hedge Trimming", icon: "cut" },
       { id: "garden_7", name: "Leaf Blowing", icon: "wind" },
       { id: "garden_8", name: "Tree Planting", icon: "tree" },
-      { id: "garden_9", name: "Mulching", icon: "mound" },
+      { id: "garden_9", name: "Mulching", icon: "info-circle" },
       { id: "garden_10", name: "Fertilizing", icon: "flask" },
     ],
     Gaming: [
@@ -192,7 +198,7 @@ function PostRequest({ navigation, route }) {
     ],
     Plumbing: [
       { id: "plumb_1", name: "Leak Repair", icon: "water" },
-      { id: "plumb_2", name: "Pipe Installation", icon: "pipe" },
+      { id: "plumb_2", name: "Pipe Installation", icon: "water" },
       { id: "plumb_3", name: "Drain Cleaning", icon: "bath" },
       { id: "plumb_4", name: "Fixture Installation", icon: "faucet" },
       { id: "plumb_5", name: "Water Heater", icon: "water" },
@@ -207,20 +213,20 @@ function PostRequest({ navigation, route }) {
     ],
     Carpentry: [
       { id: "carp_1", name: "Furniture Repair", icon: "chair" },
-      { id: "carp_2", name: "Cabinet Installation", icon: "cabinet" },
-      { id: "carp_3", name: "Shelving", icon: "books" },
+      { id: "carp_2", name: "Cabinet Installation", icon: "house-user" },
+      { id: "carp_3", name: "Shelving", icon: "book" },
       { id: "carp_4", name: "Deck Repair", icon: "home" },
     ],
     Painting: [
       { id: "paint_1", name: "Wall Painting", icon: "paint-roller" },
       { id: "paint_2", name: "Ceiling Painting", icon: "arrow-up" },
-      { id: "paint_3", name: "Trim Painting", icon: "border" },
-      { id: "paint_4", name: "Cabinet Painting", icon: "cabinet" },
+      { id: "paint_3", name: "Trim Painting", icon: "grip-lines-vertical" },
+      { id: "paint_4", name: "Cabinet Painting", icon: "house-user" },
       { id: "paint_5", name: "Touch-ups", icon: "brush" },
     ],
     Delivery: [
       { id: "del_1", name: "Package Delivery", icon: "box" },
-      { id: "del_2", name: "Food Delivery", icon: "pizza" },
+      { id: "del_2", name: "Food Delivery", icon: "pizza-slice" },
       { id: "del_3", name: "Grocery Delivery", icon: "shopping-bag" },
       { id: "del_4", name: "Furniture Delivery", icon: "couch" },
     ],
@@ -243,13 +249,13 @@ function PostRequest({ navigation, route }) {
       { id: "photo_1", name: "Event Photography", icon: "camera" },
       { id: "photo_2", name: "Portrait", icon: "portrait" },
       { id: "photo_3", name: "Product", icon: "box" },
-      { id: "photo_4", name: "Editing", icon: "pencil" },
+      { id: "photo_4", name: "Editing", icon: "pen" },
     ],
     "Pet Care": [
       { id: "pet_1", name: "Dog Walking", icon: "dog" },
       { id: "pet_2", name: "Pet Sitting", icon: "cat" },
       { id: "pet_3", name: "Grooming", icon: "cut" },
-      { id: "pet_4", name: "Feeding", icon: "bowl-food" },
+      { id: "pet_4", name: "Feeding", icon: "utensil-spoon" },
     ],
 
     Other: [],
@@ -708,10 +714,8 @@ function PostRequest({ navigation, route }) {
     ],
   };
 
-  
-
   function getRandomImage(taskType: string) {
-    const defaultType = t("postRequest.txt6"); 
+    const defaultType = t("postRequest.txt6");
     const key = TASK_IMAGE_KEYS[taskType] || TASK_IMAGE_KEYS[defaultType];
     const images = DEFAULT_IMAGES?.[key];
     if (!Array.isArray(images) || images.length === 0) return null;
@@ -898,6 +902,7 @@ function PostRequest({ navigation, route }) {
           contentContainerStyle={styles.scrollViewContent}
           keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false}
+          nestedScrollEnabled
         >
           <Animated.View
             style={[
@@ -991,7 +996,10 @@ function PostRequest({ navigation, route }) {
                     },
                   ]}
                 >
-                  <ScrollView showsVerticalScrollIndicator={false}>
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    nestedScrollEnabled
+                  >
                     {translatedTaskOptions.map((item) => (
                       <TouchableOpacity
                         key={item.id}
@@ -1158,7 +1166,10 @@ function PostRequest({ navigation, route }) {
                         },
                       ]}
                     >
-                      <ScrollView showsVerticalScrollIndicator={false}>
+                      <ScrollView
+                        nestedScrollEnabled
+                        showsVerticalScrollIndicator={false}
+                      >
                         {translatedSubTasks.map((subTask) => {
                           const isSelected = selectedSubTasks.find(
                             (st) => st.id === subTask.id,
@@ -1470,14 +1481,130 @@ function PostRequest({ navigation, route }) {
                 </Text>
               </View>
 
-              <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                onChange={onDateChange}
-                minimumDate={new Date()}
-                accentColor={Colors.primary}
-                themeVariant={theme.mode === "dark" ? "dark" : "light"}
-              />
+              <TouchableOpacity
+                style={{
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? "rgba(19, 19, 21, 1)"
+                      : "rgba(238, 238, 240, 1)",
+                  width: "60%",
+                  padding: 14,
+                  borderRadius: 5,
+                }}
+                onPress={() => {
+                  setTempDate(selectedDate);
+                  setShowDatePicker(true);
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.darkGrey,
+                    fontSize: RFPercentage(1.8),
+                    fontFamily: "Poppins_400Regular",
+                    textAlign: "center",
+                  }}
+                >
+                  {formattedDate || "Select Date"}
+                </Text>
+              </TouchableOpacity>
+
+              {showDatePicker &&
+                (Platform.OS === "android" ? (
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display="default"
+                    themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                    minimumDate={new Date()}
+                    onChange={(event, date) => {
+                      setShowDatePicker(false);
+                      if (date) setSelectedDate(date);
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: "transparent",
+                      borderWidth: 1,
+                      borderColor:
+                        theme.mode === "dark"
+                          ? "rgba(23, 24, 33, 1)"
+                          : "rgba(235, 236, 251, 1)",
+                      borderRadius: RFPercentage(1.5),
+                      alignItems: "center",
+                      marginTop: RFPercentage(1),
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "90%",
+                        marginTop: RFPercentage(2),
+                      }}
+                    >
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? Colors.primary + "40"
+                              : Colors.primary + "10",
+                          padding: RFPercentage(0.7),
+                          borderRadius: RFPercentage(100),
+                          paddingHorizontal: RFPercentage(1.5),
+                        }}
+                        onPress={() => {
+                          setSelectedDate(tempDate);
+                          setShowDatePicker(false);
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : Colors.primary,
+
+                            fontFamily: "Poppins_600SemiBold",
+                            fontSize: RFPercentage(1.4),
+                          }}
+                          numberOfLines={1}
+                        >
+                           {t("postRequest.date1")}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => setShowDatePicker(false)}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          color={
+                            theme.mode === "dark"
+                              ? Colors.darkGrey + "50"
+                              : Colors.primary + "30"
+                          }
+                          size={RFPercentage(3.5)}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <DateTimePicker
+                      value={tempDate}
+                      mode="date"
+                      display="spinner"
+                      themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                      minimumDate={new Date()}
+                      onChange={(event, date) => {
+                        if (date) setTempDate(date);
+                      }}
+                    />
+                  </View>
+                ))}
             </View>
 
             {/* Time Selection */}
@@ -1500,14 +1627,129 @@ function PostRequest({ navigation, route }) {
                 </Text>
               </View>
 
-              <DateTimePicker
-                value={selectedTime}
-                mode="time"
-                onChange={onTimeChange}
-                minuteInterval={5}
-                accentColor={Colors.primary}
-                themeVariant={theme.mode === "dark" ? "dark" : "light"}
-              />
+              <TouchableOpacity
+                style={{
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? "rgba(19, 19, 21, 1)"
+                      : "rgba(242, 242, 246, 1)",
+                  width: "60%",
+                  padding: 12,
+                  borderRadius: 5,
+                }}
+                onPress={() => {
+                  setTempTime(selectedTime);
+                  setShowTimePicker(true);
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.darkGrey,
+                    fontSize: RFPercentage(1.8),
+                    fontFamily: "Poppins_400Regular",
+                    textAlign: "center",
+                  }}
+                >
+                  {formattedTime || "Select Time"}
+                </Text>
+              </TouchableOpacity>
+
+              {showTimePicker &&
+                (Platform.OS === "android" ? (
+                  <DateTimePicker
+                    value={selectedTime}
+                    mode="time"
+                    minuteInterval={5}
+                    display="default"
+                    themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                    onChange={(event, time) => {
+                      setShowTimePicker(false);
+                      if (time) setSelectedTime(time);
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: "transparent",
+                      borderWidth: 1,
+                      borderColor:
+                        theme.mode === "dark"
+                          ? "rgba(23, 24, 33, 1)"
+                          : "rgba(235, 236, 251, 1)",
+                      borderRadius: RFPercentage(1.5),
+                      alignItems: "center",
+                      marginTop: RFPercentage(1),
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "90%",
+                        marginTop: RFPercentage(2),
+                      }}
+                    >
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? Colors.primary + "40"
+                              : Colors.primary + "10",
+                          padding: RFPercentage(0.7),
+                          borderRadius: RFPercentage(100),
+                          paddingHorizontal: RFPercentage(1.5),
+                        }}
+                        onPress={() => {
+                          setSelectedTime(tempTime);
+                          setShowTimePicker(false);
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : Colors.primary,
+                            fontFamily: "Poppins_600SemiBold",
+                            fontSize: RFPercentage(1.4),
+                          }}
+                          numberOfLines={1}
+                        >
+                          {t("postRequest.time1")}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => setShowTimePicker(false)}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          color={
+                            theme.mode === "dark"
+                              ? Colors.darkGrey + "50"
+                              : Colors.primary + "30"
+                          }
+                          size={RFPercentage(3.5)}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <DateTimePicker
+                      value={tempTime}
+                      mode="time"
+                      minuteInterval={5}
+                      display="spinner"
+                      themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                      onChange={(event, time) => {
+                        if (time) setTempTime(time);
+                      }}
+                    />
+                  </View>
+                ))}
             </View>
 
             {/* Estimated Duration */}

@@ -111,17 +111,13 @@ const GroupChat = ({ navigation, route }: any) => {
 
   const senderMember = groupMembers.find((m) => m.userId === currentUserId);
 
-
-
   useEffect(() => {
-  const rawInitial = customTaskTitle || taskType || "";
-  if (!rawInitial) return;
-  cachedTranslate(rawInitial).then((translated) => {
-    if (translated) setGroupTitle(translated);
-  });
-}, []);
-
-
+    const rawInitial = customTaskTitle || taskType || "";
+    if (!rawInitial) return;
+    cachedTranslate(rawInitial).then((translated) => {
+      if (translated) setGroupTitle(translated);
+    });
+  }, []);
 
   // ── Load group metadata (members) with real-time listener ─────────────────
   useEffect(() => {
@@ -491,7 +487,7 @@ const GroupChat = ({ navigation, route }: any) => {
                   : {
                       backgroundColor:
                         theme.mode === "dark"
-                          ? "rgba(30,30,30,1)"
+                          ? "rgba(10, 10, 17, 1)"
                           : "rgba(240,240,240,1)",
                       borderBottomLeftRadius: 4,
                     },
@@ -519,7 +515,12 @@ const GroupChat = ({ navigation, route }: any) => {
                     <Text
                       style={[
                         styles.msgAvatarInitial,
-                        { color: Colors.primary },
+                        {
+                          color:
+                            theme.mode === "dark"
+                              ? Colors.white
+                              : Colors.primary,
+                        },
                       ]}
                     >
                       {displayName[0]?.toUpperCase() || "?"}
@@ -682,7 +683,7 @@ const GroupChat = ({ navigation, route }: any) => {
           onPress={() => navigation.goBack()}
         >
           <Ionicons
-            name="chevron-back"
+            name="arrow-back"
             size={RFPercentage(2.7)}
             color={theme.heading}
           />
@@ -702,13 +703,18 @@ const GroupChat = ({ navigation, route }: any) => {
           <View
             style={[
               styles.groupIconContainer,
-              { backgroundColor: Colors.primary + "20" },
+              {
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? Colors.darkGrey
+                    : Colors.primary + "20",
+              },
             ]}
           >
             <Ionicons
               name="people"
               size={RFPercentage(3.2)}
-              color={Colors.primary}
+              color={theme.mode === "dark" ? Colors.white : Colors.primary}
             />
           </View>
         </TouchableOpacity>
@@ -782,10 +788,10 @@ const GroupChat = ({ navigation, route }: any) => {
             style={[styles.modalContainer, { backgroundColor: theme.white }]}
           >
             <Text style={[styles.modalTitle, { color: theme.heading }]}>
-              Delete Message
+               {t("chat.txt3")}
             </Text>
             <Text style={[styles.modalText, { color: theme.darkGrey }]}>
-              Are you sure you want to delete this message?
+              {t("chat.txt4")}
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -798,14 +804,14 @@ const GroupChat = ({ navigation, route }: any) => {
                     fontFamily: "Poppins_500Medium",
                   }}
                 >
-                  Cancel
+                  {t("buttons.cancel")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.deleteBtn}
                 onPress={confirmDelete}
               >
-                <Text style={styles.deleteBtnText}>Delete</Text>
+                <Text style={styles.deleteBtnText}>{t("chat.txt5")}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -961,7 +967,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     textAlignVertical: "top",
     // lineHeight: RFPercentage(2.7),
-    paddingTop:3
+    paddingTop: 3,
   },
   sendButton: {
     justifyContent: "center",
@@ -1018,14 +1024,14 @@ const styles = StyleSheet.create({
   cancelBtn: {
     flex: 1,
     paddingVertical: RFPercentage(1.2),
-    borderRadius: RFPercentage(1.5),
+    borderRadius: RFPercentage(100),
     borderWidth: 1,
     alignItems: "center",
   },
   deleteBtn: {
     flex: 1,
     paddingVertical: RFPercentage(1.2),
-    borderRadius: RFPercentage(1.5),
+    borderRadius: RFPercentage(100),
     backgroundColor: "#F44336",
     alignItems: "center",
   },

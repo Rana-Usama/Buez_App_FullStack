@@ -191,7 +191,10 @@
     "skipForNow": "Jetzt überspringen",
     "info1": "Karte jetzt hinzufügen gewährleistet ununterbrochenen Service nach dem Test",
     "info2": "Deine Karte wird erst nach 14 Tagen belastet",
-    "info3": "Du kannst während der Testphase jederzeit kündigen"
+    "info3": "Du kannst während der Testphase jederzeit kündigen",
+     "importantNote": "Beginne deine Premium-Reise",
+  "automaticSubscription": "Genieße vollen Premium-Zugang 14 Tage kostenlos! Nach deiner Testphase wird dein monatliches Abonnement automatisch fortgesetzt, wenn du eine Karte hinzufügst, damit du nie den Zugang zu deinen Premium-Vorteilen verlierst."
+
   },
   "subscription": {
     "txt1": "Deine 14-tägige kostenlose Testphase ist beendet.",
@@ -306,7 +309,9 @@
     "duration-1": "Geschätzte Dauer auswählen",
     "photo": "Foto hinzufügen",
     "photo-1": "Fotos hochladen",
-    "photo-2": "Optional"
+    "photo-2": "Optional",
+      "date1": "Datum festlegen",
+  "time1": "Zeit festlegen"
   },
   "messages": {
     "txt1": "Nachrichten",
@@ -466,7 +471,8 @@
   "notifications": {
     "txt1": "Lade Benachrichtigungen...",
     "txt2": "Wenn du Benachrichtigungen erhältst, erscheinen sie hier",
-    "txt3": "Bewertung:"
+    "txt3": "Bewertung:",
+      "txt4": "Benachrichtigungen"
   },
   "completed": {
     "txt1": "BEWERTET",

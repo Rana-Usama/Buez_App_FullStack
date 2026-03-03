@@ -93,19 +93,19 @@ export const HomeGradients = {
 ========================================================= */
 export const TopRatedUserGradients = {
   pro: {
-     light: ["#eeeeeeff", "#fdf5dfff"] as const,
+     light: ["#e8e9efff", "#f4f4faff"] as const,
     dark: ["#403f3813", "#2d2d39ff"] as const,
   },
   rising: {
-    light: ["#f1f5f1ff", "#d4e6d4ff"] as const, // Mint to Teal - for rising talent
+   light: ["#101a3dff", "#e4e7f2ff"] as const, // Mint to Teal - for rising talent
     dark: ["#2a282cff", "#231f27ff"] as const,
   },
   beginner: {
-   light: ["#fefefeff", "#b0debfff"] as const, // Light purple to violet - for beginners
+ light: ["#101a3dff", "#e4e7f2ff"] as const, // Light purple to violet - for beginners
     dark: ["#2e3231ff", "#2a332dff"] as const,
   },
   default: {
-   light: ["#F5F5F5", "#EEEEEE"] as const, // Light blue to blue - default
+  light: ["#101a3dff", "#e4e7f2ff"] as const, // Light blue to blue - default
     dark: ["#313445", "#0F1F43"] as const,
   },
 };

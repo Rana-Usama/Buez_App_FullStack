@@ -51,7 +51,7 @@ function Subscription({ navigation, route }) {
     free: { USD: 0, EUR: 0, CHF: 0 },
   };
 
-  const locale = Localization.locale;
+  const locale = Localization?.locale;
   const userCurrency = getCurrencyFromLocale(locale);
 
   const priceLabelForPlan = (planId) => {
@@ -70,9 +70,9 @@ function Subscription({ navigation, route }) {
       userId,
       t,
     });
-    console.log("res...............", res);
+
     if (res.success) {
-      if (newUser) {
+      if (userData?.interests === undefined) {
         navigation.navigate("InterestSelection");
       } else {
         navigation.navigate("TabNavigator");

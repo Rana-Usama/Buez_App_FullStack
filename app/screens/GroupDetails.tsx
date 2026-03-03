@@ -177,7 +177,7 @@ const MemberRow = ({
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? Colors.primary + "25"
+                        ? Colors.primary + "30"
                         : Colors.primary + "15",
                   },
                 ]}
@@ -185,10 +185,20 @@ const MemberRow = ({
                 <MaterialCommunityIcons
                   name="hammer-wrench"
                   size={RFPercentage(1.3)}
-                  color={Colors.primary}
+                  color={
+                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary
+                  }
                 />
                 <Text
-                  style={[styles.workerBadgeText, { color: Colors.primary }]}
+                  style={[
+                    styles.workerBadgeText,
+                    {
+                      color:
+                        theme.mode === "dark"
+                          ? Colors.darkGrey
+                          : Colors.primary,
+                    },
+                  ]}
                 >
                   {t("taskApplicants.helper")}
                 </Text>
@@ -215,7 +225,7 @@ const MemberRow = ({
               {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? Colors.primary + "20"
+                    ? Colors.primary + "30"
                     : Colors.primary + "12",
               },
             ]}
@@ -225,7 +235,7 @@ const MemberRow = ({
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={RFPercentage(2.2)}
-              color={Colors.primary}
+              color={theme.mode === "dark" ? Colors.white : Colors.primary}
             />
           </TouchableOpacity>
         )}
@@ -579,11 +589,17 @@ const GroupDetails = ({ navigation, route }: any) => {
                 <View
                   style={[
                     styles.sectionCount,
-                    { backgroundColor: Colors.primary + "20" },
+                    { backgroundColor: theme.mode === "dark" ? Colors.primary + "40" : Colors.primary + "20" },
                   ]}
                 >
                   <Text
-                    style={[styles.sectionCountText, { color: Colors.primary }]}
+                    style={[
+                      styles.sectionCountText,
+                      {
+                        color:
+                          theme.mode === "dark" ? Colors.white : Colors.primary,
+                      },
+                    ]}
                   >
                     {workers.length}
                   </Text>

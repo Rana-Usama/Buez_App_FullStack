@@ -318,6 +318,8 @@ function OfferDetail({ navigation, route }) {
     }
   }, [postRequest, currentUserId]);
 
+  console.log("applied..........", hasApplied);
+
   // Check if user can apply
   const canApply = () => {
     if (!isWorker) return false; // Not a worker
@@ -393,20 +395,63 @@ function OfferDetail({ navigation, route }) {
   // Real-time acceptance status monitoring
   useEffect(() => {
     if (!postRequest?.id) return;
+
     const taskDocRef = doc(db, "taskRequests", postRequest.id);
+
     const unsubscribe = onSnapshot(taskDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const updatedData = docSnap.data();
-        if (updatedData?.acceptedBy) {
-          setIsAccepted(true);
-        } else {
-          setIsAccepted(false);
-        }
+      if (!docSnap.exists()) return;
+
+      const updatedData = docSnap.data();
+
+      // Acceptance status
+      setIsAccepted(!!updatedData.acceptedBy);
+
+      // Applied & confirmed workers
+      setAppliedWorkers(updatedData.appliedWorkers || []);
+      setConfirmedWorkers(updatedData.confirmedWorkers || []);
+
+      // Update confirmed state for current user
+      if (currentUserId) {
+        const confirmed = (updatedData.confirmedWorkers || []).some(
+          (worker) => worker.userId === currentUserId,
+        );
+        const hasApplied = (updatedData.appliedWorkers || []).some(
+          (worker) => worker.userId === currentUserId,
+        );
+
+        setConfirmed(confirmed);
+        setHasApplied(hasApplied);
       }
+
+      // Reviews & average rating
+      if (updatedData.reviews && updatedData.reviews.length > 0) {
+        const taskOwnerId = updatedData.userId;
+        const reviewsAboutTaskOwner = updatedData.reviews.filter(
+          (review) => review.recipient?.userId === taskOwnerId,
+        );
+        setTranslatedReviews(reviewsAboutTaskOwner);
+
+        const ratings = reviewsAboutTaskOwner
+          .map((r) => r.rating)
+          .filter(Boolean);
+        setAverageRating(
+          ratings.length > 0
+            ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(
+                1,
+              )
+            : null,
+        );
+      } else {
+        setTranslatedReviews([]);
+        setAverageRating(null);
+      }
+
+      // If you want, you can update other postRequest fields here too
+      // e.g., numberOfWorkers, taskType, description, etc.
     });
 
     return () => unsubscribe();
-  }, [postRequest?.id]);
+  }, [postRequest?.id, currentUserId]);
 
   // Modal handlers
   const handleModalClose = () => {
@@ -1977,14 +2022,15 @@ function OfferDetail({ navigation, route }) {
                     </Text>
                   </TouchableOpacity>
                 )}
-
-                <CustomAppButton
-                  title={t("details.txt12")}
-                  onPress={handleAccept}
-                  loading={loading}
-                  icon="checkmark-circle"
-                  disabled={currentUserId === postRequest.userId}
-                />
+                {!isPostOwner && (
+                  <CustomAppButton
+                    title={t("details.txt12")}
+                    onPress={handleAccept}
+                    loading={loading}
+                    icon="checkmark-circle"
+                    disabled={currentUserId === postRequest.userId}
+                  />
+                )}
               </>
             )}
           </View>

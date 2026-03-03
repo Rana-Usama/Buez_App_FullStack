@@ -632,7 +632,7 @@ function SubscriptionV2(props) {
                     {loading ? (
                       <ActivityIndicator size="small" color={theme.white} />
                     ) : (
-                      <Text style={styles.primaryButtonText}>
+                      <Text style={styles.primaryButtonText} numberOfLines={1}>
                         {t("freeTrialModal.addCardNow")}
                       </Text>
                     )}
@@ -656,6 +656,7 @@ function SubscriptionV2(props) {
                           styles.secondaryButtonText,
                           { color: theme.primary },
                         ]}
+                        numberOfLines={1}
                       >
                         {t("freeTrialModal.skipForNow")}
                       </Text>
@@ -937,6 +938,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.primary,
     backgroundColor: "transparent",
+    paddingHorizontal:5
   },
   primaryButtonText: {
     color: Colors.white,

@@ -319,7 +319,9 @@
     "duration-1": "Select estimated duration",
     "photo": "Add Photo",
     "photo-1": "Upload Photos",
-    "photo-2": "Optional"
+    "photo-2": "Optional",
+    "date1": "Set Date",
+    "time1": "Set Time"
   },
   "messages": {
     "txt1": "Messages",
@@ -479,7 +481,8 @@
   "notifications": {
     "txt1": "Loading notifications...",
     "txt2": "When you get notifications, they'll appear here",
-    "txt3": "Rating:"
+    "txt3": "Rating:",
+    "txt4" : "Notifications"
   },
   "completed": {
     "txt1": "REVIEWED",
@@ -782,7 +785,7 @@
     "personalizeExperience": "Personalize Your Experience",
     "whatAreYouInterested": "What are you interested in?",
     "pickYourFavorites": "Pick your favourite services and we'll tailor Buez just for you.",
-    "selectInterestsPrompt": "Select 3 Interests To Continue",
+    "selectInterestsPrompt": "Select Your Top 3 Interests To Continue",
     "selectedInterests": "{{total}} selected ✓",
     "addCustomInterestTitle": "Add Custom Interest",
     "addCustomInterestSubtitle": "Don't see what you need? Add it here.",

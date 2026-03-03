@@ -1123,7 +1123,6 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
             <Text numberOfLines={1} style={groupChatButtonStyles.groupChatBtnText}>
               {t("taskApplicants.group")}
             </Text>
-            {/* <Ionicons name="chatbubbles" size={RFPercentage(2)} color="#FFF" /> */}
           </TouchableOpacity>
         )}
 

@@ -26,7 +26,7 @@ function SuccessScreen({ navigation }) {
         {
           backgroundColor:
             theme.mode === "dark"
-              ? "rgba(255,255,255,0.05)"
+              ? "rgba(25, 26, 41, 0.05)"
               : "rgba(255,255,255,0.2)",
         },
       ]}

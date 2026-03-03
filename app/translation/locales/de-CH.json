@@ -191,7 +191,10 @@
     "skipForNow": "Für jetzt überspringe",
     "info1": "E Charte jetzt hinzfüege garantiert underbrochene Dienst nach em Test",
     "info2": "Dini Charte wird erst nach 14 Täg belaschtet",
-    "info3": "Du chasch während dr Testphase jederziit kündige"
+    "info3": "Du chasch während dr Testphase jederziit kündige",
+     "importantNote": "Starte dini Premium-Reis",
+  "automaticSubscription": "Gnüss volle Premium-Zugang für 14 Täg gratis! Nach dim Trial wird dini monatligi Abonnemänt automatisch witerfüehrt, wänn du e Karte hinzufügsch, so verlürsch nie dini Premium-Vorteil."
+
   },
   "subscription": {
     "txt1": "Dini 14-tägig gratis Testphase isch beendet.",
@@ -306,7 +309,9 @@
     "duration-1": "Gschätzti Dauer usähle",
     "photo": "Foto hinzuefüege",
     "photo-1": "Fotos uflade",
-    "photo-2": "Optional"
+    "photo-2": "Optional",
+      "date1": "Datum setze",
+  "time1": "Zyt setze"
   },
   "messages": {
     "txt1": "Nachrichte",
@@ -466,7 +471,8 @@
   "notifications": {
     "txt1": "Lade Benachrichtigunge...",
     "txt2": "Wenn du Benachrichtigunge überchunsch, werded sie do erscheine",
-    "txt3": "Bewertig:"
+    "txt3": "Bewertig:",
+    "txt4": "Benachrichtigunge"
   },
   "completed": {
     "txt1": "REZENSIERT",

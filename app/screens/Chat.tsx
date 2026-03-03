@@ -533,7 +533,7 @@ const Chat = ({ navigation, route }: any) => {
               left: {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? "rgba(25,25,25,1)"
+                    ? "rgba(13, 13, 20, 1)"
                     : "rgba(239,239,239,1)",
                 padding: RFPercentage(0.6),
                 marginLeft: 0,
@@ -806,18 +806,18 @@ const styles = StyleSheet.create({
     width: "80%",
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2),
-    alignItems: "center",
+    // alignItems: "center",
     paddingVertical: RFPercentage(3),
   },
   modalTitle: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(1),
   },
   modalText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    textAlign: "center",
+    // textAlign: "center",
     marginBottom: RFPercentage(2),
   },
   modalButtons: {
@@ -837,11 +837,11 @@ const styles = StyleSheet.create({
   markButton: {
     borderRadius: RFPercentage(100),
     height: RFPercentage(5.2),
-    borderColor: Colors.primary,
+    borderColor: "#F44336",
     borderWidth: RFPercentage(0.1),
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.primary,
+     backgroundColor: "#F44336",
     width: RFPercentage(15.5),
   },
   wrap: {

@@ -191,7 +191,10 @@
     "skipForNow": "Salta per ora",
     "info1": "Aggiungere una carta ora garantisce il servizio senza interruzioni dopo la prova",
     "info2": "La tua carta non verrà addebitata fino a dopo 14 giorni",
-    "info3": "Puoi annullare in qualsiasi momento durante il periodo di prova"
+    "info3": "Puoi annullare in qualsiasi momento durante il periodo di prova",
+     "importantNote": "Inizia il tuo percorso Premium",
+  "automaticSubscription": "Goditi l’accesso completo al Premium per 14 giorni gratis! Dopo il periodo di prova, il tuo abbonamento mensile continuerà automaticamente se aggiungi una carta, così non perderai mai i tuoi vantaggi Premium."
+
   },
   "subscription": {
     "txt1": "La tua prova gratuita di 14 giorni è terminata.",
@@ -306,7 +309,9 @@
     "duration-1": "Seleziona la durata stimata",
     "photo": "Aggiungi foto",
     "photo-1": "Carica foto",
-    "photo-2": "Facoltativo"
+    "photo-2": "Facoltativo",
+      "date1": "Imposta la data",
+  "time1": "Imposta l'ora"
   },
   "messages": {
     "txt1": "Messaggi",
@@ -466,7 +471,8 @@
   "notifications": {
     "txt1": "Caricamento notifiche...",
     "txt2": "Quando ricevi notifiche, appariranno qui",
-    "txt3": "Valutazione:"
+    "txt3": "Valutazione:",
+     "txt4": "Notifiche"
   },
   "completed": {
     "txt1": "RECENSITO",

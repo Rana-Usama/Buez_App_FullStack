@@ -126,7 +126,7 @@ const InputField: React.FC<InputFieldProps> = ({
             right: RFPercentage(0.5),
             color: color,
             alignSelf: "center",
-            fontFamily: fontFamily || undefined,
+            fontFamily: fontFamily || "Poppins_400Regular",
             fontSize: fontSize,
             width: leftIconName ? "85%" : "90%",
             height: "100%",

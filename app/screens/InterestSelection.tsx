@@ -114,7 +114,11 @@ const AnimatedChip = ({
           {
             backgroundColor:
               theme.mode === "light"
-                ? "rgba(163, 165, 188, 0.47)"
+                ? "rgba(200, 203, 221, 0.47)"
+                : "rgba(65, 66, 79, 0.47)",
+            borderColor:
+              theme.mode === "light"
+                ? "rgba(179, 183, 205, 0.47)"
                 : "rgba(65, 66, 79, 0.47)",
           },
           isSelected && {
@@ -134,7 +138,7 @@ const AnimatedChip = ({
         <View
           style={[
             styles.chipIcon,
-            { backgroundColor: isSelected ? item.color : item.color + "25" },
+            { backgroundColor: isSelected ? item.color : item.color + "40" },
           ]}
         >
           <FontAwesome5
@@ -147,6 +151,12 @@ const AnimatedChip = ({
         <Text
           style={[
             styles.chipText,
+            {
+              color:
+                theme.mode === "light"
+                  ? "rgba(74, 78, 100, 1)"
+                  : "rgba(217, 218, 233, 0.47)",
+            },
             isSelected && {
               color: item.color,
               fontFamily: "Poppins_600SemiBold",
@@ -462,7 +472,15 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 style={[styles.progressFill, { width: progressWidth }]}
               />
             </View>
-            <Text style={[styles.progressText, { color: Colors.primary }]}>
+            <Text
+              style={[
+                styles.progressText,
+                {
+                  color:
+                    theme.mode === "light" ? Colors.primary : Colors.lightGrey,
+                },
+              ]}
+            >
               {totalSelected < MIN_SELECTIONS
                 ? t("interestSelection.selectInterestsPrompt")
                 : t("interestSelection.selectedInterests", {
@@ -492,17 +510,21 @@ export default function InterestSelectionScreen({ navigation }: any) {
             styles.customSection,
             {
               opacity: fadeAnim,
+              backgroundColor:
+                theme.mode === "dark"
+                  ? "rgba(20, 19, 22, 0.52)"
+                  : "rgba(227, 226, 242, 1)",
               borderColor:
                 theme.mode === "dark"
                   ? "rgba(20, 19, 22, 0.52)"
-                  : "rgba(194, 191, 197, 0.52)",
+                  : "rgba(224, 212, 236, 1)",
             },
           ]}
         >
           <View style={styles.customHeader}>
             <View style={styles.customTitleRow}>
               <LinearGradient
-                colors={["#a8a8d1ff", "#bcbae2ff"]}
+                colors={["#19195dff", "#3c36aeff"]}
                 style={styles.customIconBg}
               >
                 <FontAwesome5
@@ -512,7 +534,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                   solid
                 />
               </LinearGradient>
-              <Text style={[styles.customTitle, { color: theme.lightGrey }]}>
+              <Text style={[styles.customTitle, { color:theme.mode === "dark" ? Colors.white : theme.primary }]}>
                 {t("interestSelection.addCustomInterestTitle")}
               </Text>
             </View>
@@ -536,18 +558,11 @@ export default function InterestSelectionScreen({ navigation }: any) {
 
           <View style={styles.inputRow}>
             <View style={styles.inputWrap}>
-              <FontAwesome5
-                name="pencil-alt"
-                size={RFPercentage(1.6)}
-                color="rgba(141, 135, 135, 0.94)"
-                solid
-                style={{ marginLeft: RFPercentage(1.5) }}
-              />
               <TextInput
                 ref={inputRef}
                 style={[styles.textInput, { color: theme.black }]}
                 placeholder={t("interestSelection.customInterestPlaceholder")}
-                placeholderTextColor="rgba(141, 135, 135, 0.94)"
+                placeholderTextColor="rgba(173, 174, 178, 0.94)"
                 value={inputText}
                 onChangeText={setInputText}
                 onSubmitEditing={addCustomInterest}
@@ -654,8 +669,8 @@ export default function InterestSelectionScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingTop: Platform.OS === "ios" ? RFPercentage(8) : RFPercentage(10),
-    paddingBottom: RFPercentage(4),
+    paddingTop: Platform.OS === "ios" ? RFPercentage(8) : RFPercentage(9),
+    paddingBottom: RFPercentage(8),
   },
 
   // Decorative orbs
@@ -736,7 +751,7 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     height: RFPercentage(0.5),
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(81, 73, 73, 0.08)",
     borderRadius: RFPercentage(1),
     overflow: "hidden",
   },
@@ -751,9 +766,10 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   progressText: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
     color: "rgba(255,255,255,0.4)",
+    marginTop: 5,
   },
 
   // Chips
@@ -880,7 +896,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(115, 114, 117, 0.3)",
+    borderColor: "rgba(161, 159, 165, 0.3)",
     borderRadius: RFPercentage(1.5),
     gap: RFPercentage(0.8),
   },
@@ -890,7 +906,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
-    paddingRight: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(1.5),
   },
   addBtn: {
     borderRadius: RFPercentage(1.5),

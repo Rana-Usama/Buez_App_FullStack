@@ -176,7 +176,7 @@ const CustomDrawerContent = (props) => {
             subscriptionId: user.subscriptionId,
             planType: currentPlan || "monthly",
           }),
-        }
+        },
       );
       const result = await res.json();
       if (result.success) {
@@ -274,7 +274,6 @@ const CustomDrawerContent = (props) => {
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
         />
-        
 
         {/* Drawer Header with Glass Effect */}
         <View
@@ -313,8 +312,8 @@ const CustomDrawerContent = (props) => {
             const itemColor = item.isDestructive
               ? Colors.red
               : isActive
-              ? "white"
-              : theme.heading;
+                ? "white"
+                : theme.heading;
 
             return (
               <TouchableOpacity
@@ -422,28 +421,30 @@ const CustomDrawerContent = (props) => {
           </BlurView>
         </View>
       </DrawerContentScrollView>
-
-      <ConfirmationModal
-        isVisible={isLogoutModalVisible}
-        loading={isLoading}
-        onClose={() => setIsLogoutModalVisible(false)}
-        onConfirm={handleLogout}
-        title={t("settings.txt11") || "Logout"}
-        theme={theme}
-        t={t}
-        message={false}
-      />
-
-      <ConfirmationModal
-        isVisible={isDeleteAccountModalVisible}
-        loading={isLoading}
-        onClose={() => setIsDeleteAccountModalVisible(false)}
-        onConfirm={handleDeleteAccount}
-        title={t("settings.txt10") || "Delete Account"}
-        theme={theme}
-        t={t}
-        message={false}
-      />
+      <View>
+        <ConfirmationModal
+          isVisible={isLogoutModalVisible}
+          loading={isLoading}
+          onClose={() => setIsLogoutModalVisible(false)}
+          onConfirm={handleLogout}
+          title={t("settings.txt11") || "Logout"}
+          theme={theme}
+          t={t}
+          message={false}
+        />
+      </View>
+      <View>
+        <ConfirmationModal
+          isVisible={isDeleteAccountModalVisible}
+          loading={isLoading}
+          onClose={() => setIsDeleteAccountModalVisible(false)}
+          onConfirm={handleDeleteAccount}
+          title={t("settings.txt10") || "Delete Account"}
+          theme={theme}
+          t={t}
+          message={false}
+        />
+      </View>
     </>
   );
 };
@@ -522,7 +523,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
     };
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction
+      backAction,
     );
     return () => backHandler.remove();
   }, [screenFocused, navigation]);
@@ -575,8 +576,8 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                       isFocused
                         ? Icons.homeActive
                         : theme.mode === "dark"
-                        ? Icons.dark_tab
-                        : Icons.homeInActive
+                          ? Icons.dark_tab
+                          : Icons.homeInActive
                     }
                     style={styles.middle}
                     resizeMode="contain"

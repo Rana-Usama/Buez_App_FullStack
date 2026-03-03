@@ -62,9 +62,9 @@ function EmailVerificationScreen({ navigation, route }: any) {
         // Check free trial and navigate
         const alreadyUsed = await hasDeviceAvailedFreeTrial(deviceId);
         if (alreadyUsed) {
-          navigation.replace("Subscription", { newUser: true });
+          navigation.navigate("Subscription", { newUser: true });
         } else {
-          navigation.replace("FreeTrial");
+          navigation.navigate("FreeTrial");
         }
       } else {
         if (!silent) {
