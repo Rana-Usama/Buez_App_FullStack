@@ -1,17 +1,17 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useUser } from '../contexts/user.context';
-import { usePostContext } from '../contexts/PostContext';
-import { useTranslation } from 'react-i18next';
-import { useAppTheme } from '../contexts/themeContext';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from '../utils/useLocation';
-import { selectLocation } from '../redux/Actions';
-import { cachedTranslate } from '../utils/cachedTranslations';
-import { getRequestList } from '../services/Post.service';
-import { updateUserLocation } from '../services/User.service';
-import { fetchUsersWithTaskStats } from '../services/Review.service';
-import haversine from 'haversine';
-import { FilterOption, Task, TopRatedUser } from '../types/home.types';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useUser } from "../contexts/user.context";
+import { usePostContext } from "../contexts/PostContext";
+import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "../utils/useLocation";
+import { selectLocation } from "../redux/Actions";
+import { cachedTranslate } from "../utils/cachedTranslations";
+import { getRequestList } from "../services/Post.service";
+import { updateUserLocation } from "../services/User.service";
+import { fetchUsersWithTaskStats } from "../services/Review.service";
+import haversine from "haversine";
+import { FilterOption, Task, TopRatedUser } from "../types/home.types";
 
 export const useHomeScreen = () => {
   const { t } = useTranslation();
@@ -34,12 +34,14 @@ export const useHomeScreen = () => {
 
   const [filterOptions, setFilterOptions] = useState<FilterOption[]>([]);
   const [filterMap, setFilterMap] = useState<Record<string, string>>({});
-  const [activeFilter, setActiveFilter] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeFilter, setActiveFilter] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [topRatedUsers, setTopRatedUsers] = useState<TopRatedUser[]>([]);
-  const [activeIndices, setActiveIndices] = useState<Record<number, number>>({});
-  
+  const [activeIndices, setActiveIndices] = useState<Record<number, number>>(
+    {},
+  );
+
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
   // Update user location in database
@@ -51,28 +53,131 @@ export const useHomeScreen = () => {
         longitude: location.longitude,
       });
     } catch (error) {
-      console.error('Error updating user location:', error);
+      console.error("Error updating user location:", error);
     }
   }, []);
 
-  // Translate task fields
-  const translateTask = useCallback(async (task: Task): Promise<Task> => ({
-    ...task,
-    description: await cachedTranslate(task.description || ''),
-    otherCompensation: await cachedTranslate(task.otherCompensation || ''),
-    taskType: await cachedTranslate(task.taskType || ''),
-  }), []);
+  const translateTask = useCallback(async (task: Task): Promise<Task> => {
+    // Translate each sub-task name
+    const translatedSubTasks = await Promise.all(
+      (task.selectedSubTasks || []).map(async (subTask) => ({
+        ...subTask,
+        name: await cachedTranslate(subTask.name),
+      })),
+    );
+
+    // Translate duration label
+    const translatedDurationLabel = task.durationLabel
+      ? await cachedTranslate(task.durationLabel)
+      : task.durationLabel;
+
+    return {
+      ...task,
+      description: await cachedTranslate(task.description || ""),
+      otherCompensation: await cachedTranslate(task.otherCompensation || ""),
+      taskType: await cachedTranslate(task.taskType || ""),
+      selectedSubTasks: translatedSubTasks,
+      durationLabel: translatedDurationLabel,
+    };
+  }, []);
 
   // Initialize filters
   useEffect(() => {
     const initializeFilters = async () => {
       const originalFilters = [
-        { value: 'All', label: 'All', icon: 'apps', iconType: 'ionicons' as const },
-        { value: 'Cleaning', label: 'Cleaning', icon: 'broom', iconType: 'material-community' as const },
-        { value: 'Moving', label: 'Moving', icon: 'video-library', iconType: 'material' as const },
-        { value: 'Gardening', label: 'Gardening', icon: 'seedling', iconType: 'fontawesome5' as const },
-        { value: 'Gaming', label: 'Gaming', icon: 'game-controller', iconType: 'ionicons' as const },
-        { value: 'Other', label: 'Other', icon: 'category', iconType: 'material' as const },
+        {
+          value: "All",
+          label: "All",
+          icon: "apps",
+          iconType: "ionicons" as const,
+        },
+        {
+          value: "Cleaning",
+          label: "Cleaning",
+          icon: "broom",
+          iconType: "material-community" as const,
+        },
+        {
+          value: "Moving",
+          label: "Moving",
+          icon: "truck",
+          iconType: "fontawesome5" as const,
+        },
+        {
+          value: "Gardening",
+          label: "Gardening",
+          icon: "seedling",
+          iconType: "fontawesome5" as const,
+        },
+        {
+          value: "Gaming",
+          label: "Gaming",
+          icon: "game-controller",
+          iconType: "ionicons" as const,
+        },
+
+        {
+          value: "Plumbing",
+          label: "Plumbing",
+          icon: "wrench",
+          iconType: "fontawesome5" as const,
+        },
+        {
+          value: "Electrical",
+          label: "Electrical",
+          icon: "bolt",
+          iconType: "fontawesome5" as const,
+        },
+        {
+          value: "Carpentry",
+          label: "Carpentry",
+          icon: "hammer",
+          iconType: "fontawesome5" as const,
+        },
+        {
+          value: "Painting",
+          label: "Painting",
+          icon: "paint-brush",
+          iconType: "fontawesome5" as const,
+        },
+        {
+          value: "Delivery",
+          label: "Delivery",
+          icon: "shipping-fast",
+          iconType: "fontawesome5" as const,
+        },
+
+        {
+          value: "Tutoring",
+          label: "Tutoring",
+          icon: "chalkboard-teacher",
+          iconType: "fontawesome5" as const,
+        },
+
+        {
+          value: "Event Setup",
+          label: "Event Setup",
+          icon: "calendar-alt",
+          iconType: "fontawesome5" as const,
+        },
+        {
+          value: "Photography",
+          label: "Photography",
+          icon: "camera",
+          iconType: "fontawesome5" as const,
+        },
+        {
+          value: "Pet Care",
+          label: "Pet Care",
+          icon: "paw",
+          iconType: "ionicons" as const,
+        },
+        {
+          value: "Other",
+          label: "Other",
+          icon: "category",
+          iconType: "material" as const,
+        },
       ];
 
       // Translate labels
@@ -80,7 +185,7 @@ export const useHomeScreen = () => {
         originalFilters.map(async (filter) => ({
           ...filter,
           label: await cachedTranslate(filter.label),
-        }))
+        })),
       );
 
       // Create filter map
@@ -102,16 +207,17 @@ export const useHomeScreen = () => {
     if (!currentLocation) return;
 
     let mounted = true;
-    
+
     const loadTasks = async () => {
       setLoading(true);
-      
-      const referenceLocation = selectedLocation?.latitude2 && selectedLocation?.longitude2
-        ? {
-            latitude: selectedLocation.latitude2,
-            longitude: selectedLocation.longitude2,
-          }
-        : currentLocation;
+
+      const referenceLocation =
+        selectedLocation?.latitude2 && selectedLocation?.longitude2
+          ? {
+              latitude: selectedLocation.latitude2,
+              longitude: selectedLocation.longitude2,
+            }
+          : currentLocation;
 
       // Clean up previous listener
       if (unsubscribeRef.current) {
@@ -119,7 +225,7 @@ export const useHomeScreen = () => {
       }
 
       const unsubscribe = getRequestList(
-        filterMap[activeFilter] || '',
+        filterMap[activeFilter] || "",
         searchQuery,
         null,
         async ({ tasksArray, lastVisible }) => {
@@ -128,25 +234,31 @@ export const useHomeScreen = () => {
           // Filter by distance (100km radius)
           const filteredTasks = tasksArray.filter((task: Task) => {
             const taskLocation = task.address;
-            if (!taskLocation?.latitude || !taskLocation?.longitude) return false;
-            
-            return haversine(
-              referenceLocation,
-              { latitude: taskLocation.latitude, longitude: taskLocation.longitude },
-              { unit: 'km' }
-            ) <= 100;
+            if (!taskLocation?.latitude || !taskLocation?.longitude)
+              return false;
+
+            return (
+              haversine(
+                referenceLocation,
+                {
+                  latitude: taskLocation.latitude,
+                  longitude: taskLocation.longitude,
+                },
+                { unit: "km" },
+              ) <= 100
+            );
           });
 
           // Translate task fields
           const translatedTasks = await Promise.all(
-            filteredTasks.map(translateTask)
+            filteredTasks.map(translateTask),
           );
 
           // Update state only if tasks changed
           setAllTasks((prevTasks) => {
-            const prevIds = prevTasks.map(t => t.id).join(',');
-            const newIds = translatedTasks.map(t => t.id).join(',');
-            
+            const prevIds = prevTasks.map((t) => t.id).join(",");
+            const newIds = translatedTasks.map((t) => t.id).join(",");
+
             if (prevIds !== newIds) {
               setTaskRecords(translatedTasks);
               setLastVisiblePost(lastVisible);
@@ -159,9 +271,9 @@ export const useHomeScreen = () => {
           setLoading(false);
         },
         (error) => {
-          console.error('GET_POSTS_LIST Error:', error);
+          console.error("GET_POSTS_LIST Error:", error);
           setLoading(false);
-        }
+        },
       );
 
       unsubscribeRef.current = unsubscribe;
@@ -184,7 +296,7 @@ export const useHomeScreen = () => {
         const users = await fetchUsersWithTaskStats();
         setTopRatedUsers(users);
       } catch (error) {
-        console.error('Error loading top rated users:', error);
+        console.error("Error loading top rated users:", error);
       }
     };
 
@@ -194,7 +306,7 @@ export const useHomeScreen = () => {
   // Update active indices for image carousels
   useEffect(() => {
     if (allTasks.length === Object.keys(activeIndices).length) return;
-    
+
     const indices: Record<number, number> = {};
     allTasks.forEach((_, index) => {
       indices[index] = 0;
@@ -205,8 +317,10 @@ export const useHomeScreen = () => {
   // Filter tasks for display
   const displayTasks = allTasks.filter((task) => {
     // Category filter
-    if (filterMap[activeFilter] !== 'All') {
-      if (task.taskType?.toLowerCase() !== filterMap[activeFilter]?.toLowerCase()) {
+    if (filterMap[activeFilter] !== "All") {
+      if (
+        task.taskType?.toLowerCase() !== filterMap[activeFilter]?.toLowerCase()
+      ) {
         return false;
       }
     }
@@ -214,14 +328,26 @@ export const useHomeScreen = () => {
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      const matchesDescription = (task.description || '').toLowerCase().includes(query);
-      const matchesUserName = (task.user?.userName || '').toLowerCase().includes(query);
-      const matchesTaskType = (task.taskType || '').toLowerCase().includes(query);
-      const matchesCustomTitle = task.taskType?.toLowerCase() === 'other' 
-        ? (task.customTaskTitle || '').toLowerCase().includes(query)
-        : false;
+      const matchesDescription = (task.description || "")
+        .toLowerCase()
+        .includes(query);
+      const matchesUserName = (task.user?.userName || "")
+        .toLowerCase()
+        .includes(query);
+      const matchesTaskType = (task.taskType || "")
+        .toLowerCase()
+        .includes(query);
+      const matchesCustomTitle =
+        task.taskType?.toLowerCase() === "other"
+          ? (task.customTaskTitle || "").toLowerCase().includes(query)
+          : false;
 
-      return matchesDescription || matchesUserName || matchesTaskType || matchesCustomTitle;
+      return (
+        matchesDescription ||
+        matchesUserName ||
+        matchesTaskType ||
+        matchesCustomTitle
+      );
     }
 
     return true;
@@ -259,7 +385,7 @@ export const useHomeScreen = () => {
     displayTasks,
     activeIndices,
     setActiveIndices,
-    loading, 
+    loading,
     handleRefresh,
     handleClearLocation,
     updateUserLocationInDB,

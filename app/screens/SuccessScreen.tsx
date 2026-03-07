@@ -31,7 +31,7 @@ function SuccessScreen({ navigation }) {
         {
           backgroundColor:
             theme.mode === "dark"
-              ? "rgba(255,255,255,0.05)"
+              ? "rgba(25, 26, 41, 0.05)"
               : "rgba(255,255,255,0.2)",
         },
       ]}
@@ -135,7 +135,7 @@ function SuccessScreen({ navigation }) {
               { color: theme.mode === "dark" ? Colors.primary : Colors.white },
             ]}
           >
-            {t("successScreen.shareTitle") || "Share Your Task"}
+            {t("successScreen.shareTitle")}
           </Text>
 
           <Text
@@ -149,8 +149,7 @@ function SuccessScreen({ navigation }) {
               },
             ]}
           >
-            {t("successScreen.shareDescription") ||
-              "Share this opportunity with friends and family to find helpers faster!"}
+            {t("successScreen.shareDescription")}
           </Text>
 
           <ShareButton

@@ -37,20 +37,22 @@ function ForgotPassword(props: any) {
   const [email2, setEmail2] = useState("");
 
   const handleNext = async (values: any) => {
-    setEmail2(values.email);
+     const email = values.email.trim().toLowerCase();
+
+    setEmail2(email);
     setLoader(true);
     setErrorMessage("");
     try {
       const q = query(
         collection(FIREBASE_DB, "users"),
-        where("email", "==", values.email)
+        where("email", "==", email)
       );
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) {
         setErrorMessage(t("forgetPassword.txt6"));
         return;
       }
-      await sendPasswordResetEmail(FIREBASE_AUTH, values.email);
+      await sendPasswordResetEmail(FIREBASE_AUTH, email);
       setModalVisible(true);
     } catch (error: any) {
       console.log("Error:", error.message);
@@ -108,7 +110,7 @@ function ForgotPassword(props: any) {
             {/* Reset Button */}
             <MyAppButton
               title={`${t("forgetPassword.txt2")}`}
-              marginTop={RFPercentage(8)}
+              marginTop={RFPercentage(6)}
               onPress={() => handleSubmit()}
               loading={loader}
               disabled={loader}
@@ -178,7 +180,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "88%",
-    marginTop: 50,
+    marginTop: 30,
   },
   errorContainer: { width: "100%", marginTop: RFPercentage(0.5) },
   errorText: {

@@ -17,7 +17,12 @@ import {
   Animated,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { MaterialIcons, Feather, FontAwesome5 } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  Feather,
+  FontAwesome5,
+  Ionicons,
+} from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as Notifications from "expo-notifications";
@@ -51,7 +56,26 @@ import {
 import { useLocation } from "../utils/useLocation";
 import CustomNav from "../components/common/CustomNav";
 
+import DateTimePicker from "@react-native-community/datetimepicker";
+
 const { width } = Dimensions.get("window");
+
+const TASK_IMAGE_KEYS: Record<string, string> = {
+  "Pet Care": "Pet",
+  "Event Setup": "Event",
+  Cleaning: "Cleaning",
+  Moving: "Moving",
+  Gardening: "Gardening",
+  Gaming: "Gaming",
+  Plumbing: "Plumbing",
+  Electrical: "Electrical",
+  Carpentry: "Carpentry",
+  Painting: "Painting",
+  Delivery: "Delivery",
+  Tutoring: "Tutoring",
+  Photography: "Photography",
+  Other: "Other",
+};
 
 function PostRequest({ navigation, route }) {
   const { t } = useTranslation();
@@ -76,6 +100,216 @@ function PostRequest({ navigation, route }) {
   const inputRef = useRef(null);
   const [customTaskTitle, setCustomTaskTitle] = useState("");
 
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [estimatedDuration, setEstimatedDuration] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [datePickerMode, setDatePickerMode] = useState("date");
+  const [formattedDate, setFormattedDate] = useState("");
+  const [formattedTime, setFormattedTime] = useState("");
+
+  // New state for sub-tasks
+  const [selectedSubTasks, setSelectedSubTasks] = useState([]);
+  const [showSubTaskDropdown, setShowSubTaskDropdown] = useState(false);
+  const [customSubTask, setCustomSubTask] = useState("");
+
+  const [translatedTaskOptions, setTranslatedTaskOptions] = useState([]);
+  const [translatedCompensationOptions, setTranslatedCompensationOptions] =
+    useState([]);
+  const [originalTaskType, setOriginalTaskType] = useState("");
+  const [originalCompensationType, setOriginalCompensationType] = useState("");
+
+  const [showDurationDropdown, setShowDurationDropdown] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState("");
+  const [translatedSubTasks, setTranslatedSubTasks] = useState([]);
+  const [translatedDurationOptions, setTranslatedDurationOptions] = useState(
+    [],
+  );
+  const [tempTime, setTempTime] = useState<Date>(new Date());
+  const [tempDate, setTempDate] = useState<Date>(new Date());
+  const durationOptions = [
+    { label: "Less than 1 hour", value: "less_than_1" },
+    { label: "1-2 hours", value: "1_2_hours" },
+    { label: "2-4 hours", value: "2_4_hours" },
+    { label: "4-6 hours", value: "4_6_hours" },
+    { label: "6-8 hours", value: "6_8_hours" },
+    { label: "Full day (8+ hours)", value: "full_day" },
+    { label: "Multiple days", value: "multiple_days" },
+  ];
+
+  // Expanded task options with icons
+  const taskOptions = [
+    { id: 1, name: "Cleaning", icon: "broom" },
+    { id: 2, name: "Moving", icon: "truck" },
+    { id: 3, name: "Gardening", icon: "seedling" },
+    { id: 4, name: "Gaming", icon: "gamepad" },
+    { id: 5, name: "Plumbing", icon: "wrench" },
+    { id: 6, name: "Electrical", icon: "bolt" },
+    { id: 7, name: "Carpentry", icon: "hammer" },
+    { id: 8, name: "Painting", icon: "paint-brush" },
+    { id: 9, name: "Delivery", icon: "shipping-fast" },
+    { id: 10, name: "Tutoring", icon: "chalkboard-teacher" },
+    { id: 11, name: "Event Setup", icon: "calendar-alt" },
+    { id: 12, name: "Photography", icon: "camera" },
+    { id: 13, name: "Pet Care", icon: "paw" },
+    { id: 14, name: "Other", icon: "ellipsis-h" },
+  ];
+
+  // Sub-tasks by task type
+  const subTaskOptions = {
+    Cleaning: [
+      { id: "clean_1", name: "Deep Clean", icon: "broom" },
+      { id: "clean_2", name: "Dusting", icon: "feather" },
+      { id: "clean_3", name: "Vacuuming", icon: "wind" },
+      { id: "clean_4", name: "Mopping", icon: "bitbucket" },
+      { id: "clean_5", name: "Window Cleaning", icon: "window-maximize" },
+      { id: "clean_6", name: "Carpet Cleaning", icon: "square" },
+      { id: "clean_7", name: "Bathroom Cleaning", icon: "toilet" },
+      { id: "clean_8", name: "Kitchen Cleaning", icon: "glass-cheers" },
+    ],
+    Moving: [
+      { id: "move_1", name: "Packing", icon: "box" },
+      { id: "move_2", name: "Loading", icon: "truck-loading" },
+      { id: "move_3", name: "Unloading", icon: "truck" },
+      { id: "move_4", name: "Furniture Assembly", icon: "tools" },
+      { id: "move_5", name: "Furniture Disassembly", icon: "hammer" },
+      { id: "move_6", name: "Heavy Lifting", icon: "dumbbell" },
+      { id: "move_7", name: "Transport", icon: "shipping-fast" },
+      { id: "move_8", name: "Piano Moving", icon: "music" },
+    ],
+    Gardening: [
+      { id: "garden_1", name: "Planting", icon: "seedling" },
+      { id: "garden_2", name: "Weeding", icon: "leaf" },
+      { id: "garden_3", name: "Lawn Mowing", icon: "cut" },
+      { id: "garden_4", name: "Trimming", icon: "cut" },
+      { id: "garden_5", name: "Pruning", icon: "cut" },
+      { id: "garden_6", name: "Hedge Trimming", icon: "cut" },
+      { id: "garden_7", name: "Leaf Blowing", icon: "wind" },
+      { id: "garden_8", name: "Tree Planting", icon: "tree" },
+      { id: "garden_9", name: "Mulching", icon: "info-circle" },
+      { id: "garden_10", name: "Fertilizing", icon: "flask" },
+    ],
+    Gaming: [
+      { id: "game_1", name: "Game Testing", icon: "gamepad" },
+      { id: "game_2", name: "Streaming Setup", icon: "video" },
+      { id: "game_3", name: "Tournament", icon: "trophy" },
+      { id: "game_4", name: "LAN Party Setup", icon: "network-wired" },
+    ],
+    Plumbing: [
+      { id: "plumb_1", name: "Leak Repair", icon: "water" },
+      { id: "plumb_2", name: "Pipe Installation", icon: "water" },
+      { id: "plumb_3", name: "Drain Cleaning", icon: "bath" },
+      { id: "plumb_4", name: "Fixture Installation", icon: "faucet" },
+      { id: "plumb_5", name: "Water Heater", icon: "water" },
+      { id: "plumb_6", name: "Toilet Repair", icon: "toilet" },
+    ],
+    Electrical: [
+      { id: "elec_1", name: "Light Installation", icon: "lightbulb" },
+      { id: "elec_2", name: "Outlet Repair", icon: "plug" },
+      { id: "elec_3", name: "Ceiling Fan", icon: "fan" },
+      { id: "elec_4", name: "Switch Replacement", icon: "toggle-on" },
+      { id: "elec_5", name: "Circuit Breaker", icon: "bolt" },
+    ],
+    Carpentry: [
+      { id: "carp_1", name: "Furniture Repair", icon: "chair" },
+      { id: "carp_2", name: "Cabinet Installation", icon: "house-user" },
+      { id: "carp_3", name: "Shelving", icon: "book" },
+      { id: "carp_4", name: "Deck Repair", icon: "home" },
+    ],
+    Painting: [
+      { id: "paint_1", name: "Wall Painting", icon: "paint-roller" },
+      { id: "paint_2", name: "Ceiling Painting", icon: "arrow-up" },
+      { id: "paint_3", name: "Trim Painting", icon: "grip-lines-vertical" },
+      { id: "paint_4", name: "Cabinet Painting", icon: "house-user" },
+      { id: "paint_5", name: "Touch-ups", icon: "brush" },
+    ],
+    Delivery: [
+      { id: "del_1", name: "Package Delivery", icon: "box" },
+      { id: "del_2", name: "Food Delivery", icon: "pizza-slice" },
+      { id: "del_3", name: "Grocery Delivery", icon: "shopping-bag" },
+      { id: "del_4", name: "Furniture Delivery", icon: "couch" },
+    ],
+    Tutoring: [
+      { id: "tutor_1", name: "Math", icon: "calculator" },
+      { id: "tutor_2", name: "Science", icon: "flask" },
+      { id: "tutor_3", name: "English", icon: "book" },
+      { id: "tutor_4", name: "Languages", icon: "language" },
+      { id: "tutor_5", name: "Test Prep", icon: "graduation-cap" },
+    ],
+    "Event Setup": [
+      { id: "event_1", name: "Table Setup", icon: "table" },
+      { id: "event_2", name: "Chair Setup", icon: "chair" },
+      { id: "event_3", name: "Decoration", icon: "star-of-david" },
+      { id: "event_4", name: "Lighting", icon: "lightbulb" },
+      { id: "event_5", name: "Sound System", icon: "volume-up" },
+      { id: "event_6", name: "Cleanup", icon: "broom" },
+    ],
+    Photography: [
+      { id: "photo_1", name: "Event Photography", icon: "camera" },
+      { id: "photo_2", name: "Portrait", icon: "portrait" },
+      { id: "photo_3", name: "Product", icon: "box" },
+      { id: "photo_4", name: "Editing", icon: "pen" },
+    ],
+    "Pet Care": [
+      { id: "pet_1", name: "Dog Walking", icon: "dog" },
+      { id: "pet_2", name: "Pet Sitting", icon: "cat" },
+      { id: "pet_3", name: "Grooming", icon: "cut" },
+      { id: "pet_4", name: "Feeding", icon: "utensil-spoon" },
+    ],
+
+    Other: [],
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const translateSubTasks = async () => {
+      if (!originalTaskType || originalTaskType === "Other") {
+        setTranslatedSubTasks([]);
+        return;
+      }
+      const subs = subTaskOptions?.[originalTaskType] || [];
+      const translated = await Promise.all(
+        subs.map(async (st) => ({
+          ...st,
+          originalName: st.name, // keep original
+          name: await cachedTranslate(st.name), // translated for UI
+        })),
+      );
+
+      if (isMounted) setTranslatedSubTasks(translated);
+    };
+    translateSubTasks();
+    return () => {
+      isMounted = false;
+    };
+  }, [originalTaskType]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const translateDurations = async () => {
+      const translated = await Promise.all(
+        durationOptions.map(async (d) => ({
+          ...d,
+          originalLabel: d.label, // keep original
+          label: await cachedTranslate(d.label), // translated for UI
+        })),
+      );
+
+      if (isMounted) setTranslatedDurationOptions(translated);
+    };
+    translateDurations();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const compensationOptions = [
+    { id: 1, type: "Monitarely", icon: "money-bill-wave" },
+    { id: 2, type: "Other", icon: "exchange-alt" },
+  ];
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -85,19 +319,6 @@ function PostRequest({ navigation, route }) {
   const currentPostRequest = route.params?.postRequest;
   const [numberOfWorkers, setNumberOfWorkers] = useState(1);
   const MAX_WORKERS = 10;
-
-  const taskOptions = [
-    { id: 1, name: "Cleaning", icon: "broom" },
-    { id: 2, name: "Moving", icon: "dot-circle" },
-    { id: 3, name: "Gardening", icon: "seedling" },
-    { id: 4, name: "Gaming", icon: "gamepad" },
-    { id: 5, name: "Other", icon: "ellipsis-h" },
-  ];
-
-  const compensationOptions = [
-    { id: 1, type: "Monitarely", icon: "money-bill-wave" },
-    { id: 2, type: "Other", icon: "exchange-alt" },
-  ];
 
   useEffect(() => {
     Animated.parallel([
@@ -114,11 +335,33 @@ function PostRequest({ navigation, route }) {
     ]).start();
   }, []);
 
-  const [translatedTaskOptions, setTranslatedTaskOptions] = useState([]);
-  const [translatedCompensationOptions, setTranslatedCompensationOptions] =
-    useState([]);
-  const [originalTaskType, setOriginalTaskType] = useState("");
-  const [originalCompensationType, setOriginalCompensationType] = useState("");
+  useEffect(() => {
+    if (selectedDate) {
+      const dateStr = selectedDate.toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+      setFormattedDate(dateStr);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (selectedTime) {
+      const timeStr = selectedTime.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      setFormattedTime(timeStr);
+    }
+  }, [selectedTime]);
+
+  // Clear sub-tasks when task type changes
+  useEffect(() => {
+    setSelectedSubTasks([]);
+    setCustomSubTask("");
+  }, [originalTaskType]);
 
   const getLocationForCurrency = () => {
     return selectedLocation?.name ? selectedLocation : currentLocation;
@@ -208,6 +451,30 @@ function PostRequest({ navigation, route }) {
           if (currentPostRequest.taskType === "Other") {
             setCustomTaskTitle(currentPostRequest.customTaskTitle || "");
           }
+
+          // Load sub-tasks if they exist
+          if (currentPostRequest.selectedSubTasks) {
+            const hydrated = await Promise.all(
+              currentPostRequest.selectedSubTasks.map(async (st) => ({
+                ...st,
+                originalName: st.originalName || st.name,
+                translatedName: st.isCustom
+                  ? st.name
+                  : await cachedTranslate(st.name),
+              })),
+            );
+            setSelectedSubTasks(hydrated);
+          }
+
+          if (currentPostRequest.selectedDate) {
+            setSelectedDate(new Date(currentPostRequest.selectedDate));
+          }
+          if (currentPostRequest.selectedTime) {
+            setSelectedTime(new Date(currentPostRequest.selectedTime));
+          }
+          if (currentPostRequest.estimatedDuration) {
+            setSelectedDuration(currentPostRequest.estimatedDuration);
+          }
           const temp = [...imageUris];
           currentPostRequest.imageUrls.forEach((imgUrl, i) => {
             temp[i] = imgUrl;
@@ -225,9 +492,23 @@ function PostRequest({ navigation, route }) {
     if (dropdownType === "task") {
       setShowTaskDropdown(!showTaskDropdown);
       if (showCompensationDropdown) setShowCompensationDropdown(false);
-    } else {
+      setShowDurationDropdown(false);
+      setShowSubTaskDropdown(false);
+    } else if (dropdownType === "compensation") {
       setShowCompensationDropdown(!showCompensationDropdown);
       if (showTaskDropdown) setShowTaskDropdown(false);
+      setShowDurationDropdown(false);
+      setShowSubTaskDropdown(false);
+    } else if (dropdownType === "duration") {
+      setShowDurationDropdown(!showDurationDropdown);
+      if (showTaskDropdown) setShowTaskDropdown(false);
+      if (showCompensationDropdown) setShowCompensationDropdown(false);
+      setShowSubTaskDropdown(false);
+    } else if (dropdownType === "subtask") {
+      setShowSubTaskDropdown(!showSubTaskDropdown);
+      if (showTaskDropdown) setShowTaskDropdown(false);
+      if (showCompensationDropdown) setShowCompensationDropdown(false);
+      if (showDurationDropdown) setShowDurationDropdown(false);
     }
   };
 
@@ -241,11 +522,58 @@ function PostRequest({ navigation, route }) {
     setShowTaskDropdown(false);
   };
 
+  const toggleSubTask = (subTask) => {
+    setSelectedSubTasks((prev) => {
+      const exists = prev.find((st) => st.id === subTask.id);
+      if (exists) {
+        return prev.filter((st) => st.id !== subTask.id);
+      } else {
+        return [...prev, subTask];
+      }
+    });
+  };
+
+  const addCustomSubTask = () => {
+    if (customSubTask.trim()) {
+      const newSubTask = {
+        id: `custom_${Date.now()}`,
+        name: customSubTask.trim(),
+        icon: "tag",
+        isCustom: true,
+      };
+      setSelectedSubTasks((prev) => [...prev, newSubTask]);
+      setCustomSubTask("");
+    }
+  };
+
+  const removeSubTask = (subTaskId) => {
+    setSelectedSubTasks((prev) => prev.filter((st) => st.id !== subTaskId));
+  };
+
   const selectCompensation = (type) => {
     setSelectedCompensation(type.type);
     const original = compensationOptions.find((c) => c.id === type.id)?.type;
     setOriginalCompensationType(original);
     setShowCompensationDropdown(false);
+  };
+
+  const selectDuration = (duration) => {
+    setSelectedDuration(duration.value);
+    setShowDurationDropdown(false);
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    setShowDatePicker(Platform.OS === "ios");
+    if (selectedDate) {
+      setSelectedDate(selectedDate);
+    }
+  };
+
+  const onTimeChange = (event, selectedTime) => {
+    setShowTimePicker(Platform.OS === "ios");
+    if (selectedTime) {
+      setSelectedTime(selectedTime);
+    }
   };
 
   const pickImage = async (index) => {
@@ -313,16 +641,66 @@ function PostRequest({ navigation, route }) {
       "https://images.unsplash.com/photo-1584304474795-74fb0b42e66a?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
     Moving: [
-      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1514899706957-d22ee867a77b?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1615986201152-7686a4867f30?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1600660792241-240f01455c6f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1485095329183-d0797cdc5676?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1643208589889-0735ad7218f0?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "https://images.unsplash.com/photo-1608170825938-a8ea0305d46c?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1600518464441-9154a4dea21b?q=80&w=3775&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1614359835514-92f8ba196357?q=80&w=3544&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1714647211902-bb711d643a17?q=80&w=3732&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1580709839515-54b8991e2813?q=80&w=3829&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Plumbing: [
+      "https://plus.unsplash.com/premium_photo-1661884973994-d7625e52631a?q=80&w=3571&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1663045495725-89f23b57cfc5?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1674726253061-baba094ad8c7?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1676210134188-4c05dd172f89?q=80&w=3774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Electrical: [
+      "https://plus.unsplash.com/premium_photo-1661960643553-ccfbf7d921f6?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1682148175448-8e418fcfbaa7?q=80&w=3544&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1770121696405-cd23f3c0cf22?q=80&w=2560&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1621905251918-48416bd8575a?q=80&w=3569&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Carpentry: [
+      "https://plus.unsplash.com/premium_photo-1683140664559-f6b9372a7a0a?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1723867252384-9e4809c2fdd5?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1605125626499-e2c7efbd1ab3?q=80&w=3732&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1645651964715-d200ce0939cc?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+
+    Painting: [
+      "https://plus.unsplash.com/premium_photo-1664013263421-91e3a8101259?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1579783928621-7a13d66a62d1?q=80&w=3690&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1678812165213-12dc8d1f3e19?q=80&w=3584&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=3449&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Delivery: [
+      "https://plus.unsplash.com/premium_photo-1682146662576-900a71864a11?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1661342486992-2a08d4b466ef?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1548695607-9c73430ba065?q=80&w=3725&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1695654390723-479197a8c4a3?q=80&w=3608&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Tutoring: [
+      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1620919235663-61eb4a25bb51?q=80&w=2768&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1562564055-71e051d33c19?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Event: [
+      "https://plus.unsplash.com/premium_photo-1722168614154-60badae538c1?q=80&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1711061959382-0de7a4bddccf?q=80&w=3732&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1681841713733-7b5d6cb95137?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1759306221569-028a35bc8c66?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Photography: [
+      "https://plus.unsplash.com/premium_photo-1674389991678-0836ca77c7f7?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1682097066897-209d0d9e9ae5?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1471341971476-ae15ff5dd4ea?q=80&w=3732&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1554048612-b6a482bc67e5?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    ],
+    Pet: [
+      "https://plus.unsplash.com/premium_photo-1663040477032-0cb4ee5402bc?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1625321150203-cea4bee44b54?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1663047910718-c8758a6785e9?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://plus.unsplash.com/premium_photo-1663011219208-418276022b35?q=80&w=3570&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ],
     Other: [
       "https://images.unsplash.com/photo-1461595520627-42e3c83019bc?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -336,12 +714,11 @@ function PostRequest({ navigation, route }) {
     ],
   };
 
-  function getRandomImage(taskType) {
+  function getRandomImage(taskType: string) {
     const defaultType = t("postRequest.txt6");
-    const images = DEFAULT_IMAGES?.[taskType] || DEFAULT_IMAGES?.[defaultType];
-    if (!Array.isArray(images) || images.length === 0) {
-      return null;
-    }
+    const key = TASK_IMAGE_KEYS[taskType] || TASK_IMAGE_KEYS[defaultType];
+    const images = DEFAULT_IMAGES?.[key];
+    if (!Array.isArray(images) || images.length === 0) return null;
     const randomIndex = Math.floor(Math.random() * images.length);
     return images[randomIndex];
   }
@@ -370,12 +747,15 @@ function PostRequest({ navigation, route }) {
       !description ||
       !location ||
       (!compensation && !budget) ||
-      (originalTaskType === "Other" && !customTaskTitle)
+      (originalTaskType === "Other" && !customTaskTitle) ||
+      !selectedDate ||
+      !selectedTime ||
+      !selectedDuration
     ) {
       Toast.show({
         type: "info",
         text1: `Error`,
-        text2: `Fill all fields`,
+        text2: `Please fill all fields including date, time, and estimated duration`,
       });
       return;
     }
@@ -391,6 +771,15 @@ function PostRequest({ navigation, route }) {
     try {
       showIndicator(true);
       const keywords = description.toLowerCase().split(" ");
+
+      const scheduledDateTime = new Date(selectedDate);
+      scheduledDateTime.setHours(
+        selectedTime.getHours(),
+        selectedTime.getMinutes(),
+        0,
+        0,
+      );
+
       const data = {
         taskType: originalTaskType,
         compensationType: originalCompensationType,
@@ -414,10 +803,25 @@ function PostRequest({ navigation, route }) {
           locale: currencyInfo.locale,
         },
         numberOfWorkers: numberOfWorkers,
-        slotsAvailable: numberOfWorkers, // Track remaining slots
-        confirmedWorkers: [], // Array to store confirmed workers
-        appliedWorkers: [], // Array to store applicants
+        slotsAvailable: numberOfWorkers,
+        confirmedWorkers: [],
+        appliedWorkers: [],
         isBulkRequest: numberOfWorkers > 1,
+
+        // New fields for sub-tasks
+        selectedSubTasks: selectedSubTasks.map((st) => ({
+          id: st.id,
+          name: st.name,
+          isCustom: st.isCustom || false,
+        })),
+
+        scheduledDate: selectedDate.toISOString(),
+        scheduledTime: selectedTime.toISOString(),
+        scheduledDateTime: scheduledDateTime.toISOString(),
+        estimatedDuration: selectedDuration,
+        durationLabel:
+          durationOptions.find((d) => d.value === selectedDuration)?.label ||
+          "",
       };
       const imgs = imageUris?.filter((img) => Boolean(img));
       if (imgs?.length === 0) {
@@ -479,6 +883,11 @@ function PostRequest({ navigation, route }) {
     }
   };
 
+  // Get current sub-tasks based on selected task
+  const currentSubTasks = originalTaskType
+    ? subTaskOptions[originalTaskType] || []
+    : [];
+
   return (
     <>
       <StatusBar
@@ -502,9 +911,11 @@ function PostRequest({ navigation, route }) {
       )}
       <TouchableWithoutFeedback
         onPress={() => {
-          (Keyboard.dismiss(),
-            setShowTaskDropdown(false),
-            setShowCompensationDropdown(false));
+          Keyboard.dismiss();
+          setShowTaskDropdown(false);
+          setShowCompensationDropdown(false);
+          setShowDurationDropdown(false);
+          setShowSubTaskDropdown(false);
         }}
       >
         <ScrollView
@@ -512,6 +923,7 @@ function PostRequest({ navigation, route }) {
           contentContainerStyle={styles.scrollViewContent}
           keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false}
+          nestedScrollEnabled
         >
           <Animated.View
             style={[
@@ -601,35 +1013,41 @@ function PostRequest({ navigation, route }) {
                       backgroundColor: theme.white,
                       borderColor: theme.border,
                       shadowColor: theme.black,
+                      maxHeight: RFPercentage(38),
                     },
                   ]}
                 >
-                  {translatedTaskOptions.map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      onPress={() => selectTask(item)}
-                      style={[
-                        styles.optionItem,
-                        selectedTask === item.name && {
-                          backgroundColor: `${theme.primary}10`,
-                        },
-                      ]}
-                    >
-                      <FontAwesome5
-                        name={
-                          taskOptions.find((t) => t.id === item.id)?.icon ||
-                          "circle"
-                        }
-                        size={RFPercentage(1.8)}
-                        color={theme.lightGrey}
-                      />
-                      <Text
-                        style={[styles.optionText, { color: theme.darkGrey }]}
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    nestedScrollEnabled
+                  >
+                    {translatedTaskOptions.map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        onPress={() => selectTask(item)}
+                        style={[
+                          styles.optionItem,
+                          selectedTask === item.name && {
+                            backgroundColor: `${theme.primary}10`,
+                          },
+                        ]}
                       >
-                        {item.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <FontAwesome5
+                          name={
+                            taskOptions.find((t) => t.id === item.id)?.icon ||
+                            "circle"
+                          }
+                          size={RFPercentage(1.8)}
+                          color={theme.lightGrey}
+                        />
+                        <Text
+                          style={[styles.optionText, { color: theme.darkGrey }]}
+                        >
+                          {item.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
                 </View>
               )}
 
@@ -652,6 +1070,212 @@ function PostRequest({ navigation, route }) {
                 </View>
               )}
             </View>
+
+            {/* Sub-Tasks Section */}
+            {originalTaskType &&
+              originalTaskType !== "Other" &&
+              currentSubTasks.length > 0 && (
+                <View style={styles.section}>
+                  <View style={styles.sectionHeader}>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        { backgroundColor: `${theme.primary}15` },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name="list"
+                        size={RFPercentage(2)}
+                        color={theme.primary}
+                      />
+                    </View>
+                    <Text
+                      style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                    >
+                      {t("postRequest.sub-task")}
+                    </Text>
+                  </View>
+
+                  {/* Selected sub-tags display */}
+                  {selectedSubTasks.length > 0 && (
+                    <View style={styles.selectedTagsContainer}>
+                      {selectedSubTasks.map((subTask) => (
+                        <View
+                          key={subTask.id}
+                          style={[
+                            styles.selectedTag,
+                            { backgroundColor: `${theme.primary}15` },
+                          ]}
+                        >
+                          <FontAwesome5
+                            name={subTask.icon || "tag"}
+                            size={RFPercentage(1.2)}
+                            color={theme.primary}
+                          />
+                          <Text
+                            style={[
+                              styles.selectedTagText,
+                              { color: theme.primary },
+                            ]}
+                          >
+                            {subTask.name}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() => removeSubTask(subTask.id)}
+                            style={styles.removeTagButton}
+                          >
+                            <MaterialIcons
+                              name="close"
+                              size={RFPercentage(1.2)}
+                              color={theme.primary}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {/* Sub-tasks dropdown */}
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    style={[
+                      styles.selectField,
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: showSubTaskDropdown
+                          ? theme.primary
+                          : theme.border,
+                        borderWidth: showSubTaskDropdown ? 1.5 : 1,
+                        marginBottom: RFPercentage(1),
+                      },
+                    ]}
+                    onPress={() => toggleDropdown("subtask")}
+                  >
+                    <View style={styles.selectFieldContent}>
+                      <Text
+                        style={[
+                          styles.placeholderText,
+                          { color: theme.heading },
+                        ]}
+                      >
+                        {t("postRequest.sub-2")}
+                      </Text>
+                    </View>
+                    <MaterialIcons
+                      name={
+                        showSubTaskDropdown
+                          ? "keyboard-arrow-up"
+                          : "keyboard-arrow-down"
+                      }
+                      size={RFPercentage(2.5)}
+                      color={theme.primary}
+                    />
+                  </TouchableOpacity>
+
+                  {showSubTaskDropdown && (
+                    <View
+                      style={[
+                        styles.dropdownContainer,
+                        {
+                          backgroundColor: theme.white,
+                          borderColor: theme.border,
+                          shadowColor: theme.black,
+                          maxHeight: RFPercentage(30),
+                          position: "relative",
+                          top: 0,
+                          marginBottom: RFPercentage(2),
+                        },
+                      ]}
+                    >
+                      <ScrollView
+                        nestedScrollEnabled
+                        showsVerticalScrollIndicator={false}
+                      >
+                        {translatedSubTasks.map((subTask) => {
+                          const isSelected = selectedSubTasks.find(
+                            (st) => st.id === subTask.id,
+                          );
+                          return (
+                            <TouchableOpacity
+                              key={subTask.id}
+                              onPress={() => toggleSubTask(subTask)}
+                              style={[
+                                styles.optionItem,
+                                isSelected && {
+                                  backgroundColor: `${theme.primary}10`,
+                                },
+                              ]}
+                            >
+                              <FontAwesome5
+                                name={subTask.icon}
+                                size={RFPercentage(1.8)}
+                                color={
+                                  isSelected ? theme.primary : theme.lightGrey
+                                }
+                              />
+                              <Text
+                                style={[
+                                  styles.optionText,
+                                  {
+                                    color: isSelected
+                                      ? theme.primary
+                                      : theme.darkGrey,
+                                    fontWeight: isSelected ? "600" : "400",
+                                  },
+                                ]}
+                              >
+                                {subTask.name}
+                              </Text>
+                              {isSelected && (
+                                <MaterialIcons
+                                  name="check"
+                                  size={RFPercentage(1.8)}
+                                  color={theme.primary}
+                                  style={styles.checkIcon}
+                                />
+                              )}
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </ScrollView>
+                    </View>
+                  )}
+
+                  {/* Custom sub-task input */}
+                  <View style={styles.customSubTaskContainer}>
+                    <TextInput
+                      style={[
+                        styles.customSubTaskInput,
+                        {
+                          backgroundColor: theme.white,
+                          borderColor: theme.border,
+                          color: theme.black,
+                        },
+                      ]}
+                      placeholder={t("postRequest.sub-3")}
+                      placeholderTextColor={theme.heading}
+                      value={customSubTask}
+                      onChangeText={setCustomSubTask}
+                      onSubmitEditing={addCustomSubTask}
+                      returnKeyType="done"
+                    />
+                    <TouchableOpacity
+                      onPress={addCustomSubTask}
+                      style={[
+                        styles.addCustomButton,
+                        { backgroundColor: theme.primary },
+                      ]}
+                      disabled={!customSubTask.trim()}
+                    >
+                      <MaterialIcons
+                        name="add"
+                        size={RFPercentage(2)}
+                        color={theme.white}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
 
             {/* Compensation Type */}
             <View style={styles.section}>
@@ -860,6 +1484,397 @@ function PostRequest({ navigation, route }) {
               </Text>
             </View>
 
+            {/* Date Selection */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="date-range"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.date")}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? "rgba(19, 19, 21, 1)"
+                      : "rgba(238, 238, 240, 1)",
+                  width: "60%",
+                  padding: 14,
+                  borderRadius: 5,
+                }}
+                onPress={() => {
+                  setTempDate(selectedDate);
+                  setShowDatePicker(true);
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.darkGrey,
+                    fontSize: RFPercentage(1.8),
+                    fontFamily: "Poppins_400Regular",
+                    textAlign: "center",
+                  }}
+                >
+                  {formattedDate || "Select Date"}
+                </Text>
+              </TouchableOpacity>
+
+              {showDatePicker &&
+                (Platform.OS === "android" ? (
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display="default"
+                    themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                    minimumDate={new Date()}
+                    onChange={(event, date) => {
+                      setShowDatePicker(false);
+                      if (date) setSelectedDate(date);
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: "transparent",
+                      borderWidth: 1,
+                      borderColor:
+                        theme.mode === "dark"
+                          ? "rgba(23, 24, 33, 1)"
+                          : "rgba(235, 236, 251, 1)",
+                      borderRadius: RFPercentage(1.5),
+                      alignItems: "center",
+                      marginTop: RFPercentage(1),
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "90%",
+                        marginTop: RFPercentage(2),
+                      }}
+                    >
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? Colors.primary + "40"
+                              : Colors.primary + "10",
+                          padding: RFPercentage(0.7),
+                          borderRadius: RFPercentage(100),
+                          paddingHorizontal: RFPercentage(1.5),
+                        }}
+                        onPress={() => {
+                          setSelectedDate(tempDate);
+                          setShowDatePicker(false);
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : Colors.primary,
+                            fontFamily: "Poppins_600SemiBold",
+                            fontSize: RFPercentage(1.4),
+                          }}
+                          numberOfLines={1}
+                        >
+                          {t("postRequest.date1")}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => setShowDatePicker(false)}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          color={
+                            theme.mode === "dark"
+                              ? Colors.darkGrey + "50"
+                              : Colors.primary + "30"
+                          }
+                          size={RFPercentage(3.5)}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <DateTimePicker
+                      value={tempDate}
+                      mode="date"
+                      display="spinner"
+                      themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                      minimumDate={new Date()}
+                      onChange={(event, date) => {
+                        if (date) setTempDate(date);
+                      }}
+                    />
+                  </View>
+                ))}
+            </View>
+
+            {/* Time Selection */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="access-time"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.time")}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? "rgba(19, 19, 21, 1)"
+                      : "rgba(242, 242, 246, 1)",
+                  width: "60%",
+                  padding: 12,
+                  borderRadius: 5,
+                }}
+                onPress={() => {
+                  setTempTime(selectedTime);
+                  setShowTimePicker(true);
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.darkGrey,
+                    fontSize: RFPercentage(1.8),
+                    fontFamily: "Poppins_400Regular",
+                    textAlign: "center",
+                  }}
+                >
+                  {formattedTime || "Select Time"}
+                </Text>
+              </TouchableOpacity>
+
+              {showTimePicker &&
+                (Platform.OS === "android" ? (
+                  <DateTimePicker
+                    value={selectedTime}
+                    mode="time"
+                    minuteInterval={5}
+                    display="default"
+                    themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                    onChange={(event, time) => {
+                      setShowTimePicker(false);
+                      if (time) setSelectedTime(time);
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: "100%",
+                      backgroundColor: "transparent",
+                      borderWidth: 1,
+                      borderColor:
+                        theme.mode === "dark"
+                          ? "rgba(23, 24, 33, 1)"
+                          : "rgba(235, 236, 251, 1)",
+                      borderRadius: RFPercentage(1.5),
+                      alignItems: "center",
+                      marginTop: RFPercentage(1),
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "90%",
+                        marginTop: RFPercentage(2),
+                      }}
+                    >
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? Colors.primary + "40"
+                              : Colors.primary + "10",
+                          padding: RFPercentage(0.7),
+                          borderRadius: RFPercentage(100),
+                          paddingHorizontal: RFPercentage(1.5),
+                        }}
+                        onPress={() => {
+                          setSelectedTime(tempTime);
+                          setShowTimePicker(false);
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : Colors.primary,
+                            fontFamily: "Poppins_600SemiBold",
+                            fontSize: RFPercentage(1.4),
+                          }}
+                          numberOfLines={1}
+                        >
+                          {t("postRequest.time1")}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => setShowTimePicker(false)}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          color={
+                            theme.mode === "dark"
+                              ? Colors.darkGrey + "50"
+                              : Colors.primary + "30"
+                          }
+                          size={RFPercentage(3.5)}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <DateTimePicker
+                      value={tempTime}
+                      mode="time"
+                      minuteInterval={5}
+                      display="spinner"
+                      themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                      onChange={(event, time) => {
+                        if (time) setTempTime(time);
+                      }}
+                    />
+                  </View>
+                ))}
+            </View>
+
+            {/* Estimated Duration */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: `${theme.primary}15` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="hourglass-empty"
+                    size={RFPercentage(2)}
+                    color={theme.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
+                  {t("postRequest.duration")}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.selectField,
+                  {
+                    backgroundColor: theme.white,
+                    borderColor: showDurationDropdown
+                      ? theme.primary
+                      : theme.border,
+                    borderWidth: showDurationDropdown ? 1.5 : 1,
+                  },
+                ]}
+                onPress={() => toggleDropdown("duration")}
+              >
+                <View style={styles.selectFieldContent}>
+                  {selectedDuration ? (
+                    <Text style={[styles.selectedText, { color: theme.black }]}>
+                      {
+                        translatedDurationOptions.find(
+                          (d) => d.value === selectedDuration,
+                        )?.label
+                      }
+                    </Text>
+                  ) : (
+                    <Text
+                      style={[styles.placeholderText, { color: theme.heading }]}
+                    >
+                      {t("postRequest.duration-1")}
+                    </Text>
+                  )}
+                </View>
+                <MaterialIcons
+                  name={
+                    showDurationDropdown
+                      ? "keyboard-arrow-up"
+                      : "keyboard-arrow-down"
+                  }
+                  size={RFPercentage(2.5)}
+                  color={theme.primary}
+                />
+              </TouchableOpacity>
+
+              {showDurationDropdown && (
+                <View
+                  style={[
+                    styles.dropdownContainer,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                      shadowColor: theme.black,
+                      maxHeight: RFPercentage(38),
+                    },
+                  ]}
+                >
+                  {translatedDurationOptions.map((item) => (
+                    <TouchableOpacity
+                      key={item.value}
+                      onPress={() => selectDuration(item)}
+                      style={[
+                        styles.optionItem,
+                        selectedDuration === item.value && {
+                          backgroundColor: `${theme.primary}10`,
+                        },
+                      ]}
+                    >
+                      <FontAwesome5
+                        name="clock"
+                        size={RFPercentage(1.8)}
+                        color={theme.lightGrey}
+                      />
+                      <Text
+                        style={[styles.optionText, { color: theme.darkGrey }]}
+                      >
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
             {/* Description */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
@@ -941,7 +1956,7 @@ function PostRequest({ navigation, route }) {
               >
                 <View style={styles.locationContent}>
                   <Text
-                  numberOfLines={1}
+                    numberOfLines={1}
                     style={[
                       styles.locationText,
                       {
@@ -1049,7 +2064,10 @@ function PostRequest({ navigation, route }) {
                   {`Upload Photos`}
                 </Text>
                 <Text style={[styles.optionalText, { color: theme.heading }]}>
-                  ({`Optional`})
+                  ({t("postRequest.photo-1")})
+                </Text>
+                <Text style={[styles.optionalText, { color: theme.heading }]}>
+                  ({t("postRequest.photo-2")})
                 </Text>
               </View>
 
@@ -1116,7 +2134,7 @@ function PostRequest({ navigation, route }) {
                             { color: theme.heading },
                           ]}
                         >
-                          {`Add Photo`}
+                          {t("postRequest.photo")}
                         </Text>
                       </View>
                     )}
@@ -1300,9 +2318,58 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
     marginLeft: RFPercentage(1.2),
+    flex: 1,
+  },
+  checkIcon: {
+    marginLeft: "auto",
   },
   customTaskContainer: {
     marginTop: RFPercentage(2),
+  },
+  selectedTagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: RFPercentage(1.5),
+  },
+  selectedTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.6),
+    borderRadius: RFPercentage(1.5),
+    marginRight: RFPercentage(1),
+    marginBottom: RFPercentage(1),
+  },
+  selectedTagText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: RFPercentage(0.6),
+    marginRight: RFPercentage(0.3),
+  },
+  removeTagButton: {
+    marginLeft: RFPercentage(0.3),
+  },
+  customSubTaskContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: RFPercentage(1),
+  },
+  customSubTaskInput: {
+    flex: 1,
+    height: RFPercentage(5.5),
+    borderWidth: 1,
+    borderRadius: RFPercentage(1.2),
+    paddingHorizontal: RFPercentage(2),
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    marginRight: RFPercentage(1),
+  },
+  addCustomButton: {
+    width: RFPercentage(5.5),
+    height: RFPercentage(5.5),
+    borderRadius: RFPercentage(1.2),
+    justifyContent: "center",
+    alignItems: "center",
   },
   descriptionContainer: {
     width: "100%",

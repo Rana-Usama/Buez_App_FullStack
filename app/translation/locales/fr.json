@@ -22,9 +22,9 @@
     "error": "Erreur",
     "noDescription": "Pas de description",
     "task": "Tâche",
-"bulk": "Tâche collective avec plusieurs aides",
-"helper": "aide",
-"helpers": "aides"
+    "bulk": "Tâche collective avec plusieurs aides",
+    "helper": "aide",
+    "helpers": "aides"
   },
   "validations": {
     "inValid": "E-mail invalide",
@@ -191,7 +191,10 @@
     "skipForNow": "Passer pour l'instant",
     "info1": "Ajouter une carte maintenant assure un service sans interruption après l'essai",
     "info2": "Votre carte ne sera pas débitée avant 14 jours",
-    "info3": "Vous pouvez annuler à tout moment pendant la période d'essai"
+    "info3": "Vous pouvez annuler à tout moment pendant la période d'essai",
+    "importantNote": "Commencez votre aventure Premium",
+  "automaticSubscription": "Profitez d’un accès Premium complet pendant 14 jours gratuitement ! Après votre période d’essai, votre abonnement mensuel se poursuivra automatiquement si vous ajoutez une carte, afin que vous ne perdiez jamais vos avantages Premium."
+
   },
   "subscription": {
     "txt1": "Votre essai gratuit de 14 jours est terminé.",
@@ -277,7 +280,6 @@
     "noReviews": "Aucun avis pour le moment",
     "noReviewsDesc": "Les avis des propriétaires des tâches apparaîtront ici",
     "view": "Voir les candidats"
-
   },
   "postRequest": {
     "txt1": "Publier une demande",
@@ -297,7 +299,19 @@
     "customTaskTitle": "Veuillez spécifier votre type de tâche",
     "pr": "Prix",
     "numberOfWorkers": "Nombre d'aides nécessaires",
-    "workersHelperText": "Sélectionnez le nombre d'aides nécessaires (1-{{max}})"
+    "workersHelperText": "Sélectionnez le nombre d'aides nécessaires (1-{{max}})",
+    "sub-task": "Sous-tâches (Sélectionnez toutes les options applicables)",
+    "sub-2": "Sélectionner des sous-tâches...",
+    "sub-3": "Ajouter une sous-tâche personnalisée...",
+    "date": "Planifier la date de la tâche",
+    "time": "Planifier l’heure de la tâche",
+    "duration": "Durée estimée de la tâche",
+    "duration-1": "Sélectionner la durée estimée",
+    "photo": "Ajouter une photo",
+    "photo-1": "Télécharger des photos",
+    "photo-2": "Optionnel",
+      "date1": "Définir la date",
+  "time1": "Définir l'heure"
   },
   "messages": {
     "txt1": "Messages",
@@ -457,7 +471,8 @@
   "notifications": {
     "txt1": "Chargement des notifications...",
     "txt2": "Lorsque vous recevrez des notifications, elles apparaîtront ici",
-    "txt3": "Note :"
+    "txt3": "Note :",
+     "txt4": "Notifications"
   },
   "completed": {
     "txt1": "NOTÉ",
@@ -680,6 +695,14 @@
     "remove": "Retirer",
     "profile": "Profil",
 
+    "group": "Diffusion de tâche",
+    "member": "Membres",
+    "helper": "Assistants",
+    "owner": "Propriétaire",
+    "joined": "Inscrit",
+    "task": "Propriétaire de la tâche",
+    "exp": "Appuyez sur l’icône de chat à côté d’un membre pour démarrer une conversation privée.",
+
     "confirmDialog": {
       "title": "Confirmer l'aide",
       "message": "Êtes-vous sûr de vouloir confirmer {{name}} pour cette tâche ?",
@@ -741,5 +764,45 @@
     "status": "Statut",
     "allHelpersConfirmed": "Toutes les aides confirmées ! Vous pouvez marquer la tâche comme terminée.",
     "allSlotsFilled": "Toutes les places occupées"
-  }
+  },
+  "interestSelection": {
+  "personalizeExperience": "Personnalisez votre expérience",
+  "whatAreYouInterested": "Qu'est-ce qui vous intéresse ?",
+  "pickYourFavorites": "Choisissez vos services préférés et nous adapterons Buez pour vous.",
+  "selectInterestsPrompt": "Sélectionnez 3 centres d'intérêt pour continuer",
+  "selectedInterests": "{{total}} sélectionné(s) ✓",
+  "addCustomInterestTitle": "Ajouter un centre d'intérêt personnalisé",
+  "addCustomInterestSubtitle": "Vous ne trouvez pas ce dont vous avez besoin ? Ajoutez-le ici.",
+  "customInterestPlaceholder": "ex. Nettoyage de piscine, Yoga...",
+  "alreadyAdded": "Déjà ajouté !",
+  "alreadyAddedDesc": "\"{interest}\" est déjà dans votre liste.",
+  "pickAFewMore": "Choisissez-en quelques-uns de plus !",
+  "minSelectionDesc": "Sélectionnez au moins {{min}} centres d'intérêt pour continuer.",
+  "saving": "Enregistrement...",
+  "continueCTA": "Continuer vers Buez",
+  "selectMoreCTA": "Sélectionnez {{remaining}} de plus",
+  "skipForNow": "Passer pour l'instant"
+},
+"emailVerification": {
+  "title": "Vérifiez votre e-mail",
+  "subtitle": "Nous avons envoyé un lien de vérification à :",
+  "hint": "Cliquez sur le lien dans l'e-mail pour activer votre compte. Vérifiez votre dossier spam si vous ne le voyez pas.",
+
+  "verifiedSuccessTitle": "E-mail vérifié !",
+  "verifiedSuccessDesc": "Bienvenue à bord 🎉",
+
+  "notVerifiedTitle": "Pas encore vérifié",
+  "notVerifiedDesc": "Veuillez cliquer sur le lien dans votre e-mail.",
+
+  "emailSentTitle": "E-mail envoyé !",
+  "emailSentDesc": "L'e-mail de vérification a été renvoyé avec succès.",
+
+  "resendFailedTitle": "Échec du renvoi",
+  "resendFailedDesc": "Veuillez réessayer plus tard.",
+
+  "verifiedButton": "J'ai vérifié mon e-mail",
+  "resendButton": "Renvoyer l'e-mail",
+  "resendCooldown": "Renvoyer dans {{seconds}}s",
+  "backToLogin": "Retour à la connexion"
+}
 }

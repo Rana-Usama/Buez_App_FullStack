@@ -25,6 +25,7 @@ interface ShareButtonProps {
   showLabel?: boolean;
   iconOnly?: boolean;
   variant?: 'default' | 'light' | 'dark';
+  color? : string
 }
 
 export const ShareButton: React.FC<ShareButtonProps> = ({
@@ -36,6 +37,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   showLabel = false,
   iconOnly = true,
   variant = 'default',
+  color = Colors.primary
 }) => {
   const { shareJob, isSharing } = useShareJob();
   const { theme } = useAppTheme();
@@ -98,13 +100,13 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         {isSharing ? (
           <ActivityIndicator 
             size="small" 
-            color={textColor} 
+            color={color} 
           />
         ) : (
          <Feather
             name="share-2"
             size={RFPercentage(2.2)}
-            color={textColor}
+            color={color}
           />
         )}
       </TouchableOpacity>

@@ -36,9 +36,6 @@
 //   }
 // };
 
-
-
-
 import * as SecureStore from "expo-secure-store";
 import * as Localization from "expo-localization";
 
@@ -56,14 +53,13 @@ export const translateText = async (text, targetLang) => {
   try {
     const encodedText = encodeURIComponent(text);
     const response = await fetch(
-      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodedText}`
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodedText}`,
     );
 
     const data = await response.json();
-    return data[0]?.map(item => item[0]).join('') || text;
+    return data[0]?.map((item) => item[0]).join("") || text;
   } catch (error) {
     console.log("Translation error:", error);
     return text;
   }
 };
-

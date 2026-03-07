@@ -118,7 +118,7 @@ function SubscriptionV2(props) {
       });
       console.log("res.........", result);
       if (result.success) {
-        props.navigation.navigate("TabNavigator");
+        props.navigation.navigate("InterestSelection");
       } else {
         setModalVisible2(true);
       }
@@ -150,7 +150,7 @@ function SubscriptionV2(props) {
       });
       await scheduleFreeTrialNotification(10);
       setFreeTrialModalVisible(false); // Close modal
-      props.navigation.navigate("TabNavigator");
+      props.navigation.navigate("InterestSelection");
     } catch (error) {
       Toast.show({
         type: "error",
@@ -196,7 +196,7 @@ function SubscriptionV2(props) {
         userId,
         deviceId,
       });
-      props.navigation.navigate("TabNavigator");
+      props.navigation.navigate("InterestSelection");
     } catch (error) {
       console.log(error);
       Toast.show({
@@ -632,7 +632,7 @@ function SubscriptionV2(props) {
                     {loading ? (
                       <ActivityIndicator size="small" color={theme.white} />
                     ) : (
-                      <Text style={styles.primaryButtonText}>
+                      <Text style={styles.primaryButtonText} numberOfLines={1}>
                         {t("freeTrialModal.addCardNow")}
                       </Text>
                     )}
@@ -656,6 +656,7 @@ function SubscriptionV2(props) {
                           styles.secondaryButtonText,
                           { color: theme.primary },
                         ]}
+                        numberOfLines={1}
                       >
                         {t("freeTrialModal.skipForNow")}
                       </Text>
@@ -937,6 +938,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.primary,
     backgroundColor: "transparent",
+    paddingHorizontal:5
   },
   primaryButtonText: {
     color: Colors.white,

@@ -80,7 +80,7 @@ interface Translations {
   viewTask: string;
   bulkApplication: string;
   bulkConfirmation: string;
-  bulkview : string;
+  bulkview: string;
   viewApplications: string;
   viewPost: string;
   helpersNeeded: string;
@@ -108,7 +108,7 @@ export default function Notifications({ navigation }) {
     viewTask: "",
     bulkApplication: "",
     bulkConfirmation: "",
-    bulkview:"",
+    bulkview: "",
     viewApplications: "",
     viewPost: "",
     helpersNeeded: "",
@@ -156,7 +156,7 @@ export default function Notifications({ navigation }) {
         viewTask: "View Task",
         bulkApplication: "has applied to your",
         bulkConfirmation: "You have been confirmed for",
-        bulkview : "You can view the task in My Req Accepted tab",
+        bulkview: "You can view the task in My Req Accepted tab",
         viewApplications: "View Applicant",
         viewPost: "View Post",
         helpersNeeded: "Helpers needed",
@@ -165,18 +165,18 @@ export default function Notifications({ navigation }) {
       };
 
       const translatedVals = await Promise.all(
-        Object.values(phrases).map((txt) => cachedTranslate(txt))
+        Object.values(phrases).map((txt) => cachedTranslate(txt)),
       );
       const mapped: Translations = Object.keys(phrases).reduce(
         (acc, key, idx) => {
           acc[key as keyof Translations] = translatedVals[idx] || phrases[key];
           return acc;
         },
-        {} as Translations
+        {} as Translations,
       );
       setTr(mapped);
       await fetchNotifications();
-      setBusy(false); 
+      setBusy(false);
     };
 
     init();
@@ -190,7 +190,7 @@ export default function Notifications({ navigation }) {
       const q = query(
         collection(FIREBASE_DB, "notifications"),
         where("receiver.userId", "==", currentUserId),
-        orderBy("timestamp", "desc")
+        orderBy("timestamp", "desc"),
       );
       const snap = await getDocs(q);
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -261,7 +261,7 @@ export default function Notifications({ navigation }) {
               text: translatedDesc,
             };
           }
-        })
+        }),
       );
       setDescCache(newCache);
     })();
@@ -286,7 +286,7 @@ export default function Notifications({ navigation }) {
         console.log("Chat start error:", err);
       }
     },
-    [currentUserId, currentUser?.userData?.userName]
+    [currentUserId, currentUser?.userData?.userName],
   );
 
   const getNotificationIcon = (type, isRead) => {
@@ -369,7 +369,7 @@ export default function Notifications({ navigation }) {
       if (!isExpanded && !item.isRead) {
         markAsRead(item.id);
         setRaw((prev) =>
-          prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
+          prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n)),
         );
       }
       return;
@@ -413,7 +413,7 @@ export default function Notifications({ navigation }) {
     if (!isExpanded && !item.isRead) {
       markAsRead(item.id);
       setRaw((prev) =>
-        prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n)),
       );
     }
   };
@@ -467,7 +467,10 @@ export default function Notifications({ navigation }) {
       actionType = "view_completed";
     } else if (item.type === "bulk_task_completion") {
       mainText = `${senderName} ${tr.bulkTaskCompleted || "marked the bulk task as completed!"}`;
-      previewText = item.message || tr.bulkTaskCompletedMessage || "All confirmed helpers have been notified";
+      previewText =
+        item.message ||
+        tr.bulkTaskCompletedMessage ||
+        "All confirmed helpers have been notified";
       actionType = "view_completed";
       showHelpersInfo = true;
     } else if (item.type === "bulk_request_application") {
@@ -517,7 +520,7 @@ export default function Notifications({ navigation }) {
                 backgroundColor: theme.white,
                 borderLeftWidth: !item.isRead ? RFPercentage(0.5) : 1,
                 borderWidth: 1,
-                borderColor:  "rgba(224, 223, 232, 0.6)",
+                borderColor: "rgba(224, 223, 232, 0.6)",
                 borderLeftColor: !item.isRead
                   ? Colors.primary
                   : "rgba(224, 223, 232, 1)",
@@ -624,42 +627,65 @@ export default function Notifications({ navigation }) {
                     <>
                       <Text
                         style={[styles.description, { color: theme.darkGrey }]}
-                        numberOfLines={item.type === "bulk_task_completion" ? 3 : 1}
+                        numberOfLines={
+                          item.type === "bulk_task_completion" ? 3 : 1
+                        }
                       >
                         {item.type === "bulk_task_completion" ? (
                           <>
-                            {item.message || tr.bulkTaskCompletedMessage || "All confirmed helpers have been notified"}
+                            {item.message ||
+                              tr.bulkTaskCompletedMessage ||
+                              "All confirmed helpers have been notified"}
                             {"\n\n"}
                             <Text style={{ fontFamily: "Poppins_600SemiBold" }}>
-                              {t("common.task")} {item.task?.taskType || item.task?.description || "Unknown task"}
+                              {t("common.task")}{" "}
+                              {item.task?.taskType ||
+                                item.task?.description ||
+                                "Unknown task"}
                             </Text>
                           </>
+                        ) : translatedText.length > 50 ? (
+                          `${translatedText.substring(0, 50)}…`
                         ) : (
-                          translatedText.length > 50
-                            ? `${translatedText.substring(0, 50)}…`
-                            : translatedText
+                          translatedText
                         )}
                       </Text>
 
                       {/* Show bulk task helpers info */}
                       {showHelpersInfo && item.task?.isBulkRequest && (
-                        <View style={[
-                          styles.bulkTaskInfo,
-                          { backgroundColor: Colors.primary + "10" }
-                        ]}>
+                        <View
+                          style={[
+                            styles.bulkTaskInfo,
+                            { backgroundColor: Colors.primary + "10" },
+                          ]}
+                        >
                           <View style={styles.bulkInfoRow}>
                             <Ionicons
                               name="people"
                               size={RFPercentage(1.4)}
                               color={Colors.primary}
                             />
-                            <Text style={[styles.bulkInfoText, { color: Colors.primary }]}>
+                            <Text
+                              style={[
+                                styles.bulkInfoText,
+                                { color: Colors.primary },
+                              ]}
+                            >
                               {t("common.bulk")}
                             </Text>
                           </View>
                           {item.task?.totalHelpers > 0 && (
-                            <Text style={[styles.bulkInfoDetail, { color: theme.darkGrey }]}>
-                              {item.task?.totalHelpers} {item.task?.totalHelpers === 1 ? t("common.helper") : t("common.helpers")} {t("offerDetail.confirmed")}
+                            <Text
+                              style={[
+                                styles.bulkInfoDetail,
+                                { color: theme.darkGrey },
+                              ]}
+                            >
+                              {item.task?.totalHelpers}{" "}
+                              {item.task?.totalHelpers === 1
+                                ? t("common.helper")
+                                : t("common.helpers")}{" "}
+                              {t("offerDetail.confirmed")}
                             </Text>
                           )}
                         </View>
@@ -682,7 +708,10 @@ export default function Notifications({ navigation }) {
                       onPress={() => {
                         if (item.type === "review_added") {
                           navigation.navigate("Reviews");
-                        } else if (item.type === "task_completion" || item.type === "bulk_task_completion") {
+                        } else if (
+                          item.type === "task_completion" ||
+                          item.type === "bulk_task_completion"
+                        ) {
                           navigation.navigate("CompletedTasks", {
                             taskId: item.task?.taskId,
                             isBulk: item.type === "bulk_task_completion",
@@ -729,7 +758,8 @@ export default function Notifications({ navigation }) {
                             {tr.view || "View"}
                           </Text>
                         </>
-                      ) : item.type === "task_completion" || item.type === "bulk_task_completion" ? (
+                      ) : item.type === "task_completion" ||
+                        item.type === "bulk_task_completion" ? (
                         <>
                           <Feather
                             name="check-circle"
@@ -790,8 +820,8 @@ export default function Notifications({ navigation }) {
       title === "Today"
         ? tr.today || title
         : title === "Yesterday"
-        ? tr.yesterday || title
-        : title;
+          ? tr.yesterday || title
+          : title;
     return (
       <View style={styles.sectionHeaderContainer}>
         <View
@@ -825,7 +855,7 @@ export default function Notifications({ navigation }) {
         backgroundColor={"transparent"}
         translucent
       />
-      <CustomNav title={tr.notifications} showBack />
+      <CustomNav title={t("notifications.txt4")} showBack />
 
       <Animated.View style={[styles.container]}>
         {busy ? (

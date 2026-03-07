@@ -310,7 +310,19 @@
     "customTaskTitle": "Please specify your task type",
     "pr": "Price",
     "numberOfWorkers": "Number of helpers needed",
-    "workersHelperText": "Select number of helpers needed (1-{{max}})"
+    "workersHelperText": "Select number of helpers needed (1-{{max}})",
+    "sub-task": "Sub-Tasks (Select all that apply)",
+    "sub-2": "Select sub-tasks...",
+    "sub-3": "Add custom sub-task...",
+    "date": "Schedule Task Date",
+    "time": "Schedule Task Time",
+    "duration": "Estimated Duration Of Task",
+    "duration-1": "Select estimated duration",
+    "photo": "Add Photo",
+    "photo-1": "Upload Photos",
+    "photo-2": "Optional",
+    "date1": "Set Date",
+    "time1": "Set Time"
   },
   "messages": {
     "txt1": "Messages",
@@ -473,7 +485,8 @@
   "notifications": {
     "txt1": "Loading notifications...",
     "txt2": "When you get notifications, they'll appear here",
-    "txt3": "Rating:"
+    "txt3": "Rating:",
+    "txt4" : "Notifications"
   },
   "completed": {
     "txt1": "REVIEWED",
@@ -691,7 +704,7 @@
     "helpersNeeded": "Helpers Needed",
     "confirmed": "Confirmed",
     "applicants": "Applicants",
-    "progress": "helpers confirmed",
+    "progress": "Helpers Confirmed",
     "applicantsTab": "Applicants",
     "confirmedTab": "Confirmed",
 
@@ -701,6 +714,13 @@
     "confirm": "Confirm",
     "remove": "Remove",
     "profile": "Profile",
+    "group": "Task Broadcast",
+    "member": "Members",
+    "helper": "Helpers",
+    "owner": "Owner",
+    "joined": "Joined",
+    "task": "Task Owner",
+    "exp": "Tap the chat icon next to any member to start a private conversation with them.",
 
     "confirmDialog": {
       "title": "Confirm Helper",
@@ -763,5 +783,46 @@
     "status": "Status",
     "allHelpersConfirmed": "All helpers confirmed! You can mark the task as completed.",
     "allSlotsFilled": "All Slots Filled"
+  },
+
+  "interestSelection": {
+    "personalizeExperience": "Personalize Your Experience",
+    "whatAreYouInterested": "What are you interested in?",
+    "pickYourFavorites": "Pick your favourite services and we'll tailor Buez just for you.",
+    "selectInterestsPrompt": "Select Your Top 3 Interests To Continue",
+    "selectedInterests": "{{total}} selected ✓",
+    "addCustomInterestTitle": "Add Custom Interest",
+    "addCustomInterestSubtitle": "Don't see what you need? Add it here.",
+    "customInterestPlaceholder": "e.g. Pool Cleaning, Yoga...",
+    "alreadyAdded": "Already added!",
+    "alreadyAddedDesc": "\"{interest}\" is already in your list.",
+    "pickAFewMore": "Pick a few more!",
+    "minSelectionDesc": "Select at least {{min}} interests to continue.",
+    "saving": "Saving...",
+    "continueCTA": "Continue to Buez",
+    "selectMoreCTA": "Select {{remaining}} more",
+    "skipForNow": "Skip for now"
+  },
+  "emailVerification": {
+    "title": "Verify Your Email",
+    "subtitle": "We've sent a verification link to:",
+    "hint": "Click the link in the email to activate your account. Check your spam folder if you don't see it.",
+
+    "verifiedSuccessTitle": "Email Verified!",
+    "verifiedSuccessDesc": "Welcome aboard 🎉",
+
+    "notVerifiedTitle": "Not Verified Yet",
+    "notVerifiedDesc": "Please click the link in your email.",
+
+    "emailSentTitle": "Email Sent!",
+    "emailSentDesc": "Verification email resent successfully.",
+
+    "resendFailedTitle": "Failed to resend",
+    "resendFailedDesc": "Please try again later.",
+
+    "verifiedButton": "I've Verified My Email",
+    "resendButton": "Resend Email",
+    "resendCooldown": "Resend in {{seconds}}s",
+    "backToLogin": "Back to Login"
   }
 }

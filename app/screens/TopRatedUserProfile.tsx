@@ -40,6 +40,93 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
+import { createOrUpdateGroupChat } from "../services/GroupChat.service";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { cachedTranslate } from "../utils/cachedTranslations";
+
+// ─── Reusable colors map ─────────────────────────────────────────────────────
+const CATEGORY_MAP: Record<string, { color: string; icon: string }> = {
+  Cleaning: { color: "#4ECDC4", icon: "broom" },
+  Moving: { color: "#FF6B6B", icon: "truck" },
+  Gardening: { color: "#95E06C", icon: "seedling" },
+  Gaming: { color: "#A78BFA", icon: "gamepad" },
+  Plumbing: { color: "#60A5FA", icon: "wrench" },
+  Electrical: { color: "#FBBF24", icon: "bolt" },
+  Carpentry: { color: "#F97316", icon: "hammer" },
+  Painting: { color: "#EC4899", icon: "paint-brush" },
+  Delivery: { color: "#14B8A6", icon: "shipping-fast" },
+  Tutoring: { color: "#8B5CF6", icon: "chalkboard-teacher" },
+  "Event Setup": { color: "#F43F5E", icon: "calendar-alt" },
+  Photography: { color: "#06B6D4", icon: "camera" },
+  "Pet Care": { color: "#D97706", icon: "paw" },
+  Other: { color: "#6B7280", icon: "ellipsis-h" },
+};
+
+const InterestPill = ({
+  item,
+  isCustom,
+}: {
+  item: { key: string; label: string };
+  isCustom?: boolean;
+}) => {
+  const meta = CATEGORY_MAP[item.key];
+
+  const color = isCustom ? "#1b2572ff" : meta?.color || "#3a6dedff";
+  const icon = isCustom ? "tag" : meta?.icon || "tag";
+
+  return (
+    <View
+      style={[
+        interestPillStyle.pill,
+        {
+          borderColor: isCustom ? "#2c2d305f" : color + "40",
+          backgroundColor: color + "10",
+        },
+      ]}
+    >
+      <View
+        style={[
+          interestPillStyle.iconWrap,
+          { backgroundColor: isCustom ? "#2e2e3234" : color + "20" },
+        ]}
+      >
+        <FontAwesome5
+          name={icon}
+          size={RFPercentage(1.2)}
+          color={color}
+          solid
+        />
+      </View>
+      <Text numberOfLines={1} style={[interestPillStyle.text, { color }]}>
+        {item.label}
+      </Text>
+    </View>
+  );
+};
+
+const interestPillStyle = StyleSheet.create({
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: RFPercentage(10),
+    paddingVertical: RFPercentage(0.5),
+    paddingLeft: RFPercentage(0.55),
+    paddingRight: RFPercentage(1.2),
+    gap: RFPercentage(0.55),
+  },
+  iconWrap: {
+    width: RFPercentage(2.7),
+    height: RFPercentage(2.7),
+    borderRadius: RFPercentage(5),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_500Medium",
+  },
+});
 
 const TopRatedUserProfile = ({ navigation, route }: any) => {
   const { theme } = useAppTheme();
@@ -47,7 +134,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
   const { user, applier, postRequest } = route.params || {};
   const { location: currentLocation } = useLocation();
   const currentUser = useUser();
-
+  const [translatedBio, setTranslatedBio] = useState<string | null>(null);
   // State
   const [userDetailedData, setUserDetailedData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +150,17 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     isFull: false,
   });
   const [canConfirm, setCanConfirm] = useState(true);
+  const [translatedTasks, setTranslatedTasks] = useState({});
+  const [translatedReviews, setTranslatedReviews] = useState({});
+  const [userInterests, setUserInterests] = useState<{
+    selectedCategories: string[];
+    customInterests: string[];
+  } | null>(null);
+
+  const [translatedInterests, setTranslatedInterests] = useState<{
+    selectedCategories: { key: string; label: string }[];
+    customInterests: { key: string; label: string }[];
+  } | null>(null);
 
   const db = FIREBASE_DB;
 
@@ -179,12 +277,109 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       setLoading(true);
       const detailedData = await fetchUserDetailedProfile(userId);
       setUserDetailedData(detailedData);
+
+      const userDoc = await getDoc(doc(FIREBASE_DB, "users", userId));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setUserInterests(data?.interests || null);
+        if (data?.biography) {
+          const translateBio = async () => {
+            try {
+              const translated = await cachedTranslate(data.biography);
+              setTranslatedBio(translated);
+            } catch (e) {
+              setTranslatedBio(data.biography); // fallback
+            }
+          };
+
+          translateBio();
+        }
+
+        if (data?.interests) {
+          const translateInterests = async () => {
+            const translatedSelected = await Promise.all(
+              (data.interests.selectedCategories || []).map(async (cat) => ({
+                key: cat,
+                label: await cachedTranslate(cat),
+              })),
+            );
+
+            const translatedCustom = await Promise.all(
+              (data.interests.customInterests || []).map(async (cat) => ({
+                key: cat,
+                label: await cachedTranslate(cat),
+              })),
+            );
+
+            setTranslatedInterests({
+              selectedCategories: translatedSelected,
+              customInterests: translatedCustom,
+            });
+          };
+
+          translateInterests();
+        }
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!tasks?.completed?.length) return;
+
+    const run = async () => {
+      const map = {};
+
+      for (const item of tasks.completed) {
+        const desc = item?.taskDetails?.description;
+        const type = item?.taskDetails?.taskType;
+
+        if (!desc && !type) continue;
+
+        try {
+          map[item.id] = {
+            description: desc ? await cachedTranslate(desc) : "",
+            taskType: type ? await cachedTranslate(type) : "",
+          };
+        } catch {
+          map[item.id] = {
+            description: desc || "",
+            taskType: type || "",
+          };
+        }
+      }
+
+      setTranslatedTasks(map);
+    };
+
+    run();
+  }, [tasks?.completed]);
+
+  useEffect(() => {
+    if (!reviewsList?.length) return;
+
+    const translateReviews = async () => {
+      const map: Record<string, string> = {};
+
+      for (const review of reviewsList) {
+        if (!review?.reviewText) continue;
+
+        try {
+          const translated = await cachedTranslate(review.reviewText);
+          map[review.id] = translated;
+        } catch {
+          map[review.id] = review.reviewText; // fallback
+        }
+      }
+
+      setTranslatedReviews(map);
+    };
+
+    translateReviews();
+  }, [reviewsList]);
 
   // Confirm applicant with slot limit check
   const handleConfirmApplicant = async () => {
@@ -318,6 +513,31 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       await sendConfirmationNotification(confirmationData);
       // Save notification
       await saveConfirmationNotification(confirmationData);
+      try {
+        await createOrUpdateGroupChat(
+          postRequest.id,
+          {
+            userId: currentUser?.userData?.userId,
+            userName: currentUser?.userData?.userName,
+            profileImage: currentUser?.userData?.profileImage || "",
+            token: currentUser?.userData?.token || "",
+          },
+          {
+            userId: user.userId,
+            userName: user.userName,
+            profileImage: user.profileImage || "",
+            token: user.token || "",
+          },
+          postRequest?.taskType,
+          postRequest?.customTaskTitle,
+          postRequest?.description,
+        );
+      } catch (groupChatError) {
+        console.log(
+          "Group chat creation failed (non-blocking):",
+          groupChatError,
+        );
+      }
       setIsConfirmed(true);
       Toast.show({
         type: "success",
@@ -471,7 +691,6 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
   const rank = getRankData(stats?.completedTasks || 0);
 
-
   const light = ["#a5a5bd48", "#6183a9c7", "#3c6954c9"];
   const dark = ["#1f22388f", "#3a2850ff", "#9db7abff"];
 
@@ -583,10 +802,12 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
             {/* Bio */}
             <Text style={[styles.bioText, { color: theme.darkGrey }]}>
-              {userBasic?.biography ||
-                `${t("profileRank.txt23")} ${
-                  stats?.completedTasks || 0
-                } tasks with high efficiency.`}
+              {translatedBio
+                ? translatedBio
+                : userBasic?.biography ||
+                  `${t("profileRank.txt23")} ${
+                    stats?.completedTasks || 0
+                  } tasks with high efficiency.`}
             </Text>
 
             {applier && canConfirm && (
@@ -701,7 +922,11 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   activeOpacity={0.9}
                 >
                   <LinearGradient
-                    colors={[Colors.primary, "#4c669f"]}
+                    colors={
+                      theme.mode === "dark"
+                        ? ["#2c1545ff", "#482074ff"]
+                        : [Colors.primary, "#4c669f"]
+                    }
                     style={styles.fullMessageButtonGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
@@ -745,6 +970,73 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
           />
         </View>
 
+        {/* ── USER INTERESTS SECTION ── */}
+        {translatedInterests &&
+          (translatedInterests.selectedCategories.length > 0 ||
+            translatedInterests.customInterests.length > 0) && (
+            <View
+              style={[
+                interestsSectionStyle.card,
+                {
+                  backgroundColor: theme.white,
+                  borderColor:
+                    theme.mode === "dark"
+                      ? "rgba(21, 20, 22, 1)"
+                      : "rgba(238,238,238,1)",
+                },
+              ]}
+            >
+              {/* Header */}
+              <View style={interestsSectionStyle.header}>
+                <LinearGradient
+                  colors={["#293596ff", "#918fb8ff"]}
+                  style={interestsSectionStyle.iconBg}
+                >
+                  <FontAwesome5
+                    name="heart"
+                    size={RFPercentage(1.3)}
+                    color="#fff"
+                    solid
+                  />
+                </LinearGradient>
+                <Text
+                  style={[
+                    interestsSectionStyle.title,
+                    { color: theme.heading },
+                  ]}
+                >
+                  Interests
+                </Text>
+                <View
+                  style={[
+                    interestsSectionStyle.countBadge,
+                    { backgroundColor: Colors.primary + "18" },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      interestsSectionStyle.countText,
+                      { color: Colors.primary },
+                    ]}
+                  >
+                    {(userInterests.selectedCategories?.length || 0) +
+                      (userInterests.customInterests?.length || 0)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Pills */}
+              <View style={interestsSectionStyle.pillsWrap}>
+                {translatedInterests?.selectedCategories?.map((item) => (
+                  <InterestPill key={item.key} item={item} />
+                ))}
+                {translatedInterests?.customInterests?.map((item) => (
+                  <InterestPill key={item.key} item={item} isCustom />
+                ))}
+              </View>
+            </View>
+          )}
+
         {/* TABS SELECTION */}
         <View style={styles.tabWrapper}>
           <View
@@ -767,6 +1059,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   styles.tabText,
                   { color: activeTab === "completed" ? "#FFF" : theme.grey },
                 ]}
+                numberOfLines={1}
               >
                 {t("profileRank.txt34")} ({tasks?.completed?.length || 0})
               </Text>
@@ -780,6 +1073,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   styles.tabText,
                   { color: activeTab === "reviews" ? "#FFF" : theme.grey },
                 ]}
+                numberOfLines={1}
               >
                 {t("profileRank.txt35")} ({reviews?.length || 0})
               </Text>
@@ -813,7 +1107,8 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                       style={styles.taskOverlay}
                     >
                       <Text style={styles.taskType}>
-                        {item.taskDetails.taskType}
+                        {translatedTasks[item.id]?.taskType ??
+                          item.taskDetails.taskType}
                       </Text>
                     </BlurView>
 
@@ -822,7 +1117,8 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                         style={[styles.taskTitle, { color: theme.heading }]}
                         numberOfLines={2}
                       >
-                        {item.taskDetails.description}
+                        {translatedTasks[item.id]?.description ??
+                          item.taskDetails.description}
                       </Text>
 
                       <Text style={[styles.taskDate, { color: theme.grey }]}>
@@ -920,7 +1216,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                     </View>
                   </View>
                   <Text style={[styles.revText, { color: theme.darkGrey }]}>
-                    "{item?.reviewText}"
+                    "{translatedReviews[item.id] ?? item?.reviewText}"
                   </Text>
                 </View>
               ))}
@@ -930,7 +1226,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   style={styles.showMoreBtn}
                 >
                   <Text style={styles.showMoreText}>
-                   +{reviews.length - 3} more
+                    +{reviews.length - 3} more
                   </Text>
                 </TouchableOpacity>
               )}
@@ -1372,6 +1668,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
+    paddingHorizontal: 10,
   },
   tabText: {
     fontSize: RFPercentage(1.4),
@@ -1497,6 +1794,53 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: 13,
     fontFamily: "Poppins_500Medium",
+  },
+});
+
+const interestsSectionStyle = StyleSheet.create({
+  card: {
+    marginHorizontal: RFPercentage(3),
+    marginTop: RFPercentage(3),
+    borderRadius: RFPercentage(2),
+    padding: RFPercentage(2.2),
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.9),
+    marginBottom: RFPercentage(1.8),
+  },
+  iconBg: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+    borderRadius: RFPercentage(0.8),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+    flex: 1,
+  },
+  countBadge: {
+    paddingHorizontal: RFPercentage(1.1),
+    paddingVertical: RFPercentage(0.3),
+    borderRadius: RFPercentage(5),
+  },
+  countText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  pillsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: RFPercentage(0.9),
   },
 });
 

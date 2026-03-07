@@ -1,0 +1,17 @@
+diff --git a/node_modules/expo-localization/ios/LocalizationModule.swift b/node_modules/expo-localization/ios/LocalizationModule.swift
+index 17c9cb7..7a91966 100644
+--- a/node_modules/expo-localization/ios/LocalizationModule.swift
++++ b/node_modules/expo-localization/ios/LocalizationModule.swift
+@@ -121,8 +121,10 @@ public class LocalizationModule: Module {
+       return "persian"
+     case .republicOfChina:
+       return "roc"
+-    case .iso8601:
+-      return "iso8601"
++   case .iso8601:
++  return "iso8601"
++@unknown default:
++  return String(describing: calendar.identifier)
+     }
+   }
+ 

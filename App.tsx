@@ -13,7 +13,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import * as Notifications from "expo-notifications";
 import { registerForPushNotificationsAsync } from "./app/utils/notificationService";
-import { UserProvider } from "./app/contexts/user.context";
+import { UserProvider, useUser } from "./app/contexts/user.context";
 import { PostProvider } from "./app/contexts/PostContext";
 import ExpoStripeProvider from "./app/contexts/stripe-provider";
 import { NotificationProvider } from "./app/contexts/notification.context";
@@ -28,6 +28,10 @@ import store from "./app/redux/store";
 import * as SplashScreen from "expo-splash-screen";
 import { UnreadMessagesProvider } from "./app/contexts/unread-messages.context";
 import messaging from "@react-native-firebase/messaging";
+import LanguageOnboardingModal, {
+  useLanguageOnboarding,
+} from "./app/translation/OnBoardingSelection";
+import { initializeLanguage } from "./app/utils/cachedTranslations";
 import { useDeepLinking } from "./app/job-sharing/useDeepLinking";
 import { navigate } from "./app/router/navigationRef";
 
@@ -66,6 +70,14 @@ async function getFCMToken() {
 function MainApp() {
   const { theme } = useAppTheme();
   const [appReady, setAppReady] = useState(false);
+  const { userData, loading: userLoading } = useUser();
+  useDeepLinking({
+    userData,
+    userLoading,
+    onJobLink: (jobId) => {
+      navigate("OfferDetail", { jobId });
+    },
+  });
 
   const splashImage =
     theme.mode === "dark"
@@ -107,6 +119,7 @@ export default function App() {
     Poppins_900Black,
     Poppins_400Regular_Italic,
   });
+  const { showModal, checked, handleDone } = useLanguageOnboarding();
 
   useEffect(() => {
     getFCMToken().then((token) => {
@@ -133,12 +146,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    console.log(i18n.isInitialized);
+    const setupLanguage = async () => {
+      await initializeLanguage();
+    };
+    setupLanguage();
   }, []);
 
-   useDeepLinking((jobId) => {
-    navigate("OfferDetail", { jobId });
-  });
+  useEffect(() => {
+    console.log(i18n.isInitialized);
+  }, []);
+  if (!checked || !fontsLoaded) return null;
 
   return (
     <ThemeProvider>
@@ -149,6 +166,10 @@ export default function App() {
               <ExpoStripeProvider>
                 <Provider store={store}>
                   <MainApp />
+                  <LanguageOnboardingModal
+                    visible={showModal}
+                    onDone={handleDone}
+                  />
                 </Provider>
                 <Toast config={toastConfig} />
               </ExpoStripeProvider>

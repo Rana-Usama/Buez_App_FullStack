@@ -55,7 +55,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       const q = query(
         collection(FIREBASE_DB, "freeTrials"),
         where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true)
+        where("freeTrial", "==", true),
       );
       const snapshot = await getDocs(q);
       return !snapshot.empty;
@@ -95,7 +95,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(
         FIREBASE_AUTH,
-        googleCredential
+        googleCredential,
       );
       const user = userCredential.user;
 
@@ -125,8 +125,9 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
             webhook: existingData.webhook ?? true,
             updatedAt: serverTimestamp(),
             createdAt: existingData.createdAt || serverTimestamp(),
+            emailVerified: true,
           },
-          { merge: true }
+          { merge: true },
         );
       } else {
         // New user
@@ -145,13 +146,14 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
           webhook: true,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+          emailVerified: true,
         });
       }
 
       // Save credentials and clear logged out flag
+       await SecureStore.setItemAsync("loggedOut", "false");
       await saveCredentials(user.email, "123456");
-      await SecureStore.setItemAsync("loggedOut", "false");
-
+     
       // Give Firestore a moment to update
       await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -172,7 +174,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
 
       // Parse subscription dates
       const subStartDate = parseFirestoreTimestamp(
-        existingUser.subscriptionStart
+        existingUser.subscriptionStart,
       );
       const subEndDate = parseFirestoreTimestamp(existingUser.subscriptionEnd);
 
@@ -193,7 +195,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       // Check trial validity
       let isTrialValid = false;
       const trialStartDate = parseFirestoreTimestamp(
-        existingUser.freeTrialStartedAt
+        existingUser.freeTrialStartedAt,
       );
       if (existingUser.isFreeTrial && trialStartDate) {
         const trialDays = differenceInDays(now, trialStartDate);
@@ -206,24 +208,19 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       const deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
       console.log("Device used trial:", deviceUsedTrial);
 
-      // Navigation logic - prioritize in this order:
-      // 1. Active paid subscription
-      // 2. Active free trial
-      // 3. Device hasn't used trial → FreeTrial
-      // 4. Device used trial → Subscription
-
-      console.log("🎯 Navigation Decision:");
+    
+      console.log("Navigation Decision:");
       if (existingUser?.isSubscribed && isWithinPaidPeriod) {
-        console.log("✅ Navigating to TabNavigator (paid subscription)");
+        console.log("Navigating to TabNavigator (paid subscription)");
         navigation.replace("TabNavigator");
       } else if (isTrialValid) {
-        console.log("✅ Navigating to TabNavigator (active trial)");
+        console.log("Navigating to TabNavigator (active trial)");
         navigation.replace("TabNavigator");
       } else if (!deviceUsedTrial) {
-        console.log("✅ Navigating to FreeTrial (new device)");
+        console.log("Navigating to FreeTrial (new device)");
         navigation.replace("FreeTrial");
       } else {
-        console.log("✅ Navigating to Subscription (device used trial)");
+        console.log("Navigating to Subscription (device used trial)");
         navigation.replace("Subscription");
       }
 

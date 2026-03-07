@@ -63,4 +63,5 @@ export const Icons: { [key: string]: ImageRequireSource } = {
   dark: require("../../assets/Images/dark.jpg"),
   bar: require("../../assets/Images/bars2.png"),
   upgrade: require("../../assets/Images/upgrade.png"),
+  groupChat: require("../../assets/Images/group-chat.png"),
 };

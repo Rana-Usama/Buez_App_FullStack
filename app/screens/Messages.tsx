@@ -1,4 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  memo,
+} from "react";
 import {
   View,
   Text,
@@ -11,8 +18,6 @@ import {
   StatusBar,
   Animated,
   Platform,
-  Dimensions,
-  TextInput,
 } from "react-native";
 import {
   collection,
@@ -40,30 +45,420 @@ import { formatChatTimestamp } from "../services/Shared.service";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { Feather, Ionicons } from "@expo/vector-icons";
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+const PAGE_SIZE = 10;
+const userProfileCache = new Map<string, any>();
 
-function Messages({ navigation }) {
+// ─── Fetch other user's profile (1:1 chat) ───────────────────────────────────
+const fetchOtherUserProfile = async (userId: string): Promise<any> => {
+  if (userProfileCache.has(userId)) return userProfileCache.get(userId);
+  const userDoc = await getDoc(doc(FIREBASE_DB, "users", userId));
+  const data = userDoc.exists() ? userDoc.data() : null;
+  userProfileCache.set(userId, data);
+  return data;
+};
+
+// ─── Map 1:1 chat document ────────────────────────────────────────────────────
+const mapChatDoc = async (d: any, currentUserId: string): Promise<any> => {
+  const chatData = d.data();
+  const otherUserId = chatData.participants?.find(
+    (u: string) => u !== currentUserId,
+  );
+  const otherUserData = otherUserId
+    ? await fetchOtherUserProfile(otherUserId)
+    : null;
+  const rawText = chatData.lastMessage?.text ?? "";
+
+  const lastSenderId =
+    chatData.lastMessage?.senderId ?? chatData.senderId ?? null;
+  const shouldTranslate = lastSenderId === otherUserId;
+  let displayText = rawText;
+
+  if (rawText && shouldTranslate) {
+    try {
+      displayText = await cachedTranslate(rawText);
+    } catch {
+      displayText = rawText;
+    }
+  }
+
+  const createdAt =
+    chatData?.lastMessage?.createdAt?.toDate?.() ??
+    chatData?.lastMessageTimestamp?.toDate?.() ??
+    null;
+
+  return {
+    id: d.id,
+    ...chatData,
+    lastMessage: chatData.lastMessage
+      ? { ...chatData.lastMessage, text: displayText, createdAt }
+      : null,
+    user: otherUserData,
+    unreadCount: chatData.unreadCount?.[currentUserId] || 0,
+  };
+};
+
+// ─── Map Group chat document ──────────────────────────────────────────────────
+const mapGroupChatDoc = async (d: any, currentUserId: string): Promise<any> => {
+  const data = d.data();
+  const rawText = data.lastMessage?.text ?? "";
+  const createdAt =
+    data?.lastMessageTimestamp?.toDate?.() ??
+    (data?.lastMessageTimestamp instanceof Date
+      ? data.lastMessageTimestamp
+      : new Date());
+  const unreadCount = data.unreadCounts?.[currentUserId] || 0;
+
+  const senderName = data.lastMessage?.senderName || "";
+  const isSentByCurrentUser = data.lastMessage?.senderId === currentUserId;
+
+  return {
+    id: d.id,
+    type: "group",
+    groupTitle:
+      data.taskType === "Other"
+        ? data.customTaskTitle || "Group Chat"
+        : data.taskType || "Group Chat",
+    members: data.members || [],
+    lastMessage: rawText
+      ? {
+          text: isSentByCurrentUser
+            ? `You: ${rawText}`
+            : senderName
+              ? `${senderName}: ${rawText}`
+              : rawText,
+          senderId: data.lastMessage?.senderId,
+          createdAt,
+        }
+      : null,
+    unreadCount,
+  };
+};
+
+// ─── Filter Button ───────────────────────────────────────────────────────────
+const FilterButton = memo(({ title, isActive, onPress, theme }: any) => (
+  <TouchableOpacity
+    activeOpacity={0.7}
+    style={[
+      styles.filterButton,
+      {
+        backgroundColor: isActive ? theme.primary : theme.white,
+        borderColor: isActive ? theme.primary : theme.border,
+      },
+    ]}
+    onPress={onPress}
+  >
+    <Text
+      style={[
+        styles.filterButtonText,
+        {
+          color: isActive ? Colors.white : theme.heading,
+          fontFamily: isActive ? "Poppins_600SemiBold" : "Poppins_500Medium",
+        },
+      ]}
+    >
+      {title}
+    </Text>
+    {isActive && (
+      <View
+        style={[styles.activeIndicator, { backgroundColor: theme.white }]}
+      />
+    )}
+  </TouchableOpacity>
+));
+
+// ─── Chat Item ──────────────────────────────────────────────────────────────
+const ChatItem = memo(({ item, userId, theme, onPress, t }: any) => {
+  const isUnread =
+    (item.unread || item.unreadCount > 0) &&
+    (item.type === "group"
+      ? item.lastMessage?.senderId !== userId // group:
+      : item?.senderId !== userId); // 1:1
+  const lastMessageTime = formatChatTimestamp(item.lastMessage?.createdAt);
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={[
+        styles.chatItemContainer,
+        {
+          backgroundColor: isUnread ? theme.primary + "08" : theme.white,
+          borderBottomColor: theme.border + "40",
+        },
+      ]}
+    >
+      <View style={styles.chatItemContent}>
+        {item.type === "group" ? (
+          <View
+            style={[
+              styles.avatarContainer,
+              {
+                borderRadius: RFPercentage(100),
+                backgroundColor: Colors.primary + "20",
+                width: RFPercentage(6.5),
+                height: RFPercentage(6.5),
+                alignItems: "center",
+                justifyContent: "center",
+                // borderWidth: 1,
+                // borderColor: Colors.primary + "20",
+              },
+            ]}
+          >
+            <Ionicons
+              name="people"
+              size={RFPercentage(3.4)}
+              color={Colors.primary}
+            />
+          </View>
+        ) : (
+          <View style={styles.avatarContainer}>
+            <Image
+              style={styles.avatar}
+              source={
+                item.user?.profileImage
+                  ? { uri: item.user.profileImage }
+                  : Icons.dp
+              }
+            />
+          </View>
+        )}
+
+        <View style={styles.chatContent}>
+          <View style={styles.chatHeader}>
+            <Text
+              style={[
+                styles.userName,
+                { color: theme.darkGrey },
+                isUnread && { fontFamily: "Poppins_600SemiBold" },
+              ]}
+              numberOfLines={1}
+            >
+              {item.user?.userName ||
+                item.groupTitle ||
+                t("messages.unknownUser")}
+            </Text>
+            <Text style={[styles.timeText, { color: theme.darkGrey }]}>
+              {lastMessageTime}
+            </Text>
+          </View>
+
+          {item.lastMessage && (
+            <View style={styles.messagePreview}>
+              <Text
+                style={[
+                  styles.messageText,
+                  {
+                    color: isUnread ? theme.darkGrey : theme.lightGrey,
+                    flex: 1,
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {item.lastMessage.text}
+              </Text>
+              {isUnread && (
+                <View
+                  style={[
+                    styles.unreadBadge,
+                    { backgroundColor: theme.primary },
+                  ]}
+                ></View>
+              )}
+            </View>
+          )}
+
+          {item.lastMessage?.type === "image" && (
+            <View style={styles.messageTypeIndicator}>
+              <Feather
+                name="image"
+                size={RFPercentage(1.6)}
+                color={theme.lightGrey}
+              />
+              <Text
+                style={[styles.messageTypeText, { color: theme.lightGrey }]}
+              >
+                {t("messages.photo")}
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+// ─── Main Messages Component ────────────────────────────────────────────────
+function Messages({ navigation }: any) {
   const { t } = useTranslation();
-  const userId = getAuth().currentUser?.uid;
+  const userId = getAuth().currentUser?.uid ?? "";
   const { userData } = useUser();
   const profileImgUrl = userData?.profileImage || "";
   const { theme } = useAppTheme();
-  const [chats, setChats] = useState([]);
-  const [lastVisible, setLastVisible] = useState(null);
+
+  const [chats, setChats] = useState<any[]>([]);
+  const [lastVisible, setLastVisible] = useState<any>(null);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState(t("messages.txt2"));
-  const [searchQuery, setSearchQuery] = useState("");
-  const fadeAnim = useState(new Animated.Value(0))[0];
-  const slideAnim = useState(new Animated.Value(20))[0];
-  const pageSize = 10;
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
   useExitAppOnBack();
 
-  const filters = [t("messages.txt2"), t("messages.txt3")];
+  const filters = useMemo(() => [t("messages.txt2"), t("messages.txt3")], [t]);
+
+  const mergeChats = useCallback((prev: any[], updates: any[]): any[] => {
+    const map = new Map<string, any>(prev.map((c) => [c.id, c]));
+    updates.forEach((u) => {
+      if (u.removed) map.delete(u.id);
+      else map.set(u.id, u);
+    });
+    return Array.from(map.values()).sort(
+      (a, b) =>
+        new Date(b.lastMessage?.createdAt ?? 0).getTime() -
+        new Date(a.lastMessage?.createdAt ?? 0).getTime(),
+    );
+  }, []);
+
+  const fetchInitialChats = useCallback(async () => {
+    if (!userId) return;
+    setLoadingInitial(true);
+    try {
+      const chatsQuery = query(
+        collection(FIREBASE_DB, "chats"),
+        where("participants", "array-contains", userId),
+        orderBy("lastMessageTimestamp", "desc"),
+        limit(PAGE_SIZE),
+      );
+
+      const groupQuery = query(
+        collection(FIREBASE_DB, "groupChats"),
+        where("memberIds", "array-contains", userId),
+        orderBy("lastMessageTimestamp", "desc"),
+        limit(PAGE_SIZE),
+      );
+
+      const [chatSnap, groupSnap] = await Promise.all([
+        getDocs(chatsQuery),
+        getDocs(groupQuery),
+      ]);
+
+      const oneToOneChats = (
+        await Promise.all(chatSnap.docs.map((d) => mapChatDoc(d, userId)))
+      ).filter((c) => c.lastMessage);
+      const groupChats = (
+        await Promise.all(groupSnap.docs.map((d) => mapGroupChatDoc(d, userId)))
+      ).filter((c) => c.lastMessage);
+
+      setChats(
+        [...oneToOneChats, ...groupChats].sort(
+          (a, b) =>
+            new Date(b.lastMessage.createdAt).getTime() -
+            new Date(a.lastMessage.createdAt).getTime(),
+        ),
+      );
+    } catch (e) {
+      console.error("fetchInitialChats error:", e);
+    } finally {
+      setLoadingInitial(false);
+    }
+  }, [userId]);
+
+  const fetchMoreChats = useCallback(async () => {
+    if (!lastVisible || loadingMore || !userId) return;
+    setLoadingMore(true);
+    try {
+      const q = query(
+        collection(FIREBASE_DB, "chats"),
+        where("participants", "array-contains", userId),
+        orderBy("lastMessageTimestamp", "desc"),
+        startAfter(lastVisible),
+        limit(PAGE_SIZE),
+      );
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) return;
+      const chatData = await Promise.all(
+        snapshot.docs.map((d) => mapChatDoc(d, userId)),
+      );
+      setChats((prev) => mergeChats(prev, chatData));
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+    } catch (e) {
+      console.error("fetchMoreChats error:", e);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [lastVisible, loadingMore, userId, mergeChats]);
+
+  const refreshChats = useCallback(async () => {
+    setIsRefreshing(true);
+    await fetchInitialChats();
+    setIsRefreshing(false);
+  }, [fetchInitialChats]);
+
+  const attachListener = useCallback(() => {
+    if (!userId) return;
+
+    const chatQuery = query(
+      collection(FIREBASE_DB, "chats"),
+      where("participants", "array-contains", userId),
+      orderBy("lastMessageTimestamp", "desc"),
+      limit(PAGE_SIZE),
+    );
+
+    const groupQuery = query(
+      collection(FIREBASE_DB, "groupChats"),
+      where("memberIds", "array-contains", userId),
+      orderBy("lastMessageTimestamp", "desc"),
+      limit(PAGE_SIZE),
+    );
+
+    const unsubChats = onSnapshot(chatQuery, async (snapshot) => {
+      const changes = snapshot.docChanges();
+      if (!changes.length) return;
+
+      const updates = await Promise.all(
+        changes.map(async (change) => {
+          if (change.type === "added" || change.type === "modified") {
+            return await mapChatDoc(change.doc, userId);
+          }
+          if (change.type === "removed")
+            return { id: change.doc.id, removed: true };
+          return null;
+        }),
+      );
+
+      setChats((prev) => mergeChats(prev, updates.filter(Boolean) as any[]));
+    });
+
+    const unsubGroups = onSnapshot(groupQuery, async (snapshot) => {
+      const changes = snapshot.docChanges();
+      if (!changes.length) return;
+
+      const updates = await Promise.all(
+        changes.map(async (change) => {
+          if (change.type === "added" || change.type === "modified") {
+            return await mapGroupChatDoc(change.doc, userId);
+          }
+          if (change.type === "removed")
+            return { id: change.doc.id, removed: true };
+          return null;
+        }),
+      );
+
+      setChats((prev) => mergeChats(prev, updates.filter(Boolean) as any[]));
+    });
+
+    unsubscribeRef.current = () => {
+      unsubChats();
+      unsubGroups();
+    };
+  }, [userId, mergeChats]);
 
   useEffect(() => {
-    fetchInitialChats();
-    const unsubscribe = listenForNewChats();
+    fetchInitialChats().then(() => attachListener());
 
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -78,332 +473,97 @@ function Messages({ navigation }) {
       }),
     ]).start();
 
-    return () => unsubscribe && unsubscribe();
+    return () => unsubscribeRef.current?.();
   }, []);
+  const filteredChats = useMemo(() => {
+    const visibleChats = chats.filter((c) => c.lastMessage);
 
-
-  const getChatData = async (d: any) => {
-    const chatData = d.data();
-    const otherUser = chatData.participants.find((u: any) => u !== userId);
-    const userRef = doc(FIREBASE_DB, "users", otherUser);
-    const userDoc = await getDoc(userRef);
-    const otherUserData = userDoc.exists() ? userDoc.data() : null;
-
-    let translatedText = chatData.lastMessage?.text || "";
-    if (translatedText) {
-      try {
-        translatedText = await cachedTranslate(translatedText);
-      } catch (e: any) {
-        console.log("Translation error:", e);
-      }
-    }
-
-    const createdAt =
-      chatData?.lastMessage?.createdAt?.toDate?.() ??
-      (chatData?.lastMessage?.createdAt instanceof Date
-        ? chatData.lastMessage.createdAt
-        : new Date());
-
-    return {
-      id: d.id,
-      ...chatData,
-      lastMessage: {
-        ...chatData.lastMessage,
-        text: translatedText,
-        createdAt,
-      },
-      user: otherUserData,
-      unreadCount: chatData.unreadCount?.[userId] || 0,
-    };
-  };
-
-  const fetchInitialChats = async () => {
-    setLoadingInitial(true);
-    try {
-      const q = query(
-        collection(FIREBASE_DB, "chats"),
-        where("participants", "array-contains", userId),
-        orderBy("lastMessageTimestamp", "desc"),
-        limit(pageSize)
-      );
-
-      const snapshot = await getDocs(q);
-      const chatData = [];
-      for await (const doc of snapshot.docs) {
-        chatData.push(await getChatData(doc));
-      }
-      setChats(chatData);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-    } catch (e) {
-      console.log("Chat Error", e);
-    } finally {
-      setLoadingInitial(false);
-    }
-  };
-
-  const fetchMoreChats = async () => {
-    if (!lastVisible || loadingMore) return;
-    setLoadingMore(true);
-    try {
-      const q = query(
-        collection(FIREBASE_DB, "chats"),
-        where("participants", "array-contains", userId),
-        orderBy("lastMessageTimestamp", "desc"),
-        startAfter(lastVisible),
-        limit(pageSize)
-      );
-
-      const snapshot = await getDocs(q);
-      const chatData = [];
-      for await (const doc of snapshot.docs) {
-        chatData.push(await getChatData(doc));
-      }
-
-      setChats((prev) => [...prev, ...chatData]);
-      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-    } catch (e) {
-      console.log("Chat Error", e);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
-
-  const refreshChats = async () => {
-    setIsRefreshing(true);
-    await fetchInitialChats();
-    setIsRefreshing(false);
-  };
-
-  const listenForNewChats = () => {
-    const q = query(
-      collection(FIREBASE_DB, "chats"),
-      where("participants", "array-contains", userId),
-      orderBy("lastMessageTimestamp", "desc"),
-      limit(pageSize)
-    );
-
-    return onSnapshot(q, async (snapshot) => {
-      const updates = await Promise.all(
-        snapshot.docChanges().map(async (change) => {
-          if (change.type === "added" || change.type === "modified") {
-            return await getChatData(change.doc);
-          }
-          if (change.type === "removed") {
-            return { id: change.doc.id, removed: true };
-          }
-          return null;
-        })
-      );
-
-      const resolvedUpdates = updates.filter(Boolean);
-
-      setChats((prev) => {
-        const merged = [...prev];
-        resolvedUpdates.forEach((update) => {
-          if (update.removed) {
-            const index = merged.findIndex((c) => c.id === update.id);
-            if (index !== -1) merged.splice(index, 1);
-            return;
-          }
-
-          const index = merged.findIndex((c) => c.id === update.id);
-          if (index !== -1) merged[index] = update;
-          else merged.unshift(update);
-        });
-        return merged;
+    if (activeFilter === t("messages.txt3")) {
+      return visibleChats.filter((c) => {
+        if (c.type === "group") {
+          return c.unreadCount > 0 && c.lastMessage?.senderId !== userId;
+        } else {
+          return (
+            (c.unread === true) &&
+            c?.senderId !== userId
+          );
+        }
       });
-    });
-  };
+    }
 
-  const FilterButton = ({ title, isActive }) => (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      style={[
-        styles.filterButton,
-        {
-          backgroundColor: isActive ? theme.primary : theme.white,
-          borderColor: isActive ? theme.primary : theme.border,
-        },
-      ]}
-      onPress={() => setActiveFilter(title)}
-    >
-      <Text
-        style={[
-          styles.filterButtonText,
-          {
-            color: isActive ? Colors.white : theme.heading,
-            fontFamily: isActive ? "Poppins_600SemiBold" : "Poppins_500Medium",
-          },
-        ]}
-      >
-        {title}
-      </Text>
-      {isActive && (
-        <View
-          style={[styles.activeIndicator, { backgroundColor: theme.white }]}
-        />
-      )}
-    </TouchableOpacity>
+    return visibleChats;
+  }, [chats, activeFilter, userId, t]);
+
+  const handleChatPress = useCallback(
+    (item: any) => {
+      if (item.type === "group") {
+        navigation.navigate("GroupChat", {
+          groupChatId: item.id,
+          currentUserId: userId,
+          currentUserName: userData?.userName,
+        });
+      } else {
+        navigation.navigate("Chat", {
+          chatId: item.id,
+          senderId: userId,
+          senderName: userData?.userName,
+          receiver: item.user,
+        });
+      }
+    },
+    [navigation, userId, userData],
   );
 
-  const ChatItem = ({ item }) => {
-    const isUnread =
-      item.unreadCount > 0 && item.lastMessage?.senderId !== userId;
-    const lastMessageTime = formatChatTimestamp(item.lastMessage?.createdAt);
+  console.log("filtered chats............", filteredChats);
 
-    return (
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate("Chat", {
-            chatId: item.id,
-            senderId: userId,
-            senderName: userData.userName,
-            receiver: item.user,
-          })
-        }
-        activeOpacity={0.7}
-        style={[
-          styles.chatItemContainer,
-          {
-            backgroundColor: theme.white,
-            borderBottomColor: theme.border + "40",
-          },
-          isUnread && {
-            backgroundColor: theme.primary + "08",
-          },
-        ]}
-      >
-        <View style={styles.chatItemContent}>
-          {/* Avatar with Status Indicator */}
-          <View style={styles.avatarContainer}>
-            <Image
-              style={styles.avatar}
-              source={
-                item.user?.profileImage
-                  ? { uri: item.user.profileImage }
-                  : Icons.dp
-              }
-            />
-          </View>
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => (
+      <ChatItem
+        item={item}
+        userId={userId}
+        theme={theme}
+        onPress={() => handleChatPress(item)}
+        t={t}
+      />
+    ),
+    [userId, theme, handleChatPress, t],
+  );
 
-          {/* Chat Content */}
-          <View style={styles.chatContent}>
-            <View style={styles.chatHeader}>
-              <Text
-                style={[
-                  styles.userName,
-                  { color: theme.darkGrey },
-                  isUnread && { fontFamily: "Poppins_600SemiBold" },
-                ]}
-                numberOfLines={1}
-              >
-                {item.user?.userName || t("messages.unknownUser")}
-              </Text>
-              <Text style={[styles.timeText, { color: theme.darkGrey }]}>
-                {lastMessageTime}
-              </Text>
-            </View>
+  const keyExtractor = useCallback((item: any) => item.id, []);
 
-            <View style={styles.messagePreview}>
-              <Text
-                style={[
-                  styles.messageText,
-                  {
-                    color: isUnread ? theme.darkGrey : theme.lightGrey,
-                    flex: 1,
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                {item.lastMessage?.text
-                  ? item.lastMessage.text
-                  : `${t("messages.txt6")} ${item.user?.userName}!`}
-              </Text>
-
-              {/* Unread Badge */}
-              {isUnread && (
-                <View
-                  style={[
-                    styles.unreadBadge,
-                    { backgroundColor: theme.primary },
-                  ]}
-                >
-                  <Text style={styles.unreadCount}>{item.unreadCount}</Text>
-                </View>
-              )}
-            </View>
-
-            {/* Message Type Indicator */}
-            {item.lastMessage?.type === "image" && (
-              <View style={styles.messageTypeIndicator}>
-                <Feather
-                  name="image"
-                  size={RFPercentage(1.6)}
-                  color={theme.lightGrey}
-                />
-                <Text
-                  style={[styles.messageTypeText, { color: theme.lightGrey }]}
-                >
-                  {t("messages.photo")}
-                </Text>
-              </View>
-            )}
-          </View>
+  const EmptyState = useCallback(
+    () => (
+      <View style={styles.emptyContainer}>
+        <View
+          style={[
+            styles.emptyIconContainer,
+            { backgroundColor: theme.primary + "20" },
+          ]}
+        >
+          <Ionicons
+            name="chatbubble-ellipses-outline"
+            size={RFPercentage(5)}
+            color={theme.primary}
+          />
         </View>
-      </TouchableOpacity>
-    );
-  };
-
-  const filteredChats = useMemo(() => {
-    let validChats = chats.filter(
-      (chat) =>
-        chat.lastMessage &&
-        chat.lastMessage.text &&
-        chat.lastMessage.text.trim() !== ""
-    );   
-
-    // Apply unread filter
-    if (activeFilter === t("messages.txt3")) {
-      return validChats.filter(
-        (chat) => chat.unreadCount > 0 && chat.lastMessage?.senderId !== userId
-      );
-    }
-
-    return validChats;
-  }, [chats, activeFilter]);
-
-  const EmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <View
-        style={[
-          styles.emptyIconContainer,
-          { backgroundColor: theme.primary + "20" },
-        ]}
-      >
-        <Ionicons
-          name="chatbubble-ellipses-outline"
-          size={RFPercentage(5)}
-          color={theme.primary}
-        />
+        <Text style={[styles.emptyTitle, { color: theme.darkGrey }]}>
+          {activeFilter === t("messages.txt3")
+            ? t("messages.txt4")
+            : t("messages.txt5")}
+        </Text>
+        <Text style={[styles.emptySubtitle, { color: theme.lightGrey }]}>
+          {t("messages.emptyDescription")}
+        </Text>
       </View>
-      <Text style={[styles.emptyTitle, { color: theme.darkGrey }]}>
-        {activeFilter === t("messages.txt3")
-          ? t("messages.txt4")
-          : t("messages.txt5")}
-      </Text>
-      <Text style={[styles.emptySubtitle, { color: theme.lightGrey }]}>
-        {searchQuery.trim()
-          ? t("messages.noResults")
-          : t("messages.emptyDescription")}
-      </Text>
-    </View>
+    ),
+    [activeFilter, theme, t],
   );
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={"transparent"}
+        backgroundColor="transparent"
         translucent
       />
       <Nav
@@ -414,25 +574,22 @@ function Messages({ navigation }) {
         title={`${t("messages.txt1")}`}
       />
 
-      {/* Filter Tabs */}
       <View style={styles.filterTabContainer}>
-        {filters.map((title, index) => (
+        {filters.map((title) => (
           <FilterButton
             key={title}
             title={title}
             isActive={activeFilter === title}
+            onPress={() => setActiveFilter(title)}
+            theme={theme}
           />
         ))}
       </View>
 
-      {/* Chats List */}
       <Animated.View
         style={[
           styles.chatListContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-          },
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
         ]}
       >
         {loadingInitial ? (
@@ -445,10 +602,14 @@ function Messages({ navigation }) {
         ) : (
           <FlatList
             data={filteredChats}
-            renderItem={({ item }) => <ChatItem item={item} />}
-            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
             onEndReached={fetchMoreChats}
             onEndReachedThreshold={0.3}
+            removeClippedSubviews={true}
+            initialNumToRender={10}
+            maxToRenderPerBatch={8}
+            windowSize={8}
             refreshControl={
               <RefreshControl
                 refreshing={isRefreshing}
@@ -461,13 +622,6 @@ function Messages({ navigation }) {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.chatListContent}
             ListEmptyComponent={<EmptyState />}
-            ListFooterComponent={
-              loadingMore ? (
-                <View style={styles.loadingMoreContainer}>
-                  <ActivityIndicator size="small" color={theme.primary} />
-                </View>
-              ) : null
-            }
           />
         )}
       </Animated.View>
@@ -476,67 +630,7 @@ function Messages({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.white,
-  },
-  header: {
-    paddingTop: Platform.OS === "ios" ? RFPercentage(6) : RFPercentage(3),
-    paddingBottom: RFPercentage(2),
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border + "30",
-    elevation: 2,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-  },
-  headerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: RFPercentage(2),
-  },
-  backButton: {
-    padding: RFPercentage(1),
-  },
-  headerTitleContainer: {
-    flex: 1,
-    marginLeft: RFPercentage(1),
-  },
-  headerTitle: {
-    fontSize: RFPercentage(2.2),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  chatCount: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_400Regular",
-    marginTop: RFPercentage(0.2),
-  },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerButton: {
-    padding: RFPercentage(1),
-    marginLeft: RFPercentage(0.5),
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: RFPercentage(2),
-    marginTop: RFPercentage(2),
-    paddingHorizontal: RFPercentage(2),
-    height: RFPercentage(5.5),
-    borderRadius: RFPercentage(1.2),
-    borderWidth: 1,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: RFPercentage(1.5),
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Regular",
-    padding: 0,
-  },
+  screen: { flex: 1, backgroundColor: Colors.white },
   filterTabContainer: {
     flexDirection: "row",
     paddingHorizontal: RFPercentage(2),
@@ -552,10 +646,7 @@ const styles = StyleSheet.create({
     position: "relative",
     overflow: "hidden",
   },
-  filterButtonText: {
-    fontSize: RFPercentage(1.6),
-    textAlign: "center",
-  },
+  filterButtonText: { fontSize: RFPercentage(1.6), textAlign: "center" },
   activeIndicator: {
     position: "absolute",
     bottom: -2,
@@ -564,72 +655,42 @@ const styles = StyleSheet.create({
     height: 3,
     borderRadius: 1.5,
   },
-  chatListContainer: {
-    flex: 1,
-  },
-  chatListContent: {
-    paddingBottom: RFPercentage(2),
-  },
+  chatListContainer: { flex: 1 },
+  chatListContent: { paddingBottom: RFPercentage(2) },
   chatItemContainer: {
     paddingHorizontal: RFPercentage(2),
     paddingVertical: RFPercentage(1.5),
     borderBottomWidth: 1,
   },
-  chatItemContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatarContainer: {
-    position: "relative",
-  },
+  chatItemContent: { flexDirection: "row", alignItems: "center" },
+  avatarContainer: { position: "relative" },
   avatar: {
     width: RFPercentage(6.5),
     height: RFPercentage(6.5),
-    borderRadius: RFPercentage(3.25),
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderRadius: RFPercentage(100),
+    backgroundColor: Colors.lightGrey,
   },
-  onlineIndicator: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: RFPercentage(1.5),
-    height: RFPercentage(1.5),
-    borderRadius: RFPercentage(0.75),
-    borderWidth: 2,
-    borderColor: Colors.white,
-  },
-  chatContent: {
-    flex: 1,
-    marginLeft: RFPercentage(1.5),
-  },
+  chatContent: { flex: 1, marginLeft: RFPercentage(2) },
   chatHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: RFPercentage(0.5),
   },
-  userName: {
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_500Medium",
-    flex: 1,
-  },
-  timeText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_400Regular",
-    marginLeft: RFPercentage(1),
-  },
+  userName: { fontSize: RFPercentage(2), fontFamily: "Poppins_400Regular" },
+  timeText: { fontSize: RFPercentage(1.5), fontFamily: "Poppins_400Regular" },
   messagePreview: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 2,
+    fontFamily: "Poppins_400Regular",
   },
   messageText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },
   unreadBadge: {
-    minWidth: RFPercentage(2.5),
-    height: RFPercentage(2.5),
+    minWidth: RFPercentage(1),
+    height: RFPercentage(1),
     borderRadius: RFPercentage(1.25),
     justifyContent: "center",
     alignItems: "center",
@@ -638,95 +699,39 @@ const styles = StyleSheet.create({
   unreadCount: {
     color: Colors.white,
     fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_600SemiBold",
-    paddingHorizontal: RFPercentage(0.5),
+    fontWeight: "600",
   },
   messageTypeIndicator: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: RFPercentage(0.3),
+    marginTop: 2,
   },
   messageTypeText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.5),
     marginLeft: RFPercentage(0.5),
   },
-  moreButton: {
-    padding: RFPercentage(0.5),
-    marginLeft: RFPercentage(1),
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: RFPercentage(10),
-  },
-  loadingText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Regular",
-    marginTop: RFPercentage(2),
-  },
-  loadingMoreContainer: {
-    paddingVertical: RFPercentage(2),
-    alignItems: "center",
-  },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { marginTop: RFPercentage(1.5), fontSize: RFPercentage(1.8) },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: RFPercentage(5),
-    paddingTop: RFPercentage(15),
+    marginTop: RFPercentage(10),
   },
   emptyIconContainer: {
-    width: RFPercentage(12),
-    height: RFPercentage(12),
-    borderRadius: RFPercentage(6),
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: RFPercentage(3),
+    padding: RFPercentage(2.5),
+    borderRadius: RFPercentage(5),
+    marginBottom: RFPercentage(2),
   },
   emptyTitle: {
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
-    textAlign: "center",
-    marginBottom: RFPercentage(1),
   },
   emptySubtitle: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-    lineHeight: RFPercentage(2.2),
-    marginBottom: RFPercentage(3),
-  },
-  startChatButton: {
-    paddingHorizontal: RFPercentage(4),
-    paddingVertical: RFPercentage(1.5),
-    borderRadius: RFPercentage(1.2),
-  },
-  startChatButtonText: {
-    color: Colors.white,
     fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  fab: {
-    position: "absolute",
-    bottom: RFPercentage(3),
-    right: RFPercentage(3),
-    width: RFPercentage(7),
-    height: RFPercentage(7),
-    borderRadius: RFPercentage(3.5),
-    elevation: 6,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    overflow: "hidden",
-  },
-  fabGradient: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+    textAlign: "center",
+    marginTop: RFPercentage(1),
+    width: "80%",
   },
 });
 

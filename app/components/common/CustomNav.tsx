@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     // Extra height for iOS safe areas
     paddingTop: Platform.OS === "ios" ? 55 : 55,
     backgroundColor: Colors.primary,
-    height: RFPercentage(14),
+    height: RFPercentage(15),
     borderBottomWidth: 1,
     borderBottomColor: "rgba(161, 156, 156, 0.25)",
   },
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    marginTop: RFPercentage(3),
+    marginTop: RFPercentage(2.5),
   },
   actionContainer: {
     width: 40, // Fixed width to ensure title stays centered

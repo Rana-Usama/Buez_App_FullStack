@@ -17,11 +17,7 @@ import InputField from "../components/common/AuthInputField";
 import { fetchUsersWithTaskStats } from "../services/Review.service";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
-import {
-  Ionicons,
-  Feather,
-  AntDesign,
-} from "@expo/vector-icons";
+import { Ionicons, Feather, AntDesign } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { selectLocation } from "../redux/Actions";
 import CustomNav from "../components/common/CustomNav";
@@ -75,7 +71,7 @@ const TopRatedUsers = ({ navigation }: any) => {
             : null;
 
         const apiUsers = (await fetchUsersWithTaskStats(
-          customLocation
+          customLocation,
         )) as ApiUser[];
 
         const mappedUsers = apiUsers.map((user, index) => ({
@@ -112,7 +108,7 @@ const TopRatedUsers = ({ navigation }: any) => {
       const platformWeight = 5;
       const userTotalRating = user.reviews?.reduce(
         (sum, review) => sum + review.rating,
-        0
+        0,
       );
       const userReviewCount = user.reviews?.length;
       const bayesianRating =
@@ -173,7 +169,7 @@ const TopRatedUsers = ({ navigation }: any) => {
     const badge = getBadgeInfo(user.type);
     const getUserCardGradient = (
       type: "pro" | "rising" | "beginner",
-      isDark: boolean
+      isDark: boolean,
     ) => {
       const mode = isDark ? "dark" : "light";
 
@@ -201,7 +197,7 @@ const TopRatedUsers = ({ navigation }: any) => {
             postRequest: {},
           })
         }
-        style={[styles.cardContainer, {shadowColor:cardGradient[1]}]}
+        style={[styles.cardContainer, { shadowColor: cardGradient[1] }]}
       >
         <LinearGradient
           colors={cardGradient}
@@ -213,7 +209,7 @@ const TopRatedUsers = ({ navigation }: any) => {
             colors={[
               theme.mode === "dark"
                 ? "rgba(57, 51, 51, 0.4)"
-                : "rgba(255, 255, 255, 0.6)",
+                : "rgba(255, 255, 255, 1)",
               "transparent",
             ]}
             style={[
@@ -226,7 +222,11 @@ const TopRatedUsers = ({ navigation }: any) => {
 
           {/* MESH OVERLAY 2 (Shadow Depth) */}
           <LinearGradient
-            colors={["transparent", "rgba(0,0,0,0.15)"]}
+            colors={
+              theme.mode === "dark"
+                ? ["transparent", "rgba(0,0,0,0.15)"]
+                : ["rgba(245, 246, 255, 0.12)", "rgba(241, 241, 255, 1)"]
+            }
             style={StyleSheet.absoluteFill}
             start={{ x: 1, y: 0 }}
             end={{ x: 0, y: 1 }}
@@ -240,7 +240,14 @@ const TopRatedUsers = ({ navigation }: any) => {
               <View style={styles.nameRow}>
                 {/* Added shadow to text for better legibility on gradients */}
                 <Text
-                  style={[styles.userName, styles.textShadow]}
+                  style={[
+                    styles.userName,
+                    styles.textShadow,
+                    {
+                      color:
+                        theme.mode === "dark" ? Colors.white : Colors.primary,
+                    },
+                  ]}
                   numberOfLines={1}
                 >
                   {user.userName}
@@ -259,12 +266,24 @@ const TopRatedUsers = ({ navigation }: any) => {
                 </View>
               </View>
               <Text
-                style={[styles.memberSince, { color: "rgba(100, 97, 97, 0.8)" }]}
+                style={[
+                  styles.memberSince,
+                  {
+                    color:
+                      theme.mode === "dark"
+                        ? "rgba(248, 249, 255, 1)"
+                        : "rgba(109, 110, 118, 1)",
+                  },
+                ]}
               >
                 {t("profileRank.txt9")} {user.memberSince}
               </Text>
             </View>
-            <Feather name="chevron-right" size={20} color="#fff" />
+            <Feather
+              name="chevron-right"
+              size={20}
+              color={theme.mode === "dark" ? "#fff" : Colors.lightGrey}
+            />
           </View>
 
           <View style={[styles.statsIslandMesh]}>
@@ -272,17 +291,23 @@ const TopRatedUsers = ({ navigation }: any) => {
               <Text style={styles.statValMesh}>{user.activeTasks}</Text>
               <Text style={styles.statLabMesh}>{t("profileRank.txt6")}</Text>
             </View>
-            <View
-              style={[styles.divider]}
-            />
+            <View style={[styles.divider]} />
             <View style={styles.statBox}>
-              <Text style={styles.statValMesh}>{user.completedTasks}</Text>
-              <Text style={styles.statLabMesh}>{t("profileRank.txt7")}</Text>
+              <Text style={styles.statValMesh} numberOfLines={1}>
+                {user.completedTasks}
+              </Text>
+              <Text style={styles.statLabMesh} numberOfLines={1}>
+                {t("profileRank.txt7")}
+              </Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.statBox}>
-              <Text style={[styles.statValMesh]}>{user.successRate}%</Text>
-              <Text style={styles.statLabMesh}>{t("profileRank.txt31")}</Text>
+              <Text style={[styles.statValMesh]} numberOfLines={1}>
+                {user.successRate}%
+              </Text>
+              <Text style={styles.statLabMesh} numberOfLines={1}>
+                {t("profileRank.txt31")}
+              </Text>
             </View>
           </View>
 
@@ -339,6 +364,9 @@ const TopRatedUsers = ({ navigation }: any) => {
               activeOpacity={0.8}
               style={[
                 styles.tab,
+                {
+                  borderColor: theme.mode === "dark" ? "#22282dff" : "#E9ECEF",
+                },
                 !useCustomLocation && {
                   backgroundColor: Colors.primary,
                   borderColor: Colors.primary,
@@ -368,6 +396,9 @@ const TopRatedUsers = ({ navigation }: any) => {
               activeOpacity={0.8}
               style={[
                 styles.tab,
+                {
+                  borderColor: theme.mode === "dark" ? "#22282dff" : "#E9ECEF",
+                },
                 useCustomLocation && {
                   backgroundColor: Colors.primary,
                   borderColor: Colors.primary,
@@ -427,6 +458,10 @@ const TopRatedUsers = ({ navigation }: any) => {
                 onPress={() => setFilter(v)}
                 style={[
                   styles.chip,
+                  {
+                    borderColor:
+                      theme.mode === "dark" ? "#22282dff" : "#E9ECEF",
+                  },
                   filter === v && {
                     backgroundColor: Colors.primary,
                     borderColor: Colors.primary,
@@ -444,11 +479,11 @@ const TopRatedUsers = ({ navigation }: any) => {
                       v === "all"
                         ? "12"
                         : v === "pro"
-                        ? "13"
-                        : v === "rising"
-                        ? "14"
-                        : "15"
-                    }`
+                          ? "13"
+                          : v === "rising"
+                            ? "14"
+                            : "15"
+                    }`,
                   )}
                 </Text>
               </TouchableOpacity>
@@ -507,9 +542,9 @@ const styles = StyleSheet.create({
   },
   tabText: { fontSize: 14, fontFamily: "Poppins_500Medium" },
   chip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 25,
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "#E9ECEF",
   },
@@ -552,7 +587,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
   },
-  statBox: { alignItems: "center", flex: 1 },
+  statBox: { alignItems: "center", flex: 1, paddingHorizontal: 5 },
   statVal: { fontSize: 14, fontFamily: "Poppins_700Bold" },
   statLab: {
     fontSize: 9,
@@ -585,7 +620,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
-    overflow:"hidden"
+    overflow: "hidden",
   },
   gradientWrapper: {
     padding: 16,
@@ -608,7 +643,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 12,
     marginTop: 15,
-    backgroundColor: "rgba(144, 144, 144, 0.25)", // Semi-transparent "Glass" effect
+    backgroundColor: "rgba(127, 127, 138, 0.23)", // Semi-transparent "Glass" effect
   },
   statValMesh: {
     fontSize: 15,

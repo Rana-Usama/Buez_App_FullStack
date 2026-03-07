@@ -58,6 +58,10 @@ import TaskApplicantsScreen from "../screens/TaskApplicantsScreen";
 import ConfirmedHelpers from "../screens/ConfirmedHelpers";
 import { navigationRef } from "./navigationRef";
 
+import GroupChat from "../screens/GroupChat";
+import GroupDetails from "../screens/GroupDetails";
+import EmailVerificationScreen from "../screens/EmailVerificationScreen";
+import InterestSelectionScreen from "../screens/InterestSelection";
 
 const Stack = createStackNavigator();
 
@@ -102,7 +106,10 @@ const StackNavigator = () => {
         <Stack.Screen name="OTPInput" component={OTPInput} />
         <Stack.Screen name="SetNewPassword" component={SetNewPassword} />
         <Stack.Screen name="SuccessScreen" component={SuccessScreen} />
-        <Stack.Screen name="TaskApplicantsScreen" component={TaskApplicantsScreen} />
+        <Stack.Screen
+          name="TaskApplicantsScreen"
+          component={TaskApplicantsScreen}
+        />
 
         {/* App flow - Use Drawer as main navigator */}
         <Stack.Screen name="MainApp" component={DrawerNavigator} />
@@ -118,7 +125,6 @@ const StackNavigator = () => {
           name="CancelSubscription"
           component={CancelSubscription}
         />
-        
 
         <Stack.Screen name="OfferDetail" component={OfferDetail} />
         <Stack.Screen name="Profile" component={Profile} />
@@ -127,6 +133,8 @@ const StackNavigator = () => {
         <Stack.Screen name="Reviews" component={Reviews} />
         <Stack.Screen name="Messages" component={Messages} />
         <Stack.Screen name="Chat" component={Chat} />
+        <Stack.Screen name="GroupChat" component={GroupChat} />
+
         <Stack.Screen name="PostRequest" component={PostRequest} />
         <Stack.Screen name="Language" component={Language} />
         <Stack.Screen name="Notifications" component={Notifications} />
@@ -159,6 +167,13 @@ const StackNavigator = () => {
         <Stack.Screen name="UpgradePlan" component={UpgradePlan} />
         <Stack.Screen name="ConfirmedHelpers" component={ConfirmedHelpers} />
 
+        <Stack.Screen
+          name="GroupDetails"
+          component={GroupDetails}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
+        <Stack.Screen name="InterestSelection" component={InterestSelectionScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

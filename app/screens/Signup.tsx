@@ -16,7 +16,10 @@ import * as SecureStore from "expo-secure-store";
 import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
 import InputFieldNew from "../components/common/NewField";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import Colors from "../config/Colors";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { addUser } from "../services/User.service";
@@ -38,7 +41,7 @@ import {
   query,
   where,
   getDocs,
-  serverTimestamp
+  serverTimestamp,
 } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { LinearGradient } from "expo-linear-gradient";
@@ -81,7 +84,7 @@ function Signup({ navigation }: any) {
       const q = query(
         collection(FIREBASE_DB, "freeTrials"),
         where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true)
+        where("freeTrial", "==", true),
       );
       const snapshot = await getDocs(q);
       console.log("snapppppp..................", snapshot);
@@ -106,9 +109,10 @@ function Signup({ navigation }: any) {
       const userCredential = await createUserWithEmailAndPassword(
         FIREBASE_AUTH,
         email,
-        password
+        password,
       );
       const user = userCredential.user;
+      await sendEmailVerification(user);
       return user;
     } catch (error) {
       throw error;
@@ -119,7 +123,7 @@ function Signup({ navigation }: any) {
     showIndicator(true);
     try {
       const userName = values.name.trim();
-      const email = values.email.trim();
+      const email = values.email.trim().toLowerCase();
       const password = values.password.trim();
       const user = await createAccountWithEmail(email, password);
       await SecureStore.setItemAsync("loggedOut", "false");
@@ -132,23 +136,29 @@ function Signup({ navigation }: any) {
           isSubscribed: false,
           token: expoPushToken || null,
           isFreeTrial: false,
-          createdAt : serverTimestamp()
+          emailVerified: false,
+          createdAt: serverTimestamp(),
         };
         await addUser(user?.uid, userData);
         await saveCredentials(email, password);
       }
       Toast.show({
         type: "success",
-        text1: `${t("toast.signup.one")}`,
-        text2: `${t("toast.signup.two")}`,
+        text1: "Account Created!",
+        text2: "Please check your email to verify your account.",
       });
-      const alreadyUsed = await hasDeviceAvailedFreeTrial(deviceId);
-      console.log("alreadyUsed............", alreadyUsed);
-      if (alreadyUsed) {
-        navigation.navigate("Subscription");
-      } else {
-        navigation.navigate("FreeTrial");
-      }
+
+      // Navigate to verification screen, pass email for display
+      navigation.navigate("EmailVerification", { email, password, deviceId });
+
+      // const alreadyUsed = await hasDeviceAvailedFreeTrial(deviceId);
+      // console.log("alreadyUsed............", alreadyUsed);
+
+      // if (alreadyUsed) {
+      //   navigation.navigate("Subscription");
+      // } else {
+      //   navigation.navigate("FreeTrial");
+      // }
     } catch (error) {
       console.log("error.......", error);
       Toast.show({
@@ -181,7 +191,6 @@ function Signup({ navigation }: any) {
         locations={[0, 0.2, 0.4, 0.6, 0.8, 1]}
         style={styles.meshGradientTopLeft}
       />
-     
 
       <ScrollView
         style={styles.scrollView}
@@ -193,7 +202,7 @@ function Signup({ navigation }: any) {
           source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo}
         />
         <Text style={[styles.welcomeText, { color: theme.heading }]}>{`${t(
-          "signup.txt1"
+          "signup.txt1",
         )}`}</Text>
 
         <Formik
@@ -345,14 +354,14 @@ function Signup({ navigation }: any) {
 
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: theme.darkGrey }]}>{`${t(
-            "signup.txt3"
+            "signup.txt3",
           )}`}</Text>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => navigation.navigate("Login")}
           >
             <Text style={[styles.loginText, { color: theme.primary }]}>{`${t(
-              "buttons.login"
+              "buttons.login",
             )}`}</Text>
           </TouchableOpacity>
         </View>

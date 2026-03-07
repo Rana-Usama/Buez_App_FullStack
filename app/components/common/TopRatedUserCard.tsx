@@ -145,7 +145,7 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
             onPress={onPress}
             activeOpacity={0.8}
           >
-            <BlurView intensity={60} tint="light" style={styles.buttonBlur}>
+            <BlurView intensity={30} tint="light" style={styles.buttonBlur}>
               <Text style={styles.viewProfileText}>
                 {t("profileRank.txt8")}
               </Text>
@@ -164,10 +164,11 @@ const styles = StyleSheet.create({
     marginRight: 15,
     borderRadius: 15,
     // overflow: "hidden",
-    
+
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 6,
+    // alignSelf: "flex-start",
 
     // borderWidth: RFPercentage(0.1),
   },
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
   },
   viewProfileButton: {
     width: "100%",
-    borderRadius: 15,
+    borderRadius: 10,
     overflow: "hidden",
     marginTop: 10,
   },
@@ -245,9 +246,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 8,
+    paddingVertical: 5,
     gap: 5,
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
   },
   viewProfileText: {
     fontSize: RFPercentage(1.5),

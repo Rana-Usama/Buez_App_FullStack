@@ -22,9 +22,9 @@
     "error": "Fehler",
     "noDescription": "Keine Beschreibung",
     "task": "Aufgabe",
-"bulk": "Gruppenaufgabe mit mehreren Helfern",
-"helper": "Helfer",
-"helpers": "Helfer"
+    "bulk": "Gruppenaufgabe mit mehreren Helfern",
+    "helper": "Helfer",
+    "helpers": "Helfer"
   },
   "validations": {
     "inValid": "Ungültige E-Mail",
@@ -191,7 +191,10 @@
     "skipForNow": "Jetzt überspringen",
     "info1": "Karte jetzt hinzufügen gewährleistet ununterbrochenen Service nach dem Test",
     "info2": "Deine Karte wird erst nach 14 Tagen belastet",
-    "info3": "Du kannst während der Testphase jederzeit kündigen"
+    "info3": "Du kannst während der Testphase jederzeit kündigen",
+     "importantNote": "Beginne deine Premium-Reise",
+  "automaticSubscription": "Genieße vollen Premium-Zugang 14 Tage kostenlos! Nach deiner Testphase wird dein monatliches Abonnement automatisch fortgesetzt, wenn du eine Karte hinzufügst, damit du nie den Zugang zu deinen Premium-Vorteilen verlierst."
+
   },
   "subscription": {
     "txt1": "Deine 14-tägige kostenlose Testphase ist beendet.",
@@ -277,7 +280,6 @@
     "noReviews": "Noch keine Bewertungen",
     "noReviewsDesc": "Bewertungen von Auftraggebern werden hier angezeigt",
     "view": "Bewerber anzeigen"
-
   },
   "postRequest": {
     "txt1": "Anfrage veröffentlichen",
@@ -297,7 +299,19 @@
     "customTaskTitle": "Bitte gib deinen Aufgabentyp an",
     "pr": "Preis",
     "numberOfWorkers": "Anzahl der benötigten Helfer",
-    "workersHelperText": "Anzahl der benötigten Helfer auswählen (1-{{max}})"
+    "workersHelperText": "Anzahl der benötigten Helfer auswählen (1-{{max}})",
+    "sub-task": "Unteraufgaben (Alle zutreffenden auswählen)",
+    "sub-2": "Unteraufgaben auswählen...",
+    "sub-3": "Benutzerdefinierte Unteraufgabe hinzufügen...",
+    "date": "Aufgabendatum planen",
+    "time": "Aufgabenzeit planen",
+    "duration": "Geschätzte Dauer der Aufgabe",
+    "duration-1": "Geschätzte Dauer auswählen",
+    "photo": "Foto hinzufügen",
+    "photo-1": "Fotos hochladen",
+    "photo-2": "Optional",
+      "date1": "Datum festlegen",
+  "time1": "Zeit festlegen"
   },
   "messages": {
     "txt1": "Nachrichten",
@@ -457,7 +471,8 @@
   "notifications": {
     "txt1": "Lade Benachrichtigungen...",
     "txt2": "Wenn du Benachrichtigungen erhältst, erscheinen sie hier",
-    "txt3": "Bewertung:"
+    "txt3": "Bewertung:",
+      "txt4": "Benachrichtigungen"
   },
   "completed": {
     "txt1": "BEWERTET",
@@ -680,6 +695,13 @@
     "remove": "Entfernen",
     "profile": "Profil",
 
+    "group": "Aufgaben-Broadcast",
+    "member": "Mitglieder",
+    "helper": "Helfer",
+    "owner": "Besitzer",
+    "joined": "Beigetreten",
+    "task": "Aufgabenbesitzer",
+    "exp": "Tippen Sie auf das Chat-Symbol neben einem Mitglied, um eine private Unterhaltung zu starten.",
     "confirmDialog": {
       "title": "Helfer bestätigen",
       "message": "Sind Sie sicher, dass Sie {{name}} für diese Aufgabe bestätigen möchten?",
@@ -741,5 +763,45 @@
     "status": "Status",
     "allHelpersConfirmed": "Alle Helfer bestätigt! Sie können die Aufgabe als abgeschlossen markieren.",
     "allSlotsFilled": "Alle Plätze belegt"
-  }
+  },
+  "interestSelection": {
+  "personalizeExperience": "Personalisieren Sie Ihr Erlebnis",
+  "whatAreYouInterested": "Wofür interessieren Sie sich?",
+  "pickYourFavorites": "Wählen Sie Ihre bevorzugten Dienste aus und wir passen Buez für Sie an.",
+  "selectInterestsPrompt": "Wählen Sie 3 Interessen, um fortzufahren",
+  "selectedInterests": "{{total}} ausgewählt ✓",
+  "addCustomInterestTitle": "Eigenes Interesse hinzufügen",
+  "addCustomInterestSubtitle": "Sehen Sie nicht, was Sie brauchen? Fügen Sie es hier hinzu.",
+  "customInterestPlaceholder": "z.B. Poolreinigung, Yoga...",
+  "alreadyAdded": "Bereits hinzugefügt!",
+  "alreadyAddedDesc": "\"{interest}\" ist bereits in Ihrer Liste.",
+  "pickAFewMore": "Wählen Sie noch ein paar aus!",
+  "minSelectionDesc": "Wählen Sie mindestens {{min}} Interessen, um fortzufahren.",
+  "saving": "Speichert...",
+  "continueCTA": "Weiter zu Buez",
+  "selectMoreCTA": "Wählen Sie noch {{remaining}} aus",
+  "skipForNow": "Für jetzt überspringen"
+},
+"emailVerification": {
+  "title": "Bestätigen Sie Ihre E-Mail",
+  "subtitle": "Wir haben einen Bestätigungslink gesendet an:",
+  "hint": "Klicken Sie auf den Link in der E-Mail, um Ihr Konto zu aktivieren. Überprüfen Sie Ihren Spam-Ordner, falls Sie ihn nicht sehen.",
+
+  "verifiedSuccessTitle": "E-Mail bestätigt!",
+  "verifiedSuccessDesc": "Willkommen an Bord 🎉",
+
+  "notVerifiedTitle": "Noch nicht bestätigt",
+  "notVerifiedDesc": "Bitte klicken Sie auf den Link in Ihrer E-Mail.",
+
+  "emailSentTitle": "E-Mail gesendet!",
+  "emailSentDesc": "Bestätigungs-E-Mail wurde erneut gesendet.",
+
+  "resendFailedTitle": "Erneutes Senden fehlgeschlagen",
+  "resendFailedDesc": "Bitte versuchen Sie es später erneut.",
+
+  "verifiedButton": "Ich habe meine E-Mail bestätigt",
+  "resendButton": "E-Mail erneut senden",
+  "resendCooldown": "Erneut senden in {{seconds}}s",
+  "backToLogin": "Zurück zum Login"
+}
 }

@@ -55,6 +55,7 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import CustomNav from "../components/common/CustomNav";
+import { groupChatExists } from "../services/GroupChat.service";
 
 const { width } = Dimensions.get("window");
 
@@ -195,6 +196,7 @@ function OfferDetail({ navigation, route }) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
+  const [showAllSubTasks, setShowAllSubTasks] = useState(false);
 
   const [translatedOffer, setTranslatedOffer] = useState({
     taskType: "",
@@ -215,6 +217,7 @@ function OfferDetail({ navigation, route }) {
   const [hasApplied, setHasApplied] = useState(false);
   const [isWorker, setIsWorker] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [hasGroupChat, setHasGroupChat] = useState(false);
 
   const db = FIREBASE_DB;
   const imageObjects =
@@ -246,6 +249,76 @@ function OfferDetail({ navigation, route }) {
 
     return unsubscribe;
   }, [jobId, initialPostRequest]);
+  // Format scheduled date and time
+  const formatScheduledDateTime = () => {
+    if (postRequest?.scheduledDateTime) {
+      const date = new Date(postRequest.scheduledDateTime);
+      return date.toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else if (postRequest?.selectedDate && postRequest?.selectedTime) {
+      const date = new Date(postRequest.selectedDate);
+      const time = new Date(postRequest.selectedTime);
+      date.setHours(time.getHours(), time.getMinutes());
+      return date.toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    const checkGroupChat = async () => {
+      if (postRequest?.id && confirmedWorkers.length > 0) {
+        const exists = await groupChatExists(postRequest.id);
+        setHasGroupChat(exists);
+      } else {
+        setHasGroupChat(false);
+      }
+    };
+    checkGroupChat();
+  }, [confirmedWorkers, postRequest?.id]);
+
+  // Get duration label
+  const getDurationLabel = () => {
+    if (postRequest?.durationLabel) {
+      return postRequest.durationLabel;
+    }
+    if (postRequest?.estimatedDuration) {
+      const durationOptions = [
+        { value: "less_than_1", label: "< 1 hour" },
+        { value: "1_2_hours", label: "1-2 hours" },
+        { value: "2_4_hours", label: "2-4 hours" },
+        { value: "4_6_hours", label: "4-6 hours" },
+        { value: "6_8_hours", label: "6-8 hours" },
+        { value: "full_day", label: "Full day" },
+        { value: "multiple_days", label: "Multiple days" },
+      ];
+      const duration = durationOptions.find(
+        (d) => d.value === postRequest.estimatedDuration,
+      );
+      return duration?.label || "Duration not specified";
+    }
+    return null;
+  };
+
+  // Get sub-tasks to display
+  const selectedSubTasks = postRequest?.selectedSubTasks || [];
+  const displaySubTasks = showAllSubTasks
+    ? selectedSubTasks
+    : selectedSubTasks.slice(0, 5);
+  const hasMoreSubTasks = selectedSubTasks.length > 5;
+
+  const scheduledDateTime = formatScheduledDateTime();
+  const durationLabel = getDurationLabel();
 
   // Animations
   useEffect(() => {
@@ -280,6 +353,7 @@ function OfferDetail({ navigation, route }) {
       }
     }
   }, [postRequest, currentUserId]);
+
 
   // Check if user can apply
   const canApply = () => {
@@ -356,20 +430,63 @@ function OfferDetail({ navigation, route }) {
   // Real-time acceptance status monitoring
   useEffect(() => {
     if (!postRequest?.id) return;
+
     const taskDocRef = doc(db, "taskRequests", postRequest.id);
+
     const unsubscribe = onSnapshot(taskDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const updatedData = docSnap.data();
-        if (updatedData?.acceptedBy) {
-          setIsAccepted(true);
-        } else {
-          setIsAccepted(false);
-        }
+      if (!docSnap.exists()) return;
+
+      const updatedData = docSnap.data();
+
+      // Acceptance status
+      setIsAccepted(!!updatedData.acceptedBy);
+
+      // Applied & confirmed workers
+      setAppliedWorkers(updatedData.appliedWorkers || []);
+      setConfirmedWorkers(updatedData.confirmedWorkers || []);
+
+      // Update confirmed state for current user
+      if (currentUserId) {
+        const confirmed = (updatedData.confirmedWorkers || []).some(
+          (worker) => worker.userId === currentUserId,
+        );
+        const hasApplied = (updatedData.appliedWorkers || []).some(
+          (worker) => worker.userId === currentUserId,
+        );
+
+        setConfirmed(confirmed);
+        setHasApplied(hasApplied);
       }
+
+      // Reviews & average rating
+      if (updatedData.reviews && updatedData.reviews.length > 0) {
+        const taskOwnerId = updatedData.userId;
+        const reviewsAboutTaskOwner = updatedData.reviews.filter(
+          (review) => review.recipient?.userId === taskOwnerId,
+        );
+        setTranslatedReviews(reviewsAboutTaskOwner);
+
+        const ratings = reviewsAboutTaskOwner
+          .map((r) => r.rating)
+          .filter(Boolean);
+        setAverageRating(
+          ratings.length > 0
+            ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(
+                1,
+              )
+            : null,
+        );
+      } else {
+        setTranslatedReviews([]);
+        setAverageRating(null);
+      }
+
+      // If you want, you can update other postRequest fields here too
+      // e.g., numberOfWorkers, taskType, description, etc.
     });
 
     return () => unsubscribe();
-  }, [postRequest?.id]);
+  }, [postRequest?.id, currentUserId]);
 
   // Modal handlers
   const handleModalClose = () => {
@@ -422,6 +539,18 @@ function OfferDetail({ navigation, route }) {
     }
   }, [postRequest]);
 
+  // Translate sub-tasks if needed
+  const translateSubTasks = async (subTasks) => {
+    if (!subTasks || subTasks.length === 0) return [];
+    const translated = await Promise.all(
+      subTasks.map(async (subTask) => ({
+        ...subTask,
+        name: await translateWithCache(subTask.name || ""),
+      })),
+    );
+    return translated;
+  };
+
   // Translate reviews and calculate average rating
   useEffect(() => {
     const translateReviews = async () => {
@@ -455,13 +584,25 @@ function OfferDetail({ navigation, route }) {
   }, [postRequest?.reviews]);
 
   // Chat handler
+  // 1:1 chat with task owner (non-bulk or non-confirmed workers)
   const handleStartChat = async () => {
     const chatId = await createNewChat(currentUserId, postRequest.userId);
     navigation.navigate("Chat", {
-      chatId: chatId,
+      chatId,
       senderId: currentUserId,
       senderName: currentUser.userData.userName,
       receiver: postRequest.user,
+    });
+  };
+
+  // Group chat for confirmed workers and owner
+  const handleOpenGroupChat = () => {
+    navigation.navigate("GroupChat", {
+      groupChatId: postRequest.id,
+      currentUserId,
+      currentUserName: currentUser?.userData?.userName,
+      taskType: postRequest?.taskType,
+      customTaskTitle: postRequest?.customTaskTitle,
     });
   };
 
@@ -876,7 +1017,7 @@ function OfferDetail({ navigation, route }) {
    if (isLoadingTask) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.white }}>
-        <Text style={{ color: theme.darkGrey }}>{t("common.loading") || "Loading..."}</Text>
+        <Text style={{ color: theme.darkGrey }}>{t("taskApplicants.loading") || "Loading..."}</Text>
       </View>
     );
   }
@@ -896,6 +1037,9 @@ function OfferDetail({ navigation, route }) {
 
 
   
+  const isPostOwner = currentUserId === postRequest?.userId;
+
+  // console.log("hasApplied...........",hasApplied)
 
   return (
     <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
@@ -904,7 +1048,6 @@ function OfferDetail({ navigation, route }) {
         backgroundColor={"transparent"}
         translucent
       />
-      {/* <CustomNav title={t("details.txt1")} showBack={true} /> */}
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -1023,8 +1166,6 @@ function OfferDetail({ navigation, route }) {
 
         {/* Main Content */}
         <Animated.View style={[styles.contentContainer, { opacity: fadeAnim }]}>
-          {/* User Info Card - Light Background */}
-          {/* User Info Card - Light Background */}
           <View style={styles.userCardContainer}>
             <BlurView
               intensity={80}
@@ -1042,7 +1183,7 @@ function OfferDetail({ navigation, route }) {
                 style={styles.gradientOverlay}
               />
 
-              <View style={styles.userInfo}>
+              <View style={[styles.userInfo, {backgroundColor:Colors.primary + "05"}]}>
                 <View style={styles.avatarContainer}>
                   <LinearGradient
                     colors={[Colors.primary, "#4557B0"]}
@@ -1109,6 +1250,7 @@ function OfferDetail({ navigation, route }) {
                 {/* Share Button (Replaces the chat button) */}
                 <ShareButton
                   jobId={postRequest?.id}
+                  color="white"
                   jobTitle={
                     postRequest?.taskType === "Other"
                       ? postRequest?.customTaskTitle || postRequest?.taskType
@@ -1119,15 +1261,139 @@ function OfferDetail({ navigation, route }) {
                   style={[
                     styles.shareButton,
                     {
-                      backgroundColor: Colors.primary + "30",
+                      backgroundColor: Colors.primary ,
                     },
                   ]}
                 />
+               
               </View>
             </BlurView>
           </View>
 
-          {/* Task Description Card - Light Background */}
+          {/* Scheduled Date & Time Card */}
+          {(scheduledDateTime || durationLabel) && (
+            <View
+              style={[
+                styles.detailCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? Colors.lightGrey + "10"
+                      : Colors.primary + "05",
+                },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="calendar"
+                  size={RFPercentage(2.2)}
+                  color={Colors.primary}
+                />
+                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                  {"Scheduled Date & Time"}
+                </Text>
+              </View>
+
+              <View style={styles.scheduledContainer}>
+                {scheduledDateTime && (
+                  <View style={styles.scheduledItem}>
+                    <Ionicons
+                      name="calendar-outline"
+                      size={RFPercentage(2)}
+                      color={Colors.primary}
+                    />
+                    <Text
+                      style={[styles.scheduledText, { color: theme.darkGrey }]}
+                    >
+                      {scheduledDateTime}
+                    </Text>
+                  </View>
+                )}
+
+                {durationLabel && (
+                  <View style={styles.scheduledItem}>
+                    <Ionicons
+                      name="time-outline"
+                      size={RFPercentage(2)}
+                      color={Colors.primary}
+                    />
+                    <Text
+                      style={[styles.scheduledText, { color: theme.darkGrey }]}
+                    >
+                      {durationLabel}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Sub-Tasks Section */}
+          {selectedSubTasks.length > 0 && (
+            <View
+              style={[
+                styles.detailCard,
+                {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? Colors.lightGrey + "10"
+                      : Colors.primary + "05",
+                },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons
+                  name="list"
+                  size={RFPercentage(2.2)}
+                  color={Colors.primary}
+                />
+                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                  {"Sub-tasks"}
+                </Text>
+              </View>
+
+              <View style={styles.subTasksList}>
+                {displaySubTasks.map((subTask, idx) => (
+                  <View
+                    key={subTask.id || idx}
+                    style={[
+                      styles.subTaskTag,
+                      { backgroundColor: `${Colors.primary}15` },
+                    ]}
+                  >
+                    <FontAwesome5
+                      name={subTask.icon || "tag"}
+                      size={RFPercentage(1.2)}
+                      color={Colors.primary}
+                    />
+                    <Text
+                      style={[styles.subTaskText, { color: Colors.primary }]}
+                      numberOfLines={1}
+                    >
+                      {subTask.name}
+                    </Text>
+                  </View>
+                ))}
+                {hasMoreSubTasks && !showAllSubTasks && (
+                  <TouchableOpacity
+                    onPress={() => setShowAllSubTasks(true)}
+                    style={[
+                      styles.subTaskTag,
+                      { backgroundColor: theme.darkGrey + "10" },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.subTaskText, { color: theme.darkGrey }]}
+                    >
+                      +{selectedSubTasks.length - 5} more
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Task Description Card */}
           <View
             style={[
               styles.detailCard,
@@ -1387,7 +1653,7 @@ function OfferDetail({ navigation, route }) {
             </View>
           )}
 
-          {/* Task Info Cards - Light Backgrounds */}
+          {/* Task Info Cards */}
           <View style={styles.infoGrid}>
             {/* Location Card */}
             <View
@@ -1469,7 +1735,7 @@ function OfferDetail({ navigation, route }) {
               </View>
             </View>
 
-            {/* Date Card */}
+            {/* Created Date Card */}
             <View
               style={[
                 styles.infoCard,
@@ -1488,13 +1754,13 @@ function OfferDetail({ navigation, route }) {
                 ]}
               >
                 <Ionicons
-                  name="calendar"
+                  name="create"
                   size={RFPercentage(2.2)}
                   color="#9C27B0"
                 />
               </View>
               <Text style={[styles.infoLabel, { color: theme.darkGrey }]}>
-                {t("details.txt5")}
+                {t("myRequests.txt4") || "Posted"}
               </Text>
               <View style={styles.infoValueContainer}>
                 <Text style={[styles.infoValue, { color: theme.heading }]}>
@@ -1504,7 +1770,7 @@ function OfferDetail({ navigation, route }) {
             </View>
           </View>
 
-          {/* Reviews Section - Light Background */}
+          {/* Reviews Section */}
           {(translatedReviews?.length > 0 || averageRating) && (
             <View
               style={[
@@ -1660,50 +1926,68 @@ function OfferDetail({ navigation, route }) {
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
             {isAccepted ? (
-              <CustomAppButton
-                title={t("details.txt9")}
-                onPress={handleStartChat}
-                icon="chatbubble-ellipses"
-                disabled={!isChatEnabled()}
-              />
+              <>
+                {!isPostOwner && (
+                  <CustomAppButton
+                    title={t("details.txt9")}
+                    onPress={handleStartChat}
+                    icon="chatbubble-ellipses"
+                    disabled={!isChatEnabled()}
+                  />
+                )}
+              </>
             ) : isBulkRequest ? (
               <>
-                {/* Chat Button - Conditionally Enabled */}
-                <TouchableOpacity
-                  style={[
-                    styles.secondaryButton,
-                    {
-                      borderColor: theme.lightGrey,
-                      backgroundColor: !isChatEnabled()
-                        ? theme.lightGrey + "30"
-                        : theme.mode === "dark"
-                          ? theme.white + "10"
-                          : Colors.primary + "08",
-                      opacity: isChatEnabled() ? 1 : 0.5,
-                    },
-                  ]}
-                  onPress={handleStartChat}
-                  activeOpacity={0.8}
-                  disabled={!isChatEnabled()}
-                >
-                  <Ionicons
-                    name="chatbubble-ellipses"
-                    size={RFPercentage(1.8)}
-                    color={isChatEnabled() ? theme.darkGrey : theme.lightGrey}
-                  />
-                  <Text
+                {/* Chat Button - Only show if not post owner */}
+                {
+                  <TouchableOpacity
                     style={[
-                      styles.secondaryButtonText,
+                      styles.secondaryButton,
                       {
-                        color: isChatEnabled()
-                          ? theme.darkGrey
-                          : theme.lightGrey,
+                        borderColor:
+                          hasGroupChat && (confirmed || isPostOwner)
+                            ? theme.secondary
+                            : theme.lightGrey + "30",
+                        backgroundColor:
+                          hasGroupChat && (confirmed || isPostOwner)
+                            ? theme.secondary
+                            : theme.lightGrey + "30",
+                        opacity:
+                          hasGroupChat && (confirmed || isPostOwner) ? 1 : 0.5,
                       },
                     ]}
+                    onPress={
+                      hasGroupChat && (confirmed || isPostOwner)
+                        ? handleOpenGroupChat
+                        : undefined
+                    }
+                    activeOpacity={0.8}
+                    disabled={!(hasGroupChat && (confirmed || isPostOwner))}
                   >
-                    {t("details.txt9")}
-                  </Text>
-                </TouchableOpacity>
+                    <Ionicons
+                      name="chatbubbles"
+                      size={RFPercentage(1.8)}
+                      color={
+                        hasGroupChat && (confirmed || isPostOwner)
+                          ? Colors.white
+                          : theme.lightGrey
+                      }
+                    />
+                    <Text
+                      style={[
+                        styles.secondaryButtonText,
+                        {
+                          color:
+                            hasGroupChat && (confirmed || isPostOwner)
+                              ? Colors.white
+                              : theme.lightGrey,
+                        },
+                      ]}
+                    >
+                      {t("taskApplicants.group")}
+                    </Text>
+                  </TouchableOpacity>
+                }
 
                 {/* Apply/Accept Button */}
                 {currentUserId === postRequest?.userId ? (
@@ -1712,15 +1996,11 @@ function OfferDetail({ navigation, route }) {
                       t("offerDetail.viewApplications") || "View Applications"
                     }
                     onPress={() =>
-                      navigation.navigate("ApplicationsScreen", {
-                        postId: postRequest.id,
-                        appliedWorkers,
-                        confirmedWorkers,
-                        numberOfWorkers,
+                      navigation.navigate("TaskApplicantsScreen", {
+                        taskId: postRequest?.id,
                       })
                     }
                     icon="list"
-                    disabled={appliedWorkers.length === 0}
                   />
                 ) : // Worker - Apply Button
                 hasApplied || confirmed ? (
@@ -1761,43 +2041,53 @@ function OfferDetail({ navigation, route }) {
               </>
             ) : (
               <>
-                <TouchableOpacity
-                  style={[
-                    styles.secondaryButton,
-                    {
-                      borderColor: theme.lightGrey,
-                      backgroundColor:
-                        theme.mode === "dark"
-                          ? theme.white + "10"
-                          : Colors.primary + "08",
-                    },
-                  ]}
-                  onPress={handleStartChat}
-                  activeOpacity={0.8}
-                  disabled={currentUserId === postRequest.userId}
-                >
-                  <Ionicons
-                    name="chatbubble-ellipses"
-                    size={RFPercentage(1.8)}
-                    color={theme.darkGrey}
-                  />
-                  <Text
+                {/* Chat Button - Only show if not post owner */}
+                {!isPostOwner && (
+                  <TouchableOpacity
                     style={[
-                      styles.secondaryButtonText,
-                      { color: theme.darkGrey },
+                      styles.secondaryButton,
+                      {
+                        borderColor: theme.lightGrey,
+                        backgroundColor: !isChatEnabled()
+                          ? theme.lightGrey + "30"
+                          : theme.mode === "dark"
+                            ? theme.white + "10"
+                            : Colors.primary + "08",
+                        opacity: isChatEnabled() ? 1 : 0.5,
+                      },
                     ]}
+                    onPress={handleStartChat}
+                    activeOpacity={0.8}
+                    disabled={!isChatEnabled()}
                   >
-                    {t("details.txt9")}
-                  </Text>
-                </TouchableOpacity>
-
-                <CustomAppButton
-                  title={t("details.txt12")}
-                  onPress={handleAccept}
-                  loading={loading}
-                  icon="checkmark-circle"
-                  disabled={currentUserId === postRequest.userId}
-                />
+                    <Ionicons
+                      name="chatbubble-ellipses"
+                      size={RFPercentage(1.8)}
+                      color={isChatEnabled() ? theme.darkGrey : theme.lightGrey}
+                    />
+                    <Text
+                      style={[
+                        styles.secondaryButtonText,
+                        {
+                          color: isChatEnabled()
+                            ? theme.darkGrey
+                            : theme.lightGrey,
+                        },
+                      ]}
+                    >
+                      {t("details.txt9")}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {!isPostOwner && (
+                  <CustomAppButton
+                    title={t("details.txt12")}
+                    onPress={handleAccept}
+                    loading={loading}
+                    icon="checkmark-circle"
+                    disabled={currentUserId === postRequest.userId}
+                  />
+                )}
               </>
             )}
           </View>
@@ -1958,7 +2248,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
   },
-
   detailCard: {
     borderRadius: 16,
     padding: RFPercentage(2),
@@ -2348,6 +2637,39 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.25),
     justifyContent: "center",
     alignItems: "center",
+  },
+  scheduledContainer: {
+    width: "100%",
+  },
+  scheduledItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(1),
+  },
+  scheduledText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    marginLeft: RFPercentage(1),
+    flex: 1,
+  },
+  subTasksList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
+  subTaskTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(1.5),
+    marginRight: RFPercentage(1),
+    marginBottom: RFPercentage(0.8),
+  },
+  subTaskText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: RFPercentage(0.5),
   },
 });
 

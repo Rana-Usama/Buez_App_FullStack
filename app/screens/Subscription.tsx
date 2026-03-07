@@ -31,7 +31,7 @@ import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-function Subscription(props) {
+function Subscription({ navigation, route }) {
   const { t } = useTranslation();
   const { userData } = useUser();
   const userId = getAuth()?.currentUser?.uid;
@@ -43,6 +43,7 @@ function Subscription(props) {
   const [selectedPlan, setSelectedPlan] = useState("monthly");
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { newUser } = route.params ?? false;
 
   const prices = {
     monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
@@ -50,7 +51,7 @@ function Subscription(props) {
     free: { USD: 0, EUR: 0, CHF: 0 },
   };
 
-  const locale = Localization.locale;
+  const locale = Localization?.locale;
   const userCurrency = getCurrencyFromLocale(locale);
 
   const priceLabelForPlan = (planId) => {
@@ -69,9 +70,13 @@ function Subscription(props) {
       userId,
       t,
     });
-    console.log("res...............", res);
+
     if (res.success) {
-      props.navigation.navigate("TabNavigator");
+      if (userData?.interests === undefined) {
+        navigation.navigate("InterestSelection");
+      } else {
+        navigation.navigate("TabNavigator");
+      }
     }
     setLoading(false);
   };
@@ -110,7 +115,7 @@ function Subscription(props) {
       period: t("subscriptionV2.perYear"),
       originalPrice: formatCurrency(
         prices.monthly[userCurrency] * 12,
-        userCurrency
+        userCurrency,
       ),
       description: t("subscriptionV2.bestValue"),
       features: [
@@ -129,7 +134,7 @@ function Subscription(props) {
   const handleScroll = (event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(
-      contentOffsetX / (screenWidth * 0.8 + RFPercentage(2))
+      contentOffsetX / (screenWidth * 0.8 + RFPercentage(2)),
     );
     if (index >= 0 && index < plans.length) {
       setCurrentIndex(index);
@@ -258,10 +263,10 @@ function Subscription(props) {
                 backgroundColor: item.popular
                   ? theme.secondary
                   : item.id === "yearly"
-                  ? theme.secondary
-                  : theme.mode === "dark"
-                  ? Colors.primary + "40"
-                  : Colors.primary + "15",
+                    ? theme.secondary
+                    : theme.mode === "dark"
+                      ? Colors.primary + "40"
+                      : Colors.primary + "15",
               },
             ]}
           >
@@ -326,11 +331,11 @@ function Subscription(props) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-       <StatusBar
-              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-              backgroundColor={"transparent"}
-              translucent
-            />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
 
       <ScrollView
         style={styles.container}

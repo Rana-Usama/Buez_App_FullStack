@@ -22,7 +22,6 @@ import {
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 // shared
 import { uploadImage } from "./Shared.service";
-import { translateText } from "../translation/googleTranslation";
 import { REQUEST_STATUS } from "../utils/gloabals";
 
 const db = FIREBASE_DB;

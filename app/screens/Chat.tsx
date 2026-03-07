@@ -9,15 +9,22 @@ import {
   TextInput,
   StatusBar,
   ImageBackground,
-  Modal,
   ActivityIndicator,
+  FlatList,
 } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  memo,
+} from "react";
 import {
   GiftedChat,
-  InputToolbar,
   Bubble,
   Day,
+  InputToolbar,
 } from "react-native-gifted-chat";
 import {
   collection,
@@ -32,7 +39,6 @@ import {
   doc,
   updateDoc,
   where,
-  writeBatch,
   getDoc,
   deleteDoc,
 } from "firebase/firestore";
@@ -45,8 +51,91 @@ import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { Icons } from "../config/theme";
+import { Linking } from "react-native";
+import ClickableMessageText from "../components/common/ClickableMessageText";
+const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 
-const Chat = ({ navigation, route }) => {
+// ─── Constants ────────────────────────────────────────────────────────────────
+const INITIAL_LOAD_LIMIT = 20;
+const LOAD_MORE_LIMIT = 20;
+
+// ─── Helper: Map a Firestore doc → GiftedChat message ─────────────────────────
+const mapFirestoreDoc = async (
+  docSnap: any,
+  skipTranslation = false,
+): Promise<any> => {
+  const data = docSnap.data();
+  const text = skipTranslation ? data.text : await cachedTranslate(data.text);
+  return {
+    _id: docSnap.id,
+    text,
+    createdAt: data.timestamp.toDate(),
+    user: {
+      _id: data.senderId,
+      name: data.senderName,
+    },
+    _timestamp: data.timestamp, // keep raw Timestamp for cursor
+  };
+};
+
+// ─── Sub-components (memoised) ────────────────────────────────────────────────
+
+const DeleteModal = memo(
+  ({
+    visible,
+    onConfirm,
+    onCancel,
+    theme,
+    t,
+  }: {
+    visible: boolean;
+    onConfirm: () => void;
+    onCancel: () => void;
+    theme: any;
+    t: any;
+  }) => {
+    if (!visible) return null;
+    return (
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+          <Text style={[styles.modalTitle, { color: theme.heading }]}>
+            {t("chat.txt3")}
+          </Text>
+          <Text style={[styles.modalText, { color: theme.darkGrey }]}>
+            {t("chat.txt4")}
+          </Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[styles.cancel, { borderColor: theme.lightGrey }]}
+              onPress={onCancel}
+            >
+              <Text
+                style={{
+                  color: theme.heading,
+                  fontFamily: "Poppins_500Medium",
+                  fontSize: RFPercentage(1.7),
+                }}
+              >
+                {t("buttons.cancel")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.markButton}
+              onPress={onConfirm}
+            >
+              <Text style={styles.txt}>{t("chat.txt5")}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  },
+);
+
+// ─── Main Component ────────────────────────────────────────────────────────────
+const Chat = ({ navigation, route }: any) => {
   const { t } = useTranslation();
   const {
     chatId,
@@ -54,253 +143,492 @@ const Chat = ({ navigation, route }) => {
     senderName,
     receiver,
   } = route.params;
-  const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState("");
   const { theme } = useAppTheme();
-  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [selectedMessageId, setSelectedMessageId] = useState(null);
+
+  const [messages, setMessages] = useState<any[]>([]);
+  const [inputText, setInputText] = useState("");
   const [loader, setLoader] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    const listenForNewMessages = () => {
-      const lastLoadedTimestamp =
-        messages.length > 0
-          ? Timestamp.fromDate(messages[messages.length - 1].createdAt)
-          : Timestamp.now();
-      const q = query(
-        collection(FIREBASE_DB, `chats/${chatId}/messages`),
-        where("timestamp", ">", lastLoadedTimestamp),
-        orderBy("timestamp", "asc")
-      );
-      const unsubscribe = onSnapshot(q, async (snapshot) => {
-        const newMessages = await Promise.all(
-          snapshot.docs.map(async (doc) => {
-            const firebaseMessage = doc.data();
-            const translatedText = await cachedTranslate(firebaseMessage?.text);
-            return {
-              _id: doc.id,
-              text: translatedText,
-              createdAt: firebaseMessage.timestamp.toDate(),
-              user: {
-                _id: firebaseMessage.senderId,
-                name: firebaseMessage.senderName,
-              },
-            };
-          })
-        );
+  // Delete modal state
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
+    null,
+  );
 
-        setMessages((prevMessages) => {
-          const messagesMap = new Map();
-          prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-          newMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-          const sortedMessages = Array.from(messagesMap.values()).sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-          return GiftedChat.append([], sortedMessages).filter(Boolean);
-        });
-      });
+  // Refs — avoid stale closures and unnecessary re-renders
+  const lastDocRef = useRef<any>(null); // cursor for pagination
+  const listenerAttachedRef = useRef(false);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
 
-      return unsubscribe;
-    };
-    if (chatId) {
-      return listenForNewMessages();
-    }
+  // ── Merge helper (dedup + sort desc) ──────────────────────────────────────
+  const mergeMessages = useCallback((prev: any[], incoming: any[]): any[] => {
+    if (!incoming.length) return prev;
+    const map = new Map<string, any>();
+    prev.forEach((m) => map.set(m._id, m));
+    incoming.forEach((m) => map.set(m._id, m));
+    return Array.from(map.values()).sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }, []);
 
-  const markMessagesAsRead = async () => {
-    if (!chatId || !currentUserId) return;
-    try {
-      // Get unread messages sent by the other user
-      const docRef = doc(FIREBASE_DB, "chats", chatId);
-      await updateDoc(docRef, { unread: false });
-    } catch (error) {
-      console.error("Error marking messages as read:", error);
-    }
-  };
+  // ── Attach real-time listener for new messages ─────────────────────────────
+  const attachListener = useCallback(
+    (afterTimestamp: Timestamp) => {
+      if (listenerAttachedRef.current) return;
+      listenerAttachedRef.current = true;
 
+      const q = query(
+        collection(FIREBASE_DB, `chats/${chatId}/messages`),
+        where("timestamp", ">", afterTimestamp),
+        orderBy("timestamp", "asc"),
+      );
+
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        if (snapshot.empty) return;
+
+        const incoming = await Promise.all(
+          snapshot.docs.map((d) =>
+            mapFirestoreDoc(d, d.data().senderId === currentUserId),
+          ),
+        );
+
+        setMessages((prev) => mergeMessages(prev, incoming));
+      });
+
+      unsubscribeRef.current = unsubscribe;
+    },
+    [chatId, currentUserId, mergeMessages],
+  );
+
+  // ── Initial fetch ──────────────────────────────────────────────────────────
   useEffect(() => {
-    const fetchInitialMessages = async () => {
-      // if (chatCache.data[chatId]) return;
+    let cancelled = false;
+
+    const fetchInitial = async () => {
+      if (!chatId) return;
+      setLoader(true);
       try {
-        setLoader(true);
         const q = query(
           collection(FIREBASE_DB, `chats/${chatId}/messages`),
           orderBy("timestamp", "desc"),
-          limit(100)
+          limit(INITIAL_LOAD_LIMIT),
         );
         const snapshot = await getDocs(q);
 
-        const initialMessages = await Promise.all(
-          snapshot.docs.map(async (doc) => {
-            const firebaseMessage = doc.data();
-            const translatedText = await cachedTranslate(firebaseMessage?.text);
-            return {
-              _id: doc.id,
-              text: translatedText,
-              createdAt: firebaseMessage.timestamp.toDate(),
-              user: {
-                _id: firebaseMessage.senderId,
-                name: firebaseMessage.senderName,
-              },
-            };
-          })
+        if (cancelled) return;
+
+        if (snapshot.docs.length < INITIAL_LOAD_LIMIT) setHasMore(false);
+
+        // Store the oldest doc as the pagination cursor
+        lastDocRef.current = snapshot.docs[snapshot.docs.length - 1] ?? null;
+
+        // Translate in parallel; skip translation for own messages
+        const initial = await Promise.all(
+          snapshot.docs.map((d) =>
+            mapFirestoreDoc(d, d.data().senderId === currentUserId),
+          ),
         );
 
-        // setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        if (cancelled) return;
 
-        setMessages((prevMessages) => {
-          const messagesMap = new Map();
-          prevMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-          initialMessages.forEach((msg) => messagesMap.set(msg._id, msg));
-          const mergedMessages = Array.from(messagesMap.values()).sort(
+        setMessages(
+          initial.sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-          // chatCache.data[chatId] = mergedMessages;
-          return GiftedChat.append([], mergedMessages).filter(Boolean);
-        });
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          ),
+        );
+
+        // Mark as read (fire-and-forget)
         markMessagesAsRead();
-      } catch (error) {
-        console.error("Error fetching messages:", error);
+
+        // Attach listener from NOW (newest message timestamp or now)
+        const newestTimestamp =
+          snapshot.docs[0]?.data().timestamp ?? Timestamp.now();
+        attachListener(newestTimestamp);
+      } catch (err) {
+        console.error("fetchInitial error:", err);
       } finally {
-        setLoader(false); // stop loader
+        if (!cancelled) setLoader(false);
       }
     };
-    fetchInitialMessages();
+
+    fetchInitial();
+
+    return () => {
+      cancelled = true;
+      unsubscribeRef.current?.();
+      listenerAttachedRef.current = false;
+    };
   }, [chatId]);
 
-  const onSend = useCallback(async (messages = []) => {
-    const message = messages[0];
-    const newMessage = {
-      text: message.text,
-      timestamp: Timestamp.now(),
-      senderId: currentUserId,
-      senderName: senderName,
-      unread: true,
-    };
-
-    // Save message to Firestore
-    setMessage("");
+  // ── Load older messages (pagination) ──────────────────────────────────────
+  const loadMoreMessages = useCallback(async () => {
+    if (loadingMore || !hasMore || !lastDocRef.current) return;
+    setLoadingMore(true);
     try {
-      await addDoc(
-        collection(FIREBASE_DB, `chats/${chatId}/messages`),
-        newMessage
-      );
-      const chatRef = doc(FIREBASE_DB, "chats", chatId);
-      await updateDoc(chatRef, {
-        ...message,
-        unread: true,
-        senderId: currentUserId,
-        senderName: senderName,
-        lastMessage: message,
-        lastMessageTimestamp: Timestamp.now(),
-      });
-      sendPushNotification(message?.text);
-    } catch (e) {
-      console.log(e);
-    }
-  }, []);
-
-  async function sendPushNotification(message) {
-    try {
-      const response = await fetch(
-        "https://buez-server-khaki.vercel.app/api/send-notification",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fcmToken: receiver?.token,
-            title: senderName,
-            body: message,
-          }),
-        }
-      );
-      const data = await response.text();
-      return data;
-    } catch (error) {
-      console.log("sendPushNotification error:", error);
-      throw error;
-    }
-  }
-
-  const deleteMessage = async (messageId) => {
-    try {
-      const messageRef = doc(
-        FIREBASE_DB,
-        `chats/${chatId}/messages`,
-        messageId
-      );
-      await deleteDoc(messageRef);
-      setMessages((prevMessages) =>
-        prevMessages.filter((msg) => msg._id !== messageId)
-      );
       const q = query(
         collection(FIREBASE_DB, `chats/${chatId}/messages`),
         orderBy("timestamp", "desc"),
-        limit(1)
+        startAfter(lastDocRef.current),
+        limit(LOAD_MORE_LIMIT),
       );
       const snapshot = await getDocs(q);
-      const chatRef = doc(FIREBASE_DB, "chats", chatId);
-      if (!snapshot.empty) {
-        const latestDoc = snapshot.docs[0];
-        const latestMsg = latestDoc.data();
-        await updateDoc(chatRef, {
-          lastMessage: {
-            text: latestMsg.text,
-            createdAt: latestMsg.timestamp,
-            senderId: latestMsg.senderId,
-            senderName: latestMsg.senderName,
-            unread: latestMsg.unread ?? false,
-          },
-          lastMessageTimestamp: latestMsg.timestamp,
-        });
-      } else {
-        await updateDoc(chatRef, {
-          lastMessage: null,
-          lastMessageTimestamp: null,
-        });
+      if (snapshot.empty) {
+        setHasMore(false);
+        return;
       }
-    } catch (error) {
-      console.log("Failed to delete message:", error);
+      if (snapshot.docs.length < LOAD_MORE_LIMIT) setHasMore(false);
+      lastDocRef.current = snapshot.docs[snapshot.docs.length - 1];
+
+      const older = await Promise.all(
+        snapshot.docs.map((d) =>
+          mapFirestoreDoc(d, d.data().senderId === currentUserId),
+        ),
+      );
+
+      setMessages((prev) => mergeMessages(prev, older));
+    } catch (err) {
+      console.error("loadMore error:", err);
+    } finally {
+      setLoadingMore(false);
     }
-  };
+  }, [chatId, currentUserId, hasMore, loadingMore, mergeMessages]);
 
-  const handleDeletePress = (messageId) => {
-    setSelectedMessageId(messageId);
+  // ── Mark as read ──────────────────────────────────────────────────────────
+  const markMessagesAsRead = useCallback(async () => {
+    if (!chatId || !currentUserId) return;
+    try {
+      await updateDoc(doc(FIREBASE_DB, "chats", chatId), { unread: false });
+    } catch (err) {
+      console.error("markMessagesAsRead error:", err);
+    }
+  }, [chatId, currentUserId]);
+
+  // ── Send message ──────────────────────────────────────────────────────────
+  const onSend = useCallback(
+    async (msgs: any[] = []) => {
+      const msg = msgs[0];
+      if (!msg?.text?.trim()) return;
+
+      const newMessage = {
+        text: msg.text,
+        timestamp: Timestamp.now(),
+        senderId: currentUserId,
+        senderName,
+        unread: true,
+      };
+
+      setInputText("");
+
+      try {
+        await addDoc(
+          collection(FIREBASE_DB, `chats/${chatId}/messages`),
+          newMessage,
+        );
+        const chatRef = doc(FIREBASE_DB, "chats", chatId);
+        await updateDoc(chatRef, {
+          unread: true,
+          senderId: currentUserId,
+          senderName,
+          lastMessage: { text: msg.text },
+          lastMessageTimestamp: Timestamp.now(),
+        });
+        sendPushNotification(msg.text);
+      } catch (err) {
+        console.error("onSend error:", err);
+      }
+    },
+    [chatId, currentUserId, senderName],
+  );
+
+  // ── Push notification (fire-and-forget) ──────────────────────────────────
+  const sendPushNotification = useCallback(
+    async (text: string) => {
+      try {
+        await fetch(
+          "https://buez-server-khaki.vercel.app/api/send-notification",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              fcmToken: receiver?.token,
+              title: senderName,
+              body: text,
+            }),
+          },
+        );
+      } catch (err) {
+        console.warn("sendPushNotification error:", err);
+      }
+    },
+    [receiver?.token, senderName],
+  );
+
+  // ── Delete message ────────────────────────────────────────────────────────
+  const deleteMessage = useCallback(
+    async (messageId: string) => {
+      try {
+        await deleteDoc(
+          doc(FIREBASE_DB, `chats/${chatId}/messages`, messageId),
+        );
+        setMessages((prev) => prev.filter((m) => m._id !== messageId));
+
+        // Update lastMessage on chat doc
+        const q = query(
+          collection(FIREBASE_DB, `chats/${chatId}/messages`),
+          orderBy("timestamp", "desc"),
+          limit(1),
+        );
+        const snapshot = await getDocs(q);
+        const chatRef = doc(FIREBASE_DB, "chats", chatId);
+        if (!snapshot.empty) {
+          const d = snapshot.docs[0].data();
+          await updateDoc(chatRef, {
+            lastMessage: {
+              text: d.text,
+              createdAt: d.timestamp,
+              senderId: d.senderId,
+              senderName: d.senderName,
+              unread: d.unread ?? false,
+            },
+            lastMessageTimestamp: d.timestamp,
+          });
+        } else {
+          await updateDoc(chatRef, {
+            lastMessage: null,
+            lastMessageTimestamp: null,
+          });
+        }
+      } catch (err) {
+        console.error("deleteMessage error:", err);
+      }
+    },
+    [chatId],
+  );
+
+  const handleDeletePress = useCallback((id: string) => {
+    setSelectedMessageId(id);
     setDeleteModalVisible(true);
-  };
+  }, []);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (selectedMessageId) {
       await deleteMessage(selectedMessageId);
       setSelectedMessageId(null);
     }
     setDeleteModalVisible(false);
-  };
+  }, [selectedMessageId, deleteMessage]);
 
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setSelectedMessageId(null);
     setDeleteModalVisible(false);
-  };
+  }, []);
 
+  // ─── Memoised GiftedChat render props ─────────────────────────────────────
+
+  const renderInputToolbar = useCallback(
+    (props: any) => (
+      <View style={[styles.wrap, { backgroundColor: theme.white }]}>
+        <InputToolbar
+          {...props}
+          containerStyle={[
+            styles.toolbar,
+            {
+              backgroundColor:
+                theme.mode === "dark" ? "transparent" : "rgba(241,241,241,1)",
+              borderColor:
+                theme.mode === "dark" ? Colors.darkGrey : "rgba(234,233,233,1)",
+              borderTopColor:
+                theme.mode === "dark" ? Colors.darkGrey : "rgba(234,233,233,1)",
+            },
+          ]}
+          renderComposer={() => (
+            <TextInput
+              style={[styles.customTextInput, { color: theme.black }]}
+              placeholder={`${t("chat.txt2")}`}
+              placeholderTextColor="rgba(145,144,144,1)"
+              value={inputText}
+              onChangeText={setInputText}
+              multiline
+              scrollEnabled
+              textAlignVertical="top"
+              autoCorrect={false}
+              autoComplete="off"
+              spellCheck={false}
+              keyboardType="default"
+            />
+          )}
+          renderSend={() => (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.sendButton}
+              disabled={!inputText.trim()}
+              onPress={() => {
+                if (!inputText.trim()) return;
+                onSend([
+                  {
+                    text: inputText.trim(),
+                    user: { _id: currentUserId, name: senderName },
+                    createdAt: new Date(),
+                  },
+                ]);
+              }}
+            >
+              <Feather
+                name="send"
+                size={RFPercentage(2.6)}
+                color={theme.mode === "dark" ? Colors.white : Colors.primary}
+              />
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    ),
+    [inputText, theme, t, onSend, currentUserId, senderName],
+  );
+
+  const renderDay = useCallback(
+    (props: any) => <Day {...props} textStyle={styles.dateText} />,
+    [],
+  );
+
+  const renderAvatar = useCallback(
+    (props: any) => {
+      if (props.currentMessage?.user?._id === currentUserId) return null;
+      return receiver?.profileImage ? (
+        <Image source={{ uri: receiver.profileImage }} style={styles.img} />
+      ) : (
+        <View style={[styles.inner, { backgroundColor: theme.white }]}>
+          <Text style={[styles.nm, { color: theme.primary }]}>
+            {receiver?.userName?.[0] || "?"}
+          </Text>
+        </View>
+      );
+    },
+    [currentUserId, receiver, theme],
+  );
+
+  const renderBubble = useCallback(
+    (props: any) => {
+      const isFromSameUser =
+        props.currentMessage?.user?._id === props.previousMessage?.user?._id;
+      if (!props.currentMessage) return null;
+      return (
+        <View
+          style={{
+            flexDirection: "row",
+            marginVertical: isFromSameUser
+              ? RFPercentage(0.3)
+              : RFPercentage(1),
+          }}
+        >
+          <Bubble
+            {...props}
+            onLongPress={() => {
+              if (props.currentMessage?.user?._id === currentUserId) {
+                handleDeletePress(props.currentMessage._id);
+              }
+            }}
+            wrapperStyle={{
+              left: {
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? "rgba(13, 13, 20, 1)"
+                    : "rgba(239,239,239,1)",
+                padding: RFPercentage(0.6),
+                marginLeft: 0,
+              },
+              right: {
+                backgroundColor:
+                  theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                padding: RFPercentage(0.6),
+                marginRight: 0,
+              },
+            }}
+            textStyle={{
+              left: {
+                color: theme.black,
+                fontFamily: "Poppins_400Regular",
+                fontSize: RFPercentage(1.8),
+                lineHeight: RFPercentage(2.5),
+              },
+              right: {
+                color: Colors.white,
+                fontFamily: "Poppins_400Regular",
+                fontSize: RFPercentage(1.8),
+                lineHeight: RFPercentage(2.5),
+              },
+            }}
+          />
+        </View>
+      );
+    },
+    [currentUserId, theme, handleDeletePress],
+  );
+
+  // Footer shown while loading older messages
+  const renderLoadEarlier = useCallback(() => {
+    if (!loadingMore) return null;
+    return (
+      <ActivityIndicator
+        size="small"
+        color={Colors.primary}
+        style={{ marginVertical: 8 }}
+      />
+    );
+  }, [loadingMore]);
+
+  // Memoised listViewProps — stable object reference
+  const listViewProps = useMemo(
+    () => ({
+      removeClippedSubviews: true,
+      keyboardShouldPersistTaps: "handled" as const,
+      showsVerticalScrollIndicator: true,
+      initialNumToRender: 15,
+      maxToRenderPerBatch: 10,
+      windowSize: 10,
+      maintainVisibleContentPosition: {
+        minIndexForVisible: 0,
+        autoscrollToTopThreshold: 10,
+      },
+    }),
+    [],
+  );
+
+
+const renderMessageText = useCallback(
+  (props: any) => (
+    <ClickableMessageText
+      currentMessage={props.currentMessage}
+      currentUserId={currentUserId}
+      theme={theme}
+    />
+  ),
+  [currentUserId, theme],
+);
+
+
+
+
+  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={"transparent"}
+        backgroundColor="transparent"
         translucent
       />
+
+      {/* Header */}
       <View
         style={[styles.profileContainer, { borderBottomColor: Colors.white5 }]}
       >
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() =>
-            navigation.navigate("TabNavigator", { screen: t("bottomTab.txt4") })
-          }
+          onPress={() => navigation.goBack()}
         >
           <Ionicons
             name="chevron-back"
@@ -308,25 +636,23 @@ const Chat = ({ navigation, route }) => {
             color={theme.heading}
           />
         </TouchableOpacity>
+
         <View style={{ marginLeft: RFPercentage(2.5) }}>
           {receiver?.profileImage ? (
-            <>
-              <Image
-                source={{ uri: receiver?.profileImage }}
-                resizeMode="cover"
-                style={styles.profile}
-              />
-            </>
+            <Image
+              source={{ uri: receiver.profileImage }}
+              resizeMode="cover"
+              style={styles.profile}
+            />
           ) : (
-            <>
-              <View style={styles.noProfile}>
-                <Text style={[styles.noProfileInner, { color: theme.primary }]}>
-                  {receiver?.userName[0]}
-                </Text>
-              </View>
-            </>
+            <View style={styles.noProfile}>
+              <Text style={[styles.noProfileInner, { color: theme.primary }]}>
+                {receiver?.userName?.[0]}
+              </Text>
+            </View>
           )}
         </View>
+
         <View style={{ marginLeft: RFPercentage(1.5), width: "60%" }}>
           <Text
             style={{
@@ -339,6 +665,8 @@ const Chat = ({ navigation, route }) => {
           </Text>
         </View>
       </View>
+
+      {/* Message list */}
       <View style={styles.messageContainer}>
         <ImageBackground
           source={theme.mode === "dark" ? Icons.dark : Icons.light}
@@ -347,171 +675,30 @@ const Chat = ({ navigation, route }) => {
         >
           <GiftedChat
             messages={messages}
-            onSend={(messages) => onSend(messages)}
-            user={{
-              _id: currentUserId,
-              name: senderName,
-            }}
-            listViewProps={
-              {
-                removeClippedSubviews: false,
-                keyboardShouldPersistTaps: "handled",
-                showsVerticalScrollIndicator: true,
-                maintainVisibleContentPosition: {
-                  minIndexForVisible: 0,
-                  autoscrollToTopThreshold: 10,
-                },
-              } as any
-            }
-            renderInputToolbar={(props) => (
-              <View
-                style={[
-                  styles.wrap,
-                  {
-                    backgroundColor: theme.white,
-                  },
-                ]}
-              >
-                <InputToolbar
-                  {...props}
-                  containerStyle={[
-                    styles.toolbar,
-                    {
-                      backgroundColor:
-                        theme.mode === "dark"
-                          ? "transparent"
-                          : "rgba(241, 241, 241, 1)",
-                      borderColor:
-                        theme.mode == "dark"
-                          ? Colors.darkGrey
-                          : "rgba(234, 233, 233, 1)",
-                      borderTopColor:
-                        theme.mode == "dark"
-                          ? Colors.darkGrey
-                          : "rgba(234, 233, 233, 1)",
-                    },
-                  ]}
-                  renderComposer={() => (
-                    <TextInput
-                      style={[styles.customTextInput, { color: theme.black }]}
-                      placeholder={`${t("chat.txt2")}`}
-                      placeholderTextColor={"rgba(145, 144, 144, 1)"}
-                      value={message}
-                      onChangeText={setMessage}
-                      multiline={true}
-                      scrollEnabled={true}
-                      textAlignVertical="top"
-                    />
-                  )}
-                  renderSend={() => (
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      style={styles.sendButton}
-                      disabled={!message}
-                      onPress={() => {
-                        onSend([
-                          {
-                            text: message,
-                            user: {
-                              _id: currentUserId,
-                              name: senderName,
-                            },
-                            createdAt: new Date(),
-                          },
-                        ]);
-                      }}
-                    >
-                      <Feather
-                        name="send"
-                        size={RFPercentage(2.6)}
-                        color={
-                          theme.mode === "dark" ? Colors.white : Colors.primary
-                        }
-                      />
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
-            )}
-            renderDay={(props) => (
-              <Day {...props} textStyle={styles.dateText} />
-            )}
-            renderAvatar={(props) => {
-              const isReceiver =
-                props.currentMessage.user._id !== currentUserId;
-              if (!isReceiver) return null; // Don't show avatar for current user
-
-              return receiver?.profileImage ? (
-                <Image
-                  source={{ uri: receiver.profileImage }}
-                  style={styles.img}
-                />
-              ) : (
-                <View style={[styles.inner, { backgroundColor: theme.white }]}>
-                  <Text style={[styles.nm, { color: theme.primary }]}>
-                    {receiver?.userName?.[0] || receiver?.name?.[0] || "?"}
-                  </Text>
-                </View>
-              );
-            }}
-            renderBubble={(props) => {
-              const isFromSameUser =
-                props.currentMessage?.user?._id ===
-                props.previousMessage?.user?._id;
-              if (!props.currentMessage) return null;
-              return (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    marginVertical: isFromSameUser
-                      ? RFPercentage(0.3)
-                      : RFPercentage(1),
-                  }}
-                >
-                  <Bubble
-                    {...props}
-                    onLongPress={() => {
-                      if (props.currentMessage?.user?._id === currentUserId) {
-                        handleDeletePress(props.currentMessage._id);
-                      }
-                    }}
-                    wrapperStyle={{
-                      left: {
-                        backgroundColor:
-                          theme.mode === "dark"
-                            ? "rgba(25, 25, 25, 1)"
-                            : "rgba(239, 239, 239, 1)",
-                        padding: RFPercentage(0.6),
-                        marginLeft: 0, // Ensure no left margin
-                      },
-                      right: {
-                        backgroundColor:
-                          theme.mode === "dark"
-                            ? Colors.darkGrey
-                            : Colors.primary,
-                        padding: RFPercentage(0.6),
-                        marginRight: 0, // Ensure no right margin
-                      },
-                    }}
-                    textStyle={{
-                      left: {
-                        color: theme.black,
-                        fontFamily: "Poppins_400Regular",
-                        fontSize: RFPercentage(1.8),
-                        lineHeight: RFPercentage(2.5),
-                      },
-                      right: {
-                        color: Colors.white,
-                        fontFamily: "Poppins_400Regular",
-                        fontSize: RFPercentage(1.8),
-                        lineHeight: RFPercentage(2.5),
-                      },
-                    }}
-                  />
-                </View>
-              );
-            }}
+            onSend={onSend}
+            user={{ _id: currentUserId, name: senderName }}
+            keyExtractor={(item) => item._id.toString()}
+            renderMessageText={renderMessageText}
+            // Pagination
+            loadEarlier={hasMore}
+            onLoadEarlier={loadMoreMessages}
+            isLoadingEarlier={loadingMore}
+            renderLoadEarlier={renderLoadEarlier}
+            // Render props (all memoised)
+            renderInputToolbar={renderInputToolbar}
+            renderDay={renderDay}
+            renderAvatar={renderAvatar}
+            renderBubble={renderBubble}
+            // FlatList tuning
+            listViewProps={listViewProps as any}
+            // Misc
+            maxInputLength={500}
+            showUserAvatar={false}
+            alwaysShowSend
+            scrollToBottom
           />
+
+          {/* Initial load overlay */}
           {loader && (
             <View
               style={[
@@ -519,7 +706,7 @@ const Chat = ({ navigation, route }) => {
                 {
                   backgroundColor:
                     theme.mode === "dark"
-                      ? "rgba(4, 4, 4, 0.6)"
+                      ? "rgba(4,4,4,0.6)"
                       : "rgba(255,255,255,0.6)",
                 },
               ]}
@@ -532,81 +719,33 @@ const Chat = ({ navigation, route }) => {
           )}
         </ImageBackground>
       </View>
-      {isDeleteModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View
-            style={[styles.modalContainer, { backgroundColor: theme.white }]}
-          >
-            <Text style={[styles.modalTitle, { color: theme.heading }]}>
-              {t("chat.txt3")}
-            </Text>
-            <Text style={[styles.modalText, { color: theme.darkGrey }]}>
-              {t("chat.txt4")}
-            </Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[
-                  styles.cancel,
-                  {
-                    borderColor:
-                      theme.mode === "dark" ? theme.lightGrey : theme.lightGrey,
-                  },
-                ]}
-                onPress={cancelDelete}
-              >
-                <Text
-                  style={{
-                    color: theme.heading,
-                    fontFamily: "Poppins_500Medium",
-                    fontSize: RFPercentage(1.7),
-                  }}
-                >
-                  {t("buttons.cancel")}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.markButton}
-                onPress={confirmDelete}
-              >
-                <Text style={styles.txt}>{t("chat.txt5")}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
+
+      {/* Delete confirmation modal */}
+      <DeleteModal
+        visible={deleteModalVisible}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        theme={theme}
+        t={t}
+      />
     </View>
   );
 };
 
+// ─── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     alignItems: "center",
-    paddingTop: Platform.OS === "android" ? RFPercentage(2) : RFPercentage(4),
-  },
-  txt2: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: RFPercentage(1.8),
-    lineHeight: RFPercentage(2.5),
+    paddingTop: Platform.OS === "android" ? RFPercentage(2) : RFPercentage(3),
   },
   messageContainer: {
     flex: 1,
     width: "100%",
   },
-  loadMessages: {
-    backgroundColor: Colors.chat,
-    padding: RFPercentage(1.3),
-    borderRadius: RFPercentage(100),
-    alignSelf: "center",
-    marginBottom: 10,
-    paddingHorizontal: RFPercentage(2.6),
-  },
   toolbar: {
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(4),
-    // minHeight: RFPercentage(5.5),
     maxHeight: RFPercentage(18),
     justifyContent: "center",
     paddingHorizontal: RFPercentage(1.7),
@@ -616,7 +755,6 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1.5),
   },
   customTextInput: {
-    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     width: "90%",
@@ -624,9 +762,8 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     justifyContent: "center",
     textAlignVertical: "top",
-    top: 0,
-    lineHeight: RFPercentage(2.7),
-    // backgroundColor:"red"
+    // lineHeight: RFPercentage(2.7),
+    paddingTop:3
   },
   sendButton: {
     justifyContent: "center",
@@ -653,7 +790,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   noProfileInner: {
-    color: Colors.primary,
     fontSize: RFPercentage(2.5),
     fontFamily: "Poppins_500Medium",
     lineHeight: RFPercentage(2.6),
@@ -685,24 +821,22 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-
   modalContainer: {
     width: "80%",
-    backgroundColor: "white",
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2),
-    alignItems: "center",
+    // alignItems: "center",
     paddingVertical: RFPercentage(3),
   },
   modalTitle: {
-    fontSize: RFPercentage(2.2),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(1),
   },
   modalText: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    textAlign: "center",
+    // textAlign: "center",
     marginBottom: RFPercentage(2),
   },
   modalButtons: {
@@ -710,16 +844,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
   },
-  modalButton: {
-    flex: 1,
-    padding: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
-    marginHorizontal: RFPercentage(0.5),
-    alignItems: "center",
-  },
   cancel: {
     borderRadius: RFPercentage(100),
-    width: RFPercentage(17),
+    width: RFPercentage(15.5),
     height: RFPercentage(5.2),
     borderWidth: RFPercentage(0.2),
     justifyContent: "center",
@@ -729,12 +856,12 @@ const styles = StyleSheet.create({
   markButton: {
     borderRadius: RFPercentage(100),
     height: RFPercentage(5.2),
-    borderColor: Colors.primary,
+    borderColor: "#F44336",
     borderWidth: RFPercentage(0.1),
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.primary,
-    width: RFPercentage(17.5),
+     backgroundColor: "#F44336",
+    width: RFPercentage(15.5),
   },
   wrap: {
     minHeight: RFPercentage(10),
@@ -753,7 +880,6 @@ const styles = StyleSheet.create({
     width: RFPercentage(5),
     height: RFPercentage(5),
     borderRadius: RFPercentage(50),
-
     alignItems: "center",
     justifyContent: "center",
     bottom: RFPercentage(0.3),
@@ -781,4 +907,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Chat;
+export default memo(Chat);

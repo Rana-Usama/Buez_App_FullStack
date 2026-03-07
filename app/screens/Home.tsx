@@ -84,7 +84,7 @@ const HomeScreen: React.FC = () => {
         const convertedAmount = convertCurrency(
           originalAmount,
           task.currencyInfo.code,
-          targetCurrency
+          targetCurrency,
         );
 
         return formatCurrency(convertedAmount, currentLocation);
@@ -95,7 +95,7 @@ const HomeScreen: React.FC = () => {
           : `$${parseFloat(task.monitarily) || 0}`;
       }
     },
-    [currentLocation]
+    [currentLocation],
   );
 
   // Handle task press
@@ -103,7 +103,7 @@ const HomeScreen: React.FC = () => {
     (task: any) => {
       navigation.navigate("OfferDetail", { postRequest: task });
     },
-    [navigation]
+    [navigation],
   );
 
   // Handle top rated user press
@@ -115,7 +115,7 @@ const HomeScreen: React.FC = () => {
         postRequest: {},
       });
     },
-    [navigation]
+    [navigation],
   );
 
   // Handle image scroll
@@ -160,6 +160,7 @@ const HomeScreen: React.FC = () => {
       }
     />
   );
+
 
   return (
     <View style={{ backgroundColor: theme.white, flex: 1 }}>
@@ -228,7 +229,7 @@ const HomeScreen: React.FC = () => {
             />
 
             {/* Top Rated Users Section */}
-            {topRatedUsers.length > 0 ? (
+            {topRatedUsers?.length > 0 ? (
               <>
                 <View style={styles.sectionHeader}>
                   <Text style={[styles.sectionTitle, { color: theme.heading }]}>
@@ -254,6 +255,7 @@ const HomeScreen: React.FC = () => {
                     <TopRatedUserCard
                       user={item}
                       onPress={() => handleUserPress(item)}
+                      // onPress={()=> {navigation.navigate("InterestSelection")}}
                       darkMode={theme.mode === "dark"}
                       t={t}
                     />
@@ -348,6 +350,12 @@ const styles = StyleSheet.create({
   topRatedContainer: {
     paddingHorizontal: RFPercentage(2),
     paddingVertical: RFPercentage(1),
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    alignSelf:"flex-start",
+    // backgroundColor:"red",
+    // flex:1,
+    // width:"100%"
   },
   locationContainer: {
     flexDirection: "row",

@@ -36,11 +36,22 @@ import {
 } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { useUser } from "../contexts/user.context";
+import {
+  createOrUpdateGroupChat,
+  removeMemberFromGroupChat,
+} from "../services/GroupChat.service";
 
 const { width } = Dimensions.get("window");
 
 // Custom Modal Component
-const ConfirmationModal = ({ visible, onClose, title, message, type = "info", buttons }) => {
+const ConfirmationModal = ({
+  visible,
+  onClose,
+  title,
+  message,
+  type = "info",
+  buttons,
+}) => {
   const { theme } = useAppTheme();
   const [fadeAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(0.9));
@@ -156,7 +167,9 @@ const ConfirmationModal = ({ visible, onClose, title, message, type = "info", bu
 
             {/* Body */}
             <View style={modalStyles.modalBody}>
-              <Text style={[modalStyles.modalMessage, { color: theme.heading }]}>
+              <Text
+                style={[modalStyles.modalMessage, { color: theme.heading }]}
+              >
                 {message}
               </Text>
             </View>
@@ -168,7 +181,8 @@ const ConfirmationModal = ({ visible, onClose, title, message, type = "info", bu
                   key={index}
                   style={[
                     modalStyles.button,
-                    button.style === "destructive" && modalStyles.destructiveButton,
+                    button.style === "destructive" &&
+                      modalStyles.destructiveButton,
                     button.style === "primary" && modalStyles.primaryButton,
                     buttons.length === 1 && modalStyles.singleButton,
                   ]}
@@ -183,12 +197,13 @@ const ConfirmationModal = ({ visible, onClose, title, message, type = "info", bu
                       button.style === "primary"
                         ? typeColors.gradient
                         : button.style === "destructive"
-                        ? ["#FF5252", "#D32F2F"]
-                        : [theme.border, theme.border + "80"]
+                          ? ["#FF5252", "#D32F2F"]
+                          : [theme.border, theme.border + "80"]
                     }
                     style={[
                       modalStyles.buttonGradient,
-                      button.style === "cancel" && modalStyles.cancelButtonGradient,
+                      button.style === "cancel" &&
+                        modalStyles.cancelButtonGradient,
                     ]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
@@ -197,7 +212,8 @@ const ConfirmationModal = ({ visible, onClose, title, message, type = "info", bu
                       style={[
                         modalStyles.buttonText,
                         button.style === "cancel" && { color: theme.heading },
-                        (button.style === "primary" || button.style === "destructive") && {
+                        (button.style === "primary" ||
+                          button.style === "destructive") && {
                           color: "#FFF",
                         },
                       ]}
@@ -311,6 +327,8 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
   const currentUser = useUser();
   const db = FIREBASE_DB;
 
+  console.log("currentUser.............", currentUser.userData);
+
   // State
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -320,7 +338,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
   const [activeTab, setActiveTab] = useState("applied"); // "applied" or "confirmed"
   const [confirmingWorker, setConfirmingWorker] = useState(null);
   const [removingWorker, setRemovingWorker] = useState(null);
-  
+
   // Modal States
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState({
@@ -362,10 +380,10 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
 
         // Set workers
         setAppliedWorkers(
-          Array.isArray(data.appliedWorkers) ? data.appliedWorkers : []
+          Array.isArray(data.appliedWorkers) ? data.appliedWorkers : [],
         );
         setConfirmedWorkers(
-          Array.isArray(data.confirmedWorkers) ? data.confirmedWorkers : []
+          Array.isArray(data.confirmedWorkers) ? data.confirmedWorkers : [],
         );
       } else {
         Toast.show({
@@ -396,10 +414,10 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setAppliedWorkers(
-          Array.isArray(data.appliedWorkers) ? data.appliedWorkers : []
+          Array.isArray(data.appliedWorkers) ? data.appliedWorkers : [],
         );
         setConfirmedWorkers(
-          Array.isArray(data.confirmedWorkers) ? data.confirmedWorkers : []
+          Array.isArray(data.confirmedWorkers) ? data.confirmedWorkers : [],
         );
       }
     });
@@ -411,7 +429,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
   useFocusEffect(
     useCallback(() => {
       fetchTaskData();
-    }, [taskId])
+    }, [taskId]),
   );
 
   const onRefresh = () => {
@@ -438,7 +456,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
               postId: taskId,
             },
           }),
-        }
+        },
       );
       return await response.text();
     } catch (error) {
@@ -465,7 +483,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
               postId: taskId,
             },
           }),
-        }
+        },
       );
       return await response.text();
     } catch (error) {
@@ -473,59 +491,66 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
     }
   };
 
-  
   const handleConfirmWorker = (worker) => {
-    if (taskData?.numberOfWorkers && confirmedWorkers.length >= taskData.numberOfWorkers) {
+    if (
+      taskData?.numberOfWorkers &&
+      confirmedWorkers.length >= taskData.numberOfWorkers
+    ) {
       showModal(
         t("taskApplicants.limitReached.title"),
-        t("taskApplicants.limitReached.message", { 
-          count: taskData.numberOfWorkers 
+        t("taskApplicants.limitReached.message", {
+          count: taskData.numberOfWorkers,
         }),
         "warning",
         [
-          { 
-            text: t("common.ok"), 
-            style: "primary" 
-          }
-        ]
+          {
+            text: t("common.ok"),
+            style: "primary",
+          },
+        ],
       );
       return;
     }
 
     // Check if we're about to exceed the limit
-    if (taskData?.numberOfWorkers && confirmedWorkers.length + 1 > taskData.numberOfWorkers) {
+    if (
+      taskData?.numberOfWorkers &&
+      confirmedWorkers.length + 1 > taskData.numberOfWorkers
+    ) {
       showModal(
         t("taskApplicants.cannotConfirm.title"),
-        t("taskApplicants.cannotConfirm.message", { 
+        t("taskApplicants.cannotConfirm.message", {
           required: taskData.numberOfWorkers,
-          confirmed: confirmedWorkers.length
+          confirmed: confirmedWorkers.length,
         }),
         "warning",
         [
-          { 
-            text: t("common.ok"), 
-            style: "primary" 
-          }
-        ]
+          {
+            text: t("common.ok"),
+            style: "primary",
+          },
+        ],
       );
       return;
     }
 
     // Check if worker is already confirmed
-    const isAlreadyConfirmed = confirmedWorkers.some(w => w.userId === worker.userId);
+    const isAlreadyConfirmed = confirmedWorkers.some(
+      (w) => w.userId === worker.userId,
+    );
     if (isAlreadyConfirmed) {
       showModal(
         t("taskApplicants.alreadyConfirmed.title"),
-        t("taskApplicants.alreadyConfirmed.message", { 
-          name: worker.userName 
+        t("taskApplicants.alreadyConfirmed.message", {
+          name: worker.userName,
         }),
         "info",
         [
-          { 
-            text: t("common.ok"), 
-            style: "primary" 
-          }
-        ]
+          {
+            text: t("common.ok"),
+            style: "primary",
+          },
+        ],
       );
       return;
     }
@@ -533,17 +558,17 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
     // Proceed with confirmation
     showModal(
       t("taskApplicants.confirmDialog.title"),
-      t("taskApplicants.confirmDialog.message", { 
+      t("taskApplicants.confirmDialog.message", {
         name: worker.userName,
         current: confirmedWorkers.length + 1,
-        total: taskData?.numberOfWorkers || 1
+        total: taskData?.numberOfWorkers || 1,
       }),
       "info",
       [
-        { 
-          text: t("taskApplicants.confirmDialog.cancel"), 
+        {
+          text: t("taskApplicants.confirmDialog.cancel"),
           style: "cancel",
-          onPress: () => hideModal()
+          onPress: () => hideModal(),
         },
         {
           text: t("taskApplicants.confirmDialog.confirm"),
@@ -553,20 +578,22 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
             hideModal();
           },
         },
-      ]
+      ],
     );
   };
 
   const confirmWorker = async (worker) => {
     if (!taskData || !worker) return;
 
-    // Final safety check
-    if (taskData?.numberOfWorkers && confirmedWorkers.length >= taskData.numberOfWorkers) {
+    if (
+      taskData?.numberOfWorkers &&
+      confirmedWorkers.length >= taskData.numberOfWorkers
+    ) {
       Toast.show({
         type: "error",
         text1: t("taskApplicants.limitReached.title"),
-        text2: t("taskApplicants.limitReached.message", { 
-          count: taskData.numberOfWorkers 
+        text2: t("taskApplicants.limitReached.message", {
+          count: taskData.numberOfWorkers,
         }),
       });
       return;
@@ -576,12 +603,10 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
       setConfirmingWorker(worker.userId);
       const taskDocRef = doc(db, "taskRequests", taskId);
 
-      // Remove from applied workers
       const updatedApplied = appliedWorkers.filter(
-        (w) => w.userId !== worker.userId
+        (w) => w.userId !== worker.userId,
       );
 
-      // Add to confirmed workers with timestamp
       const confirmationData = {
         ...worker,
         confirmedAt: new Date().toISOString(),
@@ -589,22 +614,43 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
       };
       const updatedConfirmed = [...confirmedWorkers, confirmationData];
 
-      // Update Firestore
+      // Update Firestore task doc
       await updateDoc(taskDocRef, {
         appliedWorkers: updatedApplied,
         confirmedWorkers: updatedConfirmed,
       });
 
-      // Send notification to worker
+      // ── GROUP CHAT INTEGRATION ──────────────────────────────
+      await createOrUpdateGroupChat(
+        taskId,
+        {
+          userId: currentUser?.userData?.userId,
+          userName: currentUser?.userData?.userName,
+          profileImage: currentUser?.userData?.profileImage || "",
+          token: currentUser?.userData?.token || "",
+        },
+        {
+          userId: worker.userId,
+          userName: worker.userName,
+          profileImage: worker.profileImage || "",
+          token: worker.token || "",
+        },
+        taskData?.taskType,
+        taskData?.customTaskTitle,
+        taskData?.description
+
+      );
+      // ────────────────────────────────────────────────────────
+
       await sendConfirmationNotification(worker);
 
       Toast.show({
         type: "success",
         text1: t("taskApplicants.toast.success.helperConfirmed"),
-        text2: t("taskApplicants.toast.success.confirmedMessage", { 
+        text2: t("taskApplicants.toast.success.confirmedMessage", {
           name: worker.userName,
           current: updatedConfirmed.length,
-          total: taskData?.numberOfWorkers || 1
+          total: taskData?.numberOfWorkers || 1,
         }),
       });
     } catch (error) {
@@ -623,15 +669,15 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
   const handleRemoveWorker = (worker) => {
     showModal(
       t("taskApplicants.removeDialog.title"),
-      t("taskApplicants.removeDialog.message", { 
-        name: worker.userName 
+      t("taskApplicants.removeDialog.message", {
+        name: worker.userName,
       }),
       "primary",
       [
-        { 
-          text: t("taskApplicants.removeDialog.cancel"), 
+        {
+          text: t("taskApplicants.removeDialog.cancel"),
           style: "cancel",
-          onPress: () => hideModal()
+          onPress: () => hideModal(),
         },
         {
           text: t("taskApplicants.removeDialog.remove"),
@@ -641,7 +687,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
             hideModal();
           },
         },
-      ]
+      ],
     );
   };
 
@@ -652,28 +698,26 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
       setRemovingWorker(worker.userId);
       const taskDocRef = doc(db, "taskRequests", taskId);
 
-      // Remove from confirmed workers
       const updatedConfirmed = confirmedWorkers.filter(
-        (w) => w.userId !== worker.userId
+        (w) => w.userId !== worker.userId,
       );
-
-      // Add back to applied workers
       const updatedApplied = [...appliedWorkers, worker];
 
-      // Update Firestore
       await updateDoc(taskDocRef, {
         appliedWorkers: updatedApplied,
         confirmedWorkers: updatedConfirmed,
       });
 
-      // Send notification to worker
+      // ── GROUP CHAT INTEGRATION ──────────────────────────────
+      await removeMemberFromGroupChat(taskId, worker);
+
       await sendRemovalNotification(worker);
 
       Toast.show({
         type: "info",
         text1: t("taskApplicants.toast.info.helperRemoved"),
-        text2: t("taskApplicants.toast.info.removedMessage", { 
-          name: worker.userName 
+        text2: t("taskApplicants.toast.info.removedMessage", {
+          name: worker.userName,
         }),
       });
     } catch (error) {
@@ -702,7 +746,9 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
     const isConfirmed = activeTab === "confirmed";
     const isConfirming = confirmingWorker === item.userId;
     const isRemoving = removingWorker === item.userId;
-    const isLimitReached = taskData?.numberOfWorkers && confirmedWorkers.length >= taskData.numberOfWorkers;
+    const isLimitReached =
+      taskData?.numberOfWorkers &&
+      confirmedWorkers.length >= taskData.numberOfWorkers;
 
     return (
       <View
@@ -749,7 +795,8 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
                   color="#4CAF50"
                 />
                 <Text style={[styles.confirmedTime, { color: "#4CAF50" }]}>
-                  {t("taskApplicants.confirmedTime")} {new Date(item.confirmedAt).toLocaleDateString()}
+                  {t("taskApplicants.confirmedTime")}{" "}
+                  {new Date(item.confirmedAt).toLocaleDateString()}
                 </Text>
               </View>
             )}
@@ -797,12 +844,16 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
               ) : (
                 <>
                   <Ionicons
-                    name={isLimitReached ? "checkmark-done" : "checkmark-circle"}
+                    name={
+                      isLimitReached ? "checkmark-done" : "checkmark-circle"
+                    }
                     size={RFPercentage(1.8)}
                     color="#FFF"
                   />
                   <Text style={styles.confirmButtonText}>
-                    {isLimitReached ? t("taskApplicants.allSlotsFilled") : t("taskApplicants.confirm")}
+                    {isLimitReached
+                      ? t("taskApplicants.allSlotsFilled")
+                      : t("taskApplicants.confirm")}
                   </Text>
                 </>
               )}
@@ -811,16 +862,16 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
 
           {/* View Profile Button */}
           <TouchableOpacity
-            style={[styles.profileButton, { borderColor: theme.border }]}
+            style={[styles.profileButton]}
             onPress={() => viewWorkerProfile(item, isConfirmed)}
             activeOpacity={0.7}
           >
             <Ionicons
               name="person"
               size={RFPercentage(1.8)}
-              color={Colors.white}
+              color={Colors.primary}
             />
-            <Text style={[styles.profileButtonText, { color: Colors.white }]}>
+            <Text style={[styles.profileButtonText, { color: Colors.primary }]}>
               {t("taskApplicants.profile")}
             </Text>
           </TouchableOpacity>
@@ -870,7 +921,10 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
             </Text>
           </View>
 
-          <Text style={[styles.taskTitle, { color: theme.heading }]} numberOfLines={2}>
+          <Text
+            style={[styles.taskTitle, { color: theme.heading }]}
+            numberOfLines={2}
+          >
             {taskData?.description || t("taskApplicants.noDescription")}
           </Text>
 
@@ -897,7 +951,9 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
               </Text>
             </View>
 
-            <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
+            <View
+              style={[styles.statDivider, { backgroundColor: theme.border }]}
+            />
 
             <View style={styles.statItem}>
               <Ionicons
@@ -913,7 +969,9 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
               </Text>
             </View>
 
-            <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
+            <View
+              style={[styles.statDivider, { backgroundColor: theme.border }]}
+            />
 
             <View style={styles.statItem}>
               <Ionicons
@@ -921,10 +979,17 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
                 size={RFPercentage(2)}
                 color={isFull ? "#4CAF50" : "#FF9800"}
               />
-              <Text style={[styles.statValue, { 
-                color: isFull ? "#4CAF50" : "#FF9800" 
-              }]}>
-                {isFull ? t("taskApplicants.full") : t("taskApplicants.spotsLeft", { spots: availableSpots })}
+              <Text
+                style={[
+                  styles.statValue,
+                  {
+                    color: isFull ? "#4CAF50" : "#FF9800",
+                  },
+                ]}
+              >
+                {isFull
+                  ? t("taskApplicants.full")
+                  : t("taskApplicants.spotsLeft", { spots: availableSpots })}
               </Text>
               <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
                 {t("taskApplicants.status")}
@@ -933,14 +998,16 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { backgroundColor: theme.border }]}>
+            <View
+              style={[styles.progressBar, { backgroundColor: theme.border }]}
+            >
               <View
                 style={[
                   styles.progressFill,
                   {
                     width: `${Math.min(
                       (confirmedWorkers.length / requiredWorkers) * 100,
-                      100
+                      100,
                     )}%`,
                     maxWidth: "100%",
                     backgroundColor: isFull ? "#4CAF50" : Colors.primary,
@@ -949,17 +1016,26 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
               />
             </View>
             <Text style={[styles.progressText, { color: theme.darkGrey }]}>
-              {t("taskApplicants.progress", { 
-                current: confirmedWorkers.length, 
-                total: requiredWorkers 
+              {t("taskApplicants.progress", {
+                current: confirmedWorkers.length,
+                total: requiredWorkers,
               })}
             </Text>
           </View>
 
           {/* Status Alert */}
           {isFull && (
-            <View style={[styles.statusAlert, { backgroundColor: "#4CAF50" + "20" }]}>
-              <Ionicons name="checkmark-done" size={RFPercentage(1.8)} color="#4CAF50" />
+            <View
+              style={[
+                styles.statusAlert,
+                { backgroundColor: "#4CAF50" + "20" },
+              ]}
+            >
+              <Ionicons
+                name="checkmark-done"
+                size={RFPercentage(1.8)}
+                color="#4CAF50"
+              />
               <Text style={[styles.statusAlertText, { color: "#4CAF50" }]}>
                 {t("taskApplicants.allHelpersConfirmed")}
               </Text>
@@ -984,7 +1060,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
   const currentWorkers =
     activeTab === "applied" ? appliedWorkers : confirmedWorkers;
   const emptyMessage =
-    activeTab === "applied" 
+    activeTab === "applied"
       ? t("taskApplicants.empty.applicants")
       : t("taskApplicants.empty.confirmed");
   const emptyIcon =
@@ -1025,6 +1101,31 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
         {/* Task Header */}
         <TaskHeader />
 
+        {/* Group Chat Button — shows when at least 1 worker confirmed */}
+        {confirmedWorkers?.length > 0 && (
+          <TouchableOpacity
+            style={[
+              groupChatButtonStyles.groupChatBtn,
+              { backgroundColor: theme.secondary  },
+            ]}
+            onPress={() =>
+              navigation.navigate("GroupChat", {
+                groupChatId: taskId,
+                currentUserId: currentUser?.userData?.userId,
+                currentUserName: currentUser?.userData?.userName,
+                taskType: taskData?.taskType,
+                customTaskTitle: taskData?.customTaskTitle,
+              })
+            }
+            activeOpacity={0.8}
+          >
+            <Ionicons name="people" size={RFPercentage(2)} color="#FFF" />
+            <Text numberOfLines={1} style={groupChatButtonStyles.groupChatBtnText}>
+              {t("taskApplicants.group")}
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* Tabs */}
         <View style={styles.tabsContainer}>
           <View
@@ -1042,7 +1143,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
               <LinearGradient
                 colors={
                   activeTab === "applied"
-                    ? [Colors.primary, "#314495"]
+                    ? ["#9ca0b4ff", "#a0a7c6ff"]
                     : ["transparent", "transparent"]
                 }
                 style={styles.tabGradient}
@@ -1107,7 +1208,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
 
         {/* Workers List */}
         <View style={styles.listContainer}>
-          {currentWorkers.length > 0 ? (
+          {currentWorkers?.length > 0 ? (
             <FlatList
               data={currentWorkers}
               renderItem={renderWorkerItem}
@@ -1126,8 +1227,7 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
           style={[
             styles.helpContainer,
             {
-              backgroundColor:
-                theme.mode === "dark" ? "#1A1A1A" : "#F8F9FA",
+              backgroundColor: theme.mode === "dark" ? "#1A1A1A" : "#F8F9FA",
             },
           ]}
         >
@@ -1146,6 +1246,31 @@ const TaskApplicantsScreen = ({ navigation, route }) => {
     </View>
   );
 };
+
+const groupChatButtonStyles = StyleSheet.create({
+  groupChatBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(3),
+    borderRadius: RFPercentage(3),
+    marginTop: RFPercentage(2),
+    width: "40%",
+    gap: RFPercentage(1),
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    // elevation: 5,
+    alignSelf: "center",
+  },
+  groupChatBtnText: {
+    color: "#FFF",
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_600SemiBold",
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -1248,7 +1373,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_500Medium",
     textAlign: "center",
-    marginTop:RFPercentage(0.8)
+    marginTop: RFPercentage(0.8),
   },
   statusAlert: {
     flexDirection: "row",
@@ -1414,11 +1539,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.primary,
+    backgroundColor: "rgba(227, 227, 236, 0.61)",
     paddingVertical: RFPercentage(1),
     borderRadius: RFPercentage(1.5),
     borderWidth: 1,
     gap: RFPercentage(0.5),
+    borderColor: "rgba(227, 227, 236, 0.61)",
   },
   profileButtonText: {
     fontSize: RFPercentage(1.4),
@@ -1439,7 +1565,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     marginTop: RFPercentage(2),
     textAlign: "center",
-    width:"80%"
+    width: "80%",
   },
 
   // Help Container

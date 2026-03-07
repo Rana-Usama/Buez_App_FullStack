@@ -4,6 +4,8 @@
 node_modules/
 
 .env
+.GoogleService-Info.plist
+.google-services.json
 # Expo
 .expo/
 dist/
