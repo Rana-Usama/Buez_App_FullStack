@@ -10,10 +10,18 @@ import {
 } from "firebase/firestore";
 import { navigate } from "../../router/navigationRef";
 import { useUser } from "../../contexts/user.context";
-import { useDeepLinking } from "../../job-sharing/useDeepLinking";
 import Colors from "../../config/Colors";
+// ─── Removed useDeepLinking from here ────────────────────────────────────────
+// useDeepLinking registers Linking listeners + a flush useEffect that fires
+// whenever userData changes. Mounting it inside a chat message component means
+// it runs once per message bubble — causing auto-navigation to OfferDetail
+// every time userData loads while chat is open.
+//
+// For in-app link taps we don't need any of that machinery. We already have
+// userData here, so we can resolve the jobId and navigate directly.
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
+const URL_TEST_REGEX = /https?:\/\/[^\s]+/;
 const BUEZ_SHORT_LINK_REGEX = /https?:\/\/buez-server[^\s]*/;
 
 interface ClickableMessageTextProps {
@@ -22,7 +30,7 @@ interface ClickableMessageTextProps {
   theme: any;
   textStyle?: object;
   linkStyle?: object;
-  noPadding?: boolean; 
+  noPadding?: boolean;
 }
 
 const ClickableMessageText: React.FC<ClickableMessageTextProps> = ({
@@ -31,21 +39,13 @@ const ClickableMessageText: React.FC<ClickableMessageTextProps> = ({
   theme,
   textStyle,
   linkStyle,
-  noPadding = false, // default: has padding (used in 1-on-1 Chat via GiftedChat bubble)
+  noPadding = false,
 }) => {
-  const { userData, loading: userLoading } = useUser();
+  const { userData } = useUser();
   const [resolvingUrl, setResolvingUrl] = useState<string | null>(null);
   const db = getFirestore();
 
-  const { handleDeepLink } = useDeepLinking({
-    userData,
-    userLoading,
-    onJobLink: (jobId) => {
-      navigate("OfferDetail", { jobId });
-    },
-  });
-
-  // ── Resolve short code → jobId via Firestore ───────────────────────────────
+  // ── Resolve short code → jobId via Firestore ──────────────────────────────
   const resolveShortCodeToJobId = async (
     shortCode: string,
   ): Promise<string | null> => {
@@ -66,7 +66,7 @@ const ClickableMessageText: React.FC<ClickableMessageTextProps> = ({
     }
   };
 
-  // ── URL press handler ──────────────────────────────────────────────────────
+  // ── URL press handler ─────────────────────────────────────────────────────
   const handleUrlPress = useCallback(
     async (url: string) => {
       const isBuezLink = BUEZ_SHORT_LINK_REGEX.test(url);
@@ -89,25 +89,29 @@ const ClickableMessageText: React.FC<ClickableMessageTextProps> = ({
 
       try {
         const jobId = await resolveShortCodeToJobId(shortCode);
-        if (jobId) {
-          handleDeepLink(`buez://job/${jobId}`);
-        } else {
+
+        if (!jobId) {
           Linking.openURL(url);
+          return;
         }
+
+        // ── Navigate directly — user is already in the app and authenticated.
+        //    No need for the full deep link resolution flow (subscription checks
+        //    etc.) since they already passed those to get into the app.
+        navigate("OfferDetail", { jobId });
       } finally {
         setResolvingUrl(null);
       }
     },
-    [handleDeepLink],
+    [userData],
   );
 
-  // ── Split text into plain + URL parts ─────────────────────────────────────
+  // ── Split text into plain + URL parts ────────────────────────────────────
   const text: string = currentMessage?.text || "";
   const isOwn = currentMessage?.user?._id === currentUserId;
   const parts = text.split(URL_REGEX);
 
   return (
-
     <View
       style={
         noPadding
@@ -127,13 +131,11 @@ const ClickableMessageText: React.FC<ClickableMessageTextProps> = ({
             lineHeight: RFPercentage(2.7),
             flexWrap: "wrap",
           },
-          textStyle, 
+          textStyle,
         ]}
       >
         {parts.map((part, index) => {
-          URL_REGEX.lastIndex = 0;
-          const isUrl = URL_REGEX.test(part);
-          URL_REGEX.lastIndex = 0;
+          const isUrl = URL_TEST_REGEX.test(part);
 
           if (isUrl) {
             const isLoading = resolvingUrl === part;
@@ -148,11 +150,11 @@ const ClickableMessageText: React.FC<ClickableMessageTextProps> = ({
                     fontSize: RFPercentage(1.8),
                     opacity: isLoading ? 0.5 : 1,
                   },
-                  linkStyle, 
+                  linkStyle,
                 ]}
                 onPress={() => !isLoading && handleUrlPress(part)}
               >
-                {isLoading ? "Opening..." : part}
+                {isLoading ? "..." : part}
               </Text>
             );
           }

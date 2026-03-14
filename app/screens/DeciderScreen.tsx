@@ -25,13 +25,22 @@ import {
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { reload } from "firebase/auth";
 
+// ─── Must match the key used in useDeepLinking.ts ────────────────────────────
+const PENDING_JOB_KEY = "pendingDeepLinkJobId";
+
+// ─── Guard: userData is fully populated when it has a userId field ────────────
+// Prevents acting on the initial empty {} before Firestore finishes loading
+const isUserDataReady = (userData: any): boolean => {
+  return !!(userData && userData.userId);
+};
+
 const DeciderScreen = () => {
   const { theme } = useAppTheme();
   const navigation = useNavigation<any>();
   const { userData, loading: userLoading } = useUser();
 
   const [deviceId, setDeviceId] = useState("");
-  const hasNavigated = useRef(false); // Prevent multiple navigations
+  const hasNavigated = useRef(false);
 
   // Animated values
   const outerSpinValue = useRef(new Animated.Value(0)).current;
@@ -43,7 +52,7 @@ const DeciderScreen = () => {
 
   const db = getFirestore();
 
-  // Spinning animation
+  // ─── Spinning animations ──────────────────────────────────────────────────
   useEffect(() => {
     const outerSpinAnimation = Animated.loop(
       Animated.timing(outerSpinValue, {
@@ -53,7 +62,6 @@ const DeciderScreen = () => {
         useNativeDriver: true,
       }),
     );
-
     const innerSpinAnimation = Animated.loop(
       Animated.timing(innerSpinValue, {
         toValue: 1,
@@ -62,7 +70,6 @@ const DeciderScreen = () => {
         useNativeDriver: true,
       }),
     );
-
     const scaleAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(scaleValue, {
@@ -79,44 +86,19 @@ const DeciderScreen = () => {
         }),
       ]),
     );
-
     const dotAnimation = Animated.loop(
       Animated.stagger(300, [
         Animated.sequence([
-          Animated.timing(dotOpacity1, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dotOpacity1, {
-            toValue: 0.3,
-            duration: 400,
-            useNativeDriver: true,
-          }),
+          Animated.timing(dotOpacity1, { toValue: 1, duration: 400, useNativeDriver: true }),
+          Animated.timing(dotOpacity1, { toValue: 0.3, duration: 400, useNativeDriver: true }),
         ]),
         Animated.sequence([
-          Animated.timing(dotOpacity2, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dotOpacity2, {
-            toValue: 0.3,
-            duration: 400,
-            useNativeDriver: true,
-          }),
+          Animated.timing(dotOpacity2, { toValue: 1, duration: 400, useNativeDriver: true }),
+          Animated.timing(dotOpacity2, { toValue: 0.3, duration: 400, useNativeDriver: true }),
         ]),
         Animated.sequence([
-          Animated.timing(dotOpacity3, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dotOpacity3, {
-            toValue: 0.3,
-            duration: 400,
-            useNativeDriver: true,
-          }),
+          Animated.timing(dotOpacity3, { toValue: 1, duration: 400, useNativeDriver: true }),
+          Animated.timing(dotOpacity3, { toValue: 0.3, duration: 400, useNativeDriver: true }),
         ]),
       ]),
     );
@@ -134,33 +116,30 @@ const DeciderScreen = () => {
     };
   }, []);
 
-  // Interpolate spin values
+  // ─── Spin interpolations ──────────────────────────────────────────────────
   const outerSpin = outerSpinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
   });
-
   const innerSpin = innerSpinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ["360deg", "0deg"],
   });
-
   const scale = scaleValue.interpolate({
     inputRange: [0.8, 1],
     outputRange: [0.8, 1],
   });
 
-  // Fetch device unique ID
+  // ─── Fetch device ID ──────────────────────────────────────────────────────
   useEffect(() => {
     const fetchDeviceId = async () => {
       const id = await DeviceInfo.getUniqueId();
       setDeviceId(id);
-      console.log("Device ID:", id);
     };
     fetchDeviceId();
   }, []);
 
-  // Check if device has already availed free trial
+  // ─── Check if device has already availed free trial ──────────────────────
   const hasDeviceAvailedFreeTrial = async (deviceId: string) => {
     try {
       const q = query(
@@ -171,55 +150,91 @@ const DeciderScreen = () => {
       const snapshot = await getDocs(q);
       return !snapshot.empty;
     } catch (error) {
-      console.log("Error fetching freeTrials:", error);
+      console.log("[Decider] Error fetching freeTrials:", error);
       return false;
     }
   };
 
-  // Main decision logic with immediate navigation
+  const parseDate = (date: any): Date | null => {
+    if (!date) return null;
+    if (date.seconds) return new Date(date.seconds * 1000);
+    if (typeof date === "string") return new Date(date);
+    if (date instanceof Date) return date;
+    return null;
+  };
+
+  // ─── Main decision logic ──────────────────────────────────────────────────
   useEffect(() => {
     if (!deviceId || hasNavigated.current) return;
 
     const decideAndNavigate = async () => {
       try {
-        // Wait for user loading to complete
+        // ── Wait for loading to finish
         if (userLoading) return;
 
+        // ── Wait for userData to be fully populated (not just empty {})
+        // If user is logged in, Firestore populates userData asynchronously.
+        // We wait for the next useEffect cycle when userData.userId is present.
         const creds = await getCredentials();
-        const loggedOut = await SecureStore.getItemAsync("loggedOut");
         const { email } = creds || {};
+        const isLoggedIn = !!(email || creds?.password);
+
+        if (isLoggedIn && !isUserDataReady(userData)) {
+          console.log("[Decider] Logged in but userData not ready yet — waiting...");
+          return;
+        }
+
+        // ── COLD START DEEP LINK CHECK ──────────────────────────────────────
+        // If useDeepLinking parked a jobId before auth loaded,
+        // do NOT navigate — let useDeepLinking's flush useEffect handle it.
+        const pendingJobId = await SecureStore.getItemAsync(PENDING_JOB_KEY);
+        if (pendingJobId) {
+          console.log(
+            "[Decider] Pending deep link jobId found — deferring to useDeepLinking:",
+            pendingJobId,
+          );
+          return;
+        }
+
+        const loggedOut = await SecureStore.getItemAsync("loggedOut");
         const now = new Date();
 
-        console.log("creds-----------------", creds);
-
-        // Logged out → Login
+        // ── Logged out → Login
         if (loggedOut === "true") {
           hasNavigated.current = true;
           navigation.replace("Login");
           return;
         }
 
-        if ((email || creds?.password) && !userData) {
-          const timeout = setTimeout(() => {
-            if (!userData && !userLoading && !hasNavigated.current) {
-              hasNavigated.current = true;
-              navigation.replace("OnBoarding");
-            }
-          }, 3000); 
-
-          return () => clearTimeout(timeout);
-        }
-
-        // No user → OnBoarding
-        if (!userData) {
+        // ── No credentials and no userData → OnBoarding
+        if (!isLoggedIn && !userData) {
           hasNavigated.current = true;
           navigation.replace("OnBoarding");
           return;
         }
 
+        // ── Credentials exist but userData still null after timeout → OnBoarding
+        if (isLoggedIn && !userData) {
+          const timeout = setTimeout(() => {
+            if (!isUserDataReady(userData) && !hasNavigated.current) {
+              hasNavigated.current = true;
+              navigation.replace("OnBoarding");
+            }
+          }, 3000);
+          return () => clearTimeout(timeout);
+        }
+
+        // ── userData is ready
+        if (!isUserDataReady(userData)) {
+          hasNavigated.current = true;
+          navigation.replace("OnBoarding");
+          return;
+        }
+
+        // ── Email verification check
         const currentUser = FIREBASE_AUTH.currentUser;
         if (currentUser) {
-          await reload(currentUser); 
+          await reload(currentUser);
           if (!currentUser.emailVerified) {
             hasNavigated.current = true;
             navigation.replace("EmailVerification", {
@@ -238,48 +253,41 @@ const DeciderScreen = () => {
           freeTrialStartedAt,
         } = userData;
 
-        const parseDate = (date: any) => {
-          if (!date) return null;
-          if (date.seconds) return new Date(date.seconds * 1000);
-          if (typeof date === "string") return new Date(date);
-          return null;
-        };
-
         const subStartDate = parseDate(subscriptionStart);
         const subEndDate = parseDate(subscriptionEnd);
-
         const isWithinPaidPeriod =
           subStartDate &&
           subEndDate &&
           now >= subStartDate &&
           now <= subEndDate;
 
-        // Active subscription → TabNavigator
+        // ── Active paid subscription → TabNavigator
         if (isSubscribed && isWithinPaidPeriod) {
           hasNavigated.current = true;
           navigation.replace("TabNavigator");
           return;
         }
 
-        // Check free trial
         let deviceUsedTrial = false;
         if (deviceId) {
           deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
         }
 
-        // Case: New user, device not used trial → FreeTrial
+        // ── New user, no trial used → FreeTrial
         if (!isSubscribed && !isFreeTrial && !deviceUsedTrial) {
           hasNavigated.current = true;
           navigation.replace("FreeTrial");
           return;
         }
 
-        // Case: Active free trial (within 14 days)
+        // ── Active free trial (safe parsing for Timestamp + ISO string)
         let isTrialValid = false;
-        if (isFreeTrial && freeTrialStartedAt?.seconds) {
-          const trialStart = new Date(freeTrialStartedAt.seconds * 1000);
-          const trialDays = differenceInDays(now, trialStart);
-          isTrialValid = trialDays >= 0 && trialDays <= 14;
+        if (isFreeTrial && freeTrialStartedAt) {
+          const trialStart = parseDate(freeTrialStartedAt);
+          if (trialStart) {
+            const trialDays = differenceInDays(now, trialStart);
+            isTrialValid = trialDays >= 0 && trialDays <= 14;
+          }
         }
 
         if (isTrialValid) {
@@ -288,18 +296,18 @@ const DeciderScreen = () => {
           return;
         }
 
-        // Case: Trial expired or device already used trial → Subscription
+        // ── Trial expired or no subscription → Subscription
         if (!isSubscribed) {
           hasNavigated.current = true;
           navigation.replace("Subscription");
           return;
         }
 
-        // Fallback → OnBoarding
+        // ── Fallback → OnBoarding
         hasNavigated.current = true;
         navigation.replace("OnBoarding");
       } catch (error) {
-        console.log("Error deciding initial route:", error);
+        console.log("[Decider] Error deciding initial route:", error);
         if (!hasNavigated.current) {
           hasNavigated.current = true;
           navigation.replace("OnBoarding");
@@ -318,12 +326,10 @@ const DeciderScreen = () => {
         translucent
       />
 
-      {/* Animated Loading Indicator */}
       <View style={styles.loaderContainer}>
         <View
           style={[styles.outerCircle, { borderColor: theme.primary + "20" }]}
         />
-
         <Animated.View
           style={[
             styles.spinnerOuter,
@@ -333,11 +339,9 @@ const DeciderScreen = () => {
             },
           ]}
         />
-
         <View
           style={[styles.innerCircle, { borderColor: theme.primary + "30" }]}
         />
-
         <Animated.View
           style={[
             styles.spinnerInner,
@@ -347,11 +351,9 @@ const DeciderScreen = () => {
             },
           ]}
         />
-
         <View style={[styles.centerDot, { backgroundColor: theme.primary }]} />
       </View>
 
-      {/* Loading Text with animated dots */}
       <View style={styles.loadingTextContainer}>
         <Animated.Text style={[styles.loadingText, { color: theme.heading }]}>
           Loading

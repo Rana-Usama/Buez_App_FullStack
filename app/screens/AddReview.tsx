@@ -370,7 +370,7 @@ const submitReview = async () => {
                 borderColor:
                   theme.mode === "dark"
                     ? theme.border
-                    : "rgba(236, 238, 251, 1)",
+                    : Colors.cardBorderLight,
               },
             ]}
           >
@@ -443,7 +443,7 @@ const submitReview = async () => {
                 borderColor:
                   theme.mode === "dark"
                     ? theme.border
-                    : "rgba(236, 238, 251, 1)",
+                    : Colors.cardBorderLight,
               },
             ]}
           >

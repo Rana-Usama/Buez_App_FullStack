@@ -53,6 +53,8 @@ import {
   where,
   getDocs,
   query,
+  doc,
+  updateDoc,
 } from "firebase/firestore";
 import RepostSuccessModal from "../components/common/RepostModal";
 import { Ionicons } from "@expo/vector-icons";
@@ -566,33 +568,41 @@ function MyRequests({ navigation }) {
   };
 
   const repostRequest = async (index, item) => {
-    setRepostingIndex(index);
-    try {
-      const updatedData = {
-        ...item,
-        acceptedBy: null,
-        status: REQUEST_STATUS.Active,
-      };
+  setRepostingIndex(index);
+  try {
+    const taskRef = doc(db, "taskRequests", item.id);
 
-      await updateReqestStatus(item.id, REQUEST_STATUS.Active, updatedData);
-      setTaskRecords((prev) => {
-        const newRecords = [...prev];
-        newRecords[index] = { ...newRecords[index], ...updatedData };
-        return newRecords;
-      });
-      setActiveFilter(t("myRequests.txt2"));
-      setRepostModalVisible(true);
-    } catch (e) {
-      console.log("e.........", e);
-      Toast.show({
-        type: "error",
-        text1: t("toast.myRequests.five"),
-        text2: t("toast.myRequests.six"),
-      });
-    } finally {
-      setRepostingIndex(null);
-    }
-  };
+    await updateDoc(taskRef, {
+      status: REQUEST_STATUS.Active,
+      acceptedBy: null,
+      confirmedWorkers: [],
+      appliedWorkers: [],
+    });
+
+    setTaskRecords((prev) => {
+      const newRecords = [...prev];
+      newRecords[index] = {
+        ...newRecords[index],
+        status: REQUEST_STATUS.Active,
+        acceptedBy: null,
+        confirmedWorkers: [],
+        appliedWorkers: [],
+      };
+      return newRecords;
+    });
+
+    setActiveFilter(t("myRequests.txt2"));
+    setRepostModalVisible(true);
+  } catch (e) {
+    Toast.show({
+      type: "error",
+      text1: t("toast.myRequests.five"),
+      text2: t("toast.myRequests.six"),
+    });
+  } finally {
+    setRepostingIndex(null);
+  }
+};
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -1257,47 +1267,33 @@ function MyRequests({ navigation }) {
                       {isTaskOwner &&
                         hasApplicants &&
                         activeFilter === `${t("myRequests.txt2")}` && (
-                          <View style={styles.applicantsBadge}>
+                          <TouchableOpacity
+                            style={styles.applicantsBadge}
+                            onPress={(event) =>
+                              navigateToApplicantsScreen(cart.id, event)
+                            }
+                            activeOpacity={0.8}
+                          >
                             <Ionicons
                               name="person-add"
                               size={RFPercentage(1.3)}
                               color={Colors.primary}
                             />
-                            <Text style={styles.applicantsText}>
+                            <Text
+                              numberOfLines={1}
+                              style={styles.applicantsText}
+                            >
                               {totalApplicants}{" "}
                               {totalApplicants === 1
                                 ? "applicant"
                                 : "applicants"}
                             </Text>
-                          </View>
+                          </TouchableOpacity>
                         )}
                     </View>
                   )}
                 </View>
               )}
-
-              {/* View Applicants Button (only for bulk requests with applicants) */}
-              {isBulkRequest &&
-                isTaskOwner &&
-                hasApplicants &&
-                activeFilter === `${t("myRequests.txt2")}` && (
-                  <TouchableOpacity
-                    style={styles.viewApplicantsButton}
-                    onPress={(event) =>
-                      navigateToApplicantsScreen(cart.id, event)
-                    }
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons
-                      name="people"
-                      size={RFPercentage(1.4)}
-                      color="#FFF"
-                    />
-                    <Text style={styles.viewApplicantsText}>
-                      {t("myRequests.view")}
-                    </Text>
-                  </TouchableOpacity>
-                )}
 
               {activeFilter === `${t("myRequests.txt3")}` && // Completed filter
                 cart.status === REQUEST_STATUS.Completed &&
@@ -1307,7 +1303,6 @@ function MyRequests({ navigation }) {
                     {cart.acceptedBy &&
                       !cart.isBulkRequest &&
                       (cart.reviewedAccepter ? (
-                        /* ✅ ALREADY REVIEWED */
                         <View style={[styles.addReviewButton]}>
                           <Ionicons
                             name="checkmark-circle"
@@ -1350,7 +1345,7 @@ function MyRequests({ navigation }) {
                       <TouchableOpacity
                         style={[
                           styles.viewConfirmedHelpersButton,
-                          { backgroundColor: Colors.primary + "20" },
+                          { backgroundColor: Colors.primary + "10" },
                         ]}
                         onPress={(event) =>
                           navigateToConfirmedHelpers(cart, event)
@@ -1465,9 +1460,23 @@ function MyRequests({ navigation }) {
                               <Ionicons
                                 name="people"
                                 size={RFPercentage(2.3)}
-                                color={Colors.primary}
+                                color={
+                                  theme.mode === "dark"
+                                    ? "#a6a9c2ff"
+                                    : "#1b1f45ff"
+                                }
                               />
-                              <Text style={styles.txt4}>
+                              <Text
+                                style={[
+                                  styles.txt4,
+                                  {
+                                    color:
+                                      theme.mode === "dark"
+                                        ? "#a6a9c2ff"
+                                        : "#1b1f45ff",
+                                  },
+                                ]}
+                              >
                                 {t("details.txt9")}
                               </Text>
                             </TouchableOpacity>
@@ -1485,17 +1494,22 @@ function MyRequests({ navigation }) {
                                 {
                                   backgroundColor:
                                     theme.mode === "dark"
-                                      ? "rgba(255,255,255,0.1)"
+                                      ? "rgba(13, 14, 26, 1)"
                                       : Colors.primary + "15",
                                   borderWidth: 1,
                                   borderColor:
                                     theme.mode === "dark"
-                                      ? "rgba(255,255,255,0.2)"
+                                      ? "rgba(126, 115, 158, 0.2)"
                                       : Colors.primary + "30",
                                 },
                               ]}
                               showLabel={false}
                               iconOnly={true}
+                              color={
+                                theme.mode === "dark"
+                                  ? "#a6a9c2ff"
+                                  : "#1b1f45ff"
+                              }
                             />
                           </>
                         ) : (
@@ -1518,8 +1532,23 @@ function MyRequests({ navigation }) {
                                   width: RFPercentage(2.3),
                                   height: RFPercentage(2.3),
                                 }}
+                                tintColor={
+                                  theme.mode === "dark"
+                                    ? "#a6a9c2ff"
+                                    : "#1b1f45ff"
+                                }
                               />
-                              <Text style={styles.txt4}>
+                              <Text
+                                style={[
+                                  styles.txt4,
+                                  {
+                                    color:
+                                      theme.mode === "dark"
+                                        ? "#a6a9c2ff"
+                                        : "#1b1f45ff",
+                                  },
+                                ]}
+                              >
                                 {t("details.txt9")}
                               </Text>
                             </TouchableOpacity>
@@ -1538,17 +1567,22 @@ function MyRequests({ navigation }) {
                                 {
                                   backgroundColor:
                                     theme.mode === "dark"
-                                      ? "rgba(255,255,255,0.1)"
+                                      ? "rgba(13, 14, 26, 1)"
                                       : Colors.primary + "15",
                                   borderWidth: 1,
                                   borderColor:
                                     theme.mode === "dark"
-                                      ? "rgba(255,255,255,0.2)"
+                                      ? "rgba(126, 115, 158, 0.2)"
                                       : Colors.primary + "30",
                                 },
                               ]}
                               showLabel={false}
                               iconOnly={true}
+                              color={
+                                theme.mode === "dark"
+                                  ? "#a6a9c2ff"
+                                  : "#1b1f45ff"
+                              }
                             />
                           </>
                         )}
@@ -1657,17 +1691,18 @@ function MyRequests({ navigation }) {
                         {
                           backgroundColor:
                             theme.mode === "dark"
-                              ? "rgba(255,255,255,0.1)"
-                              : Colors.primary + "10",
+                              ? "rgba(13, 14, 26, 1)"
+                              : Colors.primary + "15",
                           borderWidth: 1,
                           borderColor:
                             theme.mode === "dark"
-                              ? "rgba(255,255,255,0.2)"
-                              : Colors.primary + "20",
+                              ? "rgba(126, 115, 158, 0.2)"
+                              : Colors.primary + "30",
                         },
                       ]}
                       showLabel={false}
                       iconOnly={true}
+                      color={theme.mode === "dark" ? "#a6a9c2ff" : "#1b1f45ff"}
                     />
                   </View>
                 )}
@@ -1747,7 +1782,7 @@ const styles = StyleSheet.create({
   addReviewButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.primary + "20",
+    backgroundColor: Colors.green + "20",
     borderRadius: RFPercentage(1),
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(1),

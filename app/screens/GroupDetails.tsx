@@ -10,6 +10,7 @@ import {
   Platform,
   Animated,
   ActivityIndicator,
+  FlatList
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -22,7 +23,7 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
 import { cachedTranslate } from "../utils/cachedTranslations";
-import { t } from "i18next";
+import MemberRow from "../components/group/MemberRow";
 
 interface Member {
   userId: string;
@@ -47,202 +48,6 @@ interface GroupData {
     senderName: string;
   };
 }
-
-const MemberRow = ({
-  member,
-  index,
-  currentUserId,
-  onChat,
-  theme,
-}: {
-  member: Member;
-  index: number;
-  currentUserId: string;
-  onChat: (member: Member) => void;
-  theme: any;
-}) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(24)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 350,
-        delay: index * 70,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 350,
-        delay: index * 70,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
-
-  const isOwner = member.role === "owner";
-  const isSelf = member.userId === currentUserId;
-
-  return (
-    <Animated.View
-      style={{
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }],
-      }}
-    >
-      <View
-        style={[
-          styles.memberRow,
-          {
-            backgroundColor:
-              theme.mode === "dark"
-                ? "rgba(255,255,255,0.04)"
-                : "rgba(0,0,0,0.025)",
-            borderColor:
-              theme.mode === "dark"
-                ? "rgba(255,255,255,0.07)"
-                : "rgba(0,0,0,0.06)",
-          },
-        ]}
-      >
-        {/* Avatar */}
-        <View style={styles.memberAvatarWrap}>
-          {member.profileImage ? (
-            <Image
-              source={{ uri: member.profileImage }}
-              style={styles.memberAvatar}
-            />
-          ) : (
-            <LinearGradient
-              colors={
-                isOwner
-                  ? ["#FFD700", "#FFA500"]
-                  : [Colors.primary + "cc", Colors.primary]
-              }
-              style={styles.memberAvatarFallback}
-            >
-              <Text style={styles.memberAvatarInitial}>
-                {member.userName?.[0]?.toUpperCase() || "?"}
-              </Text>
-            </LinearGradient>
-          )}
-
-          {/* Online dot placeholder — you can wire real presence later */}
-          <View style={styles.onlineDot} />
-        </View>
-
-        {/* Info */}
-        <View style={styles.memberInfo}>
-          <View style={styles.memberNameRow}>
-            <Text
-              style={[styles.memberName, { color: theme.heading }]}
-              numberOfLines={1}
-            >
-              {member.userName}
-              {isSelf && (
-                <Text
-                  style={{
-                    color: theme.darkGrey,
-                    fontFamily: "Poppins_400Regular",
-                  }}
-                >
-                  {" "}
-                  - {t("common.you")}
-                </Text>
-              )}
-            </Text>
-
-            {/* Role badge */}
-            {isOwner ? (
-              <LinearGradient
-                colors={["#FFD700", "#FFA500"]}
-                style={styles.ownerBadge}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              >
-                <Ionicons
-                  name="shield-checkmark"
-                  size={RFPercentage(1.3)}
-                  color="#FFF"
-                />
-                <Text style={styles.ownerBadgeText}>
-                  {t("taskApplicants.owner")}
-                </Text>
-              </LinearGradient>
-            ) : (
-              <View
-                style={[
-                  styles.workerBadge,
-                  {
-                    backgroundColor:
-                      theme.mode === "dark"
-                        ? Colors.primary + "30"
-                        : Colors.primary + "15",
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="hammer-wrench"
-                  size={RFPercentage(1.3)}
-                  color={
-                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary
-                  }
-                />
-                <Text
-                  style={[
-                    styles.workerBadgeText,
-                    {
-                      color:
-                        theme.mode === "dark"
-                          ? Colors.darkGrey
-                          : Colors.primary,
-                    },
-                  ]}
-                >
-                  {t("taskApplicants.helper")}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {member.joinedAt && (
-            <Text style={[styles.memberJoinedAt, { color: theme.darkGrey }]}>
-              {t("taskApplicants.joined")}{" "}
-              {new Date(member.joinedAt).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}
-            </Text>
-          )}
-        </View>
-
-        {/* Chat button — only show for others */}
-        {!isSelf && (
-          <TouchableOpacity
-            style={[
-              styles.memberChatBtn,
-              {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.primary + "30"
-                    : Colors.primary + "12",
-              },
-            ]}
-            onPress={() => onChat(member)}
-            activeOpacity={0.75}
-          >
-            <Ionicons
-              name="chatbubble-ellipses-outline"
-              size={RFPercentage(2.2)}
-              color={theme.mode === "dark" ? Colors.white : Colors.primary}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-    </Animated.View>
-  );
-};
 
 const GroupDetails = ({ navigation, route }: any) => {
   const { theme } = useAppTheme();
@@ -342,6 +147,10 @@ const GroupDetails = ({ navigation, route }: any) => {
   const owners = groupData?.members?.filter((m) => m.role === "owner") || [];
   const workers = groupData?.members?.filter((m) => m.role === "worker") || [];
 
+  // memoize owners/workers for stable references (helps FlatList and memoised items)
+  const ownersMemo = React.useMemo(() => owners, [owners.length, JSON.stringify(owners.map((o) => o.userId))]);
+  const workersMemo = React.useMemo(() => workers, [workers.length, JSON.stringify(workers.map((w) => w.userId))]);
+
   // ── Start 1:1 chat with a member ────────────────────────────────────────
   const handleMemberChat = async (member: Member) => {
     if (chattingWith) return;
@@ -365,6 +174,9 @@ const GroupDetails = ({ navigation, route }: any) => {
       setChattingWith(null);
     }
   };
+
+  // stable callback passed to MemberRow (avoid re-creating on each render)
+  const handleMemberChatCb = React.useCallback((m: Member) => handleMemberChat(m), [currentUserId, currentUserName, chattingWith]);
 
   if (loading) {
     return (
@@ -393,8 +205,8 @@ const GroupDetails = ({ navigation, route }: any) => {
         <LinearGradient
           colors={
             theme.mode === "dark"
-              ? ["#1f22388f", "#3a2850ff", "#1a1a2eff"]
-              : ["#a5a5bd48", "#6183a9c7", "#3c6954c9"]
+              ? Colors.heroGradientDark
+              : Colors.heroGradientLight
           }
           style={styles.heroGradient}
           start={{ x: 0, y: 1 }}
@@ -416,8 +228,8 @@ const GroupDetails = ({ navigation, route }: any) => {
             <LinearGradient
               colors={
                 theme.mode === "dark"
-                  ? ["#8268a1ff", "#1a1a2eff"]
-                  : [Colors.primary, "#6fafa0ff"]
+                  ? Colors.heroIconGradientDark
+                  : Colors.heroIconGradientLight
               }
               style={styles.heroIconGradient}
               start={{ x: 0, y: 0 }}
@@ -451,7 +263,7 @@ const GroupDetails = ({ navigation, route }: any) => {
                 <MaterialCommunityIcons
                   name="tag-outline"
                   size={RFPercentage(1.5)}
-                  color="rgba(255,255,255,0.85)"
+                  color={Colors.categoryBadgeText}
                 />
                 <Text style={styles.heroCategoryText}>{translatedTitle}</Text>
               </View>
@@ -468,7 +280,7 @@ const GroupDetails = ({ navigation, route }: any) => {
                 <Feather
                   name="message-circle"
                   size={RFPercentage(2)}
-                  color="rgba(255,255,255,0.8)"
+                  color={Colors.lastMsgTextColor}
                 />
                 <Text style={styles.lastMsgText} numberOfLines={1}>
                   {groupData?.lastMessage?.senderName}: {translatedLastMessage}
@@ -513,7 +325,7 @@ const GroupDetails = ({ navigation, route }: any) => {
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <LinearGradient
-                  colors={["#FFD700", "#FFA500"]}
+                  colors={[Colors.gold, Colors.orange]}
                   style={styles.sectionIconWrap}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -530,25 +342,26 @@ const GroupDetails = ({ navigation, route }: any) => {
                 <View
                   style={[
                     styles.sectionCount,
-                    { backgroundColor: "#FFD70020" },
+                    { backgroundColor: Colors.gold20 },
                   ]}
                 >
-                  <Text style={[styles.sectionCountText, { color: "#FFA500" }]}>
+                  <Text style={[styles.sectionCountText, { color: Colors.orange }]}>
                     {owners.length}
                   </Text>
                 </View>
               </View>
 
-              {owners.map((member, i) => (
-                <MemberRow
-                  key={member.userId}
-                  member={member}
-                  index={i}
-                  currentUserId={currentUserId}
-                  onChat={handleMemberChat}
-                  theme={theme}
-                />
-              ))}
+              <FlatList
+                data={ownersMemo}
+                keyExtractor={(it) => it.userId}
+                renderItem={({ item, index }) => (
+                  <MemberRow member={item} index={index} currentUserId={currentUserId} onChat={handleMemberChatCb} theme={theme} />
+                )}
+                scrollEnabled={false}
+                removeClippedSubviews
+                initialNumToRender={8}
+                windowSize={5}
+              />
             </View>
           )}
 
@@ -560,8 +373,8 @@ const GroupDetails = ({ navigation, route }: any) => {
                 {
                   backgroundColor:
                     theme.mode === "dark"
-                      ? "rgba(255,255,255,0.06)"
-                      : "rgba(0,0,0,0.05)",
+                      ? Colors.infoFooterBorderDark
+                      : Colors.infoFooterBorderLight,
                 },
               ]}
             />
@@ -606,16 +419,17 @@ const GroupDetails = ({ navigation, route }: any) => {
                 </View>
               </View>
 
-              {workers.map((member, i) => (
-                <MemberRow
-                  key={member.userId}
-                  member={member}
-                  index={owners.length + i}
-                  currentUserId={currentUserId}
-                  onChat={handleMemberChat}
-                  theme={theme}
-                />
-              ))}
+              <FlatList
+                data={workersMemo}
+                keyExtractor={(it) => it.userId}
+                renderItem={({ item, index }) => (
+                  <MemberRow member={item} index={owners.length + index} currentUserId={currentUserId} onChat={handleMemberChatCb} theme={theme} />
+                )}
+                scrollEnabled={false}
+                removeClippedSubviews
+                initialNumToRender={8}
+                windowSize={5}
+              />
             </View>
           )}
         </View>
@@ -627,12 +441,12 @@ const GroupDetails = ({ navigation, route }: any) => {
             {
               backgroundColor:
                 theme.mode === "dark"
-                  ? "rgba(255,255,255,0.03)"
-                  : "rgba(0,0,0,0.025)",
+                  ? Colors.infoFooterBgDark
+                  : Colors.infoFooterBgLight,
               borderColor:
                 theme.mode === "dark"
-                  ? "rgba(255,255,255,0.06)"
-                  : "rgba(0,0,0,0.05)",
+                  ? Colors.infoFooterBorderDark
+                  : Colors.infoFooterBorderLight,
             },
           ]}
         >
@@ -703,7 +517,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(4.5),
     height: RFPercentage(4.5),
     borderRadius: RFPercentage(100),
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -727,7 +541,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#rgba(242, 249, 249, 1)",
+    backgroundColor: Colors.memberBubble,
     borderRadius: RFPercentage(100),
     width: RFPercentage(3.5),
     height: RFPercentage(3.5),
@@ -745,7 +559,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_700Bold",
   },
   heroTitle: {
-    color: "#FFF",
+    color: Colors.heroTitleColor,
     fontSize: RFPercentage(2.6),
     fontFamily: "Poppins_700Bold",
     textAlign: "center",
@@ -760,13 +574,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: RFPercentage(0.5),
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: Colors.categoryBadgeBg,
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.5),
     borderRadius: RFPercentage(2),
   },
   heroCategoryText: {
-    color: "rgba(255,255,255,0.85)",
+    color: Colors.categoryBadgeText,
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
   },
@@ -778,14 +592,14 @@ const styles = StyleSheet.create({
     maxWidth: "80%",
   },
   lastMsgText: {
-    color: "rgba(255,255,255,0.8)",
+    color: Colors.lastMsgTextColor,
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
     flex: 1,
   },
   heroStats: {
     flexDirection: "row",
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.heroStatsBg,
     borderRadius: RFPercentage(2),
     paddingVertical: RFPercentage(1.8),
     paddingHorizontal: RFPercentage(3),
@@ -795,19 +609,19 @@ const styles = StyleSheet.create({
   },
   heroStatItem: { alignItems: "center" },
   heroStatValue: {
-    color: "#FFF",
+    color: Colors.heroTitleColor,
     fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_700Bold",
   },
   heroStatLabel: {
-    color: "rgba(255,255,255,0.7)",
+    color: Colors.heroStatsLabel,
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_400Regular",
   },
   heroStatDivider: {
     width: 1,
     height: RFPercentage(3.5),
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.heroStatsDivider,
   },
 
   // ── Sections ────────────────────────────────────────────────────────────
@@ -966,7 +780,7 @@ const styles = StyleSheet.create({
   // ── Chat loading overlay ─────────────────────────────────────────────────
   chatLoadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: Colors.chatLoadingBgOverlay,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 999,

@@ -61,8 +61,8 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
 
     switch (variant) {
       case 'light':
-        backgroundColor = 'rgba(255,255,255,0.2)';
-        borderColor = 'rgba(255,255,255,0.3)';
+        backgroundColor = Colors.backBtnBg;
+        borderColor = Colors.white3;
         textColor = Colors.white;
         break;
       case 'dark':
@@ -72,10 +72,10 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         break;
       default:
         backgroundColor = theme.mode === 'dark' 
-          ? 'rgba(255,255,255,0.15)' 
+          ? Colors.white15 
           : Colors.primary + '20';
         borderColor = theme.mode === 'dark' 
-          ? 'rgba(255,255,255,0.2)' 
+          ? Colors.backBtnBg 
           : Colors.primary + '30';
         textColor = theme.mode === 'dark' ? Colors.white : Colors.primary;
     }

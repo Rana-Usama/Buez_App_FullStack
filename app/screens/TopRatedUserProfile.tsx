@@ -43,90 +43,11 @@ import { FIREBASE_DB } from "../../firebaseConfig";
 import { createOrUpdateGroupChat } from "../services/GroupChat.service";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { cachedTranslate } from "../utils/cachedTranslations";
-
-// ─── Reusable colors map ─────────────────────────────────────────────────────
-const CATEGORY_MAP: Record<string, { color: string; icon: string }> = {
-  Cleaning: { color: "#4ECDC4", icon: "broom" },
-  Moving: { color: "#FF6B6B", icon: "truck" },
-  Gardening: { color: "#95E06C", icon: "seedling" },
-  Gaming: { color: "#A78BFA", icon: "gamepad" },
-  Plumbing: { color: "#60A5FA", icon: "wrench" },
-  Electrical: { color: "#FBBF24", icon: "bolt" },
-  Carpentry: { color: "#F97316", icon: "hammer" },
-  Painting: { color: "#EC4899", icon: "paint-brush" },
-  Delivery: { color: "#14B8A6", icon: "shipping-fast" },
-  Tutoring: { color: "#8B5CF6", icon: "chalkboard-teacher" },
-  "Event Setup": { color: "#F43F5E", icon: "calendar-alt" },
-  Photography: { color: "#06B6D4", icon: "camera" },
-  "Pet Care": { color: "#D97706", icon: "paw" },
-  Other: { color: "#6B7280", icon: "ellipsis-h" },
-};
-
-const InterestPill = ({
-  item,
-  isCustom,
-}: {
-  item: { key: string; label: string };
-  isCustom?: boolean;
-}) => {
-  const meta = CATEGORY_MAP[item.key];
-
-  const color = isCustom ? "#1b2572ff" : meta?.color || "#3a6dedff";
-  const icon = isCustom ? "tag" : meta?.icon || "tag";
-
-  return (
-    <View
-      style={[
-        interestPillStyle.pill,
-        {
-          borderColor: isCustom ? "#2c2d305f" : color + "40",
-          backgroundColor: color + "10",
-        },
-      ]}
-    >
-      <View
-        style={[
-          interestPillStyle.iconWrap,
-          { backgroundColor: isCustom ? "#2e2e3234" : color + "20" },
-        ]}
-      >
-        <FontAwesome5
-          name={icon}
-          size={RFPercentage(1.2)}
-          color={color}
-          solid
-        />
-      </View>
-      <Text numberOfLines={1} style={[interestPillStyle.text, { color }]}>
-        {item.label}
-      </Text>
-    </View>
-  );
-};
-
-const interestPillStyle = StyleSheet.create({
-  pill: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: RFPercentage(10),
-    paddingVertical: RFPercentage(0.5),
-    paddingLeft: RFPercentage(0.55),
-    paddingRight: RFPercentage(1.2),
-    gap: RFPercentage(0.55),
-  },
-  iconWrap: {
-    width: RFPercentage(2.7),
-    height: RFPercentage(2.7),
-    borderRadius: RFPercentage(5),
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_500Medium",
-  },
-});
+import ProfileHeader from "../components/TopRatedUserProfile/ProfileHeader";
+import StatsStrip from "../components/TopRatedUserProfile/StatsStrip";
+import InterestsSection from "../components/TopRatedUserProfile/InterestsSection";
+import TaskCard from "../components/TopRatedUserProfile/TaskCard";
+import ReviewCard from "../components/TopRatedUserProfile/ReviewCard";
 
 const TopRatedUserProfile = ({ navigation, route }: any) => {
   const { theme } = useAppTheme();
@@ -151,6 +72,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
   });
   const [canConfirm, setCanConfirm] = useState(true);
   const [translatedTasks, setTranslatedTasks] = useState({});
+  console.log("Translated Tasks:", translatedTasks);
   const [translatedReviews, setTranslatedReviews] = useState({});
   const [userInterests, setUserInterests] = useState<{
     selectedCategories: string[];
@@ -336,16 +258,17 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       for (const item of tasks.completed) {
         const desc = item?.taskDetails?.description;
         const type = item?.taskDetails?.taskType;
+        const id = item?.taskId; // FIX
 
-        if (!desc && !type) continue;
+        if (!id || (!desc && !type)) continue;
 
         try {
-          map[item.id] = {
+          map[id] = {
             description: desc ? await cachedTranslate(desc) : "",
             taskType: type ? await cachedTranslate(type) : "",
           };
         } catch {
-          map[item.id] = {
+          map[id] = {
             description: desc || "",
             taskType: type || "",
           };
@@ -464,9 +387,9 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       }
 
       // Check slots one more time
-      const requiredWorkers = latestData.numberOfWorkers || 1;
+      const requiredWorkers = latestData?.numberOfWorkers || 1;
       const confirmedCount = Array.isArray(latestData.confirmedWorkers)
-        ? latestData.confirmedWorkers.length
+        ? latestData?.confirmedWorkers.length
         : 0;
 
       if (confirmedCount >= requiredWorkers) {
@@ -706,338 +629,34 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* PROFILE HEADER SECTION */}
-        <LinearGradient
-          colors={theme.mode === "dark" ? dark : light}
-          style={styles.headerGradient}
-          start={{ x: 0, y: 1 }}
-          end={{ x: 1, y: 0 }}
-        >
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => navigation.goBack()}
-            style={[styles.backButton]}
-          >
-            <Ionicons name="chevron-back" size={20} color="#FFF" />
-          </TouchableOpacity>
-          <View style={styles.profileHero}>
-            {/* Profile Avatar with Ring */}
-            <View style={styles.avatarWrapper}>
-              <LinearGradient
-                colors={rank.gradient}
-                style={styles.avatarRing}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={styles.avatarContainer}>
-                  <Image
-                    source={
-                      user?.profileImage ? { uri: user.profileImage } : Icons.dp
-                    }
-                    style={styles.avatar}
-                  />
-                </View>
-              </LinearGradient>
-
-              {/* Rank Badge */}
-              <View style={styles.rankBadge}>
-                <LinearGradient
-                  colors={rank.gradient}
-                  style={styles.rankGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Ionicons
-                    name={rank.icon as any}
-                    size={RFPercentage(1.8)}
-                    color="#FFF"
-                  />
-                </LinearGradient>
-              </View>
-            </View>
-
-            {/* User Name and Status */}
-            <View style={styles.nameContainer}>
-              <Text style={[styles.nameText, { color: theme.pureWhite }]}>
-                {userBasic?.userName || user?.userName}
-              </Text>
-
-              {/* Confirmation Status Badge */}
-              {applier && isConfirmed && (
-                <View style={styles.confirmedStatusBadge}>
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={RFPercentage(1.8)}
-                    color="#4CAF50"
-                  />
-                  <Text style={styles.confirmedStatusText}>
-                    {t("profile.confirmed") || "Confirmed"}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {/* Rank and Success Rate */}
-            <View style={styles.tagRow}>
-              <LinearGradient
-                colors={rank.gradient}
-                style={styles.rankTag}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Text style={styles.rankLabel}>{rank.label}</Text>
-              </LinearGradient>
-
-              <View style={styles.successRateContainer}>
-                <Ionicons
-                  name="trending-up"
-                  size={RFPercentage(1.5)}
-                  color="#4CAF50"
-                />
-                <Text style={[styles.successText, { color: theme.darkGrey }]}>
-                  {stats?.successRate || 0}% {t("profileRank.txt31")}
-                </Text>
-              </View>
-            </View>
-
-            {/* Bio */}
-            <Text style={[styles.bioText, { color: theme.darkGrey }]}>
-              {translatedBio
-                ? translatedBio
-                : userBasic?.biography ||
-                  `${t("profileRank.txt23")} ${
-                    stats?.completedTasks || 0
-                  } tasks with high efficiency.`}
-            </Text>
-
-            {applier && canConfirm && (
-              <View style={styles.actionSection}>
-                <View style={styles.confirmationSection}>
-                  {isConfirmed ? (
-                    <></>
-                  ) : (
-                    <>
-                      <TouchableOpacity
-                        style={[
-                          styles.confirmButton,
-                          slotInfo.isFull && styles.buttonDisabled,
-                        ]}
-                        onPress={handleConfirmApplicant}
-                        disabled={confirming || slotInfo.isFull}
-                        activeOpacity={0.9}
-                      >
-                        <LinearGradient
-                          colors={
-                            slotInfo.isFull
-                              ? ["#CCCCCC", "#999999"]
-                              : [Colors.primary, "#314495"]
-                          }
-                          style={styles.confirmButtonGradient}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                        >
-                          {confirming ? (
-                            <ActivityIndicator size="small" color="#FFF" />
-                          ) : (
-                            <View style={styles.confirmButtonContent}>
-                              <View style={styles.confirmIconContainer}>
-                                <Ionicons
-                                  name={
-                                    slotInfo.isFull
-                                      ? "people"
-                                      : "checkmark-circle"
-                                  }
-                                  size={RFPercentage(2.1)}
-                                  color="#FFF"
-                                />
-                                <View style={styles.confirmIconGlow} />
-                              </View>
-                              <View style={styles.confirmTextContainer}>
-                                <Text style={styles.confirmButtonTitle}>
-                                  {slotInfo.isFull
-                                    ? t("offerDetail.full")
-                                    : t("profile.confirmApplicant") ||
-                                      t("offerDetail.cnf")}
-                                </Text>
-                              </View>
-                            </View>
-                          )}
-                        </LinearGradient>
-                      </TouchableOpacity>
-                      <Text
-                        style={[
-                          styles.confirmButtonSubtitle,
-                          { color: theme.darkGrey },
-                        ]}
-                      >
-                        {slotInfo.filled}/{slotInfo.total}{" "}
-                        {t("offerDetail.slt")} • {slotInfo.remaining}{" "}
-                        {t("offerDetail.lft")}
-                      </Text>
-                    </>
-                  )}
-                </View>
-
-                {/* Message Button */}
-                <TouchableOpacity
-                  style={styles.messageButton}
-                  onPress={handleStartChat}
-                  activeOpacity={0.9}
-                >
-                  <View
-                    style={[
-                      styles.messageButtonInner,
-                      {
-                        backgroundColor:
-                          theme.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.3)"
-                            : "rgba(112, 112, 120, 0.13)",
-                      },
-                    ]}
-                  >
-                    <Ionicons
-                      name="chatbubble-ellipses"
-                      size={RFPercentage(2.2)}
-                      color={Colors.primary}
-                    />
-                    <Text
-                      style={[
-                        styles.messageButtonText,
-                        { color: Colors.primary },
-                      ]}
-                    >
-                      {t("details.txt9")}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* REGULAR PROFILE VIEW (non-applier or non-owner) */}
-            {(!applier || !canConfirm) && (
-              <View style={styles.actionSection}>
-                <TouchableOpacity
-                  style={styles.fullMessageButton}
-                  onPress={handleStartChat}
-                  activeOpacity={0.9}
-                >
-                  <LinearGradient
-                    colors={
-                      theme.mode === "dark"
-                        ? ["#2c1545ff", "#482074ff"]
-                        : [Colors.primary, "#4c669f"]
-                    }
-                    style={styles.fullMessageButtonGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <Ionicons
-                      name="chatbubble-ellipses"
-                      size={RFPercentage(2.2)}
-                      color="#FFF"
-                    />
-                    <Text style={styles.fullMessageButtonText}>
-                      {t("details.txt9")}
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        </LinearGradient>
+        {/* PROFILE HEADER */}
+        <ProfileHeader
+          userBasic={userBasic}
+          rank={rank}
+          translatedBio={translatedBio}
+          applier={applier}
+          canConfirm={canConfirm}
+          isConfirmed={isConfirmed}
+          slotInfo={slotInfo}
+          confirming={confirming}
+          handleConfirmApplicant={handleConfirmApplicant}
+          handleStartChat={handleStartChat}
+          theme={theme}
+          t={t}
+          navigation={navigation}
+        />
 
         {/* FLOATING STATS STRIP */}
-        <View style={[styles.statsStrip, { backgroundColor: theme.white }]}>
-          <StatItem
-            label={t("profileRank.txt6")}
-            value={stats?.activeTasks || 0}
-            icon="flash-outline"
-            color="#3498db"
-          />
-          <View style={styles.statDivider} />
-          <StatItem
-            label={t("profileRank.txt23")}
-            value={stats?.completedTasks || 0}
-            icon="checkmark-circle-outline"
-            color="#2ecc71"
-          />
-          <View style={styles.statDivider} />
-          <StatItem
-            label="Member Since"
-            value={stats?.memberSince?.split(" ")[2] || "2024"}
-            icon="calendar-outline"
-            color="#e67e22"
-          />
-        </View>
+        <StatsStrip stats={stats} theme={theme} t={t} />
 
-        {/* ── USER INTERESTS SECTION ── */}
-        {translatedInterests &&
-          (translatedInterests.selectedCategories.length > 0 ||
-            translatedInterests.customInterests.length > 0) && (
-            <View
-              style={[
-                interestsSectionStyle.card,
-                {
-                  backgroundColor: theme.white,
-                  borderColor:
-                    theme.mode === "dark"
-                      ? "rgba(21, 20, 22, 1)"
-                      : "rgba(238,238,238,1)",
-                },
-              ]}
-            >
-              {/* Header */}
-              <View style={interestsSectionStyle.header}>
-                <LinearGradient
-                  colors={["#293596ff", "#918fb8ff"]}
-                  style={interestsSectionStyle.iconBg}
-                >
-                  <FontAwesome5
-                    name="heart"
-                    size={RFPercentage(1.3)}
-                    color="#fff"
-                    solid
-                  />
-                </LinearGradient>
-                <Text
-                  style={[
-                    interestsSectionStyle.title,
-                    { color: theme.heading },
-                  ]}
-                >
-                  Interests
-                </Text>
-                <View
-                  style={[
-                    interestsSectionStyle.countBadge,
-                    { backgroundColor: Colors.primary + "18" },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      interestsSectionStyle.countText,
-                      { color: Colors.primary },
-                    ]}
-                  >
-                    {(userInterests.selectedCategories?.length || 0) +
-                      (userInterests.customInterests?.length || 0)}
-                  </Text>
-                </View>
-              </View>
+        {/* INTERESTS */}
+        <InterestsSection
+          translatedInterests={translatedInterests}
+          userInterests={userInterests}
+          theme={theme}
+        />
 
-              {/* Pills */}
-              <View style={interestsSectionStyle.pillsWrap}>
-                {translatedInterests?.selectedCategories?.map((item) => (
-                  <InterestPill key={item.key} item={item} />
-                ))}
-                {translatedInterests?.customInterests?.map((item) => (
-                  <InterestPill key={item.key} item={item} isCustom />
-                ))}
-              </View>
-            </View>
-          )}
-
-        {/* TABS SELECTION */}
+        {/* TABS */}
         <View style={styles.tabWrapper}>
           <View
             style={[
@@ -1081,172 +700,87 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
           </View>
         </View>
 
-        {/* CONTENT SECTION */}
-        <View style={styles.contentSection}>
-          {activeTab === "completed" ? (
-            tasks?.completed && tasks?.completed?.length > 0 ? (
-              <>
-                {visibleCompletedTasks.map((item, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.taskCard,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: theme.border,
-                      },
-                    ]}
-                  >
-                    <Image
-                      source={{ uri: item.taskDetails.imageUrls?.[0] }}
-                      style={styles.taskImg}
-                    />
-                    <BlurView
-                      intensity={80}
-                      tint="dark"
-                      style={styles.taskOverlay}
-                    >
-                      <Text style={styles.taskType}>
-                        {translatedTasks[item.id]?.taskType ??
-                          item.taskDetails.taskType}
-                      </Text>
-                    </BlurView>
-
-                    <View style={styles.taskInfo}>
-                      <Text
-                        style={[styles.taskTitle, { color: theme.heading }]}
-                        numberOfLines={2}
-                      >
-                        {translatedTasks[item.id]?.description ??
-                          item.taskDetails.description}
-                      </Text>
-
-                      <Text style={[styles.taskDate, { color: theme.grey }]}>
-                        {t("myRequests.txt3")}{" "}
-                        {moment(
-                          item.completedAt?.seconds
-                            ? item.completedAt.seconds * 1000
-                            : item.completedAt,
-                        ).format("MMM DD, YYYY")}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-
-                {/*SHOW MORE COMPLETED */}
-                {tasks.completed.length > 3 && !showAllCompleted && (
-                  <TouchableOpacity
-                    onPress={() => setShowAllCompleted(true)}
-                    style={styles.showMoreBtn}
-                  >
-                    <Text style={styles.showMoreText}>
-                      +{tasks.completed.length - 3} more
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </>
-            ) : (
-              <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons
-                  name="checkbox-multiple-marked-circle-outline"
-                  size={RFPercentage(4)}
-                  color={theme.grey}
-                />
-                <Text style={[styles.emptyTitle, { color: theme.heading }]}>
-                  {t("myRequests.noCompletedTasks")}
-                </Text>
-                <Text style={[styles.emptySubtitle, { color: theme.grey }]}>
-                  {t("myRequests.noCompletedTasksDesc")}
-                </Text>
-              </View>
-            )
-          ) : reviews && reviews?.length > 0 ? (
+        {/* CONTENT */}
+        {activeTab === "completed" ? (
+          completedTasks && completedTasks.length > 0 ? (
             <>
-              {visibleReviews.map((item, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.reviewCard,
-                    {
-                      backgroundColor:
-                        theme.mode === "dark" ? "#0a090cff" : "#FFF",
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
-                  <View style={styles.reviewHeader}>
-                    <Image
-                      source={
-                        item?.reviewer?.profileImage
-                          ? { uri: item?.reviewer?.profileImage }
-                          : Icons.dp
-                      }
-                      style={styles.revAvatar}
-                    />
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.revName, { color: theme.heading }]}>
-                        {item?.reviewer?.userName}
+              <View style={{ marginTop: RFPercentage(3) }}>
+                {visibleCompletedTasks.map((item, idx) => (
+                  <TaskCard
+                    key={item.id || idx}
+                    item={item}
+                    translatedText={translatedTasks[item.taskId]?.description} 
+                    translatedTaskType={translatedTasks[item.taskId]?.taskType}
+                    t={t}
+                    theme={theme}
+                  />
+                ))}
+                {tasks.completed.length > INITIAL_COUNT &&
+                  !showAllCompleted && (
+                    <TouchableOpacity
+                      onPress={() => setShowAllCompleted(true)}
+                      style={styles.showMoreBtn}
+                    >
+                      <Text style={styles.showMoreText}>
+                        +{tasks.completed.length - INITIAL_COUNT} more
                       </Text>
-                      <View style={styles.starRow}>
-                        {[...Array(5)].map((_, i) => (
-                          <Ionicons
-                            key={i}
-                            name="star"
-                            size={RFPercentage(1.5)}
-                            color={i < item?.rating ? "#FFD700" : "#DDD"}
-                          />
-                        ))}
-                      </View>
-                    </View>
-                    <View>
-                      <Text
-                        style={[
-                          styles.revName,
-                          {
-                            color: Colors.primary,
-                            fontFamily: "Poppins_400Regular",
-                            fontSize: 12,
-                          },
-                        ]}
-                      >
-                        {moment(item.createdAt.seconds * 1000).format(
-                          "DD MMMM YYYY",
-                        )}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={[styles.revText, { color: theme.darkGrey }]}>
-                    "{translatedReviews[item.id] ?? item?.reviewText}"
-                  </Text>
-                </View>
+                    </TouchableOpacity>
+                  )}
+              </View>
+            </>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <MaterialCommunityIcons
+                name="checkbox-multiple-marked-circle-outline"
+                size={RFPercentage(4)}
+                color={theme.grey}
+              />
+              <Text style={[styles.emptyTitle, { color: theme.heading }]}>
+                {t("myRequests.noCompletedTasks")}
+              </Text>
+              <Text style={[styles.emptySubtitle, { color: theme.grey }]}>
+                {t("myRequests.noCompletedTasksDesc")}
+              </Text>
+            </View>
+          )
+        ) : reviews && reviews.length > 0 ? (
+          <>
+            <View style={{ marginTop: RFPercentage(3) }}>
+              {visibleReviews.map((r, i) => (
+                <ReviewCard
+                  key={r.id || i}
+                  item={r}
+                  translated={translatedReviews[r.id]}
+                  theme={theme}
+                />
               ))}
-              {reviews.length > 3 && !showAllReviews && (
+              {reviews?.length > INITIAL_COUNT && !showAllReviews && (
                 <TouchableOpacity
                   onPress={() => setShowAllReviews(true)}
                   style={styles.showMoreBtn}
                 >
                   <Text style={styles.showMoreText}>
-                    +{reviews.length - 3} more
+                    +{reviews?.length - INITIAL_COUNT} more
                   </Text>
                 </TouchableOpacity>
               )}
-            </>
-          ) : (
-            <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons
-                name="comment-text-outline"
-                size={RFPercentage(4)}
-                color={theme.grey}
-              />
-              <Text style={[styles.emptyTitle, { color: theme.heading }]}>
-                {t("myRequests.noReviews")}
-              </Text>
-              <Text style={[styles.emptySubtitle, { color: theme.grey }]}>
-                {t("myRequests.noReviewsDesc")}
-              </Text>
             </View>
-          )}
-        </View>
+          </>
+        ) : (
+          <View style={styles.emptyContainer}>
+            <MaterialCommunityIcons
+              name="comment-text-outline"
+              size={RFPercentage(4)}
+              color={theme.grey}
+            />
+            <Text style={[styles.emptyTitle, { color: theme.heading }]}>
+              {t("myRequests.noReviews")}
+            </Text>
+            <Text style={[styles.emptySubtitle, { color: theme.grey }]}>
+              {t("myRequests.noReviewsDesc")}
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -1344,7 +878,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#4CAF50" + "20",
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(0.6),
+    paddingVertical: RFPercentage(0.3),
     borderRadius: RFPercentage(2),
     gap: RFPercentage(0.5),
   },

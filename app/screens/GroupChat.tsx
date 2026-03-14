@@ -55,6 +55,10 @@ import {
   incrementUnreadForAll,
 } from "../services/GroupChat.service";
 import ClickableMessageText from "../components/common/ClickableMessageText";
+import GroupHeader from "../components/group/GroupHeader";
+import GroupInputToolbar from "../components/group/GroupInputToolbar";
+import GroupDeleteModal from "../components/group/GroupDeleteModal";
+import MessageItem from "../components/group/MessageItem";
 
 const INITIAL_LOAD_LIMIT = 20;
 const LOAD_MORE_LIMIT = 20;
@@ -426,181 +430,51 @@ const GroupChat = ({ navigation, route }: any) => {
     setDeleteModalVisible(false);
   }, []);
 
-  // ── Render: Avatar (show for non-current-user messages) ───────────────────
-  const renderAvatar = useCallback(
-    (props: any) => {
-      if (props.currentMessage?.user?._id === currentUserId) return null;
+  // create fast lookup map for group members (O(1) lookup)
+  const memberMap = useMemo(() => {
+    const m = new Map<string, any>();
+    groupMembers.forEach((gm) => m.set(gm.userId, gm));
+    return m;
+  }, [groupMembers]);
 
-      // Primary: avatar stored on the message itself
-      const messageAvatar = props.currentMessage?.user?.avatar;
-
-      // Fallback: look up from live groupMembers state
-      const member = groupMembers.find(
-        (m) => m.userId === props.currentMessage?.user?._id,
-      );
-      const profileImage = messageAvatar || member?.profileImage || "";
-      const displayName = props.currentMessage?.user?.name || "?";
-
-      return profileImage ? (
-        <Image source={{ uri: profileImage }} style={styles.avatar} />
-      ) : (
-        <View
-          style={[
-            styles.avatarFallback,
-            { backgroundColor: Colors.primary + "30" },
-          ]}
-        >
-          <Text style={[styles.avatarInitial, { color: Colors.primary }]}>
-            {displayName[0]?.toUpperCase() || "?"}
-          </Text>
-        </View>
-      );
+  // stable send wrapper for GroupInputToolbar
+  const sendText = useCallback(
+    (text: string) => {
+      if (!text?.trim()) return;
+      onSend([
+        {
+          text: text.trim(),
+          user: { _id: currentUserId, name: currentUserName },
+          createdAt: new Date(),
+        },
+      ]);
     },
-    [currentUserId, groupMembers],
+    [onSend, currentUserId, currentUserName],
   );
 
+  // replace renderMessage with lightweight memoised MessageItem usage
   const renderMessage = useCallback(
     (props: any) => {
-      if (!props.currentMessage) return null;
-      const isOwn = props.currentMessage?.user?._id === currentUserId;
-
-      // Get sender info
-      const messageAvatar = props.currentMessage?.user?.avatar;
-      const member = groupMembers.find(
-        (m) => m.userId === props.currentMessage?.user?._id,
-      );
-      const profileImage = messageAvatar || member?.profileImage || "";
-      const displayName = props.currentMessage?.user?.name || "?";
+      const msg = props.currentMessage;
+      if (!msg) return null;
+      const isOwn = msg.user?._id === currentUserId;
+      const member = memberMap.get(msg.user?._id);
+      const profileImage = msg.user?.avatar || member?.profileImage || "";
+      const displayName = msg.user?.name || member?.userName || "?";
 
       return (
-        <View
-          style={{
-            flexDirection: isOwn ? "row-reverse" : "row",
-            alignItems: "flex-end",
-            marginVertical: RFPercentage(0.5),
-            paddingHorizontal: RFPercentage(2),
-          }}
-        >
-          {/* ── Bubble column ── */}
-          <View
-            style={{
-              maxWidth: "90%",
-              alignItems: isOwn ? "flex-end" : "flex-start",
-            }}
-          >
-            {/* Message bubble */}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onLongPress={() => {
-                if (isOwn) handleDeletePress(props.currentMessage._id);
-              }}
-              style={[
-                styles.msgBubble,
-                isOwn
-                  ? {
-                      backgroundColor:
-                        theme.mode === "dark"
-                          ? Colors.darkGrey
-                          : Colors.primary,
-                      borderBottomRightRadius: 4,
-                    }
-                  : {
-                      backgroundColor:
-                        theme.mode === "dark"
-                          ? "rgba(10, 10, 17, 1)"
-                          : "rgba(240,240,240,1)",
-                      borderBottomLeftRadius: 4,
-                    },
-              ]}
-            >
-              <View
-                style={{
-                  marginRight: RFPercentage(1.2),
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                {profileImage ? (
-                  <Image
-                    source={{ uri: profileImage }}
-                    style={styles.msgAvatar}
-                  />
-                ) : (
-                  <View
-                    style={[
-                      styles.msgAvatarFallback,
-                      { backgroundColor: Colors.primary + "25" },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.msgAvatarInitial,
-                        {
-                          color:
-                            theme.mode === "dark"
-                              ? Colors.white
-                              : Colors.primary,
-                        },
-                      ]}
-                    >
-                      {displayName[0]?.toUpperCase() || "?"}
-                    </Text>
-                  </View>
-                )}
-
-                <View style={{ marginLeft: RFPercentage(1.2) }}>
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      styles.msgSenderName,
-                      { color: isOwn ? Colors.white : Colors.lightGrey },
-                    ]}
-                  >
-                    {displayName}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.msgTime,
-                      {
-                        color: isOwn
-                          ? "rgba(255,255,255,0.6)"
-                          : theme.mode === "dark"
-                            ? "rgba(255,255,255,0.4)"
-                            : "rgba(0,0,0,0.35)",
-                      },
-                    ]}
-                  >
-                    {new Date(
-                      props.currentMessage.createdAt,
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </Text>
-                </View>
-              </View>
-
-              <ClickableMessageText
-                currentMessage={props.currentMessage}
-                currentUserId={currentUserId}
-                theme={theme}
-               
-                textStyle={{
-                  color: isOwn ? Colors.white : theme.black,
-                  marginTop: RFPercentage(1.4),
-                  marginBottom: RFPercentage(0.6),
-                }}
-                linkStyle={{
-                  color: isOwn ? "rgba(255,255,255,0.85)" : theme.primary,
-                }}
-                noPadding 
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <MessageItem
+          message={msg}
+          isOwn={isOwn}
+          profileImage={profileImage}
+          displayName={displayName}
+          onLongPress={handleDeletePress}
+          currentUserId={currentUserId}
+          theme={theme}
+        />
       );
     },
-    [currentUserId, groupMembers, theme, handleDeletePress],
+    [currentUserId, memberMap, theme, handleDeletePress],
   );
 
   const renderDay = useCallback(
@@ -608,65 +482,7 @@ const GroupChat = ({ navigation, route }: any) => {
     [],
   );
 
-  const renderInputToolbar = useCallback(
-    (props: any) => (
-      <View style={[styles.wrap, { backgroundColor: theme.white }]}>
-        <InputToolbar
-          {...props}
-          containerStyle={[
-            styles.toolbar,
-            {
-              backgroundColor:
-                theme.mode === "dark" ? "transparent" : "rgba(241,241,241,1)",
-              borderColor:
-                theme.mode === "dark" ? Colors.darkGrey : "rgba(234,233,233,1)",
-              borderTopColor:
-                theme.mode === "dark" ? Colors.darkGrey : "rgba(234,233,233,1)",
-            },
-          ]}
-          renderComposer={() => (
-            <TextInput
-              style={[styles.customTextInput, { color: theme.black }]}
-              placeholder={`${t("chat.txt2")}`}
-              placeholderTextColor="rgba(145,144,144,1)"
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
-              scrollEnabled
-              textAlignVertical="top"
-              autoCorrect={false}
-              autoComplete="off"
-              spellCheck={false}
-            />
-          )}
-          renderSend={() => (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.sendButton}
-              disabled={!inputText.trim()}
-              onPress={() => {
-                if (!inputText.trim()) return;
-                onSend([
-                  {
-                    text: inputText.trim(),
-                    user: { _id: currentUserId, name: currentUserName },
-                    createdAt: new Date(),
-                  },
-                ]);
-              }}
-            >
-              <Feather
-                name="send"
-                size={RFPercentage(2.6)}
-                color={theme.mode === "dark" ? Colors.white : Colors.primary}
-              />
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-    ),
-    [inputText, theme, onSend, currentUserId, currentUserName],
-  );
+ 
 
   const renderLoadEarlier = useCallback(() => {
     if (!loadingMore) return null;
@@ -695,7 +511,7 @@ const GroupChat = ({ navigation, route }: any) => {
     [],
   );
 
-const renderMessageText = useCallback(() => null, []);
+  const renderMessageText = useCallback(() => null, []);
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -704,63 +520,22 @@ const renderMessageText = useCallback(() => null, []);
         translucent
       />
 
-      {/* ── Header ── */}
-      <View style={[styles.header, { borderBottomColor: Colors.white5 }]}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons
-            name="arrow-back"
-            size={RFPercentage(2.7)}
-            color={theme.heading}
-          />
-        </TouchableOpacity>
+      {/* header */}
+      <GroupHeader
+        navigation={navigation}
+        groupTitle={groupTitle}
+        memberCount={groupMembers.length}
+        theme={theme}
+        onOpenDetails={() =>
+          navigation.navigate("GroupDetails", {
+            groupChatId,
+            currentUserId,
+            currentUserName,
+          })
+        }
+      />
 
-        {/* Group icon */}
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("GroupDetails", {
-              groupChatId,
-              currentUserId,
-              currentUserName,
-            })
-          }
-          activeOpacity={0.8}
-        >
-          <View
-            style={[
-              styles.groupIconContainer,
-              {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.darkGrey
-                    : Colors.primary + "20",
-              },
-            ]}
-          >
-            <Ionicons
-              name="people"
-              size={RFPercentage(3.2)}
-              color={theme.mode === "dark" ? Colors.white : Colors.primary}
-            />
-          </View>
-        </TouchableOpacity>
-
-        <View style={styles.headerTextContainer}>
-          <Text
-            style={[styles.headerTitle, { color: theme.heading }]}
-            numberOfLines={1}
-          >
-            {groupTitle}
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: theme.darkGrey }]}>
-            {groupMembers.length} {t("taskApplicants.member")}
-          </Text>
-        </View>
-      </View>
-
-      {/* ── Messages ── */}
+      {/* messages */}
       <View style={styles.messageContainer}>
         <ImageBackground
           source={theme.mode === "dark" ? Icons.dark : Icons.light}
@@ -776,10 +551,18 @@ const renderMessageText = useCallback(() => null, []);
             onLoadEarlier={loadMoreMessages}
             isLoadingEarlier={loadingMore}
             renderLoadEarlier={renderLoadEarlier}
-            renderInputToolbar={renderInputToolbar}
+            renderInputToolbar={() => (
+              <GroupInputToolbar
+                inputText={inputText}
+                setInputText={setInputText}
+                onSendText={sendText}
+                theme={theme}
+                t={t}
+              />
+            )}
             renderDay={renderDay}
             renderMessage={renderMessage}
-            renderAvatar={() => {}}
+            renderAvatar={() => null}
             renderBubble={undefined}
             listViewProps={listViewProps as any}
             maxInputLength={500}
@@ -810,42 +593,14 @@ const renderMessageText = useCallback(() => null, []);
         </ImageBackground>
       </View>
 
-      {/* ── Delete Modal ── */}
-      {deleteModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View
-            style={[styles.modalContainer, { backgroundColor: theme.white }]}
-          >
-            <Text style={[styles.modalTitle, { color: theme.heading }]}>
-              {t("chat.txt3")}
-            </Text>
-            <Text style={[styles.modalText, { color: theme.darkGrey }]}>
-              {t("chat.txt4")}
-            </Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.cancelBtn, { borderColor: theme.lightGrey }]}
-                onPress={cancelDelete}
-              >
-                <Text
-                  style={{
-                    color: theme.heading,
-                    fontFamily: "Poppins_500Medium",
-                  }}
-                >
-                  {t("buttons.cancel")}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteBtn}
-                onPress={confirmDelete}
-              >
-                <Text style={styles.deleteBtnText}>{t("chat.txt5")}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
+      {/* delete modal */}
+      <GroupDeleteModal
+        visible={deleteModalVisible}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        theme={theme}
+        t={t}
+      />
     </View>
   );
 };

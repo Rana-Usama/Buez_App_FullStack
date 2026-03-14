@@ -35,7 +35,12 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 // Components
 import AcceptanceSuccessModal from "../components/common/AcceptanceSuccessModal";
 import Feather from "@expo/vector-icons/Feather";
-
+import ImageCarousel from "../components/OfferDetail/ImageCarousel";
+import InfoGrid from "../components/OfferDetail/InfoGrid";
+import WorkersCard from "../components/OfferDetail/WorkersCard";
+import ReviewsCard from "../components/OfferDetail/ReviewsCard";
+import ActionButtons from "../components/OfferDetail/ActionButtons";
+import UserCard from "../components/OfferDetail/UserCard";
 // Services & Utils
 import { getDateTime } from "../services/Shared.service";
 import { createNewChat } from "../services/Chat.service";
@@ -310,8 +315,27 @@ function OfferDetail({ navigation, route }) {
     return null;
   };
 
+  // 1. Add state
+  const [translatedSubTasks, setTranslatedSubTasks] = useState([]);
+
+  // 2. Add useEffect to translate them
+  useEffect(() => {
+    const doTranslate = async () => {
+      if (postRequest?.selectedSubTasks?.length > 0) {
+        const result = await translateSubTasks(postRequest.selectedSubTasks);
+        setTranslatedSubTasks(result);
+      }
+    };
+    if (postRequest) doTranslate();
+  }, [postRequest?.selectedSubTasks]);
+
+  // 3. Replace selectedSubTasks usage
+  const selectedSubTasks =
+    translatedSubTasks.length > 0
+      ? translatedSubTasks
+      : postRequest?.selectedSubTasks || [];
+
   // Get sub-tasks to display
-  const selectedSubTasks = postRequest?.selectedSubTasks || [];
   const displaySubTasks = showAllSubTasks
     ? selectedSubTasks
     : selectedSubTasks.slice(0, 5);
@@ -353,7 +377,6 @@ function OfferDetail({ navigation, route }) {
       }
     }
   }, [postRequest, currentUserId]);
-
 
   // Check if user can apply
   const canApply = () => {
@@ -427,25 +450,20 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
-  // Real-time acceptance status monitoring
   useEffect(() => {
     if (!postRequest?.id) return;
 
     const taskDocRef = doc(db, "taskRequests", postRequest.id);
 
-    const unsubscribe = onSnapshot(taskDocRef, (docSnap) => {
+    const unsubscribe = onSnapshot(taskDocRef, async (docSnap) => {
       if (!docSnap.exists()) return;
 
       const updatedData = docSnap.data();
 
-      // Acceptance status
       setIsAccepted(!!updatedData.acceptedBy);
-
-      // Applied & confirmed workers
       setAppliedWorkers(updatedData.appliedWorkers || []);
       setConfirmedWorkers(updatedData.confirmedWorkers || []);
 
-      // Update confirmed state for current user
       if (currentUserId) {
         const confirmed = (updatedData.confirmedWorkers || []).some(
           (worker) => worker.userId === currentUserId,
@@ -453,18 +471,23 @@ function OfferDetail({ navigation, route }) {
         const hasApplied = (updatedData.appliedWorkers || []).some(
           (worker) => worker.userId === currentUserId,
         );
-
         setConfirmed(confirmed);
         setHasApplied(hasApplied);
       }
 
-      // Reviews & average rating
       if (updatedData.reviews && updatedData.reviews.length > 0) {
         const taskOwnerId = updatedData.userId;
         const reviewsAboutTaskOwner = updatedData.reviews.filter(
           (review) => review.recipient?.userId === taskOwnerId,
         );
-        setTranslatedReviews(reviewsAboutTaskOwner);
+
+        const translated = await Promise.all(
+          reviewsAboutTaskOwner.map(async (review) => ({
+            ...review,
+            translatedText: await translateWithCache(review.reviewText || ""),
+          })),
+        );
+        setTranslatedReviews(translated);
 
         const ratings = reviewsAboutTaskOwner
           .map((r) => r.rating)
@@ -480,9 +503,6 @@ function OfferDetail({ navigation, route }) {
         setTranslatedReviews([]);
         setAverageRating(null);
       }
-
-      // If you want, you can update other postRequest fields here too
-      // e.g., numberOfWorkers, taskType, description, etc.
     });
 
     return () => unsubscribe();
@@ -1009,38 +1029,51 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
-
-
-
-
-
-   if (isLoadingTask) {
+  if (isLoadingTask) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.white }}>
-        <Text style={{ color: theme.darkGrey }}>{t("taskApplicants.loading") || "Loading..."}</Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.white,
+        }}
+      >
+        <Text style={{ color: theme.darkGrey }}>
+          {t("taskApplicants.loading") || "Loading..."}
+        </Text>
       </View>
     );
   }
 
   if (!postRequest) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.white }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.white,
+        }}
+      >
         <Text style={{ color: theme.darkGrey }}>
           {t("offerDetail.notFound") || "This task is no longer available."}
         </Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 12 }}>
-          <Text style={{ color: theme.primary }}>{t("common.goBack") || "Go back"}</Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ marginTop: 12 }}
+        >
+          <Text style={{ color: theme.primary }}>
+            {t("common.goBack") || "Go back"}
+          </Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-
-  
   const isPostOwner = currentUserId === postRequest?.userId;
 
-  // console.log("hasApplied...........",hasApplied)
-
+  console.log("translatedReviews.........", translatedReviews);
   return (
     <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -1061,58 +1094,12 @@ function OfferDetail({ navigation, route }) {
       >
         {/* Hero Image Section */}
         <View style={styles.heroSection}>
-          {postRequest?.imageUrls?.length > 0 ? (
-            <FlatList
-              data={postRequest.imageUrls}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={(event) => {
-                const index = Math.round(
-                  event.nativeEvent.contentOffset.x /
-                    event.nativeEvent.layoutMeasurement.width,
-                );
-                setActiveIndex(index);
-              }}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  activeOpacity={0.9}
-                  onPress={() => setIsVisible(true)}
-                  style={styles.imageContainer}
-                >
-                  <Image
-                    source={{ uri: item }}
-                    style={styles.heroImage}
-                    resizeMode="cover"
-                  />
-                  <LinearGradient
-                    colors={["transparent", "rgba(0,0,0,0.3)"]}
-                    style={styles.imageGradient}
-                  />
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item, index) => index.toString()}
-            />
-          ) : (
-            <View style={styles.noImageContainer}>
-              <LinearGradient
-                colors={[Colors.primary + "20", Colors.primary + "05"]}
-                style={styles.noImageGradient}
-              >
-                <Ionicons
-                  name="images"
-                  size={RFPercentage(6)}
-                  color={Colors.primary + "60"}
-                />
-                <Text
-                  style={[styles.noImageText, { color: Colors.primary + "80" }]}
-                >
-                  {t("details.txt13")}
-                </Text>
-              </LinearGradient>
-            </View>
-          )}
-
+          <ImageCarousel
+            imageUrls={postRequest?.imageUrls || []}
+            activeIndex={activeIndex}
+            setActiveIndex={setActiveIndex}
+            onOpenViewer={() => setIsVisible(true)}
+          />
           {/* Image Dots */}
           {postRequest?.imageUrls?.length > 1 && (
             <View style={styles.dotsContainer}>
@@ -1166,110 +1153,15 @@ function OfferDetail({ navigation, route }) {
 
         {/* Main Content */}
         <Animated.View style={[styles.contentContainer, { opacity: fadeAnim }]}>
-          <View style={styles.userCardContainer}>
-            <BlurView
-              intensity={80}
-              tint={theme.mode === "dark" ? "dark" : "light"}
-              style={styles.blurView}
-            >
-              <LinearGradient
-                colors={
-                  theme.mode === "dark"
-                    ? ["rgba(255,255,255,0.15)", "rgba(255,255,255,0.08)"]
-                    : [Colors.primary + "40", Colors.primary + "20"]
-                }
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradientOverlay}
-              />
-
-              <View style={[styles.userInfo, {backgroundColor:Colors.primary + "05"}]}>
-                <View style={styles.avatarContainer}>
-                  <LinearGradient
-                    colors={[Colors.primary, "#4557B0"]}
-                    style={styles.avatarGradientBorder}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <Image
-                      source={
-                        postRequest?.user?.profileImage
-                          ? { uri: postRequest.user.profileImage }
-                          : Icons.dp
-                      }
-                      style={[
-                        styles.userAvatar,
-                        {
-                          borderColor:
-                            theme.mode === "dark"
-                              ? "rgba(255,255,255,0.3)"
-                              : "white",
-                        },
-                      ]}
-                    />
-                  </LinearGradient>
-                </View>
-
-                <View style={styles.userDetails}>
-                  <Text
-                    style={[
-                      styles.userName,
-                      {
-                        color:
-                          theme.mode === "dark" ? Colors.white : theme.primary,
-                      },
-                    ]}
-                  >
-                    {postRequest?.user?.userName}
-                  </Text>
-                  <View style={styles.subtitleRow}>
-                    <Ionicons
-                      name="time-outline"
-                      size={RFPercentage(1.3)}
-                      color={
-                        theme.mode === "dark" ? Colors.white : theme.darkGrey
-                      }
-                    />
-                    <Text
-                      style={[
-                        styles.userSubtitle,
-                        {
-                          color:
-                            theme.mode === "dark"
-                              ? Colors.white
-                              : theme.darkGrey,
-                        },
-                      ]}
-                    >
-                      {t("myRequests.txt4")} •{" "}
-                      {getDateTime(postRequest?.createdAt)}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Share Button (Replaces the chat button) */}
-                <ShareButton
-                  jobId={postRequest?.id}
-                  color="white"
-                  jobTitle={
-                    postRequest?.taskType === "Other"
-                      ? postRequest?.customTaskTitle || postRequest?.taskType
-                      : postRequest?.taskType
-                  }
-                  jobDescription={postRequest?.description}
-                  companyName="Buez"
-                  style={[
-                    styles.shareButton,
-                    {
-                      backgroundColor: Colors.primary ,
-                    },
-                  ]}
-                />
-               
-              </View>
-            </BlurView>
-          </View>
-
+          <UserCard
+            postRequest={postRequest}
+            theme={theme}
+            t={t}
+            translatedOffer={translatedOffer}
+            onBack={() => navigation.goBack()}
+            onOpenViewer={() => setIsVisible(true)}
+            activeIndex={activeIndex}
+          />
           {/* Scheduled Date & Time Card */}
           {(scheduledDateTime || durationLabel) && (
             <View
@@ -1327,8 +1219,25 @@ function OfferDetail({ navigation, route }) {
               </View>
             </View>
           )}
-
-          {/* Sub-Tasks Section */}
+          <WorkersCard
+            isBulkRequest={isBulkRequest}
+            numberOfWorkers={numberOfWorkers}
+            confirmedWorkers={confirmedWorkers}
+            appliedWorkers={appliedWorkers}
+            currentUserId={currentUserId}
+            getRequesterStatusText={getRequesterStatusText}
+            getRemainingSlots={getRemainingSlots}
+            getSlotStatusText={getSlotStatusText}
+            t={t}
+            theme={theme}
+          />
+          <InfoGrid
+            postRequest={postRequest}
+            theme={theme}
+            getConvertedCompensation={getConvertedCompensation}
+            t={t}
+          />
+          {/* Sub-tasks & Description kept inline for readability; you can extract similarly */}
           {selectedSubTasks.length > 0 && (
             <View
               style={[
@@ -1351,7 +1260,6 @@ function OfferDetail({ navigation, route }) {
                   {"Sub-tasks"}
                 </Text>
               </View>
-
               <View style={styles.subTasksList}>
                 {displaySubTasks.map((subTask, idx) => (
                   <View
@@ -1392,8 +1300,6 @@ function OfferDetail({ navigation, route }) {
               </View>
             </View>
           )}
-
-          {/* Task Description Card */}
           <View
             style={[
               styles.detailCard,
@@ -1415,8 +1321,7 @@ function OfferDetail({ navigation, route }) {
                 {t("postRequest.txt8")}
               </Text>
             </View>
-
-            <View style={[styles.descriptionContainer]}>
+            <View style={styles.descriptionContainer}>
               <Text style={[styles.taskDescription, { color: theme.darkGrey }]}>
                 {isExpanded || translatedOffer?.description?.length <= 150
                   ? translatedOffer?.description
@@ -1434,342 +1339,6 @@ function OfferDetail({ navigation, route }) {
               </Text>
             </View>
           </View>
-
-          {/* Workers Information Section - Only show for bulk requests */}
-          {isBulkRequest && (
-            <View
-              style={[
-                styles.workersCard,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? Colors.lightGrey + "10"
-                      : Colors.primary + "05",
-                },
-              ]}
-            >
-              <View style={styles.sectionHeader}>
-                <Ionicons
-                  name="people"
-                  size={RFPercentage(2.2)}
-                  color={Colors.primary}
-                />
-                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
-                  {t("offerDetail.helpersNeeded") || "Helpers Needed"}
-                </Text>
-              </View>
-
-              <View style={styles.workersInfoContainer}>
-                {/* Total Workers Needed */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-around",
-                    width: "100%",
-                  }}
-                >
-                  <View style={styles.workersStat}>
-                    <View
-                      style={[
-                        styles.workersIconContainer,
-                        { backgroundColor: Colors.primary + "20" },
-                      ]}
-                    >
-                      <Ionicons
-                        name="people-outline"
-                        size={RFPercentage(2)}
-                        color={Colors.primary}
-                      />
-                    </View>
-                    <View style={styles.workersTextContainer}>
-                      <Text
-                        style={[styles.workersLabel, { color: theme.darkGrey }]}
-                      >
-                        {t("offerDetail.totalHelpers") ||
-                          "Total Helpers Needed"}
-                      </Text>
-                      <Text
-                        style={[styles.workersValue, { color: theme.heading }]}
-                      >
-                        {numberOfWorkers}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Confirmed Workers */}
-                  <View style={[styles.workersStat]}>
-                    <View
-                      style={[
-                        styles.workersIconContainer,
-                        { backgroundColor: "#4CAF50" + "20" },
-                      ]}
-                    >
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={RFPercentage(2)}
-                        color="#4CAF50"
-                      />
-                    </View>
-                    <View style={styles.workersTextContainer}>
-                      <Text
-                        style={[styles.workersLabel, { color: theme.darkGrey }]}
-                      >
-                        {t("offerDetail.confirmed") || "Confirmed"}
-                      </Text>
-                      <Text style={[styles.workersValue, { color: "#4CAF50" }]}>
-                        {confirmedWorkers?.length}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-                {/* Status Display */}
-                <View style={styles.statusContainer}>
-                  {currentUserId === postRequest?.userId ? (
-                    // Requester view
-                    <View style={styles.statusBadge}>
-                      <Ionicons
-                        name="information-circle"
-                        size={RFPercentage(1.6)}
-                        color={Colors.primary}
-                      />
-                      <Text
-                        style={[styles.statusText, { color: Colors.primary }]}
-                      >
-                        {getRequesterStatusText()}
-                      </Text>
-                    </View>
-                  ) : (
-                    // Worker view
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        getRemainingSlots() <= 0 && {
-                          backgroundColor: Colors.red + "20",
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name={
-                          getRemainingSlots() <= 0
-                            ? "alert-circle"
-                            : "information-circle"
-                        }
-                        size={RFPercentage(1.6)}
-                        color={
-                          getRemainingSlots() <= 0 ? Colors.red : Colors.primary
-                        }
-                      />
-                      <Text
-                        style={[
-                          styles.statusText,
-                          {
-                            color:
-                              getRemainingSlots() <= 0
-                                ? Colors.red
-                                : Colors.primary,
-                          },
-                        ]}
-                      >
-                        {getSlotStatusText()}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-
-              {/* Applied Workers List (Visible to Requester Only) */}
-              {currentUserId === postRequest?.userId &&
-                appliedWorkers?.length > 0 && (
-                  <View style={styles.appliedWorkersContainer}>
-                    <Text
-                      style={[styles.appliedTitle, { color: theme.darkGrey }]}
-                    >
-                      {t("offerDetail.applications") || "Applications"} (
-                      {appliedWorkers?.length})
-                    </Text>
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      style={styles.appliedScrollView}
-                    >
-                      {appliedWorkers?.map((worker, index) => {
-                        const isConfirmed = confirmedWorkers.some(
-                          (w) => w.userId === worker.userId,
-                        );
-                        return (
-                          <View
-                            key={worker.userId || index}
-                            style={styles.appliedWorkerCard}
-                          >
-                            <Image
-                              source={
-                                worker.profileImage
-                                  ? { uri: worker.profileImage }
-                                  : Icons.dp
-                              }
-                              style={styles.appliedWorkerAvatar}
-                            />
-                            <Text
-                              style={[
-                                styles.appliedWorkerName,
-                                { color: theme.heading },
-                              ]}
-                              numberOfLines={1}
-                            >
-                              {worker.userName}
-                            </Text>
-                            <View
-                              style={[
-                                styles.confirmationBadge,
-                                {
-                                  backgroundColor: isConfirmed
-                                    ? "#4CAF50" + "20"
-                                    : Colors.primary + "20",
-                                },
-                              ]}
-                            >
-                              <Text
-                                style={[
-                                  styles.confirmationText,
-                                  {
-                                    color: isConfirmed
-                                      ? "#4CAF50"
-                                      : Colors.primary,
-                                  },
-                                ]}
-                              >
-                                {isConfirmed
-                                  ? t("offerDetail.confirmed") || "Confirmed"
-                                  : t("offerDetail.pending") || "Pending"}
-                              </Text>
-                            </View>
-                          </View>
-                        );
-                      })}
-                    </ScrollView>
-                  </View>
-                )}
-            </View>
-          )}
-
-          {/* Task Info Cards */}
-          <View style={styles.infoGrid}>
-            {/* Location Card */}
-            <View
-              style={[
-                styles.infoCard,
-                {
-                  backgroundColor:
-                    theme.mode === "dark" ? Colors.lightGrey + "10" : "#E3F2FD",
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: Colors.primary + "20" },
-                ]}
-              >
-                <Ionicons
-                  name="location"
-                  size={RFPercentage(2.2)}
-                  color={Colors.primary}
-                />
-              </View>
-              <Text style={[styles.infoLabel, { color: theme.darkGrey }]}>
-                {t("details.txt4")}
-              </Text>
-              <View style={styles.infoValueContainer}>
-                <Text
-                  style={[styles.infoValue, { color: theme.heading }]}
-                  numberOfLines={2}
-                >
-                  {postRequest?.address?.name || t("details.txt16")}
-                </Text>
-              </View>
-            </View>
-
-            {/* Compensation Card */}
-            <View
-              style={[
-                styles.infoCard,
-                {
-                  backgroundColor:
-                    theme.mode === "dark" ? Colors.lightGrey + "10" : "#E8F5E9",
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: "#4CAF50" + "20" },
-                ]}
-              >
-                <Ionicons
-                  name={
-                    postRequest?.compensationType === "Monitarely"
-                      ? "cash"
-                      : "gift"
-                  }
-                  size={RFPercentage(2.2)}
-                  color={
-                    postRequest?.compensationType === "Monitarely"
-                      ? "#4CAF50"
-                      : "#FF9800"
-                  }
-                />
-              </View>
-              <Text style={[styles.infoLabel, { color: theme.darkGrey }]}>
-                {t("home.txt10")}
-              </Text>
-              <View style={styles.infoValueContainer}>
-                <Text
-                  style={[styles.infoValue, { color: Colors.primary }]}
-                  numberOfLines={2}
-                >
-                  {postRequest?.compensationType === "Monitarely"
-                    ? getConvertedCompensation(postRequest)
-                    : translatedOffer.otherCompensation || t("details.txt17")}
-                </Text>
-              </View>
-            </View>
-
-            {/* Created Date Card */}
-            <View
-              style={[
-                styles.infoCard,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? Colors.lightGrey + "10"
-                      : "#efefefff",
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: "#9C27B0" + "20" },
-                ]}
-              >
-                <Ionicons
-                  name="create"
-                  size={RFPercentage(2.2)}
-                  color="#9C27B0"
-                />
-              </View>
-              <Text style={[styles.infoLabel, { color: theme.darkGrey }]}>
-                {t("myRequests.txt4") || "Posted"}
-              </Text>
-              <View style={styles.infoValueContainer}>
-                <Text style={[styles.infoValue, { color: theme.heading }]}>
-                  {getDateTime(postRequest?.createdAt)}
-                </Text>
-              </View>
-            </View>
-          </View>
-
           {/* Reviews Section */}
           {(translatedReviews?.length > 0 || averageRating) && (
             <View
@@ -1863,7 +1432,7 @@ function OfferDetail({ navigation, route }) {
                           {
                             backgroundColor:
                               theme.mode === "dark"
-                                ? theme.white + "05"
+                                ? "rgba(32, 37, 52, 0.5)"
                                 : "rgba(255,255,255,0.5)",
                           },
                         ]}
@@ -1871,7 +1440,7 @@ function OfferDetail({ navigation, route }) {
                         <Text
                           style={[styles.reviewText, { color: theme.darkGrey }]}
                         >
-                          {review.translatedText}
+                          {review.translatedText || review.reviewText}
                         </Text>
                       </View>
                       {index < visibleReviews.length - 1 && (
@@ -1922,7 +1491,6 @@ function OfferDetail({ navigation, route }) {
               )}
             </View>
           )}
-
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
             {isAccepted ? (

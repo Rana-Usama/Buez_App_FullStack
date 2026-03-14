@@ -221,7 +221,7 @@ export default function CompletedTasks({ navigation }: any) {
           {
             backgroundColor: theme.white,
             borderColor:
-              theme.mode === "dark" ? theme.border : "rgba(236, 238, 251, 1)",
+              theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
           },
         ]}
       >
@@ -375,7 +375,7 @@ export default function CompletedTasks({ navigation }: any) {
             styles.actionContainer,
             {
               borderTopColor:
-                theme.mode === "dark" ? theme.border : "rgba(236, 238, 251, 1)",
+                theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
             },
           ]}
         >

@@ -2191,7 +2191,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
   },
   helperText: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
     marginTop: RFPercentage(1),
@@ -2420,7 +2420,7 @@ const styles = StyleSheet.create({
     marginRight: RFPercentage(1),
   },
   currencyNote: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(0.5),
     textAlign: "center",

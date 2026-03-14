@@ -200,7 +200,7 @@ const HomeScreen: React.FC = () => {
                 placeholderColor={theme.grey}
                 height={RFPercentage(6)}
                 backgroundColor={
-                  theme.mode === "dark" ? "#131214ff" : "#F1F3F5"
+                  theme.mode === "dark" ? Colors.hom2 : Colors.hom1
                 }
                 borderWidth={0}
                 borderRadius={10}

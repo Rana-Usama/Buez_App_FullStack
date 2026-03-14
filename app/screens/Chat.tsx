@@ -53,6 +53,9 @@ import { cachedTranslate } from "../utils/cachedTranslations";
 import { Icons } from "../config/theme";
 import { Linking } from "react-native";
 import ClickableMessageText from "../components/common/ClickableMessageText";
+import ChatHeader from "../components/chat/ChatHeader";
+import ChatInputToolbar from "../components/chat/ChatInputToolbar";
+import DeleteModal from "../components/chat/DeleteModal";
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -78,63 +81,6 @@ const mapFirestoreDoc = async (
   };
 };
 
-// ─── Sub-components (memoised) ────────────────────────────────────────────────
-
-const DeleteModal = memo(
-  ({
-    visible,
-    onConfirm,
-    onCancel,
-    theme,
-    t,
-  }: {
-    visible: boolean;
-    onConfirm: () => void;
-    onCancel: () => void;
-    theme: any;
-    t: any;
-  }) => {
-    if (!visible) return null;
-    return (
-      <View style={styles.modalOverlay}>
-        <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
-          <Text style={[styles.modalTitle, { color: theme.heading }]}>
-            {t("chat.txt3")}
-          </Text>
-          <Text style={[styles.modalText, { color: theme.darkGrey }]}>
-            {t("chat.txt4")}
-          </Text>
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={[styles.cancel, { borderColor: theme.lightGrey }]}
-              onPress={onCancel}
-            >
-              <Text
-                style={{
-                  color: theme.heading,
-                  fontFamily: "Poppins_500Medium",
-                  fontSize: RFPercentage(1.7),
-                }}
-              >
-                {t("buttons.cancel")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.markButton}
-              onPress={onConfirm}
-            >
-              <Text style={styles.txt}>{t("chat.txt5")}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    );
-  },
-);
-
-// ─── Main Component ────────────────────────────────────────────────────────────
 const Chat = ({ navigation, route }: any) => {
   const { t } = useTranslation();
   const {
@@ -158,7 +104,7 @@ const Chat = ({ navigation, route }: any) => {
   );
 
   // Refs — avoid stale closures and unnecessary re-renders
-  const lastDocRef = useRef<any>(null); // cursor for pagination
+  const lastDocRef = useRef<any>(null); 
   const listenerAttachedRef = useRef(false);
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
@@ -222,7 +168,6 @@ const Chat = ({ navigation, route }: any) => {
 
         if (snapshot.docs.length < INITIAL_LOAD_LIMIT) setHasMore(false);
 
-        // Store the oldest doc as the pagination cursor
         lastDocRef.current = snapshot.docs[snapshot.docs.length - 1] ?? null;
 
         // Translate in parallel; skip translation for own messages
@@ -427,68 +372,6 @@ const Chat = ({ navigation, route }: any) => {
     setDeleteModalVisible(false);
   }, []);
 
-  // ─── Memoised GiftedChat render props ─────────────────────────────────────
-
-  const renderInputToolbar = useCallback(
-    (props: any) => (
-      <View style={[styles.wrap, { backgroundColor: theme.white }]}>
-        <InputToolbar
-          {...props}
-          containerStyle={[
-            styles.toolbar,
-            {
-              backgroundColor:
-                theme.mode === "dark" ? "transparent" : "rgba(241,241,241,1)",
-              borderColor:
-                theme.mode === "dark" ? Colors.darkGrey : "rgba(234,233,233,1)",
-              borderTopColor:
-                theme.mode === "dark" ? Colors.darkGrey : "rgba(234,233,233,1)",
-            },
-          ]}
-          renderComposer={() => (
-            <TextInput
-              style={[styles.customTextInput, { color: theme.black }]}
-              placeholder={`${t("chat.txt2")}`}
-              placeholderTextColor="rgba(145,144,144,1)"
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
-              scrollEnabled
-              textAlignVertical="top"
-              autoCorrect={false}
-              autoComplete="off"
-              spellCheck={false}
-              keyboardType="default"
-            />
-          )}
-          renderSend={() => (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.sendButton}
-              disabled={!inputText.trim()}
-              onPress={() => {
-                if (!inputText.trim()) return;
-                onSend([
-                  {
-                    text: inputText.trim(),
-                    user: { _id: currentUserId, name: senderName },
-                    createdAt: new Date(),
-                  },
-                ]);
-              }}
-            >
-              <Feather
-                name="send"
-                size={RFPercentage(2.6)}
-                color={theme.mode === "dark" ? Colors.white : Colors.primary}
-              />
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-    ),
-    [inputText, theme, t, onSend, currentUserId, senderName],
-  );
 
   const renderDay = useCallback(
     (props: any) => <Day {...props} textStyle={styles.dateText} />,
@@ -509,6 +392,20 @@ const Chat = ({ navigation, route }: any) => {
       );
     },
     [currentUserId, receiver, theme],
+  );
+
+  const sendText = useCallback(
+    (text: string) => {
+      if (!text?.trim()) return;
+      onSend([
+        {
+          text: text.trim(),
+          user: { _id: currentUserId, name: senderName },
+          createdAt: new Date(),
+        },
+      ]);
+    },
+    [onSend, currentUserId, senderName],
   );
 
   const renderBubble = useCallback(
@@ -536,8 +433,8 @@ const Chat = ({ navigation, route }: any) => {
               left: {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? "rgba(13, 13, 20, 1)"
-                    : "rgba(239,239,239,1)",
+                    ? Colors.chatDarkBg
+                    : Colors.cardBorderLight,
                 padding: RFPercentage(0.6),
                 marginLeft: 0,
               },
@@ -623,48 +520,7 @@ const renderMessageText = useCallback(
       />
 
       {/* Header */}
-      <View
-        style={[styles.profileContainer, { borderBottomColor: Colors.white5 }]}
-      >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons
-            name="chevron-back"
-            size={RFPercentage(2.7)}
-            color={theme.heading}
-          />
-        </TouchableOpacity>
-
-        <View style={{ marginLeft: RFPercentage(2.5) }}>
-          {receiver?.profileImage ? (
-            <Image
-              source={{ uri: receiver.profileImage }}
-              resizeMode="cover"
-              style={styles.profile}
-            />
-          ) : (
-            <View style={styles.noProfile}>
-              <Text style={[styles.noProfileInner, { color: theme.primary }]}>
-                {receiver?.userName?.[0]}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        <View style={{ marginLeft: RFPercentage(1.5), width: "60%" }}>
-          <Text
-            style={{
-              color: theme.heading,
-              fontSize: RFPercentage(2),
-              fontFamily: "Poppins_500Medium",
-            }}
-          >
-            {receiver?.userName}
-          </Text>
-        </View>
-      </View>
+      <ChatHeader navigation={navigation} receiver={receiver} theme={theme} />
 
       {/* Message list */}
       <View style={styles.messageContainer}>
@@ -685,7 +541,15 @@ const renderMessageText = useCallback(
             isLoadingEarlier={loadingMore}
             renderLoadEarlier={renderLoadEarlier}
             // Render props (all memoised)
-            renderInputToolbar={renderInputToolbar}
+            renderInputToolbar={(props) => (
+              <ChatInputToolbar
+                inputText={inputText}
+                setInputText={setInputText}
+                onSendText={sendText}
+                theme={theme}
+                t={t}
+              />
+            )}
             renderDay={renderDay}
             renderAvatar={renderAvatar}
             renderBubble={renderBubble}
@@ -706,8 +570,8 @@ const renderMessageText = useCallback(
                 {
                   backgroundColor:
                     theme.mode === "dark"
-                      ? "rgba(4,4,4,0.6)"
-                      : "rgba(255,255,255,0.6)",
+                      ? Colors.loaderDarkOverlay
+                      : Colors.loaderLightOverlay,
                 },
               ]}
             >
@@ -720,7 +584,6 @@ const renderMessageText = useCallback(
         </ImageBackground>
       </View>
 
-      {/* Delete confirmation modal */}
       <DeleteModal
         visible={deleteModalVisible}
         onConfirm={confirmDelete}
@@ -813,7 +676,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2),
   },
   modalOverlay: {
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: Colors.overlayDark,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 9999,
@@ -856,11 +719,11 @@ const styles = StyleSheet.create({
   markButton: {
     borderRadius: RFPercentage(100),
     height: RFPercentage(5.2),
-    borderColor: "#F44336",
+    borderColor: Colors.dangerRed,
     borderWidth: RFPercentage(0.1),
     justifyContent: "center",
     alignItems: "center",
-     backgroundColor: "#F44336",
+     backgroundColor: Colors.dangerRed,
     width: RFPercentage(15.5),
   },
   wrap: {

@@ -152,7 +152,6 @@ function AddReviewToAccepter() {
     ]).start();
   };
 
-  console.log("recipientUser.......", recipientUser?.token);
 
   // Saving Review In Notifications DB
   const saveReviewNotification = async () => {
@@ -238,8 +237,6 @@ function AddReviewToAccepter() {
           }),
         }
       );
-
-      console.log("Response status:", response.status, response.statusText);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -501,7 +498,7 @@ function AddReviewToAccepter() {
                 borderColor:
                   theme.mode === "dark"
                     ? theme.border
-                    : "rgba(236, 238, 251, 1)",
+                    : Colors.cardBorderLight,
               },
             ]}
           >
@@ -567,7 +564,7 @@ function AddReviewToAccepter() {
                 borderColor:
                   theme.mode === "dark"
                     ? theme.border
-                    : "rgba(236, 238, 251, 1)",
+                    : Colors.cardBorderLight,
               },
             ]}
           >

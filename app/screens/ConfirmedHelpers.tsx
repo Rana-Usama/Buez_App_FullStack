@@ -1,4 +1,3 @@
-// screens/ConfirmedHelpersScreen.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -272,7 +271,7 @@ function ConfirmedHelpers({ route, navigation }) {
               <Ionicons
                 name="star"
                 size={RFPercentage(1.5)}
-                color="#ffffffff"
+                color={Colors.white}
               />
               <Text style={styles.reviewButtonText}>
                 {t("myRequests.addReview") || "Add Review"}
@@ -283,7 +282,7 @@ function ConfirmedHelpers({ route, navigation }) {
               <Ionicons
                 name="checkmark-circle"
                 size={RFPercentage(1.8)}
-                color="#4CAF50"
+                color={Colors.green}
               />
               <Text style={styles.reviewedText}>
                 {t("myRequests.reviewed") || "Reviewed"}
@@ -353,7 +352,7 @@ function ConfirmedHelpers({ route, navigation }) {
 
         <View style={styles.taskStatusRow}>
           <Text style={[styles.taskStatus, { color: theme.darkGrey }]}>
-            {t("taskApplicants.status")}: <Text style={{ color: "#4CAF50" }}>{task.status}</Text>
+            {t("taskApplicants.status")}: <Text style={{ color: Colors.green }}>{task.status}</Text>
           </Text>
 
           {task.reviewedAccepter && (
@@ -361,7 +360,7 @@ function ConfirmedHelpers({ route, navigation }) {
               <Ionicons
                 name="checkmark-circle"
                 size={RFPercentage(1.3)}
-                color="#4CAF50"
+                 color={Colors.green}
               />
               <Text style={styles.taskReviewedText}>
                 {task.isBulkRequest ? "Some helpers reviewed" : "Task reviewed"}
@@ -465,7 +464,7 @@ const styles = StyleSheet.create({
   taskReviewedBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: Colors.green + "30",
     paddingHorizontal: RFPercentage(1),
     paddingVertical: RFPercentage(0.5),
     borderRadius: RFPercentage(0.5),
@@ -473,7 +472,7 @@ const styles = StyleSheet.create({
   taskReviewedText: {
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_500Medium",
-    color: "#4CAF50",
+    color: Colors.green,
     marginLeft: RFPercentage(0.3),
   },
   reviewSummary: {
@@ -564,14 +563,14 @@ const styles = StyleSheet.create({
   reviewButtonText: {
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
-    color: "#ffffffff",
+    color: Colors.white,
     marginLeft: RFPercentage(0.5),
   },
   reviewedBadge: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#E8F5E9",
+    backgroundColor:  Colors.green + "30",
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(1),
     borderRadius: RFPercentage(1),
@@ -580,13 +579,13 @@ const styles = StyleSheet.create({
   reviewedText: {
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
-    color: "#4CAF50",
+    color: Colors.green,
     marginLeft: RFPercentage(0.5),
   },
   cannotReviewBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: Colors.lightGrey,
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(1),
     borderRadius: RFPercentage(1),

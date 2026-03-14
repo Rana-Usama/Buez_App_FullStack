@@ -60,10 +60,10 @@ export const useShareJob = () => {
       );
 
       if (shareResult.action === Share.sharedAction) {
-        console.log('✅ Shared successfully');
+        console.log('Shared.............', shareResult);
         return { success: true, platform: shareResult.activityType };
       } else if (shareResult.action === Share.dismissedAction) {
-        console.log('❌ Share dismissed');
+        console.log('Share dismissed');
         return { success: false, dismissed: true };
       }
 
