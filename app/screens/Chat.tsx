@@ -41,6 +41,8 @@ import {
   where,
   getDoc,
   deleteDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -55,7 +57,8 @@ import { Linking } from "react-native";
 import ClickableMessageText from "../components/common/ClickableMessageText";
 import ChatHeader from "../components/chat/ChatHeader";
 import ChatInputToolbar from "../components/chat/ChatInputToolbar";
-import DeleteModal from "../components/chat/DeleteModal";
+import MessageActionModal from "../components/chat/MessageActionModal";
+import ReactionDisplay from "../components/chat/ReactionDisplay";
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -78,6 +81,10 @@ const mapFirestoreDoc = async (
       name: data.senderName,
     },
     _timestamp: data.timestamp, // keep raw Timestamp for cursor
+    reactions: data.reactions || {},
+    edited: data.edited || false,
+    editedAt: data.editedAt || null,
+    originalText: data.originalText || null,
   };
 };
 
@@ -97,11 +104,12 @@ const Chat = ({ navigation, route }: any) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  // Delete modal state
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
-    null,
-  );
+  // Action modal state (replaces old delete modal)
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+
+  // Edit state
+  const [editingMessage, setEditingMessage] = useState<any>(null);
 
   // Refs — avoid stale closures and unnecessary re-renders
   const lastDocRef = useRef<any>(null); 
@@ -354,22 +362,145 @@ const Chat = ({ navigation, route }: any) => {
     [chatId],
   );
 
-  const handleDeletePress = useCallback((id: string) => {
-    setSelectedMessageId(id);
-    setDeleteModalVisible(true);
+  // ── Toggle reaction ───────────────────────────────────────────────────────
+  const toggleReaction = useCallback(
+    async (messageId: string, emoji: string) => {
+      try {
+        const msgRef = doc(FIREBASE_DB, `chats/${chatId}/messages`, messageId);
+        const msgSnap = await getDoc(msgRef);
+        if (!msgSnap.exists()) return;
+
+        const data = msgSnap.data();
+        const reactions = data.reactions || {};
+        const emojiUsers = reactions[emoji] || [];
+
+        if (emojiUsers.includes(currentUserId)) {
+          // Remove reaction
+          await updateDoc(msgRef, {
+            [`reactions.${emoji}`]: arrayRemove(currentUserId),
+          });
+          // Update local state
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m._id !== messageId) return m;
+              const updated = { ...m.reactions };
+              updated[emoji] = (updated[emoji] || []).filter(
+                (id: string) => id !== currentUserId,
+              );
+              if (updated[emoji].length === 0) delete updated[emoji];
+              return { ...m, reactions: updated };
+            }),
+          );
+        } else {
+          // Add reaction
+          await updateDoc(msgRef, {
+            [`reactions.${emoji}`]: arrayUnion(currentUserId),
+          });
+          // Update local state
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m._id !== messageId) return m;
+              const updated = { ...m.reactions };
+              updated[emoji] = [...(updated[emoji] || []), currentUserId];
+              return { ...m, reactions: updated };
+            }),
+          );
+        }
+      } catch (err) {
+        console.error("toggleReaction error:", err);
+      }
+    },
+    [chatId, currentUserId],
+  );
+
+  // ── Edit message ──────────────────────────────────────────────────────────
+  const editMessage = useCallback(
+    async (messageId: string, newText: string) => {
+      try {
+        const msgRef = doc(FIREBASE_DB, `chats/${chatId}/messages`, messageId);
+        const msgSnap = await getDoc(msgRef);
+        if (!msgSnap.exists()) return;
+
+        const data = msgSnap.data();
+        const updateData: any = {
+          text: newText,
+          edited: true,
+          editedAt: Timestamp.now(),
+        };
+        // Preserve original text only on first edit
+        if (!data.originalText) {
+          updateData.originalText = data.text;
+        }
+
+        await updateDoc(msgRef, updateData);
+
+        // Update local state
+        setMessages((prev) =>
+          prev.map((m) =>
+            m._id === messageId
+              ? { ...m, text: newText, edited: true }
+              : m,
+          ),
+        );
+
+        // Update lastMessage if this was the most recent message
+        const lastMsgQuery = query(
+          collection(FIREBASE_DB, `chats/${chatId}/messages`),
+          orderBy("timestamp", "desc"),
+          limit(1),
+        );
+        const snapshot = await getDocs(lastMsgQuery);
+        if (!snapshot.empty && snapshot.docs[0].id === messageId) {
+          const chatRef = doc(FIREBASE_DB, "chats", chatId);
+          await updateDoc(chatRef, {
+            lastMessage: { text: newText },
+          });
+        }
+      } catch (err) {
+        console.error("editMessage error:", err);
+      }
+    },
+    [chatId],
+  );
+
+  // ── Action modal handlers ─────────────────────────────────────────────────
+  const handleActionPress = useCallback((message: any) => {
+    setSelectedMessage(message);
+    setActionModalVisible(true);
   }, []);
 
-  const confirmDelete = useCallback(async () => {
-    if (selectedMessageId) {
-      await deleteMessage(selectedMessageId);
-      setSelectedMessageId(null);
-    }
-    setDeleteModalVisible(false);
-  }, [selectedMessageId, deleteMessage]);
+  const handleReact = useCallback(
+    (emoji: string) => {
+      if (selectedMessage) {
+        toggleReaction(selectedMessage._id, emoji);
+      }
+    },
+    [selectedMessage, toggleReaction],
+  );
 
-  const cancelDelete = useCallback(() => {
-    setSelectedMessageId(null);
-    setDeleteModalVisible(false);
+  const handleEdit = useCallback(() => {
+    if (selectedMessage) {
+      setEditingMessage(selectedMessage);
+      setInputText(selectedMessage.text);
+    }
+  }, [selectedMessage]);
+
+  const handleDeleteFromModal = useCallback(async () => {
+    if (selectedMessage) {
+      await deleteMessage(selectedMessage._id);
+    }
+    setActionModalVisible(false);
+    setSelectedMessage(null);
+  }, [selectedMessage, deleteMessage]);
+
+  const closeActionModal = useCallback(() => {
+    setActionModalVisible(false);
+    setSelectedMessage(null);
+  }, []);
+
+  const cancelEdit = useCallback(() => {
+    setEditingMessage(null);
+    setInputText("");
   }, []);
 
 
@@ -397,6 +528,15 @@ const Chat = ({ navigation, route }: any) => {
   const sendText = useCallback(
     (text: string) => {
       if (!text?.trim()) return;
+
+      // If we're in edit mode, save the edit instead of sending a new message
+      if (editingMessage) {
+        editMessage(editingMessage._id, text.trim());
+        setEditingMessage(null);
+        setInputText("");
+        return;
+      }
+
       onSend([
         {
           text: text.trim(),
@@ -405,7 +545,7 @@ const Chat = ({ navigation, route }: any) => {
         },
       ]);
     },
-    [onSend, currentUserId, senderName],
+    [onSend, currentUserId, senderName, editingMessage, editMessage],
   );
 
   const renderBubble = useCallback(
@@ -413,57 +553,83 @@ const Chat = ({ navigation, route }: any) => {
       const isFromSameUser =
         props.currentMessage?.user?._id === props.previousMessage?.user?._id;
       if (!props.currentMessage) return null;
+      const msg = props.currentMessage;
+      const isOwn = msg.user?._id === currentUserId;
       return (
         <View
           style={{
-            flexDirection: "row",
             marginVertical: isFromSameUser
               ? RFPercentage(0.3)
               : RFPercentage(1),
           }}
         >
-          <Bubble
-            {...props}
-            onLongPress={() => {
-              if (props.currentMessage?.user?._id === currentUserId) {
-                handleDeletePress(props.currentMessage._id);
+          <View style={{ flexDirection: "row" }}>
+            <Bubble
+              {...props}
+              onLongPress={() => handleActionPress(msg)}
+              wrapperStyle={{
+                left: {
+                  backgroundColor:
+                    theme.mode === "dark"
+                      ? Colors.chatDarkBg
+                      : Colors.cardBorderLight,
+                  padding: RFPercentage(0.6),
+                  marginLeft: 0,
+                },
+                right: {
+                  backgroundColor:
+                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                  padding: RFPercentage(0.6),
+                  marginRight: 0,
+                },
+              }}
+              textStyle={{
+                left: {
+                  color: theme.black,
+                  fontFamily: "Poppins_400Regular",
+                  fontSize: RFPercentage(1.8),
+                  lineHeight: RFPercentage(2.5),
+                },
+                right: {
+                  color: Colors.white,
+                  fontFamily: "Poppins_400Regular",
+                  fontSize: RFPercentage(1.8),
+                  lineHeight: RFPercentage(2.5),
+                },
+              }}
+              renderFooter={() =>
+                msg.edited ? (
+                  <Text
+                    style={[
+                      styles.editedLabel,
+                      {
+                        color: isOwn
+                          ? "rgba(255,255,255,0.55)"
+                          : theme.mode === "dark"
+                            ? "rgba(255,255,255,0.4)"
+                            : "rgba(0,0,0,0.35)",
+                        textAlign: isOwn ? "right" : "left",
+                      },
+                    ]}
+                  >
+                    {t("chat.txt8")}
+                  </Text>
+                ) : null
               }
-            }}
-            wrapperStyle={{
-              left: {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.chatDarkBg
-                    : Colors.cardBorderLight,
-                padding: RFPercentage(0.6),
-                marginLeft: 0,
-              },
-              right: {
-                backgroundColor:
-                  theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
-                padding: RFPercentage(0.6),
-                marginRight: 0,
-              },
-            }}
-            textStyle={{
-              left: {
-                color: theme.black,
-                fontFamily: "Poppins_400Regular",
-                fontSize: RFPercentage(1.8),
-                lineHeight: RFPercentage(2.5),
-              },
-              right: {
-                color: Colors.white,
-                fontFamily: "Poppins_400Regular",
-                fontSize: RFPercentage(1.8),
-                lineHeight: RFPercentage(2.5),
-              },
-            }}
+            />
+          </View>
+          {/* Reactions display */}
+          <ReactionDisplay
+            reactions={msg.reactions}
+            currentUserId={currentUserId}
+            onToggleReaction={(emoji) => toggleReaction(msg._id, emoji)}
+            theme={theme}
+            isOwnMessage={isOwn}
           />
         </View>
       );
     },
-    [currentUserId, theme, handleDeletePress],
+    [currentUserId, theme, handleActionPress, toggleReaction, t],
   );
 
   // Footer shown while loading older messages
@@ -548,6 +714,8 @@ const renderMessageText = useCallback(
                 onSendText={sendText}
                 theme={theme}
                 t={t}
+                editingMessage={editingMessage}
+                onCancelEdit={cancelEdit}
               />
             )}
             renderDay={renderDay}
@@ -584,10 +752,15 @@ const renderMessageText = useCallback(
         </ImageBackground>
       </View>
 
-      <DeleteModal
-        visible={deleteModalVisible}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
+      <MessageActionModal
+        visible={actionModalVisible}
+        isOwnMessage={selectedMessage?.user?._id === currentUserId}
+        currentReactions={selectedMessage?.reactions}
+        currentUserId={currentUserId}
+        onReact={handleReact}
+        onEdit={handleEdit}
+        onDelete={handleDeleteFromModal}
+        onClose={closeActionModal}
         theme={theme}
         t={t}
       />
@@ -767,6 +940,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "Poppins_500Medium",
     fontSize: RFPercentage(1.7),
+  },
+  editedLabel: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular_Italic",
+    marginTop: RFPercentage(0.2),
+    paddingHorizontal: RFPercentage(0.5),
   },
 });
 

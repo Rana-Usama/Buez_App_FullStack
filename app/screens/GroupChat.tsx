@@ -40,6 +40,8 @@ import {
   deleteDoc,
   getDoc,
   setDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -57,7 +59,7 @@ import {
 import ClickableMessageText from "../components/common/ClickableMessageText";
 import GroupHeader from "../components/group/GroupHeader";
 import GroupInputToolbar from "../components/group/GroupInputToolbar";
-import GroupDeleteModal from "../components/group/GroupDeleteModal";
+import MessageActionModal from "../components/chat/MessageActionModal";
 import MessageItem from "../components/group/MessageItem";
 
 const INITIAL_LOAD_LIMIT = 20;
@@ -80,6 +82,10 @@ const mapFirestoreDoc = async (
       avatar: data.senderProfileImage || "",
     },
     _timestamp: data.timestamp,
+    reactions: data.reactions || {},
+    edited: data.edited || false,
+    editedAt: data.editedAt || null,
+    originalText: data.originalText || null,
   };
 };
 
@@ -103,10 +109,13 @@ const GroupChat = ({ navigation, route }: any) => {
   const [groupTitle, setGroupTitle] = useState(
     customTaskTitle || taskType || t("taskApplicants.group"),
   );
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
-    null,
-  );
+
+  // Action modal state (replaces old delete modal)
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+
+  // Edit state
+  const [editingMessage, setEditingMessage] = useState<any>(null);
 
   const lastDocRef = useRef<any>(null);
   const listenerAttachedRef = useRef(false);
@@ -412,22 +421,143 @@ const GroupChat = ({ navigation, route }: any) => {
     [groupChatId],
   );
 
-  const handleDeletePress = useCallback((id: string) => {
-    setSelectedMessageId(id);
-    setDeleteModalVisible(true);
+  // ── Toggle reaction ───────────────────────────────────────────────────────
+  const toggleReaction = useCallback(
+    async (messageId: string, emoji: string) => {
+      try {
+        const msgRef = doc(FIREBASE_DB, collectionPath, messageId);
+        const msgSnap = await getDoc(msgRef);
+        if (!msgSnap.exists()) return;
+
+        const data = msgSnap.data();
+        const reactions = data.reactions || {};
+        const emojiUsers = reactions[emoji] || [];
+
+        if (emojiUsers.includes(currentUserId)) {
+          await updateDoc(msgRef, {
+            [`reactions.${emoji}`]: arrayRemove(currentUserId),
+          });
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m._id !== messageId) return m;
+              const updated = { ...m.reactions };
+              updated[emoji] = (updated[emoji] || []).filter(
+                (id: string) => id !== currentUserId,
+              );
+              if (updated[emoji].length === 0) delete updated[emoji];
+              return { ...m, reactions: updated };
+            }),
+          );
+        } else {
+          await updateDoc(msgRef, {
+            [`reactions.${emoji}`]: arrayUnion(currentUserId),
+          });
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m._id !== messageId) return m;
+              const updated = { ...m.reactions };
+              updated[emoji] = [...(updated[emoji] || []), currentUserId];
+              return { ...m, reactions: updated };
+            }),
+          );
+        }
+      } catch (err) {
+        console.error("GroupChat toggleReaction error:", err);
+      }
+    },
+    [groupChatId, currentUserId, collectionPath],
+  );
+
+  // ── Edit message ──────────────────────────────────────────────────────────
+  const editMessage = useCallback(
+    async (messageId: string, newText: string) => {
+      try {
+        const msgRef = doc(FIREBASE_DB, collectionPath, messageId);
+        const msgSnap = await getDoc(msgRef);
+        if (!msgSnap.exists()) return;
+
+        const data = msgSnap.data();
+        const updateData: any = {
+          text: newText,
+          edited: true,
+          editedAt: Timestamp.now(),
+        };
+        if (!data.originalText) {
+          updateData.originalText = data.text;
+        }
+
+        await updateDoc(msgRef, updateData);
+
+        setMessages((prev) =>
+          prev.map((m) =>
+            m._id === messageId
+              ? { ...m, text: newText, edited: true }
+              : m,
+          ),
+        );
+
+        // Update lastMessage if most recent
+        const lastMsgQuery = query(
+          collection(FIREBASE_DB, collectionPath),
+          orderBy("timestamp", "desc"),
+          limit(1),
+        );
+        const snapshot = await getDocs(lastMsgQuery);
+        if (!snapshot.empty && snapshot.docs[0].id === messageId) {
+          const groupRef = doc(FIREBASE_DB, "groupChats", groupChatId);
+          await updateDoc(groupRef, {
+            lastMessage: {
+              text: newText,
+              senderId: currentUserId,
+              senderName: currentUserName,
+            },
+          });
+        }
+      } catch (err) {
+        console.error("GroupChat editMessage error:", err);
+      }
+    },
+    [groupChatId, currentUserId, currentUserName, collectionPath],
+  );
+
+  // ── Action modal handlers ─────────────────────────────────────────────────
+  const handleActionPress = useCallback((message: any) => {
+    setSelectedMessage(message);
+    setActionModalVisible(true);
   }, []);
 
-  const confirmDelete = useCallback(async () => {
-    if (selectedMessageId) {
-      await deleteMessage(selectedMessageId);
-      setSelectedMessageId(null);
-    }
-    setDeleteModalVisible(false);
-  }, [selectedMessageId, deleteMessage]);
+  const handleReact = useCallback(
+    (emoji: string) => {
+      if (selectedMessage) {
+        toggleReaction(selectedMessage._id, emoji);
+      }
+    },
+    [selectedMessage, toggleReaction],
+  );
 
-  const cancelDelete = useCallback(() => {
-    setSelectedMessageId(null);
-    setDeleteModalVisible(false);
+  const handleEdit = useCallback(() => {
+    if (selectedMessage) {
+      setEditingMessage(selectedMessage);
+      setInputText(selectedMessage.text);
+    }
+  }, [selectedMessage]);
+
+  const handleDeleteFromModal = useCallback(async () => {
+    if (selectedMessage) {
+      await deleteMessage(selectedMessage._id);
+    }
+    setActionModalVisible(false);
+    setSelectedMessage(null);
+  }, [selectedMessage, deleteMessage]);
+
+  const closeActionModal = useCallback(() => {
+    setActionModalVisible(false);
+    setSelectedMessage(null);
+  }, []);
+
+  const cancelEdit = useCallback(() => {
+    setEditingMessage(null);
+    setInputText("");
   }, []);
 
   // create fast lookup map for group members (O(1) lookup)
@@ -441,6 +571,15 @@ const GroupChat = ({ navigation, route }: any) => {
   const sendText = useCallback(
     (text: string) => {
       if (!text?.trim()) return;
+
+      // If editing, save the edit instead of sending a new message
+      if (editingMessage) {
+        editMessage(editingMessage._id, text.trim());
+        setEditingMessage(null);
+        setInputText("");
+        return;
+      }
+
       onSend([
         {
           text: text.trim(),
@@ -449,7 +588,7 @@ const GroupChat = ({ navigation, route }: any) => {
         },
       ]);
     },
-    [onSend, currentUserId, currentUserName],
+    [onSend, currentUserId, currentUserName, editingMessage, editMessage],
   );
 
   // replace renderMessage with lightweight memoised MessageItem usage
@@ -468,13 +607,14 @@ const GroupChat = ({ navigation, route }: any) => {
           isOwn={isOwn}
           profileImage={profileImage}
           displayName={displayName}
-          onLongPress={handleDeletePress}
+          onLongPress={handleActionPress}
           currentUserId={currentUserId}
           theme={theme}
+          onToggleReaction={toggleReaction}
         />
       );
     },
-    [currentUserId, memberMap, theme, handleDeletePress],
+    [currentUserId, memberMap, theme, handleActionPress, toggleReaction],
   );
 
   const renderDay = useCallback(
@@ -558,6 +698,8 @@ const GroupChat = ({ navigation, route }: any) => {
                 onSendText={sendText}
                 theme={theme}
                 t={t}
+                editingMessage={editingMessage}
+                onCancelEdit={cancelEdit}
               />
             )}
             renderDay={renderDay}
@@ -593,11 +735,16 @@ const GroupChat = ({ navigation, route }: any) => {
         </ImageBackground>
       </View>
 
-      {/* delete modal */}
-      <GroupDeleteModal
-        visible={deleteModalVisible}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
+      {/* action modal */}
+      <MessageActionModal
+        visible={actionModalVisible}
+        isOwnMessage={selectedMessage?.user?._id === currentUserId}
+        currentReactions={selectedMessage?.reactions}
+        currentUserId={currentUserId}
+        onReact={handleReact}
+        onEdit={handleEdit}
+        onDelete={handleDeleteFromModal}
+        onClose={closeActionModal}
         theme={theme}
         t={t}
       />

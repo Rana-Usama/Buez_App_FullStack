@@ -148,17 +148,7 @@ function Signup({ navigation }: any) {
         text2: "Please check your email to verify your account.",
       });
 
-      // Navigate to verification screen, pass email for display
       navigation.navigate("EmailVerification", { email, password, deviceId });
-
-      // const alreadyUsed = await hasDeviceAvailedFreeTrial(deviceId);
-      // console.log("alreadyUsed............", alreadyUsed);
-
-      // if (alreadyUsed) {
-      //   navigation.navigate("Subscription");
-      // } else {
-      //   navigation.navigate("FreeTrial");
-      // }
     } catch (error) {
       console.log("error.......", error);
       Toast.show({

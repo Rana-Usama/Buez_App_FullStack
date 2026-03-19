@@ -2,16 +2,19 @@ import React, { memo } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import ClickableMessageText from "../../components/common/ClickableMessageText";
+import ReactionDisplay from "../../components/chat/ReactionDisplay";
 import Colors from "../../config/Colors";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   message: any;
   isOwn: boolean;
   profileImage: string;
   displayName: string;
-  onLongPress: (id: string) => void;
+  onLongPress: (message: any) => void;
   currentUserId: string;
   theme: any;
+  onToggleReaction?: (messageId: string, emoji: string) => void;
 };
 
 const MessageItem = memo(
@@ -23,7 +26,10 @@ const MessageItem = memo(
     onLongPress,
     currentUserId,
     theme,
+    onToggleReaction,
   }: Props) => {
+    const { t } = useTranslation();
+
     return (
       <View
         style={{
@@ -41,9 +47,7 @@ const MessageItem = memo(
         >
           <TouchableOpacity
             activeOpacity={0.85}
-            onLongPress={() => {
-              if (isOwn) onLongPress(message._id);
-            }}
+            onLongPress={() => onLongPress(message)}
             style={[
               styles.msgBubble,
               isOwn
@@ -138,7 +142,41 @@ const MessageItem = memo(
               }}
               noPadding
             />
+
+            {/* Edited label */}
+            {message.edited && (
+              <Text
+                style={[
+                  styles.editedLabel,
+                  {
+                    color: isOwn
+                      ? "rgba(255,255,255,0.55)"
+                      : theme.mode === "dark"
+                        ? "rgba(255,255,255,0.4)"
+                        : "rgba(0,0,0,0.35)",
+                    textAlign: isOwn ? "right" : "left",
+                  },
+                ]}
+              >
+                {t("chat.txt8")}
+              </Text>
+            )}
           </TouchableOpacity>
+
+          {/* Reactions display */}
+          {message.reactions && Object.keys(message.reactions).length > 0 && (
+            <ReactionDisplay
+              reactions={message.reactions}
+              currentUserId={currentUserId}
+              onToggleReaction={(emoji) => {
+                if (onToggleReaction) {
+                  onToggleReaction(message._id, emoji);
+                }
+              }}
+              theme={theme}
+              isOwnMessage={isOwn}
+            />
+          )}
         </View>
       </View>
     );
@@ -146,6 +184,8 @@ const MessageItem = memo(
   (prev, next) =>
     prev.message._id === next.message._id &&
     prev.message.text === next.message.text &&
+    prev.message.edited === next.message.edited &&
+    JSON.stringify(prev.message.reactions) === JSON.stringify(next.message.reactions) &&
     prev.isOwn === next.isOwn &&
     prev.theme === next.theme &&
     prev.currentUserId === next.currentUserId,
@@ -183,6 +223,11 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(0.8),
     borderRadius: RFPercentage(2.2),
     minWidth: RFPercentage(10),
+  },
+  editedLabel: {
+    fontSize: RFPercentage(1.1),
+    fontFamily: "Poppins_400Regular_Italic",
+    marginTop: RFPercentage(0.2),
   },
 });
 
