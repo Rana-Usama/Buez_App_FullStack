@@ -13,6 +13,8 @@ import {
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { reload } from "firebase/auth";
 import { navigate } from "../router/navigationRef";
+import { deepLinkState } from "./deepLinkState";
+
 
 // ─── Must match the key used in DeciderScreen.tsx ────────────────────────────
 const PENDING_JOB_KEY = "pendingDeepLinkJobId";
@@ -107,6 +109,8 @@ export const useDeepLinking = ({
 
       // ── Auth is ready — clear the persisted jobId so it doesn't replay
       await SecureStore.deleteItemAsync(PENDING_JOB_KEY);
+
+      deepLinkState.isHandlingDeepLink = true;
 
       const loggedOut = await SecureStore.getItemAsync("loggedOut");
       const deviceId = await DeviceInfo.getUniqueId();

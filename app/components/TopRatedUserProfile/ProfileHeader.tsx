@@ -67,7 +67,7 @@ export default function ProfileHeader({
           position: "absolute",
           top: RFPercentage(8),
           left: RFPercentage(3),
-          backgroundColor: theme.mode === "dark" ? "#2c1545ff" : "#706e7b52",
+          backgroundColor: theme.mode === "dark" ? "#483b56ff" : "#706e7b52",
           padding: RFPercentage(1.1),
           borderRadius: RFPercentage(100),
         }}
@@ -208,7 +208,7 @@ export default function ProfileHeader({
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Ionicons
               name="trending-up"
-              size={RFPercentage(1.5)}
+              size={RFPercentage(3)}
               color="#4CAF50"
             />
             <Text
@@ -301,7 +301,7 @@ export default function ProfileHeader({
             <LinearGradient
               colors={
                 theme.mode === "dark"
-                  ? ["#2c1545ff", "#482074ff"]
+                  ? ["#594174ff", "#9279acff"]
                   : [Colors.primary, "#4c669f"]
               }
               style={{
@@ -343,7 +343,7 @@ export default function ProfileHeader({
             <LinearGradient
               colors={
                 theme.mode === "dark"
-                  ? ["#2c1545ff", "#482074ff"]
+                  ? ["#6c4793ff", "#736087ff"]
                   : [Colors.primary, "#4c669f"]
               }
               style={{

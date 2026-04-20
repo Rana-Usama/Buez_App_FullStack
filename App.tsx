@@ -34,6 +34,7 @@ import LanguageOnboardingModal, {
 import { initializeLanguage } from "./app/utils/cachedTranslations";
 import { useDeepLinking } from "./app/job-sharing/useDeepLinking";
 import { navigate } from "./app/router/navigationRef";
+import { initLiveRates } from "./app/utils/currencyChange";
 
 LogBox.ignoreAllLogs();
 
@@ -120,6 +121,10 @@ export default function App() {
     Poppins_400Regular_Italic,
   });
   const { showModal, checked, handleDone } = useLanguageOnboarding();
+
+  useEffect(() => {
+    initLiveRates();
+  }, []);
 
   useEffect(() => {
     getFCMToken().then((token) => {

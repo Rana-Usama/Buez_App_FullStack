@@ -15,6 +15,7 @@ import { updateDoc, doc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { collection, query, where, getDocs, getDoc } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
+import { useAppTheme } from "../contexts/themeContext";
 
 function EmailVerificationScreen({ navigation, route }: any) {
   const { email, password, deviceId } = route.params;
@@ -131,9 +132,10 @@ function EmailVerificationScreen({ navigation, route }: any) {
   };
 
   const { t } = useTranslation();
+  const { theme } = useAppTheme();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.white }]}>
       <Text style={styles.emoji}>📧</Text>
       <Text style={styles.title}>{t("emailVerification.title")}</Text>
       <Text style={styles.subtitle}>{t("emailVerification.subtitle")}</Text>

@@ -291,7 +291,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 backgroundColor:
                   theme.mode === "light"
                     ? "rgba(215, 215, 215, 0.48)"
-                    : "rgba(52, 51, 51, 0.48)",
+                    : "rgba(88, 87, 87, 0.82)",
               },
             ]}
           >
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
   userImage: {
     width: RFPercentage(6.2),
     height: RFPercentage(6.2),
-    borderColor: "#3B82F6",
+    borderColor: Colors.primary,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(100),
   },
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scheduledText: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
     marginLeft: RFPercentage(0.5),
     flex: 1,
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   briefDescription: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
     top: RFPercentage(0.8),
   },
@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   subTasksTitle: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
     marginLeft: RFPercentage(0.5),
   },
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.8),
   },
   subTaskText: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_500Medium",
     marginLeft: RFPercentage(0.5),
   },
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.5),
   },
   statLabel: {
-    fontSize: RFPercentage(1),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
   },

@@ -1002,7 +1002,7 @@ const styles = StyleSheet.create({
     marginRight: RFPercentage(1),
   },
   title: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_500Medium",
     lineHeight: RFPercentage(2),
   },

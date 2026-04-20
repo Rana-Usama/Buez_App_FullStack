@@ -88,7 +88,7 @@ function AddReview() {
   const taskId = task?.taskId || "";
   const originalDesc = task?.taskDetails?.description ?? "";
   const completedOn = moment(
-    task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date()
+    task?.completedAt?.toDate?.() ?? task?.completedAt ?? new Date(),
   ).format("MMM D, YYYY");
   const { t } = useTranslation();
   const [lang, setLang] = useState("en");
@@ -100,7 +100,7 @@ function AddReview() {
   const [starAnimations] = useState(
     Array(5)
       .fill(null)
-      .map(() => new Animated.Value(1))
+      .map(() => new Animated.Value(1)),
   );
 
   const animateStar = (index: number) => {
@@ -175,7 +175,7 @@ function AddReview() {
             title: `${userData?.userName} left you a review on your task!`,
             body: `${previewText}`,
           }),
-        }
+        },
       );
       const data = await response.text();
       console.log("Push notification sent:", data);
@@ -207,7 +207,7 @@ function AddReview() {
         tap: "Tap to rate",
       };
       const vals = await Promise.all(
-        Object.values(phrases).map((txt) => cachedTranslate(txt))
+        Object.values(phrases).map((txt) => cachedTranslate(txt)),
       );
       const map = Object.keys(phrases).reduce((acc, k, i) => {
         acc[k as keyof Translations] =
@@ -241,107 +241,109 @@ function AddReview() {
     });
   };
 
-
-const submitReview = async () => {
-  const stars = rating.filter(Boolean).length;
-  if (reviewText.trim() === "") {
-    Toast.show({
-      type: "info",
-      text1: tr.addingReview || "Adding Review",
-      text2: tr.pleaseWrite || "Please write a review.",
-    });
-    return;
-  }
-  try {
-    setSubmitting(true);
-    const currentUser = getAuth().currentUser;
-    const currentUserId = currentUser?.uid;
-    const isBulkTask = task?.isBulkTask || false;
-    const taskOwnerId = recipientUser?.userId;
-    const reviewKey = `${currentUserId}_${taskId}_${taskOwnerId}`;
-    const existingReviewQuery = query(
-      collection(FIREBASE_DB, "reviews"),
-      where("reviewKey", "==", reviewKey)
-    );
-    const existingReviewSnap = await getDocs(existingReviewQuery);
-
-    if (!existingReviewSnap.empty) {
+  const submitReview = async () => {
+    const stars = rating.filter(Boolean).length;
+    if (reviewText.trim() === "") {
       Toast.show({
         type: "info",
-        text1: "Already Reviewed",
-        text2: "You have already reviewed this task owner.",
+        text1: tr.addingReview || "Adding Review",
+        text2: tr.pleaseWrite || "Please write a review.",
       });
-      setSubmitting(false);
       return;
     }
-    // Create review data
-    const reviewData = {
-      reviewer: {
-        userId: currentUserId || "",
-        userName: userData?.userName || "Anonymous",
-        profileImage: userData?.profileImage || null,
-      },
-      recipient: recipientUser,
-      taskId,
-      rating: stars || 0,
-      reviewText: reviewText.trim() || "",
-      createdAt: serverTimestamp(),
-      isBulkTask: isBulkTask,
-      taskOwnerId: taskOwnerId,
-      reviewedByHelper: task?.isConfirmedHelper || false,
-      reviewKey: reviewKey,
-      helperId: currentUserId,
-      helperInfo: isBulkTask && task?.isConfirmedHelper ? {
-        userId: currentUserId,
-        userName: userData?.userName,
-        wasConfirmed: true
-      } : null,
-    };
+    try {
+      setSubmitting(true);
+      const currentUser = getAuth().currentUser;
+      const currentUserId = currentUser?.uid;
+      const isBulkTask = task?.isBulkTask || false;
+      const taskOwnerId = recipientUser?.userId;
+      const reviewKey = `${currentUserId}_${taskId}_${taskOwnerId}`;
+      const existingReviewQuery = query(
+        collection(FIREBASE_DB, "reviews"),
+        where("reviewKey", "==", reviewKey),
+      );
+      const existingReviewSnap = await getDocs(existingReviewQuery);
 
-    await addDoc(collection(FIREBASE_DB, "reviews"), reviewData);
-    if (isBulkTask && currentUserId) {
-      await addDoc(collection(FIREBASE_DB, "helperReviews"), {
-        helperId: currentUserId,
-        taskId: taskId,
-        taskOwnerId: taskOwnerId,
-        reviewed: true,
-        reviewData: {
-          rating: stars,
-          reviewText: reviewText.trim(),
-          createdAt: serverTimestamp(),
+      if (!existingReviewSnap.empty) {
+        Toast.show({
+          type: "info",
+          text1: "Already Reviewed",
+          text2: "You have already reviewed this task owner.",
+        });
+        setSubmitting(false);
+        return;
+      }
+      // Create review data
+      const reviewData = {
+        reviewer: {
+          userId: currentUserId || "",
+          userName: userData?.userName || "Anonymous",
+          profileImage: userData?.profileImage || null,
         },
-        reviewKey: reviewKey
+        recipient: recipientUser,
+        taskId,
+        rating: stars || 0,
+        reviewText: reviewText.trim() || "",
+        createdAt: serverTimestamp(),
+        isBulkTask: isBulkTask,
+        taskOwnerId: taskOwnerId,
+        reviewedByHelper: task?.isConfirmedHelper || false,
+        reviewKey: reviewKey,
+        helperId: currentUserId,
+        helperInfo:
+          isBulkTask && task?.isConfirmedHelper
+            ? {
+                userId: currentUserId,
+                userName: userData?.userName,
+                wasConfirmed: true,
+              }
+            : null,
+      };
+
+      await addDoc(collection(FIREBASE_DB, "reviews"), reviewData);
+      if (isBulkTask && currentUserId) {
+        await addDoc(collection(FIREBASE_DB, "helperReviews"), {
+          helperId: currentUserId,
+          taskId: taskId,
+          taskOwnerId: taskOwnerId,
+          reviewed: true,
+          reviewData: {
+            rating: stars,
+            reviewText: reviewText.trim(),
+            createdAt: serverTimestamp(),
+          },
+          reviewKey: reviewKey,
+        });
+      }
+
+      await sendReviewPushNotification();
+      await saveReviewNotification();
+
+      Toast.show({
+        type: "success",
+        text1: tr.success || "Success",
+        text2: tr.reviewSubmitted || "Review submitted!",
       });
+      navigation.goBack();
+    } catch (e) {
+      console.log("Review submission error:", e);
+      Toast.show({
+        type: "error",
+        text1: tr.error || "Error",
+        text2: tr.couldNotSubmit || "Could not submit review.",
+      });
+    } finally {
+      setSubmitting(false);
     }
-
-    await sendReviewPushNotification();
-    await saveReviewNotification();
-
-    Toast.show({
-      type: "success",
-      text1: tr.success || "Success",
-      text2: tr.reviewSubmitted || "Review submitted!",
-    });
-    navigation.goBack();
-  } catch (e) {
-    console.log("Review submission error:", e);
-    Toast.show({
-      type: "error",
-      text1: tr.error || "Error",
-      text2: tr.couldNotSubmit || "Could not submit review.",
-    });
-  } finally {
-    setSubmitting(false);
-  }
-};
+  };
 
   // Star Color
   const getStarColor = (selected: boolean) => {
     return selected
       ? Colors.star
       : theme.mode === "dark"
-      ? Colors.darkGrey
-      : Colors.stroke;
+        ? Colors.darkGrey
+        : Colors.stroke;
   };
 
   return (
@@ -368,9 +370,7 @@ const submitReview = async () => {
               {
                 backgroundColor: theme.white,
                 borderColor:
-                  theme.mode === "dark"
-                    ? theme.border
-                    : Colors.cardBorderLight,
+                  theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
               },
             ]}
           >
@@ -441,9 +441,7 @@ const submitReview = async () => {
               {
                 backgroundColor: theme.white,
                 borderColor:
-                  theme.mode === "dark"
-                    ? theme.border
-                    : Colors.cardBorderLight,
+                  theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
               },
             ]}
           >
@@ -476,7 +474,16 @@ const submitReview = async () => {
           </View>
 
           {/* Review Input Section */}
-          <View style={[styles.reviewCard, { backgroundColor: theme.white }]}>
+          <View
+            style={[
+              styles.reviewCard,
+              {
+                backgroundColor: theme.white,
+                borderColor:
+                  theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
+              },
+            ]}
+          >
             <Text style={[styles.reviewTitle, { color: theme.heading }]}>
               {tr.writeReview || "Write your review"}
             </Text>
@@ -485,7 +492,7 @@ const submitReview = async () => {
                 styles.inputContainer,
                 {
                   backgroundColor: theme.white,
-                  borderColor: theme.border,
+                  borderColor: Colors.cardBorderLight,
                 },
               ]}
             >
@@ -653,6 +660,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 16,
     elevation: 6,
+    borderWidth:1
   },
   reviewTitle: {
     fontSize: RFPercentage(2),

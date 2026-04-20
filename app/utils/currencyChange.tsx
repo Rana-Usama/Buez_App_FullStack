@@ -1,19 +1,59 @@
-/// Exchange rates (USD → target currency) - Update these regularly
-
 import axios from "axios";
 
-export const getLiveExchangeRates = async () => {
+// export const getLiveExchangeRates = async () => {
+//   try {
+//     const response = await axios.get(
+//       "https://api.exchangerate.host/latest?base=USD"
+//     );
+//     console.log("getLiveExchangeRates...........", response);
+//     return response.data.rates; // returns { EUR: 0.92, GBP: 0.79, ... }
+//   } catch (error) {
+//     console.error("Error fetching live rates:", error);
+//     return null; // fallback handled below
+//   }
+// };
+
+
+
+
+
+
+let cachedRates: Record<string, number> | null = null;
+let cacheTimestamp: number | null = null;
+const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour — ECB updates once daily
+
+export const getLiveExchangeRates = async (): Promise<Record<string, number> | null> => {
+  // Return cache if still fresh
+  if (cachedRates && cacheTimestamp && Date.now() - cacheTimestamp < CACHE_TTL_MS) {
+    return cachedRates;
+  }
+
   try {
-    const response = await axios.get(
-      "https://api.exchangerate.host/latest?base=USD"
+    // Frankfurter: free, no key, backed by European Central Bank
+    const response = await fetch(
+      "https://api.frankfurter.app/latest?base=USD"
     );
-    console.log("getLiveExchangeRates...........", response);
-    return response.data.rates; // returns { EUR: 0.92, GBP: 0.79, ... }
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+
+    console.log("exchange rate -----------------",data)
+
+    // Frankfurter doesn't include the base currency itself
+    const rates = { USD: 1, ...data.rates };
+
+    cachedRates = rates;
+    cacheTimestamp = Date.now();
+
+    return rates;
   } catch (error) {
-    console.error("Error fetching live rates:", error);
-    return null; // fallback handled below
+    console.error("Failed to fetch live rates, using fallback:", error);
+    return null; // caller falls back to static rates
   }
 };
+
+
 
 const exchangeRates = {
   USD: 1,
@@ -649,21 +689,21 @@ export const getCurrencySymbolFromLocation = (location = null) => {
  * @returns {number}
  */
 
-export const convertCurrency = (amount, fromCurrency, toCurrency) => {
-  if (!amount || fromCurrency === toCurrency) return amount;
-  if (!exchangeRates[fromCurrency] || !exchangeRates[toCurrency]) {
-    console.log(
-      `Exchange rate not available for ${fromCurrency} to ${toCurrency}`
-    );
-    return amount;
-  }
+// export const convertCurrency = (amount, fromCurrency, toCurrency) => {
+//   if (!amount || fromCurrency === toCurrency) return amount;
+//   if (!exchangeRates[fromCurrency] || !exchangeRates[toCurrency]) {
+//     console.log(
+//       `Exchange rate not available for ${fromCurrency} to ${toCurrency}`
+//     );
+//     return amount;
+//   }
 
-  // Calculate direct exchange rate
-  const directExchangeRate =
-    exchangeRates[toCurrency] / exchangeRates[fromCurrency];
-  const convertedAmount = amount * directExchangeRate;
-  return convertedAmount;
-};
+//   // Calculate direct exchange rate
+//   const directExchangeRate =
+//     exchangeRates[toCurrency] / exchangeRates[fromCurrency];
+//   const convertedAmount = amount * directExchangeRate;
+//   return convertedAmount;
+// };
 
 /**
  * @param {number|string} amount -
@@ -792,7 +832,52 @@ export const getSupportedCountries = () => {
   return Object.keys(countryCurrencyMap);
 };
 
-// Default export for backward compatibility
+
+
+
+
+
+
+
+let activeRates: Record<string, number> = { ...exchangeRates };
+
+/** Call once on app startup (e.g. in App.tsx useEffect) */
+export const initLiveRates = async (): Promise<void> => {
+  const live = await getLiveExchangeRates();
+  console.log("live.........",live)
+  if (live) {
+    activeRates = live;
+    console.log("Live exchange rates loaded ✓");
+  } else {
+    console.log("Using static fallback rates");
+  }
+};
+
+export const convertCurrency = (
+  amount: number,
+  fromCurrency: string,
+  toCurrency: string
+): number => {
+  if (!amount || fromCurrency === toCurrency) return amount;
+
+  const fromRate = activeRates[fromCurrency];
+  const toRate = activeRates[toCurrency];
+
+
+  console.log("fromRate........",fromRate)
+
+  console.log("toRate........",toRate)
+
+  if (!fromRate || !toRate) {
+    console.log(`Rate unavailable: ${fromCurrency} → ${toCurrency}`);
+    return amount;
+  }
+
+  return amount * (toRate / fromRate);
+};
+
+
+
 export default {
   formatCurrency,
   getCurrencyFromCountry,

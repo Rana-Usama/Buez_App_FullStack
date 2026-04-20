@@ -38,81 +38,47 @@ export const HomeGradients = {
   ] as const,
 
   /* -------- Top Rated Cards -------- */
-  topRated: [
-    "#eeede4ff",
-    "#EFEACE",
-    "#967852ff",
-  ] as const,
+  topRated: ["#eeede4ff", "#EFEACE", "#967852ff"] as const,
 
-  topRatedDark: [
-    "#e2d9a6ff",
-    "#1B1919",
-    "#84643cff",
-  ] as const,
+  topRatedDark: ["#e2d9a6ff", "#1B1919", "#84643cff"] as const,
 
-  risingTalent: [
-    "#e8dff0ff",
-    "#c0aed2ff",
-    "#A8CABA",
-  ] as const,
+  risingTalent: ["#e8dff0ff", "#c0aed2ff", "#A8CABA"] as const,
 
-  risingTalentDark: [
-    "#8357b1ff",
-    "#1B1919",
-    "#99d9bbff",
-  ] as const,
+  risingTalentDark: ["#8357b1ff", "#1B1919", "#99d9bbff"] as const,
 
-  beginner: [
-    "#ebf9f7ff",
-    "#98d3ccff",
-    "#57a872ff",
-  ] as const,
+  beginner: ["#ebf9f7ff", "#98d3ccff", "#57a872ff"] as const,
 
-  beginnerDark: [
-    "#79b7b0ff",
-    "#1B1919",
-    "#3f6a4dff",
-  ] as const,
+  beginnerDark: ["#79b7b0ff", "#1B1919", "#3f6a4dff"] as const,
 
-  defaultCard: [
-    "#7C8CDD",
-    "#B4BDE9",
-    "#4C669F",
-  ] as const,
+  defaultCard: ["#7C8CDD", "#B4BDE9", "#4C669F"] as const,
 
-  defaultCardDark: [
-    "#7C8CDD",
-    "#1B1919",
-    "#4C669F",
-  ] as const,
+  defaultCardDark: ["#7C8CDD", "#1B1919", "#4C669F"] as const,
 };
-
 
 /* =========================================================
    Top Rated Users Card Gradients
 ========================================================= */
 export const TopRatedUserGradients = {
   pro: {
-     light: ["#e8e9efff", "#f4f4faff"] as const,
+    light: ["#e8e9efff", "#f4f4faff"] as const,
     dark: ["#403f3813", "#2d2d39ff"] as const,
   },
   rising: {
-   light: ["#101a3dff", "#e4e7f2ff"] as const, // Mint to Teal - for rising talent
+    light: ["#e8e9efff", "#f4f4faff"] as const,
     dark: ["#2a282cff", "#231f27ff"] as const,
   },
   beginner: {
- light: ["#101a3dff", "#e4e7f2ff"] as const, // Light purple to violet - for beginners
+    light: ["#e8e9efff", "#f4f4faff"] as const,
     dark: ["#2e3231ff", "#2a332dff"] as const,
   },
   default: {
-  light: ["#101a3dff", "#e4e7f2ff"] as const, // Light blue to blue - default
+    light: ["#e8e9efff", "#f4f4faff"] as const,
     dark: ["#313445", "#0F1F43"] as const,
   },
 };
 
-
 export default {
   OnboardingGradients,
   HomeGradients,
-  TopRatedUserGradients
+  TopRatedUserGradients,
 };

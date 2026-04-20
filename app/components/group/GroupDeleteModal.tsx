@@ -11,25 +11,41 @@ type Props = {
   t: any;
 };
 
-const GroupDeleteModal = memo(({ visible, onConfirm, onCancel, theme, t }: Props) => {
-  if (!visible) return null;
-  return (
-    <View style={styles.modalOverlay}>
-      <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
-        <Text style={[styles.modalTitle, { color: theme.heading }]}>{t("chat.txt3")}</Text>
-        <Text style={[styles.modalText, { color: theme.darkGrey }]}>{t("chat.txt4")}</Text>
-        <View style={styles.modalButtons}>
-          <TouchableOpacity style={[styles.cancelBtn, { borderColor: theme.lightGrey }]} onPress={onCancel}>
-            <Text style={{ color: theme.heading, fontFamily: "Poppins_500Medium" }}>{t("buttons.cancel")}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteBtn} onPress={onConfirm}>
-            <Text style={styles.deleteBtnText}>{t("chat.txt5")}</Text>
-          </TouchableOpacity>
+const GroupDeleteModal = memo(
+  ({ visible, onConfirm, onCancel, theme, t }: Props) => {
+    if (!visible) return null;
+    return (
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+          <Text style={[styles.modalTitle, { color: theme.heading }]}>
+            {t("chat.txt3")}
+          </Text>
+          <Text style={[styles.modalText, { color: theme.darkGrey }]}>
+            {t("chat.txt4")}
+          </Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.cancelBtn, { borderColor: theme.lightGrey }]}
+              onPress={onCancel}
+            >
+              <Text
+                style={{
+                  color: theme.heading,
+                  fontFamily: "Poppins_500Medium",
+                }}
+              >
+                {t("buttons.cancel")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteBtn} onPress={onConfirm}>
+              <Text style={styles.deleteBtnText}>{t("chat.txt5")}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
-  );
-});
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -69,13 +85,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: RFPercentage(1.2),
     borderRadius: RFPercentage(100),
-    backgroundColor: "#F44336",
+    backgroundColor: Colors.primary,
     alignItems: "center",
   },
   deleteBtnText: {
     color: "#FFF",
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
 });
 

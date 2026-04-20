@@ -255,7 +255,7 @@ const HomeScreen: React.FC = () => {
                     <TopRatedUserCard
                       user={item}
                       onPress={() => handleUserPress(item)}
-                      // onPress={()=> {navigation.navigate("InterestSelection")}}
+                      // onPress={()=> {navigation.navigate("FreeTrial")}}
                       darkMode={theme.mode === "dark"}
                       t={t}
                     />

@@ -10,7 +10,7 @@ import {
   Platform,
   Animated,
   ActivityIndicator,
-  FlatList
+  FlatList,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -137,6 +137,8 @@ const GroupDetails = ({ navigation, route }: any) => {
     }
   }, [groupData]);
 
+  console.log("Group data updated:", translatedLastMessage);
+
   const groupTitle =
     groupData?.taskType === "Other"
       ? groupData?.customTaskTitle || t("taskApplicants.group")
@@ -148,8 +150,14 @@ const GroupDetails = ({ navigation, route }: any) => {
   const workers = groupData?.members?.filter((m) => m.role === "worker") || [];
 
   // memoize owners/workers for stable references (helps FlatList and memoised items)
-  const ownersMemo = React.useMemo(() => owners, [owners.length, JSON.stringify(owners.map((o) => o.userId))]);
-  const workersMemo = React.useMemo(() => workers, [workers.length, JSON.stringify(workers.map((w) => w.userId))]);
+  const ownersMemo = React.useMemo(
+    () => owners,
+    [owners.length, JSON.stringify(owners.map((o) => o.userId))],
+  );
+  const workersMemo = React.useMemo(
+    () => workers,
+    [workers.length, JSON.stringify(workers.map((w) => w.userId))],
+  );
 
   // ── Start 1:1 chat with a member ────────────────────────────────────────
   const handleMemberChat = async (member: Member) => {
@@ -176,8 +184,12 @@ const GroupDetails = ({ navigation, route }: any) => {
   };
 
   // stable callback passed to MemberRow (avoid re-creating on each render)
-  const handleMemberChatCb = React.useCallback((m: Member) => handleMemberChat(m), [currentUserId, currentUserName, chattingWith]);
+  const handleMemberChatCb = React.useCallback(
+    (m: Member) => handleMemberChat(m),
+    [currentUserId, currentUserName, chattingWith],
+  );
 
+  console.log("workersMemo...........", workersMemo);
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.white }]}>
@@ -254,10 +266,6 @@ const GroupDetails = ({ navigation, route }: any) => {
               alignItems: "center",
             }}
           >
-            <Text style={styles.heroTitle} numberOfLines={2}>
-              {translatedTitle || t("taskApplicants.group")}
-            </Text>
-
             <View style={styles.heroCategoryRow}>
               <View style={styles.heroCategoryBadge}>
                 <MaterialCommunityIcons
@@ -268,13 +276,30 @@ const GroupDetails = ({ navigation, route }: any) => {
                 <Text style={styles.heroCategoryText}>{translatedTitle}</Text>
               </View>
             </View>
+            <Text style={styles.heroTitle} numberOfLines={1}>
+              Broadcast : {translatedTitle || t("taskApplicants.group")}
+            </Text>
 
             {description && (
-              <Text style={[styles.lastMsgText, { textAlign: "center" }]}>
+              <Text
+                numberOfLines={2}
+                style={[
+                  styles.lastMsgText,
+                  {
+                    textAlign: "center",
+                    color:
+                      theme.mode === "dark"
+                        ? Colors.lastMsgTextColor
+                        : Colors.primary,
+                    fontFamily: "Poppins_500Medium",
+                    maxWidth: "90%",
+                  },
+                ]}
+              >
                 {translatedDescription}
               </Text>
             )}
-            {/* Last message preview */}
+
             {translatedLastMessage ? (
               <View style={styles.lastMsgWrap}>
                 <Feather
@@ -345,7 +370,9 @@ const GroupDetails = ({ navigation, route }: any) => {
                     { backgroundColor: Colors.gold20 },
                   ]}
                 >
-                  <Text style={[styles.sectionCountText, { color: Colors.orange }]}>
+                  <Text
+                    style={[styles.sectionCountText, { color: Colors.orange }]}
+                  >
                     {owners.length}
                   </Text>
                 </View>
@@ -355,7 +382,13 @@ const GroupDetails = ({ navigation, route }: any) => {
                 data={ownersMemo}
                 keyExtractor={(it) => it.userId}
                 renderItem={({ item, index }) => (
-                  <MemberRow member={item} index={index} currentUserId={currentUserId} onChat={handleMemberChatCb} theme={theme} />
+                  <MemberRow
+                    member={item}
+                    index={index}
+                    currentUserId={currentUserId}
+                    onChat={handleMemberChatCb}
+                    theme={theme}
+                  />
                 )}
                 scrollEnabled={false}
                 removeClippedSubviews
@@ -381,7 +414,7 @@ const GroupDetails = ({ navigation, route }: any) => {
           )}
 
           {/* Workers section */}
-          {workers.length > 0 && (
+          {workers?.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <View
@@ -402,7 +435,12 @@ const GroupDetails = ({ navigation, route }: any) => {
                 <View
                   style={[
                     styles.sectionCount,
-                    { backgroundColor: theme.mode === "dark" ? Colors.primary + "40" : Colors.primary + "20" },
+                    {
+                      backgroundColor:
+                        theme.mode === "dark"
+                          ? Colors.primary + "40"
+                          : Colors.primary + "20",
+                    },
                   ]}
                 >
                   <Text
@@ -414,7 +452,7 @@ const GroupDetails = ({ navigation, route }: any) => {
                       },
                     ]}
                   >
-                    {workers.length}
+                    {workers?.length}
                   </Text>
                 </View>
               </View>
@@ -423,7 +461,13 @@ const GroupDetails = ({ navigation, route }: any) => {
                 data={workersMemo}
                 keyExtractor={(it) => it.userId}
                 renderItem={({ item, index }) => (
-                  <MemberRow member={item} index={owners.length + index} currentUserId={currentUserId} onChat={handleMemberChatCb} theme={theme} />
+                  <MemberRow
+                    member={item}
+                    index={owners.length + index}
+                    currentUserId={currentUserId}
+                    onChat={handleMemberChatCb}
+                    theme={theme}
+                  />
                 )}
                 scrollEnabled={false}
                 removeClippedSubviews
@@ -509,6 +553,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 10,
+    // height:RFPercentage(45)
   },
   backBtn: {
     position: "absolute",
@@ -560,8 +605,8 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     color: Colors.heroTitleColor,
-    fontSize: RFPercentage(2.6),
-    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(2.3),
+    fontFamily: "Poppins_600SemiBold",
     textAlign: "center",
     marginBottom: RFPercentage(1),
     paddingHorizontal: RFPercentage(2),
@@ -590,12 +635,12 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.6),
     marginBottom: RFPercentage(2),
     maxWidth: "80%",
+    marginTop: RFPercentage(1),
   },
   lastMsgText: {
     color: Colors.lastMsgTextColor,
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    flex: 1,
   },
   heroStats: {
     flexDirection: "row",
@@ -647,7 +692,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sectionTitle: {
-    flex: 1,
+    // flex: 1,
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
   },

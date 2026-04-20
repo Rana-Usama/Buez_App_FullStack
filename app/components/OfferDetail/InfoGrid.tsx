@@ -45,6 +45,7 @@ export default function InfoGrid({
             justifyContent: "center",
             alignItems: "center",
             marginBottom: RFPercentage(1),
+            backgroundColor:theme.mode === "dark" ? Colors.lightGrey + "30" : "#badef8ff"
           }}
         >
           <Ionicons
@@ -93,6 +94,8 @@ export default function InfoGrid({
             justifyContent: "center",
             alignItems: "center",
             marginBottom: RFPercentage(1),
+            backgroundColor:
+            theme.mode === "dark" ? Colors.lightGrey + "30" : "#c2f1c5ff",
           }}
         >
           <Ionicons
@@ -119,7 +122,7 @@ export default function InfoGrid({
         <Text
           style={{
             marginTop: RFPercentage(0.5),
-            fontSize: RFPercentage(1.4),
+            fontSize: RFPercentage(1.6),
             color: Colors.primary,
             fontFamily: "Poppins_400Regular",
           }}
@@ -149,6 +152,8 @@ export default function InfoGrid({
             justifyContent: "center",
             alignItems: "center",
             marginBottom: RFPercentage(1),
+             backgroundColor:
+            theme.mode === "dark" ? Colors.lightGrey + "30" : "#f9d5ffff",
           }}
         >
           <Ionicons name="create" size={RFPercentage(2.2)} color="#9C27B0" />

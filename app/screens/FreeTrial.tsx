@@ -22,7 +22,7 @@ const FreeTrial = ({ navigation }: any) => {
       <Image style={styles.logo} source={Icons.logo} />
       <View style={styles.headerContainer}>
         <Text style={[styles.headerText, { color: theme.primary }]}>{`${t(
-          "freeTrial.txt1"
+          "freeTrial.txt1",
         )}`}</Text>
         <Text style={[styles.subHeaderText, { color: theme.darkGrey }]}>
           🎁 {`${t("freeTrial.txt2")}`}
@@ -62,11 +62,17 @@ const FreeTrial = ({ navigation }: any) => {
             </View>
 
             <View style={styles.stepTextContainer}>
-              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t(
-                "freeTrial.txt3"
-              )}`}</Text>
               <Text
-                style={[styles.stepDescription, { color: theme.heading }]}
+                style={[
+                  styles.stepTitle,
+                  {
+                    color:
+                      theme.mode === "dark" ? theme.pureWhite : theme.primary,
+                  },
+                ]}
+              >{`${t("freeTrial.txt3")}`}</Text>
+              <Text
+                style={[styles.stepDescription, { color: theme.grey }]}
               >{`${t("freeTrial.txt4")}`}</Text>
             </View>
           </View>
@@ -97,18 +103,24 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? Colors.primary + "40"
+                        ? Colors.primary + "50"
                         : Colors.primary + "15",
                   },
                 ]}
               />
             </View>
             <View style={styles.stepTextContainerSecond}>
-              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t(
-                "freeTrial.txt5"
-              )}`}</Text>
               <Text
-                style={[styles.stepDescription, { color: theme.heading }]}
+                style={[
+                  styles.stepTitle,
+                  {
+                    color:
+                      theme.mode === "dark" ? theme.pureWhite : theme.primary,
+                  },
+                ]}
+              >{`${t("freeTrial.txt5")}`}</Text>
+              <Text
+                style={[styles.stepDescription, { color: theme.grey }]}
               >{`${t("freeTrial.txt6")}`}</Text>
             </View>
           </View>
@@ -122,7 +134,7 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? Colors.primary + "40"
+                        ? Colors.primary + "50"
                         : Colors.primary + "15",
                   },
                 ]}
@@ -139,7 +151,7 @@ const FreeTrial = ({ navigation }: any) => {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? Colors.primary + "40"
+                        ? Colors.primary + "50"
                         : Colors.primary + "15",
                   },
                 ]}
@@ -147,11 +159,17 @@ const FreeTrial = ({ navigation }: any) => {
             </View>
 
             <View style={[styles.stepTextContainer]}>
-              <Text style={[styles.stepTitle, { color: theme.primary }]}>{`${t(
-                "freeTrial.txt7"
-              )}`}</Text>
               <Text
-                style={[styles.stepDescription, { color: theme.heading }]}
+                style={[
+                  styles.stepTitle,
+                  {
+                    color:
+                      theme.mode === "dark" ? theme.pureWhite : theme.primary,
+                  },
+                ]}
+              >{`${t("freeTrial.txt7")}`}</Text>
+              <Text
+                style={[styles.stepDescription, { color: theme.grey }]}
               >{`${t("freeTrial.txt8")}`}</Text>
             </View>
           </View>
@@ -161,6 +179,7 @@ const FreeTrial = ({ navigation }: any) => {
         title={`${t("freeTrial.txt9")}`}
         onPress={() => navigation.navigate("SubscriptionV2")}
         width={"45%"}
+        marginTop={RFPercentage(2)}
       />
     </Screen>
   );

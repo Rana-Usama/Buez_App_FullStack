@@ -214,7 +214,15 @@ function Subscription({ navigation, route }) {
         {/* Plan Header */}
         <View style={styles.planHeader}>
           <View>
-            <Text style={[styles.planTitle, { color: theme.primary }]}>
+            <Text
+              style={[
+                styles.planTitle,
+                {
+                  color:
+                    theme?.mode === "dark" ? theme.darkGrey : Colors.primary,
+                },
+              ]}
+            >
               {item.title}
             </Text>
             <Text style={[styles.planDescription, { color: theme.darkGrey }]}>
@@ -230,7 +238,15 @@ function Subscription({ navigation, route }) {
               const priceStr = priceLabelForPlan(item.id);
               const [integerPart, decimalPart] = priceStr.split(".");
               return (
-                <Text style={[styles.price, { color: theme.primary }]}>
+                <Text
+                  style={[
+                    styles.price,
+                    {
+                      color:
+                        theme?.mode === "dark" ? Colors.white : Colors.primary,
+                    },
+                  ]}
+                >
                   {integerPart}
                   {decimalPart && (
                     <Text style={{ fontSize: RFPercentage(1.9) }}>
@@ -276,8 +292,8 @@ function Subscription({ navigation, route }) {
                 {
                   color:
                     item.popular || item.id === "yearly"
-                      ? theme.white
-                      : theme.primary,
+                      ? Colors.white
+                      : theme.darkGrey,
                   fontSize:
                     item.popular || item.id === "yearly"
                       ? RFPercentage(1.5)
@@ -345,7 +361,14 @@ function Subscription({ navigation, route }) {
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={[styles.title, { color: theme.primary }]}>
+            <Text
+              style={[
+                styles.title,
+                {
+                  color: theme.mode === "dark" ? theme.darkGrey : theme.primary,
+                },
+              ]}
+            >
               {t("subscription.renewSubscription") || "Renew Subscription"}
             </Text>
           </View>
@@ -435,7 +458,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginTop: Platform.OS === "android" ? RFPercentage(7) : RFPercentage(4),
+    marginTop: Platform.OS === "android" ? RFPercentage(7) : RFPercentage(2),
     paddingHorizontal: RFPercentage(3),
   },
   logo: {

@@ -16,7 +16,7 @@ const StatItem = ({ label, value, icon, color }: any) => (
       <Ionicons name={icon} size={RFPercentage(2.5)} color={color} />
     </View>
     <Text style={{ fontSize: RFPercentage(2), fontFamily: "Poppins_700Bold", marginBottom: RFPercentage(0.3), color:Colors.darkGrey }}>{value}</Text>
-    <Text style={{ fontSize: RFPercentage(1.1), fontFamily: "Poppins_500Medium", textAlign: "center", color:Colors.darkGrey2 }}>{label}</Text>
+    <Text style={{ fontSize: RFPercentage(1.1), fontFamily: "Poppins_500Medium", textAlign: "center", color:Colors.grey }}>{label}</Text>
   </View>
 );
 

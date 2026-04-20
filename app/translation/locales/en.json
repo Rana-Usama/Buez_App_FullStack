@@ -340,7 +340,7 @@
   "chat": {
     "txt1": "Load earlier messages",
     "txt2": "Type a message",
-    "txt3": " Delete Message",
+    "txt3": "Delete Message",
     "txt4": "Do you want to delete this message?",
     "txt5": "Delete"
   },
@@ -650,7 +650,7 @@
     "txt22": "No top users available at the moment",
     "txt23": "Completed",
     "txt24": "Recently",
-    "txt25": "Loading profile...",
+    "txt25": "Loading Profile Data...",
     "txt26": "User not found",
     "txt27": "Profile",
     "txt28": "ELITE BUEZER",
@@ -699,7 +699,7 @@
 
   "taskApplicants": {
     "title": "Task Applicants",
-    "loading": "Loading task details...",
+    "loading": "Loading Task Details...",
 
     "helpersNeeded": "Helpers Needed",
     "confirmed": "Confirmed",

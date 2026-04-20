@@ -77,7 +77,7 @@ const MessageItem = memo(
                 <View
                   style={[
                     styles.msgAvatarFallback,
-                    { backgroundColor: Colors.primary + "25" },
+                    { backgroundColor: Colors.primary  },
                   ]}
                 >
                   <Text
@@ -85,7 +85,7 @@ const MessageItem = memo(
                       styles.msgAvatarInitial,
                       {
                         color:
-                          theme.mode === "dark" ? Colors.white : Colors.primary,
+                          theme.mode === "dark" ? Colors.white : Colors.white,
                       },
                     ]}
                   >
@@ -99,7 +99,7 @@ const MessageItem = memo(
                   numberOfLines={1}
                   style={[
                     styles.msgSenderName,
-                    { color: isOwn ? Colors.white : Colors.lightGrey },
+                    { color: isOwn ? Colors.white : theme.mode === "dark" ? Colors.lightGrey : Colors.primary },
                   ]}
                 >
                   {displayName}
@@ -169,11 +169,11 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   msgSenderName: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
   },
   msgTime: {
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(0.4),
   },

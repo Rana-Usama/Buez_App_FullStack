@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -25,11 +25,9 @@ import {
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { reload } from "firebase/auth";
 
-// ─── Must match the key used in useDeepLinking.ts ────────────────────────────
 const PENDING_JOB_KEY = "pendingDeepLinkJobId";
+import { deepLinkState } from "../job-sharing/deepLinkState";
 
-// ─── Guard: userData is fully populated when it has a userId field ────────────
-// Prevents acting on the initial empty {} before Firestore finishes loading
 const isUserDataReady = (userData: any): boolean => {
   return !!(userData && userData.userId);
 };
@@ -42,7 +40,6 @@ const DeciderScreen = () => {
   const [deviceId, setDeviceId] = useState("");
   const hasNavigated = useRef(false);
 
-  // Animated values
   const outerSpinValue = useRef(new Animated.Value(0)).current;
   const innerSpinValue = useRef(new Animated.Value(0)).current;
   const scaleValue = useRef(new Animated.Value(0.8)).current;
@@ -52,7 +49,7 @@ const DeciderScreen = () => {
 
   const db = getFirestore();
 
-  // ─── Spinning animations ──────────────────────────────────────────────────
+  // ─── Animations (unchanged) ───────────────────────────────────────────────
   useEffect(() => {
     const outerSpinAnimation = Animated.loop(
       Animated.timing(outerSpinValue, {
@@ -89,25 +86,47 @@ const DeciderScreen = () => {
     const dotAnimation = Animated.loop(
       Animated.stagger(300, [
         Animated.sequence([
-          Animated.timing(dotOpacity1, { toValue: 1, duration: 400, useNativeDriver: true }),
-          Animated.timing(dotOpacity1, { toValue: 0.3, duration: 400, useNativeDriver: true }),
+          Animated.timing(dotOpacity1, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dotOpacity1, {
+            toValue: 0.3,
+            duration: 400,
+            useNativeDriver: true,
+          }),
         ]),
         Animated.sequence([
-          Animated.timing(dotOpacity2, { toValue: 1, duration: 400, useNativeDriver: true }),
-          Animated.timing(dotOpacity2, { toValue: 0.3, duration: 400, useNativeDriver: true }),
+          Animated.timing(dotOpacity2, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dotOpacity2, {
+            toValue: 0.3,
+            duration: 400,
+            useNativeDriver: true,
+          }),
         ]),
         Animated.sequence([
-          Animated.timing(dotOpacity3, { toValue: 1, duration: 400, useNativeDriver: true }),
-          Animated.timing(dotOpacity3, { toValue: 0.3, duration: 400, useNativeDriver: true }),
+          Animated.timing(dotOpacity3, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dotOpacity3, {
+            toValue: 0.3,
+            duration: 400,
+            useNativeDriver: true,
+          }),
         ]),
       ]),
     );
-
     outerSpinAnimation.start();
     innerSpinAnimation.start();
     scaleAnimation.start();
     dotAnimation.start();
-
     return () => {
       outerSpinAnimation.stop();
       innerSpinAnimation.stop();
@@ -116,7 +135,6 @@ const DeciderScreen = () => {
     };
   }, []);
 
-  // ─── Spin interpolations ──────────────────────────────────────────────────
   const outerSpin = outerSpinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
@@ -125,12 +143,7 @@ const DeciderScreen = () => {
     inputRange: [0, 1],
     outputRange: ["360deg", "0deg"],
   });
-  const scale = scaleValue.interpolate({
-    inputRange: [0.8, 1],
-    outputRange: [0.8, 1],
-  });
 
-  // ─── Fetch device ID ──────────────────────────────────────────────────────
   useEffect(() => {
     const fetchDeviceId = async () => {
       const id = await DeviceInfo.getUniqueId();
@@ -139,7 +152,6 @@ const DeciderScreen = () => {
     fetchDeviceId();
   }, []);
 
-  // ─── Check if device has already availed free trial ──────────────────────
   const hasDeviceAvailedFreeTrial = async (deviceId: string) => {
     try {
       const q = query(
@@ -163,161 +175,162 @@ const DeciderScreen = () => {
     return null;
   };
 
-  // ─── Main decision logic ──────────────────────────────────────────────────
-  useEffect(() => {
-    if (!deviceId || hasNavigated.current) return;
+  // ─── Extracted as useCallback so it's stable and callable ────────────────
+  const decideAndNavigate = useCallback(async () => {
+    if (hasNavigated.current) return;
 
-    const decideAndNavigate = async () => {
-      try {
-        // ── Wait for loading to finish
-        if (userLoading) return;
+    try {
+      const creds = await getCredentials();
+      const { email } = creds || {};
+      const isLoggedIn = !!(email || creds?.password);
 
-        // ── Wait for userData to be fully populated (not just empty {})
-        // If user is logged in, Firestore populates userData asynchronously.
-        // We wait for the next useEffect cycle when userData.userId is present.
-        const creds = await getCredentials();
-        const { email } = creds || {};
-        const isLoggedIn = !!(email || creds?.password);
+      // ✅ If logged in, we now KNOW userData is ready (caller guarantees it)
+      // so we no longer need the early-return guard here
 
-        if (isLoggedIn && !isUserDataReady(userData)) {
-          console.log("[Decider] Logged in but userData not ready yet — waiting...");
-          return;
-        }
+      const pendingJobId = await SecureStore.getItemAsync(PENDING_JOB_KEY);
+      if (pendingJobId || deepLinkState.isHandlingDeepLink) {
+        console.log(
+          "[Decider] Deep link is being handled — skipping TabNavigator",
+        );
+        return;
+      }
 
-        // ── COLD START DEEP LINK CHECK ──────────────────────────────────────
-        // If useDeepLinking parked a jobId before auth loaded,
-        // do NOT navigate — let useDeepLinking's flush useEffect handle it.
-        const pendingJobId = await SecureStore.getItemAsync(PENDING_JOB_KEY);
-        if (pendingJobId) {
-          console.log(
-            "[Decider] Pending deep link jobId found — deferring to useDeepLinking:",
-            pendingJobId,
-          );
-          return;
-        }
+      const loggedOut = await SecureStore.getItemAsync("loggedOut");
+      const now = new Date();
 
-        const loggedOut = await SecureStore.getItemAsync("loggedOut");
-        const now = new Date();
+      if (loggedOut === "true") {
+        hasNavigated.current = true;
+        navigation.replace("Login");
+        return;
+      }
 
-        // ── Logged out → Login
-        if (loggedOut === "true") {
-          hasNavigated.current = true;
-          navigation.replace("Login");
-          return;
-        }
-
-        // ── No credentials and no userData → OnBoarding
-        if (!isLoggedIn && !userData) {
-          hasNavigated.current = true;
-          navigation.replace("OnBoarding");
-          return;
-        }
-
-        // ── Credentials exist but userData still null after timeout → OnBoarding
-        if (isLoggedIn && !userData) {
-          const timeout = setTimeout(() => {
-            if (!isUserDataReady(userData) && !hasNavigated.current) {
-              hasNavigated.current = true;
-              navigation.replace("OnBoarding");
-            }
-          }, 3000);
-          return () => clearTimeout(timeout);
-        }
-
-        // ── userData is ready
-        if (!isUserDataReady(userData)) {
-          hasNavigated.current = true;
-          navigation.replace("OnBoarding");
-          return;
-        }
-
-        // ── Email verification check
-        const currentUser = FIREBASE_AUTH.currentUser;
-        if (currentUser) {
-          await reload(currentUser);
-          if (!currentUser.emailVerified) {
-            hasNavigated.current = true;
-            navigation.replace("EmailVerification", {
-              email: currentUser.email,
-              deviceId,
-            });
-            return;
-          }
-        }
-
-        const {
-          isSubscribed,
-          subscriptionStart,
-          subscriptionEnd,
-          isFreeTrial,
-          freeTrialStartedAt,
-        } = userData;
-
-        const subStartDate = parseDate(subscriptionStart);
-        const subEndDate = parseDate(subscriptionEnd);
-        const isWithinPaidPeriod =
-          subStartDate &&
-          subEndDate &&
-          now >= subStartDate &&
-          now <= subEndDate;
-
-        // ── Active paid subscription → TabNavigator
-        if (isSubscribed && isWithinPaidPeriod) {
-          hasNavigated.current = true;
-          navigation.replace("TabNavigator");
-          return;
-        }
-
-        let deviceUsedTrial = false;
-        if (deviceId) {
-          deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
-        }
-
-        // ── New user, no trial used → FreeTrial
-        if (!isSubscribed && !isFreeTrial && !deviceUsedTrial) {
-          hasNavigated.current = true;
-          navigation.replace("FreeTrial");
-          return;
-        }
-
-        // ── Active free trial (safe parsing for Timestamp + ISO string)
-        let isTrialValid = false;
-        if (isFreeTrial && freeTrialStartedAt) {
-          const trialStart = parseDate(freeTrialStartedAt);
-          if (trialStart) {
-            const trialDays = differenceInDays(now, trialStart);
-            isTrialValid = trialDays >= 0 && trialDays <= 14;
-          }
-        }
-
-        if (isTrialValid) {
-          hasNavigated.current = true;
-          navigation.replace("TabNavigator");
-          return;
-        }
-
-        // ── Trial expired or no subscription → Subscription
-        if (!isSubscribed) {
-          hasNavigated.current = true;
-          navigation.replace("Subscription");
-          return;
-        }
-
-        // ── Fallback → OnBoarding
+      if (!isLoggedIn && !userData) {
         hasNavigated.current = true;
         navigation.replace("OnBoarding");
-      } catch (error) {
-        console.log("[Decider] Error deciding initial route:", error);
-        if (!hasNavigated.current) {
+        return;
+      }
+
+      if (!isUserDataReady(userData)) {
+        hasNavigated.current = true;
+        navigation.replace("OnBoarding");
+        return;
+      }
+
+      // ── Email verification
+      const currentUser = FIREBASE_AUTH.currentUser;
+      if (currentUser) {
+        await reload(currentUser);
+        if (!currentUser.emailVerified) {
           hasNavigated.current = true;
-          navigation.replace("OnBoarding");
+          navigation.replace("EmailVerification", {
+            email: currentUser.email,
+            deviceId,
+          });
+          return;
         }
       }
+
+      const {
+        isSubscribed,
+        subscriptionStart,
+        subscriptionEnd,
+        isFreeTrial,
+        freeTrialStartedAt,
+      } = userData;
+
+      const subStartDate = parseDate(subscriptionStart);
+      const subEndDate = parseDate(subscriptionEnd);
+      const isWithinPaidPeriod =
+        subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
+
+      if (isSubscribed && isWithinPaidPeriod) {
+        hasNavigated.current = true;
+        navigation.replace("TabNavigator");
+        return;
+      }
+
+      let deviceUsedTrial = false;
+      if (deviceId) {
+        deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
+      }
+
+      if (!isSubscribed && !isFreeTrial && !deviceUsedTrial) {
+        hasNavigated.current = true;
+        navigation.replace("FreeTrial");
+        return;
+      }
+
+      let isTrialValid = false;
+      if (isFreeTrial && freeTrialStartedAt) {
+        const trialStart = parseDate(freeTrialStartedAt);
+        if (trialStart) {
+          const trialDays = differenceInDays(now, trialStart);
+          isTrialValid = trialDays >= 0 && trialDays <= 14;
+        }
+      }
+
+      if (isTrialValid) {
+        hasNavigated.current = true;
+        navigation.replace("TabNavigator");
+        return;
+      }
+
+      if (!isSubscribed) {
+        hasNavigated.current = true;
+        navigation.replace("Subscription");
+        return;
+      }
+
+      hasNavigated.current = true;
+      navigation.replace("OnBoarding");
+    } catch (error) {
+      console.log("[Decider] Error deciding initial route:", error);
+      if (!hasNavigated.current) {
+        hasNavigated.current = true;
+        navigation.replace("OnBoarding");
+      }
+    }
+  }, [userData, deviceId, navigation]);
+
+  // ─── KEY FIX: depend on userData?.userId (primitive) not userData (object) ─
+  // This guarantees re-execution the moment userId becomes available
+  useEffect(() => {
+    if (!deviceId) return; // device ID not fetched yet
+    if (userLoading) return; // context still loading
+    if (hasNavigated.current) return; // already navigated
+
+    const run = async () => {
+      const creds = await getCredentials();
+      const { email } = creds || {};
+      const isLoggedIn = !!(email || creds?.password);
+
+      // ✅ If logged in but userData still not ready, bail — the effect
+      // will re-fire when userData?.userId changes (i.e. when it populates)
+      if (isLoggedIn && !isUserDataReady(userData)) {
+        console.log("[Decider] Waiting for userData.userId...");
+        return;
+      }
+
+      decideAndNavigate();
     };
 
-    decideAndNavigate();
-  }, [userData, userLoading, deviceId, navigation]);
+    run();
 
+    // userData?.userId is a primitive string — reliable change detection
+  }, [userData?.userId, userLoading, deviceId, decideAndNavigate]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!hasNavigated.current && !deepLinkState.isHandlingDeepLink) {
+        console.warn("[Decider] Timeout — forcing OnBoarding");
+        hasNavigated.current = true;
+        navigation.replace("OnBoarding");
+      }
+    }, 8000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // ─── Render (unchanged) ───────────────────────────────────────────────────
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -325,7 +338,6 @@ const DeciderScreen = () => {
         backgroundColor={"transparent"}
         translucent
       />
-
       <View style={styles.loaderContainer}>
         <View
           style={[styles.outerCircle, { borderColor: theme.primary + "20" }]}
@@ -333,10 +345,7 @@ const DeciderScreen = () => {
         <Animated.View
           style={[
             styles.spinnerOuter,
-            {
-              borderColor: theme.primary,
-              transform: [{ rotate: outerSpin }, { scale }],
-            },
+            { borderColor: theme.primary, transform: [{ rotate: outerSpin }] },
           ]}
         />
         <View
@@ -345,15 +354,11 @@ const DeciderScreen = () => {
         <Animated.View
           style={[
             styles.spinnerInner,
-            {
-              borderColor: theme.primary,
-              transform: [{ rotate: innerSpin }],
-            },
+            { borderColor: theme.primary, transform: [{ rotate: innerSpin }] },
           ]}
         />
         <View style={[styles.centerDot, { backgroundColor: theme.primary }]} />
       </View>
-
       <View style={styles.loadingTextContainer}>
         <Animated.Text style={[styles.loadingText, { color: theme.heading }]}>
           Loading

@@ -152,15 +152,15 @@ const TopRatedUsers = ({ navigation }: any) => {
         return {
           icon: "rocket",
           text: t("profileRank.txt4"),
-          color: "#FF9800",
-          bgColor: "#FFF3E0",
+          color: "#79b7b0ff",
+          bgColor: "#71a5821a",
         };
       default:
         return {
           icon: "star",
           text: t("profileRank.txt3"),
-          color: Colors.primary,
-          bgColor: Colors.primary + "15",
+          color: "#b697d1ff",
+          bgColor: "#d3c2e2ff",
         };
     }
   };
@@ -197,7 +197,7 @@ const TopRatedUsers = ({ navigation }: any) => {
             postRequest: {},
           })
         }
-        style={[styles.cardContainer, { shadowColor: cardGradient[1] }]}
+        style={[styles.cardContainer, { shadowColor: cardGradient[1] },{borderColor:cardGradient[0]}]}
       >
         <LinearGradient
           colors={cardGradient}
@@ -255,11 +255,11 @@ const TopRatedUsers = ({ navigation }: any) => {
                 <View
                   style={[
                     styles.badgeTag,
-                    { backgroundColor: "rgba(0,0,0,0.15)" },
+                    { backgroundColor: badge.bgColor },
                   ]}
                 >
-                  <Ionicons name={badge.icon as any} size={10} color="#fff" />
-                  <Text style={[styles.badgeText, { color: "#fff" }]}>
+                  <Ionicons name={badge.icon as any} size={10} color={badge.color} />
+                  <Text style={[styles.badgeText, { color: badge.color }]}>
                     {`  `}
                     {badge.text}
                   </Text>
@@ -286,26 +286,26 @@ const TopRatedUsers = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={[styles.statsIslandMesh]}>
+          <View style={[styles.statsIslandMesh,]}>
             <View style={styles.statBox}>
-              <Text style={styles.statValMesh}>{user.activeTasks}</Text>
-              <Text style={styles.statLabMesh}>{t("profileRank.txt6")}</Text>
+              <Text style={[styles.statValMesh,{color:theme.grey}]}>{user.activeTasks}</Text>
+              <Text style={[styles.statLabMesh, {color:theme.darkGrey}]}>{t("profileRank.txt6")}</Text>
             </View>
             <View style={[styles.divider]} />
             <View style={styles.statBox}>
-              <Text style={styles.statValMesh} numberOfLines={1}>
+              <Text style={[styles.statValMesh,{color:theme.grey}]} numberOfLines={1}>
                 {user.completedTasks}
               </Text>
-              <Text style={styles.statLabMesh} numberOfLines={1}>
+              <Text style={[styles.statLabMesh, {color:theme.darkGrey}]} numberOfLines={1}>
                 {t("profileRank.txt7")}
               </Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.statBox}>
-              <Text style={[styles.statValMesh]} numberOfLines={1}>
+              <Text style={[styles.statValMesh, {color:theme.grey}]} numberOfLines={1}>
                 {user.successRate}%
               </Text>
-              <Text style={styles.statLabMesh} numberOfLines={1}>
+              <Text style={[styles.statLabMesh, {color:theme.darkGrey}]} numberOfLines={1}>
                 {t("profileRank.txt31")}
               </Text>
             </View>
@@ -615,12 +615,14 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginBottom: 15,
     borderRadius: 16,
-    elevation: 5,
+    // elevation: 5,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
     overflow: "hidden",
+    borderWidth:1,
+
   },
   gradientWrapper: {
     padding: 16,
@@ -639,20 +641,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    marginTop: 15,
-    backgroundColor: "rgba(127, 127, 138, 0.23)", // Semi-transparent "Glass" effect
+    backgroundColor: "rgba(173, 173, 184, 0.23)", 
+    borderRadius:RFPercentage(1.5),
+    paddingVertical:RFPercentage(1),
+    paddingHorizontal:RFPercentage(1)
   },
   statValMesh: {
-    fontSize: 15,
+    fontSize: RFPercentage(1.8),
     textAlign: "center",
     color: "white",
     fontFamily: "Poppins_600SemiBold",
   },
   statLabMesh: {
-    fontSize: 10,
+    fontSize: RFPercentage(1.3),
     color: "white",
     fontFamily: "Poppins_400Regular",
     textAlign: "center",

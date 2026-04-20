@@ -123,13 +123,12 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             styles.filterButtonText,
             {
               color: isActive ? Colors.primary : theme.lightGrey,
-              fontWeight: isActive ? "600" : "400",
             },
           ]}
-          numberOfLines={1}
+          numberOfLines={2}
         >
-          {item.label.length > 6
-            ? `${item.label.substring(0, 6)}..`
+          {item.label.length > 8
+            ? `${item.label.substring(0, 8)}..`
             : item.label}
         </Text>
       </TouchableOpacity>

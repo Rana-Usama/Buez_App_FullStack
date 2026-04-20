@@ -62,7 +62,7 @@ export default function WorkersCard({ isBulkRequest, numberOfWorkers, confirmedW
               <View key={worker.userId || idx} style={{ alignItems: "center", marginRight: RFPercentage(1.5), width: RFPercentage(8) }}>
                 <Image source={worker.profileImage ? { uri: worker.profileImage } : Icons.dp} style={{ width: RFPercentage(5), height: RFPercentage(5), borderRadius: RFPercentage(2.5), marginBottom: RFPercentage(0.5) }} />
                 <Text style={{ fontSize: RFPercentage(1.1), textAlign: "center", color: theme.heading, fontFamily: "Poppins_600SemiBold" }}>{worker.userName}</Text>
-                <View style={{ paddingHorizontal: RFPercentage(0.8), paddingVertical: RFPercentage(0.3), borderRadius: RFPercentage(0.8), marginTop: RFPercentage(0.3), backgroundColor: (confirmedWorkers.some(w => w.userId === worker.userId) ? "#4CAF50" : Colors.primary) + "20" }}>
+                <View style={{ paddingHorizontal: RFPercentage(1), paddingVertical: RFPercentage(0.3), borderRadius: RFPercentage(0.8), marginTop: RFPercentage(0.3), backgroundColor: (confirmedWorkers.some(w => w.userId === worker.userId) ? "#4CAF50" : Colors.primary) + "20" }}>
                   <Text style={{ color: confirmedWorkers.some(w => w.userId === worker.userId) ? "#4CAF50" : Colors.primary, fontSize: RFPercentage(0.9), fontFamily: "Poppins_600SemiBold" }}>{confirmedWorkers.some(w => w.userId === worker.userId) ? (t("offerDetail.confirmed") || "Confirmed") : (t("offerDetail.pending") || "Pending")}</Text>
                 </View>
               </View>

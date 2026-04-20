@@ -12,6 +12,7 @@ import {
   Animated,
   StatusBar,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
@@ -66,6 +67,7 @@ const { width } = Dimensions.get("window");
 
 import { StyleProp, ViewStyle, TextStyle } from "react-native";
 import { ShareButton } from "../job-sharing/ShareButton";
+import { deepLinkState } from "../job-sharing/deepLinkState";
 
 interface CustomAppButtonProps {
   title: string;
@@ -1039,7 +1041,8 @@ function OfferDetail({ navigation, route }) {
           backgroundColor: theme.white,
         }}
       >
-        <Text style={{ color: theme.darkGrey }}>
+        <ActivityIndicator size={"large"} color={theme.white}  />
+        <Text style={{ color: theme.darkGrey , fontSize:RFPercentage(1.8), fontFamily:"Poppins_400Regular", marginTop:RFPercentage(0.8)}}>
           {t("taskApplicants.loading") || "Loading..."}
         </Text>
       </View>
@@ -1060,7 +1063,9 @@ function OfferDetail({ navigation, route }) {
           {t("offerDetail.notFound") || "This task is no longer available."}
         </Text>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            navigation.navigate("TabNavigator");
+          }}
           style={{ marginTop: 12 }}
         >
           <Text style={{ color: theme.primary }}>
@@ -1126,7 +1131,10 @@ function OfferDetail({ navigation, route }) {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+              deepLinkState.isHandlingDeepLink = false;
+              navigation.navigate("TabNavigator");
+            }}
             style={styles.back}
           >
             <Feather name="arrow-left" color="white" size={RFPercentage(2.4)} />
@@ -1515,13 +1523,13 @@ function OfferDetail({ navigation, route }) {
                         borderColor:
                           hasGroupChat && (confirmed || isPostOwner)
                             ? theme.secondary
-                            : theme.lightGrey + "30",
+                            : theme.lightGrey + "60",
                         backgroundColor:
                           hasGroupChat && (confirmed || isPostOwner)
                             ? theme.secondary
                             : theme.lightGrey + "30",
                         opacity:
-                          hasGroupChat && (confirmed || isPostOwner) ? 1 : 0.5,
+                          hasGroupChat && (confirmed || isPostOwner) ? 1 : 0.9,
                       },
                     ]}
                     onPress={
@@ -1621,7 +1629,7 @@ function OfferDetail({ navigation, route }) {
                           : theme.mode === "dark"
                             ? theme.white + "10"
                             : Colors.primary + "08",
-                        opacity: isChatEnabled() ? 1 : 0.5,
+                        opacity: isChatEnabled() ? 1 : 0.8,
                       },
                     ]}
                     onPress={handleStartChat}
@@ -2161,9 +2169,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: RFPercentage(1.5),
     borderRadius: RFPercentage(100),
-    backgroundColor: "#4CAF50" + "10",
+    backgroundColor: "#4CAF50" + "40",
     gap: RFPercentage(0.5),
     flexDirection: "row",
+    borderWidth:1,
+    borderColor:"#4CAF50"
   },
   appliedText: {
     fontSize: RFPercentage(1.4),
@@ -2235,7 +2245,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.8),
   },
   subTaskText: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_500Medium",
     marginLeft: RFPercentage(0.5),
   },

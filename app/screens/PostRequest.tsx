@@ -1509,10 +1509,12 @@ function PostRequest({ navigation, route }) {
                   backgroundColor:
                     theme.mode === "dark"
                       ? "rgba(19, 19, 21, 1)"
-                      : "rgba(238, 238, 240, 1)",
-                  width: "60%",
-                  padding: 14,
-                  borderRadius: 5,
+                      : "rgba(239, 239, 250, 0.66)",
+                  width: "45%",
+                  height: RFPercentage(4),
+                  borderRadius: RFPercentage(1),
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
                 onPress={() => {
                   setTempDate(selectedDate);
@@ -1522,7 +1524,7 @@ function PostRequest({ navigation, route }) {
                 <Text
                   style={{
                     color: theme.darkGrey,
-                    fontSize: RFPercentage(1.8),
+                    fontSize: RFPercentage(1.7),
                     fontFamily: "Poppins_400Regular",
                     textAlign: "center",
                   }}
@@ -1553,7 +1555,7 @@ function PostRequest({ navigation, route }) {
                       borderColor:
                         theme.mode === "dark"
                           ? "rgba(23, 24, 33, 1)"
-                          : "rgba(235, 236, 251, 1)",
+                          : "rgba(239, 239, 250, 0.66)",
                       borderRadius: RFPercentage(1.5),
                       alignItems: "center",
                       marginTop: RFPercentage(1),
@@ -1654,10 +1656,12 @@ function PostRequest({ navigation, route }) {
                   backgroundColor:
                     theme.mode === "dark"
                       ? "rgba(19, 19, 21, 1)"
-                      : "rgba(242, 242, 246, 1)",
-                  width: "60%",
-                  padding: 12,
-                  borderRadius: 5,
+                      : "rgba(239, 239, 250, 0.66)",
+                  width: "40%",
+                  height: RFPercentage(4),
+                  borderRadius: RFPercentage(1),
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
                 onPress={() => {
                   setTempTime(selectedTime);
@@ -1667,7 +1671,7 @@ function PostRequest({ navigation, route }) {
                 <Text
                   style={{
                     color: theme.darkGrey,
-                    fontSize: RFPercentage(1.8),
+                    fontSize: RFPercentage(1.7),
                     fontFamily: "Poppins_400Regular",
                     textAlign: "center",
                   }}

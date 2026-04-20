@@ -58,7 +58,7 @@ function ConfirmedHelpers({ route, navigation }) {
         reviewsRef,
         where("taskId", "==", task.id),
         where("reviewedUserId", "==", workerId),
-        where("reviewerId", "==", currentUserId)
+        where("reviewerId", "==", currentUserId),
       );
       const reviewSnapshot = await getDocs(reviewQuery);
 
@@ -152,7 +152,7 @@ function ConfirmedHelpers({ route, navigation }) {
               confirmedAt:
                 worker.confirmedAt || worker.userConfirmation?.confirmedAt,
             };
-          })
+          }),
         );
         helpers = helpersWithData;
       }
@@ -329,7 +329,7 @@ function ConfirmedHelpers({ route, navigation }) {
       </View>
     );
   };
-
+  console.log("task..........", task?.imageUrls);
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -340,19 +340,29 @@ function ConfirmedHelpers({ route, navigation }) {
 
       <CustomNav title={t("myRequests.confirmedHelpers")} />
 
-      <View
-        style={[
-          styles.taskInfo,
-          { backgroundColor: "rgba(236, 238, 254, 0.26)" },
-        ]}
-      >
+      <View style={[styles.taskInfo]}>
+        <Image
+          source={{ uri: task?.imageUrls[0] }}
+          resizeMode="cover"
+          style={{
+            width: "100%",
+            height: RFPercentage(30),
+            borderRadius: RFPercentage(2),
+          }}
+        />
         <Text style={[styles.taskTitle, { color: theme.heading }]}>
           {task.taskType || task.title || "Task"}
         </Text>
 
+        <Text style={[styles.taskDescription, { color: theme.darkGrey }]}>
+          {task.description?.substring(0, 100) || "No description"}
+          {task.description?.length > 100 ? "..." : ""}
+        </Text>
+
         <View style={styles.taskStatusRow}>
           <Text style={[styles.taskStatus, { color: theme.darkGrey }]}>
-            {t("taskApplicants.status")}: <Text style={{ color: Colors.green }}>{task.status}</Text>
+            {t("taskApplicants.status")}:{" "}
+            <Text style={{ color: Colors.green }}>{task.status}</Text>
           </Text>
 
           {task.reviewedAccepter && (
@@ -360,7 +370,7 @@ function ConfirmedHelpers({ route, navigation }) {
               <Ionicons
                 name="checkmark-circle"
                 size={RFPercentage(1.3)}
-                 color={Colors.green}
+                color={Colors.green}
               />
               <Text style={styles.taskReviewedText}>
                 {task.isBulkRequest ? "Some helpers reviewed" : "Task reviewed"}
@@ -368,11 +378,6 @@ function ConfirmedHelpers({ route, navigation }) {
             </View>
           )}
         </View>
-
-        <Text style={[styles.taskDescription, { color: theme.darkGrey }]}>
-          {task.description?.substring(0, 100) || "No description"}
-          {task.description?.length > 100 ? "..." : ""}
-        </Text>
       </View>
 
       {loading ? (
@@ -399,7 +404,7 @@ function ConfirmedHelpers({ route, navigation }) {
           ListHeaderComponent={
             <View style={styles.headerContainer}>
               <Text style={[styles.helpersCount, { color: theme.heading }]}>
-                {confirmedHelpers.length} confirmed{" "}
+                {confirmedHelpers.length} Confirmed{" "}
                 {confirmedHelpers.length === 1 ? "helper" : "helpers"}
               </Text>
               <Text style={[styles.headerNote, { color: theme.darkGrey }]}>
@@ -439,23 +444,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   taskInfo: {
-    padding: RFPercentage(2),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    width:"90%",
+    alignSelf:"center"
+    // padding: RFPercentage(2),
   },
   taskTitle: {
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(0.5),
+    marginTop: RFPercentage(1),
   },
   taskStatusRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: RFPercentage(0.5),
+    marginTop: RFPercentage(0.5),
   },
   taskStatus: {
     fontSize: RFPercentage(1.5),
@@ -570,7 +572,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor:  Colors.green + "30",
+    backgroundColor: Colors.green + "30",
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(1),
     borderRadius: RFPercentage(1),

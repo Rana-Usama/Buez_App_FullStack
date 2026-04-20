@@ -487,7 +487,7 @@ export default function CompletedTasks({ navigation }: any) {
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={styles.loadingText}>{`${t("completed.txt7")}`}</Text>
+            <Text style={[styles.loadingText,{color:theme.darkGrey}]}>{`${t("completed.txt7")}`}</Text>
           </View>
         ) : tasks.length === 0 ? (
           <NotFound title={tr.noTasks || "No completed tasks yet"} />

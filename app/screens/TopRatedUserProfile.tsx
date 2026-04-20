@@ -614,9 +614,6 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
   const rank = getRankData(stats?.completedTasks || 0);
 
-  const light = ["#a5a5bd48", "#6183a9c7", "#3c6954c9"];
-  const dark = ["#1f22388f", "#3a2850ff", "#9db7abff"];
-
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -709,7 +706,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   <TaskCard
                     key={item.id || idx}
                     item={item}
-                    translatedText={translatedTasks[item.taskId]?.description} 
+                    translatedText={translatedTasks[item.taskId]?.description}
                     translatedTaskType={translatedTasks[item.taskId]?.taskType}
                     t={t}
                     theme={theme}
@@ -795,7 +792,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: RFPercentage(2),
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
   },
   scrollContent: {

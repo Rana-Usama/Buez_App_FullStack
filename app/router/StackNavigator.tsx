@@ -12,7 +12,6 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 // Contexts & Hooks
 import { useUser } from "../contexts/user.context";
 import { useAppTheme } from "../contexts/themeContext";
-import { useInitialRoute } from "./InitialRoute";
 
 // Screens
 import Onboarding from "../screens/Onboarding";
