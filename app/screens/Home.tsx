@@ -126,8 +126,16 @@ const HomeScreen: React.FC = () => {
   // Render loading state
   const renderLoading = () => (
     <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color={theme.primary} />
-      <Text style={[styles.loadingText, { color: theme.primary }]}>
+      <ActivityIndicator
+        size="large"
+        color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+      />
+      <Text
+        style={[
+          styles.loadingText,
+          { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary },
+        ]}
+      >
         {t("home.txt12")}
       </Text>
     </View>
@@ -160,7 +168,6 @@ const HomeScreen: React.FC = () => {
       }
     />
   );
-
 
   return (
     <View style={{ backgroundColor: theme.white, flex: 1 }}>
@@ -239,7 +246,17 @@ const HomeScreen: React.FC = () => {
                     activeOpacity={0.8}
                     onPress={() => navigation.navigate("TopRatedUsers")}
                   >
-                    <Text style={[styles.seeAllText, { color: theme.primary }]}>
+                    <Text
+                      style={[
+                        styles.seeAllText,
+                        {
+                          color:
+                            theme.mode === "dark"
+                              ? Colors.darkGrey
+                              : Colors.primary,
+                        },
+                      ]}
+                    >
                       {t("profileRank.txt2")}
                     </Text>
                   </TouchableOpacity>
@@ -255,7 +272,7 @@ const HomeScreen: React.FC = () => {
                     <TopRatedUserCard
                       user={item}
                       onPress={() => handleUserPress(item)}
-                      // onPress={()=> {navigation.navigate("FreeTrial")}}
+                      // onPress={()=> {navigation.navigate("EmailVerification")}}
                       darkMode={theme.mode === "dark"}
                       t={t}
                     />
@@ -263,7 +280,7 @@ const HomeScreen: React.FC = () => {
                 />
               </>
             ) : (
-              <TopRatedExplore t={t} navigation={navigation} />
+              <TopRatedExplore t={t} navigation={navigation} theme={theme} />
             )}
 
             {/* Recent Requests Section */}
@@ -279,7 +296,17 @@ const HomeScreen: React.FC = () => {
                     navigation.navigate("Location", { home: true })
                   }
                 >
-                  <Text style={[styles.locationText, { color: theme.primary }]}>
+                  <Text
+                    style={[
+                      styles.locationText,
+                      {
+                        color:
+                          theme.mode === "dark"
+                            ? Colors.darkGrey
+                            : Colors.primary,
+                      },
+                    ]}
+                  >
                     {selectedLocation.name2
                       ? selectedLocation.name2.length > 15
                         ? `${selectedLocation.name2.slice(0, 15)}...`
@@ -297,7 +324,9 @@ const HomeScreen: React.FC = () => {
                     <AntDesign
                       name="closecircle"
                       size={RFPercentage(2.5)}
-                      color={theme.primary}
+                      color={
+                        theme.mode === "dark" ? Colors.darkGrey : Colors.primary
+                      }
                     />
                   </TouchableOpacity>
                 )}
@@ -352,7 +381,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1),
     alignItems: "flex-start",
     justifyContent: "flex-start",
-    alignSelf:"flex-start",
+    alignSelf: "flex-start",
     // backgroundColor:"red",
     // flex:1,
     // width:"100%"

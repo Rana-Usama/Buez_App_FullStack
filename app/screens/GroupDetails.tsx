@@ -193,8 +193,8 @@ const GroupDetails = ({ navigation, route }: any) => {
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.white }]}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
+        <ActivityIndicator size="large" color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary} />
+        <Text style={[styles.loadingText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}>
           Loading group info...
         </Text>
       </View>

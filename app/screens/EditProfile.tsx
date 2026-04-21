@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import CustomNav from "../components/common/CustomNav";
+import Colors from "../config/Colors";
 
 type InputFieldType = {
   placeholder: string;
@@ -86,16 +87,16 @@ function EditProfile({ navigation }) {
         ] = await Promise.all([
           cachedTranslate("Biography"),
           cachedTranslate(
-            "Tell others about yourself, your skills, and experience..."
+            "Tell others about yourself, your skills, and experience...",
           ),
           cachedTranslate(
-            "Share your professional background, skills, and what makes you a great performer"
+            "Share your professional background, skills, and what makes you a great performer",
           ),
           cachedTranslate("Validation Error"),
           cachedTranslate("Please enter your name"),
           cachedTranslate("Permission Required"),
           cachedTranslate(
-            "Sorry, we need camera roll permissions to change your profile picture."
+            "Sorry, we need camera roll permissions to change your profile picture.",
           ),
         ]);
 
@@ -145,7 +146,7 @@ function EditProfile({ navigation }) {
       Alert.alert(
         translatedTexts.cameraPermissionTitle || "Permission Required",
         translatedTexts.cameraPermissionMessage ||
-          "Sorry, we need camera roll permissions to change your profile picture."
+          "Sorry, we need camera roll permissions to change your profile picture.",
       );
       return;
     }
@@ -164,7 +165,7 @@ function EditProfile({ navigation }) {
         {
           compress: 0.7,
           format: ImageManipulator.SaveFormat.JPEG,
-        }
+        },
       );
       setImageUri(compressedImage.uri);
     }
@@ -173,7 +174,7 @@ function EditProfile({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       fetchUserData();
-    }, [])
+    }, []),
   );
 
   // When fetching user data
@@ -278,8 +279,8 @@ function EditProfile({ navigation }) {
                   >
                     <MaterialIcons
                       name="photo-camera"
-                      size={RFPercentage(2.5)}
-                      color={theme.white}
+                      size={RFPercentage(2.2)}
+                      color={Colors.white}
                     />
                   </View>
                 </View>

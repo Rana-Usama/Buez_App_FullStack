@@ -258,7 +258,7 @@ function SubscriptionV2(props) {
       period: t("subscriptionV2.perYear"),
       originalPrice: formatCurrency(
         prices.monthly[userCurrency] * 12,
-        userCurrency
+        userCurrency,
       ),
       description: t("subscriptionV2.bestValue"),
       features: [
@@ -277,7 +277,7 @@ function SubscriptionV2(props) {
   const handleScroll = (event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(
-      contentOffsetX / (screenWidth * 0.8 + RFPercentage(2))
+      contentOffsetX / (screenWidth * 0.8 + RFPercentage(2)),
     );
     if (index >= 0 && index < plans.length) {
       setCurrentIndex(index);
@@ -358,7 +358,14 @@ function SubscriptionV2(props) {
         {/* Plan Header */}
         <View style={styles.planHeader}>
           <View>
-            <Text style={[styles.planTitle, { color: theme.primary }]}>
+            <Text
+              style={[
+                styles.planTitle,
+                {
+                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
+                },
+              ]}
+            >
               {item.title}
             </Text>
             <Text style={[styles.planDescription, { color: theme.darkGrey }]}>
@@ -374,7 +381,15 @@ function SubscriptionV2(props) {
               const priceStr = priceLabelForPlan(item.id); // e.g. "$8.90"
               const [integerPart, decimalPart] = priceStr.split(".");
               return (
-                <Text style={[styles.price, { color: theme.primary }]}>
+                <Text
+                  style={[
+                    styles.price,
+                    {
+                      color:
+                        theme.mode === "dark" ? Colors.white : Colors.primary,
+                    },
+                  ]}
+                >
                   {integerPart}
                   {decimalPart && (
                     <Text style={{ fontSize: RFPercentage(1.9) }}>
@@ -406,10 +421,10 @@ function SubscriptionV2(props) {
                 backgroundColor: item.popular
                   ? theme.secondary
                   : item.id === "yearly"
-                  ? theme.secondary
-                  : theme.mode === "dark"
-                  ? Colors.primary + "40"
-                  : Colors.primary + "15",
+                    ? theme.secondary
+                    : theme.mode === "dark"
+                      ? Colors.primary + "40"
+                      : Colors.primary + "15",
               },
             ]}
           >
@@ -419,8 +434,10 @@ function SubscriptionV2(props) {
                 {
                   color:
                     item.popular || item.id === "yearly"
-                      ? theme.white
-                      : theme.primary,
+                      ? Colors.white
+                      : theme.mode === "dark"
+                        ? Colors.darkGrey
+                        : Colors.primary,
                   fontSize:
                     item.popular || item.id === "yearly"
                       ? RFPercentage(1.6)
@@ -473,11 +490,11 @@ function SubscriptionV2(props) {
 
   return (
     <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
-       <StatusBar
-              barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-              backgroundColor={"transparent"}
-              translucent
-            />
+      <StatusBar
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        backgroundColor={"transparent"}
+        translucent
+      />
 
       <ScrollView
         style={styles.container}
@@ -580,10 +597,26 @@ function SubscriptionV2(props) {
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View
-                style={[styles.modalContent, { backgroundColor: theme.white }]}
+                style={[
+                  styles.modalContent,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? "rgba(20, 22, 41, 1)"
+                        : theme.white,
+                  },
+                ]}
               >
                 <View style={styles.modalHeader}>
-                  <Text style={[styles.modalTitle, { color: theme.primary }]}>
+                  <Text
+                    style={[
+                      styles.modalTitle,
+                      {
+                        color:
+                          theme.mode === "dark" ? Colors.white : theme.primary,
+                      },
+                    ]}
+                  >
                     {t("freeTrialModal.title")}
                   </Text>
                   {/* <Text
@@ -598,7 +631,12 @@ function SubscriptionV2(props) {
                 <View
                   style={[
                     styles.infoCard,
-                    { backgroundColor: theme.primary + "10" },
+                    {
+                      backgroundColor:
+                        theme.mode === "dark"
+                          ? "rgba(70, 74, 111, 0.47)"
+                          : Colors.lightWhite,
+                    },
                   ]}
                 >
                   <View style={styles.infoIcon}>
@@ -609,7 +647,17 @@ function SubscriptionV2(props) {
                     </Text>
                   </View>
                   <View style={styles.infoContent}>
-                    <Text style={[styles.infoTitle, { color: theme.primary }]}>
+                    <Text
+                      style={[
+                        styles.infoTitle,
+                        {
+                          color:
+                            theme.mode === "dark"
+                              ? Colors.white
+                              : theme.primary,
+                        },
+                      ]}
+                    >
                       {t("freeTrialModal.importantNote")}
                     </Text>
                     <Text style={[styles.infoText, { color: theme.darkGrey }]}>
@@ -643,18 +691,31 @@ function SubscriptionV2(props) {
                     style={[
                       styles.modalButton,
                       styles.secondaryModalButton,
-                      { borderColor: theme.primary },
+                      {
+                        borderColor:
+                          theme.mode === "dark" ? Colors.white : Colors.primary,
+                      },
                     ]}
                     onPress={handleFreeTrial}
                     disabled={loader}
                   >
                     {loader ? (
-                      <ActivityIndicator size="small" color={theme.primary} />
+                      <ActivityIndicator
+                        size="small"
+                        color={
+                          theme.mode === "dark" ? Colors.white : Colors.primary
+                        }
+                      />
                     ) : (
                       <Text
                         style={[
                           styles.secondaryButtonText,
-                          { color: theme.primary },
+                          {
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : Colors.primary,
+                          },
                         ]}
                         numberOfLines={1}
                       >
@@ -938,7 +999,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.primary,
     backgroundColor: "transparent",
-    paddingHorizontal:5
+    paddingHorizontal: 5,
   },
   primaryButtonText: {
     color: Colors.white,

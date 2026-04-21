@@ -405,7 +405,7 @@ function AddReview() {
             </View>
 
             <View style={styles.taskSection}>
-              <Text style={[styles.taskLabel, { color: theme.primary }]}>
+              <Text style={[styles.taskLabel, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
                 {tr.taskCompleted || "Task Completed"}
               </Text>
               <Text style={[styles.taskDescription, { color: theme.heading }]}>
@@ -425,9 +425,9 @@ function AddReview() {
                 <FontAwesome
                   name="calendar"
                   size={RFPercentage(1.6)}
-                  color={Colors.primary}
+                  color={theme.mode === "dark" ? Colors.white : Colors.primary}
                 />
-                <Text style={[styles.dateText, { color: Colors.primary }]}>
+                <Text style={[styles.dateText, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
                   {completedOn}
                 </Text>
               </View>
@@ -492,7 +492,7 @@ function AddReview() {
                 styles.inputContainer,
                 {
                   backgroundColor: theme.white,
-                  borderColor: Colors.cardBorderLight,
+                  borderColor: theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
                 },
               ]}
             >

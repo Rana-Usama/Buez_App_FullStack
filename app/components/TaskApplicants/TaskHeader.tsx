@@ -41,9 +41,9 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
           <Ionicons
             name="briefcase"
             size={RFPercentage(2)}
-            color={Colors.primary}
+            color={theme.mode === "dark" ? Colors.white : Colors.primary}
           />
-          <Text style={[styles.taskTypeText, { color: Colors.primary }]}>
+          <Text style={[styles.taskTypeText, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
             {taskData.taskType === "Other"
               ? translatedTaskData.customTaskTitle || taskData.customTaskTitle
               : translatedTaskData.taskType || taskData.taskType}

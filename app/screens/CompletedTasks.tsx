@@ -87,7 +87,7 @@ export default function CompletedTasks({ navigation }: any) {
         cnf: "You were a confirmed helper in this bulk task",
       };
       const vals = await Promise.all(
-        Object.values(base).map((txt) => cachedTranslate(txt))
+        Object.values(base).map((txt) => cachedTranslate(txt)),
       );
       const mapped = Object.keys(base).reduce((obj, k, i) => {
         obj[k as keyof Translations] = vals[i] || base[k as keyof Translations];
@@ -104,7 +104,7 @@ export default function CompletedTasks({ navigation }: any) {
     try {
       const reviewsQuery = query(
         collection(FIREBASE_DB, "reviews"),
-        where("reviewer.userId", "==", currentUserId)
+        where("reviewer.userId", "==", currentUserId),
       );
       const querySnapshot = await getDocs(reviewsQuery);
       const reviewedTaskIds: Set<string> = new Set();
@@ -142,7 +142,7 @@ export default function CompletedTasks({ navigation }: any) {
             desc: descTr || originalDesc,
             category: catTr || originalCat,
           };
-        })
+        }),
       );
       setCache(newCache);
       setTasks(records);
@@ -162,7 +162,7 @@ export default function CompletedTasks({ navigation }: any) {
   useFocusEffect(
     useCallback(() => {
       fetchCompletedTasks();
-    }, [])
+    }, []),
   );
 
   const StarRating = ({ rating }: { rating: number }) => {
@@ -361,7 +361,14 @@ export default function CompletedTasks({ navigation }: any) {
             },
           ]}
         >
-          <Text style={styles.dateLabel}>
+          <Text
+            style={[
+              styles.dateLabel,
+              {
+                color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+              },
+            ]}
+          >
             {tr.completedOn || "Completed on"}
           </Text>
           <Text style={[styles.date, { color: theme.darkGrey }]}>
@@ -383,7 +390,7 @@ export default function CompletedTasks({ navigation }: any) {
             <View style={styles.reviewSection}>
               <View style={styles.reviewHeader}>
                 <Text style={styles.reviewTitle}>{`${t(
-                  "completed.txt3"
+                  "completed.txt3",
                 )}`}</Text>
                 <StarRating rating={item.rating || 0} />
               </View>
@@ -448,17 +455,33 @@ export default function CompletedTasks({ navigation }: any) {
           ]}
         >
           <View style={[styles.statItem]}>
-            <Text style={styles.statNumber}>{tasks?.length}</Text>
+            <Text
+              style={[
+                styles.statNumber,
+                {
+                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
+                },
+              ]}
+            >
+              {tasks?.length}
+            </Text>
             <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
               {`${t("completed.txt4")}`}
             </Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
+            <Text
+              style={[
+                styles.statNumber,
+                {
+                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
+                },
+              ]}
+            >
               {
                 tasks.filter((task) =>
-                  hasUserReviewedTask(task.taskId || task.id, task)
+                  hasUserReviewedTask(task.taskId || task.id, task),
                 ).length
               }
             </Text>
@@ -468,10 +491,17 @@ export default function CompletedTasks({ navigation }: any) {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
+            <Text
+              style={[
+                styles.statNumber,
+                {
+                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
+                },
+              ]}
+            >
               {
                 tasks.filter(
-                  (task) => !hasUserReviewedTask(task.taskId || task.id, task)
+                  (task) => !hasUserReviewedTask(task.taskId || task.id, task),
                 ).length
               }
             </Text>
@@ -486,8 +516,19 @@ export default function CompletedTasks({ navigation }: any) {
       <View style={styles.content}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={[styles.loadingText,{color:theme.darkGrey}]}>{`${t("completed.txt7")}`}</Text>
+            <ActivityIndicator
+              size="large"
+              color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+            />
+            <Text
+              style={[
+                styles.loadingText,
+                {
+                  color:
+                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                },
+              ]}
+            >{`${t("completed.txt7")}`}</Text>
           </View>
         ) : tasks.length === 0 ? (
           <NotFound title={tr.noTasks || "No completed tasks yet"} />

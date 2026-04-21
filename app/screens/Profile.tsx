@@ -730,7 +730,7 @@ function Profile({ navigation }: any) {
                     style={styles.readMoreButton}
                   >
                     <Text
-                      style={[styles.readMoreText, { color: theme.primary }]}
+                      style={[styles.readMoreText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
                     >
                       {isExpanded
                         ? translatedReadMore.readLess || "Read less"
@@ -747,9 +747,9 @@ function Profile({ navigation }: any) {
                 <MaterialIcons
                   name="add"
                   size={RFPercentage(2)}
-                  color={theme.primary}
+                  color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
                 />
-                <Text style={[styles.addBioText, { color: theme.primary }]}>
+                <Text style={[styles.addBioText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}>
                   {translatedAddBio || "Add professional bio"}
                 </Text>
               </TouchableOpacity>
@@ -799,12 +799,12 @@ function Profile({ navigation }: any) {
               <FontAwesome5
                 name="pen"
                 size={RFPercentage(1.2)}
-                color={theme.primary}
+                color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
                 solid
               />
               <Text
                 numberOfLines={1}
-                style={[styles.editInterestsBtnText, { color: theme.primary }]}
+                style={[styles.editInterestsBtnText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
               >
                 {modalTx.edit}
               </Text>
@@ -1174,7 +1174,7 @@ const styles = StyleSheet.create({
   },
   readMoreButton: { marginTop: RFPercentage(0.5) },
   readMoreText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
   },
   addBioButton: {

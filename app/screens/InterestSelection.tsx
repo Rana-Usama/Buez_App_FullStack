@@ -435,7 +435,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 {
                   backgroundColor:
                     theme.mode === "light"
-                      ? "rgba(163, 165, 188, 0.47)"
+                      ? "rgba(25, 30, 86, 0.85)"
                       : "rgba(65, 66, 79, 0.47)",
                 },
               ]}
@@ -462,7 +462,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
           <Text style={[styles.title, { color: theme.darkGrey }]}>
             {t("interestSelection.whatAreYouInterested")}
           </Text>
-          <Text style={[styles.subtitle, { color: theme.lightGrey }]}>
+          <Text style={[styles.subtitle, { color: theme.darkGrey }]}>
             {t("interestSelection.pickYourFavorites")}
           </Text>
 
@@ -513,7 +513,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
               backgroundColor:
                 theme.mode === "dark"
                   ? "rgba(20, 19, 22, 0.52)"
-                  : "rgba(227, 226, 242, 1)",
+                  : "rgba(115, 111, 167, 0.33)",
               borderColor:
                 theme.mode === "dark"
                   ? "rgba(20, 19, 22, 0.52)"
@@ -538,7 +538,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 {t("interestSelection.addCustomInterestTitle")}
               </Text>
             </View>
-            <Text style={[styles.customSubtitle, { color: theme.lightGrey }]}>
+            <Text style={[styles.customSubtitle, { color: theme.darkGrey }]}>
               {t("interestSelection.addCustomInterestSubtitle")}
             </Text>
           </View>
@@ -562,7 +562,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 ref={inputRef}
                 style={[styles.textInput, { color: theme.black }]}
                 placeholder={t("interestSelection.customInterestPlaceholder")}
-                placeholderTextColor="rgba(173, 174, 178, 0.94)"
+                placeholderTextColor={theme.darkGrey}
                 value={inputText}
                 onChangeText={setInputText}
                 onSubmitEditing={addCustomInterest}
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(161, 159, 165, 0.3)",
+    borderColor: "rgba(123, 119, 131, 0.32)",
     borderRadius: RFPercentage(1.5),
     gap: RFPercentage(0.8),
   },
@@ -937,12 +937,12 @@ const styles = StyleSheet.create({
   // CTA
   ctaContainer: {
     position: "absolute",
-    bottom: 0,
+    bottom: 50,
     left: 0,
     right: 0,
     paddingHorizontal: RFPercentage(3),
     paddingBottom: Platform.OS === "ios" ? RFPercentage(2.5) : RFPercentage(3),
-    paddingTop: RFPercentage(2),
+    // paddingTop: RFPercentage(2),
     // backgroundColor: "rgba(15,12,41,0.95)",
     // borderTopWidth: 1,
     // borderTopColor: "rgba(255,255,255,0.06)",

@@ -752,9 +752,23 @@ export default function Notifications({ navigation }) {
                           <Feather
                             name="eye"
                             size={RFPercentage(1.8)}
-                            color={Colors.primary}
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.darkGrey
+                                : Colors.primary
+                            }
                           />
-                          <Text style={styles.actionButtonText}>
+                          <Text
+                            style={[
+                              styles.actionButtonText,
+                              {
+                                color:
+                                  theme.mode === "dark"
+                                    ? Colors.darkGrey
+                                    : Colors.primary,
+                              },
+                            ]}
+                          >
                             {tr.view || "View"}
                           </Text>
                         </>
@@ -764,9 +778,23 @@ export default function Notifications({ navigation }) {
                           <Feather
                             name="check-circle"
                             size={RFPercentage(1.8)}
-                            color={Colors.primary}
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.darkGrey
+                                : Colors.primary
+                            }
                           />
-                          <Text style={styles.actionButtonText}>
+                          <Text
+                            style={[
+                              styles.actionButtonText,
+                              {
+                                color:
+                                  theme.mode === "dark"
+                                    ? Colors.darkGrey
+                                    : Colors.primary,
+                              },
+                            ]}
+                          >
                             {tr.viewTask || "View Task"}
                           </Text>
                         </>
@@ -775,9 +803,23 @@ export default function Notifications({ navigation }) {
                           <Ionicons
                             name="people"
                             size={RFPercentage(1.8)}
-                            color={Colors.primary}
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.darkGrey
+                                : Colors.primary
+                            }
                           />
-                          <Text style={styles.actionButtonText}>
+                          <Text
+                            style={[
+                              styles.actionButtonText,
+                              {
+                                color:
+                                  theme.mode === "dark"
+                                    ? Colors.darkGrey
+                                    : Colors.primary,
+                              },
+                            ]}
+                          >
                             {tr.viewApplications || "View Applications"}
                           </Text>
                         </>
@@ -786,9 +828,23 @@ export default function Notifications({ navigation }) {
                           <Feather
                             name="external-link"
                             size={RFPercentage(1.8)}
-                            color={Colors.primary}
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.darkGrey
+                                : Colors.primary
+                            }
                           />
-                          <Text style={styles.actionButtonText}>
+                          <Text
+                            style={[
+                              styles.actionButtonText,
+                              {
+                                color:
+                                  theme.mode === "dark"
+                                    ? Colors.darkGrey
+                                    : Colors.primary,
+                              },
+                            ]}
+                          >
                             {tr.viewPost || "View Post"}
                           </Text>
                         </>
@@ -797,9 +853,23 @@ export default function Notifications({ navigation }) {
                           <Feather
                             name="message-circle"
                             size={RFPercentage(1.8)}
-                            color={Colors.primary}
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.darkGrey
+                                : Colors.primary
+                            }
                           />
-                          <Text style={styles.actionButtonText}>
+                          <Text
+                            style={[
+                              styles.actionButtonText,
+                              {
+                                color:
+                                  theme.mode === "dark"
+                                    ? Colors.darkGrey
+                                    : Colors.primary,
+                              },
+                            ]}
+                          >
                             {tr.message || "Message"}
                           </Text>
                         </>
@@ -860,8 +930,19 @@ export default function Notifications({ navigation }) {
       <Animated.View style={[styles.container]}>
         {busy ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
+            <ActivityIndicator
+              size="large"
+              color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+            />
+            <Text
+              style={[
+                styles.loadingText,
+                {
+                  color:
+                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                },
+              ]}
+            >
               {t("notifications.txt1")}
             </Text>
           </View>

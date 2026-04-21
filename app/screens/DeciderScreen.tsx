@@ -184,7 +184,7 @@ const DeciderScreen = () => {
       const { email } = creds || {};
       const isLoggedIn = !!(email || creds?.password);
 
-      // ✅ If logged in, we now KNOW userData is ready (caller guarantees it)
+      // If logged in, we now KNOW userData is ready (caller guarantees it)
       // so we no longer need the early-return guard here
 
       const pendingJobId = await SecureStore.getItemAsync(PENDING_JOB_KEY);
@@ -249,6 +249,12 @@ const DeciderScreen = () => {
         return;
       }
 
+      if (isSubscribed && !isWithinPaidPeriod) {
+        hasNavigated.current = true;
+        navigation.replace("Subscription");
+        return;
+      }
+
       let deviceUsedTrial = false;
       if (deviceId) {
         deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
@@ -292,8 +298,7 @@ const DeciderScreen = () => {
     }
   }, [userData, deviceId, navigation]);
 
-  // ─── KEY FIX: depend on userData?.userId (primitive) not userData (object) ─
-  // This guarantees re-execution the moment userId becomes available
+
   useEffect(() => {
     if (!deviceId) return; // device ID not fetched yet
     if (userLoading) return; // context still loading
@@ -304,7 +309,7 @@ const DeciderScreen = () => {
       const { email } = creds || {};
       const isLoggedIn = !!(email || creds?.password);
 
-      // ✅ If logged in but userData still not ready, bail — the effect
+      // If logged in but userData still not ready, bail — the effect
       // will re-fire when userData?.userId changes (i.e. when it populates)
       if (isLoggedIn && !isUserDataReady(userData)) {
         console.log("[Decider] Waiting for userData.userId...");

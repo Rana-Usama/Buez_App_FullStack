@@ -80,10 +80,9 @@ function Login({ navigation }) {
 
       await reload(user);
 
-
       if (!user.emailVerified) {
         Toast.show({
-          type: "error",
+          type: "info",
           text1: "Email Not Verified",
           text2: "Please verify your email before logging in.",
         });
@@ -104,6 +103,11 @@ function Login({ navigation }) {
     try {
       const { email, password } = values;
       const user = await signInWithEmail(email, password);
+
+      if (!user) {
+        showIndicator(false);
+        return;
+      }
       await SecureStore.setItemAsync("loggedOut", "false");
       await SecureStore.setItemAsync("password2", password);
       await new Promise((resolve) => setTimeout(resolve, 100));

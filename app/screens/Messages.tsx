@@ -594,8 +594,8 @@ function Messages({ navigation }: any) {
       >
         {loadingInitial ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.primary} />
-            <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
+            <ActivityIndicator size="large" color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary} />
+            <Text style={[styles.loadingText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}>
               {t("messages.loading")}
             </Text>
           </View>

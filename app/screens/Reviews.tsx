@@ -248,6 +248,7 @@ export default function Reviews({ navigation }) {
             styles.reviewText,
             { color: theme.heading, fontStyle: "italic" },
           ]}
+          numberOfLines={3}
         >
           "{translatedReview}"
         </Text>
@@ -278,7 +279,7 @@ export default function Reviews({ navigation }) {
         style={[
           styles.sectionHeaderText,
           {
-            color: theme.primary,
+            color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
             backgroundColor:
               theme.mode === "dark"
                 ? Colors.primary + "40"
@@ -326,7 +327,7 @@ export default function Reviews({ navigation }) {
                 },
               ]}
             >
-              <Text style={[styles.averageRating, { color: Colors.primary }]}>
+              <Text style={[styles.averageRating, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
                 {averageRating}
               </Text>
               <Text style={[styles.ratingOutOf, { color: theme.lightGrey }]}>
@@ -334,7 +335,7 @@ export default function Reviews({ navigation }) {
               </Text>
             </View>
             <View style={styles.ratingInfo}>
-              <Text style={[styles.ratingTitle, { color: Colors.primary }]}>
+              <Text style={[styles.ratingTitle, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
                 {t("reviews.txt5")}
               </Text>
               <Text style={[styles.reviewCount, { color: theme.darkGrey }]}>
@@ -356,7 +357,7 @@ export default function Reviews({ navigation }) {
       {loading ? (
         <ActivityIndicator
           size="large"
-          color={Colors.primary}
+          color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
           style={styles.loader}
         />
       ) : sections.length === 0 ? (
@@ -478,7 +479,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    minHeight: RFPercentage(18),
+    // minHeight: RFPercentage(15),
     borderWidth: 1,
     width: "90%",
     alignSelf: "center",

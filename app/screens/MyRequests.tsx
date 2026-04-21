@@ -568,41 +568,41 @@ function MyRequests({ navigation }) {
   };
 
   const repostRequest = async (index, item) => {
-  setRepostingIndex(index);
-  try {
-    const taskRef = doc(db, "taskRequests", item.id);
+    setRepostingIndex(index);
+    try {
+      const taskRef = doc(db, "taskRequests", item.id);
 
-    await updateDoc(taskRef, {
-      status: REQUEST_STATUS.Active,
-      acceptedBy: null,
-      confirmedWorkers: [],
-      appliedWorkers: [],
-    });
-
-    setTaskRecords((prev) => {
-      const newRecords = [...prev];
-      newRecords[index] = {
-        ...newRecords[index],
+      await updateDoc(taskRef, {
         status: REQUEST_STATUS.Active,
         acceptedBy: null,
         confirmedWorkers: [],
         appliedWorkers: [],
-      };
-      return newRecords;
-    });
+      });
 
-    setActiveFilter(t("myRequests.txt2"));
-    setRepostModalVisible(true);
-  } catch (e) {
-    Toast.show({
-      type: "error",
-      text1: t("toast.myRequests.five"),
-      text2: t("toast.myRequests.six"),
-    });
-  } finally {
-    setRepostingIndex(null);
-  }
-};
+      setTaskRecords((prev) => {
+        const newRecords = [...prev];
+        newRecords[index] = {
+          ...newRecords[index],
+          status: REQUEST_STATUS.Active,
+          acceptedBy: null,
+          confirmedWorkers: [],
+          appliedWorkers: [],
+        };
+        return newRecords;
+      });
+
+      setActiveFilter(t("myRequests.txt2"));
+      setRepostModalVisible(true);
+    } catch (e) {
+      Toast.show({
+        type: "error",
+        text1: t("toast.myRequests.five"),
+        text2: t("toast.myRequests.six"),
+      });
+    } finally {
+      setRepostingIndex(null);
+    }
+  };
 
   const FilterButton = ({ title, isActive, isFirst }) => (
     <TouchableOpacity
@@ -1067,8 +1067,8 @@ function MyRequests({ navigation }) {
                     {
                       backgroundColor:
                         theme.mode === "light"
-                          ? "rgba(215, 215, 215, 0.48)"
-                          : "rgba(52, 51, 51, 0.48)",
+                          ? "rgba(222, 221, 224, 0.48)"
+                          : "rgba(77, 77, 82, 0.33)",
                     },
                   ]}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -1077,7 +1077,9 @@ function MyRequests({ navigation }) {
                     <Ionicons
                       name="chevron-down"
                       size={RFPercentage(2.2)}
-                      color={theme.primary}
+                      color={
+                        theme.mode === "dark" ? Colors.darkGrey : Colors.primary
+                      }
                     />
                   </Animated.View>
                 </TouchableOpacity>
@@ -1096,7 +1098,6 @@ function MyRequests({ navigation }) {
               {/* Expandable Content */}
               {expandedCards[index] && (
                 <View style={styles.expandableContent}>
-                  {/* Scheduled Date & Time */}
                   {(scheduledDateTime || durationLabel) && (
                     <View style={styles.scheduledSection}>
                       {scheduledDateTime && (
@@ -1166,12 +1167,21 @@ function MyRequests({ navigation }) {
                             <FontAwesome5
                               name={subTask.icon || "tag"}
                               size={RFPercentage(1.1)}
-                              color={Colors.primary}
+                              color={
+                                theme.mode === "dark"
+                                  ? Colors.darkGrey
+                                  : Colors.primary
+                              }
                             />
                             <Text
                               style={[
                                 styles.subTaskText,
-                                { color: Colors.primary },
+                                {
+                                  color:
+                                    theme.mode === "dark"
+                                      ? Colors.darkGrey
+                                      : Colors.primary,
+                                },
                               ]}
                               numberOfLines={1}
                             >
@@ -1277,16 +1287,28 @@ function MyRequests({ navigation }) {
                             <Ionicons
                               name="person-add"
                               size={RFPercentage(1.3)}
-                              color={Colors.primary}
+                              color={
+                                theme.mode === "dark"
+                                  ? Colors.darkGrey
+                                  : Colors.primary
+                              }
                             />
                             <Text
                               numberOfLines={1}
-                              style={styles.applicantsText}
+                              style={[
+                                styles.applicantsText,
+                                {
+                                  color:
+                                    theme.mode === "dark"
+                                      ? Colors.darkGrey
+                                      : Colors.primary,
+                                },
+                              ]}
                             >
                               {totalApplicants}{" "}
                               {totalApplicants === 1
-                                ? "applicant"
-                                : "applicants"}
+                                ? "Applicant"
+                                : "Applicants"}
                             </Text>
                           </TouchableOpacity>
                         )}
@@ -1378,7 +1400,12 @@ function MyRequests({ navigation }) {
                   <Text
                     style={[
                       styles.compensationAmount,
-                      { color: theme.primary },
+                      {
+                        color:
+                          theme.mode === "dark"
+                            ? Colors.darkGrey
+                            : Colors.primary,
+                      },
                     ]}
                   >
                     {cart.compensationType === "Monitarely"
@@ -1712,8 +1739,21 @@ function MyRequests({ navigation }) {
 
         {(loading || loadingMore) && (
           <View style={{ marginTop: RFPercentage(28) }}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={styles.empty}>{t("myRequests.txt13")}</Text>
+            <ActivityIndicator
+              size="large"
+              color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+            />
+            <Text
+              style={[
+                styles.empty,
+                {
+                  color:
+                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                },
+              ]}
+            >
+              {t("myRequests.txt13")}
+            </Text>
           </View>
         )}
 
@@ -2035,7 +2075,7 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(2),
   },
   taskInfoContainer: {
-    width: "92%",
+    width: "90%",
     justifyContent: "flex-start",
     alignItems: "center",
     flexDirection: "row",
@@ -2054,7 +2094,7 @@ const styles = StyleSheet.create({
   compensationAmount: {
     color: Colors.primary,
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
   },
   bottomSpacing: {
     marginBottom: RFPercentage(6),

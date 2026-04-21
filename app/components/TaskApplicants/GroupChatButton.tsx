@@ -8,14 +8,15 @@ import Colors from "../../config/Colors";
 interface GroupChatButtonProps {
   onPress: () => void;
   t: (key: string) => string;
+  style?:object
 }
 
-const GroupChatButton: React.FC<GroupChatButtonProps> = ({ onPress, t }) => {
+const GroupChatButton: React.FC<GroupChatButtonProps> = ({ onPress, t, style }) => {
   const { theme } = useAppTheme();
 
   return (
     <TouchableOpacity
-      style={[styles.groupChatBtn, { backgroundColor: theme.secondary }]}
+      style={[styles.groupChatBtn, { backgroundColor: theme.secondary }, style]}
       onPress={onPress}
       activeOpacity={0.8}
     >

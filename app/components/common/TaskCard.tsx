@@ -291,7 +291,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 backgroundColor:
                   theme.mode === "light"
                     ? "rgba(215, 215, 215, 0.48)"
-                    : "rgba(88, 87, 87, 0.82)",
+                    : "rgba(53, 51, 64, 0.82)",
               },
             ]}
           >
@@ -299,7 +299,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               <Ionicons
                 name="chevron-down"
                 size={RFPercentage(2)}
-                color={theme.primary}
+                color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
               />
             </Animated.View>
           </TouchableOpacity>
@@ -343,6 +343,42 @@ const TaskCard: React.FC<TaskCardProps> = ({
           </Text>
         </View>
 
+        {!expanded && (
+          <View
+            style={[
+              styles.compensationWrapper,
+              { width: "90%", alignSelf: "center" },
+            ]}
+          >
+            <Image
+              tintColor={theme.darkGrey}
+              style={styles.compensationIcon}
+              source={require("../../../assets/Images/compensation.png")}
+            />
+            <Text
+              style={[styles.compensationText, { color: theme.darkGrey2 }]}
+              numberOfLines={1}
+            >
+              {`${t("home.txt10")}`}:{" "}
+              <Text
+                style={[
+                  styles.compensationAmount,
+                  {
+                    color:
+                      theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                  },
+                ]}
+              >
+                {task.compensationType === "Monitarely"
+                  ? compensation ||
+                    `$${parseFloat(task.monitarily || "0").toLocaleString()}`
+                  : task.otherCompensation?.substr(0, 20) +
+                    (task.otherCompensation?.length > 20 ? "..." : "")}
+              </Text>
+            </Text>
+          </View>
+        )}
+
         {/* Expandable Content - Conditionally rendered with animation */}
         {expanded && (
           <Animated.View
@@ -381,12 +417,24 @@ const TaskCard: React.FC<TaskCardProps> = ({
                       ]}
                     >
                       <FontAwesome5
-                        name={subTask.icon || "tag"}
+                        name={"tag"}
                         size={RFPercentage(1.2)}
-                        color={theme.primary}
+                        color={
+                          theme.mode === "dark"
+                            ? Colors.darkGrey
+                            : Colors.primary
+                        }
                       />
                       <Text
-                        style={[styles.subTaskText, { color: theme.primary }]}
+                        style={[
+                          styles.subTaskText,
+                          {
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.darkGrey
+                                : Colors.primary,
+                          },
+                        ]}
                         numberOfLines={1}
                       >
                         {subTask.name}
@@ -444,7 +492,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
                       <Ionicons
                         name="people-outline"
                         size={RFPercentage(1.4)}
-                        color={Colors.primary}
+                        color={
+                          theme.mode === "dark"
+                            ? Colors.darkGrey
+                            : Colors.primary
+                        }
                       />
                     </View>
                     <View>
@@ -526,8 +578,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
               </>
             )}
 
-            {/* Compensation */}
-            <View style={styles.compensationWrapper}>
+            <View
+              style={[
+                styles.compensationWrapper,
+               
+              ]}
+            >
               <Image
                 tintColor={theme.darkGrey}
                 style={styles.compensationIcon}
@@ -539,7 +595,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
               >
                 {`${t("home.txt10")}`}:{" "}
                 <Text
-                  style={[styles.compensationAmount, { color: theme.primary }]}
+                  style={[
+                    styles.compensationAmount,
+                    {
+                      color:
+                        theme.mode === "dark"
+                          ? Colors.darkGrey
+                          : Colors.primary,
+                    },
+                  ]}
                 >
                   {task.compensationType === "Monitarely"
                     ? compensation ||
@@ -746,7 +810,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     width: "100%",
-    paddingHorizontal: RFPercentage(0.5),
   },
   compensationIcon: {
     width: RFPercentage(2),

@@ -72,7 +72,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         break;
       default:
         backgroundColor = theme.mode === 'dark' 
-          ? Colors.white15 
+          ? "rgba(87, 84, 121, 0.34)"
           : Colors.primary + '20';
         borderColor = theme.mode === 'dark' 
           ? Colors.backBtnBg 

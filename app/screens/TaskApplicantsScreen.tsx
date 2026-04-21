@@ -29,6 +29,7 @@ import { useWorkerActions } from "../hooks/useWorkerActions";
 import { useTaskData } from "../hooks/useTaskData";
 import { TABS } from "../config/constants";
 import { TranslatedTaskData, ModalConfig } from "../types/TaskApplicants/types";
+import { RFPercentage } from "react-native-responsive-fontsize";
 interface TaskApplicantsScreenProps {
   navigation: any;
   route: any;
@@ -350,6 +351,7 @@ const TaskApplicantsScreen: React.FC<TaskApplicantsScreenProps> = ({
         {/* Group Chat Button */}
         {confirmedWorkers?.length > 0 && (
           <GroupChatButton
+          style={{marginTop:RFPercentage(-1.5)}}
             onPress={() =>
               navigation.navigate("GroupChat", {
                 groupChatId: taskId,

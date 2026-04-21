@@ -1110,12 +1110,12 @@ function PostRequest({ navigation, route }) {
                           <FontAwesome5
                             name={subTask.icon || "tag"}
                             size={RFPercentage(1.2)}
-                            color={theme.primary}
+                            color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
                           />
                           <Text
                             style={[
                               styles.selectedTagText,
-                              { color: theme.primary },
+                              { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary },
                             ]}
                           >
                             {subTask.name}
@@ -1127,7 +1127,7 @@ function PostRequest({ navigation, route }) {
                             <MaterialIcons
                               name="close"
                               size={RFPercentage(1.2)}
-                              color={theme.primary}
+                              color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
                             />
                           </TouchableOpacity>
                         </View>
@@ -1270,7 +1270,7 @@ function PostRequest({ navigation, route }) {
                       <MaterialIcons
                         name="add"
                         size={RFPercentage(2)}
-                        color={theme.white}
+                        color={Colors.white}
                       />
                     </TouchableOpacity>
                   </View>
@@ -2038,7 +2038,7 @@ function PostRequest({ navigation, route }) {
                   />
                   {selectedLocation?.name && (
                     <Text
-                      style={[styles.currencyNote, { color: theme.primary }]}
+                      style={[styles.currencyNote, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
                     >
                       {`${t("profileRank.txt46")}`} {currentCurrencySymbol} (
                       {currencyInfo.code}){`${t("profileRank.txt47")}`}{" "}

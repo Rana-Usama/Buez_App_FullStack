@@ -566,7 +566,9 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
   // UI Helpers
   const getRankData = (completedCount: number) => {
-    if (completedCount >= 3)
+
+    console.log("completedCount.....",completedCount)
+    if (completedCount >= 6)
       return {
         label: t("profileRank.txt39"),
         icon: "trophy",
@@ -604,8 +606,16 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.white }]}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={[styles.loadingText, { color: theme.darkGrey }]}>
+        <ActivityIndicator
+          size="large"
+          color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+        />
+        <Text
+          style={[
+            styles.loadingText,
+            { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary },
+          ]}
+        >
           {t("profileRank.txt25")}
         </Text>
       </View>

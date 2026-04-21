@@ -1246,7 +1246,7 @@ function OfferDetail({ navigation, route }) {
             t={t}
           />
           {/* Sub-tasks & Description kept inline for readability; you can extract similarly */}
-          {selectedSubTasks.length > 0 && (
+          {selectedSubTasks?.length > 0 && (
             <View
               style={[
                 styles.detailCard,
@@ -1280,10 +1280,10 @@ function OfferDetail({ navigation, route }) {
                     <FontAwesome5
                       name={subTask.icon || "tag"}
                       size={RFPercentage(1.2)}
-                      color={Colors.primary}
+                      color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
                     />
                     <Text
-                      style={[styles.subTaskText, { color: Colors.primary }]}
+                      style={[styles.subTaskText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
                       numberOfLines={1}
                     >
                       {subTask.name}

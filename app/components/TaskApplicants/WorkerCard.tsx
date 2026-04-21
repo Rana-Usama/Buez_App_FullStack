@@ -14,7 +14,6 @@ import Colors from "../../config/Colors";
 import { Icons } from "../../config/theme";
 import { Worker } from "../../types/TaskApplicants/types";
 
-
 interface WorkerCardProps {
   worker: Worker;
   isConfirmed: boolean;
@@ -58,14 +57,21 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
       >
         <Image
           source={worker.profileImage ? { uri: worker.profileImage } : Icons.dp}
-          style={[styles.workerAvatar, { borderColor: Colors.workerAvatarBorder(Colors.primary) }]}
+          style={[
+            styles.workerAvatar,
+            { borderColor: Colors.workerAvatarBorder(Colors.primary) },
+          ]}
         />
         <View style={styles.workerDetails}>
           <Text style={[styles.workerName, { color: theme.heading }]}>
             {worker.userName}
           </Text>
           <View style={styles.workerMeta}>
-            <Ionicons name="mail" size={RFPercentage(1.4)} color={theme.darkGrey} />
+            <Ionicons
+              name="mail"
+              size={RFPercentage(1.4)}
+              color={theme.darkGrey}
+            />
             <Text
               style={[styles.workerEmail, { color: theme.darkGrey }]}
               numberOfLines={1}
@@ -80,7 +86,12 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
                 size={RFPercentage(1.4)}
                 color={Colors.statusAlertSuccess}
               />
-              <Text style={[styles.confirmedTime, { color: Colors.statusAlertSuccess }]}>
+              <Text
+                style={[
+                  styles.confirmedTime,
+                  { color: Colors.statusAlertSuccess },
+                ]}
+              >
                 {t("taskApplicants.confirmedTime")}{" "}
                 {new Date(worker.confirmedAt).toLocaleDateString()}
               </Text>
@@ -146,18 +157,33 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
 
         {/* View Profile Button */}
         <TouchableOpacity
-          style={styles.profileButton}
+          style={[
+            styles.profileButton,
+            {
+              backgroundColor:
+                theme.mode === "dark"
+                  ? "rgba(71, 72, 82, 0.71)"
+                  : Colors.profileButtonBg,
+              borderColor:
+                theme.mode === "dark"
+                  ? "rgba(71, 72, 82, 0.71)"
+                  : Colors.profileButtonBg,
+            },
+          ]}
           onPress={onViewProfile}
           activeOpacity={0.7}
         >
           <Ionicons
             name="person"
             size={RFPercentage(1.8)}
-            color={Colors.primary}
+            color={theme.mode === "dark" ? Colors.white : Colors.primary}
           />
           <Text
             numberOfLines={1}
-            style={[styles.profileButtonText, { color: Colors.primary }]}
+            style={[
+              styles.profileButtonText,
+              { color: theme.mode === "dark" ? Colors.white : Colors.primary },
+            ]}
           >
             {t("taskApplicants.profile")}
           </Text>

@@ -31,7 +31,7 @@ function SuccessScreen({ navigation }) {
         {
           backgroundColor:
             theme.mode === "dark"
-              ? "rgba(25, 26, 41, 0.05)"
+              ? "rgba(117, 123, 205, 0.05)"
               : "rgba(255,255,255,0.2)",
         },
       ]}
@@ -39,14 +39,14 @@ function SuccessScreen({ navigation }) {
       <MaterialIcons
         name={icon}
         size={RFPercentage(3)}
-        color={theme.mode === "dark" ? Colors.primary : Colors.white}
+        color={ Colors.white}
         style={styles.infoIcon}
       />
       <View style={styles.infoTextContainer}>
         <Text
           style={[
             styles.infoTitle,
-            { color: theme.mode === "dark" ? Colors.primary : Colors.white },
+            { color: Colors.white },
           ]}
         >
           {title}
@@ -119,22 +119,41 @@ function SuccessScreen({ navigation }) {
       </Text>
 
       {/* Share Card - Prominent CTA */}
-      <View style={styles.shareCard}>
-        <View style={styles.shareIconContainer}>
+      <View
+        style={[
+          styles.shareCard,
+          {
+            backgroundColor:
+              theme.mode === "dark"
+                ? "rgba(46, 43, 86, 0.1)"
+                : "rgba(255,255,255,0.1)",
+            borderColor:
+              theme.mode === "dark"
+                ? "rgba(87, 84, 121, 0.34)"
+                : "rgba(255,255,255,0.15)",
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.shareIconContainer,
+            {
+              backgroundColor:
+                theme.mode === "dark"
+                  ? "rgba(87, 84, 121, 0.34)"
+                  : "rgba(255,255,255,0.15)",
+            },
+          ]}
+        >
           <Ionicons
             name="share-outline"
             size={RFPercentage(3)}
-            color={theme.mode === "dark" ? Colors.primary : Colors.white}
+            color={theme.mode === "dark" ? Colors.white : Colors.white}
           />
         </View>
 
         <View style={styles.shareContent}>
-          <Text
-            style={[
-              styles.shareTitle,
-              { color: theme.mode === "dark" ? Colors.primary : Colors.white },
-            ]}
-          >
+          <Text style={[styles.shareTitle, { color: Colors.white }]}>
             {t("successScreen.shareTitle")}
           </Text>
 
@@ -157,7 +176,20 @@ function SuccessScreen({ navigation }) {
             jobTitle={taskData?.taskType || "New Task"}
             jobDescription={taskData?.description || ""}
             companyName="Buez"
-            style={styles.shareButton}
+            style={[
+              styles.shareButton,
+              {
+                backgroundColor:
+                  theme.mode === "dark"
+                    ? "rgba(87, 84, 121, 0.34)"
+                    : "rgba(255,255,255,0.15)",
+
+                borderColor:
+                  theme.mode === "dark"
+                    ? "rgba(87, 84, 121, 0.34)"
+                    : "rgba(255,255,255,0.15)",
+              },
+            ]}
             showLabel={true}
             iconOnly={false}
             variant="light"
@@ -225,7 +257,7 @@ function SuccessScreen({ navigation }) {
             styles.secondaryButton,
             {
               borderColor:
-                theme.mode === "dark" ? Colors.primary : Colors.white,
+                theme.mode === "dark" ? Colors.darkGrey : Colors.white,
             },
           ]}
           activeOpacity={0.8}
@@ -242,7 +274,7 @@ function SuccessScreen({ navigation }) {
             numberOfLines={1}
             style={[
               styles.secondaryButtonText,
-              { color: theme.mode === "dark" ? Colors.primary : Colors.white },
+              { color: theme.mode === "dark" ? Colors.darkGrey : Colors.white },
             ]}
           >
             {t("successScreen.txt12")}
@@ -332,7 +364,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1.5),
     marginBottom: RFPercentage(2),
     borderLeftWidth: 3,
-    borderLeftColor: Colors.success2,
+    borderLeftColor: Colors.primary,
   },
   infoIcon: {
     marginRight: RFPercentage(2),
@@ -364,7 +396,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(6),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: RFPercentage(1.5),
+    borderRadius: RFPercentage(2),
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -383,7 +415,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(6),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: RFPercentage(1.5),
+    borderRadius: RFPercentage(2),
     borderWidth: RFPercentage(0.15),
     backgroundColor: "transparent",
   },

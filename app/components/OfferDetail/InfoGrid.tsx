@@ -51,7 +51,7 @@ export default function InfoGrid({
           <Ionicons
             name="location"
             size={RFPercentage(2.2)}
-            color={Colors.primary}
+            color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
           />
         </View>
         <Text
@@ -123,7 +123,7 @@ export default function InfoGrid({
           style={{
             marginTop: RFPercentage(0.5),
             fontSize: RFPercentage(1.6),
-            color: Colors.primary,
+            color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
             fontFamily: "Poppins_400Regular",
           }}
           numberOfLines={2}

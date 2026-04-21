@@ -846,7 +846,7 @@ export const initLiveRates = async (): Promise<void> => {
   const live = await getLiveExchangeRates();
   console.log("live.........",live)
   if (live) {
-    activeRates = live;
+    activeRates = { ...exchangeRates, ...live };
     console.log("Live exchange rates loaded ✓");
   } else {
     console.log("Using static fallback rates");

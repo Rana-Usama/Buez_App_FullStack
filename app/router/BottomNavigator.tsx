@@ -296,7 +296,7 @@ const CustomDrawerContent = (props) => {
               </BlurView>
             </View>
 
-            <Text style={[styles.userName, { color: theme.primary }]}>
+            <Text style={[styles.userName, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}>
               {user?.userName || "Guest User"}
             </Text>
             <Text style={[styles.userEmail, { color: theme.heading }]}>

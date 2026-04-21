@@ -440,7 +440,7 @@ const Chat = ({ navigation, route }: any) => {
               },
               right: {
                 backgroundColor:
-                  theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                  theme.mode === "dark" ? "rgba(69, 70, 95, 1)" : Colors.primary,
                 padding: RFPercentage(0.6),
                 marginRight: 0,
               },
