@@ -56,13 +56,13 @@ import ClickableMessageText from "../components/common/ClickableMessageText";
 import ChatHeader from "../components/chat/ChatHeader";
 import ChatInputToolbar from "../components/chat/ChatInputToolbar";
 import DeleteModal from "../components/chat/DeleteModal";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 
-// ─── Constants ────────────────────────────────────────────────────────────────
 const INITIAL_LOAD_LIMIT = 20;
 const LOAD_MORE_LIMIT = 20;
 
-// ─── Helper: Map a Firestore doc → GiftedChat message ─────────────────────────
 const mapFirestoreDoc = async (
   docSnap: any,
   skipTranslation = false,
@@ -97,18 +97,15 @@ const Chat = ({ navigation, route }: any) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  // Delete modal state
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
     null,
   );
 
-  // Refs — avoid stale closures and unnecessary re-renders
-  const lastDocRef = useRef<any>(null); 
+  const lastDocRef = useRef<any>(null);
   const listenerAttachedRef = useRef(false);
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
-  // ── Merge helper (dedup + sort desc) ──────────────────────────────────────
   const mergeMessages = useCallback((prev: any[], incoming: any[]): any[] => {
     if (!incoming.length) return prev;
     const map = new Map<string, any>();
@@ -120,7 +117,6 @@ const Chat = ({ navigation, route }: any) => {
     );
   }, []);
 
-  // ── Attach real-time listener for new messages ─────────────────────────────
   const attachListener = useCallback(
     (afterTimestamp: Timestamp) => {
       if (listenerAttachedRef.current) return;
@@ -163,11 +159,8 @@ const Chat = ({ navigation, route }: any) => {
           limit(INITIAL_LOAD_LIMIT),
         );
         const snapshot = await getDocs(q);
-
         if (cancelled) return;
-
         if (snapshot.docs.length < INITIAL_LOAD_LIMIT) setHasMore(false);
-
         lastDocRef.current = snapshot.docs[snapshot.docs.length - 1] ?? null;
 
         // Translate in parallel; skip translation for own messages
@@ -372,7 +365,6 @@ const Chat = ({ navigation, route }: any) => {
     setDeleteModalVisible(false);
   }, []);
 
-
   const renderDay = useCallback(
     (props: any) => <Day {...props} textStyle={styles.dateText} />,
     [],
@@ -380,15 +372,24 @@ const Chat = ({ navigation, route }: any) => {
 
   const renderAvatar = useCallback(
     (props: any) => {
+      const dark = theme.mode === "dark" ? true : false;
+      const firstLetter = receiver?.userName?.trim()?.[0];
+      const [, groupTextColor] = getAvatarColors(firstLetter, dark);
+
       if (props.currentMessage?.user?._id === currentUserId) return null;
       return receiver?.profileImage ? (
         <Image source={{ uri: receiver.profileImage }} style={styles.img} />
       ) : (
-        <View style={[styles.inner, { backgroundColor: theme.white }]}>
-          <Text style={[styles.nm, { color: theme.primary }]}>
-            {receiver?.userName?.[0] || "?"}
-          </Text>
-        </View>
+        <AvatarInitials
+          name={receiver?.userName}
+          style={{
+            width: RFPercentage(5.5),
+            height: RFPercentage(5.5),
+            borderRadius: RFPercentage(100),
+            borderWidth: 1,
+            borderColor: groupTextColor,
+          }}
+        />
       );
     },
     [currentUserId, receiver, theme],
@@ -440,7 +441,9 @@ const Chat = ({ navigation, route }: any) => {
               },
               right: {
                 backgroundColor:
-                  theme.mode === "dark" ? "rgba(69, 70, 95, 1)" : Colors.primary,
+                  theme.mode === "dark"
+                    ? "rgba(69, 70, 95, 1)"
+                    : Colors.primary,
                 padding: RFPercentage(0.6),
                 marginRight: 0,
               },
@@ -495,20 +498,16 @@ const Chat = ({ navigation, route }: any) => {
     [],
   );
 
-
-const renderMessageText = useCallback(
-  (props: any) => (
-    <ClickableMessageText
-      currentMessage={props.currentMessage}
-      currentUserId={currentUserId}
-      theme={theme}
-    />
-  ),
-  [currentUserId, theme],
-);
-
-
-
+  const renderMessageText = useCallback(
+    (props: any) => (
+      <ClickableMessageText
+        currentMessage={props.currentMessage}
+        currentUserId={currentUserId}
+        theme={theme}
+      />
+    ),
+    [currentUserId, theme],
+  );
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
@@ -535,12 +534,10 @@ const renderMessageText = useCallback(
             user={{ _id: currentUserId, name: senderName }}
             keyExtractor={(item) => item._id.toString()}
             renderMessageText={renderMessageText}
-            // Pagination
             loadEarlier={hasMore}
             onLoadEarlier={loadMoreMessages}
             isLoadingEarlier={loadingMore}
             renderLoadEarlier={renderLoadEarlier}
-            // Render props (all memoised)
             renderInputToolbar={(props) => (
               <ChatInputToolbar
                 inputText={inputText}
@@ -553,9 +550,7 @@ const renderMessageText = useCallback(
             renderDay={renderDay}
             renderAvatar={renderAvatar}
             renderBubble={renderBubble}
-            // FlatList tuning
             listViewProps={listViewProps as any}
-            // Misc
             maxInputLength={500}
             showUserAvatar={false}
             alwaysShowSend
@@ -626,7 +621,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     textAlignVertical: "top",
     // lineHeight: RFPercentage(2.7),
-    paddingTop:3
+    paddingTop: 3,
   },
   sendButton: {
     justifyContent: "center",
@@ -723,7 +718,7 @@ const styles = StyleSheet.create({
     borderWidth: RFPercentage(0.1),
     justifyContent: "center",
     alignItems: "center",
-     backgroundColor: Colors.dangerRed,
+    backgroundColor: Colors.dangerRed,
     width: RFPercentage(15.5),
   },
   wrap: {

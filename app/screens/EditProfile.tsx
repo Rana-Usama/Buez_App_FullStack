@@ -28,6 +28,8 @@ import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import CustomNav from "../components/common/CustomNav";
 import Colors from "../config/Colors";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 type InputFieldType = {
   placeholder: string;
@@ -237,6 +239,11 @@ function EditProfile({ navigation }) {
     biography.trim() !== originalData.biography.trim() ||
     imageUri !== originalData.imageUri;
 
+  const isDark = theme.mode === "dark";
+
+  const firstLetter = inputField[0].value.trim()?.[0];
+  const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -264,26 +271,61 @@ function EditProfile({ navigation }) {
                 onPress={pickImage}
                 style={styles.imageTouchable}
               >
-                <View
-                  style={[styles.imageWrapper, { borderColor: theme.primary }]}
-                >
-                  <Image
-                    style={styles.profileImage}
-                    source={imageUri ? { uri: imageUri } : Icons.dp}
-                  />
+                {imageUri ? (
                   <View
                     style={[
-                      styles.editOverlay,
-                      { backgroundColor: `${theme.primary}E6` },
+                      styles.imageWrapper,
+                      { borderColor: theme.primary },
                     ]}
                   >
-                    <MaterialIcons
-                      name="photo-camera"
-                      size={RFPercentage(2.2)}
-                      color={Colors.white}
+                    <Image
+                      style={styles.profileImage}
+                      source={{ uri: imageUri }}
                     />
+
+                    <View
+                      style={[
+                        styles.editOverlay,
+                        { backgroundColor: `${theme.primary}E6` },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name="photo-camera"
+                        size={RFPercentage(2.2)}
+                        color={Colors.white}
+                      />
+                    </View>
                   </View>
-                </View>
+                ) : (
+                  <>
+                    <AvatarInitials
+                      name={inputField[0].value}
+                      style={{
+                        width: RFPercentage(13),
+                        height: RFPercentage(13),
+                        borderRadius: RFPercentage(100),
+                        borderWidth: RFPercentage(0.2),
+                        borderColor: groupTextColor,
+                      }}
+                      textStyle={{
+                        fontSize: RFPercentage(4),
+                        lineHeight: RFPercentage(6),
+                      }}
+                    />
+                    <View
+                      style={[
+                        styles.editOverlay,
+                        { backgroundColor: groupTextColor },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name="photo-camera"
+                        size={RFPercentage(2.2)}
+                        color={Colors.white}
+                      />
+                    </View>
+                  </>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -330,10 +372,10 @@ function EditProfile({ navigation }) {
             <View style={styles.fieldSection}>
               <View style={styles.biographyHeader}>
                 <Text style={[styles.fieldLabel, { color: theme.heading }]}>
-                  {translatedTexts.biographyTitle || "Biography"}
+                  {translatedTexts?.biographyTitle || "Biography"}
                 </Text>
                 <Text style={[styles.charCount, { color: theme.darkGrey }]}>
-                  {biography.length}/300
+                  {biography?.length}/300
                 </Text>
               </View>
 

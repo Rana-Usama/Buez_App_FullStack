@@ -44,6 +44,8 @@ import { useAppTheme } from "../contexts/themeContext";
 import { formatChatTimestamp } from "../services/Shared.service";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { Feather, Ionicons } from "@expo/vector-icons";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PAGE_SIZE = 10;
@@ -175,6 +177,12 @@ const ChatItem = memo(({ item, userId, theme, onPress, t }: any) => {
       ? item.lastMessage?.senderId !== userId // group:
       : item?.senderId !== userId); // 1:1
   const lastMessageTime = formatChatTimestamp(item.lastMessage?.createdAt);
+
+  const isDark = theme.mode === "dark";
+
+  const firstLetter = item.groupTitle?.trim()?.[0];
+  const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -182,44 +190,46 @@ const ChatItem = memo(({ item, userId, theme, onPress, t }: any) => {
       style={[
         styles.chatItemContainer,
         {
-          backgroundColor: isUnread ? theme.primary + "08" : theme.white,
+          backgroundColor: isUnread ? theme.primary + "10" : theme.white,
           borderBottomColor: theme.border + "40",
         },
       ]}
     >
       <View style={styles.chatItemContent}>
         {item.type === "group" ? (
-          <View
-            style={[
-              styles.avatarContainer,
-              {
-                borderRadius: RFPercentage(100),
-                backgroundColor: Colors.primary + "20",
-                width: RFPercentage(6.5),
-                height: RFPercentage(6.5),
-                alignItems: "center",
-                justifyContent: "center",
-                // borderWidth: 1,
-                // borderColor: Colors.primary + "20",
-              },
-            ]}
-          >
-            <Ionicons
-              name="people"
-              size={RFPercentage(3.4)}
-              color={Colors.primary}
-            />
+          <View style={styles.avatarContainer}>
+            <AvatarInitials name={item.groupTitle} size={RFPercentage(6.5)} />
+            {/* Small group indicator badge */}
+            <View
+              style={[
+                styles.groupBadge,
+                { backgroundColor: groupTextColor + (isDark ? "60" : "70") },
+              ]}
+            >
+              <Ionicons
+                name="people"
+                size={RFPercentage(1.4)}
+                color={Colors.white}
+              />
+            </View>
           </View>
         ) : (
           <View style={styles.avatarContainer}>
-            <Image
-              style={styles.avatar}
-              source={
-                item.user?.profileImage
-                  ? { uri: item.user.profileImage }
-                  : Icons.dp
-              }
-            />
+            {item.user?.profileImage ? (
+              <Image
+                style={styles.avatar}
+                source={{ uri: item.user.profileImage }}
+              />
+            ) : (
+              <AvatarInitials
+                name={item.user?.userName}
+                style={{
+                  width: RFPercentage(6.5),
+                  height: RFPercentage(6.5),
+                  borderRadius: RFPercentage(100),
+                }}
+              />
+            )}
           </View>
         )}
 
@@ -483,10 +493,7 @@ function Messages({ navigation }: any) {
         if (c.type === "group") {
           return c.unreadCount > 0 && c.lastMessage?.senderId !== userId;
         } else {
-          return (
-            (c.unread === true) &&
-            c?.senderId !== userId
-          );
+          return c.unread === true && c?.senderId !== userId;
         }
       });
     }
@@ -594,8 +601,19 @@ function Messages({ navigation }: any) {
       >
         {loadingInitial ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary} />
-            <Text style={[styles.loadingText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}>
+            <ActivityIndicator
+              size="large"
+              color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+            />
+            <Text
+              style={[
+                styles.loadingText,
+                {
+                  color:
+                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                },
+              ]}
+            >
               {t("messages.loading")}
             </Text>
           </View>
@@ -732,6 +750,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: RFPercentage(1),
     width: "80%",
+  },
+  groupBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: RFPercentage(2.6),
+    height: RFPercentage(2.6),
+    borderRadius: RFPercentage(100),
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Colors.white,
   },
 });
 

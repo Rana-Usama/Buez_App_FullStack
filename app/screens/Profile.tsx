@@ -28,6 +28,8 @@ import CustomNav from "../components/common/CustomNav";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import Toast from "react-native-toast-message";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 // ─── Category master list (always English — source of truth) ──────────────────
 const taskOptions = [
@@ -631,6 +633,11 @@ function Profile({ navigation }: any) {
     (interests.selectedCategories?.length > 0 ||
       interests.customInterests?.length > 0);
 
+  const isDark = theme.mode === "dark";
+
+  const firstLetter = userName.trim()?.[0];
+  const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
@@ -663,14 +670,35 @@ function Profile({ navigation }: any) {
               activeOpacity={0.8}
               onPress={() => navigation.navigate("EditProfile")}
             >
-              <View
-                style={[styles.imageContainer, { borderColor: theme.primary }]}
-              >
-                <Image
-                  style={styles.profileImage}
-                  source={profileImgUrl ? { uri: profileImgUrl } : Icons.dp}
+              {profileImgUrl ? (
+                <View
+                  style={[
+                    styles.imageContainer,
+                    { borderColor: theme.primary },
+                  ]}
+                >
+                  <Image
+                    style={styles.profileImage}
+                    source={{ uri: profileImgUrl }}
+                  />
+                </View>
+              ) : (
+                <AvatarInitials
+                  name={userName}
+                  style={{
+                    borderWidth: RFPercentage(0.3),
+                    borderRadius: RFPercentage(10),
+                    padding: RFPercentage(0.1),
+                    borderColor: groupTextColor,
+                    width: RFPercentage(12),
+                    height: RFPercentage(12),
+                  }}
+                  textStyle={{
+                    fontSize: RFPercentage(3.5),
+                    lineHeight: RFPercentage(5),
+                  }}
                 />
-              </View>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -730,7 +758,15 @@ function Profile({ navigation }: any) {
                     style={styles.readMoreButton}
                   >
                     <Text
-                      style={[styles.readMoreText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
+                      style={[
+                        styles.readMoreText,
+                        {
+                          color:
+                            theme.mode === "dark"
+                              ? Colors.darkGrey
+                              : Colors.primary,
+                        },
+                      ]}
                     >
                       {isExpanded
                         ? translatedReadMore.readLess || "Read less"
@@ -747,9 +783,21 @@ function Profile({ navigation }: any) {
                 <MaterialIcons
                   name="add"
                   size={RFPercentage(2)}
-                  color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+                  color={
+                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary
+                  }
                 />
-                <Text style={[styles.addBioText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}>
+                <Text
+                  style={[
+                    styles.addBioText,
+                    {
+                      color:
+                        theme.mode === "dark"
+                          ? Colors.darkGrey
+                          : Colors.primary,
+                    },
+                  ]}
+                >
                   {translatedAddBio || "Add professional bio"}
                 </Text>
               </TouchableOpacity>
@@ -804,7 +852,13 @@ function Profile({ navigation }: any) {
               />
               <Text
                 numberOfLines={1}
-                style={[styles.editInterestsBtnText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
+                style={[
+                  styles.editInterestsBtnText,
+                  {
+                    color:
+                      theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                  },
+                ]}
               >
                 {modalTx.edit}
               </Text>
@@ -988,7 +1042,6 @@ function Profile({ navigation }: any) {
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
-             
               <Text style={modalStyles.sectionLabel}>
                 {modalTx.categoriesLabel}
               </Text>
@@ -1474,13 +1527,13 @@ const modalStyles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     paddingRight: RFPercentage(1.5),
   },
-  addBtn: { },
+  addBtn: {},
   addBtnGradient: {
     width: RFPercentage(5.2),
     height: RFPercentage(5.2),
     justifyContent: "center",
     alignItems: "center",
-     borderRadius: RFPercentage(1.5),
+    borderRadius: RFPercentage(1.5),
   },
   saveContainer: {
     position: "absolute",

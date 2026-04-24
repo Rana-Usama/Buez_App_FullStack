@@ -11,14 +11,7 @@ import {
 import { navigate } from "../../router/navigationRef";
 import { useUser } from "../../contexts/user.context";
 import Colors from "../../config/Colors";
-// ─── Removed useDeepLinking from here ────────────────────────────────────────
-// useDeepLinking registers Linking listeners + a flush useEffect that fires
-// whenever userData changes. Mounting it inside a chat message component means
-// it runs once per message bubble — causing auto-navigation to OfferDetail
-// every time userData loads while chat is open.
-//
-// For in-app link taps we don't need any of that machinery. We already have
-// userData here, so we can resolve the jobId and navigate directly.
+
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 const URL_TEST_REGEX = /https?:\/\/[^\s]+/;
@@ -70,34 +63,23 @@ const ClickableMessageText: React.FC<ClickableMessageTextProps> = ({
   const handleUrlPress = useCallback(
     async (url: string) => {
       const isBuezLink = BUEZ_SHORT_LINK_REGEX.test(url);
-
       if (!isBuezLink) {
         Linking.openURL(url);
         return;
       }
-
-      // Extract short code from end of URL: /FIocimfM → FIocimfM
       const shortCode = url.match(/\/([a-zA-Z0-9]+)\s*$/)?.[1];
-
       if (!shortCode) {
         console.warn("[ClickableMessageText] Could not extract short code:", url);
         Linking.openURL(url);
         return;
       }
-
       setResolvingUrl(url);
-
       try {
         const jobId = await resolveShortCodeToJobId(shortCode);
-
         if (!jobId) {
           Linking.openURL(url);
           return;
         }
-
-        // ── Navigate directly — user is already in the app and authenticated.
-        //    No need for the full deep link resolution flow (subscription checks
-        //    etc.) since they already passed those to get into the app.
         navigate("OfferDetail", { jobId });
       } finally {
         setResolvingUrl(null);

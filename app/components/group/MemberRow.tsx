@@ -12,6 +12,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
 import { useNavigation } from "@react-navigation/native";
+import AvatarInitials from "../common/DefaultAvatars";
 
 type Member = {
   userId: string;
@@ -76,7 +77,7 @@ const MemberRow = ({ member, index, currentUserId, onChat, theme }: Props) => {
         ]}
       >
         <TouchableOpacity
-        disabled={isSelf}
+          disabled={isSelf}
           onPress={() => {
             navigation.navigate("TopRatedUserProfile", {
               user: member,
@@ -93,18 +94,10 @@ const MemberRow = ({ member, index, currentUserId, onChat, theme }: Props) => {
               style={styles.memberAvatar}
             />
           ) : (
-            <LinearGradient
-              colors={
-                isOwner
-                  ? ["#FFD700", "#FFA500"]
-                  : [Colors.primary + "cc", Colors.primary]
-              }
-              style={styles.memberAvatarFallback}
-            >
-              <Text style={styles.memberAvatarInitial}>
-                {member.userName?.[0]?.toUpperCase() || "?"}
-              </Text>
-            </LinearGradient>
+            <AvatarInitials
+              name={member.userName}
+              style={styles.memberAvatar}
+            />
           )}
 
           <View style={styles.onlineDot} />

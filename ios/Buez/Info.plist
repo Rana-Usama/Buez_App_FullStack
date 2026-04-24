@@ -65,22 +65,29 @@
 	</array>
 
 	<!-- Permissions -->
-	<key>NSCameraUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your camera.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your microphone.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your photos.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your location.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your location.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your location.</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to use Face ID for authentication.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to deliver personalized ads to you.</string>
+<key>NSCameraUsageDescription</key>
+<string>Buez uses your camera to capture photos and videos directly within the app. For example, you can take a photo to upload as your profile picture or add images to a service listing you create.</string>
+
+<key>NSMicrophoneUsageDescription</key>
+<string>Buez uses your microphone to record audio when capturing videos within the app. For example, when you record a video to attach to a listing or send in a chat message, the microphone captures the audio.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Buez accesses your photo library so you can upload existing images to your profile, listings, or posts. For example, you can choose a photo from your gallery to set as your profile picture or attach to a service listing.</string>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Buez uses your location while you are using the app to show nearby services and businesses relevant to you. For example, when you browse or search, we display listings and results closest to your current location.</string>
+
+<key>NSLocationAlwaysUsageDescription</key>
+<string>Buez uses your location in the background to send you timely alerts about activity near you. For example, you may receive a push notification when a new service listing becomes available close to your location.</string>
+
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Buez uses your location both while using the app and in the background to show nearby services and deliver real-time proximity alerts. For example, we display businesses near you while browsing and notify you when a relevant listing appears in your area.</string>
+
+<key>NSFaceIDUsageDescription</key>
+<string>Buez uses Face ID to securely verify your identity when logging into your account. For example, instead of typing your password each time, you can authenticate instantly using Face ID.</string>
+
+<key>NSUserTrackingUsageDescription</key>
+<string>Buez uses your device's advertising identifier to show you personalized ads that are relevant to your interests. For example, if you browse service listings in a specific category, you may see related ads tailored to your activity.</string>
 
 	<!-- App Transport Security (ATS) -->
 	<key>NSAppTransportSecurity</key>

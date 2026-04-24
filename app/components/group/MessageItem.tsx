@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Image, Text, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import ClickableMessageText from "../../components/common/ClickableMessageText";
 import Colors from "../../config/Colors";
+import AvatarInitials from "../common/DefaultAvatars";
 
 type Props = {
   message: any;
@@ -57,7 +58,7 @@ const MessageItem = memo(
                     backgroundColor:
                       theme.mode === "dark"
                         ? "rgba(10,10,17,1)"
-                        : "rgba(240,240,240,1)",
+                        : "rgba(240, 242, 245, 1)",
                   },
             ]}
           >
@@ -74,24 +75,7 @@ const MessageItem = memo(
                   style={styles.msgAvatar}
                 />
               ) : (
-                <View
-                  style={[
-                    styles.msgAvatarFallback,
-                    { backgroundColor: Colors.primary  },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.msgAvatarInitial,
-                      {
-                        color:
-                          theme.mode === "dark" ? Colors.white : Colors.white,
-                      },
-                    ]}
-                  >
-                    {displayName[0]?.toUpperCase() || "?"}
-                  </Text>
-                </View>
+                <AvatarInitials name={displayName} style={styles.msgAvatar} />
               )}
 
               <View style={{ marginLeft: RFPercentage(1.2) }}>
@@ -99,7 +83,13 @@ const MessageItem = memo(
                   numberOfLines={1}
                   style={[
                     styles.msgSenderName,
-                    { color: isOwn ? Colors.white : theme.mode === "dark" ? Colors.lightGrey : Colors.primary },
+                    {
+                      color: isOwn
+                        ? Colors.white
+                        : theme.mode === "dark"
+                          ? Colors.lightGrey
+                          : Colors.darkGrey2,
+                    },
                   ]}
                 >
                   {displayName}

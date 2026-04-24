@@ -1,8 +1,17 @@
 import React, { memo } from "react";
-import { View, TouchableOpacity, Image,Platform, Text, StyleSheet } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Image,
+  Platform,
+  Text,
+  StyleSheet,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Colors from "../../config/Colors";
+import AvatarInitials from "../common/DefaultAvatars";
+import { getAvatarColors } from "../../config/avatarColors";
 
 type Props = {
   navigation: any;
@@ -11,21 +20,40 @@ type Props = {
 };
 
 const ChatHeader = memo(({ navigation, receiver, theme }: Props) => {
+  const dark = theme.mode === "dark" ? true : false;
+  const firstLetter = receiver?.userName?.trim()?.[0];
+  const [, groupTextColor] = getAvatarColors(firstLetter, dark);
+
   return (
-    <View style={[styles.profileContainer, { borderBottomColor: Colors.white5 }]}>
+    <View
+      style={[styles.profileContainer, { borderBottomColor: Colors.white5 }]}
+    >
       <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
-        <Ionicons name="chevron-back" size={RFPercentage(2.7)} color={theme.heading} />
+        <Ionicons
+          name="chevron-back"
+          size={RFPercentage(2.7)}
+          color={theme.heading}
+        />
       </TouchableOpacity>
 
       <View style={{ marginLeft: RFPercentage(2.5) }}>
         {receiver?.profileImage ? (
-          <Image source={{ uri: receiver.profileImage }} resizeMode="cover" style={styles.profile} />
+          <Image
+            source={{ uri: receiver.profileImage }}
+            resizeMode="cover"
+            style={styles.profile}
+          />
         ) : (
-          <View style={styles.noProfile}>
-            <Text style={[styles.noProfileInner, { color: theme.primary }]}>
-              {receiver?.userName?.[0]}
-            </Text>
-          </View>
+          <AvatarInitials
+            name={receiver?.userName}
+            style={{
+              width: RFPercentage(7),
+              height: RFPercentage(7),
+              borderRadius: RFPercentage(100),
+              borderWidth: 1,
+              borderColor:groupTextColor
+            }}
+          />
         )}
       </View>
 
@@ -59,7 +87,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(7),
     height: RFPercentage(7),
     borderRadius: RFPercentage(100),
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: Colors.primary,
   },
   noProfile: {

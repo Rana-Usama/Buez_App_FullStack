@@ -23,7 +23,7 @@ const GroupHeader = memo(({ navigation, groupTitle, memberCount, theme, onOpenDe
         <View
           style={[
             styles.groupIconContainer,
-            { backgroundColor: theme.mode === "dark" ? Colors.darkGrey : Colors.primary + "20" },
+            { backgroundColor: theme.mode === "dark" ? Colors.darkGrey2 : Colors.primary + "20" },
           ]}
         >
           <Ionicons name="people" size={RFPercentage(3.2)} color={theme.mode === "dark" ? Colors.white : Colors.primary} />
