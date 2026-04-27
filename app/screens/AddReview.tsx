@@ -39,6 +39,8 @@ import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { useTranslation } from "react-i18next";
 import CustomNav from "../components/common/CustomNav";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 const getTargetLanguage = async () => {
   try {
@@ -346,6 +348,10 @@ function AddReview() {
         : Colors.stroke;
   };
 
+  const isDark = theme.mode === "dark";
+  const firstLetter = recipientUser?.userName.trim()?.[0];
+  const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: theme.white }]}
@@ -375,15 +381,19 @@ function AddReview() {
             ]}
           >
             <View style={styles.userHeader}>
-              <Image
-                source={
-                  recipientUser?.profileImage
-                    ? { uri: recipientUser?.profileImage }
-                    : Icons.dp
-                }
-                resizeMode="cover"
-                style={styles.profileImage}
-              />
+              {recipientUser?.profileImage ? (
+                <Image
+                  source={{ uri: recipientUser?.profileImage }}
+                  resizeMode="cover"
+                  style={styles.profileImage}
+                />
+              ) : (
+                <AvatarInitials
+                  name={recipientUser.userName}
+                  style={[styles.profileImage, { borderColor: groupTextColor }]}
+                />
+              )}
+
               <View style={styles.userInfo}>
                 <Text style={[styles.userName, { color: theme.heading }]}>
                   {recipientUser.userName}
@@ -405,7 +415,15 @@ function AddReview() {
             </View>
 
             <View style={styles.taskSection}>
-              <Text style={[styles.taskLabel, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
+              <Text
+                style={[
+                  styles.taskLabel,
+                  {
+                    color:
+                      theme.mode === "dark" ? Colors.white : Colors.primary,
+                  },
+                ]}
+              >
                 {tr.taskCompleted || "Task Completed"}
               </Text>
               <Text style={[styles.taskDescription, { color: theme.heading }]}>
@@ -427,7 +445,15 @@ function AddReview() {
                   size={RFPercentage(1.6)}
                   color={theme.mode === "dark" ? Colors.white : Colors.primary}
                 />
-                <Text style={[styles.dateText, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
+                <Text
+                  style={[
+                    styles.dateText,
+                    {
+                      color:
+                        theme.mode === "dark" ? Colors.white : Colors.primary,
+                    },
+                  ]}
+                >
                   {completedOn}
                 </Text>
               </View>
@@ -492,7 +518,10 @@ function AddReview() {
                 styles.inputContainer,
                 {
                   backgroundColor: theme.white,
-                  borderColor: theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
+                  borderColor:
+                    theme.mode === "dark"
+                      ? theme.border
+                      : Colors.cardBorderLight,
                 },
               ]}
             >
@@ -578,7 +607,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(8),
     height: RFPercentage(8),
     borderRadius: RFPercentage(4),
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: Colors.primary,
   },
   userInfo: {
@@ -660,7 +689,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 16,
     elevation: 6,
-    borderWidth:1
+    borderWidth: 1,
   },
   reviewTitle: {
     fontSize: RFPercentage(2),

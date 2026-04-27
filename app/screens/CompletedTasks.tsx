@@ -33,6 +33,8 @@ import {
 } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { getAuth } from "firebase/auth";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 type Translations = {
   completedTasks: string;
@@ -214,6 +216,11 @@ export default function CompletedTasks({ navigation }: any) {
     const hasReviewed = hasUserReviewedTask(taskId, item);
     const userIsConfirmedHelper = isBulkTask && item.isConfirmedHelper;
 
+    const isDark = theme.mode === "dark";
+
+    const firstLetter = owner?.userName.trim()?.[0];
+    const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
+
     return (
       <View
         style={[
@@ -249,12 +256,19 @@ export default function CompletedTasks({ navigation }: any) {
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.userInfo}>
-            <Image
-              style={styles.avatar}
-              source={
-                owner?.profileImage ? { uri: owner?.profileImage } : Icons.dp
-              }
-            />
+            {owner?.profileImage ? (
+              <Image
+                style={styles.avatar}
+                source={{ uri: owner?.profileImage }}
+              />
+            ) : (
+              <AvatarInitials
+                name={owner.userName}
+                style={[styles.avatar, { borderColor: groupTextColor }]}
+                textStyle={{fontSize:RFPercentage(2.2)}}
+              />
+            )}
+
             <View style={styles.userDetails}>
               <Text style={[styles.userName, { color: theme.darkGrey }]}>
                 {owner.userName || "User"}
@@ -530,7 +544,7 @@ export default function CompletedTasks({ navigation }: any) {
               ]}
             >{`${t("completed.txt7")}`}</Text>
           </View>
-        ) : tasks.length === 0 ? (
+        ) : tasks?.length === 0 ? (
           <NotFound title={tr.noTasks || "No completed tasks yet"} />
         ) : (
           <FlatList
@@ -671,10 +685,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatar: {
-    width: RFPercentage(5.5),
-    height: RFPercentage(5.5),
+    width: RFPercentage(6),
+    height: RFPercentage(6),
     borderRadius: RFPercentage(3),
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: Colors.primary,
   },
   userDetails: {

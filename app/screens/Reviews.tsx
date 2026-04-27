@@ -24,6 +24,8 @@ import { useAppTheme } from "../contexts/themeContext";
 import { useTranslation } from "react-i18next";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import CustomNav from "../components/common/CustomNav";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 const sameDay = (d1, d2) =>
   d1.getDate() === d2.getDate() &&
@@ -99,7 +101,7 @@ export default function Reviews({ navigation }) {
       setLang(userLang);
       const keys = Object.keys(labels);
       const translated = await Promise.all(
-        keys.map((k) => cachedTranslate(labels[k]))
+        keys.map((k) => cachedTranslate(labels[k])),
       );
       const newLabels = keys.reduce((obj, key, index) => {
         obj[key as keyof Labels] = translated[index] || labels[key];
@@ -131,7 +133,7 @@ export default function Reviews({ navigation }) {
         .map(([title, data]) => ({
           title,
           data: data.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
           ),
         }))
         .sort((a, b) => {
@@ -173,7 +175,7 @@ export default function Reviews({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       fetchMyReviews();
-    }, [lang])
+    }, [lang]),
   );
 
   const StarRating = ({ rating, size = "medium" }) => {
@@ -189,7 +191,7 @@ export default function Reviews({ navigation }) {
           }}
         >
           ★
-        </Text>
+        </Text>,
       );
     }
     return <View style={styles.starsRow}>{stars}</View>;
@@ -199,6 +201,11 @@ export default function Reviews({ navigation }) {
     const created = moment(item.createdAt).format("MMM D, YYYY");
     const translatedReview =
       translations[item.id] || labels.translating || "Translating...";
+
+    const isDark = theme.mode === "dark";
+
+    const firstLetter = item?.reviewer?.userName.trim()?.[0];
+    const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
 
     return (
       <TouchableOpacity
@@ -215,14 +222,18 @@ export default function Reviews({ navigation }) {
         {/* Header with avatar and rating */}
         <View style={styles.cardHeader}>
           <View style={styles.userInfo}>
-            <Image
-              style={styles.avatar}
-              source={
-                item?.reviewer?.profileImage
-                  ? { uri: item?.reviewer?.profileImage }
-                  : Icons.dp
-              }
-            />
+            {item?.reviewer?.profileImage ? (
+              <Image
+                style={styles.avatar}
+                source={{ uri: item?.reviewer?.profileImage }}
+              />
+            ) : (
+              <AvatarInitials
+                name={item.reviewer?.userName}
+                style={[styles.avatar, { borderColor: groupTextColor }]}
+              />
+            )}
+
             <View style={styles.userDetails}>
               <Text style={[styles.userName, { color: Colors.darkGrey }]}>
                 {item.reviewer?.userName?.length > 12
@@ -327,7 +338,15 @@ export default function Reviews({ navigation }) {
                 },
               ]}
             >
-              <Text style={[styles.averageRating, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
+              <Text
+                style={[
+                  styles.averageRating,
+                  {
+                    color:
+                      theme.mode === "dark" ? Colors.white : Colors.primary,
+                  },
+                ]}
+              >
                 {averageRating}
               </Text>
               <Text style={[styles.ratingOutOf, { color: theme.lightGrey }]}>
@@ -335,7 +354,15 @@ export default function Reviews({ navigation }) {
               </Text>
             </View>
             <View style={styles.ratingInfo}>
-              <Text style={[styles.ratingTitle, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
+              <Text
+                style={[
+                  styles.ratingTitle,
+                  {
+                    color:
+                      theme.mode === "dark" ? Colors.white : Colors.primary,
+                  },
+                ]}
+              >
                 {t("reviews.txt5")}
               </Text>
               <Text style={[styles.reviewCount, { color: theme.darkGrey }]}>

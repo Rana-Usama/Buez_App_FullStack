@@ -5,12 +5,16 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { useAppTheme } from "../../contexts/themeContext";
 import Colors from "../../config/Colors";
 import { TaskData, TranslatedTaskData } from "../../types/TaskApplicants/types";
+import GroupChatButton from "./GroupChatButton";
 
 interface TaskHeaderProps {
   taskData: TaskData | null;
   confirmedWorkers: any[];
   translatedTaskData: TranslatedTaskData;
   t: (key: string, options?: any) => string;
+  navigation: any;
+  taskId: any;
+  currentUser: any;
 }
 
 const TaskHeader: React.FC<TaskHeaderProps> = ({
@@ -18,6 +22,9 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
   confirmedWorkers,
   translatedTaskData,
   t,
+  navigation,
+  taskId,
+  currentUser,
 }) => {
   const { theme } = useAppTheme();
 
@@ -43,7 +50,12 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
             size={RFPercentage(2)}
             color={theme.mode === "dark" ? Colors.white : Colors.primary}
           />
-          <Text style={[styles.taskTypeText, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
+          <Text
+            style={[
+              styles.taskTypeText,
+              { color: theme.mode === "dark" ? Colors.white : Colors.primary },
+            ]}
+          >
             {taskData.taskType === "Other"
               ? translatedTaskData.customTaskTitle || taskData.customTaskTitle
               : translatedTaskData.taskType || taskData.taskType}
@@ -51,68 +63,117 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
         </View>
 
         {/* Task Description */}
-        <Text style={[styles.taskTitle, { color: theme.heading }]} numberOfLines={2}>
+        <Text
+          style={[styles.taskTitle, { color: theme.heading }]}
+          numberOfLines={2}
+        >
           {translatedTaskData.description ||
             taskData.description ||
             t("taskApplicants.noDescription")}
         </Text>
+
+        {/* Group Chat Button */}
+        {confirmedWorkers?.length > 0 && (
+          <GroupChatButton
+            style={{ marginTop: RFPercentage(0), width: "50%" }}
+            onPress={() =>
+              navigation.navigate("GroupChat", {
+                groupChatId: taskId,
+                currentUserId: currentUser?.userData?.userId,
+                currentUserName: currentUser?.userData?.userName,
+                taskType: taskData?.taskType,
+                customTaskTitle: taskData?.customTaskTitle,
+              })
+            }
+            t={t}
+          />
+        )}
 
         {/* Task Stats */}
         <View
           style={[
             styles.taskStats,
             {
-              backgroundColor: theme.mode === "dark" ? theme.primary + "20" : "#F8F9FA",
+              backgroundColor:
+                theme.mode === "dark" ? theme.primary + "20" : "#F8F9FA",
             },
           ]}
         >
           <View style={styles.statItem}>
-            <Ionicons name="people" size={RFPercentage(2)} color={theme.darkGrey} />
-            <Text style={[styles.statValue, { color: theme.heading }]}>
+            <Ionicons
+              name="people"
+              size={RFPercentage(2.5)}
+              color={theme.darkGrey}
+            />
+            <Text
+              style={[styles.statValue, { color: theme.heading }]}
+              numberOfLines={1}
+            >
               {requiredWorkers}
             </Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
+            <Text
+              style={[styles.statLabel, { color: theme.darkGrey }]}
+              numberOfLines={1}
+            >
               {t("taskApplicants.helpersNeeded")}
             </Text>
           </View>
 
-          <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
+          <View
+            style={[styles.statDivider, { backgroundColor: theme.border }]}
+          />
 
           <View style={styles.statItem}>
             <Ionicons
               name="checkmark-circle"
-              size={RFPercentage(2)}
+              size={RFPercentage(2.5)}
               color={Colors.statusAlertSuccess}
             />
-            <Text style={[styles.statValue, { color: Colors.statusAlertSuccess }]}>
+            <Text
+              style={[styles.statValue, { color: Colors.statusAlertSuccess }]}
+              numberOfLines={1}
+            >
               {confirmedWorkers.length}
             </Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
+            <Text
+              style={[styles.statLabel, { color: theme.darkGrey }]}
+              numberOfLines={1}
+            >
               {t("taskApplicants.confirmed")}
             </Text>
           </View>
 
-          <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
+          <View
+            style={[styles.statDivider, { backgroundColor: theme.border }]}
+          />
 
           <View style={styles.statItem}>
             <Ionicons
               name={isFull ? "checkmark-done-circle" : "alert-circle"}
-              size={RFPercentage(2)}
-              color={isFull ? Colors.statusAlertSuccess : Colors.statusAlertWarning}
+              size={RFPercentage(2.5)}
+              color={
+                isFull ? Colors.statusAlertSuccess : Colors.statusAlertWarning
+              }
             />
             <Text
               style={[
                 styles.statValue,
                 {
-                  color: isFull ? Colors.statusAlertSuccess : Colors.statusAlertWarning,
+                  color: isFull
+                    ? Colors.statusAlertSuccess
+                    : Colors.statusAlertWarning,
                 },
               ]}
+              numberOfLines={1}
             >
               {isFull
                 ? t("taskApplicants.full")
                 : t("taskApplicants.spotsLeft", { spots: availableSpots })}
             </Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
+            <Text
+              style={[styles.statLabel, { color: theme.darkGrey }]}
+              numberOfLines={1}
+            >
               {t("taskApplicants.status")}
             </Text>
           </View>
@@ -127,7 +188,9 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
                 {
                   width: `${Math.min((confirmedWorkers.length / requiredWorkers) * 100, 100)}%`,
                   maxWidth: "100%",
-                  backgroundColor: isFull ? Colors.statusAlertSuccess : Colors.primary,
+                  backgroundColor: isFull
+                    ? Colors.statusAlertSuccess
+                    : Colors.primary,
                 },
               ]}
             />
@@ -145,7 +208,11 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
           <View
             style={[
               styles.statusAlert,
-              { backgroundColor: Colors.statusAlertSuccessBg(Colors.statusAlertSuccess) },
+              {
+                backgroundColor: Colors.statusAlertSuccessBg(
+                  Colors.statusAlertSuccess,
+                ),
+              },
             ]}
           >
             <Ionicons
@@ -154,7 +221,10 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
               color={Colors.statusAlertSuccess}
             />
             <Text
-              style={[styles.statusAlertText, { color: Colors.statusAlertSuccess }]}
+              style={[
+                styles.statusAlertText,
+                { color: Colors.statusAlertSuccess },
+              ]}
             >
               {t("taskApplicants.allHelpersConfirmed")}
             </Text>
@@ -167,8 +237,8 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 
 const styles = StyleSheet.create({
   taskHeader: {
-    paddingTop: RFPercentage(2),
-    paddingBottom: RFPercentage(4),
+    paddingTop: RFPercentage(2.5),
+    paddingBottom: RFPercentage(2.5),
     paddingHorizontal: RFPercentage(3),
     borderBottomLeftRadius: RFPercentage(3),
     borderBottomRightRadius: RFPercentage(3),
@@ -207,20 +277,20 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2),
-    marginBottom: RFPercentage(2),
+    marginVertical: RFPercentage(2),
   },
   statItem: {
     alignItems: "center",
     flex: 1,
   },
   statValue: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_700Bold",
     marginTop: RFPercentage(0.5),
     marginBottom: RFPercentage(0.3),
   },
   statLabel: {
-    fontSize: RFPercentage(1.1),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
     textAlign: "center",
   },

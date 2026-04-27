@@ -1077,8 +1077,6 @@ function OfferDetail({ navigation, route }) {
   }
 
   const isPostOwner = currentUserId === postRequest?.userId;
-
-  console.log("translatedReviews.........", translatedReviews);
   return (
     <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
       <StatusBar

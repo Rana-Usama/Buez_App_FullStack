@@ -43,7 +43,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
           <LinearGradient
             colors={
               activeTab === TABS.APPLIED
-                ? ["#9ca0b4ff", "#a0a7c6ff"]
+                ? ["#717793ff", "#465493ff"]
                 : ["transparent", "transparent"]
             }
             style={styles.tabGradient}
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   tabsBackground: {
     flexDirection: "row",
-    borderRadius: RFPercentage(3),
+    borderRadius: RFPercentage(1),
     padding: RFPercentage(0.5),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    borderRadius: RFPercentage(3),
+    borderRadius: RFPercentage(1),
     overflow: "hidden",
   },
   tabGradient: {

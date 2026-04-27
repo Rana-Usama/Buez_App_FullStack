@@ -56,22 +56,20 @@ const TaskApplicantsScreen: React.FC<TaskApplicantsScreenProps> = ({
     setConfirmedWorkers,
   } = useTaskData(taskId, () => navigation.goBack());
 
-  const {
-    confirmingWorker,
-    removingWorker,
-    confirmWorker,
-    removeWorker,
-  } = useWorkerActions({
-    taskId,
-    taskData,
-    currentUserId: currentUser?.userData?.userId || "",
-    currentUserName: currentUser?.userData?.userName || "",
-    currentUserProfileImage: currentUser?.userData?.profileImage,
-    currentUserToken: currentUser?.userData?.token,
-  });
+  const { confirmingWorker, removingWorker, confirmWorker, removeWorker } =
+    useWorkerActions({
+      taskId,
+      taskData,
+      currentUserId: currentUser?.userData?.userId || "",
+      currentUserName: currentUser?.userData?.userName || "",
+      currentUserProfileImage: currentUser?.userData?.profileImage,
+      currentUserToken: currentUser?.userData?.token,
+    });
 
   // ── LOCAL STATE ──
-  const [activeTab, setActiveTab] = useState<"applied" | "confirmed">(TABS.APPLIED);
+  const [activeTab, setActiveTab] = useState<"applied" | "confirmed">(
+    TABS.APPLIED,
+  );
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState<ModalConfig>({
     title: "",
@@ -79,11 +77,12 @@ const TaskApplicantsScreen: React.FC<TaskApplicantsScreenProps> = ({
     type: "info",
     buttons: [],
   });
-  const [translatedTaskData, setTranslatedTaskData] = useState<TranslatedTaskData>({
-    taskType: "",
-    customTaskTitle: "",
-    description: "",
-  });
+  const [translatedTaskData, setTranslatedTaskData] =
+    useState<TranslatedTaskData>({
+      taskType: "",
+      customTaskTitle: "",
+      description: "",
+    });
 
   // ── TRANSLATION EFFECT ──
   useEffect(() => {
@@ -105,15 +104,16 @@ const TaskApplicantsScreen: React.FC<TaskApplicantsScreenProps> = ({
     };
 
     translateTaskHeader();
-  }, [
-    taskData?.taskType,
-    taskData?.customTaskTitle,
-    taskData?.description,
-  ]);
+  }, [taskData?.taskType, taskData?.customTaskTitle, taskData?.description]);
 
   // ── MODAL FUNCTIONS ──
   const showModal = useCallback(
-    (title: string, message: string, type: "info" | "success" | "warning" | "error", buttons: any[]) => {
+    (
+      title: string,
+      message: string,
+      type: "info" | "success" | "warning" | "error",
+      buttons: any[],
+    ) => {
       setModalConfig({ title, message, type, buttons });
       setModalVisible(true);
     },
@@ -346,24 +346,10 @@ const TaskApplicantsScreen: React.FC<TaskApplicantsScreenProps> = ({
           confirmedWorkers={confirmedWorkers}
           translatedTaskData={translatedTaskData}
           t={t}
+          navigation={navigation}
+          taskId={taskId}
+          currentUser={currentUser}
         />
-
-        {/* Group Chat Button */}
-        {confirmedWorkers?.length > 0 && (
-          <GroupChatButton
-          style={{marginTop:RFPercentage(-1.5)}}
-            onPress={() =>
-              navigation.navigate("GroupChat", {
-                groupChatId: taskId,
-                currentUserId: currentUser?.userData?.userId,
-                currentUserName: currentUser?.userData?.userName,
-                taskType: taskData?.taskType,
-                customTaskTitle: taskData?.customTaskTitle,
-              })
-            }
-            t={t}
-          />
-        )}
 
         {/* Tabs */}
         <TabsSection

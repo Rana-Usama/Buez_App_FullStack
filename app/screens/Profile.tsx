@@ -48,9 +48,7 @@ const taskOptions = [
   { id: 13, name: "Pet Care", icon: "paw", color: "#D97706" },
 ];
 
-// ─── Modal Chip ────────────────────────────────────────────────────────────────
-// Receives English `item` for icon/color, and `translatedLabel` for display.
-// Selection logic inside parent still uses English keys.
+
 const ModalChip = ({
   item,
   translatedLabel,
@@ -546,7 +544,7 @@ function Profile({ navigation }: any) {
             color: "#FFD700",
             bgColor: "#41403462",
             borderColor: "#FFD700",
-            bgColor2: "#b6b38e62",
+            bgColor2: "#dfddc562",
           };
         else if (count >= 2)
           badge = {
@@ -555,7 +553,7 @@ function Profile({ navigation }: any) {
             color: "#FF9800",
             bgColor: "#a4937685",
             borderColor: "#FF9800",
-            bgColor2: "#cabda673",
+            bgColor2: "#d2c8b773",
           };
         else if (count >= 1)
           badge = {
@@ -564,7 +562,7 @@ function Profile({ navigation }: any) {
             color: "#4CAF50",
             bgColor: "#679d6793",
             borderColor: "#4CAF50",
-            bgColor2: "#a9cfa993",
+            bgColor2: "#bcd7bc93",
           };
         setUserBadge(badge);
       } catch (e) {
@@ -633,10 +631,6 @@ function Profile({ navigation }: any) {
     (interests.selectedCategories?.length > 0 ||
       interests.customInterests?.length > 0);
 
-  const isDark = theme.mode === "dark";
-
-  const firstLetter = userName.trim()?.[0];
-  const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -686,10 +680,7 @@ function Profile({ navigation }: any) {
                 <AvatarInitials
                   name={userName}
                   style={{
-                    borderWidth: RFPercentage(0.3),
                     borderRadius: RFPercentage(10),
-                    padding: RFPercentage(0.1),
-                    borderColor: groupTextColor,
                     width: RFPercentage(12),
                     height: RFPercentage(12),
                   }}

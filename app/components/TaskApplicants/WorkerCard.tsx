@@ -13,6 +13,8 @@ import { useAppTheme } from "../../contexts/themeContext";
 import Colors from "../../config/Colors";
 import { Icons } from "../../config/theme";
 import { Worker } from "../../types/TaskApplicants/types";
+import AvatarInitials from "../common/DefaultAvatars";
+import { getAvatarColors } from "../../config/avatarColors";
 
 interface WorkerCardProps {
   worker: Worker;
@@ -39,13 +41,18 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
 }) => {
   const { theme } = useAppTheme();
 
+  const isDark = theme.mode === "dark";
+
+  const firstLetter = worker?.userName.trim()?.[0];
+  const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
+
   return (
     <View
       style={[
         styles.workerCard,
         {
           backgroundColor: theme.white,
-          borderColor: theme.border,
+          borderColor: Colors.cardBorderLight,
         },
       ]}
     >
@@ -55,13 +62,21 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
         onPress={onViewProfile}
         activeOpacity={0.7}
       >
-        <Image
-          source={worker.profileImage ? { uri: worker.profileImage } : Icons.dp}
-          style={[
-            styles.workerAvatar,
-            { borderColor: Colors.workerAvatarBorder(Colors.primary) },
-          ]}
-        />
+        {worker.profileImage ? (
+          <Image
+            source={{ uri: worker.profileImage }}
+            style={[
+              styles.workerAvatar,
+              { borderColor: Colors.workerAvatarBorder(Colors.primary) },
+            ]}
+          />
+        ) : (
+          <AvatarInitials
+            name={worker.userName}
+            style={[styles.workerAvatar, { borderColor: groupTextColor }]}
+          />
+        )}
+
         <View style={styles.workerDetails}>
           <Text style={[styles.workerName, { color: theme.heading }]}>
             {worker.userName}
@@ -213,9 +228,9 @@ const styles = StyleSheet.create({
   workerAvatar: {
     width: RFPercentage(6),
     height: RFPercentage(6),
-    borderRadius: RFPercentage(3),
+    borderRadius: RFPercentage(1),
     marginRight: RFPercentage(1.5),
-    borderWidth: 2,
+    borderWidth: 1,
   },
   workerDetails: {
     flex: 1,
@@ -245,12 +260,11 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1),
   },
   confirmButton: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.secondary,
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(1.3),
     borderRadius: RFPercentage(1.5),
     gap: RFPercentage(0.5),
     shadowColor: Colors.primary,
@@ -259,6 +273,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     paddingHorizontal: RFPercentage(2),
+    width: "48%",
   },
   confirmButtonText: {
     color: "#FFF",
@@ -266,12 +281,11 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   removeButton: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.buttonRemove,
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(1.3),
     borderRadius: RFPercentage(1.5),
     gap: RFPercentage(0.5),
     shadowColor: Colors.buttonRemoveShadow,
@@ -280,6 +294,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     paddingHorizontal: RFPercentage(2),
+    width: "48%",
   },
   removeButtonText: {
     color: "#FFF",
@@ -287,16 +302,16 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   profileButton: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.profileButtonBg,
-    paddingVertical: RFPercentage(1),
+    paddingVertical: RFPercentage(1.3),
     borderRadius: RFPercentage(1.5),
     borderWidth: 1,
     gap: RFPercentage(0.5),
     borderColor: Colors.profileButtonBg,
+    width: "48%",
   },
   profileButtonText: {
     fontSize: RFPercentage(1.4),

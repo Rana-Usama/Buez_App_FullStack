@@ -33,6 +33,7 @@ import {
 } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import CustomNav from "../components/common/CustomNav";
+import AvatarInitials from "../components/common/DefaultAvatars";
 
 const getTargetLanguage = async () => {
   try {
@@ -156,7 +157,7 @@ export default function Notifications({ navigation }) {
         viewTask: "View Task",
         bulkApplication: "has applied to your",
         bulkConfirmation: "You have been confirmed for",
-        bulkview: "You can view the task in My Req Accepted tab",
+        bulkview: "",
         viewApplications: "View Applicant",
         viewPost: "View Post",
         helpersNeeded: "Helpers needed",
@@ -297,19 +298,19 @@ export default function Notifications({ navigation }) {
         return (
           <Ionicons
             name="checkmark-circle"
-            size={RFPercentage(2.2)}
+            size={RFPercentage(2)}
             color={iconColor}
           />
         );
       case "review_added":
         return (
-          <Ionicons name="star" size={RFPercentage(2.2)} color={iconColor} />
+          <Ionicons name="star" size={RFPercentage(2)} color={iconColor} />
         );
       case "task_completion":
         return (
           <Ionicons
             name="checkmark-done-circle"
-            size={RFPercentage(2.2)}
+            size={RFPercentage(2)}
             color={iconColor}
           />
         );
@@ -317,7 +318,7 @@ export default function Notifications({ navigation }) {
         return (
           <Ionicons
             name="checkmark-done-circle"
-            size={RFPercentage(2.2)}
+            size={RFPercentage(2)}
             color={iconColor}
           />
         );
@@ -325,7 +326,7 @@ export default function Notifications({ navigation }) {
         return (
           <Ionicons
             name="person-add"
-            size={RFPercentage(2.2)}
+            size={RFPercentage(2)}
             color={iconColor}
           />
         );
@@ -333,7 +334,7 @@ export default function Notifications({ navigation }) {
         return (
           <Ionicons
             name="checkmark-circle-outline"
-            size={RFPercentage(2.2)}
+            size={RFPercentage(2)}
             color={iconColor}
           />
         );
@@ -341,7 +342,7 @@ export default function Notifications({ navigation }) {
         return (
           <Ionicons
             name="notifications"
-            size={RFPercentage(2.2)}
+            size={RFPercentage(2)}
             color={iconColor}
           />
         );
@@ -538,10 +539,15 @@ export default function Notifications({ navigation }) {
           >
             <View style={styles.cardHeader}>
               <View style={styles.headerLeft}>
-                <Image
-                  source={profileImage ? { uri: profileImage } : Icons.dp}
-                  style={styles.avatar}
-                />
+                {profileImage ? (
+                  <Image
+                    source={profileImage ? { uri: profileImage } : Icons.dp}
+                    style={styles.avatar}
+                  />
+                ) : (
+                  <AvatarInitials name={senderName} />
+                )}
+
                 <View
                   style={[
                     styles.notificationIcon,

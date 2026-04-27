@@ -42,6 +42,15 @@ export const useHomeScreen = () => {
     {},
   );
 
+
+  useEffect(() => {
+  if (currentLocation) {
+    updateUserLocationInDB(currentLocation); // sync to Firestore on app open
+  }
+}, [currentLocation]);
+
+
+
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
   // Update user location in database

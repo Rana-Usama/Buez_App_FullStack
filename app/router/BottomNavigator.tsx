@@ -48,6 +48,8 @@ import ConfirmationModal from "../components/common/ConfirmationModal";
 import DeviceInfo from "react-native-device-info";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -260,6 +262,8 @@ const CustomDrawerContent = (props) => {
     }
   };
 
+
+
   return (
     <>
       <DrawerContentScrollView
@@ -282,21 +286,44 @@ const CustomDrawerContent = (props) => {
           <View style={styles.headerContent}>
             {/* Avatar with Glass Border */}
             <View style={styles.avatarWrapper}>
-              <BlurView
-                intensity={40}
-                tint="light"
-                style={styles.avatarGlassBorder}
-              >
-                <Image
-                  source={
-                    user?.profileImage ? { uri: user?.profileImage } : Icons.dp
-                  }
-                  style={styles.userImage}
+              {user?.profileImage ? (
+                <>
+                  <BlurView
+                    intensity={40}
+                    tint="light"
+                    style={styles.avatarGlassBorder}
+                  >
+                    <Image
+                      source={
+                        user?.profileImage
+                          ? { uri: user?.profileImage }
+                          : Icons.dp
+                      }
+                      style={styles.userImage}
+                    />
+                  </BlurView>
+                </>
+              ) : (
+                <AvatarInitials
+                  name={user?.userName}
+                   style={styles.userImage}
+                  textStyle={{
+                    fontSize: RFPercentage(4),
+                    lineHeight: RFPercentage(6),
+                  }}
                 />
-              </BlurView>
+              )}
             </View>
 
-            <Text style={[styles.userName, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}>
+            <Text
+              style={[
+                styles.userName,
+                {
+                  color:
+                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+                },
+              ]}
+            >
               {user?.userName || "Guest User"}
             </Text>
             <Text style={[styles.userEmail, { color: theme.heading }]}>
@@ -635,7 +662,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               )}
               <Text
                 style={{
-                  color: isFocused ? theme.primary : theme.detailsText,
+                  color: isFocused ? Colors.primary : theme.detailsText,
                   fontSize: RFPercentage(1.4),
                   top:
                     route.name === `${t("bottomTab.txt3")}`
@@ -646,7 +673,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     : "Poppins_500Medium",
                 }}
               >
-                {label.length > 9 ? label.slice(0, 9) + `..` : label}
+                {label?.length > 9 ? label?.slice(0, 9) + `..` : label}
               </Text>
             </TouchableOpacity>
           );
@@ -770,9 +797,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   avatarGlassBorder: {
-    width: 90,
-    height: 90,
-    borderRadius: 100,
+    width: RFPercentage(13),
+    height: RFPercentage(13),
+    borderRadius: RFPercentage(100),
     padding: 3,
     overflow: "hidden",
     borderWidth: 2,
@@ -782,20 +809,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   userImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: RFPercentage(13),
+    height: RFPercentage(13),
+    borderRadius: RFPercentage(100),
   },
   userName: {
-    fontSize: 18,
-    marginTop: 4,
+    fontSize: RFPercentage(1.9),
+    marginTop: RFPercentage(0.3),
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   userEmail: {
-    fontSize: 13,
-    marginTop: 4,
+    fontSize:  RFPercentage(1.5),
+    marginTop:  RFPercentage(0.9),
   },
   drawerItemsContainer: {
     flex: 1,

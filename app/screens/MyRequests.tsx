@@ -67,6 +67,7 @@ import {
 import { useLocation } from "../utils/useLocation";
 import { ShareButton } from "../job-sharing/ShareButton";
 import { groupChatExists } from "../services/GroupChat.service";
+import AvatarInitials from "../components/common/DefaultAvatars";
 
 // Enable LayoutAnimation for Android
 if (
@@ -1019,15 +1020,25 @@ function MyRequests({ navigation }) {
 
               {/* User Info with Expand/Collapse Button */}
               <View style={styles.cartInfoContainer}>
-                <TouchableOpacity activeOpacity={0.8}>
-                  <Image
-                    style={styles.userImage}
-                    source={
-                      cart?.user?.profileImage
-                        ? { uri: cart?.user?.profileImage }
-                        : Icons.dp
-                    }
-                  />
+                <TouchableOpacity activeOpacity={1}>
+                  {cart?.user?.profileImage ? (
+                    <Image
+                      style={styles.userImage}
+                      source={{ uri: cart?.user?.profileImage }}
+                    />
+                  ) : (
+                    <AvatarInitials
+                      name={cart?.user?.userName}
+                      textStyle={{
+                        fontSize: RFPercentage(2),
+                        lineHeight: RFPercentage(4),
+                      }}
+                      style={[
+                        styles.userImage,
+                        { borderWidth: RFPercentage(0) },
+                      ]}
+                    />
+                  )}
                 </TouchableOpacity>
                 <Text
                   style={[styles.userName, { color: theme.heading }]}
@@ -1899,7 +1910,7 @@ const styles = StyleSheet.create({
   },
   bulkRequestInfo: {
     width: "100%",
-    marginVertical: RFPercentage(1),
+    marginVertical: RFPercentage(0),
     padding: RFPercentage(1),
     borderRadius: RFPercentage(1),
   },

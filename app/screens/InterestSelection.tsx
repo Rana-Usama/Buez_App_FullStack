@@ -11,8 +11,7 @@ import {
   Platform,
   StatusBar,
   KeyboardAvoidingView,
-  Modal,
-  FlatList,
+  Dimensions,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -25,6 +24,8 @@ import Colors from "../config/Colors";
 import Feather from "@expo/vector-icons/Feather";
 import { useTranslation } from "react-i18next";
 import { cachedTranslate } from "../utils/cachedTranslations";
+
+const { width } = Dimensions.get("window");
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
@@ -44,17 +45,6 @@ const taskOptions = [
   { id: 13, name: "Pet Care", icon: "paw", color: "#D97706" },
 ];
 
-const translateTaskOptions = async () => {
-  const translatedOptions = await Promise.all(
-    taskOptions.map(async (item) => ({
-      ...item,
-      name: await cachedTranslate(item.name),
-    })),
-  );
-
-  return translatedOptions;
-};
-
 // ─── Animated Chip ────────────────────────────────────────────────────────────
 
 const AnimatedChip = ({
@@ -62,37 +52,37 @@ const AnimatedChip = ({
   isSelected,
   onPress,
   index,
-  theme,
+  isDark,
 }: {
   item: any;
   isSelected: boolean;
   onPress: () => void;
   index: number;
-  theme: any;
+  isDark: boolean;
 }) => {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const selectScale = useRef(new Animated.Value(1)).current;
+  const mountAnim = useRef(new Animated.Value(0)).current;
+  const pressScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.timing(scaleAnim, {
+    Animated.timing(mountAnim, {
       toValue: 1,
-      duration: 400,
-      delay: index * 40,
-      easing: Easing.out(Easing.back(1.4)),
+      duration: 380,
+      delay: index * 35,
+      easing: Easing.out(Easing.back(1.3)),
       useNativeDriver: true,
     }).start();
   }, []);
 
   const handlePress = () => {
     Animated.sequence([
-      Animated.timing(selectScale, {
-        toValue: 0.88,
-        duration: 80,
+      Animated.timing(pressScale, {
+        toValue: 0.9,
+        duration: 70,
         useNativeDriver: true,
       }),
-      Animated.timing(selectScale, {
+      Animated.timing(pressScale, {
         toValue: 1,
-        duration: 180,
+        duration: 200,
         easing: Easing.out(Easing.back(2)),
         useNativeDriver: true,
       }),
@@ -103,73 +93,74 @@ const AnimatedChip = ({
   return (
     <Animated.View
       style={{
-        transform: [{ scale: Animated.multiply(scaleAnim, selectScale) }],
+        transform: [{ scale: Animated.multiply(mountAnim, pressScale) }],
+        opacity: mountAnim,
       }}
     >
       <TouchableOpacity
         onPress={handlePress}
         activeOpacity={0.85}
         style={[
-          styles.chip,
+          chipStyles.chip,
           {
-            backgroundColor:
-              theme.mode === "light"
-                ? "rgba(200, 203, 221, 0.47)"
-                : "rgba(65, 66, 79, 0.47)",
-            borderColor:
-              theme.mode === "light"
-                ? "rgba(179, 183, 205, 0.47)"
-                : "rgba(65, 66, 79, 0.47)",
-          },
-          isSelected && {
-            borderColor: item.color,
-            backgroundColor: item.color + "22",
+            backgroundColor: isDark
+              ? isSelected
+                ? item.color + "1A"
+                : "rgba(30,33,58,0.8)"
+              : isSelected
+                ? item.color + "15"
+                : "rgba(240,242,255,0.9)",
+            borderColor: isSelected
+              ? item.color + "AA"
+              : isDark
+                ? "rgba(69,87,176,0.18)"
+                : "rgba(37,50,117,0.1)",
           },
         ]}
       >
-        {isSelected && (
-          <View
-            style={[
-              styles.chipSelectedGlow,
-              { backgroundColor: item.color + "15" },
-            ]}
-          />
-        )}
-        <View
-          style={[
-            styles.chipIcon,
-            { backgroundColor: isSelected ? item.color : item.color + "40" },
-          ]}
+        {/* Icon */}
+        <LinearGradient
+          colors={
+            isSelected
+              ? [item.color, item.color + "CC"]
+              : [item.color + "30", item.color + "18"]
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={chipStyles.iconBg}
         >
           <FontAwesome5
             name={item.icon}
-            size={RFPercentage(1.8)}
+            size={RFPercentage(1.7)}
             color={isSelected ? "#fff" : item.color}
             solid
           />
-        </View>
+        </LinearGradient>
+
         <Text
           style={[
-            styles.chipText,
+            chipStyles.label,
             {
-              color:
-                theme.mode === "light"
-                  ? "rgba(74, 78, 100, 1)"
-                  : "rgba(217, 218, 233, 0.47)",
-            },
-            isSelected && {
-              color: item.color,
-              fontFamily: "Poppins_600SemiBold",
+              color: isSelected
+                ? item.color
+                : isDark
+                  ? "rgba(180,186,220,0.85)"
+                  : "#475569",
+              fontFamily: isSelected
+                ? "Poppins_600SemiBold"
+                : "Poppins_400Regular",
             },
           ]}
         >
           {item.displayName || item.name}
         </Text>
+
+        {/* Tick badge */}
         {isSelected && (
-          <View style={[styles.checkBadge, { backgroundColor: item.color }]}>
+          <View style={[chipStyles.tick, { backgroundColor: item.color }]}>
             <FontAwesome5
               name="check"
-              size={RFPercentage(0.9)}
+              size={RFPercentage(0.8)}
               color="#fff"
               solid
             />
@@ -180,48 +171,76 @@ const AnimatedChip = ({
   );
 };
 
-// ─── Custom Interest Tag ──────────────────────────────────────────────────────
+const chipStyles = StyleSheet.create({
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderRadius: 100,
+    paddingVertical: RFPercentage(0.65),
+    paddingLeft: RFPercentage(0.65),
+    paddingRight: RFPercentage(1.6),
+    gap: RFPercentage(0.75),
+  },
+  iconBg: {
+    width: RFPercentage(3.5),
+    height: RFPercentage(3.5),
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  label: {
+    fontSize: RFPercentage(1.55),
+  },
+  tick: {
+    width: RFPercentage(1.8),
+    height: RFPercentage(1.8),
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 2,
+  },
+});
+
+// ─── Custom Tag ───────────────────────────────────────────────────────────────
 
 const CustomTag = ({
   name,
   onRemove,
-  index,
 }: {
   name: string;
   onRemove: () => void;
   index: number;
 }) => {
-  const enterAnim = useRef(new Animated.Value(0)).current;
+  const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.spring(enterAnim, {
+    Animated.spring(anim, {
       toValue: 1,
-      tension: 180,
-      friction: 10,
+      tension: 200,
+      friction: 12,
       useNativeDriver: true,
     }).start();
   }, []);
 
   return (
-    <Animated.View
-      style={{ transform: [{ scale: enterAnim }], opacity: enterAnim }}
-    >
+    <Animated.View style={{ transform: [{ scale: anim }], opacity: anim }}>
       <LinearGradient
-        colors={["#1d277eff", "#342fa0ff"]}
+        colors={["#253275", "#4557B0"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        style={styles.customTag}
+        style={tagStyles.tag}
       >
-        <Text style={styles.customTagText}>{name}</Text>
+        <Text style={tagStyles.label}>{name}</Text>
         <TouchableOpacity
           onPress={onRemove}
-          style={styles.customTagRemove}
+          style={tagStyles.remove}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <FontAwesome5
             name="times"
-            size={RFPercentage(1.1)}
-            color="rgba(255,255,255,0.8)"
+            size={RFPercentage(1.0)}
+            color="rgba(255,255,255,0.85)"
             solid
           />
         </TouchableOpacity>
@@ -230,68 +249,132 @@ const CustomTag = ({
   );
 };
 
+const tagStyles = StyleSheet.create({
+  tag: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 100,
+    paddingVertical: RFPercentage(0.65),
+    paddingLeft: RFPercentage(1.4),
+    paddingRight: RFPercentage(0.7),
+    gap: RFPercentage(0.6),
+  },
+  label: {
+    fontSize: RFPercentage(1.45),
+    fontFamily: "Poppins_500Medium",
+    color: "#fff",
+  },
+  remove: {
+    width: RFPercentage(2.1),
+    height: RFPercentage(2.1),
+    borderRadius: 100,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
+
+// ─── Progress Steps ────────────────────────────────────────────────────────────
+
+const ProgressDots = ({
+  current,
+  total,
+}: {
+  current: number;
+  total: number;
+}) => (
+  <View style={dotStyles.row}>
+    {Array.from({ length: total }).map((_, i) => (
+      <View
+        key={i}
+        style={[
+          dotStyles.dot,
+          i < current && dotStyles.dotFilled,
+          i === current - 1 && dotStyles.dotActive,
+        ]}
+      />
+    ))}
+  </View>
+);
+
+const dotStyles = StyleSheet.create({
+  row: { flexDirection: "row", gap: 5, alignItems: "center" },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(69,87,176,0.2)",
+  },
+  dotFilled: { backgroundColor: "#4557B0" },
+  dotActive: { width: 18, backgroundColor: "#DD53A8" },
+});
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function InterestSelectionScreen({ navigation }: any) {
   const { theme } = useAppTheme();
+  const { t } = useTranslation();
+  const isDark = theme.mode === "dark";
+
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [customInterests, setCustomInterests] = useState<string[]>([]);
   const [inputText, setInputText] = useState("");
   const [saving, setSaving] = useState(false);
-  const [showInput, setShowInput] = useState(false);
+  const [translatedOptions, setTranslatedOptions] = useState<
+    typeof taskOptions
+  >([]);
 
   const headerAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const inputRef = useRef<TextInput>(null);
 
-  const totalSelected = selected.size + customInterests.length;
   const MIN_SELECTIONS = 3;
+  const totalSelected = selected.size + customInterests.length;
+  const isReady = totalSelected >= MIN_SELECTIONS;
 
-  const { t } = useTranslation();
-  const [translatedOptions, setTranslatedOptions] = useState<
-    typeof taskOptions
-  >([]);
-
+  // ── Load translated task options ─────────────────────────────────────────
   useEffect(() => {
-    const loadTranslatedTasks = async () => {
+    (async () => {
       const translated = await Promise.all(
         taskOptions.map(async (item) => ({
           ...item,
-          displayName: await cachedTranslate(item.name), // new property for display
+          displayName: await cachedTranslate(item.name),
         })),
       );
       setTranslatedOptions(translated);
-    };
-    loadTranslatedTasks();
+    })();
   }, []);
 
+  // ── Mount animations ──────────────────────────────────────────────────────
   useEffect(() => {
     Animated.parallel([
       Animated.timing(headerAnim, {
         toValue: 1,
-        duration: 700,
+        duration: 650,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 800,
-        delay: 200,
+        duration: 750,
+        delay: 180,
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
 
+  // ── Progress bar ─────────────────────────────────────────────────────────
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: Math.min(totalSelected / MIN_SELECTIONS, 1),
-      duration: 400,
+      duration: 380,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     }).start();
   }, [totalSelected]);
 
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const toggleInterest = (name: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -319,6 +402,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
     setCustomInterests((prev) => prev.filter((i) => i !== name));
   };
 
+  // ── Save (Firebase — untouched) ───────────────────────────────────────────
   const handleSave = async () => {
     if (totalSelected < MIN_SELECTIONS) {
       Toast.show({
@@ -328,7 +412,6 @@ export default function InterestSelectionScreen({ navigation }: any) {
       });
       return;
     }
-
     setSaving(true);
     try {
       const uid = FIREBASE_AUTH.currentUser?.uid;
@@ -361,7 +444,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
         text1: t("interestSelection.oops") || "Oops!",
         text2:
           t("interestSelection.failedToSave") ||
-          "Failed to save interests. Please try again.",
+          "Failed to save. Please try again.",
       });
     }
     setSaving(false);
@@ -372,8 +455,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
     outputRange: ["0%", "100%"],
   });
 
-  const isReady = totalSelected >= MIN_SELECTIONS;
-
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -385,25 +467,32 @@ export default function InterestSelectionScreen({ navigation }: any) {
         translucent
       />
 
+      {/* ── Background ── */}
       <LinearGradient
         colors={
-          theme.mode === "dark"
-            ? ["#000000ff", "#201b36ff", "#1b1929ff"]
-            : ["#ffffffff", "#dbd7ecff", "#ffffffff"]
+          isDark
+            ? ["#080b1a", "#0f1230", "#080b1a"]
+            : ["#f0f3ff", "#e8ecff", "#f5f0ff"]
         }
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View style={styles.orb1} />
-      <View style={styles.orb2} />
-      <View style={styles.orb3} />
+      {/* ── Subtle top glow strip ── */}
+      <LinearGradient
+        colors={["rgba(37,50,117,0.35)", "transparent"]}
+        style={styles.topGlow}
+        pointerEvents="none"
+      />
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {/* ════════════════════════════════════
+            HEADER
+        ════════════════════════════════════ */}
         <Animated.View
           style={[
             styles.header,
@@ -413,84 +502,163 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 {
                   translateY: headerAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [-30, 0],
+                    outputRange: [-24, 0],
                   }),
                 },
               ],
             },
           ]}
         >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: RFPercentage(2),
-            }}
-          >
+          {/* Top row: back + badge */}
+          <View style={styles.topRow}>
             <TouchableOpacity
-              activeOpacity={0.8}
               onPress={() => navigation.goBack()}
+              activeOpacity={0.8}
               style={[
-                styles.back,
+                styles.backBtn,
                 {
-                  backgroundColor:
-                    theme.mode === "light"
-                      ? "rgba(25, 30, 86, 0.85)"
-                      : "rgba(65, 66, 79, 0.47)",
+                  backgroundColor: isDark
+                    ? "rgba(69,87,176,0.15)"
+                    : "rgba(37,50,117,0.1)",
                 },
               ]}
             >
               <Feather
                 name="arrow-left"
-                color="white"
-                size={RFPercentage(2.4)}
+                size={RFPercentage(2.2)}
+                color={isDark ? "#a0aec0" : "#253275"}
               />
             </TouchableOpacity>
-            <View style={styles.headerBadge}>
-              <FontAwesome5
-                name="magic"
-                size={RFPercentage(1.4)}
-                color="#ffffffff"
-                solid
-              />
-              <Text style={styles.headerBadgeText}>
-                {t("interestSelection.personalizeExperience")}
-              </Text>
+
+            <View style={styles.badge}>
+              <LinearGradient
+                colors={["#253275", "#DD53A8"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.badgeGradient}
+              >
+                <FontAwesome5
+                  name="magic"
+                  size={RFPercentage(1.2)}
+                  color="#fff"
+                  solid
+                />
+                <Text style={styles.badgeText}>
+                  {t("interestSelection.personalizeExperience")}
+                </Text>
+              </LinearGradient>
             </View>
           </View>
 
-          <Text style={[styles.title, { color: theme.darkGrey }]}>
+          {/* Title */}
+          <Text
+            style={[styles.title, { color: isDark ? "#eef0ff" : "#1a1e4a" }]}
+          >
             {t("interestSelection.whatAreYouInterested")}
           </Text>
-          <Text style={[styles.subtitle, { color: theme.darkGrey }]}>
+
+          {/* Gradient underline */}
+          <LinearGradient
+            colors={["#253275", "#DD53A8", "transparent"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.titleUnderline}
+          />
+
+          <Text
+            style={[styles.subtitle, { color: isDark ? "#6b7db3" : "#64748B" }]}
+          >
             {t("interestSelection.pickYourFavorites")}
           </Text>
 
-          <View style={styles.progressContainer}>
-            <View style={styles.progressTrack}>
+          {/* Progress */}
+          <View style={styles.progressSection}>
+            <View style={styles.progressMeta}>
+              <ProgressDots
+                current={Math.min(totalSelected, MIN_SELECTIONS)}
+                total={MIN_SELECTIONS}
+              />
+              <Text
+                style={[
+                  styles.progressLabel,
+                  {
+                    color: isReady ? "#DD53A8" : isDark ? "#4557B0" : "#8094c8",
+                  },
+                ]}
+              >
+                {isReady
+                  ? t("interestSelection.selectedInterests", {
+                      total: totalSelected,
+                    })
+                  : t("interestSelection.selectInterestsPrompt")}
+              </Text>
+            </View>
+
+            {/* Track */}
+            <View
+              style={[
+                styles.track,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(69,87,176,0.15)"
+                    : "rgba(37,50,117,0.08)",
+                },
+              ]}
+            >
               <Animated.View
-                style={[styles.progressFill, { width: progressWidth }]}
+                style={{
+                  width: progressWidth,
+                  height: "100%",
+                  borderRadius: 4,
+                  overflow: "hidden",
+                }}
+              >
+                <LinearGradient
+                  colors={
+                    isReady ? ["#253275", "#DD53A8"] : ["#253275", "#4557B0"]
+                  }
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={StyleSheet.absoluteFillObject}
+                />
+              </Animated.View>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* ════════════════════════════════════
+            CHIPS GRID
+        ════════════════════════════════════ */}
+        <Animated.View style={[styles.chipsWrap, { opacity: fadeAnim }]}>
+          {/* Section label */}
+          <View style={styles.sectionLabelRow}>
+            <View
+              style={[
+                styles.sectionLabelDot,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(69,87,176,0.4)"
+                    : "rgba(37,50,117,0.15)",
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.sectionLabelDotInner,
+                  { backgroundColor: "#4557B0" },
+                ]}
               />
             </View>
             <Text
               style={[
-                styles.progressText,
-                {
-                  color:
-                    theme.mode === "light" ? Colors.primary : Colors.lightGrey,
-                },
+                styles.sectionLabel,
+                { color: isDark ? "#4a5a8a" : "#94a3b8" },
               ]}
             >
-              {totalSelected < MIN_SELECTIONS
-                ? t("interestSelection.selectInterestsPrompt")
-                : t("interestSelection.selectedInterests", {
-                    total: totalSelected,
-                  })}
+              CATEGORIES
             </Text>
           </View>
-        </Animated.View>
 
-        <Animated.View style={[styles.chipsSection, { opacity: fadeAnim }]}>
           <View style={styles.chipsGrid}>
             {translatedOptions.map((item, index) => (
               <AnimatedChip
@@ -499,168 +667,260 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 isSelected={selected.has(item.name)}
                 onPress={() => toggleInterest(item.name)}
                 index={index}
-                theme={theme}
+                isDark={isDark}
               />
             ))}
           </View>
         </Animated.View>
 
+        {/* ════════════════════════════════════
+            CUSTOM INTEREST CARD
+        ════════════════════════════════════ */}
         <Animated.View
-          style={[
-            styles.customSection,
-            {
-              opacity: fadeAnim,
-              backgroundColor:
-                theme.mode === "dark"
-                  ? "rgba(20, 19, 22, 0.52)"
-                  : "rgba(115, 111, 167, 0.33)",
-              borderColor:
-                theme.mode === "dark"
-                  ? "rgba(20, 19, 22, 0.52)"
-                  : "rgba(224, 212, 236, 1)",
-            },
-          ]}
+          style={{
+            opacity: fadeAnim,
+            paddingHorizontal: RFPercentage(2.5),
+            marginBottom: RFPercentage(2),
+          }}
         >
-          <View style={styles.customHeader}>
-            <View style={styles.customTitleRow}>
-              <LinearGradient
-                colors={["#19195dff", "#3c36aeff"]}
-                style={styles.customIconBg}
-              >
-                <FontAwesome5
-                  name="plus"
-                  size={RFPercentage(1.4)}
-                  color="#fff"
-                  solid
-                />
-              </LinearGradient>
-              <Text style={[styles.customTitle, { color:theme.mode === "dark" ? Colors.white : theme.primary }]}>
-                {t("interestSelection.addCustomInterestTitle")}
-              </Text>
-            </View>
-            <Text style={[styles.customSubtitle, { color: theme.darkGrey }]}>
-              {t("interestSelection.addCustomInterestSubtitle")}
-            </Text>
-          </View>
+          <View
+            style={[
+              styles.customCard,
+              {
+                backgroundColor: isDark
+                  ? "rgba(18,21,48,0.9)"
+                  : "rgba(255,255,255,0.92)",
+                borderColor: isDark
+                  ? "rgba(69,87,176,0.22)"
+                  : "rgba(37,50,117,0.12)",
+              },
+            ]}
+          >
+            {/* Card accent bar */}
+            <LinearGradient
+              colors={["#253275", "#4557B0", "#DD53A8"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.cardBar}
+            />
 
-          {customInterests?.length > 0 && (
-            <View style={styles.customTagsWrap}>
-              {customInterests.map((name, index) => (
-                <CustomTag
-                  key={name}
-                  name={name}
-                  onRemove={() => removeCustom(name)}
-                  index={index}
-                />
-              ))}
-            </View>
-          )}
+            <View style={styles.customCardBody}>
+              {/* Header row */}
+              <View style={styles.customCardHeader}>
+                <LinearGradient
+                  colors={["#253275", "#4557B0"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.customIconBg}
+                >
+                  <FontAwesome5
+                    name="plus"
+                    size={RFPercentage(1.3)}
+                    color="#fff"
+                    solid
+                  />
+                </LinearGradient>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.customCardTitle,
+                      { color: isDark ? "#dde3ff" : "#1a1e4a" },
+                    ]}
+                  >
+                    {t("interestSelection.addCustomInterestTitle")}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.customCardSubtitle,
+                      { color: isDark ? "#4a5a8a" : "#94a3b8" },
+                    ]}
+                  >
+                    {t("interestSelection.addCustomInterestSubtitle")}
+                  </Text>
+                </View>
+              </View>
 
-          <View style={styles.inputRow}>
-            <View style={styles.inputWrap}>
-              <TextInput
-                ref={inputRef}
-                style={[styles.textInput, { color: theme.black }]}
-                placeholder={t("interestSelection.customInterestPlaceholder")}
-                placeholderTextColor={theme.darkGrey}
-                value={inputText}
-                onChangeText={setInputText}
-                onSubmitEditing={addCustomInterest}
-                returnKeyType="done"
-                maxLength={40}
-              />
+              {/* Custom tags */}
+              {customInterests.length > 0 && (
+                <View style={styles.tagsWrap}>
+                  {customInterests.map((name, index) => (
+                    <CustomTag
+                      key={name}
+                      name={name}
+                      onRemove={() => removeCustom(name)}
+                      index={index}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {/* Input row */}
+              <View style={styles.inputRow}>
+                <View
+                  style={[
+                    styles.inputWrap,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(37,50,117,0.12)"
+                        : "rgba(37,50,117,0.05)",
+                      borderColor: isDark
+                        ? "rgba(69,87,176,0.25)"
+                        : "rgba(37,50,117,0.12)",
+                    },
+                  ]}
+                >
+                  <FontAwesome5
+                    name="pen"
+                    size={RFPercentage(1.4)}
+                    color={isDark ? "#4557B0" : "#8094c8"}
+                    solid
+                    style={{ marginLeft: RFPercentage(1.4) }}
+                  />
+                  <TextInput
+                    ref={inputRef}
+                    style={[
+                      styles.input,
+                      { color: isDark ? "#dde3ff" : "#1a1e4a" },
+                    ]}
+                    placeholder={t(
+                      "interestSelection.customInterestPlaceholder",
+                    )}
+                    placeholderTextColor={isDark ? "#374070" : "#94a3b8"}
+                    value={inputText}
+                    onChangeText={setInputText}
+                    onSubmitEditing={addCustomInterest}
+                    returnKeyType="done"
+                    maxLength={40}
+                  />
+                </View>
+
+                <TouchableOpacity
+                  onPress={addCustomInterest}
+                  disabled={!inputText.trim()}
+                  activeOpacity={0.85}
+                  style={styles.addBtn}
+                >
+                  <LinearGradient
+                    colors={
+                      inputText.trim()
+                        ? ["#253275", "#4557B0"]
+                        : ["#555", "#666"]
+                    }
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[
+                      styles.addBtnInner,
+                      !inputText.trim() && { opacity: 0.4 },
+                    ]}
+                  >
+                    <FontAwesome5
+                      name="arrow-right"
+                      size={RFPercentage(1.6)}
+                      color="#fff"
+                      solid
+                    />
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
             </View>
-            <TouchableOpacity
-              onPress={addCustomInterest}
-              style={[
-                styles.addBtn,
-                !inputText.trim() && styles.addBtnDisabled,
-              ]}
-              disabled={!inputText.trim()}
-            >
-              <LinearGradient
-                colors={
-                  inputText.trim()
-                    ? ["#1e206eff", "#2a267cff"]
-                    : ["#9c9cacff", "#9f9fbdff"]
-                }
-                style={styles.addBtnGradient}
-              >
-                <FontAwesome5
-                  name="arrow-right"
-                  size={RFPercentage(1.6)}
-                  color={
-                    inputText.trim() ? "#fff" : "rgba(255, 255, 255, 0.76)"
-                  }
-                  solid
-                />
-              </LinearGradient>
-            </TouchableOpacity>
           </View>
         </Animated.View>
 
-        <View style={{ height: RFPercentage(14) }} />
-
-        <View style={styles.ctaContainer}>
-          <TouchableOpacity
-            onPress={handleSave}
-            disabled={saving}
-            activeOpacity={0.9}
-            style={{ width: "60%" }}
-          >
-            <LinearGradient
-              colors={
-                isReady
-                  ? ["#161f59ff", "#221b6eff"]
-                  : theme.mode === "dark"
-                    ? ["#31314fff", "#2d2d45ff"]
-                    : ["#b4b4c6ff", "#bfbfd2ff"]
-              }
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.ctaButton}
-            >
-              {saving ? (
-                <View style={styles.ctaContent}>
-                  <FontAwesome5
-                    name="circle-notch"
-                    size={RFPercentage(2)}
-                    color="#fff"
-                  />
-                  <Text style={styles.ctaText}>
-                    {t("interestSelection.saving")}
-                  </Text>
-                </View>
-              ) : (
-                <View style={styles.ctaContent}>
-                  <Text
-                    style={[
-                      styles.ctaText,
-                      !isReady && { color: "rgba(255, 255, 255, 0.97)" },
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {isReady
-                      ? t("interestSelection.continueCTA")
-                      : t("interestSelection.selectMoreCTA", {
-                          remaining: MIN_SELECTIONS - totalSelected,
-                        })}
-                  </Text>
-                </View>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => navigation.replace("TabNavigator")}
-            style={styles.skipBtn}
-          >
-            <Text style={[styles.skipText, { color: theme.grey }]}>
-              {t("interestSelection.skipForNow")}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Spacer for floating CTA */}
+        <View style={{ height: RFPercentage(16) }} />
       </ScrollView>
+
+      {/* ════════════════════════════════════
+          FLOATING CTA
+      ════════════════════════════════════ */}
+      <View
+        style={[
+          styles.cta,
+          {
+            backgroundColor: isDark
+              ? "rgba(8,11,26,0.96)"
+              : "rgba(240,243,255,0.97)",
+            borderTopColor: isDark
+              ? "rgba(69,87,176,0.15)"
+              : "rgba(37,50,117,0.08)",
+          },
+        ]}
+      >
+        {/* Continue / Select more button */}
+        <TouchableOpacity
+          onPress={handleSave}
+          disabled={saving}
+          activeOpacity={0.88}
+          style={styles.ctaBtn}
+        >
+          <LinearGradient
+            colors={
+              isReady
+                ? ["#253275", "#4557B0"]
+                : isDark
+                  ? ["#1c1f3a", "#22254a"]
+                  : ["#c5cce8", "#d0d5ec"]
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.ctaBtnInner}
+          >
+            {saving ? (
+              <>
+                <FontAwesome5
+                  name="circle-notch"
+                  size={RFPercentage(1.9)}
+                  color="#fff"
+                />
+                <Text style={styles.ctaBtnText}>
+                  {t("interestSelection.saving")}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text
+                  style={[
+                    styles.ctaBtnText,
+                    !isReady && {
+                      color: isDark
+                        ? "rgba(255,255,255,0.5)"
+                        : "rgba(37,50,117,0.5)",
+                    },
+                  ]}
+                >
+                  {isReady
+                    ? t("interestSelection.continueCTA")
+                    : t("interestSelection.selectMoreCTA", {
+                        remaining: MIN_SELECTIONS - totalSelected,
+                      })}
+                </Text>
+                {isReady && (
+                  <View style={styles.ctaArrow}>
+                    <Feather
+                      name="arrow-right"
+                      size={RFPercentage(1.8)}
+                      color="#fff"
+                    />
+                  </View>
+                )}
+              </>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+
+        {/* Skip */}
+        <TouchableOpacity
+          onPress={() => navigation.replace("TabNavigator")}
+          activeOpacity={0.7}
+          style={styles.skip}
+        >
+          <Text
+            style={[styles.skipText, { color: isDark ? "#3a4570" : "#94a3b8" }]}
+          >
+            {t("interestSelection.skipForNow")}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -668,318 +928,262 @@ export default function InterestSelectionScreen({ navigation }: any) {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  scrollContent: {
+  scroll: {
     paddingTop: Platform.OS === "ios" ? RFPercentage(8) : RFPercentage(9),
-    paddingBottom: RFPercentage(8),
+    paddingBottom: RFPercentage(4),
   },
 
-  // Decorative orbs
-  orb1: {
+  // Background
+  topGlow: {
     position: "absolute",
-    width: RFPercentage(40),
-    height: RFPercentage(40),
-    borderRadius: RFPercentage(20),
-    backgroundColor: "#7C3AED",
-    opacity: 0.08,
-    top: -RFPercentage(10),
-    right: -RFPercentage(10),
-  },
-  orb2: {
-    position: "absolute",
-    width: RFPercentage(30),
-    height: RFPercentage(30),
-    borderRadius: RFPercentage(15),
-    backgroundColor: "#4F46E5",
-    opacity: 0.06,
-    bottom: RFPercentage(20),
-    left: -RFPercentage(10),
-  },
-  orb3: {
-    position: "absolute",
-    width: RFPercentage(20),
-    height: RFPercentage(20),
-    borderRadius: RFPercentage(10),
-    backgroundColor: "#EC4899",
-    opacity: 0.05,
-    top: RFPercentage(40),
-    right: RFPercentage(5),
+    top: 0,
+    left: 0,
+    right: 0,
+    height: RFPercentage(25),
   },
 
   // Header
   header: {
-    paddingHorizontal: RFPercentage(3),
-    marginBottom: RFPercentage(3),
+    paddingHorizontal: RFPercentage(2.5),
+    marginBottom: RFPercentage(3.5),
   },
-  headerBadge: {
+  topRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.primary,
-    borderWidth: 1,
-    borderColor: Colors.primary,
+    marginBottom: RFPercentage(2.8),
+    gap: RFPercentage(1.2),
+  },
+  backBtn: {
+    width: RFPercentage(4.6),
+    height: RFPercentage(4.6),
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badge: {
+    borderRadius: 100,
+    overflow: "hidden",
+  },
+  badgeGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.6),
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(0.6),
-    borderRadius: RFPercentage(5),
-    alignSelf: "flex-start",
-
-    gap: RFPercentage(0.7),
-    marginLeft: RFPercentage(1),
-    top: 5,
+    paddingVertical: RFPercentage(0.55),
+    borderRadius: 100,
   },
-  headerBadgeText: {
-    color: "#ffffffff",
-    fontSize: RFPercentage(1.4),
+  badgeText: {
     fontFamily: "Poppins_500Medium",
-  },
-  title: {
-    fontSize: RFPercentage(3.2),
-    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.35),
     color: "#fff",
-    lineHeight: RFPercentage(5),
-    marginBottom: RFPercentage(1.2),
+    letterSpacing: 0.2,
+  },
+
+  title: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(3.1),
+    lineHeight: RFPercentage(4.4),
+    letterSpacing: -0.5,
+    marginBottom: RFPercentage(0.8),
+  },
+  titleUnderline: {
+    height: 3,
+    width: 56,
+    borderRadius: 2,
+    marginBottom: RFPercentage(1.4),
   },
   subtitle: {
-    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.45)",
-    lineHeight: RFPercentage(2.8),
+    fontSize: RFPercentage(1.6),
+    lineHeight: RFPercentage(2.6),
     marginBottom: RFPercentage(2.5),
   },
 
   // Progress
-  progressContainer: {
-    gap: RFPercentage(0.8),
+  progressSection: { gap: RFPercentage(1.2) },
+  progressMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  progressTrack: {
-    height: RFPercentage(0.5),
-    backgroundColor: "rgba(81, 73, 73, 0.08)",
-    borderRadius: RFPercentage(1),
+  progressLabel: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.4),
+  },
+  track: {
+    height: RFPercentage(0.55),
+    borderRadius: 4,
     overflow: "hidden",
   },
-  progressFill: {
-    height: "100%",
-    borderRadius: RFPercentage(1),
-    backgroundColor: Colors.primary,
-    // Gradient-like effect
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
+
+  // Section label
+  sectionLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.8),
+    marginBottom: RFPercentage(1.6),
   },
-  progressText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_600SemiBold",
-    color: "rgba(255,255,255,0.4)",
-    marginTop: 5,
+  sectionLabelDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionLabelDotInner: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  sectionLabel: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.1),
+    letterSpacing: 2,
   },
 
   // Chips
-  chipsSection: {
+  chipsWrap: {
     paddingHorizontal: RFPercentage(2.5),
     marginBottom: RFPercentage(3),
   },
   chipsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: RFPercentage(1.1),
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(65, 66, 79, 0.47)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.1)",
-    borderRadius: RFPercentage(10),
-    paddingVertical: RFPercentage(0.5),
-    paddingLeft: RFPercentage(0.8),
-    paddingRight: RFPercentage(1.5),
-    gap: RFPercentage(0.8),
-    position: "relative",
-    overflow: "hidden",
-  },
-  chipSelectedGlow: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: RFPercentage(10),
-  },
-  chipIcon: {
-    width: RFPercentage(3.4),
-    height: RFPercentage(3.4),
-    borderRadius: RFPercentage(5),
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  chipText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.75)",
-  },
-  checkBadge: {
-    width: RFPercentage(1.9),
-    height: RFPercentage(1.9),
-    borderRadius: RFPercentage(1),
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: RFPercentage(0.3),
+    gap: RFPercentage(1),
   },
 
-  // Custom Section
-  customSection: {
-    marginHorizontal: RFPercentage(2.5),
-    backgroundColor: "rgba(255,255,255,0.04)",
+  // Custom card
+  customCard: {
+    borderRadius: 20,
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(206, 204, 208, 0.52)",
-    borderRadius: RFPercentage(2.5),
-    padding: RFPercentage(2.5),
-    borderBottomWidth: RFPercentage(0.2),
+    shadowColor: "#253275",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
   },
-  customHeader: {
-    marginBottom: RFPercentage(2),
-  },
-  customTitleRow: {
+  cardBar: { height: 3, width: "100%" },
+  customCardBody: { padding: RFPercentage(2.2) },
+  customCardHeader: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: RFPercentage(1),
-    marginBottom: RFPercentage(0.5),
+    alignItems: "flex-start",
+    gap: RFPercentage(1.1),
+    marginBottom: RFPercentage(1.8),
   },
   customIconBg: {
-    width: RFPercentage(3.2),
-    height: RFPercentage(3.2),
-    borderRadius: RFPercentage(1),
-    justifyContent: "center",
+    width: RFPercentage(3.6),
+    height: RFPercentage(3.6),
+    borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
   },
-  customTitle: {
-    fontSize: RFPercentage(1.9),
+  customCardTitle: {
     fontFamily: "Poppins_600SemiBold",
-    color: "#fff",
+    fontSize: RFPercentage(1.75),
+    marginBottom: 2,
   },
-  customSubtitle: {
-    fontSize: RFPercentage(1.5),
+  customCardSubtitle: {
     fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.35)",
-    marginLeft: RFPercentage(4.2),
+    fontSize: RFPercentage(1.4),
+    lineHeight: RFPercentage(2.2),
   },
-  customTagsWrap: {
+  tagsWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: RFPercentage(0.9),
-    marginBottom: RFPercentage(2),
+    gap: RFPercentage(0.8),
+    marginBottom: RFPercentage(1.6),
   },
-  customTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: RFPercentage(5),
-    paddingVertical: RFPercentage(0.7),
-    paddingLeft: RFPercentage(1.4),
-    paddingRight: RFPercentage(0.8),
-    gap: RFPercentage(0.7),
-  },
-  customTagText: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_500Medium",
-    color: "#fff",
-  },
-  customTagRemove: {
-    width: RFPercentage(2.2),
-    height: RFPercentage(2.2),
-    borderRadius: RFPercentage(1.1),
-    backgroundColor: "rgba(255,255,255,0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
+  // Input
   inputRow: {
     flexDirection: "row",
     gap: RFPercentage(1),
+    alignItems: "center",
   },
   inputWrap: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(123, 119, 131, 0.32)",
-    borderRadius: RFPercentage(1.5),
+    borderRadius: 14,
     gap: RFPercentage(0.8),
+    height: RFPercentage(5.8),
   },
-  textInput: {
+  input: {
     flex: 1,
-    height: RFPercentage(5.5),
-    color: "#fff",
-    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
-    paddingHorizontal: RFPercentage(1.5),
+    fontSize: RFPercentage(1.55),
+    paddingRight: RFPercentage(1.4),
+    height: "100%",
   },
   addBtn: {
-    borderRadius: RFPercentage(1.5),
+    borderRadius: 14,
     overflow: "hidden",
+    shadowColor: "#253275",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  addBtnDisabled: {
-    opacity: 0.5,
-  },
-  addBtnGradient: {
-    width: RFPercentage(5.5),
-    height: RFPercentage(5.5),
-    justifyContent: "center",
+  addBtnInner: {
+    width: RFPercentage(5.8),
+    height: RFPercentage(5.8),
     alignItems: "center",
-    borderRadius: RFPercentage(1.5),
+    justifyContent: "center",
+    borderRadius: 14,
   },
 
-  back: {
-    // position: "absolute",
-    // top: RFPercentage(6),
-    // left: RFPercentage(2),
-    width: RFPercentage(4.5),
-    height: RFPercentage(4.5),
-    borderRadius: RFPercentage(100),
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(72, 70, 70, 0.3)",
-  },
-  // CTA
-  ctaContainer: {
+  // Floating CTA
+  cta: {
     position: "absolute",
-    bottom: 50,
+    bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: RFPercentage(3),
-    paddingBottom: Platform.OS === "ios" ? RFPercentage(2.5) : RFPercentage(3),
-    // paddingTop: RFPercentage(2),
-    // backgroundColor: "rgba(15,12,41,0.95)",
-    // borderTopWidth: 1,
-    // borderTopColor: "rgba(255,255,255,0.06)",
+    paddingHorizontal: RFPercentage(2.5),
+    paddingTop: RFPercentage(1.8),
+    paddingBottom: Platform.OS === "ios" ? RFPercentage(4) : RFPercentage(2.5),
+    borderTopWidth: 1,
     alignItems: "center",
-    gap: RFPercentage(1),
+    gap: RFPercentage(0.8),
   },
-  ctaButton: {
-    width: "100%",
+  ctaBtn: {
+    width: "60%",
     borderRadius: RFPercentage(100),
-    paddingVertical: RFPercentage(1.5),
-    alignItems: "center",
-    justifyContent: "center",
+    overflow: "hidden",
+    shadowColor: "#253275",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    // elevation: 10,
+    height: RFPercentage(6),
   },
-  ctaContent: {
+  ctaBtnInner: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: RFPercentage(1),
+    borderRadius: RFPercentage(100),
+    height: RFPercentage(6),
   },
-  ctaText: {
-    fontSize: RFPercentage(1.8),
+  ctaBtnText: {
     fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.85),
     color: "#fff",
+    letterSpacing: 0.2,
   },
   ctaArrow: {
-    width: RFPercentage(3),
-    height: RFPercentage(3),
-    borderRadius: RFPercentage(1.5),
-    backgroundColor: "rgba(255,255,255,0.15)",
-    justifyContent: "center",
+    width: RFPercentage(3.2),
+    height: RFPercentage(3.2),
+    borderRadius: 100,
+    backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
+    justifyContent: "center",
   },
-  skipBtn: {
-    paddingVertical: RFPercentage(0.5),
-  },
+  skip: { paddingVertical: RFPercentage(0.6) },
   skipText: {
-    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.3)",
+    fontSize: RFPercentage(1.5),
   },
 });

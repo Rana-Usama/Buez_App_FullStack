@@ -30,6 +30,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { createNewChat } from "../services/Chat.service";
 import { useUser } from "../contexts/user.context";
 import CustomNav from "../components/common/CustomNav";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 interface ReviewType {
   id: string;
@@ -227,7 +229,17 @@ function ConfirmedHelpers({ route, navigation }) {
     });
   };
 
+
+  
+
   const renderHelperItem = ({ item, index }) => {
+
+      const isDark = theme.mode === "dark";
+    
+      const firstLetter = item?.userName.trim()?.[0];
+      const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
+
+
     return (
       <View
         style={[
@@ -240,10 +252,16 @@ function ConfirmedHelpers({ route, navigation }) {
         ]}
       >
         <View style={styles.helperInfo}>
-          <Image
-            style={styles.helperImage}
-            source={item?.profileImage ? { uri: item.profileImage } : Icons.dp}
-          />
+          {item?.profileImage ? (
+            <Image
+              style={styles.helperImage}
+              source={{ uri: item.profileImage }}
+              resizeMode="cover"
+            />
+          ) : (
+            <AvatarInitials name={item?.userName} style={[styles.helperImage,{borderColor:groupTextColor}]} />
+          )}
+
           <View style={styles.helperDetails}>
             <Text style={[styles.helperName, { color: theme.heading }]}>
               {item.userName || "Unknown User"}
@@ -444,8 +462,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   taskInfo: {
-    width:"90%",
-    alignSelf:"center"
+    width: "90%",
+    alignSelf: "center",
     // padding: RFPercentage(2),
   },
   taskTitle: {

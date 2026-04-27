@@ -17,7 +17,6 @@ import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import ConfirmationModal from "../components/common/ConfirmationModal";

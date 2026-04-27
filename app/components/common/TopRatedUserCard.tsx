@@ -14,6 +14,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { HomeGradients } from "../../config/Gradients";
 import { TopRatedUser } from "../../types/home.types";
 import { Icons } from "../../config/theme";
+import AvatarInitials from "./DefaultAvatars";
 
 interface TopRatedUserCardProps {
   user: TopRatedUser;
@@ -119,14 +120,27 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
 
           {/* Avatar */}
           <View style={styles.avatarWrapper}>
-            <View style={styles.avatarShadow}>
-              <Image
-                source={
-                  user.profileImage ? { uri: user.profileImage } : Icons.dp
-                }
-                style={styles.avatar}
+            {user.profileImage ? (
+              <View style={styles.avatarShadow}>
+                <Image
+                  source={{ uri: user.profileImage }}
+                  style={styles.avatar}
+                />
+              </View>
+            ) : (
+              <AvatarInitials
+                name={user.name}
+                bgColor={cardGradient[0]}
+                textColor={cardGradient[2]}
+                style={[
+                  styles.avatar,
+                  {
+                    borderWidth: RFPercentage(0.3),
+                    borderColor: cardGradient[2],
+                  },
+                ]}
               />
-            </View>
+            )}
           </View>
 
           {/* Name & Handle */}

@@ -23,6 +23,7 @@ import { selectLocation } from "../redux/Actions";
 import CustomNav from "../components/common/CustomNav";
 import { LinearGradient } from "expo-linear-gradient";
 import { TopRatedUserGradients } from "../config/Gradients";
+import AvatarInitials from "../components/common/DefaultAvatars";
 
 type ApiUser = {
   userId: string;
@@ -197,7 +198,11 @@ const TopRatedUsers = ({ navigation }: any) => {
             postRequest: {},
           })
         }
-        style={[styles.cardContainer, { shadowColor: cardGradient[1] },{borderColor:cardGradient[0]}]}
+        style={[
+          styles.cardContainer,
+          { shadowColor: cardGradient[1] },
+          { borderColor: cardGradient[0] },
+        ]}
       >
         <LinearGradient
           colors={cardGradient}
@@ -232,10 +237,16 @@ const TopRatedUsers = ({ navigation }: any) => {
             end={{ x: 0, y: 1 }}
           />
           <View style={styles.cardHeader}>
-            <Image
-              source={user.profileImage ? { uri: user.profileImage } : Icons.dp}
-              style={styles.avatar}
-            />
+            {user?.profileImage ? (
+              <Image
+                source={{ uri: user.profileImage }}
+                style={styles.avatar}
+                resizeMode="cover"
+              />
+            ) : (
+              <AvatarInitials name={user.userName} style={styles.avatar} />
+            )}
+
             <View style={styles.headerInfo}>
               <View style={styles.nameRow}>
                 {/* Added shadow to text for better legibility on gradients */}
@@ -253,12 +264,13 @@ const TopRatedUsers = ({ navigation }: any) => {
                   {user.userName}
                 </Text>
                 <View
-                  style={[
-                    styles.badgeTag,
-                    { backgroundColor: badge.bgColor },
-                  ]}
+                  style={[styles.badgeTag, { backgroundColor: badge.bgColor }]}
                 >
-                  <Ionicons name={badge.icon as any} size={10} color={badge.color} />
+                  <Ionicons
+                    name={badge.icon as any}
+                    size={10}
+                    color={badge.color}
+                  />
                   <Text style={[styles.badgeText, { color: badge.color }]}>
                     {`  `}
                     {badge.text}
@@ -286,26 +298,42 @@ const TopRatedUsers = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={[styles.statsIslandMesh,]}>
+          <View style={[styles.statsIslandMesh]}>
             <View style={styles.statBox}>
-              <Text style={[styles.statValMesh,{color:theme.grey}]}>{user.activeTasks}</Text>
-              <Text style={[styles.statLabMesh, {color:theme.darkGrey}]}>{t("profileRank.txt6")}</Text>
+              <Text style={[styles.statValMesh, { color: theme.grey }]}>
+                {user.activeTasks}
+              </Text>
+              <Text style={[styles.statLabMesh, { color: theme.darkGrey }]}>
+                {t("profileRank.txt6")}
+              </Text>
             </View>
             <View style={[styles.divider]} />
             <View style={styles.statBox}>
-              <Text style={[styles.statValMesh,{color:theme.grey}]} numberOfLines={1}>
+              <Text
+                style={[styles.statValMesh, { color: theme.grey }]}
+                numberOfLines={1}
+              >
                 {user.completedTasks}
               </Text>
-              <Text style={[styles.statLabMesh, {color:theme.darkGrey}]} numberOfLines={1}>
+              <Text
+                style={[styles.statLabMesh, { color: theme.darkGrey }]}
+                numberOfLines={1}
+              >
                 {t("profileRank.txt7")}
               </Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.statBox}>
-              <Text style={[styles.statValMesh, {color:theme.grey}]} numberOfLines={1}>
+              <Text
+                style={[styles.statValMesh, { color: theme.grey }]}
+                numberOfLines={1}
+              >
                 {user.successRate}%
               </Text>
-              <Text style={[styles.statLabMesh, {color:theme.darkGrey}]} numberOfLines={1}>
+              <Text
+                style={[styles.statLabMesh, { color: theme.darkGrey }]}
+                numberOfLines={1}
+              >
                 {t("profileRank.txt31")}
               </Text>
             </View>
@@ -573,7 +601,7 @@ const styles = StyleSheet.create({
     }),
   },
   cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
-  avatar: { width: 50, height: 50, borderRadius: 12 },
+  avatar: { width: RFPercentage(6), height: RFPercentage(6), borderRadius:RFPercentage(1.5) },
   headerInfo: { flex: 1, marginLeft: 12 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
 
@@ -621,8 +649,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 4,
     overflow: "hidden",
-    borderWidth:1,
-
+    borderWidth: 1,
   },
   gradientWrapper: {
     padding: 16,
@@ -641,10 +668,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "rgba(173, 173, 184, 0.23)", 
-    borderRadius:RFPercentage(1.5),
-    paddingVertical:RFPercentage(1),
-    paddingHorizontal:RFPercentage(1)
+    backgroundColor: "rgba(173, 173, 184, 0.23)",
+    borderRadius: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1),
   },
   statValMesh: {
     fontSize: RFPercentage(1.8),

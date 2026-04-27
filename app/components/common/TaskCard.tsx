@@ -19,6 +19,7 @@ import { Task } from "../../types/home.types";
 import { getFormatedDate } from "../../services/Shared.service";
 import { Icons } from "../../config/theme";
 import Colors from "../../config/Colors";
+import AvatarInitials from "./DefaultAvatars";
 
 const { width } = Dimensions.get("window");
 
@@ -244,15 +245,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
       <View style={styles.infoWrapper}>
         {/* User Info - Always Visible */}
         <View style={styles.cartInfoContainer}>
-          <Image
-            style={styles.userImage}
-            source={
-              task.user?.profileImage
-                ? { uri: task.user.profileImage }
-                : Icons.dp
-            }
-            defaultSource={Icons.dp}
-          />
+          {task.user?.profileImage ? (
+            <Image
+              style={styles.userImage}
+              source={{ uri: task.user.profileImage }}
+            />
+          ) : (
+            <AvatarInitials
+              name={task.user?.userName}
+              style={[styles.userImage, { borderWidth: 0 }]}
+              textStyle={{
+                fontSize: RFPercentage(2.5),
+                lineHeight: RFPercentage(3.5),
+              }}
+            />
+          )}
+
           <View style={styles.userInfoContainer}>
             <Text
               style={[styles.userName, { color: theme.heading }]}
@@ -578,12 +586,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               </>
             )}
 
-            <View
-              style={[
-                styles.compensationWrapper,
-               
-              ]}
-            >
+            <View style={[styles.compensationWrapper]}>
               <Image
                 tintColor={theme.darkGrey}
                 style={styles.compensationIcon}

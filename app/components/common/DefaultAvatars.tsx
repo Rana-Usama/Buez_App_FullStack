@@ -8,7 +8,7 @@ type Props = {
   size?: number;
   bgColor?: string;
   textColor?: string;
-  style?: ViewStyle;
+  style?: any;
   textStyle?: TextStyle;
 };
 

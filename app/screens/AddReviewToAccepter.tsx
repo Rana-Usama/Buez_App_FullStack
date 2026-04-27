@@ -1,4 +1,3 @@
-// screens/AddReviewToAccepter.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -40,6 +39,8 @@ import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { useTranslation } from "react-i18next";
 import CustomNav from "../components/common/CustomNav";
+import AvatarInitials from "../components/common/DefaultAvatars";
+import { getAvatarColors } from "../config/avatarColors";
 
 const getTargetLanguage = async () => {
   try {
@@ -66,7 +67,7 @@ type Translations = {
   writeReview: string;
   characters: string;
   tap: string;
-  bulk:string
+  bulk: string;
 };
 
 interface ParamsType {
@@ -121,7 +122,7 @@ function AddReviewToAccepter() {
   const taskId = task?.taskId || "";
   const originalDesc = task?.description ?? "";
   const completedOn = moment(
-    task?.createdAt?.toDate?.() ?? task?.createdAt ?? new Date()
+    task?.createdAt?.toDate?.() ?? task?.createdAt ?? new Date(),
   ).format("MMM D, YYYY");
   const { t } = useTranslation();
   const [lang, setLang] = useState("en");
@@ -133,7 +134,7 @@ function AddReviewToAccepter() {
   const [starAnimations] = useState(
     Array(5)
       .fill(null)
-      .map(() => new Animated.Value(1))
+      .map(() => new Animated.Value(1)),
   );
 
   // Rating Star Animation
@@ -151,7 +152,6 @@ function AddReviewToAccepter() {
       }),
     ]).start();
   };
-
 
   // Saving Review In Notifications DB
   const saveReviewNotification = async () => {
@@ -213,9 +213,6 @@ function AddReviewToAccepter() {
         translatedReview.length > 50
           ? translatedReview.substring(0, 50) + "..."
           : translatedReview;
-
-      console.log("Sending review notification...");
-
       const response = await fetch(
         "https://buez-server-khaki.vercel.app/api/send-notification",
         {
@@ -235,7 +232,7 @@ function AddReviewToAccepter() {
               reviewRating: rating.filter(Boolean).length,
             },
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -243,7 +240,7 @@ function AddReviewToAccepter() {
         console.log("Server error response:", errorText);
         if (response.status === 500 && errorText.includes("not found")) {
           console.log(
-            "FCM token is invalid. User may have uninstalled the app."
+            "FCM token is invalid. User may have uninstalled the app.",
           );
         }
         return;
@@ -277,10 +274,10 @@ function AddReviewToAccepter() {
         writeReview: "Write your review",
         characters: "characters",
         tap: "Tap to rate",
-        bulk :"Bulk Task Helper"
+        bulk: "Bulk Task Helper",
       };
       const vals = await Promise.all(
-        Object.values(phrases).map((txt) => cachedTranslate(txt))
+        Object.values(phrases).map((txt) => cachedTranslate(txt)),
       );
       const map = Object.keys(phrases).reduce((acc, k, i) => {
         acc[k as keyof Translations] =
@@ -377,7 +374,7 @@ function AddReviewToAccepter() {
       };
       const reviewRef = await addDoc(
         collection(FIREBASE_DB, "reviews"),
-        reviewData
+        reviewData,
       );
       const reviewId = reviewRef.id;
       console.log("Review saved with ID:", reviewId);
@@ -390,16 +387,16 @@ function AddReviewToAccepter() {
           const reviewQuery = query(
             reviewsRef,
             where("taskId", "==", task.id),
-            where("reviewerId", "==", currentUserId)
+            where("reviewerId", "==", currentUserId),
           );
           const reviewSnapshot = await getDocs(reviewQuery);
 
           const reviewedWorkers = new Set(
-            reviewSnapshot.docs.map((doc) => doc.data().reviewedUserId)
+            reviewSnapshot.docs.map((doc) => doc.data().reviewedUserId),
           );
 
           const allConfirmedWorkersReviewed = task.confirmedWorkers.every(
-            (worker) => reviewedWorkers.has(worker.userId)
+            (worker) => reviewedWorkers.has(worker.userId),
           );
 
           if (allConfirmedWorkersReviewed) {
@@ -428,7 +425,7 @@ function AddReviewToAccepter() {
       } catch (notificationSaveError) {
         console.log(
           "Error saving notification (non-critical):",
-          notificationSaveError
+          notificationSaveError,
         );
       }
 
@@ -438,7 +435,7 @@ function AddReviewToAccepter() {
       } catch (notificationError) {
         console.log(
           "Push notification failed (non-critical):",
-          notificationError
+          notificationError,
         );
       }
 
@@ -468,9 +465,13 @@ function AddReviewToAccepter() {
     return selected
       ? Colors.star
       : theme.mode === "dark"
-      ? Colors.darkGrey
-      : Colors.stroke;
+        ? Colors.darkGrey
+        : Colors.stroke;
   };
+
+  const isDark = theme.mode === "dark";
+  const firstLetter = recipientUser?.userName.trim()?.[0];
+  const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
 
   return (
     <KeyboardAvoidingView
@@ -496,22 +497,24 @@ function AddReviewToAccepter() {
               {
                 backgroundColor: theme.white,
                 borderColor:
-                  theme.mode === "dark"
-                    ? theme.border
-                    : Colors.cardBorderLight,
+                  theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
               },
             ]}
           >
             <View style={styles.userHeader}>
-              <Image
-                source={
-                  recipientUser?.profileImage
-                    ? { uri: recipientUser?.profileImage }
-                    : Icons.dp
-                }
-                resizeMode="cover"
-                style={styles.profileImage}
-              />
+              {recipientUser?.profileImage ? (
+                <Image
+                  source={{ uri: recipientUser?.profileImage }}
+                  resizeMode="cover"
+                  style={styles.profileImage}
+                />
+              ) : (
+                <AvatarInitials
+                  name={recipientUser.userName}
+                  style={[styles.profileImage, { borderColor: groupTextColor }]}
+                />
+              )}
+
               <View style={styles.userInfo}>
                 <Text style={[styles.userName, { color: theme.heading }]}>
                   {recipientUser.userName}
@@ -562,9 +565,7 @@ function AddReviewToAccepter() {
               {
                 backgroundColor: theme.white,
                 borderColor:
-                  theme.mode === "dark"
-                    ? theme.border
-                    : Colors.cardBorderLight,
+                  theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
               },
             ]}
           >

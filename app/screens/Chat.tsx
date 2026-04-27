@@ -162,27 +162,20 @@ const Chat = ({ navigation, route }: any) => {
         if (cancelled) return;
         if (snapshot.docs.length < INITIAL_LOAD_LIMIT) setHasMore(false);
         lastDocRef.current = snapshot.docs[snapshot.docs.length - 1] ?? null;
-
         // Translate in parallel; skip translation for own messages
         const initial = await Promise.all(
           snapshot.docs.map((d) =>
             mapFirestoreDoc(d, d.data().senderId === currentUserId),
           ),
         );
-
         if (cancelled) return;
-
         setMessages(
           initial.sort(
             (a, b) =>
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           ),
         );
-
-        // Mark as read (fire-and-forget)
         markMessagesAsRead();
-
-        // Attach listener from NOW (newest message timestamp or now)
         const newestTimestamp =
           snapshot.docs[0]?.data().timestamp ?? Timestamp.now();
         attachListener(newestTimestamp);
@@ -258,9 +251,7 @@ const Chat = ({ navigation, route }: any) => {
         senderName,
         unread: true,
       };
-
       setInputText("");
-
       try {
         await addDoc(
           collection(FIREBASE_DB, `chats/${chatId}/messages`),
@@ -313,7 +304,6 @@ const Chat = ({ navigation, route }: any) => {
           doc(FIREBASE_DB, `chats/${chatId}/messages`, messageId),
         );
         setMessages((prev) => prev.filter((m) => m._id !== messageId));
-
         // Update lastMessage on chat doc
         const q = query(
           collection(FIREBASE_DB, `chats/${chatId}/messages`),
@@ -532,7 +522,7 @@ const Chat = ({ navigation, route }: any) => {
             messages={messages}
             onSend={onSend}
             user={{ _id: currentUserId, name: senderName }}
-            keyExtractor={(item) => item._id.toString()}
+            // keyExtractor={(item:any) => item._id.toString()}
             renderMessageText={renderMessageText}
             loadEarlier={hasMore}
             onLoadEarlier={loadMoreMessages}
@@ -554,7 +544,7 @@ const Chat = ({ navigation, route }: any) => {
             maxInputLength={500}
             showUserAvatar={false}
             alwaysShowSend
-            scrollToBottom
+            // scrollToBottom
           />
 
           {/* Initial load overlay */}

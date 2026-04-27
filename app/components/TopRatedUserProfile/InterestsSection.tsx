@@ -102,11 +102,11 @@ export default function InterestsSection({
         backgroundColor:
           theme.mode === "dark"
             ? "rgba(14, 14, 24, 1)"
-            : "rgba(227, 227, 240, 1)",
+            : "rgba(235, 235, 235, 0.57)",
         borderColor:
           theme.mode === "dark"
             ? "rgba(35, 35, 51, 1)"
-            : "rgba(227, 227, 240, 1)",
+            : "rgba(235, 235, 235, 0.57)",
       }}
     >
       <View

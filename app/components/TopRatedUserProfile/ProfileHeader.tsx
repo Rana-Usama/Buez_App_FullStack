@@ -12,6 +12,7 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
 import { Icons } from "../../config/theme";
 import { navigationRef } from "../../utils/navigationRef";
+import AvatarInitials from "../common/DefaultAvatars";
 
 type Props = {
   userBasic: any;
@@ -101,14 +102,19 @@ export default function ProfileHeader({
                 borderRadius: RFPercentage(7),
               }}
             >
-              <Image
-                source={
-                  userBasic?.profileImage
-                    ? { uri: userBasic.profileImage }
-                    : Icons.dp
-                }
-                style={{ width: "100%", height: "100%" }}
-              />
+              {userBasic?.profileImage ? (
+                <Image
+                  source={{ uri: userBasic.profileImage }}
+                  style={{ width: "100%", height: "100%" }}
+                />
+              ) : (
+                <AvatarInitials
+                  name={userBasic?.userName}
+                  textStyle={{fontSize:RFPercentage(4), lineHeight:RFPercentage(6)}}
+                  textColor={theme.mode === "dark" ?  "#2f095dff"  : "#315175ff"}
+                  style={{ width: "100%", height: "100%", backgroundColor:theme.mode === "dark" ?  "#664d84ff"  : "#7f99b7ff" }}
+                />
+              )}
             </View>
           </LinearGradient>
           <View
@@ -166,7 +172,7 @@ export default function ProfileHeader({
               color="#4CAF50"
             />
             <Text
-            numberOfLines={1}
+              numberOfLines={1}
               style={{
                 color: "#4CAF50",
                 fontFamily: "Poppins_600SemiBold",
@@ -195,7 +201,7 @@ export default function ProfileHeader({
             }}
           >
             <Text
-            numberOfLines={1}
+              numberOfLines={1}
               style={{
                 color: "#FFF",
                 fontSize: RFPercentage(1.2),
@@ -212,7 +218,7 @@ export default function ProfileHeader({
               color="#4CAF50"
             />
             <Text
-            numberOfLines={1}
+              numberOfLines={1}
               style={{ marginLeft: RFPercentage(0.5), color: theme.darkGrey }}
             >
               {/* success rate displayed by parent if needed */}
@@ -259,14 +265,14 @@ export default function ProfileHeader({
                     style={{
                       paddingVertical: RFPercentage(1.5),
                       alignItems: "center",
-                      paddingHorizontal:RFPercentage(2)
+                      paddingHorizontal: RFPercentage(2),
                     }}
                   >
                     {confirming ? (
                       <ActivityIndicator color="#FFF" />
                     ) : (
                       <Text
-                      numberOfLines={1}
+                        numberOfLines={1}
                         style={{
                           color: "#FFF",
                           fontSize: RFPercentage(1.6),
@@ -289,46 +295,48 @@ export default function ProfileHeader({
                   }}
                 >{`${slotInfo.filled}/${slotInfo.total} ${t("offerDetail.slt")} • ${slotInfo.remaining} ${t("offerDetail.lft")}`}</Text>
               </>
-            ) : ( <TouchableOpacity
-            onPress={handleStartChat}
-            style={{
-              width: "50%",
-              alignSelf: "center",
-              borderRadius: RFPercentage(3),
-              overflow: "hidden",
-            }}
-          >
-            <LinearGradient
-              colors={
-                theme.mode === "dark"
-                  ? ["#594174ff", "#9279acff"]
-                  : [Colors.primary, "#4c669f"]
-              }
-              style={{
-                paddingVertical: RFPercentage(1.8),
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: RFPercentage(1),
-              }}
-            >
-              <Ionicons
-                name="chatbubble-ellipses"
-                size={RFPercentage(2.2)}
-                color="#FFF"
-              />
-              <Text
-              numberOfLines={1}
+            ) : (
+              <TouchableOpacity
+                onPress={handleStartChat}
                 style={{
-                  color: "#FFF",
-                  fontSize: RFPercentage(1.6),
-                  fontFamily: "Poppins_600SemiBold",
+                  width: "50%",
+                  alignSelf: "center",
+                  borderRadius: RFPercentage(3),
+                  overflow: "hidden",
                 }}
               >
-                {t("details.txt9")}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>)}
+                <LinearGradient
+                  colors={
+                    theme.mode === "dark"
+                      ? ["#594174ff", "#9279acff"]
+                      : [Colors.primary, "#4c669f"]
+                  }
+                  style={{
+                    paddingVertical: RFPercentage(1.8),
+                    alignItems: "center",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    gap: RFPercentage(1),
+                  }}
+                >
+                  <Ionicons
+                    name="chatbubble-ellipses"
+                    size={RFPercentage(2.2)}
+                    color="#FFF"
+                  />
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      color: "#FFF",
+                      fontSize: RFPercentage(1.6),
+                      fontFamily: "Poppins_600SemiBold",
+                    }}
+                  >
+                    {t("details.txt9")}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           <TouchableOpacity
@@ -360,7 +368,7 @@ export default function ProfileHeader({
                 color="#FFF"
               />
               <Text
-              numberOfLines={1}
+                numberOfLines={1}
                 style={{
                   color: "#FFF",
                   fontSize: RFPercentage(1.6),

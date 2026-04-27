@@ -7,6 +7,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../../config/Colors";
 import { Icons } from "../../config/theme";
 import { ShareButton } from "../../job-sharing/ShareButton";
+import AvatarInitials from "../common/DefaultAvatars";
+import { getAvatarColors } from "../../config/avatarColors";
 
 type Props = {
   postRequest: any;
@@ -27,6 +29,11 @@ export default function UserCard({
   onOpenViewer,
   activeIndex,
 }: Props) {
+
+    const isDark = theme.mode === "dark";
+  
+    const firstLetter = postRequest?.user?.userName.trim()?.[0];
+    const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
   return (
     <View
       style={{
@@ -57,30 +64,37 @@ export default function UserCard({
           }}
         >
           <View style={{ marginRight: RFPercentage(1.5) }}>
-            <LinearGradient
-              colors={[Colors.primary, "#4557B0"]}
-              style={{
-                width: RFPercentage(6.5),
-                height: RFPercentage(6.5),
-                borderRadius: RFPercentage(3.25),
-                padding: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Image
-                source={
-                  postRequest?.user?.profileImage
-                    ? { uri: postRequest.user.profileImage }
-                    : Icons.dp
-                }
+            {postRequest?.user?.profileImage ? (
+              <LinearGradient
+                colors={[Colors.primary, "#4557B0"]}
                 style={{
-                  width: "100%",
-                  height: "100%",
+                  width: RFPercentage(6.5),
+                  height: RFPercentage(6.5),
+                  borderRadius: RFPercentage(100),
+                  padding: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={{ uri: postRequest.user.profileImage }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: RFPercentage(100),
+                  }}
+                />
+              </LinearGradient>
+            ) : (
+              <AvatarInitials
+                name={postRequest?.user?.userName}
+                style={{
+                  width: RFPercentage(6.5),
+                  height: RFPercentage(6.5),
                   borderRadius: RFPercentage(100),
                 }}
               />
-            </LinearGradient>
+            )}
           </View>
 
           <View style={{ flex: 1 }}>
@@ -110,8 +124,8 @@ export default function UserCard({
                 style={{
                   fontSize: RFPercentage(1.2),
                   color: theme.mode === "dark" ? Colors.white : theme.darkGrey,
-                  fontFamily:"Poppins_400Regular",
-                  lineHeight:RFPercentage(1.5)
+                  fontFamily: "Poppins_400Regular",
+                  lineHeight: RFPercentage(1.5),
                 }}
               >
                 {t("myRequests.txt4")} •{" "}
