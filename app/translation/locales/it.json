@@ -804,5 +804,27 @@
   "resendButton": "Invia di nuovo",
   "resendCooldown": "Invia di nuovo tra {{seconds}}s",
   "backToLogin": "Torna al login"
+},
+"freeTrialBanner": {
+  "active": {
+    "label": "Prova gratuita attiva",
+    "title": "Goditi le funzionalità premium"
+  },
+  "warning_no_card": {
+    "label": "Prova in scadenza",
+    "title": "Aggiungi un metodo di pagamento per continuare"
+  },
+  "urgent_no_card": {
+    "label": "Prova scade domani!",
+    "title": "Aggiorna ora per continuare"
+  },
+  "warning_with_card": {
+    "label": "Prova in scadenza",
+    "title": "Il tuo piano inizierà automaticamente"
+  },
+  "autorenew": {
+    "label": "Inizia domani",
+    "title": "Il piano mensile inizierà automaticamente"
+  }
 }
 }

@@ -150,6 +150,7 @@ function SubscriptionV2(props) {
         isFreeTrial: true,
         freeTrialStartedAt: serverTimestamp(),
         planType: "free",
+        hasPaymentMethod: false,
       });
       await createFreeTrialRecord({ userId, deviceId });
       await scheduleFreeTrialNotification(10);
@@ -195,6 +196,9 @@ function SubscriptionV2(props) {
         planType: "monthly",
         userCurrency,
         t,
+      });
+      await updateDoc(doc(firestore, "users", userId), {
+        hasPaymentMethod: true,
       });
       await createFreeTrialRecord({ userId, deviceId });
       props.navigation.navigate("InterestSelection");
@@ -320,7 +324,7 @@ function SubscriptionV2(props) {
         style={[
           styles.planCard,
           {
-            backgroundColor: isDark ? "rgba(16,19,44,0.95)" : "#fff",
+            backgroundColor: isDark ? "rgba(7, 9, 25, 0.95)" : "#fff",
             ...getBorderGradient(isSelected),
             marginLeft: index === 0 ? RFPercentage(3) : RFPercentage(1),
             marginRight:
@@ -412,7 +416,7 @@ function SubscriptionV2(props) {
               <Text
                 style={[
                   styles.planDescription,
-                  { color: isDark ? "#6b7db3" : "#64748B" },
+                  { color: isDark ? "#909fccff" : "#64748B" },
                 ]}
                 numberOfLines={1}
               >
@@ -451,7 +455,7 @@ function SubscriptionV2(props) {
                       <Text
                         style={[
                           styles.priceDecimal,
-                          { color: isDark ? "#8892b0" : "#64748B" },
+                          { color: isDark ? "#acb8daff" : "#64748B" },
                         ]}
                       >
                         .{decimalPart}
@@ -463,7 +467,7 @@ function SubscriptionV2(props) {
               <Text
                 style={[
                   styles.period,
-                  { color: isDark ? "#6b7db3" : "#94a3b8" },
+                  { color: isDark ? "#8f9dc8ff" : "#94a3b8" },
                 ]}
               >
                 {item.period}
@@ -494,7 +498,7 @@ function SubscriptionV2(props) {
                       item.popular || item.id === "yearly"
                         ? "#DD53A8"
                         : isDark
-                          ? "#4557B0"
+                          ? "#616ca5ff"
                           : "#253275",
                   },
                 ]}
@@ -506,7 +510,7 @@ function SubscriptionV2(props) {
               <Text
                 style={[
                   styles.originalPrice,
-                  { color: isDark ? "#4a5580" : "#94a3b8" },
+                  { color: isDark ? "#838aa8ff" : "#94a3b8" },
                 ]}
               >
                 {item.originalPrice}
@@ -541,7 +545,7 @@ function SubscriptionV2(props) {
                 <Text
                   style={[
                     styles.featureText,
-                    { color: isDark ? "#8892b0" : "#475569" },
+                    { color: isDark ? "#a8b3d4ff" : "#475569" },
                   ]}
                   numberOfLines={1}
                 >
@@ -566,12 +570,7 @@ function SubscriptionV2(props) {
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <View
-      style={[
-        styles.screen,
-        { backgroundColor: isDark ? "#080b1a" : "#f0f3ff" },
-      ]}
-    >
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -579,18 +578,22 @@ function SubscriptionV2(props) {
       />
 
       {/* Background gradient */}
-      <LinearGradient
+      {/* <LinearGradient
         colors={
           isDark
             ? ["#080b1a", "#0f1230", "#080b1a"]
             : ["#f0f3ff", "#eaedff", "#f5f0ff"]
         }
         style={StyleSheet.absoluteFillObject}
-      />
+      /> */}
 
       {/* Top glow strip */}
       <LinearGradient
-        colors={["rgba(37,50,117,0.28)", "transparent"]}
+        colors={
+          theme.mode === "dark"
+            ? ["rgba(37, 50, 117, 0.7)", "transparent"]
+            : ["rgba(37, 50, 117, 0.92)", Colors.white]
+        }
         style={styles.topGlow}
         pointerEvents="none"
       />
@@ -639,40 +642,6 @@ function SubscriptionV2(props) {
           >
             {t("subscriptionV2.startFree")}
           </Text>
-
-          {/* Trust badges */}
-          <View style={styles.trustRow}>
-            {[
-              { icon: "shield", label: t("subscriptionV2.securePayment") },
-              { icon: "x-circle", label: t("subscriptionV2.cancelAnytime") },
-            ].map((badge, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.trustBadge,
-                  {
-                    backgroundColor: isDark
-                      ? "rgba(69,87,176,0.12)"
-                      : "rgba(37,50,117,0.06)",
-                  },
-                ]}
-              >
-                <Feather
-                  name={badge.icon as any}
-                  size={RFPercentage(1.4)}
-                  color={isDark ? "#4557B0" : "#253275"}
-                />
-                <Text
-                  style={[
-                    styles.trustText,
-                    { color: isDark ? "#4557B0" : "#253275" },
-                  ]}
-                >
-                  {badge.label}
-                </Text>
-              </View>
-            ))}
-          </View>
         </View>
 
         {/* ── Plan cards ── */}
@@ -735,9 +704,7 @@ function SubscriptionV2(props) {
         style={[
           styles.footer,
           {
-            backgroundColor: isDark
-              ? "rgba(8,11,26,0.97)"
-              : "rgba(240,243,255,0.97)",
+            backgroundColor: theme.white,
             borderTopColor: isDark
               ? "rgba(69,87,176,0.15)"
               : "rgba(37,50,117,0.08)",

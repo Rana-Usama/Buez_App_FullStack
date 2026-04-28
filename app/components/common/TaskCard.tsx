@@ -234,10 +234,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
       </View>
 
       {/* Task Type Badge */}
-      <View
-        style={[styles.bulkBadge, { backgroundColor: Colors.primary + "20" }]}
-      >
-        <Text style={[styles.bulkBadgeText, { color: Colors.primary }]}>
+      <View style={[styles.bulkBadge, { backgroundColor: Colors.primary }]}>
+        <Text
+          style={[styles.bulkBadgeText, { color: Colors.white }]}
+          numberOfLines={1}
+        >
           {task.taskType}
         </Text>
       </View>
@@ -832,17 +833,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: RFPercentage(1.5),
     right: RFPercentage(1.5),
-    flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
+    paddingVertical: RFPercentage(0.7),
+    borderRadius: RFPercentage(100),
     zIndex: 10,
+    justifyContent: "center",
   },
   bulkBadgeText: {
     fontSize: RFPercentage(1.1),
     fontFamily: "Poppins_600SemiBold",
-    lineHeight: RFPercentage(1.3),
+    lineHeight: RFPercentage(1.5),
   },
 });
 

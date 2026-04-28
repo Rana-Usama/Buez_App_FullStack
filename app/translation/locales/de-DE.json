@@ -803,5 +803,27 @@
   "resendButton": "E-Mail erneut senden",
   "resendCooldown": "Erneut senden in {{seconds}}s",
   "backToLogin": "Zurück zum Login"
+},
+"freeTrialBanner": {
+  "active": {
+    "label": "Kostenlose Testphase aktiv",
+    "title": "Premium-Funktionen geniessen"
+  },
+  "warning_no_card": {
+    "label": "Testphase endet bald",
+    "title": "Zahlungsmethode hinzufügen, um fortzufahren"
+  },
+  "urgent_no_card": {
+    "label": "Test endet morgen!",
+    "title": "Jetzt upgraden, um fortzufahren"
+  },
+  "warning_with_card": {
+    "label": "Testphase endet bald",
+    "title": "Dein Abo startet automatisch"
+  },
+  "autorenew": {
+    "label": "Startet morgen",
+    "title": "Monatliches Abo startet automatisch"
+  }
 }
 }

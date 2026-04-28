@@ -264,7 +264,7 @@
     "slt": "slots filled",
     "lft": "left",
     "avl": "Available Slots",
-     "share": "Share"
+    "share": "Share"
   },
   "myRequests": {
     "txt1": "My Requests",
@@ -431,7 +431,7 @@
     "txt10": "Stay Updated",
     "txt11": "You'll get notifications when someone’s interested or sends an offer.",
     "txt12": "View My Requests",
-     "shareTitle": "Share Your Task",
+    "shareTitle": "Share Your Task",
     "shareDescription": "Share this opportunity with friends and family to find helpers faster!",
     "shareButton": "Share Now"
   },
@@ -486,7 +486,7 @@
     "txt1": "Loading notifications...",
     "txt2": "When you get notifications, they'll appear here",
     "txt3": "Rating:",
-    "txt4" : "Notifications"
+    "txt4": "Notifications"
   },
   "completed": {
     "txt1": "REVIEWED",
@@ -824,5 +824,28 @@
     "resendButton": "Resend Email",
     "resendCooldown": "Resend in {{seconds}}s",
     "backToLogin": "Back to Login"
+  },
+
+  "freeTrialBanner": {
+    "active": {
+      "label": "Free trial active",
+      "title": "Enjoying premium features"
+    },
+    "warning_no_card": {
+      "label": "Trial expiring soon",
+      "title": "Add payment method to continue"
+    },
+    "urgent_no_card": {
+      "label": "Trial expires tomorrow!",
+      "title": "Upgrade now to continue"
+    },
+    "warning_with_card": {
+      "label": "Trial ending soon",
+      "title": "Your plan will start automatically"
+    },
+    "autorenew": {
+      "label": "Starting tomorrow",
+      "title": "Monthly plan will begin automatically"
+    }
   }
 }

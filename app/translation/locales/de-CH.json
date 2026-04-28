@@ -804,5 +804,27 @@
   "resendButton": "E-Mail nomol sende",
   "resendCooldown": "Nomol sende i {{seconds}}s",
   "backToLogin": "Zurück zum Login"
+},
+"freeTrialBanner": {
+  "active": {
+    "label": "Gratis-Test aktiv",
+    "title": "Premium-Funktionen geniessen"
+  },
+  "warning_no_card": {
+    "label": "Test endet bald",
+    "title": "Zahlungsmethode hinzufügen, um fortzufahren"
+  },
+  "urgent_no_card": {
+    "label": "Test endet morgen!",
+    "title": "Jetzt upgraden, um weiterzumachen"
+  },
+  "warning_with_card": {
+    "label": "Test endet bald",
+    "title": "Dein Abo startet automatisch"
+  },
+  "autorenew": {
+    "label": "Startet morgen",
+    "title": "Monatliches Abo startet automatisch"
+  }
 }
 }

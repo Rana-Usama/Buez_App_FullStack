@@ -132,7 +132,7 @@ const StepRow = ({
           stepStyles.card,
           {
             backgroundColor: isDark
-              ? "rgba(18,21,48,0.75)"
+              ? "rgba(26, 30, 61, 0.75)"
               : "rgba(255,255,255,0.85)",
             borderColor: isDark ? step.accent + "28" : step.accent + "20",
           },
@@ -151,7 +151,10 @@ const StepRow = ({
             </Text>
           </View>
           <Text
-            style={[stepStyles.desc, { color: isDark ? "#8892b0" : "#64748B" }]}
+            style={[
+              stepStyles.desc,
+              { color: isDark ? "#abb2c9ff" : "#64748B" },
+            ]}
           >
             {t(step.descKey)}
           </Text>
@@ -169,11 +172,11 @@ const stepStyles = StyleSheet.create({
   },
   leftCol: {
     alignItems: "center",
-    width: RFPercentage(7),
+    width: RFPercentage(6),
   },
   iconCircle: {
-    width: RFPercentage(5.8),
-    height: RFPercentage(5.8),
+    width: RFPercentage(5),
+    height: RFPercentage(5),
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
@@ -207,7 +210,7 @@ const stepStyles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: 16,
     borderWidth: 1,
-    marginLeft: RFPercentage(1.6),
+    marginLeft: RFPercentage(1),
     marginBottom: RFPercentage(2.2),
     overflow: "hidden",
     shadowColor: "#253275",
@@ -273,7 +276,7 @@ const FreeTrial = ({ navigation }: any) => {
   }, []);
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.black }]}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -281,18 +284,22 @@ const FreeTrial = ({ navigation }: any) => {
       />
 
       {/* ── Background gradient ── */}
-      <LinearGradient
+      {/* <LinearGradient
         colors={
           isDark
             ? ["#080b1a", "#0f1230", "#080b1a"]
             : ["#f0f3ff", "#eaedff", "#f5f0ff"]
         }
         style={StyleSheet.absoluteFillObject}
-      />
+      /> */}
 
       {/* ── Top glow ── */}
       <LinearGradient
-        colors={["rgba(37,50,117,0.3)", "transparent"]}
+        colors={
+          theme.mode === "dark"
+            ? ["rgba(37, 50, 117, 0.7)", "transparent"]
+            : ["rgba(37, 50, 117, 0.92)", Colors.white]
+        }
         style={styles.topGlow}
         pointerEvents="none"
       />

@@ -458,7 +458,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: theme.white }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <StatusBar
@@ -468,18 +468,22 @@ export default function InterestSelectionScreen({ navigation }: any) {
       />
 
       {/* ── Background ── */}
-      <LinearGradient
+      {/* <LinearGradient
         colors={
           isDark
             ? ["#080b1a", "#0f1230", "#080b1a"]
             : ["#f0f3ff", "#e8ecff", "#f5f0ff"]
         }
         style={StyleSheet.absoluteFillObject}
-      />
+      /> */}
 
       {/* ── Subtle top glow strip ── */}
       <LinearGradient
-        colors={["rgba(37,50,117,0.35)", "transparent"]}
+        colors={
+          theme.mode === "dark"
+            ? ["rgba(37, 50, 117, 0.7)", "transparent"]
+            : ["rgba(37, 50, 117, 0.92)", Colors.white]
+        }
         style={styles.topGlow}
         pointerEvents="none"
       />
@@ -837,9 +841,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
         style={[
           styles.cta,
           {
-            backgroundColor: isDark
-              ? "rgba(8,11,26,0.96)"
-              : "rgba(240,243,255,0.97)",
+            backgroundColor: theme.white,
             borderTopColor: isDark
               ? "rgba(69,87,176,0.15)"
               : "rgba(37,50,117,0.08)",
@@ -915,7 +917,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
           style={styles.skip}
         >
           <Text
-            style={[styles.skipText, { color: isDark ? "#3a4570" : "#94a3b8" }]}
+            style={[styles.skipText, { color: isDark ? "#9098b9ff" : "#94a3b8" }]}
           >
             {t("interestSelection.skipForNow")}
           </Text>
@@ -1169,7 +1171,7 @@ const styles = StyleSheet.create({
   },
   ctaBtnText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.85),
+    fontSize: RFPercentage(1.7),
     color: "#fff",
     letterSpacing: 0.2,
   },

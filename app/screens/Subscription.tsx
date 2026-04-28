@@ -11,6 +11,7 @@ import {
   FlatList,
   Dimensions,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -28,6 +29,8 @@ import { useAppTheme } from "../contexts/themeContext";
 import * as Localization from "expo-localization";
 import { handlePaymentSheet } from "../services/Subscription.service";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
+import { LinearGradient } from "expo-linear-gradient";
+import Feather from "@expo/vector-icons/Feather";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -44,6 +47,10 @@ function Subscription({ navigation, route }) {
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const { newUser } = route.params ?? false;
+
+  const isDark = theme.mode === "dark";
+
+  // ── ALL ORIGINAL LOGIC — UNTOUCHED ───────────────────────────────────────
 
   const prices = {
     monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
@@ -144,35 +151,34 @@ function Subscription({ navigation, route }) {
 
   const getCardGradient = (isSelected) => {
     if (!isSelected) return null;
-
     return {
       shadowColor: theme.primary,
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
+      shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.3,
       shadowRadius: 10,
-      elevation: 8,
+      // elevation: 8,
     };
   };
 
   const getBorderGradient = (isSelected) => {
-    if (!isSelected) return { borderColor: "rgba(232, 232, 232, 1)" };
-    return {
-      borderColor: theme.primary,
-      borderWidth: 1.2,
-    };
+    if (!isSelected)
+      return {
+        borderColor: isDark ? "rgba(69,87,176,0.18)" : "rgba(37,50,117,0.1)",
+      };
+    return { borderColor: "#253275", borderWidth: 1.5 };
   };
 
+  // ── PLAN CARD RENDERER ────────────────────────────────────────────────────
   const renderPlanCard = ({ item, index }) => {
     const isSelected = selectedPlan === item.id;
+    const accentColor = item.id === "monthly" ? "#253275" : "#DD53A8";
+
     return (
       <TouchableOpacity
         style={[
           styles.planCard,
           {
-            backgroundColor: theme.white,
+            backgroundColor: isDark ? "rgba(17, 20, 48, 0.95)" : "#fff",
             ...getBorderGradient(isSelected),
             marginLeft: index === 0 ? RFPercentage(3) : RFPercentage(1),
             marginRight:
@@ -191,166 +197,248 @@ function Subscription({ navigation, route }) {
         }}
         activeOpacity={0.7}
       >
+        {/* Top accent bar */}
+        <LinearGradient
+          colors={
+            item.id === "monthly"
+              ? ["#253275", "#4557B0"]
+              : ["#253275", "#DD53A8"]
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.cardTopBar}
+        />
+
+        {/* Popular badge */}
         {item.popular && (
-          <View
-            style={[styles.popularBadge, { backgroundColor: theme.primary }]}
+          <LinearGradient
+            colors={["#253275", "#DD53A8"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.popularBadge}
           >
             <Text style={styles.popularText}>
-              {t("subscriptionV2.mostPopular") || "MOST POPULAR"}
+              ✦ {t("subscriptionV2.mostPopular") || "MOST POPULAR"}
             </Text>
-          </View>
+          </LinearGradient>
         )}
 
-        {/* Selection Glow Effect */}
+        {/* Selection glow */}
         {isSelected && (
           <View
             style={[
               styles.selectedGlow,
-              { backgroundColor: theme.primary + "05" },
+              { backgroundColor: accentColor + "06" },
             ]}
           />
         )}
 
-        {/* Plan Header */}
-        <View style={styles.planHeader}>
-          <View>
-            <Text
-              style={[
-                styles.planTitle,
-                {
-                  color:
-                    theme?.mode === "dark" ? theme.darkGrey : Colors.primary,
-                },
-              ]}
+        <View style={styles.cardBody}>
+          {/* Plan header */}
+          <View style={styles.planHeader}>
+            <LinearGradient
+              colors={[accentColor, accentColor + "BB"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.planIconBubble}
             >
-              {item.title}
-            </Text>
-            <Text style={[styles.planDescription, { color: theme.darkGrey }]}>
-              {item.description}
-            </Text>
-          </View>
-        </View>
+              <Feather
+                name={item.id === "monthly" ? "calendar" : "star"}
+                size={RFPercentage(2)}
+                color="#fff"
+              />
+            </LinearGradient>
 
-        {/* Price Section */}
-        <View style={styles.priceSection}>
-          <View style={styles.priceContainer}>
-            {(() => {
-              const priceStr = priceLabelForPlan(item.id);
-              const [integerPart, decimalPart] = priceStr.split(".");
-              return (
-                <Text
-                  style={[
-                    styles.price,
-                    {
-                      color:
-                        theme?.mode === "dark" ? Colors.white : Colors.primary,
-                    },
-                  ]}
-                >
-                  {integerPart}
-                  {decimalPart && (
-                    <Text style={{ fontSize: RFPercentage(1.9) }}>
-                      .{decimalPart}
-                    </Text>
-                  )}
-                </Text>
-              );
-            })()}
-            <Text style={[styles.period, { color: theme.darkGrey }]}>
-              {item.period}
-            </Text>
-          </View>
-        </View>
-
-        {/* Highlight Badge */}
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: RFPercentage(2),
-          }}
-        >
-          <View
-            style={[
-              styles.highlightBadge,
-              {
-                backgroundColor: item.popular
-                  ? theme.secondary
-                  : item.id === "yearly"
-                    ? theme.secondary
-                    : theme.mode === "dark"
-                      ? Colors.primary + "40"
-                      : Colors.primary + "15",
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.highlightText,
-                {
-                  color:
-                    item.popular || item.id === "yearly"
-                      ? Colors.white
-                      : theme.darkGrey,
-                  fontSize:
-                    item.popular || item.id === "yearly"
-                      ? RFPercentage(1.5)
-                      : RFPercentage(1.3),
-                },
-              ]}
-            >
-              {item.highlight}
-            </Text>
-          </View>
-
-          {item.originalPrice && (
-            <Text style={[styles.originalPrice, { color: theme.darkGrey }]}>
-              {item.originalPrice}
-            </Text>
-          )}
-        </View>
-
-        {/* Features */}
-        <View style={styles.featuresContainer}>
-          {item.features.map((feature, featureIndex) => (
-            <View key={featureIndex} style={styles.featureRow}>
-              <View
-                style={[styles.checkIcon, { backgroundColor: theme.primary }]}
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[
+                  styles.planTitle,
+                  { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                ]}
               >
-                <Text style={styles.checkText}>✓</Text>
-              </View>
-              <Text style={[styles.featureText, { color: theme.heading }]}>
-                {feature}
+                {item.title}
+              </Text>
+              <Text
+                style={[
+                  styles.planDescription,
+                  { color: isDark ? "#6b7db3" : "#64748B" },
+                ]}
+              >
+                {item.description}
               </Text>
             </View>
-          ))}
+          </View>
+
+          {/* Divider */}
+          <View
+            style={[
+              styles.cardDivider,
+              {
+                backgroundColor: isDark
+                  ? "rgba(69,87,176,0.15)"
+                  : "rgba(37,50,117,0.07)",
+              },
+            ]}
+          />
+
+          {/* Price */}
+          <View style={styles.priceSection}>
+            <View style={styles.priceContainer}>
+              {(() => {
+                const priceStr = priceLabelForPlan(item.id);
+                const [integerPart, decimalPart] = priceStr.split(".");
+                return (
+                  <Text
+                    style={[
+                      styles.price,
+                      { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                    ]}
+                  >
+                    {integerPart}
+                    {decimalPart && (
+                      <Text
+                        style={[
+                          styles.priceDecimal,
+                          { color: isDark ? "#8892b0" : "#64748B" },
+                        ]}
+                      >
+                        .{decimalPart}
+                      </Text>
+                    )}
+                  </Text>
+                );
+              })()}
+              <Text
+                style={[
+                  styles.period,
+                  { color: isDark ? "#6b7db3" : "#94a3b8" },
+                ]}
+              >
+                {item.period}
+              </Text>
+            </View>
+          </View>
+
+          {/* Highlight badge + original price */}
+          <View style={styles.highlightRow}>
+            <View
+              style={[
+                styles.highlightBadge,
+                {
+                  backgroundColor:
+                    item.popular || item.id === "yearly"
+                      ? "#DD53A820"
+                      : isDark
+                        ? "rgba(69,87,176,0.2)"
+                        : "rgba(37,50,117,0.08)",
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.highlightText,
+                  {
+                    color:
+                      item.popular || item.id === "yearly"
+                        ? "#DD53A8"
+                        : isDark
+                          ? "#4557B0"
+                          : "#253275",
+                  },
+                ]}
+              >
+                {item.highlight}
+              </Text>
+            </View>
+            {item.originalPrice && (
+              <Text
+                style={[
+                  styles.originalPrice,
+                  { color: isDark ? "#4a5580" : "#94a3b8" },
+                ]}
+              >
+                {item.originalPrice}
+              </Text>
+            )}
+          </View>
+
+          {/* Divider */}
+          <View
+            style={[
+              styles.cardDivider,
+              {
+                backgroundColor: isDark
+                  ? "rgba(69,87,176,0.12)"
+                  : "rgba(37,50,117,0.06)",
+              },
+            ]}
+          />
+
+          {/* Features */}
+          <View style={styles.featuresContainer}>
+            {item.features.map((feature, featureIndex) => (
+              <View key={featureIndex} style={styles.featureRow}>
+                <LinearGradient
+                  colors={[accentColor, accentColor + "CC"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.checkIcon}
+                >
+                  <Text style={styles.checkText}>✓</Text>
+                </LinearGradient>
+                <Text
+                  style={[
+                    styles.featureText,
+                    { color: isDark ? "#8892b0" : "#475569" },
+                  ]}
+                >
+                  {feature}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
+
+        {/* Decorative stars */}
         <View>
           <Image
             source={Icons.stars}
             resizeMode="contain"
-            style={{
-              width: RFPercentage(10),
-              height: RFPercentage(10),
-              alignSelf: "flex-end",
-              position: "absolute",
-              bottom: -RFPercentage(3),
-              right: -RFPercentage(2),
-            }}
+            style={styles.starsImage}
           />
         </View>
       </TouchableOpacity>
     );
   };
 
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
+    <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={"transparent"}
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
         translucent
+      />
+
+      {/* Background gradient */}
+      {/* <LinearGradient
+        colors={
+          isDark
+            ? ["#080b1a", "#0f1230", "#080b1a"]
+            : ["#f0f3ff", "#eaedff", "#f5f0ff"]
+        }
+        style={StyleSheet.absoluteFillObject}
+      /> */}
+
+      {/* Top glow strip */}
+      <LinearGradient
+        colors={
+          theme.mode === "dark"
+            ? ["rgba(37, 50, 117, 0.7)", "transparent"]
+            : ["rgba(37, 50, 117, 0.92)", Colors.white]
+        }
+        style={styles.topGlow}
+        pointerEvents="none"
       />
 
       <ScrollView
@@ -358,28 +446,90 @@ function Subscription({ navigation, route }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <View style={styles.header}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text
-              style={[
-                styles.title,
-                {
-                  color: theme.mode === "dark" ? theme.darkGrey : theme.primary,
-                },
-              ]}
+          {/* Badge */}
+          <View style={styles.titleBadgeWrap}>
+            <LinearGradient
+              colors={["#253275", "#DD53A8"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.titleBadge}
             >
-              {t("subscription.renewSubscription") || "Renew Subscription"}
-            </Text>
+              <Feather
+                name="refresh-cw"
+                size={RFPercentage(1.3)}
+                color="#fff"
+              />
+              <Text style={styles.titleBadgeText}>
+                {t("subscription.renewSubscription") || "Renew Subscription"}
+              </Text>
+            </LinearGradient>
           </View>
 
-          <Text style={[styles.subtitle, { color: theme.darkGrey }]}>
-            {t("subscription.choosePlanToContinue") ||
-              "Choose a plan to continue enjoying premium features"}
+          <Text
+            style={[styles.title, { color: isDark ? "#eef0ff" : "#1a1e4a" }]}
+          >
+            {t("subscription.renewSubscription") || "Renew Subscription"}
           </Text>
+
+          {/* Gradient underline */}
+          <LinearGradient
+            colors={["#253275", "#DD53A8", "transparent"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.titleUnderline}
+          />
+
+          <Text
+            style={[styles.subtitle, { color: isDark ? "#6b7db3" : "#64748B" }]}
+          >
+            {t("subscription.choosePlanToContinue") ||
+              "Choose a plan to continue enjoying\npremium features on BUEZ"}
+          </Text>
+
+          {/* Trust badges */}
+          <View style={styles.trustRow}>
+            {[
+              {
+                icon: "shield",
+                label: t("subscription.securePayment") || "Secure payment",
+              },
+              {
+                icon: "x-circle",
+                label: t("subscription.cancelAnytime") || "Cancel anytime",
+              },
+            ].map((badge, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.trustBadge,
+                  {
+                    backgroundColor: isDark
+                      ? "rgba(69,87,176,0.12)"
+                      : "rgba(37,50,117,0.06)",
+                  },
+                ]}
+              >
+                <Feather
+                  name={badge.icon as any}
+                  size={RFPercentage(1.4)}
+                  color={isDark ? "#4557B0" : "#253275"}
+                />
+                <Text
+                  style={[
+                    styles.trustText,
+                    { color: isDark ? "#4557B0" : "#253275" },
+                  ]}
+                >
+                  {badge.label}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
 
-        {/* Horizontal Plan Cards */}
+        {/* ── Plan Cards ── */}
         <View style={styles.cardsContainer}>
           <FlatList
             ref={flatListRef}
@@ -393,7 +543,7 @@ function Subscription({ navigation, route }) {
             contentContainerStyle={styles.flatListContent}
             onScroll={handleScroll}
             scrollEventThrottle={16}
-            initialScrollIndex={0} // Start with yearly plan (index 1)
+            initialScrollIndex={0}
             getItemLayout={(data, index) => ({
               length: screenWidth * 0.8 + RFPercentage(2),
               offset: (screenWidth * 0.8 + RFPercentage(2)) * index,
@@ -402,140 +552,229 @@ function Subscription({ navigation, route }) {
           />
         </View>
 
-        {/* Plan Indicators */}
-        <View style={styles.indicatorsContainer}>
+        {/* ── Dot indicators ── */}
+        {/* <View style={styles.indicatorsContainer}>
           {plans.map((plan, index) => (
-            <View
+            <LinearGradient
               key={plan.id}
+              colors={
+                currentIndex === index
+                  ? ["#253275", "#DD53A8"]
+                  : [
+                      isDark ? "#1e2240" : "#d1d5e8",
+                      isDark ? "#1e2240" : "#d1d5e8",
+                    ]
+              }
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
               style={[
                 styles.indicator,
-                {
-                  backgroundColor:
-                    currentIndex === index ? theme.primary : theme.stroke,
-                  width:
-                    currentIndex === index
-                      ? RFPercentage(2.5)
-                      : RFPercentage(1),
-                },
+                { width: currentIndex === index ? RFPercentage(3) : RFPercentage(1) },
               ]}
             />
           ))}
-        </View>
+        </View> */}
       </ScrollView>
 
-      {/* Footer Actions */}
+      {/* ── Footer CTA ── */}
       <View
         style={[
           styles.footer,
-          { borderTopColor: theme.border, backgroundColor: theme.white },
+          {
+            backgroundColor: isDark
+              ? "rgba(8,11,26,0.97)"
+              : "rgba(240,243,255,0.97)",
+            borderTopColor: isDark
+              ? "rgba(69,87,176,0.15)"
+              : "rgba(37,50,117,0.08)",
+          },
         ]}
       >
-        <MyAppButton
-          title={`${t("subscription.renewWith") || "Renew with"} ${
-            plans.find((p) => p.id === selectedPlan)?.title
-          }`}
+        <TouchableOpacity
           onPress={openPaymentSheet}
-          width={"100%"}
-          loading={loading}
-          marginTop={RFPercentage(1.5)}
-          height={Platform.OS === "ios" ? RFPercentage(6.5) : RFPercentage(7)}
-        />
+          disabled={loading}
+          activeOpacity={0.88}
+          style={styles.ctaOuter}
+        >
+          <LinearGradient
+            colors={["#253275", "#4557B0"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.ctaBtn}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Text style={styles.ctaBtnText}>
+                  {`${t("subscription.renewWith") || "Start with"} ${
+                    plans.find((p) => p.id === selectedPlan)?.title
+                  }`}
+                </Text>
+                <View style={styles.ctaArrow}>
+                  <Feather
+                    name="arrow-right"
+                    size={RFPercentage(1.8)}
+                    color="#fff"
+                  />
+                </View>
+              </>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
-    </Screen>
+    </View>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.white,
+  screen: { flex: 1 },
+  container: { flex: 1 },
+  scrollContent: { paddingBottom: RFPercentage(16) },
+
+  topGlow: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: RFPercentage(28),
   },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: RFPercentage(16),
-  },
+
+  // ── Header ──
   header: {
     alignItems: "center",
-    marginTop: Platform.OS === "android" ? RFPercentage(7) : RFPercentage(2),
     paddingHorizontal: RFPercentage(3),
+    paddingTop: Platform.OS === "android" ? RFPercentage(8) : RFPercentage(8),
+    marginBottom: RFPercentage(1),
   },
-  logo: {
-    width: RFPercentage(6),
-    height: RFPercentage(6),
+  titleBadgeWrap: { marginBottom: RFPercentage(1.8) },
+  titleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.6),
+    paddingHorizontal: RFPercentage(1.6),
+    paddingVertical: RFPercentage(0.55),
+    borderRadius: 100,
+  },
+  titleBadgeText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.3),
+    color: "#fff",
+    letterSpacing: 0.2,
   },
   title: {
-    fontSize: RFPercentage(2.5),
+    fontSize: RFPercentage(2.7),
     fontFamily: "Poppins_700Bold",
     textAlign: "center",
-    marginBottom: RFPercentage(1),
+    letterSpacing: -0.4,
+    marginBottom: RFPercentage(0.8),
+  },
+  titleUnderline: {
+    height: 3,
+    width: 48,
+    borderRadius: 2,
+    marginBottom: RFPercentage(1.2),
   },
   subtitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
-    lineHeight: RFPercentage(2.2),
+    lineHeight: RFPercentage(2.4),
+    marginBottom: RFPercentage(2),
   },
-  cardsContainer: {
-    marginTop: RFPercentage(6),
+  trustRow: {
+    flexDirection: "row",
+    gap: RFPercentage(1),
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
-  flatListContent: {
+  trustBadge: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: RFPercentage(1.8),
+    gap: RFPercentage(0.5),
+    paddingHorizontal: RFPercentage(1.3),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: 100,
   },
+  trustText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.3),
+  },
+
+  // ── Cards ──
+  cardsContainer: { marginTop: RFPercentage(2) },
+  flatListContent: { alignItems: "center", paddingVertical: RFPercentage(2) },
+
   planCard: {
     width: screenWidth * 0.8,
-    borderRadius: RFPercentage(2),
-    padding: RFPercentage(3),
-    borderWidth: 1,
-    borderColor: Colors.stroke,
-    marginBottom: RFPercentage(2),
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    overflow: "hidden",
     position: "relative",
-    // overflow: "hidden",
+    shadowColor: "#253275",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    // elevation: 8,
+    marginBottom: RFPercentage(2),
   },
-  selectedGlow: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: RFPercentage(2),
-  },
+  cardTopBar: { height: 3, width: "100%" },
+  cardBody: { padding: RFPercentage(2.5) },
+
   popularBadge: {
-    position: "absolute",
-    top: -RFPercentage(1.5),
+    // position: "absolute",
+    // top: -RFPercentage(0.1),
     alignSelf: "center",
     paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
-    zIndex: 1,
+    paddingVertical: RFPercentage(0.55),
+    borderRadius: 100,
+    zIndex: 10,
+    // left: "20%",
+    // right: "20%",
+    alignItems: "center",
+    marginTop: RFPercentage(1),
   },
   popularText: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.4),
+    color: "#fff",
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_700Bold",
+    textAlign: "center",
   },
+  selectedGlow: { ...StyleSheet.absoluteFillObject },
+
+  // Plan header
   planHeader: {
-    marginBottom: RFPercentage(1),
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(1.2),
+    marginBottom: RFPercentage(1.6),
+  },
+  planIconBubble: {
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    // elevation: 6,
   },
   planTitle: {
-    fontSize: RFPercentage(2.4),
+    fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_700Bold",
-    marginBottom: RFPercentage(0.5),
+    letterSpacing: -0.3,
   },
   planDescription: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
   },
+
+  cardDivider: { height: 1, marginVertical: RFPercentage(1.4) },
+
+  // Price
   priceSection: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -545,108 +784,134 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: "row",
     alignItems: "baseline",
+    gap: RFPercentage(0.6),
   },
   price: {
-    fontSize: RFPercentage(4.5),
+    fontSize: RFPercentage(4.2),
     fontFamily: "Poppins_700Bold",
-    marginRight: RFPercentage(1),
+    letterSpacing: -1,
   },
-  period: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_400Regular",
-  },
-  originalPrice: {
+  priceDecimal: {
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_400Regular",
-    textDecorationLine: "line-through",
-    opacity: 0.8,
+  },
+  period: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    paddingBottom: RFPercentage(0.5),
+  },
+
+  // Highlight
+  highlightRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: RFPercentage(1),
   },
   highlightBadge: {
     alignSelf: "flex-start",
-    paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
-    // marginBottom: RFPercentage(2),
+    paddingHorizontal: RFPercentage(1.4),
+    paddingVertical: RFPercentage(0.45),
+    borderRadius: 100,
   },
   highlightText: {
-    fontSize: RFPercentage(1.3),
+    fontSize: RFPercentage(1.35),
     fontFamily: "Poppins_600SemiBold",
   },
-  featuresContainer: {
-    // marginBottom: RFPercentage(2),
+  originalPrice: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_400Regular",
+    textDecorationLine: "line-through",
   },
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: RFPercentage(1.2),
-  },
+
+  // Features
+  featuresContainer: { gap: RFPercentage(0.9), marginTop: RFPercentage(0.4) },
+  featureRow: { flexDirection: "row", alignItems: "center" },
   checkIcon: {
-    width: RFPercentage(2.2),
-    height: RFPercentage(2.2),
-    borderRadius: RFPercentage(1.1),
+    width: RFPercentage(2.3),
+    height: RFPercentage(2.3),
+    borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: RFPercentage(1.5),
+    marginRight: RFPercentage(1.2),
   },
   checkText: {
-    color: Colors.white,
+    color: "#fff",
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_700Bold",
   },
   featureText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.55),
     fontFamily: "Poppins_400Regular",
     flex: 1,
   },
-  selectionIndicator: {
-    paddingVertical: RFPercentage(1.2),
-    borderRadius: RFPercentage(1),
-    borderWidth: 1,
-    alignItems: "center",
+  starsImage: {
+    width: RFPercentage(10),
+    height: RFPercentage(10),
+    alignSelf: "flex-end",
+    position: "absolute",
+    bottom: RFPercentage(0),
+    right: RFPercentage(0),
   },
-  selectionText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_600SemiBold",
-  },
+
+  // Indicators
   indicatorsContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    gap: RFPercentage(0.6),
     marginBottom: RFPercentage(3),
   },
   indicator: {
-    height: RFPercentage(1),
-    borderRadius: RFPercentage(0.5),
-    marginHorizontal: RFPercentage(0.5),
+    height: RFPercentage(0.9),
+    borderRadius: 100,
   },
-  infoContainer: {
-    paddingHorizontal: RFPercentage(3),
-    gap: RFPercentage(1.5),
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  infoIcon: {
-    fontSize: RFPercentage(2),
-    marginRight: RFPercentage(1),
-  },
-  infoText: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-  },
+
+  // Footer
   footer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.white,
     paddingHorizontal: RFPercentage(3),
+    paddingTop: RFPercentage(1.6),
+    paddingBottom:
+      Platform.OS === "ios" ? RFPercentage(4.5) : RFPercentage(2.8),
     borderTopWidth: 1,
-    borderTopColor: Colors.stroke,
-    height: RFPercentage(11),
+  },
+  ctaOuter: {
+    width: "70%",
+    borderRadius: 100,
+    overflow: "hidden",
+    shadowColor: "#253275",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    alignSelf: "center",
+    height: RFPercentage(6),
+    // elevation: 12,
+  },
+  ctaBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: RFPercentage(1),
+    borderRadius: 100,
+    height: RFPercentage(6),
+  },
+  ctaBtnText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.7),
+    color: "#fff",
+    letterSpacing: 0.2,
+  },
+  ctaArrow: {
+    width: RFPercentage(3.2),
+    height: RFPercentage(3.2),
+    borderRadius: 100,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

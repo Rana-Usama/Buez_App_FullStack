@@ -193,8 +193,7 @@
     "info2": "Votre carte ne sera pas débitée avant 14 jours",
     "info3": "Vous pouvez annuler à tout moment pendant la période d'essai",
     "importantNote": "Commencez votre aventure Premium",
-  "automaticSubscription": "Profitez d’un accès Premium complet pendant 14 jours gratuitement ! Après votre période d’essai, votre abonnement mensuel se poursuivra automatiquement si vous ajoutez une carte, afin que vous ne perdiez jamais vos avantages Premium."
-
+    "automaticSubscription": "Profitez d’un accès Premium complet pendant 14 jours gratuitement ! Après votre période d’essai, votre abonnement mensuel se poursuivra automatiquement si vous ajoutez une carte, afin que vous ne perdiez jamais vos avantages Premium."
   },
   "subscription": {
     "txt1": "Votre essai gratuit de 14 jours est terminé.",
@@ -310,8 +309,8 @@
     "photo": "Ajouter une photo",
     "photo-1": "Télécharger des photos",
     "photo-2": "Optionnel",
-      "date1": "Définir la date",
-  "time1": "Définir l'heure"
+    "date1": "Définir la date",
+    "time1": "Définir l'heure"
   },
   "messages": {
     "txt1": "Messages",
@@ -472,7 +471,7 @@
     "txt1": "Chargement des notifications...",
     "txt2": "Lorsque vous recevrez des notifications, elles apparaîtront ici",
     "txt3": "Note :",
-     "txt4": "Notifications"
+    "txt4": "Notifications"
   },
   "completed": {
     "txt1": "NOTÉ",
@@ -766,43 +765,65 @@
     "allSlotsFilled": "Toutes les places occupées"
   },
   "interestSelection": {
-  "personalizeExperience": "Personnalisez votre expérience",
-  "whatAreYouInterested": "Qu'est-ce qui vous intéresse ?",
-  "pickYourFavorites": "Choisissez vos services préférés et nous adapterons Buez pour vous.",
-  "selectInterestsPrompt": "Sélectionnez 3 centres d'intérêt pour continuer",
-  "selectedInterests": "{{total}} sélectionné(s) ✓",
-  "addCustomInterestTitle": "Ajouter un centre d'intérêt personnalisé",
-  "addCustomInterestSubtitle": "Vous ne trouvez pas ce dont vous avez besoin ? Ajoutez-le ici.",
-  "customInterestPlaceholder": "ex. Nettoyage de piscine, Yoga...",
-  "alreadyAdded": "Déjà ajouté !",
-  "alreadyAddedDesc": "\"{interest}\" est déjà dans votre liste.",
-  "pickAFewMore": "Choisissez-en quelques-uns de plus !",
-  "minSelectionDesc": "Sélectionnez au moins {{min}} centres d'intérêt pour continuer.",
-  "saving": "Enregistrement...",
-  "continueCTA": "Continuer vers Buez",
-  "selectMoreCTA": "Sélectionnez {{remaining}} de plus",
-  "skipForNow": "Passer pour l'instant"
-},
-"emailVerification": {
-  "title": "Vérifiez votre e-mail",
-  "subtitle": "Nous avons envoyé un lien de vérification à :",
-  "hint": "Cliquez sur le lien dans l'e-mail pour activer votre compte. Vérifiez votre dossier spam si vous ne le voyez pas.",
+    "personalizeExperience": "Personnalisez votre expérience",
+    "whatAreYouInterested": "Qu'est-ce qui vous intéresse ?",
+    "pickYourFavorites": "Choisissez vos services préférés et nous adapterons Buez pour vous.",
+    "selectInterestsPrompt": "Sélectionnez 3 centres d'intérêt pour continuer",
+    "selectedInterests": "{{total}} sélectionné(s) ✓",
+    "addCustomInterestTitle": "Ajouter un centre d'intérêt personnalisé",
+    "addCustomInterestSubtitle": "Vous ne trouvez pas ce dont vous avez besoin ? Ajoutez-le ici.",
+    "customInterestPlaceholder": "ex. Nettoyage de piscine, Yoga...",
+    "alreadyAdded": "Déjà ajouté !",
+    "alreadyAddedDesc": "\"{interest}\" est déjà dans votre liste.",
+    "pickAFewMore": "Choisissez-en quelques-uns de plus !",
+    "minSelectionDesc": "Sélectionnez au moins {{min}} centres d'intérêt pour continuer.",
+    "saving": "Enregistrement...",
+    "continueCTA": "Continuer vers Buez",
+    "selectMoreCTA": "Sélectionnez {{remaining}} de plus",
+    "skipForNow": "Passer pour l'instant"
+  },
+  "emailVerification": {
+    "title": "Vérifiez votre e-mail",
+    "subtitle": "Nous avons envoyé un lien de vérification à :",
+    "hint": "Cliquez sur le lien dans l'e-mail pour activer votre compte. Vérifiez votre dossier spam si vous ne le voyez pas.",
 
-  "verifiedSuccessTitle": "E-mail vérifié !",
-  "verifiedSuccessDesc": "Bienvenue à bord 🎉",
+    "verifiedSuccessTitle": "E-mail vérifié !",
+    "verifiedSuccessDesc": "Bienvenue à bord 🎉",
 
-  "notVerifiedTitle": "Pas encore vérifié",
-  "notVerifiedDesc": "Veuillez cliquer sur le lien dans votre e-mail.",
+    "notVerifiedTitle": "Pas encore vérifié",
+    "notVerifiedDesc": "Veuillez cliquer sur le lien dans votre e-mail.",
 
-  "emailSentTitle": "E-mail envoyé !",
-  "emailSentDesc": "L'e-mail de vérification a été renvoyé avec succès.",
+    "emailSentTitle": "E-mail envoyé !",
+    "emailSentDesc": "L'e-mail de vérification a été renvoyé avec succès.",
 
-  "resendFailedTitle": "Échec du renvoi",
-  "resendFailedDesc": "Veuillez réessayer plus tard.",
+    "resendFailedTitle": "Échec du renvoi",
+    "resendFailedDesc": "Veuillez réessayer plus tard.",
 
-  "verifiedButton": "J'ai vérifié mon e-mail",
-  "resendButton": "Renvoyer l'e-mail",
-  "resendCooldown": "Renvoyer dans {{seconds}}s",
-  "backToLogin": "Retour à la connexion"
-}
+    "verifiedButton": "J'ai vérifié mon e-mail",
+    "resendButton": "Renvoyer l'e-mail",
+    "resendCooldown": "Renvoyer dans {{seconds}}s",
+    "backToLogin": "Retour à la connexion"
+  },
+  "freeTrialBanner": {
+    "active": {
+      "label": "Essai gratuit actif",
+      "title": "Profitez des fonctionnalités premium"
+    },
+    "warning_no_card": {
+      "label": "Essai bientôt terminé",
+      "title": "Ajoutez un moyen de paiement pour continuer"
+    },
+    "urgent_no_card": {
+      "label": "Essai expire demain !",
+      "title": "Passez à l’abonnement pour continuer"
+    },
+    "warning_with_card": {
+      "label": "Essai bientôt terminé",
+      "title": "Votre abonnement démarrera automatiquement"
+    },
+    "autorenew": {
+      "label": "Démarre demain",
+      "title": "L’abonnement mensuel commencera automatiquement"
+    }
+  }
 }

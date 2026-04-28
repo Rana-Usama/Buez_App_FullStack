@@ -803,5 +803,27 @@
     "resendButton": "Reenviar correo",
     "resendCooldown": "Reenviar en {{seconds}}s",
     "backToLogin": "Volver al inicio de sesión"
+  },
+  "freeTrialBanner": {
+  "active": {
+    "label": "Prueba gratuita activa",
+    "title": "Disfruta de funciones premium"
+  },
+  "warning_no_card": {
+    "label": "La prueba termina pronto",
+    "title": "Añade un método de pago para continuar"
+  },
+  "urgent_no_card": {
+    "label": "¡La prueba termina mañana!",
+    "title": "Actualiza ahora para continuar"
+  },
+  "warning_with_card": {
+    "label": "La prueba termina pronto",
+    "title": "Tu plan comenzará automáticamente"
+  },
+  "autorenew": {
+    "label": "Empieza mañana",
+    "title": "El plan mensual comenzará automáticamente"
   }
+}
 }

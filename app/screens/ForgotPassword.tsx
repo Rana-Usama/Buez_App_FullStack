@@ -340,7 +340,7 @@ function SuccessModal({
     <Modal transparent visible={visible} animationType="fade">
       <BlurView
         intensity={20}
-        tint={isDark ? "dark" : "light"}
+        tint={isDark ? "dark" : "dark"}
         style={modalStyles.overlay}
       >
         <View
@@ -637,10 +637,10 @@ function ForgotPassword(props: any) {
                 styles.card,
                 {
                   backgroundColor: isDark
-                    ? "rgba(19,22,40,0.9)"
+                    ? "rgba(3, 3, 3, 1)"
                     : "rgba(255,255,255,0.95)",
                   borderColor: isDark
-                    ? "rgba(69,87,176,0.2)"
+                    ? "rgba(107, 115, 156, 0.38)"
                     : "rgba(37,50,117,0.1)",
                 },
               ]}
@@ -676,7 +676,7 @@ function ForgotPassword(props: any) {
                       touched.email && (errors.email || errorMessage)
                         ? Colors.red
                         : isDark
-                          ? "rgba(69,87,176,0.3)"
+                          ? "rgba(69, 87, 176, 0.63)"
                           : "rgba(37,50,117,0.15)",
                     marginTop: RFPercentage(1),
                   }}
