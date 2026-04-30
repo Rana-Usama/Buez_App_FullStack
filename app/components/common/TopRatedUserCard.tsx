@@ -130,12 +130,12 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
             ) : (
               <AvatarInitials
                 name={user.name}
-                bgColor={cardGradient[0]}
+                bgColor={cardGradient[1]}
                 textColor={cardGradient[2]}
                 style={[
                   styles.avatar,
                   {
-                    borderWidth: RFPercentage(0.3),
+                    borderWidth: RFPercentage(0.4),
                     borderColor: cardGradient[2],
                   },
                 ]}

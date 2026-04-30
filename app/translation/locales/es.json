@@ -779,7 +779,7 @@
     "minSelectionDesc": "Selecciona al menos {{min}} intereses para continuar.",
     "saving": "Guardando...",
     "continueCTA": "Continuar en Buez",
-    "selectMoreCTA": "Selecciona {{remaining}} más",
+    "selectMoreCTA": "Seleccionar intereses",
     "skipForNow": "Omitir por ahora"
   },
   "emailVerification": {

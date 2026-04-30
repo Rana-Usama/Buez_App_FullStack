@@ -779,7 +779,7 @@
   "minSelectionDesc": "Wählen Sie mindestens {{min}} Interessen, um fortzufahren.",
   "saving": "Speichert...",
   "continueCTA": "Weiter zu Buez",
-  "selectMoreCTA": "Wählen Sie noch {{remaining}} aus",
+  "selectMoreCTA": "Interessen auswählen",
   "skipForNow": "Für jetzt überspringen"
 },
 "emailVerification": {

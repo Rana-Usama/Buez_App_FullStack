@@ -38,7 +38,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         .toLowerCase()
         .replace(/\s+/g, "")
         .replace("event setup", "eventSetup")
-        .replace("pet care", "petCare") as keyof typeof Colors.categoryColors.dark;
+        .replace(
+          "pet care",
+          "petCare",
+        ) as keyof typeof Colors.categoryColors.dark;
 
       const colorSet = isDarkMode
         ? Colors.categoryColors.dark[categoryKey]
@@ -47,10 +50,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       return (
         colorSet || {
           backgroundColor: theme.card || "#3b4a5eff",
-          iconColor:  "#261249ff",
+          iconColor: "#261249ff",
           borderColor: theme.border,
-          backgroundColorHex:  "#2e236525",
-          iconColorHex:  "#4c14a1ff",
+          backgroundColorHex: "#2e236525",
+          iconColorHex: "#4c14a1ff",
         }
       );
     };
@@ -122,7 +125,11 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           style={[
             styles.filterButtonText,
             {
-              color: isActive ? Colors.primary : theme.lightGrey,
+              color: isActive
+                ? theme.mode === "dark"
+                  ? Colors.white
+                  : Colors.primary
+                : theme.lightGrey,
             },
           ]}
           numberOfLines={2}

@@ -800,7 +800,7 @@
     "minSelectionDesc": "Select at least {{min}} interests to continue.",
     "saving": "Saving...",
     "continueCTA": "Continue to Buez",
-    "selectMoreCTA": "Select {{remaining}} more",
+    "selectMoreCTA": "Select Interests",
     "skipForNow": "Skip for now"
   },
   "emailVerification": {

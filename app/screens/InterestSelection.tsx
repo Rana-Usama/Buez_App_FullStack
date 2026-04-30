@@ -151,6 +151,7 @@ const AnimatedChip = ({
                 : "Poppins_400Regular",
             },
           ]}
+          numberOfLines={1}
         >
           {item.displayName || item.name}
         </Text>
@@ -333,7 +334,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
   const totalSelected = selected.size + customInterests.length;
   const isReady = totalSelected >= MIN_SELECTIONS;
 
-  // ── Load translated task options ─────────────────────────────────────────
+  // ── Load translated task options 
   useEffect(() => {
     (async () => {
       const translated = await Promise.all(
@@ -346,7 +347,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
     })();
   }, []);
 
-  // ── Mount animations ──────────────────────────────────────────────────────
+  // ── Mount animations 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(headerAnim, {
@@ -455,7 +456,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
     outputRange: ["0%", "100%"],
   });
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+  // ─── Render 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: theme.white }}
@@ -467,21 +468,11 @@ export default function InterestSelectionScreen({ navigation }: any) {
         translucent
       />
 
-      {/* ── Background ── */}
-      {/* <LinearGradient
-        colors={
-          isDark
-            ? ["#080b1a", "#0f1230", "#080b1a"]
-            : ["#f0f3ff", "#e8ecff", "#f5f0ff"]
-        }
-        style={StyleSheet.absoluteFillObject}
-      /> */}
-
       {/* ── Subtle top glow strip ── */}
       <LinearGradient
         colors={
           theme.mode === "dark"
-            ? ["rgba(37, 50, 117, 0.7)", "transparent"]
+            ? ["rgba(37, 50, 117, 0.9)", "transparent"]
             : ["rgba(37, 50, 117, 0.92)", Colors.white]
         }
         style={styles.topGlow}
@@ -494,9 +485,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ════════════════════════════════════
-            HEADER
-        ════════════════════════════════════ */}
+      
         <Animated.View
           style={[
             styles.header,
@@ -530,7 +519,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
               <Feather
                 name="arrow-left"
                 size={RFPercentage(2.2)}
-                color={isDark ? "#a0aec0" : "#253275"}
+                color={Colors.white}
               />
             </TouchableOpacity>
 
@@ -630,9 +619,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
           </View>
         </Animated.View>
 
-        {/* ════════════════════════════════════
-            CHIPS GRID
-        ════════════════════════════════════ */}
+     
         <Animated.View style={[styles.chipsWrap, { opacity: fadeAnim }]}>
           {/* Section label */}
           <View style={styles.sectionLabelRow}>
@@ -677,9 +664,6 @@ export default function InterestSelectionScreen({ navigation }: any) {
           </View>
         </Animated.View>
 
-        {/* ════════════════════════════════════
-            CUSTOM INTEREST CARD
-        ════════════════════════════════════ */}
         <Animated.View
           style={{
             opacity: fadeAnim,
@@ -692,7 +676,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
               styles.customCard,
               {
                 backgroundColor: isDark
-                  ? "rgba(18,21,48,0.9)"
+                  ? "rgba(11, 13, 24, 1)"
                   : "rgba(255,255,255,0.92)",
                 borderColor: isDark
                   ? "rgba(69,87,176,0.22)"
@@ -808,7 +792,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                     colors={
                       inputText.trim()
                         ? ["#253275", "#4557B0"]
-                        : ["#555", "#666"]
+                        : ["#333a61ff", "#60678cff"]
                     }
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
@@ -819,7 +803,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                   >
                     <FontAwesome5
                       name="arrow-right"
-                      size={RFPercentage(1.6)}
+                      size={RFPercentage(1.8)}
                       color="#fff"
                       solid
                     />
@@ -834,9 +818,6 @@ export default function InterestSelectionScreen({ navigation }: any) {
         <View style={{ height: RFPercentage(16) }} />
       </ScrollView>
 
-      {/* ════════════════════════════════════
-          FLOATING CTA
-      ════════════════════════════════════ */}
       <View
         style={[
           styles.cta,
@@ -861,7 +842,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 ? ["#253275", "#4557B0"]
                 : isDark
                   ? ["#1c1f3a", "#22254a"]
-                  : ["#c5cce8", "#d0d5ec"]
+                  : ["#d7dae8ff", "#ecf0ffff"]
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -874,7 +855,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                   size={RFPercentage(1.9)}
                   color="#fff"
                 />
-                <Text style={styles.ctaBtnText}>
+                <Text style={styles.ctaBtnText} numberOfLines={1}>
                   {t("interestSelection.saving")}
                 </Text>
               </>
@@ -889,6 +870,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                         : "rgba(37,50,117,0.5)",
                     },
                   ]}
+                  numberOfLines={1}
                 >
                   {isReady
                     ? t("interestSelection.continueCTA")
@@ -917,7 +899,11 @@ export default function InterestSelectionScreen({ navigation }: any) {
           style={styles.skip}
         >
           <Text
-            style={[styles.skipText, { color: isDark ? "#9098b9ff" : "#94a3b8" }]}
+            style={[
+              styles.skipText,
+              { color: isDark ? "#9098b9ff" : "#94a3b8" },
+            ]}
+            numberOfLines={1}
           >
             {t("interestSelection.skipForNow")}
           </Text>
@@ -927,12 +913,12 @@ export default function InterestSelectionScreen({ navigation }: any) {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Styles 
 
 const styles = StyleSheet.create({
   scroll: {
     paddingTop: Platform.OS === "ios" ? RFPercentage(8) : RFPercentage(9),
-    paddingBottom: RFPercentage(4),
+    paddingBottom: RFPercentage(15),
   },
 
   // Background
@@ -1127,7 +1113,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 6,
+    // elevation: 6,
   },
   addBtnInner: {
     width: RFPercentage(5.8),

@@ -9,6 +9,7 @@ import {
   SectionList,
   TouchableOpacity,
   StatusBar,
+  Platform,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
@@ -50,41 +51,20 @@ const getSectionTitle = (date, lang) => {
   });
 };
 
-type Labels = {
-  today: string;
-  yesterday: string;
-  dated: string;
-  by: string;
-  reviews: string;
-  noReviews: string;
-  translating: string;
-};
-
-type TranslationsMap = Record<string, string>;
-type Review = {
-  id: string;
-  reviewText: string;
-  rating: number;
-  createdAt: Date;
-  [key: string]: any;
-};
-
-type Section = {
-  title: string;
-  data: Review[];
-};
+const ACCENT_COLORS = [Colors.primary, Colors.secondary, Colors.green];
 
 export default function Reviews({ navigation }) {
   const { t } = useTranslation();
-  const [sections, setSections] = useState<Section[]>([]);
-  const [lang, setLang] = useState<string>("en");
-  const [translations, setTranslations] = useState<TranslationsMap>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [averageRating, setAverageRating] = useState<string | null>(null);
-  const [totalReviews, setTotalReviews] = useState<number>(0);
+  const [sections, setSections] = useState([]);
+  const [lang, setLang] = useState("en");
+  const [translations, setTranslations] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [averageRating, setAverageRating] = useState(null);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [ratingDistribution, setRatingDistribution] = useState([0, 0, 0, 0, 0]);
 
-  const [labels, setLabels] = useState<Labels>({
+  const [labels, setLabels] = useState({
     today: "Today",
     yesterday: "Yesterday",
     dated: "Dated",
@@ -95,6 +75,8 @@ export default function Reviews({ navigation }) {
   });
 
   const { theme } = useAppTheme();
+  const isDark = theme.mode === "dark";
+
   useEffect(() => {
     (async () => {
       const userLang = await getTargetLanguage();
@@ -103,10 +85,10 @@ export default function Reviews({ navigation }) {
       const translated = await Promise.all(
         keys.map((k) => cachedTranslate(labels[k])),
       );
-      const newLabels = keys.reduce((obj, key, index) => {
-        obj[key as keyof Labels] = translated[index] || labels[key];
+      const newLabels = keys.reduce((obj, key, i) => {
+        obj[key] = translated[i] || labels[key];
         return obj;
-      }, {} as Labels);
+      }, {});
       setLabels(newLabels);
     })();
   }, []);
@@ -122,8 +104,9 @@ export default function Reviews({ navigation }) {
           review.createdAt?.toDate?.() ?? review.createdAt ?? new Date();
         const title = getSectionTitle(new Date(createdAt), lang);
         if (!translationMap[review.id]) {
-          const translatedText = await cachedTranslate(review.reviewText || "");
-          translationMap[review.id] = translatedText;
+          translationMap[review.id] = await cachedTranslate(
+            review.reviewText || "",
+          );
         }
         const arr = grouped.get(title) || [];
         arr.push({ ...review, createdAt });
@@ -137,26 +120,29 @@ export default function Reviews({ navigation }) {
           ),
         }))
         .sort((a, b) => {
-          const getPriority = (t: string) =>
+          const p = (t) =>
             t === labels.today ? 0 : t === labels.yesterday ? 1 : 2;
-          const pA = getPriority(a.title);
-          const pB = getPriority(b.title);
           return (
-            pA - pB ||
+            p(a.title) - p(b.title) ||
             new Date(b.data[0].createdAt).getTime() -
               new Date(a.data[0].createdAt).getTime()
           );
         });
 
       const ratings = data.map((r) => r.rating).filter(Boolean);
-      const totalReviews = ratings.length;
+      // rating distribution [5,4,3,2,1]
+      const dist = [5, 4, 3, 2, 1].map(
+        (star) => ratings.filter((r) => Math.round(r) === star).length,
+      );
+      setRatingDistribution(dist);
+      setTotalReviews(ratings.length);
       if (ratings.length > 0) {
-        const avg = ratings.reduce((sum, r) => sum + r, 0) / ratings.length;
-        setAverageRating(avg.toFixed(1));
+        setAverageRating(
+          (ratings.reduce((s, r) => s + r, 0) / ratings.length).toFixed(1),
+        );
       } else {
         setAverageRating(null);
       }
-      setTotalReviews(totalReviews);
       setTranslations(translationMap);
       setSections(finalSections);
     } catch (err) {
@@ -178,407 +164,486 @@ export default function Reviews({ navigation }) {
     }, [lang]),
   );
 
-  const StarRating = ({ rating, size = "medium" }) => {
-    const starSize = size === "large" ? RFPercentage(2.8) : RFPercentage(1.8);
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
+  const StarRow = ({ rating, size = RFPercentage(1.8) }) => (
+    <View style={styles.starsRow}>
+      {[1, 2, 3, 4, 5].map((i) => (
         <Text
+          key={i}
           style={{
-            color: i <= rating ? Colors.star : theme.lightGrey,
-            fontSize: starSize,
-            lineHeight: RFPercentage(2.9),
+            fontSize: size,
+            color: i <= rating ? Colors.star : isDark ? "#3a3a4a" : "#E2E8F0",
           }}
         >
           ★
-        </Text>,
-      );
-    }
-    return <View style={styles.starsRow}>{stars}</View>;
+        </Text>
+      ))}
+    </View>
+  );
+
+  const RatingBars = () => {
+    const max = Math.max(...ratingDistribution, 1);
+    return (
+      <View style={styles.barsContainer}>
+        {[5, 4, 3, 2, 1].map((star, i) => {
+          let barColor;
+          if (star === 5) {
+            barColor = Colors.green;
+          } else if (star === 4 || star === 3) {
+            barColor = Colors.secondary;
+          } else {
+            barColor = Colors.primary;
+          }
+
+          return (
+            <View key={star} style={styles.barRow}>
+              <Text
+                style={[
+                  styles.barLabel,
+                  { color: isDark ? Colors.darkGrey : Colors.detailsText },
+                ]}
+              >
+                {star}
+              </Text>
+              <View
+                style={[
+                  styles.barTrack,
+                  { backgroundColor: isDark ? "#1f202cff" : "#F1F3F5" },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.barFill,
+                    {
+                      width: `${(ratingDistribution[i] / max) * 100}%`,
+                      opacity: 1 - i * 0.15,
+                      backgroundColor: barColor,
+                    },
+                  ]}
+                />
+              </View>
+              <Text
+                style={[
+                  styles.barCount,
+                  { color: isDark ? Colors.darkGrey : Colors.detailsText },
+                ]}
+              >
+                {ratingDistribution[i]}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    );
   };
 
   const renderItem = ({ item, index }) => {
     const created = moment(item.createdAt).format("MMM D, YYYY");
-    const translatedReview =
-      translations[item.id] || labels.translating || "Translating...";
-
-    const isDark = theme.mode === "dark";
-
-    const firstLetter = item?.reviewer?.userName.trim()?.[0];
+    const translatedReview = translations[item.id] || labels.translating;
+    const firstLetter = item?.reviewer?.userName?.trim()?.[0] ?? "?";
     const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
+    const accentColor = ACCENT_COLORS[index % ACCENT_COLORS.length];
 
     return (
-      <TouchableOpacity
+      <View
         style={[
           styles.card,
           {
             backgroundColor: theme.white,
-            borderColor:
-              theme.mode === "dark" ? theme.border : "rgba(236, 238, 251, 1)",
+            borderColor: isDark ? theme.border : Colors.cardBorderLight,
           },
         ]}
-        activeOpacity={1}
       >
-        {/* Header with avatar and rating */}
-        <View style={styles.cardHeader}>
-          <View style={styles.userInfo}>
-            {item?.reviewer?.profileImage ? (
-              <Image
-                style={styles.avatar}
-                source={{ uri: item?.reviewer?.profileImage }}
-              />
-            ) : (
-              <AvatarInitials
-                name={item.reviewer?.userName}
-                style={[styles.avatar, { borderColor: groupTextColor }]}
-              />
-            )}
+        <View style={styles.cardBody}>
+          {/* Header */}
+          <View style={styles.cardHeader}>
+            <View style={styles.userInfo}>
+              {item?.reviewer?.profileImage ? (
+                <Image
+                  style={[styles.avatar, { borderColor: accentColor + "50" }]}
+                  source={{ uri: item.reviewer.profileImage }}
+                />
+              ) : (
+                <AvatarInitials
+                  name={item.reviewer?.userName}
+                  style={[styles.avatar, { borderColor: groupTextColor }]}
+                  textStyle={{
+                    fontSize: RFPercentage(1.8),
+                    lineHeight: RFPercentage(5),
+                  }}
+                />
+              )}
+              <View style={styles.userDetails}>
+                <Text
+                  style={[
+                    styles.userName,
+                    { color: isDark ? Colors.white : Colors.darkGrey2 },
+                  ]}
+                >
+                  {item.reviewer?.userName?.length > 14
+                    ? item.reviewer.userName.substring(0, 14) + "…"
+                    : item.reviewer?.userName}
+                </Text>
+                <Text style={[styles.date, { color: Colors.lightGrey }]}>
+                  {created}
+                </Text>
+              </View>
+            </View>
 
-            <View style={styles.userDetails}>
-              <Text style={[styles.userName, { color: Colors.darkGrey }]}>
-                {item.reviewer?.userName?.length > 12
-                  ? item.reviewer?.userName.substring(0, 12) + "..."
-                  : item.reviewer?.userName}
-              </Text>
-              <Text style={[styles.date, { color: Colors.lightGrey }]}>
-                {created}
+            {/* Rating badge */}
+            <View
+              style={[styles.ratingBadge, { backgroundColor: accentColor }]}
+            >
+              <Text style={styles.ratingNumber}>{item.rating || 0}</Text>
+              <Text style={styles.ratingStar}>★</Text>
+            </View>
+          </View>
+
+          {/* Quote */}
+          <View
+            style={[styles.quoteBlock, { borderLeftColor: accentColor + "80" }]}
+          >
+            <Text
+              style={[
+                styles.reviewText,
+                { color: isDark ? Colors.darkGrey : Colors.detailsText },
+              ]}
+              numberOfLines={3}
+            >
+              "{translatedReview}"
+            </Text>
+          </View>
+
+          {/* Footer */}
+          <View style={styles.cardFooter}>
+            <StarRow rating={Math.round(item.rating || 0)} />
+            <View
+              style={[
+                styles.verifiedPill,
+                { backgroundColor: theme.mode === "dark" ? accentColor + "40" : accentColor + "10" },
+              ]}
+            >
+              <Text style={[styles.verifiedText, { color: accentColor }]}>
+                Verified
               </Text>
             </View>
           </View>
-          <View style={styles.ratingBadge}>
-            <Text style={[styles.ratingNumber, { color: Colors.white }]}>
-              {item.rating || 0}
-            </Text>
-            <Text style={[styles.ratingStar, { color: Colors.white }]}>★</Text>
-          </View>
         </View>
-
-        {/* Review Text */}
-        <Text
-          style={[
-            styles.reviewText,
-            { color: theme.heading, fontStyle: "italic" },
-          ]}
-          numberOfLines={3}
-        >
-          "{translatedReview}"
-        </Text>
-
-        {/* Detailed Star Rating */}
-        <View style={styles.detailedRating}>
-          <Text
-            style={[
-              styles.ratingStar,
-              {
-                color: Colors.star,
-                fontSize: RFPercentage(2),
-                lineHeight: RFPercentage(2),
-              },
-            ]}
-          >
-            {"★".repeat(Math.round(item.rating))}
-          </Text>
-        </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
+  // ── Section header ────────────────────────────────────────────────────────
   const renderHeader = ({ section: { title } }) => (
     <View style={styles.sectionHeaderContainer}>
-      <View style={styles.sectionHeaderLine} />
+      <View
+        style={[
+          styles.sectionHeaderLine,
+          { backgroundColor: isDark ? "#2a2d45" : Colors.detailsBorder },
+        ]}
+      />
       <Text
         style={[
           styles.sectionHeaderText,
           {
-            color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
-            backgroundColor:
-              theme.mode === "dark"
-                ? Colors.primary + "40"
-                : Colors.primary + "15",
+            color: isDark ? Colors.darkGrey : Colors.primary,
+            backgroundColor: isDark
+              ? Colors.primary + "30"
+              : Colors.primary + "12",
           },
         ]}
       >
         {title}
       </Text>
-      <View style={styles.sectionHeaderLine} />
+      <View
+        style={[
+          styles.sectionHeaderLine,
+          { backgroundColor: isDark ? "#2a2d45" : Colors.detailsBorder },
+        ]}
+      />
     </View>
   );
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={"transparent"}
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
         translucent
       />
       <CustomNav title={`${t("profile.txt3")}`} showBack />
 
-      {/* Rating Overview */}
+      {/* ── Rating overview ── */}
       {averageRating && (
         <View
           style={[
-            styles.ratingOverview,
+            styles.overviewCard,
             {
               backgroundColor: theme.white,
-              borderWidth: RFPercentage(0.1),
-              borderColor:
-                theme.mode === "dark" ? theme.border : "rgba(236, 238, 251, 1)",
+              borderColor: isDark ? theme.border : Colors.cardBorderLight,
             },
           ]}
         >
-          <View style={styles.ratingMain}>
-            <View
-              style={[
-                styles.ratingCircle,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? "rgba(241, 244, 254, 0.08)"
-                      : "rgba(250, 250, 255, 1)",
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.averageRating,
-                  {
-                    color:
-                      theme.mode === "dark" ? Colors.white : Colors.primary,
-                  },
-                ]}
-              >
-                {averageRating}
-              </Text>
-              <Text style={[styles.ratingOutOf, { color: theme.lightGrey }]}>
-                /5
-              </Text>
+          <View style={styles.overviewRow}>
+            {/* Score box */}
+            <View style={styles.scoreBox}>
+              <Text style={styles.scoreNum}>{averageRating}</Text>
+              <Text style={styles.scoreDenom}>/ 5</Text>
             </View>
-            <View style={styles.ratingInfo}>
+
+            <View style={styles.overviewRight}>
               <Text
                 style={[
-                  styles.ratingTitle,
-                  {
-                    color:
-                      theme.mode === "dark" ? Colors.white : Colors.primary,
-                  },
+                  styles.overviewTitle,
+                  { color: isDark ? Colors.white : Colors.primary },
                 ]}
               >
                 {t("reviews.txt5")}
               </Text>
-              <Text style={[styles.reviewCount, { color: theme.darkGrey }]}>
+              <Text
+                style={[
+                  styles.overviewSub,
+                  { color: isDark ? Colors.darkGrey : Colors.detailsText },
+                ]}
+              >
                 {t("reviews.txt6")} {totalReviews}{" "}
-                {totalReviews === 1
-                  ? `${t("reviews.txt7")}`
-                  : `${t("reviews.txt8")}`}
+                {totalReviews === 1 ? t("reviews.txt7") : t("reviews.txt8")}
               </Text>
-              <StarRating
+              <StarRow
                 rating={Math.round(parseFloat(averageRating))}
-                size="large"
+                size={RFPercentage(2.2)}
               />
             </View>
           </View>
+
+          {/* Distribution bars */}
+          <View
+            style={[
+              styles.divider,
+              { backgroundColor: isDark ? "#2a2d45" : Colors.detailsBorder },
+            ]}
+          />
+          <RatingBars />
         </View>
       )}
 
-      {/* Reviews List */}
+      {/* ── List ── */}
       {loading ? (
         <ActivityIndicator
           size="large"
-          color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+          color={isDark ? Colors.darkGrey : Colors.primary}
           style={styles.loader}
         />
       ) : sections.length === 0 ? (
         <NotFound title={labels.noReviews} />
       ) : (
-        <View style={styles.listContainer}>
-          <SectionList
-            sections={sections}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            renderSectionHeader={renderHeader}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[Colors.primary, Colors.secondary]}
-                tintColor={Colors.primary}
-              />
-            }
-            contentContainerStyle={styles.listContent}
-            stickySectionHeadersEnabled={false}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          renderSectionHeader={renderHeader}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[Colors.primary, Colors.secondary]}
+              tintColor={Colors.primary}
+            />
+          }
+          contentContainerStyle={styles.listContent}
+          stickySectionHeadersEnabled={false}
+          showsVerticalScrollIndicator={false}
+        />
       )}
     </View>
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.lightWhite,
-  },
-  header: {
-    width: "100%",
-    alignSelf: "center",
-  },
-  ratingOverview: {
+  screen: { flex: 1 },
+
+  // Overview card
+  overviewCard: {
     margin: RFPercentage(2),
-    padding: RFPercentage(2),
     borderRadius: RFPercentage(2),
-    elevation: 8,
-    shadowColor: Colors.primary + "40",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
+    borderWidth: 0.5,
+    padding: RFPercentage(2),
+    shadowColor: "#a7a4eeff",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  ratingMain: {
+  overviewRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: RFPercentage(1.8),
   },
-  ratingCircle: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    backgroundColor: Colors.lightPrimary,
-    padding: RFPercentage(2),
-    borderRadius: RFPercentage(3),
-    marginRight: RFPercentage(2),
+  scoreBox: {
+    backgroundColor: Colors.primary,
+    borderRadius: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(1.5),
+    alignItems: "center",
+    minWidth: RFPercentage(9),
   },
-  averageRating: {
+  scoreNum: {
     fontSize: RFPercentage(4),
     fontFamily: "Poppins_700Bold",
+    color: "#fff",
+    lineHeight: RFPercentage(4.8),
   },
-  ratingOutOf: {
+  scoreDenom: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+    color: "rgba(255,255,255,0.6)",
+  },
+  overviewRight: { flex: 1 },
+  overviewTitle: {
     fontSize: RFPercentage(2),
-    fontFamily: "Poppins_400Regular",
-  },
-  ratingInfo: {
-    flex: 1,
-  },
-  ratingTitle: {
-    fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(0.5),
+    marginBottom: RFPercentage(0.3),
   },
-  reviewCount: {
-    fontSize: RFPercentage(1.6),
+  overviewSub: {
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    marginBottom: RFPercentage(1),
-    opacity: 0.8,
+    marginBottom: Platform.OS === "ios" ? RFPercentage(0.5) : RFPercentage(0),
   },
-  loader: {
-    marginTop: RFPercentage(28),
+  starsRow: { flexDirection: "row", gap: 2 },
+  divider: { height: 0.5, marginVertical: RFPercentage(1.5) },
+
+  // Rating bars
+  barsContainer: { gap: RFPercentage(0.7) },
+  barRow: { flexDirection: "row", alignItems: "center", gap: RFPercentage(1) },
+  barLabel: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+    width: RFPercentage(1.5),
+    textAlign: "right",
   },
-  listContainer: {
+  barTrack: {
     flex: 1,
+    height: RFPercentage(0.6),
+    borderRadius: 100,
+    overflow: "hidden",
   },
-  listContent: {
-    paddingBottom: RFPercentage(20),
+  barFill: {
+    height: "100%",
+    borderRadius: 100,
+    backgroundColor: Colors.primary,
   },
+  barCount: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+    width: RFPercentage(2),
+    textAlign: "right",
+  },
+
+  // Section header
   sectionHeaderContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: RFPercentage(3),
+    marginVertical: RFPercentage(2),
     paddingHorizontal: RFPercentage(2),
   },
-  sectionHeaderLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.border,
-  },
+  sectionHeaderLine: { flex: 1, height: 0.5 },
   sectionHeaderText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
-    marginHorizontal: RFPercentage(2),
-    paddingHorizontal: RFPercentage(2),
+    marginHorizontal: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(1.8),
     paddingVertical: RFPercentage(0.4),
-    borderRadius: RFPercentage(1),
+    borderRadius: 100,
   },
+
+  // Card
   card: {
-    flex: 1,
-    backgroundColor: Colors.white,
-    marginBottom: RFPercentage(2),
-    padding: RFPercentage(2),
+    marginHorizontal: RFPercentage(2),
+    marginBottom: RFPercentage(1.5),
     borderRadius: RFPercentage(2),
-    elevation: 4,
-    shadowColor: Colors.primary + "30",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    // minHeight: RFPercentage(15),
-    borderWidth: 1,
-    width: "90%",
-    alignSelf: "center",
+    borderWidth: 0.8,
+    shadowColor: "#a7a4eeff",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
+  cardAccentBar: { height: 3, width: "100%" },
+  cardBody: { padding: RFPercentage(2) },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: RFPercentage(1.5),
+    marginBottom: RFPercentage(1.4),
   },
-  userInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
+  userInfo: { flexDirection: "row", alignItems: "center", flex: 1 },
   avatar: {
     width: RFPercentage(5),
     height: RFPercentage(5),
-    borderRadius: RFPercentage(2.5),
-    borderColor: Colors.primary,
-    borderWidth: 2,
-    marginRight: RFPercentage(1),
+    borderRadius: RFPercentage(100),
+    borderWidth: 1,
+    marginRight: RFPercentage(1.2),
   },
-  userDetails: {
-    flex: 1,
-  },
+  userDetails: { flex: 1 },
   userName: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(0.3),
+    marginBottom: RFPercentage(0.2),
   },
-  date: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_400Regular",
-  },
+  date: { fontSize: RFPercentage(1.35), fontFamily: "Poppins_400Regular" },
   ratingBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.primary,
-    paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
+    gap: RFPercentage(0.3),
+    paddingHorizontal: RFPercentage(1.2),
+    borderRadius: RFPercentage(0.8),
     justifyContent: "center",
   },
   ratingNumber: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_600SemiBold",
-    marginRight: RFPercentage(0.3),
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_700Bold",
+    color: "#fff",
+    lineHeight: RFPercentage(4),
   },
-  ratingStar: {
-    fontSize: RFPercentage(1.5),
-    lineHeight: RFPercentage(1.5),
+  ratingStar: { fontSize: RFPercentage(1.4), color: "#FFD700" },
+
+  // Quote block
+  quoteBlock: {
+    borderLeftWidth: 2.5,
+    borderRadius: 0,
+    paddingLeft: RFPercentage(1.4),
+    marginBottom: RFPercentage(1.4),
   },
   reviewText: {
-    fontSize: RFPercentage(1.7),
-    lineHeight: RFPercentage(2.2),
-    marginBottom: RFPercentage(1.5),
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2.5),
     fontStyle: "italic",
   },
-  detailedRating: {
-    alignItems: "flex-start",
-  },
-  starsRow: {
+
+  // Footer
+  cardFooter: {
     flexDirection: "row",
-  },
-  starContainer: {
-    width: RFPercentage(2.8),
-    height: RFPercentage(2.8),
-    borderRadius: RFPercentage(0.7),
-    justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: RFPercentage(0.2),
-    borderWidth: 1,
+    justifyContent: "space-between",
   },
+  verifiedPill: {
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.3),
+    borderRadius: 100,
+  },
+  verifiedText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_500Medium",
+    lineHeight: RFPercentage(1.6),
+  },
+
+  listContent: { paddingBottom: RFPercentage(12) },
+  loader: { marginTop: RFPercentage(28) },
 });

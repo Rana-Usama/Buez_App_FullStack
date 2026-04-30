@@ -347,7 +347,7 @@ function SuccessModal({
           style={[
             modalStyles.card,
             {
-              backgroundColor: isDark ? "#13162a" : "#ffffff",
+              backgroundColor: isDark ? "#080a16ff" : "#ffffff",
               borderColor: isDark
                 ? "rgba(69,87,176,0.2)"
                 : "rgba(37,50,117,0.1)",
@@ -433,7 +433,7 @@ function SuccessModal({
                 style={modalStyles.btn}
               >
                 <Text style={modalStyles.btnText}>
-                  {t("forgetPassword.txt5")}
+                  {t("buttons.login")}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -469,8 +469,8 @@ const modalStyles = StyleSheet.create({
     paddingTop: RFPercentage(3),
   },
   checkCircle: {
-    width: RFPercentage(8),
-    height: RFPercentage(8),
+    width: RFPercentage(6),
+    height: RFPercentage(6),
     borderRadius: RFPercentage(4),
     alignItems: "center",
     justifyContent: "center",
@@ -857,8 +857,8 @@ const styles = StyleSheet.create({
   },
   arrowText: {
     color: "#fff",
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: RFPercentage(2.2),
+    lineHeight: RFPercentage(2.5),
   },
   backRow: {
     marginTop: RFPercentage(2.2),

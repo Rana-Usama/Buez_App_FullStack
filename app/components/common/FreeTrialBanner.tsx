@@ -117,6 +117,17 @@ const FreeTrialBanner: React.FC = () => {
     return { daysLeft: remaining, bannerState: state };
   }, [userData]);
 
+  // Determine if banner should be clickable and navigate to subscription
+  const shouldNavigateToSubscription = () => {
+    return bannerState === "warning_no_card" || bannerState === "urgent_no_card";
+  };
+
+  const handlePress = () => {
+    if (shouldNavigateToSubscription()) {
+      navigation.navigate("Subscription");
+    }
+  };
+
   if (!bannerState) return null;
 
   const config = BANNER_CONFIG[bannerState];
@@ -129,8 +140,8 @@ const FreeTrialBanner: React.FC = () => {
 
   return (
     <TouchableOpacity
-      activeOpacity={0.92}
-      onPress={() => navigation.navigate("Subscription")}
+      activeOpacity={shouldNavigateToSubscription() ? 0.8 : 1}
+      onPress={handlePress}
       style={styles.wrapper}
     >
       <LinearGradient

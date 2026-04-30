@@ -545,7 +545,7 @@ export default function Notifications({ navigation }) {
                     style={styles.avatar}
                   />
                 ) : (
-                  <AvatarInitials name={senderName} />
+                  <AvatarInitials name={senderName} textStyle={{fontSize:RFPercentage(1.8)}} />
                 )}
 
                 <View

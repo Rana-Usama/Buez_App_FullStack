@@ -577,21 +577,13 @@ function SubscriptionV2(props) {
         translucent
       />
 
-      {/* Background gradient */}
-      {/* <LinearGradient
-        colors={
-          isDark
-            ? ["#080b1a", "#0f1230", "#080b1a"]
-            : ["#f0f3ff", "#eaedff", "#f5f0ff"]
-        }
-        style={StyleSheet.absoluteFillObject}
-      /> */}
+      
 
       {/* Top glow strip */}
       <LinearGradient
         colors={
           theme.mode === "dark"
-            ? ["rgba(37, 50, 117, 0.7)", "transparent"]
+            ? ["rgba(37, 50, 117, 0.9)", "transparent"]
             : ["rgba(37, 50, 117, 0.92)", Colors.white]
         }
         style={styles.topGlow}
@@ -760,7 +752,7 @@ function SubscriptionV2(props) {
               <View
                 style={[
                   styles.modalContent,
-                  { backgroundColor: isDark ? "#13162a" : "#fff" },
+                  { backgroundColor: isDark ? "#04081cff" : "#fff" },
                 ]}
               >
                 {/* Modal top bar */}
@@ -830,30 +822,7 @@ function SubscriptionV2(props) {
                   </View>
 
                   {/* Benefit bullets */}
-                  <View style={styles.modalBullets}>
-                    {[
-                      t("freeTrialModal.noChargeDuringTrial"),
-                      t("freeTrialModal.cancelAnytime"),
-                      t("freeTrialModal.fullAccess"),
-                    ].map((bullet, i) => (
-                      <View key={i} style={styles.bulletRow}>
-                        <View
-                          style={[
-                            styles.bulletDot,
-                            { backgroundColor: "#4557B0" },
-                          ]}
-                        />
-                        <Text
-                          style={[
-                            styles.bulletText,
-                            { color: isDark ? "#8892b0" : "#64748B" },
-                          ]}
-                        >
-                          {bullet.replace(/^•\s*/, "")}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
+                 
 
                   {/* Divider */}
                   <View
@@ -869,7 +838,6 @@ function SubscriptionV2(props) {
 
                   {/* Buttons */}
                   <View style={styles.modalButtonsContainer}>
-                    {/* Add Card */}
                     <TouchableOpacity
                       onPress={handleAddCardNow}
                       disabled={loading}

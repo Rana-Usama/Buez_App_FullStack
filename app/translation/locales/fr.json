@@ -779,7 +779,7 @@
     "minSelectionDesc": "Sélectionnez au moins {{min}} centres d'intérêt pour continuer.",
     "saving": "Enregistrement...",
     "continueCTA": "Continuer vers Buez",
-    "selectMoreCTA": "Sélectionnez {{remaining}} de plus",
+    "selectMoreCTA": "Sélectionner des centres d’intérêt",
     "skipForNow": "Passer pour l'instant"
   },
   "emailVerification": {

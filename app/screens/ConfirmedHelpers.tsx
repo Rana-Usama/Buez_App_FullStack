@@ -347,7 +347,6 @@ function ConfirmedHelpers({ route, navigation }) {
       </View>
     );
   };
-  console.log("task..........", task?.imageUrls);
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -464,6 +463,7 @@ const styles = StyleSheet.create({
   taskInfo: {
     width: "90%",
     alignSelf: "center",
+    marginTop:RFPercentage(2)
     // padding: RFPercentage(2),
   },
   taskTitle: {
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(6),
     borderRadius: RFPercentage(3),
     marginRight: RFPercentage(2),
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: Colors.primary,
   },
   helperDetails: {

@@ -420,21 +420,13 @@ function Subscription({ navigation, route }) {
         translucent
       />
 
-      {/* Background gradient */}
-      {/* <LinearGradient
-        colors={
-          isDark
-            ? ["#080b1a", "#0f1230", "#080b1a"]
-            : ["#f0f3ff", "#eaedff", "#f5f0ff"]
-        }
-        style={StyleSheet.absoluteFillObject}
-      /> */}
+     
 
       {/* Top glow strip */}
       <LinearGradient
         colors={
           theme.mode === "dark"
-            ? ["rgba(37, 50, 117, 0.7)", "transparent"]
+            ? ["rgba(37, 50, 117, 0.9)", "transparent"]
             : ["rgba(37, 50, 117, 0.92)", Colors.white]
         }
         style={styles.topGlow}

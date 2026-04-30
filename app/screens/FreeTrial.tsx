@@ -177,7 +177,7 @@ const stepStyles = StyleSheet.create({
   iconCircle: {
     width: RFPercentage(5),
     height: RFPercentage(5),
-    borderRadius: 100,
+    borderRadius: RFPercentage(100),
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -188,8 +188,8 @@ const stepStyles = StyleSheet.create({
   },
   iconRing: {
     position: "absolute",
-    width: RFPercentage(7.2),
-    height: RFPercentage(7.2),
+    width: RFPercentage(6.2),
+    height: RFPercentage(6.2),
     borderRadius: 100,
     borderWidth: 1.5,
   },
@@ -283,21 +283,13 @@ const FreeTrial = ({ navigation }: any) => {
         translucent
       />
 
-      {/* ── Background gradient ── */}
-      {/* <LinearGradient
-        colors={
-          isDark
-            ? ["#080b1a", "#0f1230", "#080b1a"]
-            : ["#f0f3ff", "#eaedff", "#f5f0ff"]
-        }
-        style={StyleSheet.absoluteFillObject}
-      /> */}
+   
 
       {/* ── Top glow ── */}
       <LinearGradient
         colors={
           theme.mode === "dark"
-            ? ["rgba(37, 50, 117, 0.7)", "transparent"]
+            ? ["rgba(37, 50, 117, 0.9)", "transparent"]
             : ["rgba(37, 50, 117, 0.92)", Colors.white]
         }
         style={styles.topGlow}
@@ -456,12 +448,13 @@ const styles = StyleSheet.create({
   logo: {
     width: RFPercentage(8),
     height: RFPercentage(10),
+    zIndex:99999
   },
 
   // Header
   headerWrap: {
     alignItems: "center",
-    marginBottom: RFPercentage(3.5),
+    marginBottom: RFPercentage(2.5),
     paddingHorizontal: RFPercentage(3),
     marginTop: RFPercentage(4),
   },
@@ -473,9 +466,9 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(0.8),
   },
   titleUnderline: {
-    height: 3,
-    width: 52,
-    borderRadius: 2,
+    height: RFPercentage(0.4),
+    width: RFPercentage(8),
+    borderRadius: RFPercentage(100),
     marginBottom: RFPercentage(1.6),
   },
   giftBadge: {
@@ -484,7 +477,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.7),
     paddingHorizontal: RFPercentage(1.8),
     paddingVertical: RFPercentage(0.6),
-    borderRadius: 100,
+    borderRadius: RFPercentage(100),
   },
   giftEmoji: {
     fontSize: RFPercentage(1.7),
@@ -499,6 +492,8 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: RFPercentage(2.8),
     flex: 1,
+    // backgroundColor:"red",
+    paddingTop:RFPercentage(3)
   },
 
   // CTA

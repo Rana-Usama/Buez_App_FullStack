@@ -16,8 +16,6 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import { useStripe } from "@stripe/stripe-react-native";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
-import Screen from "../components/Screen";
-import MyAppButton from "../components/common/MyAppButton";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
@@ -25,12 +23,13 @@ import Toast from "react-native-toast-message";
 import { saveSubscription } from "../services/User.service";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import * as Localization from "expo-localization";
 import { handlePaymentSheet } from "../services/Subscription.service";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 import CustomNav from "../components/common/CustomNav";
+import { LinearGradient } from "expo-linear-gradient";
+import Feather from "@expo/vector-icons/Feather";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -44,6 +43,9 @@ function UpgradePlan(props) {
   const { theme } = useAppTheme();
   const flatListRef = useRef(null);
   const navigation = useNavigation();
+  const isDark = theme.mode === "dark";
+
+  // ── ALL ORIGINAL LOGIC — UNTOUCHED ────────────────────────────────────────
 
   const prices = {
     monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
@@ -86,10 +88,9 @@ function UpgradePlan(props) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: userData?.email, userId }),
-        }
+        },
       );
       const { setupIntentClientSecret, customerId } = await response.json();
-
       if (!setupIntentClientSecret || !customerId) {
         throw new Error("Missing client secret or customer ID");
       }
@@ -106,9 +107,6 @@ function UpgradePlan(props) {
     if (!setupData) return;
     const { setupIntentClientSecret, customerId } = setupData;
 
-    console.log("SetupIntent Client Secret:", setupIntentClientSecret);
-    console.log("Customer ID:", customerId);
-
     const { error: initError } = await initPaymentSheet({
       setupIntentClientSecret,
       merchantDisplayName: "BUEZ",
@@ -116,14 +114,12 @@ function UpgradePlan(props) {
     });
 
     if (initError) {
-      console.log("Payment sheet init error:", initError);
       setLoading(false);
       return;
     }
 
     const { error: paymentError } = await presentPaymentSheet();
     if (paymentError) {
-      console.log("Payment sheet error:", paymentError);
       Toast.show({
         type: "info",
         text1: t("toast.upgradePlan.paymentCancelled"),
@@ -133,12 +129,7 @@ function UpgradePlan(props) {
       return;
     }
 
-    // Payment was successful - get the SetupIntent ID
     const setupIntentId = setupIntentClientSecret.split("_secret")[0];
-    console.log("setupIntentId:", setupIntentId);
-    console.log("customerId:", customerId);
-    console.log("currentSubscriptionId:", userData.subscriptionId);
-    console.log("userId:", userId);
 
     try {
       const res = await fetch(
@@ -153,16 +144,15 @@ function UpgradePlan(props) {
             setupIntentId,
             userCurrency,
           }),
-        }
+        },
       );
 
       const result = await res.json();
-      console.log("Upgrade result:", result);
 
       if (result.success) {
         await updateSubscriptionStatus(
           result?.currentPeriodStart,
-          result?.currentPeriodEnd
+          result?.currentPeriodEnd,
         );
         await saveSubscription(userId, result?.subscriptionId);
         Toast.show({
@@ -179,7 +169,6 @@ function UpgradePlan(props) {
         });
       }
     } catch (error) {
-      console.log("Fetch error:", error);
       Toast.show({
         type: "error",
         text1: t("toast.upgradePlan.upgradeFailed"),
@@ -192,6 +181,7 @@ function UpgradePlan(props) {
 
   const yearlyPrice = priceLabelForPlan("yearly");
   const monthlyPrice = priceLabelForPlan("monthly");
+
   const savingsPercentage =
     ((prices.monthly[userCurrency] * 12 - prices.yearly[userCurrency]) /
       (prices.monthly[userCurrency] * 12)) *
@@ -223,7 +213,7 @@ function UpgradePlan(props) {
       period: t("subscriptionV2.perYear"),
       originalPrice: formatCurrency(
         prices.monthly[userCurrency] * 12,
-        userCurrency
+        userCurrency,
       ),
       description: `${t("upgradePlan.bestValue")} ${highlightText}`,
       features: [
@@ -243,204 +233,288 @@ function UpgradePlan(props) {
   const monthlyAmount = prices.monthly[userCurrency] ?? prices.monthly.USD;
   const yearlyAmount = prices.yearly[userCurrency] ?? prices.yearly.USD;
 
-  // Compute savings with currency formatting
   const yearlySavings = {
-    monthlyCost: formatCurrency(monthlyAmount * 12, userCurrency), // total if paying monthly
-    yearlyCost: formatCurrency(yearlyAmount, userCurrency), // yearly plan cost
-    savings: formatCurrency(monthlyAmount * 12 - yearlyAmount, userCurrency), // saved amount
+    monthlyCost: formatCurrency(monthlyAmount * 12, userCurrency),
+    yearlyCost: formatCurrency(yearlyAmount, userCurrency),
+    savings: formatCurrency(monthlyAmount * 12 - yearlyAmount, userCurrency),
     savingsPercentage: Math.round(
-      ((monthlyAmount * 12 - yearlyAmount) / (monthlyAmount * 12)) * 100
-    ), // e.g., 25%
+      ((monthlyAmount * 12 - yearlyAmount) / (monthlyAmount * 12)) * 100,
+    ),
   };
 
-  const renderPlanCard = ({ item, index }) => (
-    <View
-      style={[
-        styles.planCard,
-        {
-          backgroundColor: theme.white,
-          borderColor: item.current
-            ? theme.primary
-            : item.popular
-            ? theme.secondary
-            : theme.stroke,
-          borderWidth: item.current || item.popular ? 1.5 : 1,
-          marginLeft: index === 0 ? RFPercentage(3) : RFPercentage(1),
-          marginRight:
-            index === plans.length - 1 ? RFPercentage(3) : RFPercentage(1),
-          opacity: item.current ? 0.9 : 1,
-          padding:
-            currentPlan === "monthly" ? RFPercentage(4) : RFPercentage(3),
-        },
-      ]}
-    >
-      {/* Current Plan Badge */}
-      {item.current && (
-        <View style={[styles.currentBadge, { backgroundColor: theme.primary }]}>
-          <Text style={styles.currentBadgeText}>
-            {t("upgradePlan.currentPlan") || "CURRENT PLAN"}
-          </Text>
-        </View>
-      )}
+  // ── PLAN CARD RENDERER ─────────────────────────────────────────────────────
+  const renderPlanCard = ({ item, index }) => {
+    const accentColor = item.current ? "#4557B0" : "#DD53A8";
 
-      {/* Recommended Badge */}
-      {item.popular && (
-        <View
-          style={[
-            styles.recommendedBadge,
-            { backgroundColor: theme.secondary },
-          ]}
-        >
-          <Text style={styles.recommendedBadgeText}>
-            {t("upgradePlan.recommended") || "RECOMMENDED"}
-          </Text>
-        </View>
-      )}
+    return (
+      <View
+        style={[
+          styles.planCard,
+          {
+            backgroundColor: isDark ? "rgba(10, 12, 27, 1)" : Colors.white,
+            borderColor: item.current
+              ? isDark
+                ? "rgba(69,87,176,0.4)"
+                : "rgba(37,50,117,0.2)"
+              : "#DD53A8AA",
+            borderWidth: 1.5,
+            marginLeft: index === 0 ? RFPercentage(3) : RFPercentage(1),
+            marginRight:
+              index === plans.length - 1 ? RFPercentage(3) : RFPercentage(1),
+            opacity: item.current ? 0.88 : 1,
+          },
+        ]}
+      >
+        {/* Top accent bar */}
+        <LinearGradient
+          colors={
+            item.current ? ["#253275", "#4557B0"] : ["#253275", "#DD53A8"]
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.cardTopBar}
+        />
 
-      {/* Plan Header */}
-      <View style={styles.planHeader}>
-        <View>
-          <Text
-            style={[
-              styles.planTitle,
-              {
-                color: item.current
-                  ? theme.primary
-                  : item.popular
-                  ? theme.secondary
-                  : theme.primary,
-              },
-            ]}
+        {/* Current Plan badge */}
+        {item.current && (
+          <LinearGradient
+            colors={["#253275", "#4557B0"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.planBadge}
           >
-            {item.title}
-          </Text>
-          <Text style={[styles.planDescription, { color: theme.darkGrey }]}>
-            {item.description}
-          </Text>
-        </View>
-      </View>
+            <Text style={styles.planBadgeText}>
+              {t("upgradePlan.currentPlan") || "CURRENT PLAN"}
+            </Text>
+          </LinearGradient>
+        )}
 
-      {/* Price Section */}
-      <View style={styles.priceSection}>
-        <View style={styles.priceContainer}>
-          {(() => {
-            const priceStr = priceLabelForPlan(item.id);
-            const [integerPart, decimalPart] = priceStr.split(".");
-            return (
+        {/* Recommended badge */}
+        {item.popular && (
+          <LinearGradient
+            colors={["#253275", "#DD53A8"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.planBadge}
+          >
+            <Text style={styles.planBadgeText}>
+              ✦ {t("upgradePlan.recommended") || "RECOMMENDED"}
+            </Text>
+          </LinearGradient>
+        )}
+
+        <View style={styles.cardBody}>
+          {/* Plan header */}
+          <View style={styles.planHeader}>
+            <LinearGradient
+              colors={[accentColor, accentColor + "BB"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.planIconBubble}
+            >
+              <Feather
+                name={item.current ? "calendar" : "star"}
+                size={RFPercentage(2)}
+                color="#fff"
+              />
+            </LinearGradient>
+            <View style={{ flex: 1 }}>
               <Text
                 style={[
-                  styles.price,
+                  styles.planTitle,
+                  { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                ]}
+              >
+                {item.title}
+              </Text>
+              <Text
+                style={[
+                  styles.planDescription,
+                  { color: isDark ? "#6b7db3" : "#64748B" },
+                ]}
+              >
+                {item.description}
+              </Text>
+            </View>
+          </View>
+
+          {/* Divider */}
+          <View
+            style={[
+              styles.cardDivider,
+              {
+                backgroundColor: isDark
+                  ? "rgba(69,87,176,0.15)"
+                  : "rgba(37,50,117,0.07)",
+              },
+            ]}
+          />
+
+          {/* Price */}
+          <View style={styles.priceSection}>
+            <View style={styles.priceContainer}>
+              {(() => {
+                const priceStr = priceLabelForPlan(item.id);
+                const [integerPart, decimalPart] = priceStr.split(".");
+                return (
+                  <Text
+                    style={[
+                      styles.price,
+                      { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                    ]}
+                  >
+                    {integerPart}
+                    {decimalPart && (
+                      <Text
+                        style={[
+                          styles.priceDecimal,
+                          { color: isDark ? "#8892b0" : "#64748B" },
+                        ]}
+                      >
+                        .{decimalPart}
+                      </Text>
+                    )}
+                  </Text>
+                );
+              })()}
+              <Text
+                style={[
+                  styles.period,
+                  { color: isDark ? "#6b7db3" : "#94a3b8" },
+                ]}
+              >
+                {item.period}
+              </Text>
+            </View>
+          </View>
+
+          {/* Savings badge + original price */}
+          <View style={styles.highlightRow}>
+            {item.savings && (
+              <View style={styles.savingsBadge}>
+                <Text style={styles.savingsText}>{item.savings}</Text>
+              </View>
+            )}
+            {!item.savings && !item.current && <View />}
+            {item.current && (
+              <View
+                style={[
+                  styles.currentTag,
                   {
-                    color:
-                      item.id === "yearly" ? theme.secondary : theme.primary,
+                    backgroundColor: isDark
+                      ? "rgba(69,87,176,0.2)"
+                      : "rgba(37,50,117,0.08)",
                   },
                 ]}
               >
-                {integerPart}
-                {decimalPart && (
-                  <Text style={{ fontSize: RFPercentage(1.9) }}>
-                    .{decimalPart}
-                  </Text>
-                )}
+                <Text
+                  style={[
+                    styles.currentTagText,
+                    { color: isDark ? "#4557B0" : "#253275" },
+                  ]}
+                >
+                  Active
+                </Text>
+              </View>
+            )}
+            {item.originalPrice && (
+              <Text
+                style={[
+                  styles.originalPrice,
+                  { color: isDark ? "#4a5580" : "#94a3b8" },
+                ]}
+              >
+                {item.originalPrice}
               </Text>
-            );
-          })()}
-          <Text style={[styles.period, { color: theme.darkGrey }]}>
-            {item.period}
-          </Text>
+            )}
+          </View>
+
+          {/* Divider */}
+          <View
+            style={[
+              styles.cardDivider,
+              {
+                backgroundColor: isDark
+                  ? "rgba(69,87,176,0.12)"
+                  : "rgba(37,50,117,0.06)",
+              },
+            ]}
+          />
+
+          {/* Features */}
+          <View style={styles.featuresContainer}>
+            {item.features.map((feature, featureIndex) => (
+              <View key={featureIndex} style={styles.featureRow}>
+                <LinearGradient
+                  colors={[accentColor, accentColor + "CC"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.checkIcon}
+                >
+                  <Text style={styles.checkText}>✓</Text>
+                </LinearGradient>
+                <Text
+                  style={[
+                    styles.featureText,
+                    { color: isDark ? "#8892b0" : "#475569" },
+                  ]}
+                >
+                  {feature}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Upgrade button — only on yearly card */}
+          {item.popular && (
+            <TouchableOpacity
+              onPress={openPaymentSheet}
+              disabled={loading}
+              activeOpacity={0.88}
+              style={styles.upgradeBtnOuter}
+            >
+              <LinearGradient
+                colors={["#253275", "#DD53A8"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.upgradeBtn}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Feather name="zap" size={RFPercentage(1.7)} color="#fff" />
+                    <Text style={styles.upgradeBtnText} numberOfLines={1}>
+                      {t("upgradePlan.upgradeNow") || "Upgrade Now"}
+                    </Text>
+                  </>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Stars decoration */}
+        <View>
+          <Image
+            source={Icons.stars}
+            resizeMode="contain"
+            style={styles.starsImage}
+          />
         </View>
       </View>
+    );
+  };
 
-      {/* Savings Badge */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: RFPercentage(2),
-        }}
-      >
-        {item.savings && (
-          <View
-            style={[styles.savingsBadge, { backgroundColor: theme.secondary }]}
-          >
-            <Text style={styles.savingsText}>{item.savings}</Text>
-          </View>
-        )}
-
-        {item.originalPrice && (
-          <Text style={[styles.originalPrice, { color: theme.darkGrey }]}>
-            {item.originalPrice}
-          </Text>
-        )}
-      </View>
-
-      {/* Features */}
-      <View style={styles.featuresContainer}>
-        {item.features.map((feature, featureIndex) => (
-          <View key={featureIndex} style={styles.featureRow}>
-            <View
-              style={[
-                styles.checkIcon,
-                {
-                  backgroundColor: item.current
-                    ? theme.border
-                    : item.popular
-                    ? theme.border
-                    : theme.border,
-                },
-              ]}
-            >
-              <Text style={styles.checkText}>✓</Text>
-            </View>
-            <Text style={[styles.featureText, { color: theme.heading }]}>
-              {feature}
-            </Text>
-          </View>
-        ))}
-      </View>
-
-      {/* Upgrade Button - Only show for yearly plan */}
-      {item.popular && (
-        <TouchableOpacity
-          style={[styles.upgradeButton, { backgroundColor: theme.secondary }]}
-          onPress={openPaymentSheet}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color={"white"} />
-          ) : (
-            <Text style={styles.upgradeButtonText}>
-              {t("upgradePlan.upgradeNow") || "Upgrade Now"}
-            </Text>
-          )}
-        </TouchableOpacity>
-      )}
-      <View>
-        <Image
-          source={Icons.stars}
-          resizeMode="contain"
-          style={{
-            width: RFPercentage(10),
-            height: RFPercentage(10),
-            alignSelf: "flex-end",
-            position: "absolute",
-            bottom: -RFPercentage(4),
-            right: -RFPercentage(3),
-          }}
-        />
-      </View>
-    </View>
-  );
-
+  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={"transparent"}
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
         translucent
       />
+
       <CustomNav title={t("upgradePlan.upgradeYourPlan")} showBack />
 
       <ScrollView
@@ -448,66 +522,193 @@ function UpgradePlan(props) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Savings Highlight */}
-        <View
-          style={[
-            styles.savingsContainer,
-            {
-              backgroundColor:
-                theme.mode === "dark"
-                  ? Colors.primary + "40"
-                  : Colors.primary + "15",
-            },
-          ]}
-        >
-          <Text style={[styles.savingsTitle, { color: theme.primary }]}>
-            {t("upgradePlan.youSave")} {highlightText}
-          </Text>
-          <Text style={[styles.savingsDescription, { color: theme.darkGrey }]}>
-            {t("upgradePlan.yearlySavings")} {yearlySavings.savings}
-          </Text>
+        {/* ── Savings hero card ── */}
+        <View style={styles.heroWrap}>
+          <LinearGradient
+            colors={["#2c43b6a1", "#4557b0d3", "#dd53a8e4"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.heroCard]}
+          >
+            <Text style={[styles.heroTitle]}>
+              {t("upgradePlan.youSave")} {highlightText}
+            </Text>
+            <Text style={styles.heroSubtitle}>
+              {t("upgradePlan.yearlySavings")} {yearlySavings.savings}
+            </Text>
+          </LinearGradient>
         </View>
 
-        {/* Plan Comparison */}
-        <View style={styles.comparisonContainer}>
-          <Text style={[styles.comparisonTitle, { color: theme.primary }]}>
-            {t("upgradePlan.planComparison") || "Plan Comparison"}
-          </Text>
-
-          <View style={styles.comparisonRow}>
-            <Text style={[styles.comparisonLabel, { color: theme.darkGrey }]}>
-              {t("upgradePlan.monthlyCost") || "Monthly plan cost per year:"}
-            </Text>
-            <Text style={[styles.comparisonValue, { color: theme.darkGrey }]}>
-              {yearlySavings.monthlyCost}
-            </Text>
-          </View>
-
-          <View style={styles.comparisonRow}>
-            <Text style={[styles.comparisonLabel, { color: theme.darkGrey }]}>
-              {t("upgradePlan.yearlyCost") || "Yearly plan cost:"}
-            </Text>
-            <Text style={[styles.comparisonValue, { color: theme.secondary }]}>
-              {yearlySavings.yearlyCost}
-            </Text>
-          </View>
-
-          <View style={[styles.comparisonRow, styles.totalSavingsRow]}>
-            <Text
+        {/* ── Plan comparison card ── */}
+        <View style={styles.sectionWrap}>
+          {/* Section label */}
+          <View style={styles.sectionLabelRow}>
+            <View
               style={[
-                styles.comparisonLabel,
-                { color: theme.primary, fontFamily: "Poppins_600SemiBold" },
+                styles.sectionDot,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(69,87,176,0.4)"
+                    : "rgba(37,50,117,0.15)",
+                },
               ]}
             >
-              {t("upgradePlan.totalSavings") || "Your total savings:"}
+              <View
+                style={[styles.sectionDotInner, { backgroundColor: "#4557B0" }]}
+              />
+            </View>
+            <Text
+              style={[
+                styles.sectionLabel,
+                { color: isDark ? "#4a5a8a" : "#94a3b8" },
+              ]}
+            >
+              PLAN COMPARISON
             </Text>
-            <Text style={[styles.comparisonValue, { color: theme.secondary }]}>
-              {yearlySavings.savings}
+          </View>
+
+          <View
+            style={[
+              styles.comparisonCard,
+              {
+                backgroundColor: isDark ? "rgba(10, 12, 27, 1)" : Colors.white,
+                borderColor: isDark
+                  ? "rgba(69,87,176,0.2)"
+                  : "rgba(37,50,117,0.1)",
+              },
+            ]}
+          >
+            
+
+            <View style={styles.comparisonBody}>
+              <Text
+                style={[
+                  styles.comparisonTitle,
+                  { color: isDark ? "#dde3ff" : "#1a1e4a" },
+                ]}
+              >
+                {t("upgradePlan.planComparison") || "Plan Comparison"}
+              </Text>
+
+              {/* Monthly cost row */}
+              <View
+                style={[
+                  styles.compRow,
+                  {
+                    borderBottomColor: isDark
+                      ? "rgba(69,87,176,0.12)"
+                      : "rgba(37,50,117,0.06)",
+                  },
+                ]}
+              >
+                <View style={styles.compRowLeft}>
+                  <View
+                    style={[styles.compDot, { backgroundColor: "#4557B0" }]}
+                  />
+                  <Text
+                    style={[
+                      styles.compLabel,
+                      { color: isDark ? "#8892b0" : "#64748B" },
+                    ]}
+                  >
+                    {t("upgradePlan.monthlyCost") || "Monthly plan (per year)"}
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.compValue,
+                    { color: isDark ? "#8892b0" : "#64748B" },
+                  ]}
+                >
+                  {yearlySavings.monthlyCost}
+                </Text>
+              </View>
+
+              {/* Yearly cost row */}
+              <View
+                style={[
+                  styles.compRow,
+                  {
+                    borderBottomColor: isDark
+                      ? "rgba(69,87,176,0.12)"
+                      : "rgba(37,50,117,0.06)",
+                  },
+                ]}
+              >
+                <View style={styles.compRowLeft}>
+                  <View
+                    style={[styles.compDot, { backgroundColor: "#DD53A8" }]}
+                  />
+                  <Text
+                    style={[
+                      styles.compLabel,
+                      { color: isDark ? "#8892b0" : "#64748B" },
+                    ]}
+                  >
+                    {t("upgradePlan.yearlyCost") || "Yearly plan cost"}
+                  </Text>
+                </View>
+                <Text style={[styles.compValue, { color: "#DD53A8" }]}>
+                  {yearlySavings.yearlyCost}
+                </Text>
+              </View>
+
+              {/* Total savings row */}
+              <View style={[styles.compRow, { borderBottomWidth: 0 }]}>
+                <View style={styles.compRowLeft}>
+                  <View
+                    style={[styles.compDot, { backgroundColor: "#4CAF50" }]}
+                  />
+                  <Text
+                    style={[
+                      styles.compLabel,
+                      {
+                        color: isDark ? "#dde3ff" : "#1a1e4a",
+                        fontFamily: "Poppins_600SemiBold",
+                      },
+                    ]}
+                  >
+                    {t("upgradePlan.totalSavings") || "Your total savings"}
+                  </Text>
+                </View>
+                <View style={styles.savingsChip}>
+                  <Text style={styles.savingsChipText}>
+                    {yearlySavings.savings}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* ── Plan cards ── */}
+        <View style={styles.sectionWrap}>
+          <View style={styles.sectionLabelRow}>
+            <View
+              style={[
+                styles.sectionDot,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(69,87,176,0.4)"
+                    : "rgba(37,50,117,0.15)",
+                },
+              ]}
+            >
+              <View
+                style={[styles.sectionDotInner, { backgroundColor: "#DD53A8" }]}
+              />
+            </View>
+            <Text
+              style={[
+                styles.sectionLabel,
+                { color: isDark ? "#4a5a8a" : "#94a3b8" },
+              ]}
+            >
+              PLANS
             </Text>
           </View>
         </View>
 
-        {/* Horizontal Plan Cards */}
         <View style={styles.cardsContainer}>
           <FlatList
             ref={flatListRef}
@@ -526,262 +727,315 @@ function UpgradePlan(props) {
   );
 }
 
+// ─── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.white,
+  screen: { flex: 1 },
+  container: { flex: 1 },
+  scrollContent: { paddingBottom: RFPercentage(6) },
+
+  topGlow: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: RFPercentage(28),
   },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: RFPercentage(4),
-  },
-  header: {
-    alignItems: "center",
-    paddingTop: RFPercentage(4),
-    width: "100%",
-    alignSelf: "center",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    borderBottomWidth: RFPercentage(0.1),
-    paddingBottom: RFPercentage(2),
-    paddingHorizontal: RFPercentage(2),
-  },
-  logo: {
-    width: RFPercentage(8),
-    height: RFPercentage(8),
-    marginBottom: RFPercentage(2),
-  },
-  title: {
-    fontSize: RFPercentage(2.2),
-    fontFamily: "Poppins_600SemiBold",
-    marginLeft: RFPercentage(2),
-  },
-  subtitle: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-    lineHeight: RFPercentage(1.8),
-  },
-  savingsContainer: {
-    marginHorizontal: RFPercentage(3),
-    marginTop: RFPercentage(3),
-    padding: RFPercentage(2),
-    borderRadius: RFPercentage(2),
-    alignItems: "center",
-  },
-  savingsTitle: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_700Bold",
-    marginBottom: RFPercentage(0.5),
-  },
-  savingsDescription: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-  },
-  comparisonContainer: {
-    marginHorizontal: RFPercentage(3),
-    marginTop: RFPercentage(3),
-    padding: RFPercentage(2),
-    borderWidth: 1,
-    borderColor: Colors.stroke,
-    borderRadius: RFPercentage(2),
-  },
-  comparisonTitle: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_700Bold",
-    marginBottom: RFPercentage(1.5),
-    textAlign: "center",
-  },
-  comparisonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+
+  // ── Hero savings card ──
+  heroWrap: {
+    paddingHorizontal: RFPercentage(3),
+    marginTop: RFPercentage(2.5),
     marginBottom: RFPercentage(1),
   },
-  totalSavingsRow: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.stroke,
-    paddingTop: RFPercentage(1),
-    marginTop: RFPercentage(1),
-  },
-  comparisonLabel: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_400Regular",
-    flex: 1,
-  },
-  comparisonValue: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  cardsContainer: {
-    marginVertical: RFPercentage(3),
-  },
-  flatListContent: {
+  heroCard: {
+    borderRadius: 20,
+    padding: RFPercentage(2.8),
     alignItems: "center",
-    paddingVertical: RFPercentage(2),
+    shadowColor: "#253275",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
   },
-  planCard: {
-    width: screenWidth * 0.8,
-    borderRadius: RFPercentage(3),
-    padding: RFPercentage(3),
+  heroPill: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 100,
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(0.5),
+    marginBottom: RFPercentage(1.2),
     borderWidth: 1,
-    borderColor: Colors.stroke,
-    marginBottom: RFPercentage(2),
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderColor: "rgba(255,255,255,0.3)",
   },
-  currentBadge: {
-    position: "absolute",
-    top: -RFPercentage(1.5),
-    alignSelf: "center",
-    paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
-    zIndex: 1,
-  },
-  currentBadgeText: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.2),
+  heroPillText: {
     fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.55),
+    color: "#fff",
+    letterSpacing: 0.3,
   },
-  recommendedBadge: {
-    position: "absolute",
-    top: -RFPercentage(1.5),
-    alignSelf: "center",
-    paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
-    zIndex: 1,
-  },
-  recommendedBadgeText: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.2),
+  heroTitle: {
     fontFamily: "Poppins_700Bold",
-  },
-  planHeader: {
-    marginBottom: RFPercentage(2),
-  },
-  planTitle: {
-    fontSize: RFPercentage(2.4),
-    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(2.2),
+    color: "#fff",
+    textAlign: "center",
+    letterSpacing: -0.3,
     marginBottom: RFPercentage(0.5),
   },
+  heroSubtitle: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.5),
+    color: "rgba(255,255,255,0.75)",
+    textAlign: "center",
+  },
+
+  // ── Section label ──
+  sectionWrap: {
+    paddingHorizontal: RFPercentage(3),
+    marginTop: RFPercentage(3),
+  },
+  sectionLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.8),
+    marginBottom: RFPercentage(1.4),
+  },
+  sectionDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionDotInner: { width: 6, height: 6, borderRadius: 3 },
+  sectionLabel: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.5),
+    letterSpacing: 2,
+  },
+
+  // ── Comparison card ──
+  comparisonCard: {
+    borderRadius: 20,
+    borderWidth: 1,
+    overflow: "hidden",
+    shadowColor: "#253275",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  cardTopBar: { height: 3, width: "100%" },
+  comparisonBody: { padding: RFPercentage(2.2) },
+  comparisonTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.7),
+    letterSpacing: -0.2,
+    marginBottom: RFPercentage(1.6),
+  },
+  compRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: RFPercentage(1.1),
+    borderBottomWidth: 1,
+  },
+  compRowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.8),
+    flex: 1,
+  },
+  compDot: { width: 7, height: 7, borderRadius: 4 },
+  compLabel: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.45),
+    flex: 1,
+  },
+  compValue: { fontFamily: "Poppins_600SemiBold", fontSize: RFPercentage(1.5) },
+  savingsChip: {
+    backgroundColor: "rgba(76,175,80,0.15)",
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.35),
+    borderRadius: 100,
+  },
+  savingsChipText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.4),
+    color: "#4CAF50",
+  },
+
+  // ── Plan cards ──
+  cardsContainer: { marginTop: RFPercentage(0.5) },
+  flatListContent: { alignItems: "center", paddingVertical: RFPercentage(2) },
+
+  planCard: {
+    width: screenWidth * 0.8,
+    borderRadius: 20,
+    overflow: "hidden",
+    position: "relative",
+    shadowColor: "#253275",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    marginBottom: RFPercentage(2),
+  },
+  cardBody: { padding: RFPercentage(2.5) },
+
+  planBadge: {
+    alignSelf: "center",
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(0.55),
+    borderRadius: 100,
+    marginTop: RFPercentage(1),
+    marginBottom: -RFPercentage(0.5),
+    alignItems: "center",
+  },
+  planBadgeText: {
+    color: "#fff",
+    fontSize: RFPercentage(1.25),
+    fontFamily: "Poppins_700Bold",
+    textAlign: "center",
+  },
+
+  planHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(1.2),
+    marginBottom: RFPercentage(1.6),
+    marginTop: RFPercentage(1),
+  },
+  planIconBubble: {
+    width: RFPercentage(4.5),
+    height: RFPercentage(4.5),
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  planTitle: {
+    fontSize: RFPercentage(2.2),
+    fontFamily: "Poppins_700Bold",
+    letterSpacing: -0.3,
+  },
   planDescription: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.45),
     fontFamily: "Poppins_400Regular",
   },
+
+  cardDivider: { height: 1, marginVertical: RFPercentage(1.4) },
+
   priceSection: {
     flexDirection: "row",
     alignItems: "flex-end",
-    justifyContent: "space-between",
-    marginBottom: RFPercentage(2),
+    marginBottom: RFPercentage(1),
   },
   priceContainer: {
     flexDirection: "row",
     alignItems: "baseline",
+    gap: RFPercentage(0.6),
   },
   price: {
-    fontSize: RFPercentage(4.5),
+    fontSize: RFPercentage(4.2),
     fontFamily: "Poppins_700Bold",
-    marginRight: RFPercentage(1),
+    letterSpacing: -1,
   },
+  priceDecimal: { fontSize: RFPercentage(2), fontFamily: "Poppins_400Regular" },
   period: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
+    paddingBottom: RFPercentage(0.5),
   },
-  originalPrice: {
-    fontSize: RFPercentage(1.9),
-    fontFamily: "Poppins_400Regular",
-    textDecorationLine: "line-through",
-    opacity: 0.8,
-  },
-  savingsBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
-    // marginBottom: RFPercentage(2),
-  },
-  savingsText: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  featuresContainer: {
-    // marginBottom: RFPercentage(2),
-  },
-  featureRow: {
+
+  highlightRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: RFPercentage(1.2),
+    justifyContent: "space-between",
+    marginBottom: RFPercentage(1),
   },
+  savingsBadge: {
+    backgroundColor: "#DD53A820",
+    paddingHorizontal: RFPercentage(1.4),
+    paddingVertical: RFPercentage(0.45),
+    borderRadius: 100,
+  },
+  savingsText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.35),
+    color: "#DD53A8",
+  },
+
+  currentTag: {
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: 100,
+  },
+  currentTagText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.3),
+  },
+  originalPrice: {
+    fontSize: RFPercentage(1.65),
+    fontFamily: "Poppins_400Regular",
+    textDecorationLine: "line-through",
+  },
+
+  featuresContainer: { gap: RFPercentage(0.9), marginTop: RFPercentage(0.4) },
+  featureRow: { flexDirection: "row", alignItems: "center" },
   checkIcon: {
-    width: RFPercentage(2.2),
-    height: RFPercentage(2.2),
-    borderRadius: RFPercentage(1.1),
+    width: RFPercentage(2.3),
+    height: RFPercentage(2.3),
+    borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: RFPercentage(1.5),
+    marginRight: RFPercentage(1.2),
   },
   checkText: {
-    color: Colors.white,
+    color: "#fff",
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_700Bold",
   },
   featureText: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.55),
     fontFamily: "Poppins_400Regular",
     flex: 1,
   },
-  upgradeButton: {
-    paddingVertical: RFPercentage(1.5),
-    borderRadius: RFPercentage(100),
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: RFPercentage(2),
-    zIndex: 9999,
+
+  // Upgrade button inside yearly card
+  upgradeBtnOuter: {
+    marginTop: RFPercentage(2.2),
+    borderRadius: 100,
+    overflow: "hidden",
+    shadowColor: "#DD53A8",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 14,
+    elevation: 10,
+    zIndex: 10,
   },
-  upgradeButtonText: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  benefitsContainer: {
-    marginHorizontal: RFPercentage(3),
-    marginTop: RFPercentage(2),
-    padding: RFPercentage(2),
-  },
-  benefitsTitle: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_700Bold",
-    marginBottom: RFPercentage(1.5),
-    textAlign: "center",
-  },
-  benefitRow: {
+  upgradeBtn: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: RFPercentage(1.5),
+    justifyContent: "center",
+    height: RFPercentage(6),
+    gap: RFPercentage(0.8),
+    borderRadius: 100,
   },
-  benefitIcon: {
-    fontSize: RFPercentage(2),
-    marginRight: RFPercentage(1.5),
-    width: RFPercentage(3),
-    textAlign: "center",
+  upgradeBtnText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.75),
+    color: "#fff",
+    letterSpacing: 0.2,
   },
-  benefitText: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_400Regular",
-    flex: 1,
-    lineHeight: RFPercentage(2),
+
+  starsImage: {
+    width: RFPercentage(10),
+    height: RFPercentage(10),
+    alignSelf: "flex-end",
+    position: "absolute",
+    bottom: RFPercentage(0),
+    right: RFPercentage(0),
   },
 });
 

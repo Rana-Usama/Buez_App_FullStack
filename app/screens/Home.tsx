@@ -184,8 +184,8 @@ const HomeScreen: React.FC = () => {
         gradientColors={[Colors.primary, "#0b1544ff"]}
         title={t("home.txt1")}
       />
-      {/* <FreeTrialBanner /> */}
-      <FreeTrialBannerTest  theme = {theme} />
+      <FreeTrialBanner />
+      {/* <FreeTrialBannerTest  theme = {theme} /> */}
 
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
@@ -276,7 +276,7 @@ const HomeScreen: React.FC = () => {
                       user={item}
                       onPress={() => handleUserPress(item)}
                       // onPress={() => {
-                      //   navigation.navigate("ForgotPassword");
+                      //   navigation.navigate("InterestSelection");
                       // }}
                       darkMode={theme.mode === "dark"}
                       t={t}

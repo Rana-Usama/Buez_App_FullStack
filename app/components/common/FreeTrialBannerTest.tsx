@@ -33,7 +33,7 @@ interface BannerConfig {
 const BANNER_CONFIG: Record<BannerState, BannerConfig> = {
   active: {
     gradientColors: ["#555690ff", "#4a357bff"],
-    gradientColors2: ["#6366F180", "#8B5CF680"],
+    gradientColors2: ["#6365f155", "#8B5CF680"],
     icon: "gift",
     label: "Free trial active",
     title: "Enjoying premium features",
@@ -41,7 +41,7 @@ const BANNER_CONFIG: Record<BannerState, BannerConfig> = {
   },
   warning: {
     gradientColors: ["#be9e66ff", "#774725ff"],
-    gradientColors2: ["#F59E0B80", "#F9731680"],
+    gradientColors2: ["#f59f0b48", "#F9731680"],
     icon: "clock",
     label: "Trial expiring soon",
     title: "Subscribe to keep access",
@@ -49,7 +49,7 @@ const BANNER_CONFIG: Record<BannerState, BannerConfig> = {
   },
   urgent: {
     gradientColors: ["#874c4cff", "#a22626ff"],
-    gradientColors2: ["#EF444480", "#DC262680"],
+    gradientColors2: ["#ef44445c", "#DC262680"],
     icon: "alert-triangle",
     label: "Trial expires tomorrow!",
     title: "Upgrade now to continue",
@@ -57,7 +57,7 @@ const BANNER_CONFIG: Record<BannerState, BannerConfig> = {
   },
   warning_with_card: {
     gradientColors: ["#558f7cff", "#306b58ff"],
-    gradientColors2: ["#10B98180", "#05966980"],
+    gradientColors2: ["#10b98130", "#05966980"],
     icon: "credit-card",
     label: "Trial ending soon",
     title: "Your plan will start automatically",
@@ -65,7 +65,7 @@ const BANNER_CONFIG: Record<BannerState, BannerConfig> = {
   },
   autorenew: {
     gradientColors: ["#4b5c76ff", "#27437fff"],
-    gradientColors2: ["#3B82F680", "#2563EB80"],
+    gradientColors2: ["#3b83f650", "#2563EB80"],
     icon: "refresh-cw",
     label: "Starting tomorrow",
     title: "Monthly plan will begin automatically",
@@ -83,7 +83,7 @@ type TestScenario =
   | "card_warning_with_card"
   | "card_autorenew_test";
 
-const TEST_SCENARIO: TestScenario = "card_active";
+const TEST_SCENARIO: TestScenario = "card_warning_with_card";
 
 const getTestData = (scenario: TestScenario) => {
   switch (scenario) {

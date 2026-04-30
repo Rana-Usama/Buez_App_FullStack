@@ -9,6 +9,7 @@ import {
   RefreshControl,
   StatusBar,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
@@ -54,6 +55,127 @@ type Translations = {
   cnf: string;
 };
 
+// ─── Animated Task Card Wrapper ───────────────────────────────────────────────
+const AnimatedCard = ({
+  children,
+  index,
+}: {
+  children: React.ReactNode;
+  index: number;
+}) => {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(24)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 380,
+        delay: index * 70,
+        useNativeDriver: true,
+      }),
+      Animated.spring(translateY, {
+        toValue: 0,
+        tension: 60,
+        friction: 9,
+        delay: index * 70,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
+      {children}
+    </Animated.View>
+  );
+};
+
+// ─── Star Rating ──────────────────────────────────────────────────────────────
+const StarRating = ({ rating }: { rating: number }) => (
+  <View style={starStyles.row}>
+    {[1, 2, 3, 4, 5].map((i) => (
+      <Text
+        key={i}
+        style={[
+          starStyles.star,
+          { color: i <= rating ? "#F5A623" : "rgba(0,0,0,0.12)" },
+        ]}
+      >
+        ★
+      </Text>
+    ))}
+  </View>
+);
+
+const starStyles = StyleSheet.create({
+  row: { flexDirection: "row", gap: 2 },
+  star: { fontSize: RFPercentage(2), lineHeight: RFPercentage(2.4) },
+});
+
+// ─── Pill Badge ───────────────────────────────────────────────────────────────
+const Pill = ({
+  label,
+  color,
+  bg,
+}: {
+  label: string;
+  color: string;
+  bg: string;
+}) => (
+  <View style={[pillStyles.pill, { backgroundColor: bg }]}>
+    <Text style={[pillStyles.text, { color }]}>{label}</Text>
+  </View>
+);
+
+const pillStyles = StyleSheet.create({
+  pill: {
+    paddingHorizontal: RFPercentage(1.4),
+    paddingVertical: RFPercentage(0.45),
+    borderRadius: 100,
+    alignSelf: "flex-start",
+  },
+  text: {
+    fontSize: RFPercentage(1.25),
+    fontFamily: "Poppins_600SemiBold",
+    letterSpacing: 0.2,
+  },
+});
+
+// ─── Stat Cell ────────────────────────────────────────────────────────────────
+const StatCell = ({
+  value,
+  label,
+  accent,
+  theme
+}: {
+  value: number;
+  label: string;
+  accent: string;
+  theme:any
+}) => (
+  <View style={statCellStyles.cell}>
+    <Text style={[statCellStyles.value, { color: theme?.mode === "dark" ? Colors.white :  accent }]}>{value}</Text>
+    <Text style={[statCellStyles.label,{color: theme?.mode === "dark" ? Colors.darkGrey : "rgba(0,0,0,0.45)",}]}>{label}</Text>
+  </View>
+);
+
+const statCellStyles = StyleSheet.create({
+  cell: { flex: 1, alignItems: "center", gap: RFPercentage(0.3) },
+  value: {
+    fontSize: RFPercentage(2.6),
+    fontFamily: "Poppins_700Bold",
+    lineHeight: RFPercentage(3.2),
+  },
+  label: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular",
+    color: "rgba(0,0,0,0.45)",
+    textAlign: "center",
+  },
+});
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function CompletedTasks({ navigation }: any) {
   const [tr, setTr] = useState<Partial<Translations>>({});
   const { t } = useTranslation();
@@ -68,7 +190,27 @@ export default function CompletedTasks({ navigation }: any) {
 
   const currentUserId = getAuth().currentUser?.uid;
 
-  // Translations-----
+  const isDark = theme.mode === "dark";
+
+  // ─── Tokens ──────────────────────────────────────────────────────────────
+  const token = {
+    bg: isDark ? "#0E0F14" : "#F6F7FB",
+    card: isDark ? "#18191F" : "#FFFFFF",
+    border: isDark ? "rgba(255,255,255,0.07)" : "rgba(235, 235, 255, 0.81)",
+    heading: isDark ? "#FFFFFF" : "#0D0E14",
+    body: isDark ? "rgba(255,255,255,0.55)" : "rgba(13,14,20,0.55)",
+    accent: Colors.primary,
+    success: "#22C55E",
+    warning: "#F5A623",
+    statBg: isDark ? "rgba(255,255,255,0.04)" : "rgba(13,14,20,0.03)",
+    bannerBg: isDark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.07)",
+    bulkBg: isDark ? "rgba(99,102,241,0.10)" : "rgba(99,102,241,0.06)",
+    dateBg: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
+    reviewBg: isDark ? "rgba(255,255,255,0.04)" : "rgba(13,14,20,0.03)",
+    divider: isDark ? "rgba(255, 255, 255, 0.27)" : "rgba(0,0,0,0.06)",
+  };
+
+  // ─── Translations ─────────────────────────────────────────────────────────
   useEffect(() => {
     (async () => {
       const base: Translations = {
@@ -89,32 +231,30 @@ export default function CompletedTasks({ navigation }: any) {
         cnf: "You were a confirmed helper in this bulk task",
       };
       const vals = await Promise.all(
-        Object.values(base).map((txt) => cachedTranslate(txt)),
+        Object.values(base).map((txt) => cachedTranslate(txt))
       );
       const mapped = Object.keys(base).reduce((obj, k, i) => {
-        obj[k as keyof Translations] = vals[i] || base[k as keyof Translations];
+        obj[k as keyof Translations] =
+          vals[i] || base[k as keyof Translations];
         return obj;
       }, {} as Translations);
-
       setTr(mapped);
     })();
   }, []);
 
-  // Fetch user's reviews to check what they've already reviewed
+  // ─── Fetch Reviews ────────────────────────────────────────────────────────
   const fetchUserReviews = async (): Promise<Set<string>> => {
     if (!currentUserId) return new Set<string>();
     try {
       const reviewsQuery = query(
         collection(FIREBASE_DB, "reviews"),
-        where("reviewer.userId", "==", currentUserId),
+        where("reviewer.userId", "==", currentUserId)
       );
       const querySnapshot = await getDocs(reviewsQuery);
       const reviewedTaskIds: Set<string> = new Set();
       querySnapshot.forEach((doc) => {
         const reviewData = doc.data();
-        if (reviewData.taskId) {
-          reviewedTaskIds.add(reviewData.taskId as string);
-        }
+        if (reviewData.taskId) reviewedTaskIds.add(reviewData.taskId as string);
       });
       return reviewedTaskIds;
     } catch (error) {
@@ -123,7 +263,7 @@ export default function CompletedTasks({ navigation }: any) {
     }
   };
 
-  // Fetching Completed Tasks-------------
+  // ─── Fetch Tasks ──────────────────────────────────────────────────────────
   const fetchCompletedTasks = async () => {
     setLoading(true);
     try {
@@ -144,7 +284,7 @@ export default function CompletedTasks({ navigation }: any) {
             desc: descTr || originalDesc,
             category: catTr || originalCat,
           };
-        }),
+        })
       );
       setCache(newCache);
       setTasks(records);
@@ -164,43 +304,30 @@ export default function CompletedTasks({ navigation }: any) {
   useFocusEffect(
     useCallback(() => {
       fetchCompletedTasks();
-    }, []),
+    }, [])
   );
 
-  const StarRating = ({ rating }: { rating: number }) => {
-    return (
-      <View style={styles.starRow}>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Text
-            key={i}
-            style={{
-              color: i <= rating ? Colors.star : Colors.stroke,
-              fontSize: RFPercentage(1.8),
-            }}
-          >
-            ★
-          </Text>
-        ))}
-      </View>
-    );
-  };
-
+  // ─── Review Check ─────────────────────────────────────────────────────────
   const hasUserReviewedTask = (taskId: string, task: any) => {
     if (task.isPersonalReview) return true;
     if (task.reviewed) {
-      if (task.reviewer?.userId === currentUserId) {
-        return true;
-      }
+      if (task.reviewer?.userId === currentUserId) return true;
       if (
         task.taskDetails?.isBulkRequest &&
         task.taskOwnerId === task.taskDetails?.user?.userId
-      ) {
+      )
         return true;
-      }
     }
     return false;
   };
 
+  // ─── Derived Stats ────────────────────────────────────────────────────────
+  const reviewedCount = tasks.filter((t) =>
+    hasUserReviewedTask(t.taskId || t.id, t)
+  ).length;
+  const pendingCount = tasks.length - reviewedCount;
+
+  // ─── Render Card ──────────────────────────────────────────────────────────
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     const details = item.taskDetails || {};
     const owner = details.user || {};
@@ -216,335 +343,289 @@ export default function CompletedTasks({ navigation }: any) {
     const hasReviewed = hasUserReviewedTask(taskId, item);
     const userIsConfirmedHelper = isBulkTask && item.isConfirmedHelper;
 
-    const isDark = theme.mode === "dark";
-
-    const firstLetter = owner?.userName.trim()?.[0];
+    const firstLetter = owner?.userName?.trim()?.[0];
     const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
 
     return (
-      <View
-        style={[
-          styles.taskCard,
-          {
-            backgroundColor: theme.white,
-            borderColor:
-              theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
-          },
-        ]}
-      >
-        {/* Bulk Task Info Banner */}
-        {isBulkTask && userIsConfirmedHelper && (
-          <View
-            style={[
-              styles.bulkTaskBanner,
-              { backgroundColor: Colors.primary + "05" },
-            ]}
-          >
-            <Ionicons
-              name="people"
-              size={RFPercentage(1.6)}
-              color={Colors.lightGrey}
-            />
-            <Text
-              style={[styles.bulkTaskBannerText, { color: Colors.lightGrey }]}
+      <AnimatedCard index={index}>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: token.card,
+              borderColor: token.border,
+              shadowColor: isDark ? "#000" : "#5c61aaff",
+            },
+          ]}
+        >
+          {/* ── Confirmed Helper Banner ── */}
+          {isBulkTask && userIsConfirmedHelper && (
+            <View
+              style={[styles.banner, { backgroundColor: token.bannerBg }]}
             >
-              {tr.cnf}
-            </Text>
-          </View>
-        )}
-
-        {/* Header Section */}
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            {owner?.profileImage ? (
-              <Image
-                style={styles.avatar}
-                source={{ uri: owner?.profileImage }}
+              <Ionicons
+                name="shield-checkmark"
+                size={RFPercentage(1.8)}
+                color={token.accent}
               />
-            ) : (
-              <AvatarInitials
-                name={owner.userName}
-                style={[styles.avatar, { borderColor: groupTextColor }]}
-                textStyle={{fontSize:RFPercentage(2.2)}}
-              />
-            )}
+              <Text style={[styles.bannerText, { color: theme.mode  === "dark" ?  Colors.white : token.accent }]}>
+                {tr.cnf}
+              </Text>
+            </View>
+          )}
 
-            <View style={styles.userDetails}>
-              <Text style={[styles.userName, { color: theme.darkGrey }]}>
+          {/* ── Header Row ── */}
+          <View style={styles.headerRow}>
+            {/* Avatar */}
+            <View style={styles.avatarWrap}>
+              {owner?.profileImage ? (
+                <Image
+                  style={[styles.avatar, { borderColor: token.accent + "40" }]}
+                  source={{ uri: owner?.profileImage }}
+                />
+              ) : (
+                <AvatarInitials
+                  name={owner.userName}
+                  style={[styles.avatar, { borderColor: groupTextColor }]}
+                  textStyle={{ fontSize: RFPercentage(2.1) }}
+                />
+              )}
+              {/* Online-style dot reused as bulk indicator */}
+              {isBulkTask && (
+                <View
+                  style={[
+                    styles.bulkDot,
+                    { backgroundColor: token.accent },
+                  ]}
+                />
+              )}
+            </View>
+
+            {/* Name + Category */}
+            <View style={styles.metaBlock}>
+              <Text
+                style={[styles.userName, { color: Colors.darkGrey2 }]}
+                numberOfLines={1}
+              >
                 {owner.userName || "User"}
               </Text>
-              <View
+              <Pill
+                label={catName}
+                color={token.success}
+                bg={token.success + "18"}
+              />
+            </View>
+
+            {/* Status Badge */}
+            <View
+              style={[
+                styles.statusBadge,
+                {
+                  backgroundColor: hasReviewed
+                    ? token.success + "18"
+                    : token.accent + "18",
+                },
+              ]}
+            >
+              {hasReviewed ? (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={RFPercentage(1.6)}
+                  color={token.success}
+                />
+              ) : (
+                <Ionicons
+                  name="time-outline"
+                  size={RFPercentage(1.6)}
+                  color={theme.mode  === "dark" ?  Colors.white : token.accent}
+                />
+              )}
+              <Text
                 style={[
-                  styles.categoryBadge,
-                  {
-                    backgroundColor:
-                      theme.mode === "dark"
-                        ? Colors.success2 + "30"
-                        : Colors.success2 + "20",
-                  },
+                  styles.statusText,
+                  { color: hasReviewed ? token.success : theme.mode  === "dark" ?  Colors.white : token.accent },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.categoryText,
-                    { color: hasReviewed ? Colors.success2 : Colors.success2 },
-                  ]}
-                >
-                  {catName}
+                {hasReviewed
+                  ? tr.reviewAdded || "Done"
+                  : tr.alreadyReviewed || "Pending"}
+              </Text>
+            </View>
+          </View>
+
+          {/* ── Description ── */}
+          <Text
+            style={[styles.description, { color: token.body }]}
+            numberOfLines={2}
+          >
+            {desc}
+          </Text>
+
+          {/* ── Bulk Stats Row ── */}
+          {isBulkTask && (
+            <View
+              style={[styles.bulkRow, { backgroundColor: token.bulkBg }]}
+            >
+              <View style={styles.bulkCell}>
+                <Ionicons
+                  name="people-outline"
+                  size={RFPercentage(1.7)}
+                  color={token.accent}
+                />
+                <Text style={[styles.bulkLabel, { color: token.body }]}>
+                  {details?.numberOfWorkers || 1} {t("common.helpers")}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.bulkDividerLine,
+                  { backgroundColor: token.divider },
+                ]}
+              />
+              <View style={styles.bulkCell}>
+                <Ionicons
+                  name="checkmark-done-outline"
+                  size={RFPercentage(1.7)}
+                  color={token.success}
+                />
+                <Text style={[styles.bulkLabel, { color: token.body }]}>
+                  {details.confirmedWorkers?.length || 0}{" "}
+                  {t("offerDetail.confirmed")}
                 </Text>
               </View>
             </View>
-          </View>
+          )}
 
-          {/* Review Status */}
-          <View
-            style={[
-              styles.statusIndicator,
-              {
-                backgroundColor: hasReviewed ? Colors.success2 : Colors.primary,
-              },
-            ]}
-          >
-            <Text style={styles.statusText}>
-              {hasReviewed
-                ? tr.reviewAdded || "Review Added"
-                : tr.alreadyReviewed || "Review Pending"}
+          {/* ── Divider ── */}
+          <View style={[styles.divider, { backgroundColor: token.divider }]} />
+
+          {/* ── Date Row ── */}
+          <View style={styles.dateRow}>
+            <Ionicons
+              name="calendar-outline"
+              size={RFPercentage(1.7)}
+              color={token.body}
+            />
+            <Text style={[styles.dateLabel, { color: token.body }]}>
+              {tr.completedOn || "Completed on"}
+            </Text>
+            <Text style={[styles.dateValue, { color: token.heading }]}>
+              {getFormatedDate(doneOn)}
             </Text>
           </View>
-        </View>
 
-        {/* Task Description */}
-        <View style={styles.descriptionContainer}>
-          <Text style={[styles.description, { color: theme.heading }]}>
-            {desc}
-          </Text>
-        </View>
-
-        {/* Bulk Task Stats */}
-        {isBulkTask && (
-          <View
-            style={[
-              styles.bulkStatsContainer,
-              {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.primary + "20"
-                    : Colors.primary + "10",
-              },
-            ]}
-          >
-            <View style={styles.bulkStatItem}>
-              <Ionicons
-                name="people"
-                size={RFPercentage(1.6)}
-                color={theme.darkGrey}
-              />
-              <Text style={[styles.bulkStatText, { color: theme.darkGrey }]}>
-                {details?.numberOfWorkers || 1} {t("common.helpers")}
-              </Text>
-            </View>
+          {/* ── Action / Review ── */}
+          {hasReviewed ? (
             <View
               style={[
-                styles.bulkStatDivider,
-                { backgroundColor: theme.border },
+                styles.reviewBox,
+                { backgroundColor: token.reviewBg, borderColor: token.border },
               ]}
-            />
-            <View style={styles.bulkStatItem}>
-              <Ionicons
-                name="checkmark-circle"
-                size={RFPercentage(1.6)}
-                color="#4CAF50"
-              />
-              <Text style={[styles.bulkStatText, { color: "#4CAF50" }]}>
-                {details.confirmedWorkers?.length || 0}{" "}
-                {t("offerDetail.confirmed")}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Date Section */}
-        <View
-          style={[
-            styles.dateContainer,
-            {
-              backgroundColor:
-                theme.mode === "dark"
-                  ? Colors.primary + "30"
-                  : Colors.primary + "10",
-            },
-          ]}
-        >
-          <Text
-            style={[
-              styles.dateLabel,
-              {
-                color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
-              },
-            ]}
-          >
-            {tr.completedOn || "Completed on"}
-          </Text>
-          <Text style={[styles.date, { color: theme.darkGrey }]}>
-            {getFormatedDate(doneOn)}
-          </Text>
-        </View>
-
-        {/* Action Section */}
-        <View
-          style={[
-            styles.actionContainer,
-            {
-              borderTopColor:
-                theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
-            },
-          ]}
-        >
-          {hasReviewed ? (
-            <View style={styles.reviewSection}>
-              <View style={styles.reviewHeader}>
-                <Text style={styles.reviewTitle}>{`${t(
-                  "completed.txt3",
-                )}`}</Text>
+            >
+              <View style={styles.reviewTopRow}>
+                <Text style={[styles.reviewTitle, { color: token.heading }]}>
+                  {`${t("completed.txt3")}`}
+                </Text>
                 <StarRating rating={item.rating || 0} />
               </View>
               {item.reviewText && (
-                <View
-                  style={[
-                    styles.reviewTextContainer,
-                    {
-                      backgroundColor:
-                        theme.mode === "dark"
-                          ? "rgba(24, 26, 40, 1)"
-                          : Colors.lightWhite,
-                    },
-                  ]}
+                <Text
+                  style={[styles.reviewQuote, { color: token.body }]}
+                  numberOfLines={3}
                 >
-                  <Text style={[styles.reviewText, { color: theme.darkGrey }]}>
-                    "{item.reviewText}"
-                  </Text>
-                </View>
+                  "{item.reviewText}"
+                </Text>
               )}
             </View>
           ) : (
-            <View style={styles.reviewButtonContainer}>
-              <MyAppButton
-                title={tr.review || "Add Review"}
-                height={RFPercentage(5)}
-                marginTop={0}
-                onPress={() =>
-                  navigation.navigate("AddReview", {
-                    task: item,
-                    isBulkTask: isBulkTask,
-                    taskOwner: owner,
-                    isConfirmedHelper: userIsConfirmedHelper,
-                  })
-                }
-              />
-            </View>
+            <TouchableOpacity
+              activeOpacity={0.82}
+              style={[styles.reviewCTA, { backgroundColor: token.accent }]}
+              onPress={() =>
+                navigation.navigate("AddReview", {
+                  task: item,
+                  isBulkTask: isBulkTask,
+                  taskOwner: owner,
+                  isConfirmedHelper: userIsConfirmedHelper,
+                })
+              }
+            >
+              <Feather name="edit-3" size={RFPercentage(1.8)} color="#fff" />
+              <Text style={styles.reviewCTAText}>
+                {tr.review || "Add Review"}
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
-      </View>
+      </AnimatedCard>
     );
   };
 
+  // ─── Root Render ──────────────────────────────────────────────────────────
   return (
-    <View style={[styles.container, { backgroundColor: theme.white }]}>
+    <View style={[styles.root, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={"transparent"}
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
         translucent
       />
       <CustomNav title={t("profile.txt4")} showBack />
 
-      {/* Stats Overview */}
-      {!loading && tasks?.length > 0 && (
+      {/* ── Stats Bar ── */}
+      {!loading && tasks.length > 0 && (
         <View
           style={[
-            styles.statsContainer,
+            styles.statsBar,
             {
-              backgroundColor:
-                theme.mode === "dark" ? Colors.primary + "30" : Colors.white,
+              backgroundColor: token.card,
+              borderColor: token.border,
+              shadowColor: isDark ? "#000" : "#5c61aaff",
             },
           ]}
         >
-          <View style={[styles.statItem]}>
-            <Text
-              style={[
-                styles.statNumber,
-                {
-                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
-                },
-              ]}
-            >
-              {tasks?.length}
-            </Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
-              {`${t("completed.txt4")}`}
-            </Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text
-              style={[
-                styles.statNumber,
-                {
-                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
-                },
-              ]}
-            >
-              {
-                tasks.filter((task) =>
-                  hasUserReviewedTask(task.taskId || task.id, task),
-                ).length
-              }
-            </Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
-              {`${t("completed.txt5")}`}
-            </Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text
-              style={[
-                styles.statNumber,
-                {
-                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
-                },
-              ]}
-            >
-              {
-                tasks.filter(
-                  (task) => !hasUserReviewedTask(task.taskId || task.id, task),
-                ).length
-              }
-            </Text>
-            <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
-              {`${t("completed.txt6")}`}
-            </Text>
-          </View>
+          <StatCell
+            value={tasks.length}
+            label={`${t("completed.txt4")}`}
+            accent={token.accent}
+            theme ={theme}
+          />
+          <View
+            style={[styles.statsDivider, { backgroundColor: token.divider }]}
+          />
+          <StatCell
+            value={reviewedCount}
+            label={`${t("completed.txt5")}`}
+            accent={token.success}
+                        theme ={theme}
+
+          />
+          <View
+            style={[styles.statsDivider, { backgroundColor: token.divider }]}
+          />
+          <StatCell
+            value={pendingCount}
+            label={`${t("completed.txt6")}`}
+            accent={token.warning}
+                        theme ={theme}
+
+          />
         </View>
       )}
 
-      {/* Content */}
+      {/* ── Content ── */}
       <View style={styles.content}>
         {loading ? (
-          <View style={styles.loadingContainer}>
+          <View style={styles.loadingWrap}>
             <ActivityIndicator
               size="large"
-              color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+              color={token.body}
+              style={{ marginBottom: RFPercentage(1.5) }}
             />
-            <Text
-              style={[
-                styles.loadingText,
-                {
-                  color:
-                    theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
-                },
-              ]}
-            >{`${t("completed.txt7")}`}</Text>
+            <Text style={[styles.loadingText, { color: token.body }]}>
+              {`${t("completed.txt7")}`}
+            </Text>
           </View>
-        ) : tasks?.length === 0 ? (
+        ) : tasks.length === 0 ? (
           <NotFound title={tr.noTasks || "No completed tasks yet"} />
         ) : (
           <FlatList
@@ -562,8 +643,8 @@ export default function CompletedTasks({ navigation }: any) {
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             getItemLayout={(data, index) => ({
-              length: RFPercentage(25),
-              offset: RFPercentage(25) * index,
+              length: RFPercentage(30),
+              offset: RFPercentage(30) * index,
               index,
             })}
           />
@@ -573,330 +654,212 @@ export default function CompletedTasks({ navigation }: any) {
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  headerContainer: {
-    backgroundColor: Colors.white,
-    shadowColor: Colors.primary + "20",
+  root: { flex: 1 },
+
+  // Stats Bar
+  statsBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: RFPercentage(2),
+    marginTop: RFPercentage(1.5),
+    marginBottom: RFPercentage(0.5),
+    paddingVertical: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+    borderRadius: RFPercentage(2),
+    borderWidth: 1,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.06,
     shadowRadius: 12,
     elevation: 4,
   },
-  statsContainer: {
-    flexDirection: "row",
-    margin: RFPercentage(2),
-    padding: RFPercentage(2),
-    borderRadius: RFPercentage(2),
-    shadowColor: Colors.primary + "30",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 6,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  statNumber: {
-    fontSize: RFPercentage(2.1),
-    fontFamily: "Poppins_700Bold",
-    color: Colors.primary,
-    marginBottom: RFPercentage(0.5),
-  },
-  statLabel: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_500Medium",
-    color: Colors.darkGrey,
-    textAlign: "center",
-  },
-  statDivider: {
+  statsDivider: {
     width: 1,
-    backgroundColor: Colors.border,
-    marginHorizontal: RFPercentage(1),
+    height: RFPercentage(5),
+    marginHorizontal: RFPercentage(0.5),
   },
-  selectedTaskHeader: {
-    marginHorizontal: RFPercentage(2),
-    padding: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: RFPercentage(1),
-    gap: RFPercentage(1),
-  },
-  selectedTaskText: {
-    fontSize: RFPercentage(1.4),
-    fontFamily: "Poppins_500Medium",
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-  },
-  loadingContainer: {
+
+  // Content
+  content: { flex: 1 },
+  loadingWrap: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   loadingText: {
     fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_500Medium",
-    color: Colors.darkGrey,
-    marginTop: RFPercentage(2),
+    fontFamily: "Poppins_400Regular",
   },
   listContent: {
     padding: RFPercentage(2),
-    paddingTop: RFPercentage(1),
+    paddingTop: RFPercentage(1.5),
+    gap: RFPercentage(1.8),
   },
-  scrollToNotice: {
-    marginBottom: RFPercentage(1),
-    padding: RFPercentage(1),
-    backgroundColor: Colors.primary + "10",
-    borderRadius: RFPercentage(1),
-  },
-  scrollToText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-    fontStyle: "italic",
-  },
-  taskCard: {
-    backgroundColor: Colors.white,
-    borderRadius: RFPercentage(2),
-    marginBottom: RFPercentage(2),
-    padding: RFPercentage(2.5),
-    shadowColor: Colors.primary + "40",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 8,
+
+  // Card
+  card: {
+    borderRadius: RFPercentage(2.5),
+    padding: RFPercentage(2.2),
     borderWidth: 1,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    elevation: 6,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: RFPercentage(1.5),
-  },
-  userInfo: {
+
+  // Banner
+  banner: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
+    gap: RFPercentage(0.6),
+    paddingHorizontal: RFPercentage(1.4),
+    paddingVertical: RFPercentage(0.8),
+    borderRadius: RFPercentage(1.2),
+    marginBottom: RFPercentage(1.8),
   },
-  avatar: {
-    width: RFPercentage(6),
-    height: RFPercentage(6),
-    borderRadius: RFPercentage(3),
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
-  userDetails: {
-    marginLeft: RFPercentage(1.5),
-    flex: 1,
-  },
-  userName: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_600SemiBold",
-    color: Colors.darkGrey,
-    marginBottom: RFPercentage(0.5),
-  },
-  categoryBadge: {
-    paddingHorizontal: RFPercentage(1.2),
-    paddingVertical: RFPercentage(0.4),
-    borderRadius: RFPercentage(1),
-    alignSelf: "flex-start",
-  },
-  categoryText: {
+  bannerText: {
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
+    flex: 1,
   },
-  bulkIndicator: {
-    padding: RFPercentage(0.5),
-    borderRadius: RFPercentage(0.8),
-    marginRight: RFPercentage(0.5),
+
+  // Header Row
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(1.2),
+    marginBottom: RFPercentage(1.4),
   },
-  statusIndicator: {
+  avatarWrap: { position: "relative" },
+  avatar: {
+    width: RFPercentage(6.2),
+    height: RFPercentage(6.2),
+    borderRadius: RFPercentage(3.1),
+    borderWidth: 1.5,
+  },
+  bulkDot: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: RFPercentage(1.5),
+    height: RFPercentage(1.5),
+    borderRadius: RFPercentage(0.75),
+    borderWidth: 1.5,
+    borderColor: "#fff",
+  },
+  metaBlock: { flex: 1, gap: RFPercentage(0.5) ,},
+  userName: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+  },
+
+  // Status Badge
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.4),
     paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
+    paddingVertical: RFPercentage(0.55),
+    borderRadius: 100,
   },
   statusText: {
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_600SemiBold",
-    color: Colors.white,
-  },
-  descriptionContainer: {
-    marginBottom: RFPercentage(1.5),
-  },
-  description: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_400Regular",
-    color: Colors.heading,
-    lineHeight: RFPercentage(2.2),
-  },
-  bulkTaskContainer: {
-    marginBottom: RFPercentage(1.5),
-    padding: RFPercentage(1.5),
-    borderRadius: RFPercentage(1.2),
-  },
-  bulkHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: RFPercentage(1),
-    gap: RFPercentage(0.5),
-  },
-  bulkTitle: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  bulkStats: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: RFPercentage(0.8),
-  },
-  bulkStat: {
-    flex: 1,
-    alignItems: "center",
-  },
-  bulkStatLabel: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_400Regular",
-    marginBottom: RFPercentage(0.2),
-    textAlign: "center",
-  },
-  bulkStatValue: {
-    fontSize: RFPercentage(1.8),
-    fontFamily: "Poppins_700Bold",
   },
 
-  confirmedBadge: {
+  // Description
+  description: {
+    fontSize: RFPercentage(1.55),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2.3),
+    marginBottom: RFPercentage(1.4),
+  },
+
+  // Bulk Row
+  bulkRow: {
     flexDirection: "row",
     alignItems: "center",
-    alignSelf: "flex-start",
-    paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(0.8),
-    marginTop: RFPercentage(0.5),
-    gap: RFPercentage(0.3),
+    borderRadius: RFPercentage(1.4),
+    paddingVertical: RFPercentage(1.1),
+    paddingHorizontal: RFPercentage(1.5),
+    marginBottom: RFPercentage(1.4),
   },
-  confirmedText: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_600SemiBold",
-  },
-  viewHelpersButton: {
+  bulkCell: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.primary,
-    alignSelf: "flex-start",
-    paddingHorizontal: RFPercentage(1.2),
-    paddingVertical: RFPercentage(0.6),
-    borderRadius: RFPercentage(0.8),
-    marginTop: RFPercentage(1),
-    gap: RFPercentage(0.3),
+    gap: RFPercentage(0.6),
+    justifyContent: "center",
   },
-  viewHelpersText: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_600SemiBold",
-    color: Colors.white,
+  bulkLabel: {
+    fontSize: RFPercentage(1.35),
+    fontFamily: "Poppins_500Medium",
   },
-  dateContainer: {
+  bulkDividerLine: {
+    width: 1,
+    height: RFPercentage(2.5),
+    marginHorizontal: RFPercentage(1),
+  },
+
+  // Divider
+  divider: {
+    height: 1,
+    marginBottom: RFPercentage(1.2),
+  },
+
+  // Date Row
+  dateRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: RFPercentage(2),
-    padding: RFPercentage(1.2),
-    backgroundColor: Colors.lightPrimary,
-    borderRadius: RFPercentage(1),
+    gap: RFPercentage(0.5),
+    marginBottom: RFPercentage(1.8),
   },
   dateLabel: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+  },
+  dateValue: {
+    fontSize: RFPercentage(1.45),
     fontFamily: "Poppins_600SemiBold",
-    color: Colors.primary,
-    marginRight: RFPercentage(0.5),
+    marginLeft: "auto",
   },
-  date: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_500Medium",
-    color: Colors.darkGrey,
+
+  // Review Box
+  reviewBox: {
+    borderRadius: RFPercentage(1.6),
+    padding: RFPercentage(1.6),
+    borderWidth: 1,
+    gap: RFPercentage(0.8),
   },
-  actionContainer: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: RFPercentage(1.5),
-  },
-  reviewSection: {
-    // Review content styles
-  },
-  reviewHeader: {
+  reviewTopRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: RFPercentage(1),
   },
   reviewTitle: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.55),
     fontFamily: "Poppins_600SemiBold",
-    color: Colors.primary,
   },
-  reviewTextContainer: {
-    backgroundColor: Colors.lightWhite,
-    padding: RFPercentage(1.5),
-    borderRadius: RFPercentage(1),
-    borderLeftWidth: 2,
-    borderLeftColor: Colors.star,
-  },
-  reviewText: {
-    fontSize: RFPercentage(1.6),
+  reviewQuote: {
+    fontSize: RFPercentage(1.45),
     fontFamily: "Poppins_400Regular",
-    color: Colors.darkGrey,
+    lineHeight: RFPercentage(2.1),
     fontStyle: "italic",
-    lineHeight: RFPercentage(2),
   },
-  reviewButtonContainer: {
-    alignItems: "flex-end",
-  },
-  starRow: {
+
+  // Review CTA
+  reviewCTA: {
     flexDirection: "row",
-  },
-  star: {
-    width: RFPercentage(2.2),
-    height: RFPercentage(2.2),
-    borderRadius: RFPercentage(0.5),
+    alignItems: "center",
     justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: RFPercentage(0.2),
+    gap: RFPercentage(0.8),
+    paddingVertical: RFPercentage(1.4),
+    borderRadius: RFPercentage(1.6),
   },
-  // Add to your styles:
-  bulkTaskBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: RFPercentage(1),
-    borderRadius: RFPercentage(0.8),
-    marginBottom: RFPercentage(1.5),
-    gap: RFPercentage(0.5),
-  },
-  bulkTaskBannerText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_500Medium",
-  },
-  bulkStatsContainer: {
-    flexDirection: "row",
-    padding: RFPercentage(1),
-    borderRadius: RFPercentage(1),
-    marginBottom: RFPercentage(1.5),
-    justifyContent: "space-around",
-  },
-  bulkStatItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: RFPercentage(0.5),
-  },
-  bulkStatText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_500Medium",
-  },
-  bulkStatDivider: {
-    width: 1,
-    height: "100%",
+  reviewCTAText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_600SemiBold",
+    color: "#FFFFFF",
   },
 });
