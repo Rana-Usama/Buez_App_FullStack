@@ -6,6 +6,8 @@ import {
   Animated,
   Easing,
   Platform,
+  Text,
+  Image,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
@@ -27,6 +29,8 @@ import { reload } from "firebase/auth";
 
 const PENDING_JOB_KEY = "pendingDeepLinkJobId";
 import { deepLinkState } from "../job-sharing/deepLinkState";
+import { Icons } from "../config/theme";
+import { useTranslation } from "react-i18next";
 
 const isUserDataReady = (userData: any): boolean => {
   return !!(userData && userData.userId);
@@ -36,114 +40,105 @@ const DeciderScreen = () => {
   const { theme } = useAppTheme();
   const navigation = useNavigation<any>();
   const { userData, loading: userLoading } = useUser();
+  const { t } = useTranslation();
 
   const [deviceId, setDeviceId] = useState("");
+  const [messageIndex, setMessageIndex] = useState(0);
   const hasNavigated = useRef(false);
 
-  const outerSpinValue = useRef(new Animated.Value(0)).current;
-  const innerSpinValue = useRef(new Animated.Value(0)).current;
-  const scaleValue = useRef(new Animated.Value(0.8)).current;
-  const dotOpacity1 = useRef(new Animated.Value(0.3)).current;
-  const dotOpacity2 = useRef(new Animated.Value(0.3)).current;
-  const dotOpacity3 = useRef(new Animated.Value(0.3)).current;
+  // ─── Animation values ─────────────────────────────────────────────────────
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.85)).current;
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const taglineOpacity = useRef(new Animated.Value(0)).current;
+  const messageOpacity = useRef(new Animated.Value(1)).current;
 
   const db = getFirestore();
 
-  // ─── Animations (unchanged) ───────────────────────────────────────────────
+  // ─── Logo + tagline entrance ──────────────────────────────────────────────
   useEffect(() => {
-    const outerSpinAnimation = Animated.loop(
-      Animated.timing(outerSpinValue, {
+    Animated.parallel([
+      Animated.spring(logoScale, {
         toValue: 1,
-        duration: 2000,
-        easing: Easing.linear,
+        tension: 60,
+        friction: 8,
         useNativeDriver: true,
       }),
-    );
-    const innerSpinAnimation = Animated.loop(
-      Animated.timing(innerSpinValue, {
+      Animated.timing(logoOpacity, {
         toValue: 1,
-        duration: 1500,
-        easing: Easing.linear,
+        duration: 600,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
-    );
-    const scaleAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(scaleValue, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.ease,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleValue, {
-          toValue: 0.8,
-          duration: 1000,
-          easing: Easing.ease,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    const dotAnimation = Animated.loop(
-      Animated.stagger(300, [
-        Animated.sequence([
-          Animated.timing(dotOpacity1, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dotOpacity1, {
-            toValue: 0.3,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(dotOpacity2, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dotOpacity2, {
-            toValue: 0.3,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(dotOpacity3, {
-            toValue: 1,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-          Animated.timing(dotOpacity3, {
-            toValue: 0.3,
-            duration: 400,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]),
-    );
-    outerSpinAnimation.start();
-    innerSpinAnimation.start();
-    scaleAnimation.start();
-    dotAnimation.start();
-    return () => {
-      outerSpinAnimation.stop();
-      innerSpinAnimation.stop();
-      scaleAnimation.stop();
-      dotAnimation.stop();
-    };
+    ]).start(() => {
+      Animated.timing(taglineOpacity, {
+        toValue: 1,
+        duration: 500,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }).start();
+    });
   }, []);
 
-  const outerSpin = outerSpinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
-  const innerSpin = innerSpinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["360deg", "0deg"],
-  });
+  // ─── Progress bar fill (0 → 0.85 over 6s, stays until navigation) ────────
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: 0.85,
+      duration: 6000,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: false,
+    }).start();
+  }, []);
 
+  // ─── Splash messages shown during progress ────────────────────────────────────
+  const SPLASH_MESSAGES = [
+    t("decider.dc1"),
+    t("decider.dc2"),
+    t("decider.dc3"),
+    t("decider.dc4"),
+  ];
+
+  // ─── Cycle splash messages every 1.8s ────────────────────────────────────
+  useEffect(() => {
+    const interval = setInterval(() => {
+      Animated.timing(messageOpacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }).start(() => {
+        setMessageIndex((i) => (i + 1) % SPLASH_MESSAGES.length);
+        Animated.timing(messageOpacity, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      });
+    }, 1800);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ─── Complete progress bar before navigating ──────────────────────────────
+  const completeAndNavigate = useCallback(
+    (routeName: string, params?: object) => {
+      if (hasNavigated.current) return;
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: false,
+      }).start(() => {
+        hasNavigated.current = true;
+        if (params) {
+          navigation.replace(routeName, params);
+        } else {
+          navigation.replace(routeName);
+        }
+      });
+    },
+    [navigation, progressAnim],
+  );
+
+  // ─── Device ID ────────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchDeviceId = async () => {
       const id = await DeviceInfo.getUniqueId();
@@ -152,21 +147,38 @@ const DeciderScreen = () => {
     fetchDeviceId();
   }, []);
 
-  const hasDeviceAvailedFreeTrial = async (deviceId: string) => {
+  // ─── Free Trial Checks ────────────────────────────────────────────────────
+  const hasDeviceAvailedFreeTrial = async (id: string): Promise<boolean> => {
     try {
       const q = query(
         collection(db, "freeTrials"),
-        where("deviceId", "==", deviceId),
+        where("deviceId", "==", id),
         where("freeTrial", "==", true),
       );
       const snapshot = await getDocs(q);
       return !snapshot.empty;
     } catch (error) {
-      console.log("[Decider] Error fetching freeTrials:", error);
+      console.log("[Decider] Error fetching freeTrials by deviceId:", error);
       return false;
     }
   };
 
+  const hasUserAvailedFreeTrial = async (userId: string): Promise<boolean> => {
+    try {
+      const q = query(
+        collection(db, "freeTrials"),
+        where("userId", "==", userId),
+        where("freeTrial", "==", true),
+      );
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    } catch (error) {
+      console.log("[Decider] Error fetching freeTrials by userId:", error);
+      return false;
+    }
+  };
+
+  // ─── Date Parser ──────────────────────────────────────────────────────────
   const parseDate = (date: any): Date | null => {
     if (!date) return null;
     if (date.seconds) return new Date(date.seconds * 1000);
@@ -175,7 +187,7 @@ const DeciderScreen = () => {
     return null;
   };
 
-  // ─── Extracted as useCallback so it's stable and callable ────────────────
+  // ─── Main Navigation Decision ─────────────────────────────────────────────
   const decideAndNavigate = useCallback(async () => {
     if (hasNavigated.current) return;
 
@@ -183,9 +195,6 @@ const DeciderScreen = () => {
       const creds = await getCredentials();
       const { email } = creds || {};
       const isLoggedIn = !!(email || creds?.password);
-
-      // If logged in, we now KNOW userData is ready (caller guarantees it)
-      // so we no longer need the early-return guard here
 
       const pendingJobId = await SecureStore.getItemAsync(PENDING_JOB_KEY);
       if (pendingJobId || deepLinkState.isHandlingDeepLink) {
@@ -199,30 +208,26 @@ const DeciderScreen = () => {
       const now = new Date();
 
       if (loggedOut === "true") {
-        hasNavigated.current = true;
-        navigation.replace("Login");
+        completeAndNavigate("Login");
         return;
       }
 
       if (!isLoggedIn && !userData) {
-        hasNavigated.current = true;
-        navigation.replace("OnBoarding");
+        completeAndNavigate("OnBoarding");
         return;
       }
 
       if (!isUserDataReady(userData)) {
-        hasNavigated.current = true;
-        navigation.replace("OnBoarding");
+        completeAndNavigate("OnBoarding");
         return;
       }
 
-      // ── Email verification
+      // ── Email verification ─────────────────────────────────────────────────
       const currentUser = FIREBASE_AUTH.currentUser;
       if (currentUser) {
         await reload(currentUser);
         if (!currentUser.emailVerified) {
-          hasNavigated.current = true;
-          navigation.replace("EmailVerification", {
+          completeAndNavigate("EmailVerification", {
             email: currentUser.email,
             deviceId,
           });
@@ -243,29 +248,38 @@ const DeciderScreen = () => {
       const isWithinPaidPeriod =
         subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
+      // ── Active paid subscription ───────────────────────────────────────────
       if (isSubscribed && isWithinPaidPeriod) {
-        hasNavigated.current = true;
-        navigation.replace("TabNavigator");
+        completeAndNavigate("TabNavigator");
         return;
       }
 
+      // ── Expired paid subscription ──────────────────────────────────────────
       if (isSubscribed && !isWithinPaidPeriod) {
-        hasNavigated.current = true;
-        navigation.replace("Subscription");
+        completeAndNavigate("Subscription");
         return;
       }
 
+      // ── Free trial eligibility (device + user both checked) ───────────────
       let deviceUsedTrial = false;
+      let userUsedTrial = false;
+
       if (deviceId) {
         deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
       }
+      // Short-circuit: skip userId query if device already blocked
+      if (!deviceUsedTrial && userData?.userId) {
+        userUsedTrial = await hasUserAvailedFreeTrial(userData.userId);
+      }
 
-      if (!isSubscribed && !isFreeTrial && !deviceUsedTrial) {
-        hasNavigated.current = true;
-        navigation.replace("FreeTrial");
+      const alreadyUsedTrial = deviceUsedTrial || userUsedTrial;
+
+      if (!isSubscribed && !isFreeTrial && !alreadyUsedTrial) {
+        completeAndNavigate("FreeTrial");
         return;
       }
 
+      // ── Validate ongoing free trial ────────────────────────────────────────
       let isTrialValid = false;
       if (isFreeTrial && freeTrialStartedAt) {
         const trialStart = parseDate(freeTrialStartedAt);
@@ -276,41 +290,36 @@ const DeciderScreen = () => {
       }
 
       if (isTrialValid) {
-        hasNavigated.current = true;
-        navigation.replace("TabNavigator");
+        completeAndNavigate("TabNavigator");
         return;
       }
 
+      // ── No valid subscription or trial ────────────────────────────────────
       if (!isSubscribed) {
-        hasNavigated.current = true;
-        navigation.replace("Subscription");
+        completeAndNavigate("Subscription");
         return;
       }
 
-      hasNavigated.current = true;
-      navigation.replace("OnBoarding");
+      completeAndNavigate("OnBoarding");
     } catch (error) {
       console.log("[Decider] Error deciding initial route:", error);
       if (!hasNavigated.current) {
-        hasNavigated.current = true;
-        navigation.replace("OnBoarding");
+        completeAndNavigate("OnBoarding");
       }
     }
-  }, [userData, deviceId, navigation]);
+  }, [userData, deviceId, navigation, completeAndNavigate]);
 
-
+  // ─── Trigger decision when dependencies are ready ─────────────────────────
   useEffect(() => {
-    if (!deviceId) return; // device ID not fetched yet
-    if (userLoading) return; // context still loading
-    if (hasNavigated.current) return; // already navigated
+    if (!deviceId) return;
+    if (userLoading) return;
+    if (hasNavigated.current) return;
 
     const run = async () => {
       const creds = await getCredentials();
       const { email } = creds || {};
       const isLoggedIn = !!(email || creds?.password);
 
-      // If logged in but userData still not ready, bail — the effect
-      // will re-fire when userData?.userId changes (i.e. when it populates)
       if (isLoggedIn && !isUserDataReady(userData)) {
         console.log("[Decider] Waiting for userData.userId...");
         return;
@@ -320,71 +329,114 @@ const DeciderScreen = () => {
     };
 
     run();
-
-    // userData?.userId is a primitive string — reliable change detection
   }, [userData?.userId, userLoading, deviceId, decideAndNavigate]);
 
+  // ─── Safety timeout fallback ──────────────────────────────────────────────
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!hasNavigated.current && !deepLinkState.isHandlingDeepLink) {
         console.warn("[Decider] Timeout — forcing OnBoarding");
-        hasNavigated.current = true;
-        navigation.replace("OnBoarding");
+        completeAndNavigate("OnBoarding");
       }
     }, 8000);
     return () => clearTimeout(timeout);
   }, []);
 
-  // ─── Render (unchanged) ───────────────────────────────────────────────────
+  // ─── Progress bar width interpolation ────────────────────────────────────
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0%", "100%"],
+  });
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
-        backgroundColor={"transparent"}
+        backgroundColor="transparent"
         translucent
       />
-      <View style={styles.loaderContainer}>
-        <View
-          style={[styles.outerCircle, { borderColor: theme.primary + "20" }]}
-        />
+
+      {/* ── Center content ── */}
+      <View style={styles.centerContent}>
+        {/* Logo */}
         <Animated.View
           style={[
-            styles.spinnerOuter,
-            { borderColor: theme.primary, transform: [{ rotate: outerSpin }] },
+            styles.logoWrapper,
+            {
+              opacity: logoOpacity,
+              transform: [{ scale: logoScale }],
+            },
           ]}
-        />
-        <View
-          style={[styles.innerCircle, { borderColor: theme.primary + "30" }]}
-        />
-        <Animated.View
+        >
+          {/* Replace with your own <Image> or SVG logo */}
+          <View style={[styles.logoPlaceholder]}>
+            <Image
+              source={theme.mode === "dark" ? Icons.dark_logo : Icons.logo}
+              style={[
+                {
+                  width:
+                    theme.mode === "dark" ? RFPercentage(20) : RFPercentage(15),
+                  height:
+                    theme.mode === "dark" ? RFPercentage(20) : RFPercentage(15),
+                },
+              ]}
+              resizeMode="contain"
+            />
+          </View>
+        </Animated.View>
+
+        {/* Tagline */}
+        <Animated.Text
           style={[
-            styles.spinnerInner,
-            { borderColor: theme.primary, transform: [{ rotate: innerSpin }] },
+            styles.tagline,
+            {
+              color: theme.heading,
+              opacity: taglineOpacity,
+            },
           ]}
-        />
-        <View style={[styles.centerDot, { backgroundColor: theme.primary }]} />
-      </View>
-      <View style={styles.loadingTextContainer}>
-        <Animated.Text style={[styles.loadingText, { color: theme.heading }]}>
-          Loading
+        >
+          {t("decider.tag")}
         </Animated.Text>
-        <View style={styles.dotsContainer}>
-          <Animated.Text
-            style={[styles.dot, { color: theme.heading, opacity: dotOpacity1 }]}
-          >
-            .
-          </Animated.Text>
-          <Animated.Text
-            style={[styles.dot, { color: theme.heading, opacity: dotOpacity2 }]}
-          >
-            .
-          </Animated.Text>
-          <Animated.Text
-            style={[styles.dot, { color: theme.heading, opacity: dotOpacity3 }]}
-          >
-            .
-          </Animated.Text>
+      </View>
+
+      {/* ── Bottom section: progress + message ── */}
+      <View style={styles.bottomSection}>
+        {/* Cycling message */}
+        <Animated.Text
+          style={[
+            styles.statusMessage,
+            {
+              color: theme.darkGrey,
+              opacity: messageOpacity,
+            },
+          ]}
+        >
+          {SPLASH_MESSAGES[messageIndex]}
+        </Animated.Text>
+
+        {/* Progress bar track */}
+        <View
+          style={[
+            styles.progressTrack,
+            { backgroundColor: theme.primary + "25" },
+          ]}
+        >
+          <Animated.View
+            style={[
+              styles.progressFill,
+              {
+                width: progressWidth,
+                backgroundColor: theme.primary,
+              },
+            ]}
+          />
         </View>
+
+        {/* Footer credit */}
+        <Text style={[styles.footerText, { color: theme.heading }]}>
+          {t("decider.footer")}
+        </Text>
       </View>
     </View>
   );
@@ -393,88 +445,68 @@ const DeciderScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: RFPercentage(10),
+    paddingBottom: RFPercentage(6),
+    paddingHorizontal: RFPercentage(5),
+  },
+  centerContent: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  loaderContainer: {
-    width: RFPercentage(20),
-    height: RFPercentage(20),
-    justifyContent: "center",
+  logoWrapper: {
+    marginBottom: RFPercentage(3),
     alignItems: "center",
-    position: "relative",
   },
-  outerCircle: {
-    position: "absolute",
-    width: RFPercentage(15),
-    height: RFPercentage(15),
-    borderRadius: RFPercentage(7.5),
-    borderWidth: RFPercentage(0.4),
-    opacity: 0.3,
+  logoPlaceholder: {
+    width: RFPercentage(14),
+    height: RFPercentage(14),
+    borderRadius: RFPercentage(3.5),
   },
-  spinnerOuter: {
-    position: "absolute",
-    width: RFPercentage(15),
-    height: RFPercentage(15),
-    borderRadius: RFPercentage(7.5),
-    borderWidth: RFPercentage(0.4),
-    ...Platform.select({
-      ios: {
-        borderLeftColor: "transparent",
-        borderRightColor: "transparent",
-      },
-      android: {
-        borderLeftColor: "rgba(255,255,255,0.1)",
-        borderRightColor: "rgba(255,255,255,0.1)",
-        borderTopColor: "transparent",
-      },
-    }),
+  logoImage: {
+    width: RFPercentage(14),
+    height: RFPercentage(14),
   },
-  innerCircle: {
-    position: "absolute",
-    width: RFPercentage(10),
-    height: RFPercentage(10),
-    borderRadius: RFPercentage(5),
-    borderWidth: RFPercentage(0.3),
-    opacity: 0.3,
+  appName: {
+    fontSize: RFPercentage(3.8),
+    fontFamily: "Poppins_600SemiBold",
+    letterSpacing: 0.5,
+    marginBottom: RFPercentage(1),
   },
-  spinnerInner: {
-    position: "absolute",
-    width: RFPercentage(10),
-    height: RFPercentage(10),
-    borderRadius: RFPercentage(5),
-    borderWidth: RFPercentage(0.3),
-    ...Platform.select({
-      ios: {
-        borderTopColor: "transparent",
-        borderBottomColor: "transparent",
-      },
-      android: {
-        borderTopColor: "rgba(255,255,255,0.1)",
-        borderBottomColor: "rgba(255,255,255,0.1)",
-      },
-    }),
+  tagline: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_500Medium",
+    textAlign: "center",
+    letterSpacing: 0.3,
+    paddingHorizontal: RFPercentage(4),
+    bottom: RFPercentage(1),
   },
-  centerDot: {
-    width: RFPercentage(2),
-    height: RFPercentage(2),
+  bottomSection: {
+    width: "100%",
+    alignItems: "center",
+    gap: RFPercentage(1.5),
+  },
+  statusMessage: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_400Regular",
+    marginBottom: RFPercentage(0.5),
+  },
+  progressTrack: {
+    width: "80%",
+    height: RFPercentage(0.6),
+    borderRadius: RFPercentage(1),
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
     borderRadius: RFPercentage(1),
   },
-  loadingTextContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: RFPercentage(4),
-  },
-  loadingText: {
-    fontSize: RFPercentage(2.2),
-    fontFamily: "Poppins_500Medium",
-  },
-  dotsContainer: {
-    flexDirection: "row",
-    marginLeft: RFPercentage(0.2),
-  },
-  dot: {
-    fontSize: RFPercentage(2.5),
-    fontFamily: "Poppins_700Bold",
+  footerText: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    // marginTop: RFPercentage(1),
   },
 });
 

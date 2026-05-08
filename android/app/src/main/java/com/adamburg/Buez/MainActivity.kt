@@ -1,4 +1,4 @@
-package com.adamburg.Buez
+package com.adamburg.buez
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

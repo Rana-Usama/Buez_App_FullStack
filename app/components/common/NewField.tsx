@@ -24,11 +24,13 @@ interface Props {
   maxLength?: number;
   editable?: boolean;
   onSubmitEditing?: () => void;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  autoCorrect? : boolean
 }
 
 const InputFieldNew = (props: Props) => {
   const [visible, setVisible] = useState<boolean>(
-    props.password ? false : true
+    props.password ? false : true,
   );
   const { theme } = useAppTheme();
   const togglePasswordVisibility = () => {
@@ -51,6 +53,8 @@ const InputFieldNew = (props: Props) => {
         selectionColor={theme.black}
         cursorColor={theme.black}
         onSubmitEditing={props.onSubmitEditing}
+        autoCapitalize={props.autoCapitalize}
+        autoCorrect={props.autoCorrect}
       />
       {props.password && (
         <TouchableOpacity onPress={togglePasswordVisibility} style={{}}>

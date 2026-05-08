@@ -7,18 +7,26 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:211367941601:android:a42474a129db983351aea0",
+        "mobilesdk_app_id": "1:211367941601:android:0bfc0a567592303c51aea0",
         "android_client_info": {
-          "package_name": "com.adamburg.Buez"
+          "package_name": "com.adamburg.buez"
         }
       },
       "oauth_client": [
         {
-          "client_id": "211367941601-nndlk3cqrvphep05a303i1kqaobqa2t8.apps.googleusercontent.com",
+          "client_id": "211367941601-9ml9gb46aneeq11am7u6nhoht3gakb88.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.adamburg.Buez",
+            "package_name": "com.adamburg.buez",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "211367941601-jdlmf05dq6mj573nabul2nedpps50q87.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adamburg.buez",
+            "certificate_hash": "7a0ca9bf201c7de6924c80a4fea27a32105d6582"
           }
         },
         {

@@ -805,25 +805,33 @@
     "backToLogin": "Volver al inicio de sesión"
   },
   "freeTrialBanner": {
-  "active": {
-    "label": "Prueba gratuita activa",
-    "title": "Disfruta de funciones premium"
+    "active": {
+      "label": "Prueba gratuita activa",
+      "title": "Disfruta de funciones premium"
+    },
+    "warning_no_card": {
+      "label": "La prueba termina pronto",
+      "title": "Añade un método de pago para continuar"
+    },
+    "urgent_no_card": {
+      "label": "¡La prueba termina mañana!",
+      "title": "Actualiza ahora para continuar"
+    },
+    "warning_with_card": {
+      "label": "La prueba termina pronto",
+      "title": "Tu plan comenzará automáticamente"
+    },
+    "autorenew": {
+      "label": "Empieza mañana",
+      "title": "El plan mensual comenzará automáticamente"
+    }
   },
-  "warning_no_card": {
-    "label": "La prueba termina pronto",
-    "title": "Añade un método de pago para continuar"
-  },
-  "urgent_no_card": {
-    "label": "¡La prueba termina mañana!",
-    "title": "Actualiza ahora para continuar"
-  },
-  "warning_with_card": {
-    "label": "La prueba termina pronto",
-    "title": "Tu plan comenzará automáticamente"
-  },
-  "autorenew": {
-    "label": "Empieza mañana",
-    "title": "El plan mensual comenzará automáticamente"
+  "decider": {
+    "dc1": "Conectando tu comunidad…",
+    "dc2": "Buscando oportunidades cerca de ti…",
+    "dc3": "Ayudando a las personas a hacer las cosas…",
+    "dc4": "Casi listo para Buez…",
+    "tag": "¡Las tareas diarias hechas fáciles!",
+    "footer": "Impulsado por Buez"
   }
-}
 }

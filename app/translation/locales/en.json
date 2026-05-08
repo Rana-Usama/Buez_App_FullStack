@@ -847,5 +847,13 @@
       "label": "Starting tomorrow",
       "title": "Monthly plan will begin automatically"
     }
+  },
+  "decider": {
+    "dc1": "Connecting your community…",
+    "dc2": "Finding opportunities nearby…",
+    "dc3": "Helping people get things done…",
+    "dc4": "Almost ready for Buez…",
+    "tag": "Daily Chores Made Easy!",
+    "footer": "Powered by Buez"
   }
 }

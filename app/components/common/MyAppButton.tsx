@@ -66,7 +66,7 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
             numberOfLines={1}
             style={{
               color: Colors.white,
-              fontSize: RFPercentage(1.7),
+              fontSize: RFPercentage(1.8),
               fontFamily: "Poppins_600SemiBold",
               textAlign: "center",
               marginHorizontal: 5,

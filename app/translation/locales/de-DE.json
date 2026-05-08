@@ -825,5 +825,13 @@
     "label": "Startet morgen",
     "title": "Monatliches Abo startet automatisch"
   }
-}
+},
+"decider": {
+      "dc1": "Verbinde deine Community…",
+      "dc2": "Suche nach Möglichkeiten in deiner Nähe…",
+      "dc3": "Menschen dabei helfen, Dinge zu erledigen…",
+      "dc4": "Fast bereit für Buez…",
+      "tag": "Alltägliche Aufgaben leicht gemacht!",
+      "footer": "Bereitgestellt von Buez"
+    }
 }

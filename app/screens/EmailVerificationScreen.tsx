@@ -13,7 +13,7 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import Toast from "react-native-toast-message";
 import { updateDoc, doc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
-import { collection, query, where, getDocs, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 
@@ -25,10 +25,13 @@ function EmailVerificationScreen({ navigation, route }: any) {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const cooldownRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-poll every 5 seconds to check verification status
+  const { t } = useTranslation();
+  const { theme } = useAppTheme();
+
+  // ─── Auto-poll every 5 seconds ────────────────────────────────────────────
   useEffect(() => {
     intervalRef.current = setInterval(async () => {
-      await checkVerification(true); // silent check
+      await checkVerification(true);
     }, 5000);
 
     return () => {
@@ -37,13 +40,58 @@ function EmailVerificationScreen({ navigation, route }: any) {
     };
   }, []);
 
+  // ─── Free trial check by deviceId ────────────────────────────────────────
+  const hasDeviceAvailedFreeTrial = async (deviceId: string): Promise<boolean> => {
+    try {
+      const q = query(
+        collection(FIREBASE_DB, "freeTrials"),
+        where("deviceId", "==", deviceId),
+        where("freeTrial", "==", true),
+      );
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    } catch (error) {
+      console.log("[EmailVerification] Error checking deviceId free trial:", error);
+      return false;
+    }
+  };
+
+  // ─── Free trial check by userId ───────────────────────────────────────────
+  const hasUserAvailedFreeTrial = async (userId: string): Promise<boolean> => {
+    try {
+      const q = query(
+        collection(FIREBASE_DB, "freeTrials"),
+        where("userId", "==", userId),
+        where("freeTrial", "==", true),
+      );
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    } catch (error) {
+      console.log("[EmailVerification] Error checking userId free trial:", error);
+      return false;
+    }
+  };
+
+  // ─── Combined free trial eligibility ─────────────────────────────────────
+  // Returns true if EITHER the device OR the user has already used a trial
+  const hasAlreadyUsedFreeTrial = async (
+    deviceId: string,
+    userId: string,
+  ): Promise<boolean> => {
+    const deviceUsed = await hasDeviceAvailedFreeTrial(deviceId);
+    // Short-circuit: skip userId query if device already blocked
+    if (deviceUsed) return true;
+    const userUsed = await hasUserAvailedFreeTrial(userId);
+    return userUsed;
+  };
+
+  // ─── Verification check ───────────────────────────────────────────────────
   const checkVerification = async (silent = false) => {
     if (!silent) setChecking(true);
     try {
       const user = FIREBASE_AUTH.currentUser;
       if (!user) return;
 
-      // Reload user to get latest emailVerified status from Firebase
       await reload(user);
 
       if (user.emailVerified) {
@@ -60,8 +108,9 @@ function EmailVerificationScreen({ navigation, route }: any) {
           text2: t("emailVerification.verifiedSuccessDesc"),
         });
 
-        // Check free trial and navigate
-        const alreadyUsed = await hasDeviceAvailedFreeTrial(deviceId);
+        // Check both deviceId and userId before offering free trial
+        const alreadyUsed = await hasAlreadyUsedFreeTrial(deviceId, user.uid);
+
         if (alreadyUsed) {
           navigation.navigate("Subscription", { newUser: true });
         } else {
@@ -82,6 +131,7 @@ function EmailVerificationScreen({ navigation, route }: any) {
     if (!silent) setChecking(false);
   };
 
+  // ─── Resend verification email ────────────────────────────────────────────
   const resendVerificationEmail = async () => {
     if (cooldown > 0) return;
     setResending(true);
@@ -116,24 +166,7 @@ function EmailVerificationScreen({ navigation, route }: any) {
     setResending(false);
   };
 
-  // Reuse your existing function
-  const hasDeviceAvailedFreeTrial = async (deviceId: string) => {
-    try {
-      const q = query(
-        collection(FIREBASE_DB, "freeTrials"),
-        where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true),
-      );
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  const { t } = useTranslation();
-  const { theme } = useAppTheme();
-
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       <Text style={styles.emoji}>📧</Text>
@@ -191,13 +224,11 @@ function EmailVerificationScreen({ navigation, route }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: RFPercentage(4),
     backgroundColor: Colors.white,
     paddingTop: RFPercentage(18),
   },
-
   emoji: { fontSize: RFPercentage(9), marginBottom: RFPercentage(2) },
   title: {
     fontSize: RFPercentage(3),
@@ -255,7 +286,6 @@ const styles = StyleSheet.create({
     color: Colors.darkGrey,
     fontFamily: "Poppins_500Medium",
     fontSize: RFPercentage(1.7),
-    // marginTop: RFPercentage(1),
   },
 });
 

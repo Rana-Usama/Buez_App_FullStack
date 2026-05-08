@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" package="com.adamburg.Buez">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" package="com.adamburg.buez">
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   <uses-permission android:name="android.permission.INTERNET"/>
@@ -46,7 +46,7 @@
   <category android:name="android.intent.category.BROWSABLE"/>
   <data android:scheme="buez"/>
   <data android:scheme="exp+buez"/>
-  <data android:scheme="com.adamburg.Buez"/>
+  <data android:scheme="com.adamburg.buez"/>
 </intent-filter>
 
 <!-- For in-app job deep linking -->

@@ -314,7 +314,7 @@ export default function Location({ navigation, route }) {
 
           {/* Show location details for debugging */}
           {selectedLocation.countryCode && (
-            <Text style={[styles.locationDetails, { color: theme.darkGrey }]}>
+            <Text style={[styles.locationDetails, { color: theme.darkGrey }]} numberOfLines={1}>
               {selectedLocation.city && `${selectedLocation.city}, `}
               {selectedLocation.country} ({selectedLocation.countryCode})
             </Text>
@@ -353,8 +353,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   applyButton: {
-    paddingHorizontal: RFPercentage(2.4),
-    paddingVertical: RFPercentage(1.6),
+    paddingHorizontal: RFPercentage(2.8),
+    paddingVertical: RFPercentage(1.8),
     borderRadius: RFPercentage(10),
     justifyContent: "center",
     alignItems: "center",

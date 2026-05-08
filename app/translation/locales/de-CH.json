@@ -192,9 +192,8 @@
     "info1": "E Charte jetzt hinzfüege garantiert underbrochene Dienst nach em Test",
     "info2": "Dini Charte wird erst nach 14 Täg belaschtet",
     "info3": "Du chasch während dr Testphase jederziit kündige",
-     "importantNote": "Starte dini Premium-Reis",
-  "automaticSubscription": "Gnüss volle Premium-Zugang für 14 Täg gratis! Nach dim Trial wird dini monatligi Abonnemänt automatisch witerfüehrt, wänn du e Karte hinzufügsch, so verlürsch nie dini Premium-Vorteil."
-
+    "importantNote": "Starte dini Premium-Reis",
+    "automaticSubscription": "Gnüss volle Premium-Zugang für 14 Täg gratis! Nach dim Trial wird dini monatligi Abonnemänt automatisch witerfüehrt, wänn du e Karte hinzufügsch, so verlürsch nie dini Premium-Vorteil."
   },
   "subscription": {
     "txt1": "Dini 14-tägig gratis Testphase isch beendet.",
@@ -310,8 +309,8 @@
     "photo": "Foto hinzuefüege",
     "photo-1": "Fotos uflade",
     "photo-2": "Optional",
-      "date1": "Datum setze",
-  "time1": "Zyt setze"
+    "date1": "Datum setze",
+    "time1": "Zyt setze"
   },
   "messages": {
     "txt1": "Nachrichte",
@@ -784,47 +783,55 @@
     "skipForNow": "Fürs Erste überspringe"
   },
   "emailVerification": {
-  "title": "Bestätige dini E-Mail",
-  "subtitle": "Mir hend en Bestätigungslink gschickt a:",
-  "hint": "Klick uf de Link i de E-Mail, zum dis Konto z aktiviere. Lueg au i dim Spam-Ordner, falls du ihn nöd gsehsch.",
+    "title": "Bestätige dini E-Mail",
+    "subtitle": "Mir hend en Bestätigungslink gschickt a:",
+    "hint": "Klick uf de Link i de E-Mail, zum dis Konto z aktiviere. Lueg au i dim Spam-Ordner, falls du ihn nöd gsehsch.",
 
-  "verifiedSuccessTitle": "E-Mail bestätigt!",
-  "verifiedSuccessDesc": "Willkomme a Bord 🎉",
+    "verifiedSuccessTitle": "E-Mail bestätigt!",
+    "verifiedSuccessDesc": "Willkomme a Bord 🎉",
 
-  "notVerifiedTitle": "No nöd bestätigt",
-  "notVerifiedDesc": "Bitte klick uf de Link i dim E-Mail.",
+    "notVerifiedTitle": "No nöd bestätigt",
+    "notVerifiedDesc": "Bitte klick uf de Link i dim E-Mail.",
 
-  "emailSentTitle": "E-Mail gschickt!",
-  "emailSentDesc": "Bestätigungs-E-Mail isch nomol gschickt worde.",
+    "emailSentTitle": "E-Mail gschickt!",
+    "emailSentDesc": "Bestätigungs-E-Mail isch nomol gschickt worde.",
 
-  "resendFailedTitle": "Nomol sende fehlgschlage",
-  "resendFailedDesc": "Bitte versuech's spöter nomol.",
+    "resendFailedTitle": "Nomol sende fehlgschlage",
+    "resendFailedDesc": "Bitte versuech's spöter nomol.",
 
-  "verifiedButton": "Ich ha mini E-Mail bestätigt",
-  "resendButton": "E-Mail nomol sende",
-  "resendCooldown": "Nomol sende i {{seconds}}s",
-  "backToLogin": "Zurück zum Login"
-},
-"freeTrialBanner": {
-  "active": {
-    "label": "Gratis-Test aktiv",
-    "title": "Premium-Funktionen geniessen"
+    "verifiedButton": "Ich ha mini E-Mail bestätigt",
+    "resendButton": "E-Mail nomol sende",
+    "resendCooldown": "Nomol sende i {{seconds}}s",
+    "backToLogin": "Zurück zum Login"
   },
-  "warning_no_card": {
-    "label": "Test endet bald",
-    "title": "Zahlungsmethode hinzufügen, um fortzufahren"
+  "freeTrialBanner": {
+    "active": {
+      "label": "Gratis-Test aktiv",
+      "title": "Premium-Funktionen geniessen"
+    },
+    "warning_no_card": {
+      "label": "Test endet bald",
+      "title": "Zahlungsmethode hinzufügen, um fortzufahren"
+    },
+    "urgent_no_card": {
+      "label": "Test endet morgen!",
+      "title": "Jetzt upgraden, um weiterzumachen"
+    },
+    "warning_with_card": {
+      "label": "Test endet bald",
+      "title": "Dein Abo startet automatisch"
+    },
+    "autorenew": {
+      "label": "Startet morgen",
+      "title": "Monatliches Abo startet automatisch"
+    }
   },
-  "urgent_no_card": {
-    "label": "Test endet morgen!",
-    "title": "Jetzt upgraden, um weiterzumachen"
-  },
-  "warning_with_card": {
-    "label": "Test endet bald",
-    "title": "Dein Abo startet automatisch"
-  },
-  "autorenew": {
-    "label": "Startet morgen",
-    "title": "Monatliches Abo startet automatisch"
+  "decider": {
+    "dc1": "Dini Community verbinde…",
+    "dc2": "Möglichkeite i de Nöchi finde…",
+    "dc3": "Lüt debii unterstütze, Sache z’erledige…",
+    "dc4": "Gli bereit für Buez…",
+    "tag": "Täglichi Ufgabe eifach gmacht!",
+    "footer": "Powered by Buez"
   }
-}
 }

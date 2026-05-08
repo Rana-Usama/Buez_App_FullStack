@@ -89,7 +89,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       let appleAuthResponse;
 
       if (!appleAuth.isSupported) {
-        console.log("⚠️ Apple Auth not supported, using simulator");
+        console.log(" Apple Auth not supported, using simulator");
         // Simulator mode for testing
         appleAuthResponse = {
           user: "simulatedUser_" + Date.now(),
@@ -223,7 +223,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       const subEndDate = parseFirestoreTimestamp(existingUser.subscriptionEnd);
 
       // Debug logs
-      console.log("🍎 Apple Login - Subscription Check:");
+      console.log("Apple Login - Subscription Check:");
       console.log("isSubscribed:", existingUser.isSubscribed);
       console.log("subscriptionStart:", existingUser.subscriptionStart);
       console.log("subscriptionEnd:", existingUser.subscriptionEnd);
@@ -253,28 +253,28 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       console.log("Device used trial:", deviceUsedTrial);
 
       // Navigation logic - same order as Google login
-      console.log("🎯 Apple Navigation Decision:");
+      console.log(" Apple Navigation Decision:");
 
       if (existingUser.isSubscribed && isWithinPaidPeriod) {
-        console.log("✅ Navigating to TabNavigator (paid subscription)");
+        console.log(" Navigating to TabNavigator (paid subscription)");
         navigation.reset({
           index: 0,
           routes: [{ name: "TabNavigator" }],
         });
       } else if (isTrialValid) {
-        console.log("✅ Navigating to TabNavigator (active trial)");
+        console.log(" Navigating to TabNavigator (active trial)");
         navigation.reset({
           index: 0,
           routes: [{ name: "TabNavigator" }],
         });
       } else if (!deviceUsedTrial) {
-        console.log("✅ Navigating to FreeTrial (new device)");
+        console.log("Navigating to FreeTrial (new device)");
         navigation.reset({
           index: 0,
           routes: [{ name: "FreeTrial" }],
         });
       } else {
-        console.log("✅ Navigating to Subscription (device used trial)");
+        console.log(" Navigating to Subscription (device used trial)");
         navigation.reset({
           index: 0,
           routes: [{ name: "Subscription" }],

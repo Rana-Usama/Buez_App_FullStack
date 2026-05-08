@@ -23,6 +23,7 @@ import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import DeviceInfo from "react-native-device-info";
 
+
 const webClientId =
   "211367941601-i7pb5oak2cqq5vcvtvfv0sqsl4t6mgma.apps.googleusercontent.com";
 const iosClientId =
@@ -91,6 +92,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
         showPlayServicesUpdateDialog: true,
       });
       const userInfo = await GoogleSignin.signIn();
+      console.log("user....", userInfo)
       const { idToken } = userInfo.data;
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(

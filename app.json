@@ -59,7 +59,7 @@
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
-      "package": "com.adamburg.Buez",
+      "package": "com.adamburg.buez",
       "permissions": [
         "android.permission.INTERNET"
       ]

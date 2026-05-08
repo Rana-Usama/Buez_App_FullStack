@@ -210,8 +210,13 @@ function Login({ navigation }) {
                   <View style={styles.inputContainer}>
                     <InputFieldNew
                       placeholder={t("common.email")}
-                      onChangeText={handleChange("email")}
+                      onChangeText={(text) =>
+                        handleChange("email")(text.toLowerCase())
+                      }
                       handleBlur={handleBlur("email")}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      keyboardType="email-address"
                       value={values.email}
                       customStyle={{
                         borderColor:

@@ -888,6 +888,14 @@ function PostRequest({ navigation, route }) {
     ? subTaskOptions[originalTaskType] || []
     : [];
 
+  const dismissAll = () => {
+    Keyboard.dismiss();
+    setShowTaskDropdown(false);
+    setShowCompensationDropdown(false);
+    setShowDurationDropdown(false);
+    setShowSubTaskDropdown(false);
+  };
+
   return (
     <>
       <StatusBar
@@ -909,133 +917,492 @@ function PostRequest({ navigation, route }) {
           />
         </>
       )}
-      <TouchableWithoutFeedback
-        onPress={() => {
-          Keyboard.dismiss();
-          setShowTaskDropdown(false);
-          setShowCompensationDropdown(false);
-          setShowDurationDropdown(false);
-          setShowSubTaskDropdown(false);
-        }}
-      >
+      <TouchableWithoutFeedback onPress={dismissAll}>
         <ScrollView
           style={[styles.screen, { backgroundColor: theme.white }]}
           contentContainerStyle={styles.scrollViewContent}
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled
+          onScrollBeginDrag={dismissAll}
         >
-          <Animated.View
-            style={[
-              styles.formContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            {/* Task Type */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="category"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
+          <Pressable onPress={dismissAll} style={{ flex: 1 }}>
+            <Animated.View
+              style={[
+                styles.formContainer,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+            >
+              {/* Task Type */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="category"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {t("postRequest.txt3")}
+                  </Text>
                 </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {t("postRequest.txt3")}
-                </Text>
-              </View>
 
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[
-                  styles.selectField,
-                  {
-                    backgroundColor: theme.white,
-                    borderColor: showTaskDropdown
-                      ? theme.primary
-                      : theme.border,
-                    borderWidth: showTaskDropdown ? 1.5 : 1,
-                  },
-                ]}
-                onPress={() => toggleDropdown("task")}
-              >
-                <View style={styles.selectFieldContent}>
-                  {selectedTask ? (
-                    <View style={styles.selectedOption}>
-                      <FontAwesome5
-                        name={
-                          taskOptions.find((t) => t.name === originalTaskType)
-                            ?.icon || "tasks"
-                        }
-                        size={RFPercentage(1.8)}
-                        color={theme.lightGrey}
-                        style={styles.optionIcon}
-                      />
-                      <Text
-                        style={[styles.selectedText, { color: theme.black }]}
-                      >
-                        {selectedTask}
-                      </Text>
-                    </View>
-                  ) : (
-                    <Text
-                      style={[styles.placeholderText, { color: theme.heading }]}
-                    >
-                      {t("postRequest.txt3")}
-                    </Text>
-                  )}
-                </View>
-                <MaterialIcons
-                  name={
-                    showTaskDropdown
-                      ? "keyboard-arrow-up"
-                      : "keyboard-arrow-down"
-                  }
-                  size={RFPercentage(2.5)}
-                  color={theme.primary}
-                />
-              </TouchableOpacity>
-
-              {showTaskDropdown && (
-                <View
+                <TouchableOpacity
+                  activeOpacity={0.7}
                   style={[
-                    styles.dropdownContainer,
+                    styles.selectField,
                     {
                       backgroundColor: theme.white,
-                      borderColor: theme.border,
-                      shadowColor: theme.black,
-                      maxHeight: RFPercentage(38),
+                      borderColor: showTaskDropdown
+                        ? theme.primary
+                        : theme.border,
+                      borderWidth: showTaskDropdown ? 1.5 : 1,
                     },
                   ]}
+                  onPress={() => toggleDropdown("task")}
                 >
-                  <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    nestedScrollEnabled
+                  <View style={styles.selectFieldContent}>
+                    {selectedTask ? (
+                      <View style={styles.selectedOption}>
+                        <FontAwesome5
+                          name={
+                            taskOptions.find((t) => t.name === originalTaskType)
+                              ?.icon || "tasks"
+                          }
+                          size={RFPercentage(1.8)}
+                          color={theme.lightGrey}
+                          style={styles.optionIcon}
+                        />
+                        <Text
+                          style={[styles.selectedText, { color: theme.black }]}
+                        >
+                          {selectedTask}
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text
+                        style={[
+                          styles.placeholderText,
+                          { color: theme.heading },
+                        ]}
+                      >
+                        {t("postRequest.txt3")}
+                      </Text>
+                    )}
+                  </View>
+                  <MaterialIcons
+                    name={
+                      showTaskDropdown
+                        ? "keyboard-arrow-up"
+                        : "keyboard-arrow-down"
+                    }
+                    size={RFPercentage(2.5)}
+                    color={theme.primary}
+                  />
+                </TouchableOpacity>
+
+                {showTaskDropdown && (
+                  <View
+                    style={[
+                      styles.dropdownContainer,
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: theme.border,
+                        shadowColor: theme.black,
+                        maxHeight: RFPercentage(38),
+                      },
+                    ]}
                   >
-                    {translatedTaskOptions.map((item) => (
+                    <ScrollView
+                      showsVerticalScrollIndicator={false}
+                      nestedScrollEnabled
+                    >
+                      {translatedTaskOptions.map((item) => (
+                        <TouchableOpacity
+                          key={item.id}
+                          onPress={() => selectTask(item)}
+                          style={[
+                            styles.optionItem,
+                            selectedTask === item.name && {
+                              backgroundColor: `${theme.primary}10`,
+                            },
+                          ]}
+                        >
+                          <FontAwesome5
+                            name={
+                              taskOptions.find((t) => t.id === item.id)?.icon ||
+                              "circle"
+                            }
+                            size={RFPercentage(1.8)}
+                            color={theme.lightGrey}
+                          />
+                          <Text
+                            style={[
+                              styles.optionText,
+                              { color: theme.darkGrey },
+                            ]}
+                          >
+                            {item.name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+
+                {originalTaskType === "Other" && (
+                  <View style={styles.customTaskContainer}>
+                    <InputFieldNew
+                      placeholder={t("postRequest.customTaskTitle")}
+                      value={customTaskTitle}
+                      onChangeText={setCustomTaskTitle}
+                      maxLength={20}
+                      customStyle={{
+                        width: "100%",
+                        borderRadius: RFPercentage(1.2),
+                        backgroundColor: theme.white,
+                        borderColor: theme.border,
+                        height: RFPercentage(6),
+                        marginTop: 0,
+                      }}
+                    />
+                  </View>
+                )}
+              </View>
+
+              {/* Sub-Tasks Section */}
+              {originalTaskType &&
+                originalTaskType !== "Other" &&
+                currentSubTasks.length > 0 && (
+                  <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                      <View
+                        style={[
+                          styles.iconContainer,
+                          { backgroundColor: `${theme.primary}15` },
+                        ]}
+                      >
+                        <MaterialIcons
+                          name="list"
+                          size={RFPercentage(2)}
+                          color={theme.primary}
+                        />
+                      </View>
+                      <Text
+                        style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                      >
+                        {t("postRequest.sub-task")}
+                      </Text>
+                    </View>
+
+                    {/* Selected sub-tags display */}
+                    {selectedSubTasks.length > 0 && (
+                      <View style={styles.selectedTagsContainer}>
+                        {selectedSubTasks.map((subTask) => (
+                          <View
+                            key={subTask.id}
+                            style={[
+                              styles.selectedTag,
+                              { backgroundColor: `${theme.primary}15` },
+                            ]}
+                          >
+                            <FontAwesome5
+                              name={subTask.icon || "tag"}
+                              size={RFPercentage(1.2)}
+                              color={
+                                theme.mode === "dark"
+                                  ? Colors.darkGrey
+                                  : Colors.primary
+                              }
+                            />
+                            <Text
+                              style={[
+                                styles.selectedTagText,
+                                {
+                                  color:
+                                    theme.mode === "dark"
+                                      ? Colors.darkGrey
+                                      : Colors.primary,
+                                },
+                              ]}
+                            >
+                              {subTask.name}
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => removeSubTask(subTask.id)}
+                              style={styles.removeTagButton}
+                            >
+                              <MaterialIcons
+                                name="close"
+                                size={RFPercentage(1.2)}
+                                color={
+                                  theme.mode === "dark"
+                                    ? Colors.darkGrey
+                                    : Colors.primary
+                                }
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+
+                    {/* Sub-tasks dropdown */}
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={[
+                        styles.selectField,
+                        {
+                          backgroundColor: theme.white,
+                          borderColor: showSubTaskDropdown
+                            ? theme.primary
+                            : theme.border,
+                          borderWidth: showSubTaskDropdown ? 1.5 : 1,
+                          marginBottom: RFPercentage(1),
+                        },
+                      ]}
+                      onPress={() => toggleDropdown("subtask")}
+                    >
+                      <View style={styles.selectFieldContent}>
+                        <Text
+                          style={[
+                            styles.placeholderText,
+                            { color: theme.heading },
+                          ]}
+                        >
+                          {t("postRequest.sub-2")}
+                        </Text>
+                      </View>
+                      <MaterialIcons
+                        name={
+                          showSubTaskDropdown
+                            ? "keyboard-arrow-up"
+                            : "keyboard-arrow-down"
+                        }
+                        size={RFPercentage(2.5)}
+                        color={theme.primary}
+                      />
+                    </TouchableOpacity>
+
+                    {showSubTaskDropdown && (
+                      <View
+                        style={[
+                          styles.dropdownContainer,
+                          {
+                            backgroundColor: theme.white,
+                            borderColor: theme.border,
+                            shadowColor: theme.black,
+                            maxHeight: RFPercentage(30),
+                            position: "relative",
+                            top: 0,
+                            marginBottom: RFPercentage(2),
+                          },
+                        ]}
+                      >
+                        <ScrollView
+                          nestedScrollEnabled
+                          showsVerticalScrollIndicator={false}
+                        >
+                          {translatedSubTasks.map((subTask) => {
+                            const isSelected = selectedSubTasks.find(
+                              (st) => st.id === subTask.id,
+                            );
+                            return (
+                              <TouchableOpacity
+                                key={subTask.id}
+                                onPress={() => toggleSubTask(subTask)}
+                                style={[
+                                  styles.optionItem,
+                                  isSelected && {
+                                    backgroundColor: `${theme.primary}10`,
+                                  },
+                                ]}
+                              >
+                                <FontAwesome5
+                                  name={subTask.icon}
+                                  size={RFPercentage(1.8)}
+                                  color={
+                                    isSelected ? theme.primary : theme.lightGrey
+                                  }
+                                />
+                                <Text
+                                  style={[
+                                    styles.optionText,
+                                    {
+                                      color: isSelected
+                                        ? theme.primary
+                                        : theme.darkGrey,
+                                      fontWeight: isSelected ? "600" : "400",
+                                    },
+                                  ]}
+                                >
+                                  {subTask.name}
+                                </Text>
+                                {isSelected && (
+                                  <MaterialIcons
+                                    name="check"
+                                    size={RFPercentage(1.8)}
+                                    color={theme.primary}
+                                    style={styles.checkIcon}
+                                  />
+                                )}
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </ScrollView>
+                      </View>
+                    )}
+
+                    {/* Custom sub-task input */}
+                    <View style={styles.customSubTaskContainer}>
+                      <TextInput
+                        style={[
+                          styles.customSubTaskInput,
+                          {
+                            backgroundColor: theme.white,
+                            borderColor: theme.border,
+                            color: theme.black,
+                          },
+                        ]}
+                        placeholder={t("postRequest.sub-3")}
+                        placeholderTextColor={theme.heading}
+                        value={customSubTask}
+                        onChangeText={setCustomSubTask}
+                        onSubmitEditing={addCustomSubTask}
+                        returnKeyType="done"
+                      />
+                      <TouchableOpacity
+                        onPress={addCustomSubTask}
+                        style={[
+                          styles.addCustomButton,
+                          { backgroundColor: theme.primary },
+                        ]}
+                        disabled={!customSubTask.trim()}
+                      >
+                        <MaterialIcons
+                          name="add"
+                          size={RFPercentage(2)}
+                          color={Colors.white}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+              {/* Compensation Type */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="attach-money"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {t("postRequest.txt7")}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={[
+                    styles.selectField,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: showCompensationDropdown
+                        ? theme.primary
+                        : theme.border,
+                      borderWidth: showCompensationDropdown ? 1.5 : 1,
+                    },
+                  ]}
+                  onPress={() => toggleDropdown("compensation")}
+                >
+                  <View style={styles.selectFieldContent}>
+                    {selectedCompensation ? (
+                      <View style={styles.selectedOption}>
+                        <FontAwesome5
+                          name={
+                            compensationOptions.find(
+                              (c) => c.type === originalCompensationType,
+                            )?.icon || "dollar-sign"
+                          }
+                          size={RFPercentage(1.8)}
+                          color={theme.lightGrey}
+                          style={styles.optionIcon}
+                        />
+                        <Text
+                          style={[styles.selectedText, { color: theme.black }]}
+                        >
+                          {selectedCompensation}
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text
+                        style={[
+                          styles.placeholderText,
+                          { color: theme.heading },
+                        ]}
+                      >
+                        {t("postRequest.txt7")}
+                      </Text>
+                    )}
+                  </View>
+                  <MaterialIcons
+                    name={
+                      showCompensationDropdown
+                        ? "keyboard-arrow-up"
+                        : "keyboard-arrow-down"
+                    }
+                    size={RFPercentage(2.5)}
+                    color={theme.primary}
+                  />
+                </TouchableOpacity>
+
+                {showCompensationDropdown && (
+                  <View
+                    style={[
+                      styles.dropdownContainer,
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: theme.border,
+                        shadowColor: theme.black,
+                      },
+                    ]}
+                  >
+                    {translatedCompensationOptions.map((item) => (
                       <TouchableOpacity
                         key={item.id}
-                        onPress={() => selectTask(item)}
+                        onPress={() => selectCompensation(item)}
                         style={[
                           styles.optionItem,
-                          selectedTask === item.name && {
+                          selectedCompensation === item.type && {
                             backgroundColor: `${theme.primary}10`,
                           },
                         ]}
                       >
                         <FontAwesome5
                           name={
-                            taskOptions.find((t) => t.id === item.id)?.icon ||
-                            "circle"
+                            compensationOptions.find((c) => c.id === item.id)
+                              ?.icon || "circle"
                           }
                           size={RFPercentage(1.8)}
                           color={theme.lightGrey}
@@ -1043,989 +1410,656 @@ function PostRequest({ navigation, route }) {
                         <Text
                           style={[styles.optionText, { color: theme.darkGrey }]}
                         >
-                          {item.name}
+                          {item.type}
                         </Text>
                       </TouchableOpacity>
                     ))}
-                  </ScrollView>
-                </View>
-              )}
-
-              {originalTaskType === "Other" && (
-                <View style={styles.customTaskContainer}>
-                  <InputFieldNew
-                    placeholder={t("postRequest.customTaskTitle")}
-                    value={customTaskTitle}
-                    onChangeText={setCustomTaskTitle}
-                    maxLength={20}
-                    customStyle={{
-                      width: "100%",
-                      borderRadius: RFPercentage(1.2),
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
-                      height: RFPercentage(6),
-                      marginTop: 0,
-                    }}
-                  />
-                </View>
-              )}
-            </View>
-
-            {/* Sub-Tasks Section */}
-            {originalTaskType &&
-              originalTaskType !== "Other" &&
-              currentSubTasks.length > 0 && (
-                <View style={styles.section}>
-                  <View style={styles.sectionHeader}>
-                    <View
-                      style={[
-                        styles.iconContainer,
-                        { backgroundColor: `${theme.primary}15` },
-                      ]}
-                    >
-                      <MaterialIcons
-                        name="list"
-                        size={RFPercentage(2)}
-                        color={theme.primary}
-                      />
-                    </View>
-                    <Text
-                      style={[styles.sectionTitle, { color: theme.darkGrey }]}
-                    >
-                      {t("postRequest.sub-task")}
-                    </Text>
                   </View>
+                )}
+              </View>
 
-                  {/* Selected sub-tags display */}
-                  {selectedSubTasks.length > 0 && (
-                    <View style={styles.selectedTagsContainer}>
-                      {selectedSubTasks.map((subTask) => (
-                        <View
-                          key={subTask.id}
-                          style={[
-                            styles.selectedTag,
-                            { backgroundColor: `${theme.primary}15` },
-                          ]}
-                        >
-                          <FontAwesome5
-                            name={subTask.icon || "tag"}
-                            size={RFPercentage(1.2)}
-                            color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
-                          />
-                          <Text
-                            style={[
-                              styles.selectedTagText,
-                              { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary },
-                            ]}
-                          >
-                            {subTask.name}
-                          </Text>
-                          <TouchableOpacity
-                            onPress={() => removeSubTask(subTask.id)}
-                            style={styles.removeTagButton}
-                          >
-                            <MaterialIcons
-                              name="close"
-                              size={RFPercentage(1.2)}
-                              color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
-                            />
-                          </TouchableOpacity>
-                        </View>
-                      ))}
-                    </View>
-                  )}
-
-                  {/* Sub-tasks dropdown */}
-                  <TouchableOpacity
-                    activeOpacity={0.7}
+              {/* Number of Workers */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
                     style={[
-                      styles.selectField,
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="people"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {t("postRequest.numberOfWorkers") ||
+                      "Number of helpers needed"}
+                  </Text>
+                </View>
+
+                <View style={styles.numberInputContainer}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (numberOfWorkers > 1) {
+                        setNumberOfWorkers(numberOfWorkers - 1);
+                      }
+                    }}
+                    style={[
+                      styles.numberButton,
                       {
-                        backgroundColor: theme.white,
-                        borderColor: showSubTaskDropdown
-                          ? theme.primary
-                          : theme.border,
-                        borderWidth: showSubTaskDropdown ? 1.5 : 1,
-                        marginBottom: RFPercentage(1),
+                        backgroundColor: theme.primary,
+                        opacity: numberOfWorkers <= 1 ? 0.5 : 1,
                       },
                     ]}
-                    onPress={() => toggleDropdown("subtask")}
+                    disabled={numberOfWorkers <= 1}
                   >
-                    <View style={styles.selectFieldContent}>
+                    <MaterialIcons
+                      name="remove"
+                      size={RFPercentage(2)}
+                      color={theme.pureWhite}
+                    />
+                  </TouchableOpacity>
+
+                  <TextInput
+                    style={[
+                      styles.numberInput,
+                      {
+                        backgroundColor: theme.white,
+                        borderColor: theme.border,
+                        color: theme.black,
+                      },
+                    ]}
+                    value={numberOfWorkers.toString()}
+                    onChangeText={(text) => {
+                      const num = parseInt(text.replace(/[^\d]/g, "")) || 1;
+                      if (num >= 1 && num <= MAX_WORKERS) {
+                        setNumberOfWorkers(num);
+                      }
+                    }}
+                    keyboardType="numeric"
+                    maxLength={2}
+                    textAlign="center"
+                  />
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (numberOfWorkers < MAX_WORKERS) {
+                        setNumberOfWorkers(numberOfWorkers + 1);
+                      }
+                    }}
+                    style={[
+                      styles.numberButton,
+                      {
+                        backgroundColor: theme.primary,
+                        opacity: numberOfWorkers >= MAX_WORKERS ? 0.5 : 1,
+                      },
+                    ]}
+                    disabled={numberOfWorkers >= MAX_WORKERS}
+                  >
+                    <MaterialIcons
+                      name="add"
+                      size={RFPercentage(2)}
+                      color={theme.pureWhite}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={[styles.helperText, { color: theme.darkGrey }]}>
+                  {t("postRequest.workersHelperText", { max: MAX_WORKERS }) ||
+                    `Select number of helpers needed (1-${MAX_WORKERS})`}
+                </Text>
+              </View>
+
+              {/* Date Selection */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="date-range"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {t("postRequest.date")}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={{
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? "rgba(19, 19, 21, 1)"
+                        : "rgba(239, 239, 250, 0.66)",
+                    width: "45%",
+                    height: RFPercentage(4),
+                    borderRadius: RFPercentage(1),
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  onPress={() => {
+                    setTempDate(selectedDate);
+                    setShowDatePicker(true);
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: theme.darkGrey,
+                      fontSize: RFPercentage(1.7),
+                      fontFamily: "Poppins_400Regular",
+                      textAlign: "center",
+                    }}
+                  >
+                    {formattedDate || "Select Date"}
+                  </Text>
+                </TouchableOpacity>
+
+                {showDatePicker &&
+                  (Platform.OS === "android" ? (
+                    <DateTimePicker
+                      value={selectedDate}
+                      mode="date"
+                      display="default"
+                      themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                      minimumDate={new Date()}
+                      onChange={(event, date) => {
+                        setShowDatePicker(false);
+                        if (date) setSelectedDate(date);
+                      }}
+                    />
+                  ) : (
+                    <View
+                      style={{
+                        width: "100%",
+                        backgroundColor: "transparent",
+                        borderWidth: 1,
+                        borderColor:
+                          theme.mode === "dark"
+                            ? "rgba(23, 24, 33, 1)"
+                            : "rgba(239, 239, 250, 0.66)",
+                        borderRadius: RFPercentage(1.5),
+                        alignItems: "center",
+                        marginTop: RFPercentage(1),
+                      }}
+                    >
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "90%",
+                          marginTop: RFPercentage(2),
+                        }}
+                      >
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          style={{
+                            backgroundColor:
+                              theme.mode === "dark"
+                                ? Colors.primary + "40"
+                                : Colors.primary + "10",
+                            padding: RFPercentage(0.7),
+                            borderRadius: RFPercentage(100),
+                            paddingHorizontal: RFPercentage(1.5),
+                          }}
+                          onPress={() => {
+                            setSelectedDate(tempDate);
+                            setShowDatePicker(false);
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color:
+                                theme.mode === "dark"
+                                  ? Colors.white
+                                  : Colors.primary,
+                              fontFamily: "Poppins_600SemiBold",
+                              fontSize: RFPercentage(1.4),
+                            }}
+                            numberOfLines={1}
+                          >
+                            {t("postRequest.date1")}
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() => setShowDatePicker(false)}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.darkGrey + "50"
+                                : Colors.primary + "30"
+                            }
+                            size={RFPercentage(3.5)}
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      <DateTimePicker
+                        value={tempDate}
+                        mode="date"
+                        display="spinner"
+                        themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                        minimumDate={new Date()}
+                        onChange={(event, date) => {
+                          if (date) setTempDate(date);
+                        }}
+                      />
+                    </View>
+                  ))}
+              </View>
+
+              {/* Time Selection */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="access-time"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {t("postRequest.time")}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={{
+                    backgroundColor:
+                      theme.mode === "dark"
+                        ? "rgba(19, 19, 21, 1)"
+                        : "rgba(239, 239, 250, 0.66)",
+                    width: "40%",
+                    height: RFPercentage(4),
+                    borderRadius: RFPercentage(1),
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  onPress={() => {
+                    setTempTime(selectedTime);
+                    setShowTimePicker(true);
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: theme.darkGrey,
+                      fontSize: RFPercentage(1.7),
+                      fontFamily: "Poppins_400Regular",
+                      textAlign: "center",
+                    }}
+                  >
+                    {formattedTime || "Select Time"}
+                  </Text>
+                </TouchableOpacity>
+
+                {showTimePicker &&
+                  (Platform.OS === "android" ? (
+                    <DateTimePicker
+                      value={selectedTime}
+                      mode="time"
+                      minuteInterval={5}
+                      display="default"
+                      themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                      onChange={(event, time) => {
+                        setShowTimePicker(false);
+                        if (time) setSelectedTime(time);
+                      }}
+                    />
+                  ) : (
+                    <View
+                      style={{
+                        width: "100%",
+                        backgroundColor: "transparent",
+                        borderWidth: 1,
+                        borderColor:
+                          theme.mode === "dark"
+                            ? "rgba(23, 24, 33, 1)"
+                            : "rgba(235, 236, 251, 1)",
+                        borderRadius: RFPercentage(1.5),
+                        alignItems: "center",
+                        marginTop: RFPercentage(1),
+                      }}
+                    >
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "90%",
+                          marginTop: RFPercentage(2),
+                        }}
+                      >
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          style={{
+                            backgroundColor:
+                              theme.mode === "dark"
+                                ? Colors.primary + "40"
+                                : Colors.primary + "10",
+                            padding: RFPercentage(0.7),
+                            borderRadius: RFPercentage(100),
+                            paddingHorizontal: RFPercentage(1.5),
+                          }}
+                          onPress={() => {
+                            setSelectedTime(tempTime);
+                            setShowTimePicker(false);
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color:
+                                theme.mode === "dark"
+                                  ? Colors.white
+                                  : Colors.primary,
+                              fontFamily: "Poppins_600SemiBold",
+                              fontSize: RFPercentage(1.4),
+                            }}
+                            numberOfLines={1}
+                          >
+                            {t("postRequest.time1")}
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() => setShowTimePicker(false)}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.darkGrey + "50"
+                                : Colors.primary + "30"
+                            }
+                            size={RFPercentage(3.5)}
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      <DateTimePicker
+                        value={tempTime}
+                        mode="time"
+                        minuteInterval={5}
+                        display="spinner"
+                        themeVariant={theme.mode === "dark" ? "dark" : "light"}
+                        onChange={(event, time) => {
+                          if (time) setTempTime(time);
+                        }}
+                      />
+                    </View>
+                  ))}
+              </View>
+
+              {/* Estimated Duration */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="hourglass-empty"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {t("postRequest.duration")}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={[
+                    styles.selectField,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: showDurationDropdown
+                        ? theme.primary
+                        : theme.border,
+                      borderWidth: showDurationDropdown ? 1.5 : 1,
+                    },
+                  ]}
+                  onPress={() => toggleDropdown("duration")}
+                >
+                  <View style={styles.selectFieldContent}>
+                    {selectedDuration ? (
+                      <Text
+                        style={[styles.selectedText, { color: theme.black }]}
+                      >
+                        {
+                          translatedDurationOptions.find(
+                            (d) => d.value === selectedDuration,
+                          )?.label
+                        }
+                      </Text>
+                    ) : (
                       <Text
                         style={[
                           styles.placeholderText,
                           { color: theme.heading },
                         ]}
                       >
-                        {t("postRequest.sub-2")}
+                        {t("postRequest.duration-1")}
                       </Text>
-                    </View>
-                    <MaterialIcons
-                      name={
-                        showSubTaskDropdown
-                          ? "keyboard-arrow-up"
-                          : "keyboard-arrow-down"
-                      }
-                      size={RFPercentage(2.5)}
-                      color={theme.primary}
-                    />
-                  </TouchableOpacity>
-
-                  {showSubTaskDropdown && (
-                    <View
-                      style={[
-                        styles.dropdownContainer,
-                        {
-                          backgroundColor: theme.white,
-                          borderColor: theme.border,
-                          shadowColor: theme.black,
-                          maxHeight: RFPercentage(30),
-                          position: "relative",
-                          top: 0,
-                          marginBottom: RFPercentage(2),
-                        },
-                      ]}
-                    >
-                      <ScrollView
-                        nestedScrollEnabled
-                        showsVerticalScrollIndicator={false}
-                      >
-                        {translatedSubTasks.map((subTask) => {
-                          const isSelected = selectedSubTasks.find(
-                            (st) => st.id === subTask.id,
-                          );
-                          return (
-                            <TouchableOpacity
-                              key={subTask.id}
-                              onPress={() => toggleSubTask(subTask)}
-                              style={[
-                                styles.optionItem,
-                                isSelected && {
-                                  backgroundColor: `${theme.primary}10`,
-                                },
-                              ]}
-                            >
-                              <FontAwesome5
-                                name={subTask.icon}
-                                size={RFPercentage(1.8)}
-                                color={
-                                  isSelected ? theme.primary : theme.lightGrey
-                                }
-                              />
-                              <Text
-                                style={[
-                                  styles.optionText,
-                                  {
-                                    color: isSelected
-                                      ? theme.primary
-                                      : theme.darkGrey,
-                                    fontWeight: isSelected ? "600" : "400",
-                                  },
-                                ]}
-                              >
-                                {subTask.name}
-                              </Text>
-                              {isSelected && (
-                                <MaterialIcons
-                                  name="check"
-                                  size={RFPercentage(1.8)}
-                                  color={theme.primary}
-                                  style={styles.checkIcon}
-                                />
-                              )}
-                            </TouchableOpacity>
-                          );
-                        })}
-                      </ScrollView>
-                    </View>
-                  )}
-
-                  {/* Custom sub-task input */}
-                  <View style={styles.customSubTaskContainer}>
-                    <TextInput
-                      style={[
-                        styles.customSubTaskInput,
-                        {
-                          backgroundColor: theme.white,
-                          borderColor: theme.border,
-                          color: theme.black,
-                        },
-                      ]}
-                      placeholder={t("postRequest.sub-3")}
-                      placeholderTextColor={theme.heading}
-                      value={customSubTask}
-                      onChangeText={setCustomSubTask}
-                      onSubmitEditing={addCustomSubTask}
-                      returnKeyType="done"
-                    />
-                    <TouchableOpacity
-                      onPress={addCustomSubTask}
-                      style={[
-                        styles.addCustomButton,
-                        { backgroundColor: theme.primary },
-                      ]}
-                      disabled={!customSubTask.trim()}
-                    >
-                      <MaterialIcons
-                        name="add"
-                        size={RFPercentage(2)}
-                        color={Colors.white}
-                      />
-                    </TouchableOpacity>
+                    )}
                   </View>
-                </View>
-              )}
-
-            {/* Compensation Type */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
                   <MaterialIcons
-                    name="attach-money"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {t("postRequest.txt7")}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[
-                  styles.selectField,
-                  {
-                    backgroundColor: theme.white,
-                    borderColor: showCompensationDropdown
-                      ? theme.primary
-                      : theme.border,
-                    borderWidth: showCompensationDropdown ? 1.5 : 1,
-                  },
-                ]}
-                onPress={() => toggleDropdown("compensation")}
-              >
-                <View style={styles.selectFieldContent}>
-                  {selectedCompensation ? (
-                    <View style={styles.selectedOption}>
-                      <FontAwesome5
-                        name={
-                          compensationOptions.find(
-                            (c) => c.type === originalCompensationType,
-                          )?.icon || "dollar-sign"
-                        }
-                        size={RFPercentage(1.8)}
-                        color={theme.lightGrey}
-                        style={styles.optionIcon}
-                      />
-                      <Text
-                        style={[styles.selectedText, { color: theme.black }]}
-                      >
-                        {selectedCompensation}
-                      </Text>
-                    </View>
-                  ) : (
-                    <Text
-                      style={[styles.placeholderText, { color: theme.heading }]}
-                    >
-                      {t("postRequest.txt7")}
-                    </Text>
-                  )}
-                </View>
-                <MaterialIcons
-                  name={
-                    showCompensationDropdown
-                      ? "keyboard-arrow-up"
-                      : "keyboard-arrow-down"
-                  }
-                  size={RFPercentage(2.5)}
-                  color={theme.primary}
-                />
-              </TouchableOpacity>
-
-              {showCompensationDropdown && (
-                <View
-                  style={[
-                    styles.dropdownContainer,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
-                      shadowColor: theme.black,
-                    },
-                  ]}
-                >
-                  {translatedCompensationOptions.map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      onPress={() => selectCompensation(item)}
-                      style={[
-                        styles.optionItem,
-                        selectedCompensation === item.type && {
-                          backgroundColor: `${theme.primary}10`,
-                        },
-                      ]}
-                    >
-                      <FontAwesome5
-                        name={
-                          compensationOptions.find((c) => c.id === item.id)
-                            ?.icon || "circle"
-                        }
-                        size={RFPercentage(1.8)}
-                        color={theme.lightGrey}
-                      />
-                      <Text
-                        style={[styles.optionText, { color: theme.darkGrey }]}
-                      >
-                        {item.type}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-
-            {/* Number of Workers */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="people"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {t("postRequest.numberOfWorkers") ||
-                    "Number of helpers needed"}
-                </Text>
-              </View>
-
-              <View style={styles.numberInputContainer}>
-                <TouchableOpacity
-                  onPress={() => {
-                    if (numberOfWorkers > 1) {
-                      setNumberOfWorkers(numberOfWorkers - 1);
+                    name={
+                      showDurationDropdown
+                        ? "keyboard-arrow-up"
+                        : "keyboard-arrow-down"
                     }
-                  }}
-                  style={[
-                    styles.numberButton,
-                    {
-                      backgroundColor: theme.primary,
-                      opacity: numberOfWorkers <= 1 ? 0.5 : 1,
-                    },
-                  ]}
-                  disabled={numberOfWorkers <= 1}
-                >
-                  <MaterialIcons
-                    name="remove"
-                    size={RFPercentage(2)}
-                    color={theme.pureWhite}
+                    size={RFPercentage(2.5)}
+                    color={theme.primary}
                   />
                 </TouchableOpacity>
 
-                <TextInput
-                  style={[
-                    styles.numberInput,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
-                      color: theme.black,
-                    },
-                  ]}
-                  value={numberOfWorkers.toString()}
-                  onChangeText={(text) => {
-                    const num = parseInt(text.replace(/[^\d]/g, "")) || 1;
-                    if (num >= 1 && num <= MAX_WORKERS) {
-                      setNumberOfWorkers(num);
-                    }
-                  }}
-                  keyboardType="numeric"
-                  maxLength={2}
-                  textAlign="center"
-                />
-
-                <TouchableOpacity
-                  onPress={() => {
-                    if (numberOfWorkers < MAX_WORKERS) {
-                      setNumberOfWorkers(numberOfWorkers + 1);
-                    }
-                  }}
-                  style={[
-                    styles.numberButton,
-                    {
-                      backgroundColor: theme.primary,
-                      opacity: numberOfWorkers >= MAX_WORKERS ? 0.5 : 1,
-                    },
-                  ]}
-                  disabled={numberOfWorkers >= MAX_WORKERS}
-                >
-                  <MaterialIcons
-                    name="add"
-                    size={RFPercentage(2)}
-                    color={theme.pureWhite}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <Text style={[styles.helperText, { color: theme.darkGrey }]}>
-                {t("postRequest.workersHelperText", { max: MAX_WORKERS }) ||
-                  `Select number of helpers needed (1-${MAX_WORKERS})`}
-              </Text>
-            </View>
-
-            {/* Date Selection */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="date-range"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {t("postRequest.date")}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? "rgba(19, 19, 21, 1)"
-                      : "rgba(239, 239, 250, 0.66)",
-                  width: "45%",
-                  height: RFPercentage(4),
-                  borderRadius: RFPercentage(1),
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                onPress={() => {
-                  setTempDate(selectedDate);
-                  setShowDatePicker(true);
-                }}
-              >
-                <Text
-                  style={{
-                    color: theme.darkGrey,
-                    fontSize: RFPercentage(1.7),
-                    fontFamily: "Poppins_400Regular",
-                    textAlign: "center",
-                  }}
-                >
-                  {formattedDate || "Select Date"}
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker &&
-                (Platform.OS === "android" ? (
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="default"
-                    themeVariant={theme.mode === "dark" ? "dark" : "light"}
-                    minimumDate={new Date()}
-                    onChange={(event, date) => {
-                      setShowDatePicker(false);
-                      if (date) setSelectedDate(date);
-                    }}
-                  />
-                ) : (
+                {showDurationDropdown && (
                   <View
-                    style={{
-                      width: "100%",
-                      backgroundColor: "transparent",
-                      borderWidth: 1,
-                      borderColor:
-                        theme.mode === "dark"
-                          ? "rgba(23, 24, 33, 1)"
-                          : "rgba(239, 239, 250, 0.66)",
-                      borderRadius: RFPercentage(1.5),
-                      alignItems: "center",
-                      marginTop: RFPercentage(1),
-                    }}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        width: "90%",
-                        marginTop: RFPercentage(2),
-                      }}
-                    >
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        style={{
-                          backgroundColor:
-                            theme.mode === "dark"
-                              ? Colors.primary + "40"
-                              : Colors.primary + "10",
-                          padding: RFPercentage(0.7),
-                          borderRadius: RFPercentage(100),
-                          paddingHorizontal: RFPercentage(1.5),
-                        }}
-                        onPress={() => {
-                          setSelectedDate(tempDate);
-                          setShowDatePicker(false);
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color:
-                              theme.mode === "dark"
-                                ? Colors.white
-                                : Colors.primary,
-                            fontFamily: "Poppins_600SemiBold",
-                            fontSize: RFPercentage(1.4),
-                          }}
-                          numberOfLines={1}
-                        >
-                          {t("postRequest.date1")}
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => setShowDatePicker(false)}
-                      >
-                        <Ionicons
-                          name="close-circle"
-                          color={
-                            theme.mode === "dark"
-                              ? Colors.darkGrey + "50"
-                              : Colors.primary + "30"
-                          }
-                          size={RFPercentage(3.5)}
-                        />
-                      </TouchableOpacity>
-                    </View>
-
-                    <DateTimePicker
-                      value={tempDate}
-                      mode="date"
-                      display="spinner"
-                      themeVariant={theme.mode === "dark" ? "dark" : "light"}
-                      minimumDate={new Date()}
-                      onChange={(event, date) => {
-                        if (date) setTempDate(date);
-                      }}
-                    />
-                  </View>
-                ))}
-            </View>
-
-            {/* Time Selection */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="access-time"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {t("postRequest.time")}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? "rgba(19, 19, 21, 1)"
-                      : "rgba(239, 239, 250, 0.66)",
-                  width: "40%",
-                  height: RFPercentage(4),
-                  borderRadius: RFPercentage(1),
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                onPress={() => {
-                  setTempTime(selectedTime);
-                  setShowTimePicker(true);
-                }}
-              >
-                <Text
-                  style={{
-                    color: theme.darkGrey,
-                    fontSize: RFPercentage(1.7),
-                    fontFamily: "Poppins_400Regular",
-                    textAlign: "center",
-                  }}
-                >
-                  {formattedTime || "Select Time"}
-                </Text>
-              </TouchableOpacity>
-
-              {showTimePicker &&
-                (Platform.OS === "android" ? (
-                  <DateTimePicker
-                    value={selectedTime}
-                    mode="time"
-                    minuteInterval={5}
-                    display="default"
-                    themeVariant={theme.mode === "dark" ? "dark" : "light"}
-                    onChange={(event, time) => {
-                      setShowTimePicker(false);
-                      if (time) setSelectedTime(time);
-                    }}
-                  />
-                ) : (
-                  <View
-                    style={{
-                      width: "100%",
-                      backgroundColor: "transparent",
-                      borderWidth: 1,
-                      borderColor:
-                        theme.mode === "dark"
-                          ? "rgba(23, 24, 33, 1)"
-                          : "rgba(235, 236, 251, 1)",
-                      borderRadius: RFPercentage(1.5),
-                      alignItems: "center",
-                      marginTop: RFPercentage(1),
-                    }}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        width: "90%",
-                        marginTop: RFPercentage(2),
-                      }}
-                    >
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        style={{
-                          backgroundColor:
-                            theme.mode === "dark"
-                              ? Colors.primary + "40"
-                              : Colors.primary + "10",
-                          padding: RFPercentage(0.7),
-                          borderRadius: RFPercentage(100),
-                          paddingHorizontal: RFPercentage(1.5),
-                        }}
-                        onPress={() => {
-                          setSelectedTime(tempTime);
-                          setShowTimePicker(false);
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color:
-                              theme.mode === "dark"
-                                ? Colors.white
-                                : Colors.primary,
-                            fontFamily: "Poppins_600SemiBold",
-                            fontSize: RFPercentage(1.4),
-                          }}
-                          numberOfLines={1}
-                        >
-                          {t("postRequest.time1")}
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => setShowTimePicker(false)}
-                      >
-                        <Ionicons
-                          name="close-circle"
-                          color={
-                            theme.mode === "dark"
-                              ? Colors.darkGrey + "50"
-                              : Colors.primary + "30"
-                          }
-                          size={RFPercentage(3.5)}
-                        />
-                      </TouchableOpacity>
-                    </View>
-
-                    <DateTimePicker
-                      value={tempTime}
-                      mode="time"
-                      minuteInterval={5}
-                      display="spinner"
-                      themeVariant={theme.mode === "dark" ? "dark" : "light"}
-                      onChange={(event, time) => {
-                        if (time) setTempTime(time);
-                      }}
-                    />
-                  </View>
-                ))}
-            </View>
-
-            {/* Estimated Duration */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="hourglass-empty"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {t("postRequest.duration")}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[
-                  styles.selectField,
-                  {
-                    backgroundColor: theme.white,
-                    borderColor: showDurationDropdown
-                      ? theme.primary
-                      : theme.border,
-                    borderWidth: showDurationDropdown ? 1.5 : 1,
-                  },
-                ]}
-                onPress={() => toggleDropdown("duration")}
-              >
-                <View style={styles.selectFieldContent}>
-                  {selectedDuration ? (
-                    <Text style={[styles.selectedText, { color: theme.black }]}>
-                      {
-                        translatedDurationOptions.find(
-                          (d) => d.value === selectedDuration,
-                        )?.label
-                      }
-                    </Text>
-                  ) : (
-                    <Text
-                      style={[styles.placeholderText, { color: theme.heading }]}
-                    >
-                      {t("postRequest.duration-1")}
-                    </Text>
-                  )}
-                </View>
-                <MaterialIcons
-                  name={
-                    showDurationDropdown
-                      ? "keyboard-arrow-up"
-                      : "keyboard-arrow-down"
-                  }
-                  size={RFPercentage(2.5)}
-                  color={theme.primary}
-                />
-              </TouchableOpacity>
-
-              {showDurationDropdown && (
-                <View
-                  style={[
-                    styles.dropdownContainer,
-                    {
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
-                      shadowColor: theme.black,
-                      maxHeight: RFPercentage(38),
-                    },
-                  ]}
-                >
-                  {translatedDurationOptions.map((item) => (
-                    <TouchableOpacity
-                      key={item.value}
-                      onPress={() => selectDuration(item)}
-                      style={[
-                        styles.optionItem,
-                        selectedDuration === item.value && {
-                          backgroundColor: `${theme.primary}10`,
-                        },
-                      ]}
-                    >
-                      <FontAwesome5
-                        name="clock"
-                        size={RFPercentage(1.8)}
-                        color={theme.lightGrey}
-                      />
-                      <Text
-                        style={[styles.optionText, { color: theme.darkGrey }]}
-                      >
-                        {item.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-
-            {/* Description */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="description"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {t("postRequest.txt8")}
-                </Text>
-              </View>
-
-              <Pressable
-                onPress={() => inputRef.current?.focus()}
-                style={[
-                  styles.descriptionContainer,
-                  {
-                    backgroundColor: theme.white,
-                    borderColor: theme.border,
-                  },
-                ]}
-              >
-                <TextInput
-                  ref={inputRef}
-                  placeholder={t("postRequest.txt8")}
-                  placeholderTextColor={theme.heading}
-                  value={description}
-                  multiline
-                  onChangeText={setDescription}
-                  maxLength={250}
-                  style={[styles.desc, { color: theme.black }]}
-                />
-                <View style={styles.charCountContainer}>
-                  <Text style={[styles.charCount, { color: theme.darkGrey }]}>
-                    {description.length}/250
-                  </Text>
-                </View>
-              </Pressable>
-            </View>
-
-            {/* Location */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="location-on"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {"Location"}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Location", { home: false })}
-                activeOpacity={0.7}
-                style={[
-                  styles.locationField,
-                  {
-                    backgroundColor: theme.white,
-                    borderColor: theme.border,
-                  },
-                ]}
-              >
-                <View style={styles.locationContent}>
-                  <Text
-                    numberOfLines={1}
                     style={[
-                      styles.locationText,
+                      styles.dropdownContainer,
                       {
-                        color:
-                          location?.name || selectedLocation?.name
-                            ? theme.black
-                            : theme.heading,
+                        backgroundColor: theme.white,
+                        borderColor: theme.border,
+                        shadowColor: theme.black,
+                        maxHeight: RFPercentage(38),
                       },
                     ]}
                   >
-                    {location?.name ||
-                      selectedLocation?.name ||
-                      t("postRequest.txt9")}
-                  </Text>
-                </View>
-                <MaterialIcons
-                  name="chevron-right"
-                  size={RFPercentage(2.5)}
-                  color={theme.darkGrey}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/* Budget/Compensation */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="monetization-on"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {originalCompensationType === "Other"
-                    ? `Compensation Details`
-                    : t("postRequest.pr")}
-                </Text>
+                    {translatedDurationOptions.map((item) => (
+                      <TouchableOpacity
+                        key={item.value}
+                        onPress={() => selectDuration(item)}
+                        style={[
+                          styles.optionItem,
+                          selectedDuration === item.value && {
+                            backgroundColor: `${theme.primary}10`,
+                          },
+                        ]}
+                      >
+                        <FontAwesome5
+                          name="clock"
+                          size={RFPercentage(1.8)}
+                          color={theme.lightGrey}
+                        />
+                        <Text
+                          style={[styles.optionText, { color: theme.darkGrey }]}
+                        >
+                          {item.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
 
-              {originalCompensationType === "Other" ? (
-                <InputFieldNew
-                  placeholder={t("postRequest.txt10")}
-                  value={compensation}
-                  onChangeText={setCompensation}
-                  customStyle={{
-                    width: "100%",
-                    borderRadius: RFPercentage(1.2),
-                    backgroundColor: theme.white,
-                    borderColor: theme.border,
-                    height: RFPercentage(6),
-                    marginTop: 0,
-                  }}
-                />
-              ) : (
-                <>
+              {/* Description */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="description"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {t("postRequest.txt8")}
+                  </Text>
+                </View>
+
+                <Pressable
+                  onPress={() => inputRef.current?.focus()}
+                  style={[
+                    styles.descriptionContainer,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    ref={inputRef}
+                    placeholder={t("postRequest.txt8")}
+                    placeholderTextColor={theme.heading}
+                    value={description}
+                    multiline
+                    onChangeText={setDescription}
+                    maxLength={250}
+                    style={[styles.desc, { color: theme.black }]}
+                  />
+                  <View style={styles.charCountContainer}>
+                    <Text style={[styles.charCount, { color: theme.darkGrey }]}>
+                      {description.length}/250
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+
+              {/* Location */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="location-on"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {"Location"}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("Location", { home: false })
+                  }
+                  activeOpacity={0.7}
+                  style={[
+                    styles.locationField,
+                    {
+                      backgroundColor: theme.white,
+                      borderColor: theme.border,
+                    },
+                  ]}
+                >
+                  <View style={styles.locationContent}>
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.locationText,
+                        {
+                          color:
+                            location?.name || selectedLocation?.name
+                              ? theme.black
+                              : theme.heading,
+                        },
+                      ]}
+                    >
+                      {location?.name ||
+                        selectedLocation?.name ||
+                        t("postRequest.txt9")}
+                    </Text>
+                  </View>
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={RFPercentage(2.5)}
+                    color={theme.darkGrey}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Budget/Compensation */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="monetization-on"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {originalCompensationType === "Other"
+                      ? `Compensation Details`
+                      : t("postRequest.pr")}
+                  </Text>
+                </View>
+
+                {originalCompensationType === "Other" ? (
                   <InputFieldNew
-                    placeholder={t("postRequest.pr")}
-                    value={budget}
-                    onChangeText={handleBudgetChange}
+                    placeholder={t("postRequest.txt10")}
+                    value={compensation}
+                    onChangeText={setCompensation}
                     customStyle={{
                       width: "100%",
                       borderRadius: RFPercentage(1.2),
@@ -2034,133 +2068,159 @@ function PostRequest({ navigation, route }) {
                       height: RFPercentage(6),
                       marginTop: 0,
                     }}
-                    keyboardType="numeric"
                   />
-                  {selectedLocation?.name && (
-                    <Text
-                      style={[styles.currencyNote, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
-                    >
-                      {`${t("profileRank.txt46")}`} {currentCurrencySymbol} (
-                      {currencyInfo.code}){`${t("profileRank.txt47")}`}{" "}
-                      {selectedLocation.name}
-                    </Text>
-                  )}
-                </>
-              )}
-            </View>
-
-            {/* Images */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: `${theme.primary}15` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="photo-library"
-                    size={RFPercentage(2)}
-                    color={theme.primary}
-                  />
-                </View>
-                <Text style={[styles.sectionTitle, { color: theme.darkGrey }]}>
-                  {`Upload Photos`}
-                </Text>
-                <Text style={[styles.optionalText, { color: theme.heading }]}>
-                  ({t("postRequest.photo-1")})
-                </Text>
-                <Text style={[styles.optionalText, { color: theme.heading }]}>
-                  ({t("postRequest.photo-2")})
-                </Text>
+                ) : (
+                  <>
+                    <InputFieldNew
+                      placeholder={t("postRequest.pr")}
+                      value={budget}
+                      onChangeText={handleBudgetChange}
+                      customStyle={{
+                        width: "100%",
+                        borderRadius: RFPercentage(1.2),
+                        backgroundColor: theme.white,
+                        borderColor: theme.border,
+                        height: RFPercentage(6),
+                        marginTop: 0,
+                      }}
+                      keyboardType="numeric"
+                    />
+                    {selectedLocation?.name && (
+                      <Text
+                        style={[
+                          styles.currencyNote,
+                          {
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.darkGrey
+                                : Colors.primary,
+                          },
+                        ]}
+                      >
+                        {`${t("profileRank.txt46")}`} {currentCurrencySymbol} (
+                        {currencyInfo.code}){`${t("profileRank.txt47")}`}{" "}
+                        {selectedLocation.name}
+                      </Text>
+                    )}
+                  </>
+                )}
               </View>
 
-              <View style={styles.imageGrid}>
-                {[0, 1, 2].map((index) => (
-                  <TouchableOpacity
-                    key={index}
-                    activeOpacity={0.7}
-                    onPress={() => pickImage(index)}
+              {/* Images */}
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
                     style={[
-                      styles.imageContainer,
-                      {
-                        backgroundColor: theme.white,
-                        borderColor: imageUris[index]
-                          ? theme.primary
-                          : theme.border,
-                        borderWidth: imageUris[index] ? 1.5 : 1,
-                      },
+                      styles.iconContainer,
+                      { backgroundColor: `${theme.primary}15` },
                     ]}
                   >
-                    {imageUris[index] ? (
-                      <>
-                        <Image
-                          style={styles.selectedImage}
-                          source={{ uri: imageUris[index] }}
-                        />
-                        <TouchableOpacity
-                          onPress={() => deleteImage(index)}
-                          style={[
-                            styles.deleteButton,
-                            { backgroundColor: Colors.red },
-                          ]}
-                        >
-                          <MaterialIcons
-                            name="close"
-                            size={RFPercentage(1.8)}
-                            color={theme.white}
-                          />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => pickImage(index)}
-                          style={[
-                            styles.editButton,
-                            { backgroundColor: theme.primary },
-                          ]}
-                        >
-                          <MaterialIcons
-                            name="edit"
-                            size={RFPercentage(1.5)}
-                            color={theme.white}
-                          />
-                        </TouchableOpacity>
-                      </>
-                    ) : (
-                      <View style={styles.imagePlaceholder}>
-                        <MaterialIcons
-                          name="add-a-photo"
-                          size={RFPercentage(3)}
-                          color={theme.heading}
-                        />
-                        <Text
-                          style={[
-                            styles.addPhotoText,
-                            { color: theme.heading },
-                          ]}
-                        >
-                          {t("postRequest.photo")}
-                        </Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+                    <MaterialIcons
+                      name="photo-library"
+                      size={RFPercentage(2)}
+                      color={theme.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.sectionTitle, { color: theme.darkGrey }]}
+                  >
+                    {`Upload Photos`}
+                  </Text>
+                  <Text style={[styles.optionalText, { color: theme.heading }]}>
+                    ({t("postRequest.photo-1")})
+                  </Text>
+                  <Text style={[styles.optionalText, { color: theme.heading }]}>
+                    ({t("postRequest.photo-2")})
+                  </Text>
+                </View>
 
-            {/* Submit Button */}
-            <View style={{ alignItems: "center" }}>
-              <MyAppButton
-                disabled={indicator}
-                loading={indicator}
-                title={
-                  isEditing ? t("postRequest.txt13") : t("postRequest.txt14")
-                }
-                marginTop={RFPercentage(4)}
-                onPress={submitPostData}
-              />
-            </View>
-            <View style={styles.bottomSpace} />
-          </Animated.View>
+                <View style={styles.imageGrid}>
+                  {[0, 1, 2].map((index) => (
+                    <TouchableOpacity
+                      key={index}
+                      activeOpacity={0.7}
+                      onPress={() => pickImage(index)}
+                      style={[
+                        styles.imageContainer,
+                        {
+                          backgroundColor: theme.white,
+                          borderColor: imageUris[index]
+                            ? theme.primary
+                            : theme.border,
+                          borderWidth: imageUris[index] ? 1.5 : 1,
+                        },
+                      ]}
+                    >
+                      {imageUris[index] ? (
+                        <>
+                          <Image
+                            style={styles.selectedImage}
+                            source={{ uri: imageUris[index] }}
+                          />
+                          <TouchableOpacity
+                            onPress={() => deleteImage(index)}
+                            style={[
+                              styles.deleteButton,
+                              { backgroundColor: Colors.red },
+                            ]}
+                          >
+                            <MaterialIcons
+                              name="close"
+                              size={RFPercentage(1.8)}
+                              color={theme.white}
+                            />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => pickImage(index)}
+                            style={[
+                              styles.editButton,
+                              { backgroundColor: theme.primary },
+                            ]}
+                          >
+                            <MaterialIcons
+                              name="edit"
+                              size={RFPercentage(1.5)}
+                              color={theme.white}
+                            />
+                          </TouchableOpacity>
+                        </>
+                      ) : (
+                        <View style={styles.imagePlaceholder}>
+                          <MaterialIcons
+                            name="add-a-photo"
+                            size={RFPercentage(3)}
+                            color={theme.heading}
+                          />
+                          <Text
+                            style={[
+                              styles.addPhotoText,
+                              { color: theme.heading },
+                            ]}
+                          >
+                            {t("postRequest.photo")}
+                          </Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Submit Button */}
+              <View style={{ alignItems: "center" }}>
+                <MyAppButton
+                  disabled={indicator}
+                  loading={indicator}
+                  title={
+                    isEditing ? t("postRequest.txt13") : t("postRequest.txt14")
+                  }
+                  marginTop={RFPercentage(4)}
+                  onPress={submitPostData}
+                />
+              </View>
+              <View style={styles.bottomSpace} />
+            </Animated.View>
+          </Pressable>
         </ScrollView>
       </TouchableWithoutFeedback>
     </>

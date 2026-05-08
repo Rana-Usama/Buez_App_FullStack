@@ -1,4 +1,4 @@
-package com.adamburg.Buez
+package com.adamburg.buez
 
 import android.app.Application
 import android.content.res.Configuration

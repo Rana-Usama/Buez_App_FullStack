@@ -192,9 +192,8 @@
     "info1": "Aggiungere una carta ora garantisce il servizio senza interruzioni dopo la prova",
     "info2": "La tua carta non verrà addebitata fino a dopo 14 giorni",
     "info3": "Puoi annullare in qualsiasi momento durante il periodo di prova",
-     "importantNote": "Inizia il tuo percorso Premium",
-  "automaticSubscription": "Goditi l’accesso completo al Premium per 14 giorni gratis! Dopo il periodo di prova, il tuo abbonamento mensile continuerà automaticamente se aggiungi una carta, così non perderai mai i tuoi vantaggi Premium."
-
+    "importantNote": "Inizia il tuo percorso Premium",
+    "automaticSubscription": "Goditi l’accesso completo al Premium per 14 giorni gratis! Dopo il periodo di prova, il tuo abbonamento mensile continuerà automaticamente se aggiungi una carta, così non perderai mai i tuoi vantaggi Premium."
   },
   "subscription": {
     "txt1": "La tua prova gratuita di 14 giorni è terminata.",
@@ -310,8 +309,8 @@
     "photo": "Aggiungi foto",
     "photo-1": "Carica foto",
     "photo-2": "Facoltativo",
-      "date1": "Imposta la data",
-  "time1": "Imposta l'ora"
+    "date1": "Imposta la data",
+    "time1": "Imposta l'ora"
   },
   "messages": {
     "txt1": "Messaggi",
@@ -472,7 +471,7 @@
     "txt1": "Caricamento notifiche...",
     "txt2": "Quando ricevi notifiche, appariranno qui",
     "txt3": "Valutazione:",
-     "txt4": "Notifiche"
+    "txt4": "Notifiche"
   },
   "completed": {
     "txt1": "RECENSITO",
@@ -784,47 +783,55 @@
     "skipForNow": "Salta per ora"
   },
   "emailVerification": {
-  "title": "Verifica la tua email",
-  "subtitle": "Abbiamo inviato un link di verifica a:",
-  "hint": "Clicca sul link nell'email per attivare il tuo account. Controlla la cartella spam se non lo vedi.",
+    "title": "Verifica la tua email",
+    "subtitle": "Abbiamo inviato un link di verifica a:",
+    "hint": "Clicca sul link nell'email per attivare il tuo account. Controlla la cartella spam se non lo vedi.",
 
-  "verifiedSuccessTitle": "Email verificata!",
-  "verifiedSuccessDesc": "Benvenuto a bordo 🎉",
+    "verifiedSuccessTitle": "Email verificata!",
+    "verifiedSuccessDesc": "Benvenuto a bordo 🎉",
 
-  "notVerifiedTitle": "Non ancora verificata",
-  "notVerifiedDesc": "Clicca sul link nella tua email.",
+    "notVerifiedTitle": "Non ancora verificata",
+    "notVerifiedDesc": "Clicca sul link nella tua email.",
 
-  "emailSentTitle": "Email inviata!",
-  "emailSentDesc": "Email di verifica reinviata con successo.",
+    "emailSentTitle": "Email inviata!",
+    "emailSentDesc": "Email di verifica reinviata con successo.",
 
-  "resendFailedTitle": "Invio non riuscito",
-  "resendFailedDesc": "Riprova più tardi.",
+    "resendFailedTitle": "Invio non riuscito",
+    "resendFailedDesc": "Riprova più tardi.",
 
-  "verifiedButton": "Ho verificato la mia email",
-  "resendButton": "Invia di nuovo",
-  "resendCooldown": "Invia di nuovo tra {{seconds}}s",
-  "backToLogin": "Torna al login"
-},
-"freeTrialBanner": {
-  "active": {
-    "label": "Prova gratuita attiva",
-    "title": "Goditi le funzionalità premium"
+    "verifiedButton": "Ho verificato la mia email",
+    "resendButton": "Invia di nuovo",
+    "resendCooldown": "Invia di nuovo tra {{seconds}}s",
+    "backToLogin": "Torna al login"
   },
-  "warning_no_card": {
-    "label": "Prova in scadenza",
-    "title": "Aggiungi un metodo di pagamento per continuare"
+  "freeTrialBanner": {
+    "active": {
+      "label": "Prova gratuita attiva",
+      "title": "Goditi le funzionalità premium"
+    },
+    "warning_no_card": {
+      "label": "Prova in scadenza",
+      "title": "Aggiungi un metodo di pagamento per continuare"
+    },
+    "urgent_no_card": {
+      "label": "Prova scade domani!",
+      "title": "Aggiorna ora per continuare"
+    },
+    "warning_with_card": {
+      "label": "Prova in scadenza",
+      "title": "Il tuo piano inizierà automaticamente"
+    },
+    "autorenew": {
+      "label": "Inizia domani",
+      "title": "Il piano mensile inizierà automaticamente"
+    }
   },
-  "urgent_no_card": {
-    "label": "Prova scade domani!",
-    "title": "Aggiorna ora per continuare"
-  },
-  "warning_with_card": {
-    "label": "Prova in scadenza",
-    "title": "Il tuo piano inizierà automaticamente"
-  },
-  "autorenew": {
-    "label": "Inizia domani",
-    "title": "Il piano mensile inizierà automaticamente"
+  "decider": {
+    "dc1": "Connessione con la tua comunità…",
+    "dc2": "Ricerca di opportunità nelle vicinanze…",
+    "dc3": "Aiutare le persone a portare a termine le cose…",
+    "dc4": "Quasi pronto per Buez…",
+    "tag": "Le faccende quotidiane rese semplici!",
+    "footer": "Offerto da Buez"
   }
-}
 }
