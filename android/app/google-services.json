@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "211367941601-ngcp33u2en3tj0mfldnklaokvpkvphn4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adamburg.buez",
+            "certificate_hash": "b7eb1f978101b4d3aecf293be69a51755e9ecfd8"
+          }
+        },
+        {
           "client_id": "211367941601-i7pb5oak2cqq5vcvtvfv0sqsl4t6mgma.apps.googleusercontent.com",
           "client_type": 3
         }
