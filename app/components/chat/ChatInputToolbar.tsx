@@ -89,7 +89,9 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     justifyContent: "center",
     textAlignVertical: "top",
-    paddingTop: 3,
+    paddingTop: 5,
+    // backgroundColor:"red",
+    lineHeight:RFPercentage(2)
   },
   sendButton: {
     justifyContent: "center",

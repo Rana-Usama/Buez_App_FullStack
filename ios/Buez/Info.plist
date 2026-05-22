@@ -86,15 +86,11 @@
 <key>NSFaceIDUsageDescription</key>
 <string>Buez uses Face ID to securely verify your identity when logging into your account. For example, instead of typing your password each time, you can authenticate instantly using Face ID.</string>
 
-<key>NSUserTrackingUsageDescription</key>
-<string>Buez uses your device's advertising identifier to show you personalized ads that are relevant to your interests. For example, if you browse service listings in a specific category, you may see related ads tailored to your activity.</string>
 
 	<!-- App Transport Security (ATS) -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<!-- ⚡ Allow all network connections (fix slow Firebase fetch on iOS) -->
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+		
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>

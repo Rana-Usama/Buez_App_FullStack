@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { TouchableOpacity, Platform, ActivityIndicator } from "react-native";
+import {
+  Platform,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import {
   getDoc,
   doc,
@@ -83,27 +88,22 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       return;
     }
 
+    if (!appleAuth.isSupported) {
+      Toast.show({
+        type: "error",
+        text1: "Not supported",
+        text2: "Sign in with Apple requires iOS 13 or later.",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      // Apple auth request
-      let appleAuthResponse;
-
-      if (!appleAuth.isSupported) {
-        console.log(" Apple Auth not supported, using simulator");
-        // Simulator mode for testing
-        appleAuthResponse = {
-          user: "simulatedUser_" + Date.now(),
-          email: `appleuser_${Date.now()}@test.com`,
-          fullName: { givenName: "Apple", familyName: "User" },
-          identityToken: "mock-identity-token-" + Date.now(),
-          nonce: "mock-nonce-" + Date.now(),
-        };
-      } else {
-        appleAuthResponse = await appleAuth.performRequest({
-          requestedOperation: appleAuth.Operation.LOGIN,
-          requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-        });
-      }
+      // 1️⃣ Apple auth request
+      const appleAuthResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
 
       const {
         identityToken,
@@ -114,9 +114,10 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       } = appleAuthResponse;
 
       if (!identityToken) {
-        throw new Error("No identity token from Apple Sign-In");
+        throw new Error("Apple Sign-In failed: no identity token received");
       }
 
+      // 2️⃣ Firebase credential + sign in
       const provider = new OAuthProvider("apple.com");
       const credential = provider.credential({
         idToken: identityToken,
@@ -129,8 +130,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       );
       const user = userCredential.user;
 
-      const pushToken = await registerForPushNotificationsAsync();
-
+      // 3️⃣ Firestore read/write — no push token needed here
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
@@ -147,14 +147,12 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
           {
             userName: finalName || existingData.userName,
             profileImage: existingData.profileImage || user.photoURL || "",
-            token: pushToken,
             phoneNumber: user.phoneNumber || existingData.phoneNumber || "",
             email: finalEmail || existingData.email,
             appleId: appleUserId,
-            appleIdentityToken: identityToken,
+            // Note: never store identityToken in Firestore (security)
             isSubscribed: existingData.isSubscribed ?? false,
             isFreeTrial: existingData.isFreeTrial ?? false,
-            // Preserve existing subscription data
             subscriptionStart: existingData.subscriptionStart || null,
             subscriptionEnd: existingData.subscriptionEnd || null,
             subscriptionId: existingData.subscriptionId || null,
@@ -177,9 +175,7 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
           email: finalEmail,
           profileImage: user.photoURL || "",
           phoneNumber: user.phoneNumber || "",
-          token: pushToken,
           appleId: appleUserId,
-          appleIdentityToken: identityToken,
           isSubscribed: false,
           isFreeTrial: false,
           subscriptionStart: null,
@@ -194,110 +190,91 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
         });
       }
 
-      // Save credentials
       await saveCredentials(finalEmail, appleUserId);
       await SecureStore.setItemAsync("loggedOut", "false");
 
-      // Give Firestore time to update
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Get updated user data
+      // 4️⃣ Fetch updated user data for routing
       const updatedSnap = await getDoc(userRef);
       const existingUser = updatedSnap.data();
 
       if (!existingUser) {
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Failed to retrieve user data",
-        });
-        return;
+        throw new Error("Failed to retrieve user data after sign-in");
       }
 
       const now = new Date();
 
-      // Parse subscription dates using helper
       const subStartDate = parseFirestoreTimestamp(
         existingUser.subscriptionStart,
       );
       const subEndDate = parseFirestoreTimestamp(existingUser.subscriptionEnd);
-
-      // Debug logs
-      console.log("Apple Login - Subscription Check:");
-      console.log("isSubscribed:", existingUser.isSubscribed);
-      console.log("subscriptionStart:", existingUser.subscriptionStart);
-      console.log("subscriptionEnd:", existingUser.subscriptionEnd);
-      console.log("Parsed start:", subStartDate);
-      console.log("Parsed end:", subEndDate);
-      console.log("Current date:", now);
-
       const isWithinPaidPeriod =
         subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
-      console.log("Is within paid period:", isWithinPaidPeriod);
-
-      // Check trial validity
       let isTrialValid = false;
       const trialStartDate = parseFirestoreTimestamp(
         existingUser.freeTrialStartedAt,
       );
       if (existingUser.isFreeTrial && trialStartDate) {
         const trialDays = differenceInDays(now, trialStartDate);
-        console.log("Trial days:", trialDays);
         isTrialValid = trialDays >= 0 && trialDays <= 14;
-        console.log("Is trial valid:", isTrialValid);
       }
 
-      // Check if device has already used free trial
       const deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
-      console.log("Device used trial:", deviceUsedTrial);
 
-      // Navigation logic - same order as Google login
-      console.log(" Apple Navigation Decision:");
-
+      // 5️⃣ Determine target route
+      let targetRoute: string;
       if (existingUser.isSubscribed && isWithinPaidPeriod) {
-        console.log(" Navigating to TabNavigator (paid subscription)");
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "TabNavigator" }],
-        });
+        targetRoute = "TabNavigator";
       } else if (isTrialValid) {
-        console.log(" Navigating to TabNavigator (active trial)");
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "TabNavigator" }],
-        });
+        targetRoute = "TabNavigator";
       } else if (!deviceUsedTrial) {
-        console.log("Navigating to FreeTrial (new device)");
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "FreeTrial" }],
-        });
+        targetRoute = "FreeTrial";
       } else {
-        console.log(" Navigating to Subscription (device used trial)");
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Subscription" }],
-        });
+        targetRoute = "Subscription";
       }
 
+      console.log("Apple Sign-In → navigating to:", targetRoute);
+
+      // 6️⃣ Navigate FIRST — never block navigation on push token registration
       Toast.show({
         type: "success",
         text1: `${t("toast.login.one")}`,
         text2: `${t("toast.login.two")}`,
       });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: targetRoute }],
+      });
+
+      // 7️⃣ Register push token in the background AFTER navigation completes
+      registerForPushNotificationsAsync()
+        .then((pushToken) => {
+          if (pushToken) {
+            setDoc(userRef, { token: pushToken }, { merge: true }).catch((e) =>
+              console.warn("Failed to update push token:", e),
+            );
+          }
+        })
+        .catch((e) => console.warn("Push token registration error:", e));
     } catch (error: any) {
-      console.log("Apple Sign-In Error:", error);
-      console.log("Error code:", error.code);
-      console.log("Error message:", error.message);
+      console.log("Apple Sign-In Full Error:", JSON.stringify(error, null, 2));
+
+      // User cancelled — don't show error toast
+      if (
+        error.code === "1001" ||
+        error.code === "ERR_CANCELED" ||
+        error.message?.includes("cancelled") ||
+        error.message?.includes("canceled")
+      ) {
+        return;
+      }
 
       let errorMessage = `${t("toast.login.four")}`;
 
-      // More specific error messages
       if (error.code === "auth/operation-not-allowed") {
         errorMessage = "Apple Sign-In is not enabled in Firebase";
       } else if (error.code === "auth/invalid-credential") {
-        errorMessage = "Invalid Apple credentials";
+        errorMessage = "Invalid Apple credentials. Please try again.";
       } else if (
         error.code === "auth/account-exists-with-different-credential"
       ) {
@@ -317,15 +294,32 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
   if (loading) return <ActivityIndicator size="small" color="grey" />;
 
   return (
-    <TouchableOpacity activeOpacity={0.8} onPress={handleAppleLogin}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={handleAppleLogin}
+      style={[
+        styles.circleButton,
+        { backgroundColor: theme.mode === "dark" ? "#FFFFFF" : "#000000ff" },
+      ]}
+    >
       <FontAwesome
         name="apple"
-        size={RFPercentage(5.3)}
-        color={theme.black}
-        style={{ bottom: 0.5 }}
+        size={RFPercentage(3)}
+        color={theme.mode === "dark" ? "#000000" : "#FFFFFF"}
+        style={{ marginTop: -RFPercentage(0.3) }}
       />
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  circleButton: {
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+    borderRadius: RFPercentage(3.5),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
 
 export default AppleLoginButton;

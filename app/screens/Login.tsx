@@ -37,7 +37,7 @@ import { useAppTheme } from "../contexts/themeContext";
 import { BlurView } from "expo-blur";
 import { decideUserRoute } from "../utils/decideLoginRoute";
 import { doc, getDoc } from "firebase/firestore";
-import { FIREBASE_DB } from "../../firebaseConfig"; // adjust path
+import { FIREBASE_DB } from "../../firebaseConfig";
 import AppleLoginButton from "../utils/appleLogin";
 import { LinearGradient } from "expo-linear-gradient";
 import DeviceInfo from "react-native-device-info";
@@ -323,12 +323,11 @@ function Login({ navigation }) {
 
             <View style={styles.socialIconsContainer}>
               <GoogleLoginButton navigation={navigation} />
-              {Platform.OS === "android" ? null : (
-                <View style={{ marginLeft: RFPercentage(2) }}>
-                  <AppleLoginButton navigation={navigation} />
-                </View>
+              {Platform.OS !== "android" && (
+                <AppleLoginButton navigation={navigation} />
               )}
             </View>
+
 
             <View style={styles.signupContainer}>
               <Text style={[styles.signupText, { color: theme.darkGrey }]}>
@@ -552,6 +551,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: RFPercentage(1.5),
   },
   socialIcon: {
     width: RFPercentage(4.8),

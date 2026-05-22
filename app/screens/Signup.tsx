@@ -351,7 +351,7 @@ function Signup({ navigation }: any) {
           </View> */}
           <GoogleLoginButton navigation={navigation} />
           {Platform.OS === "android" ? null : (
-            <View style={{ marginLeft: RFPercentage(2) }}>
+            <View style={{ marginLeft: RFPercentage(1.5) }}>
               <AppleLoginButton navigation={navigation} />
             </View>
           )}

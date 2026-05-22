@@ -1,47 +1,28 @@
 import * as Notifications from "expo-notifications";
-import { Platform, PermissionsAndroid, Alert } from "react-native";
+import { Platform, PermissionsAndroid } from "react-native";
 import messaging from "@react-native-firebase/messaging";
 
 export async function registerForPushNotificationsAsync() {
   try {
-    let granted = false;
-
-    if (Platform.OS === "ios") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      granted = status === "granted";
-    } else if (Platform.OS === "android") {
-      if (Platform.Version >= 33) {
-        const res = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-        );
-        granted = res === PermissionsAndroid.RESULTS.GRANTED;
-      } else {
-        granted = true; // Android ≤12 doesn’t need prompt
-      }
-    }
-
-    // if (!granted) {
-    //   Alert.alert("Push notifications not allowed");
-    //   return null;
-    // }
-
-    // ----- 2️⃣ Ask FCM for authorization (iOS only, but safe to call everywhere) -----
+    // ----- 1️⃣ Request FCM permission (handles both Expo + Firebase in one call on iOS) -----
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
     if (!enabled) {
-      Alert.alert("FCM permission not granted");
+      // User denied — silently return null, never block the caller
+      console.log("Push notification permission not granted");
       return null;
     }
 
-    // ----- 3️⃣ Get the FCM token -----
-    const fcmToken = await messaging().getToken();
-    console.log("✅ FCM Token:", fcmToken);
-
-    // ----- 4️⃣ Android channel (optional but recommended) -----
+    // ----- 2️⃣ Android: explicit permission prompt + notification channel -----
     if (Platform.OS === "android") {
+      if (Platform.Version >= 33) {
+        await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+      }
       await Notifications.setNotificationChannelAsync("default", {
         name: "default",
         importance: Notifications.AndroidImportance.MAX,
@@ -50,6 +31,9 @@ export async function registerForPushNotificationsAsync() {
       });
     }
 
+    // ----- 3️⃣ Get the FCM token -----
+    const fcmToken = await messaging().getToken();
+    console.log("✅ FCM Token:", fcmToken);
     return fcmToken;
   } catch (e) {
     console.error("Error getting FCM token", e);

@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { TouchableOpacity, Image, ActivityIndicator } from "react-native";
+import {
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import {
   getDoc,
@@ -22,6 +27,7 @@ import { Icons } from "../config/theme";
 import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import DeviceInfo from "react-native-device-info";
+import { useAppTheme } from "../contexts/themeContext";
 
 
 const webClientId =
@@ -32,6 +38,7 @@ const iosClientId =
 const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
+  const { theme } = useAppTheme();
   const [deviceId, setDeviceId] = useState("");
   const { t } = useTranslation();
 
@@ -249,14 +256,39 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
   if (loading) return <ActivityIndicator size={"small"} color={"grey"} />;
 
   return (
-    <TouchableOpacity activeOpacity={0.8} onPress={handleGoogleLogin}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={handleGoogleLogin}
+      style={[
+        styles.circleButton,
+        {
+          backgroundColor: theme.white,
+          borderColor: theme.border,
+        },
+      ]}
+    >
       <Image
         source={Icons.google}
-        style={{ width: RFPercentage(4.5), height: RFPercentage(4.5) }}
+        style={styles.googleIcon}
         resizeMode="contain"
       />
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  circleButton: {
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+    borderRadius: RFPercentage(3.5),
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+  },
+  googleIcon: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+  },
+});
 
 export default GoogleLoginButton;
