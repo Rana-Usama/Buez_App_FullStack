@@ -278,7 +278,9 @@
     "noCompletedTasksDesc": "Les tâches que vous terminez apparaîtront ici",
     "noReviews": "Aucun avis pour le moment",
     "noReviewsDesc": "Les avis des propriétaires des tâches apparaîtront ici",
-    "view": "Voir les candidats"
+    "view": "Voir les candidats",
+    "viewConfirmedHelpers": "Voir les aides",
+    "txt14": "Passées"
   },
   "postRequest": {
     "txt1": "Publier une demande",
@@ -310,7 +312,15 @@
     "photo-1": "Télécharger des photos",
     "photo-2": "Optionnel",
     "date1": "Définir la date",
-    "time1": "Définir l'heure"
+    "time1": "Définir l'heure",
+    "step1Title": "Détails de la tâche",
+    "step2Title": "Horaire et aides",
+    "step3Title": "Description et paiement",
+    "stepIndicator": "Étape {{current}} sur {{total}}",
+    "back": "Retour",
+    "validateStep1": "Veuillez sélectionner un type de tâche et de rémunération",
+    "validateStep2": "Veuillez choisir une date, une heure et une durée estimée",
+    "validateStep3": "Veuillez ajouter une description, un lieu et une rémunération"
   },
   "messages": {
     "txt1": "Messages",
@@ -428,7 +438,8 @@
     "applicantProfile": "Profil du candidat",
     "confirmApplicant": "Confirmer",
     "confirmed": "Confirmé",
-    "confirmedOn": "Confirmé le"
+    "confirmedOn": "Confirmé le",
+    "txt5": "Tâches acceptées"
   },
   "editProfile": {
     "txt1": "Entrez votre nom",
@@ -497,16 +508,15 @@
     "txt1": "Tâche acceptée avec succès !",
     "txt2": "Commencer à communiquer",
     "txt3": "Vous pouvez maintenant discuter avec le demandeur des détails de la tâche.",
-    "txt4": "Trouver dans Mes demandes",
-    "txt5": "Cette tâche est listée sous 'Acceptées' dans Mes demandes.",
+    "txt4": "Voir dans Tâches acceptées",
+    "txt5": "Cette tâche figure dans vos Tâches acceptées.",
     "txt6": "Restez informé",
     "txt7": "Vous recevrez des notifications pour les mises à jour ou les messages.",
     "txt8": "Prochaines étapes",
     "txt9": "Coordonnez-vous avec le demandeur pour terminer la tâche.",
     "txt10": "Compris !",
-    "txt11": "Voir mes demandes"
+    "txt11": "Voir les tâches acceptées"
   },
-
   "faqs": {
     "txt1": "Comment pouvons-nous vous aider ?",
     "txt2": " Trouvez des réponses aux questions fréquemment posées",
@@ -679,21 +689,17 @@
   "taskApplicants": {
     "title": "Candidats à la tâche",
     "loading": "Chargement des détails de la tâche...",
-
     "helpersNeeded": "Aides nécessaires",
     "confirmed": "Confirmés",
     "applicants": "Candidats",
     "progress": "aides confirmées",
     "applicantsTab": "Candidats",
     "confirmedTab": "Confirmés",
-
     "noEmail": "Aucun email",
     "confirmedTime": "Confirmé",
-
     "confirm": "Confirmer",
     "remove": "Retirer",
     "profile": "Profil",
-
     "group": "Diffusion de tâche",
     "member": "Membres",
     "helper": "Assistants",
@@ -701,21 +707,18 @@
     "joined": "Inscrit",
     "task": "Propriétaire de la tâche",
     "exp": "Appuyez sur l’icône de chat à côté d’un membre pour démarrer une conversation privée.",
-
     "confirmDialog": {
       "title": "Confirmer l'aide",
       "message": "Êtes-vous sûr de vouloir confirmer {{name}} pour cette tâche ?",
       "cancel": "Annuler",
       "confirm": "Confirmer"
     },
-
     "removeDialog": {
       "title": "Retirer l'aide",
       "message": "Êtes-vous sûr de vouloir retirer {{name}} des aides confirmées ?",
       "cancel": "Annuler",
       "remove": "Retirer"
     },
-
     "toast": {
       "error": {
         "taskNotFound": "Tâche non trouvée",
@@ -732,12 +735,10 @@
         "removedMessage": "{{name}} a été retiré(e) des aides confirmées"
       }
     },
-
     "empty": {
       "applicants": "Aucun candidat pour l'instant",
       "confirmed": "Aucune aide confirmée pour l'instant"
     },
-
     "help": {
       "applicants": "Appuyez sur 'Confirmer' pour ajouter des aides à votre équipe. Appuyez sur 'Profil' pour voir leurs détails.",
       "confirmed": "Appuyez sur 'Retirer' pour annuler la confirmation d'une aide. Elle retournera dans la liste des candidats."
@@ -746,17 +747,14 @@
       "title": "Limite atteinte",
       "message": "Vous avez déjà confirmé les {{count}} aides nécessaires pour cette tâche."
     },
-
     "cannotConfirm": {
       "title": "Impossible de confirmer plus d'aides",
       "message": "Cette tâche ne nécessite que {{required}} aides. Vous en avez déjà confirmé {{confirmed}}."
     },
-
     "alreadyConfirmed": {
       "title": "Déjà confirmé",
       "message": "{{name}} est déjà confirmé(e) pour cette tâche."
     },
-
     "noDescription": "Aucune description",
     "full": "Complet",
     "spotsLeft": "Encore {{spots}} places disponibles",
@@ -786,19 +784,14 @@
     "title": "Vérifiez votre e-mail",
     "subtitle": "Nous avons envoyé un lien de vérification à :",
     "hint": "Cliquez sur le lien dans l'e-mail pour activer votre compte. Vérifiez votre dossier spam si vous ne le voyez pas.",
-
     "verifiedSuccessTitle": "E-mail vérifié !",
     "verifiedSuccessDesc": "Bienvenue à bord 🎉",
-
     "notVerifiedTitle": "Pas encore vérifié",
     "notVerifiedDesc": "Veuillez cliquer sur le lien dans votre e-mail.",
-
     "emailSentTitle": "E-mail envoyé !",
     "emailSentDesc": "L'e-mail de vérification a été renvoyé avec succès.",
-
     "resendFailedTitle": "Échec du renvoi",
     "resendFailedDesc": "Veuillez réessayer plus tard.",
-
     "verifiedButton": "J'ai vérifié mon e-mail",
     "resendButton": "Renvoyer l'e-mail",
     "resendCooldown": "Renvoyer dans {{seconds}}s",
@@ -825,14 +818,24 @@
       "label": "Démarre demain",
       "title": "L’abonnement mensuel commencera automatiquement"
     }
-     
   },
-  "decider" : {
-    "dc1" : "Connecting your community…",
-    "dc2" : "Finding opportunities nearby…",
-    "dc3" : "Helping people get things done…",
-    "dc4" : "Almost ready for Buez…",
-    "tag" : "Daily Chores Made Easy!",
-    "footer" : "Powered by Buez"
+  "decider": {
+    "dc1": "Connecting your community…",
+    "dc2": "Finding opportunities nearby…",
+    "dc3": "Helping people get things done…",
+    "dc4": "Almost ready for Buez…",
+    "tag": "Daily Chores Made Easy!",
+    "footer": "Powered by Buez"
+  },
+  "postDashboard": {
+    "header": "Demandes",
+    "overview": "Aperçu",
+    "emptyTitle": "Publiez votre première tâche",
+    "emptyText": "Besoin d’aide ? Créez votre première demande et trouvez des personnes prêtes à vous aider.",
+    "emptyCta": "Publier ma première tâche",
+    "newCta": "Nouvelle tâche",
+    "total": "Total des tâches publiées",
+    "active": "Tâches actives",
+    "completed": "Tâches terminées"
   }
 }

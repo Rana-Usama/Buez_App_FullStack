@@ -24,7 +24,6 @@ import {
   doc,
   onSnapshot,
 } from "firebase/firestore";
-import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { useTranslation } from "react-i18next";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -142,14 +141,9 @@ const customButtonStyles = StyleSheet.create({
   button: {
     flex: 1,
     height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
-    borderRadius: RFPercentage(100),
+    borderRadius: RFPercentage(1.8),
     justifyContent: "center",
     alignItems: "center",
-    elevation: 4,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
   content: {
     flexDirection: "row",
@@ -229,6 +223,21 @@ function OfferDetail({ navigation, route }) {
   const db = FIREBASE_DB;
   const imageObjects =
     postRequest?.imageUrls?.map((url) => ({ uri: url })) || [];
+
+  // ── Unified, theme-driven UI palette (presentation only) ──
+  const isDark = theme.mode === "dark";
+  const ui = {
+    screenBg: isDark ? theme.white : "#FAFAFC",
+    cardBg: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+    cardBorder: isDark ? "rgba(255,255,255,0.10)" : "rgba(17,24,39,0.08)",
+    iconChip: isDark ? "rgba(255,255,255,0.08)" : Colors.primary + "0D",
+    accent: theme.primary,
+    shadow: isDark ? "#000000" : Colors.primary,
+    footerBg: isDark ? "#15171F" : "#FFFFFF",
+    headerBg: isDark ? "rgba(21,23,31,0.96)" : "rgba(255,255,255,0.98)",
+    divider: isDark ? "rgba(255,255,255,0.08)" : "rgba(17,24,39,0.06)",
+    softFill: isDark ? "rgba(255,255,255,0.04)" : "#F6F7F9",
+  };
 
   useEffect(() => {
     if (initialPostRequest) return; // already have full object
@@ -518,7 +527,7 @@ function OfferDetail({ navigation, route }) {
 
   const handleViewRequests = () => {
     setShowSuccessModal(false);
-    navigation.navigate("TabNavigator", { screen: t("bottomTab.txt1") });
+    navigation.navigate("AcceptedTasks");
   };
 
   // Translation function with cache
@@ -1077,13 +1086,81 @@ function OfferDetail({ navigation, route }) {
   }
 
   const isPostOwner = currentUserId === postRequest?.userId;
+
+  // Only show the sticky action bar when it would render at least one control.
+  // Single-request owners also need it (to "View Applications" and confirm a
+  // helper) once someone has applied and before a helper is assigned.
+  const hasActionContent =
+    isBulkRequest ||
+    !isPostOwner ||
+    (isPostOwner && !isAccepted && (appliedWorkers?.length || 0) > 0);
+
+  // Scroll-driven header fade-in (presentation only).
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [RFPercentage(18), RFPercentage(30)],
+    outputRange: [0, 1],
+    extrapolate: "clamp",
+  });
+
+  // Smooth content entrance.
+  const contentTranslateY = fadeAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [24, 0],
+  });
+
+  // Prominent hero compensation (derived from existing data only).
+  const heroCompensation =
+    postRequest?.compensationType === "Monitarely"
+      ? getConvertedCompensation(postRequest)
+      : translatedOffer?.otherCompensation || postRequest?.otherCompensation;
+
+  const heroTitle =
+    postRequest?.taskType === "Other"
+      ? translatedOffer?.customTaskTitle || translatedOffer?.taskType
+      : translatedOffer?.taskType;
+
   return (
-    <View style={[styles.safeArea, { backgroundColor: theme.white }]}>
+    <View style={[styles.safeArea, { backgroundColor: ui.screenBg }]}>
       <StatusBar
         barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={"transparent"}
         translucent
       />
+
+      {/* Animated collapsing header (fades in on scroll) */}
+      <Animated.View
+        pointerEvents="box-none"
+        style={[
+          styles.animatedHeader,
+          {
+            backgroundColor: ui.headerBg,
+            borderBottomColor: ui.cardBorder,
+            opacity: headerOpacity,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => {
+            deepLinkState.isHandlingDeepLink = false;
+            navigation.navigate("TabNavigator");
+          }}
+          style={[styles.headerBackBtn, { backgroundColor: ui.iconChip }]}
+        >
+          <Feather
+            name="arrow-left"
+            color={theme.heading}
+            size={RFPercentage(2.2)}
+          />
+        </TouchableOpacity>
+        <Text
+          style={[styles.animatedHeaderTitle, { color: theme.heading }]}
+          numberOfLines={1}
+        >
+          {heroTitle}
+        </Text>
+        <View style={styles.headerBackBtn} />
+      </Animated.View>
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -1114,11 +1191,11 @@ function OfferDetail({ navigation, route }) {
                     {
                       backgroundColor:
                         index === activeIndex
-                          ? Colors.primary
-                          : "rgba(255,255,255,0.5)",
+                          ? Colors.white
+                          : "rgba(255,255,255,0.45)",
                       width:
                         index === activeIndex
-                          ? RFPercentage(1.5)
+                          ? RFPercentage(2.2)
                           : RFPercentage(1),
                     },
                   ]}
@@ -1140,12 +1217,7 @@ function OfferDetail({ navigation, route }) {
 
           {/* Category Badge */}
           <View style={styles.categoryBadge}>
-            <LinearGradient
-              colors={[Colors.primary, "#4557B0"]}
-              style={styles.categoryGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
+            <View style={styles.categoryPill}>
               {getCategoryIcon(postRequest?.category)}
               <Text style={styles.categoryText}>
                 {postRequest?.taskType === "Other"
@@ -1153,12 +1225,45 @@ function OfferDetail({ navigation, route }) {
                     translatedOffer?.taskType
                   : translatedOffer?.taskType}
               </Text>
-            </LinearGradient>
+            </View>
           </View>
+
+          {/* Hero Compensation Badge */}
+          {!!heroCompensation && (
+            <View style={styles.heroPriceBadge}>
+              <BlurView
+                intensity={40}
+                tint="dark"
+                style={styles.heroPriceBlur}
+              >
+                <Ionicons
+                  name={
+                    postRequest?.compensationType === "Monitarely"
+                      ? "cash"
+                      : "gift"
+                  }
+                  size={RFPercentage(2)}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.heroPriceText} numberOfLines={1}>
+                  {heroCompensation}
+                </Text>
+              </BlurView>
+            </View>
+          )}
         </View>
 
         {/* Main Content */}
-        <Animated.View style={[styles.contentContainer, { opacity: fadeAnim }]}>
+        <Animated.View
+          style={[
+            styles.contentContainer,
+            {
+              backgroundColor: ui.screenBg,
+              opacity: fadeAnim,
+              transform: [{ translateY: contentTranslateY }],
+            },
+          ]}
+        >
           <UserCard
             postRequest={postRequest}
             theme={theme}
@@ -1168,63 +1273,6 @@ function OfferDetail({ navigation, route }) {
             onOpenViewer={() => setIsVisible(true)}
             activeIndex={activeIndex}
           />
-          {/* Scheduled Date & Time Card */}
-          {(scheduledDateTime || durationLabel) && (
-            <View
-              style={[
-                styles.detailCard,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? Colors.lightGrey + "10"
-                      : Colors.primary + "05",
-                },
-              ]}
-            >
-              <View style={styles.sectionHeader}>
-                <Ionicons
-                  name="calendar"
-                  size={RFPercentage(2.2)}
-                  color={Colors.primary}
-                />
-                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
-                  {"Scheduled Date & Time"}
-                </Text>
-              </View>
-
-              <View style={styles.scheduledContainer}>
-                {scheduledDateTime && (
-                  <View style={styles.scheduledItem}>
-                    <Ionicons
-                      name="calendar-outline"
-                      size={RFPercentage(2)}
-                      color={Colors.primary}
-                    />
-                    <Text
-                      style={[styles.scheduledText, { color: theme.darkGrey }]}
-                    >
-                      {scheduledDateTime}
-                    </Text>
-                  </View>
-                )}
-
-                {durationLabel && (
-                  <View style={styles.scheduledItem}>
-                    <Ionicons
-                      name="time-outline"
-                      size={RFPercentage(2)}
-                      color={Colors.primary}
-                    />
-                    <Text
-                      style={[styles.scheduledText, { color: theme.darkGrey }]}
-                    >
-                      {durationLabel}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          )}
           <WorkersCard
             isBulkRequest={isBulkRequest}
             numberOfWorkers={numberOfWorkers}
@@ -1237,92 +1285,25 @@ function OfferDetail({ navigation, route }) {
             t={t}
             theme={theme}
           />
-          <InfoGrid
-            postRequest={postRequest}
-            theme={theme}
-            getConvertedCompensation={getConvertedCompensation}
-            t={t}
-          />
-          {/* Sub-tasks & Description kept inline for readability; you can extract similarly */}
-          {selectedSubTasks?.length > 0 && (
-            <View
-              style={[
-                styles.detailCard,
-                {
-                  backgroundColor:
-                    theme.mode === "dark"
-                      ? Colors.lightGrey + "10"
-                      : Colors.primary + "05",
-                },
-              ]}
-            >
-              <View style={styles.sectionHeader}>
-                <Ionicons
-                  name="list"
-                  size={RFPercentage(2.2)}
-                  color={Colors.primary}
-                />
-                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
-                  {"Sub-tasks"}
-                </Text>
-              </View>
-              <View style={styles.subTasksList}>
-                {displaySubTasks.map((subTask, idx) => (
-                  <View
-                    key={subTask.id || idx}
-                    style={[
-                      styles.subTaskTag,
-                      { backgroundColor: `${Colors.primary}15` },
-                    ]}
-                  >
-                    <FontAwesome5
-                      name={subTask.icon || "tag"}
-                      size={RFPercentage(1.2)}
-                      color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
-                    />
-                    <Text
-                      style={[styles.subTaskText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
-                      numberOfLines={1}
-                    >
-                      {subTask.name}
-                    </Text>
-                  </View>
-                ))}
-                {hasMoreSubTasks && !showAllSubTasks && (
-                  <TouchableOpacity
-                    onPress={() => setShowAllSubTasks(true)}
-                    style={[
-                      styles.subTaskTag,
-                      { backgroundColor: theme.darkGrey + "10" },
-                    ]}
-                  >
-                    <Text
-                      style={[styles.subTaskText, { color: theme.darkGrey }]}
-                    >
-                      +{selectedSubTasks.length - 5} more
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          )}
           <View
             style={[
               styles.detailCard,
-              {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.lightGrey + "10"
-                    : Colors.primary + "05",
-              },
+              { backgroundColor: ui.cardBg, borderColor: ui.cardBorder },
             ]}
           >
             <View style={styles.sectionHeader}>
-              <Ionicons
-                name="document-text"
-                size={RFPercentage(2.2)}
-                color={Colors.primary}
-              />
+              <View
+                style={[
+                  styles.sectionIconChip,
+                  { backgroundColor: ui.iconChip },
+                ]}
+              >
+                <Ionicons
+                  name="document-text"
+                  size={RFPercentage(2.2)}
+                 color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                />
+              </View>
               <Text style={[styles.sectionTitle, { color: theme.heading }]}>
                 {t("postRequest.txt8")}
               </Text>
@@ -1345,23 +1326,164 @@ function OfferDetail({ navigation, route }) {
               </Text>
             </View>
           </View>
+          <InfoGrid
+            postRequest={postRequest}
+            theme={theme}
+            getConvertedCompensation={getConvertedCompensation}
+            t={t}
+          />
+          {/* Sub-tasks & Description kept inline for readability; you can extract similarly */}
+          {selectedSubTasks?.length > 0 && (
+            <View
+              style={[
+                styles.detailCard,
+                { backgroundColor: ui.cardBg, borderColor: ui.cardBorder },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.sectionIconChip,
+                    { backgroundColor: ui.iconChip },
+                  ]}
+                >
+                  <Ionicons
+                    name="list"
+                    size={RFPercentage(2.2)}
+                   color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                  {"Sub-tasks"}
+                </Text>
+              </View>
+              <View style={styles.subTasksList}>
+                {displaySubTasks.map((subTask, idx) => (
+                  <View
+                    key={subTask.id || idx}
+                    style={[
+                      styles.subTaskTag,
+                      {
+                        backgroundColor: ui.softFill,
+                        borderColor: ui.cardBorder,
+                      },
+                    ]}
+                  >
+                    <FontAwesome5
+                      name={subTask.icon || "tag"}
+                      size={RFPercentage(1.2)}
+                      color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+                    />
+                    <Text
+                      style={[styles.subTaskText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
+                      numberOfLines={1}
+                    >
+                      {subTask.name}
+                    </Text>
+                  </View>
+                ))}
+                {hasMoreSubTasks && !showAllSubTasks && (
+                  <TouchableOpacity
+                    onPress={() => setShowAllSubTasks(true)}
+                    style={[
+                      styles.subTaskTag,
+                      {
+                        backgroundColor: "transparent",
+                        borderColor: ui.cardBorder,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.subTaskText, { color: theme.darkGrey }]}
+                    >
+                      +{selectedSubTasks.length - 5} more
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          )}
+          {/* Scheduled Date & Time Card */}
+          {(scheduledDateTime || durationLabel) && (
+            <View
+              style={[
+                styles.detailCard,
+                { backgroundColor: ui.cardBg, borderColor: ui.cardBorder },
+              ]}
+            >
+              <View style={styles.sectionHeader}>
+                <View
+                  style={[
+                    styles.sectionIconChip,
+                    { backgroundColor: ui.iconChip },
+                  ]}
+                >
+                  <Ionicons
+                    name="calendar"
+                    size={RFPercentage(2.2)}
+                   color={theme.mode === "dark" ? Colors.white : Colors.primary}
+
+                  />
+                </View>
+                <Text style={[styles.sectionTitle, { color: theme.heading }]}>
+                  {"Scheduled Date & Time"}
+                </Text>
+              </View>
+
+              <View style={styles.scheduledContainer}>
+                {scheduledDateTime && (
+                  <View style={styles.scheduledItem}>
+                    <Ionicons
+                      name="calendar-outline"
+                      size={RFPercentage(2)}
+                      color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+                    />
+                    <Text
+                      style={[styles.scheduledText, { color: theme.darkGrey }]}
+                    >
+                      {scheduledDateTime}
+                    </Text>
+                  </View>
+                )}
+
+                {durationLabel && (
+                  <View style={styles.scheduledItem}>
+                    <Ionicons
+                      name="time-outline"
+                      size={RFPercentage(2)}
+                     color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+                    />
+                    <Text
+                      style={[styles.scheduledText, { color: theme.darkGrey }]}
+                    >
+                      {durationLabel}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
           {/* Reviews Section */}
           {(translatedReviews?.length > 0 || averageRating) && (
             <View
               style={[
                 styles.reviewsCard,
-                {
-                  backgroundColor:
-                    theme.mode === "dark" ? theme.white + "10" : "#FFF8E1",
-                },
+                { backgroundColor: ui.cardBg, borderColor: ui.cardBorder },
               ]}
             >
               <View style={styles.sectionHeader}>
-                <Ionicons
-                  name="star"
-                  size={RFPercentage(2.2)}
-                  color="#FFD700"
-                />
+                <View
+                  style={[
+                    styles.sectionIconChip,
+                    { backgroundColor: ui.iconChip  },
+                  ]}
+                >
+                  <Ionicons
+                    name="star"
+                    size={RFPercentage(2.2)}
+                    color="#FFC107"
+                  />
+                </View>
                 <Text style={[styles.sectionTitle, { color: theme.heading }]}>
                   {t("profile.txt3")}
                   {averageRating && (
@@ -1383,10 +1505,9 @@ function OfferDetail({ navigation, route }) {
                       style={[
                         styles.reviewItem,
                         {
-                          backgroundColor:
-                            theme.mode === "dark"
-                              ? theme.white + "08"
-                              : "rgba(255,255,255,0.7)",
+                          backgroundColor: ui.softFill,
+                          borderWidth: 1,
+                          borderColor: ui.divider,
                         },
                       ]}
                     >
@@ -1436,10 +1557,11 @@ function OfferDetail({ navigation, route }) {
                         style={[
                           styles.reviewTextContainer,
                           {
-                            backgroundColor:
-                              theme.mode === "dark"
-                                ? "rgba(32, 37, 52, 0.5)"
-                                : "rgba(255,255,255,0.5)",
+                            backgroundColor: isDark
+                              ? "rgba(32, 37, 52, 0.5)"
+                              : "#FFFFFF",
+                            borderWidth: 1,
+                            borderColor: ui.divider,
                           },
                         ]}
                       >
@@ -1466,7 +1588,7 @@ function OfferDetail({ navigation, route }) {
                       style={styles.viewAllButton}
                     >
                       <Text
-                        style={[styles.viewAllText, { color: Colors.primary }]}
+                        style={[styles.viewAllText, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}
                       >
                         +{hiddenCount} {t("details.txt11")}
                       </Text>
@@ -1482,12 +1604,7 @@ function OfferDetail({ navigation, route }) {
                 <View
                   style={[
                     styles.noReviewsContainer,
-                    {
-                      backgroundColor:
-                        theme.mode === "dark"
-                          ? theme.white + "08"
-                          : "rgba(255,255,255,0.7)",
-                    },
+                    { backgroundColor: ui.softFill },
                   ]}
                 >
                   <Text style={[styles.noReviews, { color: theme.darkGrey }]}>
@@ -1497,7 +1614,17 @@ function OfferDetail({ navigation, route }) {
               )}
             </View>
           )}
-          {/* Action Buttons */}
+        </Animated.View>
+      </Animated.ScrollView>
+
+      {/* Sticky Action Bar — buttons & logic unchanged, only repositioned */}
+      {hasActionContent && (
+        <View
+          style={[
+            styles.stickyFooter,
+            { backgroundColor: ui.footerBg, borderTopColor: ui.cardBorder },
+          ]}
+        >
           <View style={styles.actionButtons}>
             {isAccepted ? (
               <>
@@ -1625,7 +1752,7 @@ function OfferDetail({ navigation, route }) {
                         backgroundColor: !isChatEnabled()
                           ? theme.lightGrey + "30"
                           : theme.mode === "dark"
-                            ? theme.white + "10"
+                            ? theme.lightGrey + "10"
                             : Colors.primary + "08",
                         opacity: isChatEnabled() ? 1 : 0.8,
                       },
@@ -1653,20 +1780,57 @@ function OfferDetail({ navigation, route }) {
                     </Text>
                   </TouchableOpacity>
                 )}
-                {!isPostOwner && (
+                {/* Single requests now use apply → owner confirms one helper */}
+                {isPostOwner ? (
                   <CustomAppButton
-                    title={t("details.txt12")}
-                    onPress={handleAccept}
-                    loading={loading}
-                    icon="checkmark-circle"
-                    disabled={currentUserId === postRequest.userId}
+                    title={
+                      t("offerDetail.viewApplications") || "View Applications"
+                    }
+                    onPress={() =>
+                      navigation.navigate("TaskApplicantsScreen", {
+                        taskId: postRequest?.id,
+                      })
+                    }
+                    icon="list"
                   />
+                ) : hasApplied || confirmed ? (
+                  <View style={styles.appliedStatusContainer}>
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={RFPercentage(2.5)}
+                      color="#4CAF50"
+                    />
+                    <Text style={[styles.appliedText, { color: "#4CAF50" }]}>
+                      {confirmed
+                        ? t("offerDetail.confirmed")
+                        : t("offerDetail.applied")}
+                    </Text>
+                  </View>
+                ) : canApply() ? (
+                  <CustomAppButton
+                    title={t("offerDetail.imAvailable") || "I'm available"}
+                    onPress={handleApply}
+                    loading={loading}
+                    icon="add-circle"
+                    iconColor="white"
+                  />
+                ) : (
+                  <View style={styles.disabledApplyContainer}>
+                    <Ionicons
+                      name="close-circle"
+                      size={RFPercentage(2.5)}
+                      color={Colors.red}
+                    />
+                    <Text style={[styles.disabledText, { color: Colors.red }]}>
+                      {t("offerDetail.cannotApply") || "Cannot apply"}
+                    </Text>
+                  </View>
                 )}
               </>
             )}
           </View>
-        </Animated.View>
-      </Animated.ScrollView>
+        </View>
+      )}
 
       {/* Image Viewer */}
       <ImageView
@@ -1738,11 +1902,63 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: RFPercentage(10),
+    paddingBottom: RFPercentage(16),
   },
   heroSection: {
     height: RFPercentage(40),
     position: "relative",
+  },
+  animatedHeader: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: Platform.OS === "ios" ? RFPercentage(6) : RFPercentage(4),
+    paddingBottom: RFPercentage(1.4),
+    paddingHorizontal: RFPercentage(2),
+    borderBottomWidth: 1,
+  },
+  headerBackBtn: {
+    width: RFPercentage(4.4),
+    height: RFPercentage(4.4),
+    borderRadius: RFPercentage(100),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  animatedHeaderTitle: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_600SemiBold",
+    marginHorizontal: RFPercentage(1),
+  },
+  heroPriceBadge: {
+    position: "absolute",
+    bottom: RFPercentage(7),
+    marginHorizontal: RFPercentage(4),
+    borderRadius: RFPercentage(100),
+    overflow: "hidden",
+    // alignSelf:"center",
+    // width:"90%"
+  },
+  heroPriceBlur: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.7),
+    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(0.9),
+    backgroundColor: "rgba(0, 0, 0, 0.47)",
+    // width:"100%"
+  },
+  heroPriceText: {
+    color: "#FFFFFF",
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+    // width:"80%"
   },
   imageContainer: {
     width: width,
@@ -1778,10 +1994,14 @@ const styles = StyleSheet.create({
   },
   dotsContainer: {
     position: "absolute",
-    bottom: RFPercentage(2),
+    bottom: RFPercentage(7),
     alignSelf: "center",
     flexDirection: "row",
     gap: RFPercentage(0.5),
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.7),
+    borderRadius: RFPercentage(100),
+    backgroundColor: "rgba(0,0,0,0.25)",
   },
   dot: {
     height: RFPercentage(1),
@@ -1791,20 +2011,19 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: RFPercentage(6),
     right: RFPercentage(2),
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(100),
     overflow: "hidden",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
-  categoryGradient: {
+  categoryPill: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.8),
     gap: RFPercentage(0.8),
+    backgroundColor: "rgba(17,24,39,0.55)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.22)",
+    borderRadius: RFPercentage(100),
   },
   categoryText: {
     color: "white",
@@ -1812,8 +2031,11 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   contentContainer: {
-    marginTop: -RFPercentage(5),
+    marginTop: -RFPercentage(3.5),
+    paddingTop: RFPercentage(2.5),
     paddingHorizontal: RFPercentage(2),
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
   },
   userCard: {
     borderRadius: 16,
@@ -1825,7 +2047,7 @@ const styles = StyleSheet.create({
   detailCard: {
     borderRadius: 16,
     padding: RFPercentage(2),
-    marginBottom: RFPercentage(2),
+    marginBottom: RFPercentage(1.6),
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
   },
@@ -1834,11 +2056,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: RFPercentage(1.5),
-    gap: RFPercentage(0.8),
+    gap: RFPercentage(1),
+  },
+  sectionIconChip: {
+    width: RFPercentage(3.4),
+    height: RFPercentage(3.4),
+    borderRadius: RFPercentage(1),
+    justifyContent: "center",
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
+    letterSpacing: 0.2,
   },
   taskDescription: {
     fontSize: RFPercentage(1.5),
@@ -1886,7 +2116,7 @@ const styles = StyleSheet.create({
   reviewsCard: {
     borderRadius: 16,
     padding: RFPercentage(2),
-    marginBottom: RFPercentage(2),
+    marginBottom: RFPercentage(1.6),
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
   },
@@ -1961,11 +2191,20 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontStyle: "italic",
   },
+  stickyFooter: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: RFPercentage(1.4),
+    paddingBottom:
+      Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(1.8),
+    borderTopWidth: 1,
+  },
   actionButtons: {
     flexDirection: "row",
     gap: RFPercentage(1.5),
-    marginTop: RFPercentage(1),
-    marginBottom: RFPercentage(4),
   },
   secondaryButton: {
     flex: 1,
@@ -1973,7 +2212,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: RFPercentage(1.2),
-    borderRadius: RFPercentage(100),
+    borderRadius: RFPercentage(1.8),
     borderWidth: 1,
     gap: RFPercentage(0.8),
   },
@@ -2166,12 +2405,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: RFPercentage(1.5),
-    borderRadius: RFPercentage(100),
-    backgroundColor: "#4CAF50" + "40",
+    borderRadius: RFPercentage(1.8),
+    backgroundColor: "#4CAF50" + "18",
     gap: RFPercentage(0.5),
     flexDirection: "row",
-    borderWidth:1,
-    borderColor:"#4CAF50"
+    borderWidth: 1,
+    borderColor: "#4CAF50" + "66",
   },
   appliedText: {
     fontSize: RFPercentage(1.4),
@@ -2187,8 +2426,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: RFPercentage(1.6),
-    borderRadius: RFPercentage(100),
-    backgroundColor: Colors.red + "10",
+    borderRadius: RFPercentage(1.8),
+    backgroundColor: Colors.red + "15",
+    borderWidth: 1,
+    borderColor: Colors.red + "55",
     gap: RFPercentage(0.5),
     flexDirection: "row",
   },
@@ -2200,12 +2441,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: RFPercentage(6),
     left: RFPercentage(2),
-    width: RFPercentage(4.5),
-    height: RFPercentage(4.5),
+    width: RFPercentage(4.8),
+    height: RFPercentage(4.8),
     borderRadius: RFPercentage(100),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.35)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.25)",
   },
   shareButton: {
     width: RFPercentage(4.5),
@@ -2215,7 +2458,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   scheduledContainer: {
-    width: "100%",
+    width: "95%",
+    alignSelf:'center'
   },
   scheduledItem: {
     flexDirection: "row",
@@ -2236,9 +2480,10 @@ const styles = StyleSheet.create({
   subTaskTag: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.6),
+    borderRadius: RFPercentage(100),
+    borderWidth: 1,
     marginRight: RFPercentage(1),
     marginBottom: RFPercentage(0.8),
   },

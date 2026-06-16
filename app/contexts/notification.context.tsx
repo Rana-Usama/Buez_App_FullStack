@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -46,29 +47,44 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const db = FIREBASE_DB;
 
   useEffect(() => {
+    // Holds the active Firestore listener so it can be torn down whenever the
+    // auth state changes (previously this was leaked, stacking a new listener
+    // on every token refresh / sign-in).
+    let snapshotUnsub: (() => void) | null = null;
+
     const authUnsub = getAuth().onAuthStateChanged((user) => {
-      if (!user?.uid) return;
+      // Always detach the previous notifications listener first.
+      if (snapshotUnsub) {
+        snapshotUnsub();
+        snapshotUnsub = null;
+      }
+
+      if (!user?.uid) {
+        setNotifications([]);
+        return;
+      }
 
       const q = query(
         collection(db, "notifications"),
         where("receiver.userId", "==", user.uid),
       );
 
-      const unsub = onSnapshot(q, (snap) => {
+      snapshotUnsub = onSnapshot(q, (snap) => {
         const list: Notification[] = [];
         snap.forEach((doc) =>
           list.push({ id: doc.id, ...(doc.data() as Omit<Notification, "id">) })
         );
         setNotifications(list);
       });
-
-      return unsub;
     });
 
-    return () => authUnsub(); // cleanup on unmount
+    return () => {
+      if (snapshotUnsub) snapshotUnsub();
+      authUnsub();
+    };
   }, [db]);
 
-  const markAllRead = async () => {
+  const markAllRead = useCallback(async () => {
     const unread = notifications.filter((n) => !n.isRead);
     if (!unread.length) return;
 
@@ -82,21 +98,28 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     setNotifications((prev) =>
       prev.map((n) => ({ ...n, isRead: true }))
     );
-  };
+  }, [notifications, db]);
 
-  const markAsRead = async (id: string) => {
-    await updateDoc(doc(db, "notifications", id), { isRead: true });
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
-  };
+  const markAsRead = useCallback(
+    async (id: string) => {
+      await updateDoc(doc(db, "notifications", id), { isRead: true });
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      );
+    },
+    [db]
+  );
 
-  const value: Ctx = {
-    notifications,
-    unreadCount: notifications.filter((n) => !n.isRead).length,
-    markAllRead,
-    markAsRead,
-  };
+  // Memoized so consumers don't re-render unless the data actually changes.
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.isRead).length,
+    [notifications]
+  );
+
+  const value = useMemo<Ctx>(
+    () => ({ notifications, unreadCount, markAllRead, markAsRead }),
+    [notifications, unreadCount, markAllRead, markAsRead]
+  );
 
   return (
     <NotificationContext.Provider value={value}>

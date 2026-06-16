@@ -304,6 +304,7 @@ function Login({ navigation }) {
                     marginTop={RFPercentage(7)}
                     onPress={() => handleSubmit()}
                     disabled={indicator}
+                    width={"90%"}
                   />
                 </>
               )}
@@ -327,7 +328,6 @@ function Login({ navigation }) {
                 <AppleLoginButton navigation={navigation} />
               )}
             </View>
-
 
             <View style={styles.signupContainer}>
               <Text style={[styles.signupText, { color: theme.darkGrey }]}>
@@ -394,6 +394,7 @@ function Login({ navigation }) {
                         setIsModalVisible(false);
                         navigation.navigate("InstagramLoginWebView");
                       }}
+                      width={"90%"}
                     />
                   </View>
                 </TouchableWithoutFeedback>

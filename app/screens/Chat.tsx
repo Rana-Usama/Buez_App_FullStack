@@ -432,7 +432,7 @@ const Chat = ({ navigation, route }: any) => {
               right: {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? "rgba(69, 70, 95, 1)"
+                    ? "rgba(27, 27, 36, 1)"
                     : Colors.primary,
                 padding: RFPercentage(0.6),
                 marginRight: 0,
@@ -538,11 +538,11 @@ const Chat = ({ navigation, route }: any) => {
               />
             )}
             renderDay={renderDay}
-            renderAvatar={renderAvatar}
+            // renderAvatar={renderAvatar}
             renderBubble={renderBubble}
             listViewProps={listViewProps as any}
             maxInputLength={500}
-            showUserAvatar={false}
+            // showUserAvatar={false}
             alwaysShowSend
             // scrollToBottom
           />

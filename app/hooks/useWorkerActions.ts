@@ -106,30 +106,50 @@ export const useWorkerActions = ({
       };
       const updatedConfirmed = [...confirmedWorkers, confirmationData];
 
-      await updateDoc(taskDocRef, {
+      // Single-helper requests (numberOfWorkers <= 1): confirming the chosen
+      // applicant also marks the task assigned via `acceptedBy` (so it leaves
+      // the home feed and downstream completion/review flows keep working),
+      // and we keep a 1:1 chat (no group chat).
+      const isSingle = (taskData.numberOfWorkers || 1) <= 1;
+
+      const updatePayload: any = {
         appliedWorkers: updatedApplied,
         confirmedWorkers: updatedConfirmed,
-      });
-
-      // ── GROUP CHAT INTEGRATION ──
-      await createOrUpdateGroupChat(
-        taskId,
-        {
-          userId: currentUserId,
-          userName: currentUserName,
-          profileImage: currentUserProfileImage || "",
-          token: currentUserToken || "",
-        },
-        {
+      };
+      if (isSingle) {
+        updatePayload.acceptedBy = {
           userId: worker.userId,
           userName: worker.userName,
-          profileImage: worker.profileImage || "",
-          token: worker.token || "",
-        },
-        taskData.taskType,
-        taskData.customTaskTitle,
-        taskData.description,
-      );
+          email: worker.email || null,
+          profileImage: worker.profileImage || null,
+          phone: worker.phone || null,
+          token: worker.token || null,
+        };
+      }
+
+      await updateDoc(taskDocRef, updatePayload);
+
+      // ── GROUP CHAT INTEGRATION (bulk only — single keeps 1:1 chat) ──
+      if (!isSingle) {
+        await createOrUpdateGroupChat(
+          taskId,
+          {
+            userId: currentUserId,
+            userName: currentUserName,
+            profileImage: currentUserProfileImage || "",
+            token: currentUserToken || "",
+          },
+          {
+            userId: worker.userId,
+            userName: worker.userName,
+            profileImage: worker.profileImage || "",
+            token: worker.token || "",
+          },
+          taskData.taskType,
+          taskData.customTaskTitle,
+          taskData.description,
+        );
+      }
 
       await sendConfirmationNotification(worker);
 
@@ -169,12 +189,23 @@ export const useWorkerActions = ({
       const updatedConfirmed = confirmedWorkers.filter((w) => w.userId !== worker.userId);
       const updatedApplied = [...appliedWorkers, worker];
 
-      await updateDoc(taskDocRef, {
+      // Single-helper: removing the confirmed helper un-assigns the task
+      // (clear acceptedBy so it returns to the feed); no group chat to update.
+      const isSingle = (taskData.numberOfWorkers || 1) <= 1;
+
+      const updatePayload: any = {
         appliedWorkers: updatedApplied,
         confirmedWorkers: updatedConfirmed,
-      });
+      };
+      if (isSingle) {
+        updatePayload.acceptedBy = null;
+      }
 
-      await removeMemberFromGroupChat(taskId, worker);
+      await updateDoc(taskDocRef, updatePayload);
+
+      if (!isSingle) {
+        await removeMemberFromGroupChat(taskId, worker);
+      }
       await sendRemovalNotification(worker);
 
       Toast.show({

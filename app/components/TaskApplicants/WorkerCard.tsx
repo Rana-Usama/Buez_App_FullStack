@@ -46,45 +46,72 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
   const firstLetter = worker?.userName.trim()?.[0];
   const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
 
+  const accentColor = isConfirmed ? Colors.statusAlertSuccess : Colors.secondary;
+
   return (
     <View
       style={[
         styles.workerCard,
         {
           backgroundColor: theme.white,
-          borderColor: Colors.cardBorderLight,
+          borderColor: isDark ? theme.border : Colors.cardBorderLight,
         },
       ]}
     >
+    
+
       {/* Worker Info */}
       <TouchableOpacity
         style={styles.workerInfo}
         onPress={onViewProfile}
         activeOpacity={0.7}
       >
-        {worker.profileImage ? (
-          <Image
-            source={{ uri: worker.profileImage }}
-            style={[
-              styles.workerAvatar,
-              { borderColor: Colors.workerAvatarBorder(Colors.primary) },
-            ]}
-          />
-        ) : (
-          <AvatarInitials
-            name={worker.userName}
-            style={[styles.workerAvatar, { borderColor: groupTextColor }]}
-          />
-        )}
+        <View style={styles.avatarWrapper}>
+          {worker.profileImage ? (
+            <Image
+              source={{ uri: worker.profileImage }}
+              style={[
+                styles.workerAvatar,
+                { borderColor: Colors.workerAvatarBorder(Colors.primary) },
+              ]}
+            />
+          ) : (
+            <AvatarInitials
+              name={worker.userName}
+              style={[styles.workerAvatar, { borderColor: groupTextColor }]}
+            />
+          )}
+
+          {isConfirmed && (
+            <View
+              style={[
+                styles.avatarBadge,
+                {
+                  backgroundColor: Colors.statusAlertSuccess,
+                  borderColor: theme.white,
+                },
+              ]}
+            >
+              <Ionicons
+                name="checkmark"
+                size={RFPercentage(1.4)}
+                color="#FFF"
+              />
+            </View>
+          )}
+        </View>
 
         <View style={styles.workerDetails}>
-          <Text style={[styles.workerName, { color: theme.heading }]}>
+          <Text
+            style={[styles.workerName, { color: theme.heading }]}
+            numberOfLines={1}
+          >
             {worker.userName}
           </Text>
           <View style={styles.workerMeta}>
             <Ionicons
-              name="mail"
-              size={RFPercentage(1.4)}
+              name="mail-outline"
+              size={RFPercentage(1.5)}
               color={theme.darkGrey}
             />
             <Text
@@ -97,8 +124,8 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
           {isConfirmed && worker.confirmedAt && (
             <View style={styles.workerMeta}>
               <Ionicons
-                name="time"
-                size={RFPercentage(1.4)}
+                name="time-outline"
+                size={RFPercentage(1.5)}
                 color={Colors.statusAlertSuccess}
               />
               <Text
@@ -106,6 +133,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
                   styles.confirmedTime,
                   { color: Colors.statusAlertSuccess },
                 ]}
+                numberOfLines={1}
               >
                 {t("taskApplicants.confirmedTime")}{" "}
                 {new Date(worker.confirmedAt).toLocaleDateString()}
@@ -113,7 +141,16 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
             </View>
           )}
         </View>
+
+        <Ionicons
+          name="chevron-forward"
+          size={RFPercentage(2)}
+          color={theme.darkGrey}
+        />
       </TouchableOpacity>
+
+      {/* Divider */}
+      <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
@@ -210,35 +247,55 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
 
 const styles = StyleSheet.create({
   workerCard: {
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(2.2),
     padding: RFPercentage(2),
-    marginBottom: RFPercentage(1.5),
+    paddingLeft: RFPercentage(2.4),
+    marginBottom: RFPercentage(1.6),
     borderWidth: 1,
+    overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+  },
+  accentStrip: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: RFPercentage(0.6),
   },
   workerInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: RFPercentage(1.5),
+  },
+  avatarWrapper: {
+    marginRight: RFPercentage(1.5),
   },
   workerAvatar: {
-    width: RFPercentage(6),
-    height: RFPercentage(6),
-    borderRadius: RFPercentage(1),
-    marginRight: RFPercentage(1.5),
-    borderWidth: 1,
+    width: RFPercentage(6.2),
+    height: RFPercentage(6.2),
+    borderRadius: RFPercentage(3.1),
+    borderWidth: 2,
+  },
+  avatarBadge: {
+    position: "absolute",
+    bottom: -RFPercentage(0.3),
+    right: -RFPercentage(0.3),
+    width: RFPercentage(2.4),
+    height: RFPercentage(2.4),
+    borderRadius: RFPercentage(1.2),
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
   },
   workerDetails: {
     flex: 1,
   },
   workerName: {
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(0.3),
+    marginBottom: RFPercentage(0.4),
   },
   workerMeta: {
     flexDirection: "row",
@@ -247,13 +304,18 @@ const styles = StyleSheet.create({
     gap: RFPercentage(0.5),
   },
   workerEmail: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.25),
     fontFamily: "Poppins_400Regular",
     flex: 1,
   },
   confirmedTime: {
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.25),
     fontFamily: "Poppins_400Regular",
+  },
+  divider: {
+    height: 1,
+    marginVertical: RFPercentage(1.5),
+    opacity: 0.6,
   },
   actionButtons: {
     flexDirection: "row",
@@ -264,16 +326,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.secondary,
-    paddingVertical: RFPercentage(1.3),
-    borderRadius: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1.4),
+    borderRadius: RFPercentage(2),
     gap: RFPercentage(0.5),
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 3,
+
     paddingHorizontal: RFPercentage(2),
-    width: "48%",
+    flex: 1,
   },
   confirmButtonText: {
     color: "#FFF",
@@ -285,16 +347,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.buttonRemove,
-    paddingVertical: RFPercentage(1.3),
-    borderRadius: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1.4),
+    borderRadius: RFPercentage(2),
     gap: RFPercentage(0.5),
     shadowColor: Colors.buttonRemoveShadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 3,
+
     paddingHorizontal: RFPercentage(2),
-    width: "48%",
+    flex: 1,
   },
   removeButtonText: {
     color: "#FFF",
@@ -306,12 +368,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.profileButtonBg,
-    paddingVertical: RFPercentage(1.3),
-    borderRadius: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1.4),
+    borderRadius: RFPercentage(2),
     borderWidth: 1,
     gap: RFPercentage(0.5),
     borderColor: Colors.profileButtonBg,
-    width: "48%",
+    flex: 1,
   },
   profileButtonText: {
     fontSize: RFPercentage(1.4),

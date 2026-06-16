@@ -3,73 +3,60 @@ import {
   View,
   Text,
   StyleSheet,
-  Platform,
   ScrollView,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import ToggleSwitch from "toggle-switch-react-native";
+import { Ionicons } from "@expo/vector-icons";
 import i18n from "../translation/i18n";
 import * as SecureStore from "expo-secure-store";
-import Nav from "../components/common/Nav";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
-import {
-  setCurrentLanguage,
-  cachedTranslate,
-} from "../utils/cachedTranslations";
+import { setCurrentLanguage } from "../utils/cachedTranslations";
 import CustomNav from "../components/common/CustomNav";
-import { StatusBar } from "react-native";
 
-const languages = [
-  "Swiss German",
-  "German",
-  "French",
-  "Italian",
-  "Spanish",
-  "English",
-];
-
-const languageMap = {
-  "Swiss German": "de-CH",
-  German: "de-DE",
-  French: "fr",
-  Italian: "it",
-  Spanish: "es",
-  English: "en",
+type LanguageOption = {
+  label: string;
+  native: string;
+  code: string;
+  flag: string;
 };
 
+const LANGUAGES: LanguageOption[] = [
+  { label: "Swiss German", native: "Schwiizerdütsch", code: "de-CH", flag: "🇨🇭" },
+  { label: "German", native: "Deutsch", code: "de-DE", flag: "🇩🇪" },
+  { label: "French", native: "Français", code: "fr", flag: "🇫🇷" },
+  { label: "Italian", native: "Italiano", code: "it", flag: "🇮🇹" },
+  { label: "Spanish", native: "Español", code: "es", flag: "🇪🇸" },
+  { label: "English", native: "English", code: "en", flag: "🇬🇧" },
+];
+
 function Language({ navigation }) {
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedCode, setSelectedCode] = useState("");
   const { t } = useTranslation();
   const { theme } = useAppTheme();
+  const isDark = theme.mode === "dark";
 
   useEffect(() => {
     const getStoredLanguage = async () => {
       const code = await SecureStore.getItemAsync("appLanguage");
       if (code) {
-        const lang = Object.keys(languageMap).find(
-          (key) => languageMap[key] === code
-        );
-        if (lang) {
-          setSelectedLanguage(lang);
-          i18n.changeLanguage(code);
-        }
+        setSelectedCode(code);
+        i18n.changeLanguage(code);
       } else {
-        // fallback to device locale
-        const defaultLang = "English";
-        setSelectedLanguage(defaultLang);
-        i18n.changeLanguage(languageMap[defaultLang]);
-        await SecureStore.setItemAsync("appLanguage", languageMap[defaultLang]);
+        const defaultCode = "en";
+        setSelectedCode(defaultCode);
+        i18n.changeLanguage(defaultCode);
+        await SecureStore.setItemAsync("appLanguage", defaultCode);
       }
     };
     getStoredLanguage();
   }, []);
 
-  const changeLanguage = async (lang) => {
-    setSelectedLanguage(lang);
-    const code = languageMap[lang];
+  const changeLanguage = async (code: string) => {
+    setSelectedCode(code);
     i18n.changeLanguage(code);
     setCurrentLanguage(code); // update cachedTranslate's current language
     await SecureStore.setItemAsync("appLanguage", code);
@@ -78,38 +65,98 @@ function Language({ navigation }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
+        barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor={"transparent"}
         translucent
       />
       <CustomNav title={`${t("settings.txt12")}`} showBack />
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.container}>
-          {languages.map((lang) => (
-            <TouchableOpacity
-              key={lang}
-              style={[styles.languageCard, { borderColor: theme.border }]}
-              activeOpacity={0.8}
-              onPress={() => changeLanguage(lang)}
-            >
-              <Text
+
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[styles.sectionLabel, { color: theme.detailsText }]}>
+          {t("settings.txt12")}
+        </Text>
+
+        <View style={styles.list}>
+          {LANGUAGES.map((lang) => {
+            const isSelected = selectedCode === lang.code;
+            return (
+              <TouchableOpacity
+                key={lang.code}
+                activeOpacity={0.85}
+                onPress={() => changeLanguage(lang.code)}
                 style={[
-                  styles.languageText,
-                  selectedLanguage === lang && styles.languageTextSelected,
-                  { color: theme.heading },
+                  styles.card,
+                  {
+                    backgroundColor: isSelected
+                      ? isDark
+                        ? theme.white
+                        : Colors.primary + "10"
+                      : theme.white,
+                    borderColor: isSelected ? isDark ? Colors.darkGrey : theme.primary : theme.border,
+                    borderWidth: isSelected ? 1.5 : 1,
+                  },
                 ]}
               >
-                {lang}
-              </Text>
-              <ToggleSwitch
-                isOn={selectedLanguage === lang}
-                onColor={Colors.primary}
-                offColor={Colors.switch}
-                size="small"
-                onToggle={() => changeLanguage(lang)}
-              />
-            </TouchableOpacity>
-          ))}
+                <View
+                  style={[
+                    styles.flagBadge,
+                    {
+                      backgroundColor: isDark
+                        ? theme.white
+                        : Colors.pureWhite,
+                      borderColor: theme.border,
+                    },
+                  ]}
+                >
+                  <Text style={styles.flagText}>{lang.flag}</Text>
+                </View>
+
+                <View style={styles.textWrap}>
+                  <Text
+                    style={[
+                      styles.languageLabel,
+                      {
+                        color: isSelected ? isDark ? Colors.white : theme.primary : theme.heading,
+                        fontFamily: isSelected
+                          ? "Poppins_600SemiBold"
+                          : "Poppins_500Medium",
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {lang.label}
+                  </Text>
+                  <Text
+                    style={[styles.languageNative, { color: theme.detailsText }]}
+                    numberOfLines={1}
+                  >
+                    {lang.native}
+                  </Text>
+                </View>
+
+                <View
+                  style={[
+                    styles.radio,
+                    {
+                      borderColor: isSelected ? theme.primary : theme.stroke,
+                      backgroundColor: isSelected ? theme.primary : "transparent",
+                    },
+                  ]}
+                >
+                  {isSelected && (
+                    <Ionicons
+                      name="checkmark"
+                      size={RFPercentage(2)}
+                      color={Colors.white}
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ScrollView>
     </View>
@@ -122,35 +169,59 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   scroll: {
-    alignItems: "center",
+    paddingHorizontal: RFPercentage(2.5),
     paddingBottom: RFPercentage(5),
   },
-  container: {
+  sectionLabel: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_500Medium",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginTop: RFPercentage(2.5),
+    marginBottom: RFPercentage(1.5),
+    marginLeft: RFPercentage(0.5),
+  },
+  list: {
     width: "100%",
-    marginTop: RFPercentage(6),
-    alignItems: "center",
   },
-  languageCard: {
-    width: "90%",
-    height: RFPercentage(7),
-    borderWidth: 1,
-    borderRadius: RFPercentage(1.5),
-    borderColor: "rgba(219, 216, 216, 0.7)",
-    alignItems: "center",
-    justifyContent: "space-between",
+  card: {
     flexDirection: "row",
-    paddingHorizontal: RFPercentage(2),
-    marginBottom: RFPercentage(2),
-    // backgroundColor: "#F9FAFB",
+    alignItems: "center",
+    borderRadius: RFPercentage(1.6),
+    paddingVertical: RFPercentage(1.4),
+    paddingHorizontal: RFPercentage(1.8),
+    marginBottom: RFPercentage(1.6),
   },
-  languageText: {
-    fontSize: RFPercentage(1.7),
+  flagBadge: {
+    width: RFPercentage(5.2),
+    height: RFPercentage(5.2),
+    borderRadius: RFPercentage(2.6),
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  flagText: {
+    fontSize: RFPercentage(2.6),
+  },
+  textWrap: {
+    flex: 1,
+    marginLeft: RFPercentage(1.6),
+  },
+  languageLabel: {
+    fontSize: RFPercentage(1.9),
+  },
+  languageNative: {
+    fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    color: "#333",
+    marginTop: RFPercentage(0.2),
   },
-  languageTextSelected: {
-    fontFamily: "Poppins_600SemiBold",
-    color: Colors.primary,
+  radio: {
+    width: RFPercentage(3),
+    height: RFPercentage(3),
+    borderRadius: RFPercentage(1.5),
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

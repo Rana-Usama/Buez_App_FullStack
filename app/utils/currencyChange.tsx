@@ -28,17 +28,19 @@ export const getLiveExchangeRates = async (): Promise<Record<string, number> | n
     return cachedRates;
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
   try {
     // Frankfurter: free, no key, backed by European Central Bank
     const response = await fetch(
-      "https://api.frankfurter.app/latest?base=USD"
+      "https://api.frankfurter.app/latest?base=USD",
+      { signal: controller.signal }
     );
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
-
-    console.log("exchange rate -----------------",data)
 
     // Frankfurter doesn't include the base currency itself
     const rates = { USD: 1, ...data.rates };
@@ -50,6 +52,8 @@ export const getLiveExchangeRates = async (): Promise<Record<string, number> | n
   } catch (error) {
     console.error("Failed to fetch live rates, using fallback:", error);
     return null; // caller falls back to static rates
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
@@ -844,12 +848,8 @@ let activeRates: Record<string, number> = { ...exchangeRates };
 /** Call once on app startup (e.g. in App.tsx useEffect) */
 export const initLiveRates = async (): Promise<void> => {
   const live = await getLiveExchangeRates();
-  console.log("live.........",live)
   if (live) {
     activeRates = { ...exchangeRates, ...live };
-    console.log("Live exchange rates loaded ✓");
-  } else {
-    console.log("Using static fallback rates");
   }
 };
 
@@ -863,13 +863,7 @@ export const convertCurrency = (
   const fromRate = activeRates[fromCurrency];
   const toRate = activeRates[toCurrency];
 
-
-  console.log("fromRate........",fromRate)
-
-  console.log("toRate........",toRate)
-
   if (!fromRate || !toRate) {
-    console.log(`Rate unavailable: ${fromCurrency} → ${toCurrency}`);
     return amount;
   }
 

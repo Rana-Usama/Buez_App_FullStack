@@ -24,6 +24,26 @@ const TabsSection: React.FC<TabsSectionProps> = ({
 }) => {
   const { theme } = useAppTheme();
 
+  const renderCountBadge = (count: number, active: boolean) => (
+    <View
+      style={[
+        styles.countBadge,
+        {
+          backgroundColor: active ? Colors.white3 : theme.border,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.countBadgeText,
+          { color: active ? "#FFF" : theme.darkGrey },
+        ]}
+      >
+        {count}
+      </Text>
+    </View>
+  );
+
   return (
     <View style={styles.tabsContainer}>
       <View
@@ -31,7 +51,9 @@ const TabsSection: React.FC<TabsSectionProps> = ({
           styles.tabsBackground,
           {
             backgroundColor:
-              theme.mode === "dark" ? Colors.tabsBackgroundDark : Colors.tabsBackgroundLight,
+              theme.mode === "dark"
+                ? Colors.tabsBackgroundDark
+                : Colors.tabsBackgroundLight,
           },
         ]}
       >
@@ -39,6 +61,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
         <TouchableOpacity
           style={[styles.tab, activeTab === TABS.APPLIED && styles.activeTab]}
           onPress={() => onTabChange(TABS.APPLIED)}
+          activeOpacity={0.85}
         >
           <LinearGradient
             colors={
@@ -52,10 +75,11 @@ const TabsSection: React.FC<TabsSectionProps> = ({
           >
             <Ionicons
               name="person-add"
-              size={RFPercentage(2)}
+              size={RFPercentage(1.9)}
               color={activeTab === TABS.APPLIED ? "#FFF" : theme.darkGrey}
             />
             <Text
+              numberOfLines={1}
               style={[
                 styles.tabText,
                 {
@@ -63,8 +87,9 @@ const TabsSection: React.FC<TabsSectionProps> = ({
                 },
               ]}
             >
-              {t("taskApplicants.applicantsTab")} ({appliedCount})
+              {t("taskApplicants.applicantsTab")}
             </Text>
+            {renderCountBadge(appliedCount, activeTab === TABS.APPLIED)}
           </LinearGradient>
         </TouchableOpacity>
 
@@ -72,6 +97,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
         <TouchableOpacity
           style={[styles.tab, activeTab === TABS.CONFIRMED && styles.activeTab]}
           onPress={() => onTabChange(TABS.CONFIRMED)}
+          activeOpacity={0.85}
         >
           <LinearGradient
             colors={
@@ -85,7 +111,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
           >
             <Ionicons
               name="checkmark-circle"
-              size={RFPercentage(2)}
+              size={RFPercentage(1.9)}
               color={activeTab === TABS.CONFIRMED ? "#FFF" : theme.darkGrey}
             />
             <Text
@@ -97,8 +123,9 @@ const TabsSection: React.FC<TabsSectionProps> = ({
                 },
               ]}
             >
-              {t("taskApplicants.confirmedTab")} ({confirmedCount})
+              {t("taskApplicants.confirmedTab")}
             </Text>
+            {renderCountBadge(confirmedCount, activeTab === TABS.CONFIRMED)}
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -109,35 +136,48 @@ const TabsSection: React.FC<TabsSectionProps> = ({
 const styles = StyleSheet.create({
   tabsContainer: {
     paddingHorizontal: RFPercentage(3),
-    marginTop: RFPercentage(2),
-    marginBottom: RFPercentage(2),
+    marginTop: RFPercentage(2.5),
+    marginBottom: RFPercentage(1.5),
   },
   tabsBackground: {
     flexDirection: "row",
-    borderRadius: RFPercentage(1),
-    padding: RFPercentage(0.5),
+    borderRadius: RFPercentage(3),
+    padding: RFPercentage(0.6),
+    gap: RFPercentage(0.6),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 3,
   },
   tab: {
     flex: 1,
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(2.6),
     overflow: "hidden",
   },
   tabGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: RFPercentage(1.2),
-    paddingHorizontal: RFPercentage(2),
-    gap: RFPercentage(0.8),
+    paddingVertical: RFPercentage(1.3),
+    paddingHorizontal: RFPercentage(1.5),
+    gap: RFPercentage(0.7),
   },
   tabText: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
+  },
+  countBadge: {
+    minWidth: RFPercentage(2.6),
+    height: RFPercentage(2.6),
+    borderRadius: RFPercentage(1.3),
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: RFPercentage(0.6),
+  },
+  countBadgeText: {
+    fontSize: RFPercentage(1.25),
+    fontFamily: "Poppins_700Bold",
   },
   activeTab: {
     shadowColor: "#000",

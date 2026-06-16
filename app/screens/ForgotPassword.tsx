@@ -614,14 +614,14 @@ const styles = StyleSheet.create({
   },
   btnOuter: {
     marginTop: RFPercentage(2.8),
-    borderRadius: 100,
+    borderRadius: RFPercentage(2),
     overflow: "hidden",
     shadowColor: "#253275",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.38,
     shadowRadius: 14,
     elevation: 10,
-    width: "60%",
+    width: "90%",
     alignSelf: "center",
   },
   btn: {
@@ -630,6 +630,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: RFPercentage(1.6),
     gap: 10,
+
   },
   btnText: {
     fontFamily: "Poppins_600SemiBold",
@@ -648,7 +649,7 @@ const styles = StyleSheet.create({
   arrowText: {
     color: "#fff",
     fontSize: RFPercentage(2.2),
-    lineHeight: RFPercentage(2.5),
+    lineHeight: RFPercentage(2),
   },
   backRow: {
     marginTop: RFPercentage(2.2),

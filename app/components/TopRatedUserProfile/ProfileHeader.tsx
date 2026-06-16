@@ -10,8 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
-import { Icons } from "../../config/theme";
-import { navigationRef } from "../../utils/navigationRef";
+import { HomeGradients } from "../../config/Gradients";
 import AvatarInitials from "../common/DefaultAvatars";
 
 type Props = {
@@ -29,6 +28,7 @@ type Props = {
   t: any;
   user?: any;
   navigation?: any;
+  stats? : any
 };
 
 export default function ProfileHeader({
@@ -46,19 +46,60 @@ export default function ProfileHeader({
   t,
   user,
   navigation,
+  stats
 }: Props) {
+  const isDark = theme.mode === "dark";
+
+  // Same soft brand surface as the top-rated cards (home + list screens)
+  const headerGradient = isDark
+    ? HomeGradients.topRatedBrandDark
+    : HomeGradients.topRatedBrand;
+
+  const ui = {
+    backBg: isDark ? "rgba(255,255,255,0.10)" : "rgba(17,24,39,0.06)",
+    backIcon: isDark ? "#FFFFFF" : theme.heading,
+    name: theme.heading,
+    rankTint: rank.color,
+    buttonBg: Colors.primary,
+    buttonDisabledBg: "#9AA0B5",
+  };
+
+  const PrimaryButton = ({
+    onPress,
+    disabled,
+    children,
+    backgroundColor,
+  }: any) => (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.85}
+      style={{
+        alignSelf: "center",
+        width: "60%",
+        height: RFPercentage(5.4),
+        borderRadius: RFPercentage(1.8),
+        backgroundColor: backgroundColor || ui.buttonBg,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: RFPercentage(0.8),
+      }}
+    >
+      {children}
+    </TouchableOpacity>
+  );
+
   return (
     <LinearGradient
-      colors={
-        theme.mode === "dark"
-          ? ["#1f2238", "#3a2850"]
-          : ["#a5a5bd48", "#6183a9c7"]
-      }
+      colors={headerGradient}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
       style={{
         paddingTop: RFPercentage(2),
-        paddingBottom: RFPercentage(4),
-        borderBottomLeftRadius: RFPercentage(2),
-        borderBottomRightRadius: RFPercentage(2),
+        paddingBottom: RFPercentage(5),
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
       }}
     >
       <TouchableOpacity
@@ -68,17 +109,22 @@ export default function ProfileHeader({
           position: "absolute",
           top: RFPercentage(8),
           left: RFPercentage(3),
-          backgroundColor: theme.mode === "dark" ? "#483b56ff" : "#706e7b52",
-          padding: RFPercentage(1.1),
+          zIndex: 10,
+          width: RFPercentage(4.4),
+          height: RFPercentage(4.4),
           borderRadius: RFPercentage(100),
+          backgroundColor: ui.backBg,
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <AntDesign
           name="arrowleft"
-          size={RFPercentage(2.5)}
-          color={theme.pureWhite}
+          size={RFPercentage(2.4)}
+          color={ui.backIcon}
         />
       </TouchableOpacity>
+
       <View
         style={{
           alignItems: "center",
@@ -86,12 +132,17 @@ export default function ProfileHeader({
           paddingTop: RFPercentage(8),
         }}
       >
+        {/* Avatar with rank ring + badge */}
         <View style={{ position: "relative", marginBottom: RFPercentage(2) }}>
-          <LinearGradient
-            colors={rank.gradient}
+          <View
             style={{
-              padding: RFPercentage(0.5),
+              padding: RFPercentage(0.4),
               borderRadius: RFPercentage(100),
+              borderWidth: 2,
+              borderColor: rank.color,
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(255,255,255,0.85)",
             }}
           >
             <View
@@ -110,36 +161,42 @@ export default function ProfileHeader({
               ) : (
                 <AvatarInitials
                   name={userBasic?.userName}
-                  textStyle={{fontSize:RFPercentage(4), lineHeight:RFPercentage(6)}}
-                  textColor={theme.mode === "dark" ?  "#2f095dff"  : "#315175ff"}
-                  style={{ width: "100%", height: "100%", backgroundColor:theme.mode === "dark" ?  "#664d84ff"  : "#7f99b7ff" }}
+                  textStyle={{
+                    fontSize: RFPercentage(4),
+                    lineHeight: RFPercentage(6),
+                  }}
+                  textColor={isDark ? "#FFFFFF" : Colors.primary}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.14)"
+                      : Colors.primary + "15",
+                  }}
                 />
               )}
             </View>
-          </LinearGradient>
+          </View>
           <View
             style={{
               position: "absolute",
-              right: RFPercentage(1),
-              bottom: RFPercentage(1),
+              right: RFPercentage(0.6),
+              bottom: RFPercentage(0.6),
+              width: RFPercentage(4),
+              height: RFPercentage(4),
+              borderRadius: RFPercentage(2),
+              backgroundColor: rank.color,
+              justifyContent: "center",
+              alignItems: "center",
+              borderWidth: 2,
+              borderColor: isDark ? "#23273B" : "#FFFFFF",
             }}
           >
-            <LinearGradient
-              colors={rank.gradient}
-              style={{
-                width: RFPercentage(4),
-                height: RFPercentage(4),
-                borderRadius: RFPercentage(2),
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Ionicons
-                name={rank.icon as any}
-                size={RFPercentage(1.8)}
-                color="#FFF"
-              />
-            </LinearGradient>
+            <Ionicons
+              name={rank.icon as any}
+              size={RFPercentage(1.8)}
+              color="#FFF"
+            />
           </View>
         </View>
 
@@ -147,7 +204,7 @@ export default function ProfileHeader({
           style={{
             fontSize: RFPercentage(2.4),
             fontFamily: "Poppins_700Bold",
-            color: theme.pureWhite,
+            color: ui.name,
             marginBottom: RFPercentage(0.5),
           }}
         >
@@ -159,10 +216,12 @@ export default function ProfileHeader({
             style={{
               flexDirection: "row",
               alignItems: "center",
-              backgroundColor: "#4CAF50" + "20",
+              backgroundColor: "#4CAF50" + "18",
+              borderWidth: 1,
+              borderColor: "#4CAF50" + "55",
               paddingHorizontal: RFPercentage(1.5),
-              paddingVertical: RFPercentage(0.6),
-              borderRadius: RFPercentage(2),
+              paddingVertical: RFPercentage(0.5),
+              borderRadius: RFPercentage(100),
               marginBottom: RFPercentage(1),
             }}
           >
@@ -185,43 +244,41 @@ export default function ProfileHeader({
           </View>
         )}
 
+        {/* Rank pill */}
         <View
           style={{
             flexDirection: "row",
             gap: RFPercentage(1),
-            marginBottom: RFPercentage(1),
+            marginBottom: RFPercentage(1.2),
           }}
         >
-          <LinearGradient
-            colors={rank.gradient}
+          <View
             style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: RFPercentage(0.6),
               paddingHorizontal: RFPercentage(1.5),
               paddingVertical: RFPercentage(0.6),
-              borderRadius: RFPercentage(2),
+              borderRadius: RFPercentage(100),
+              backgroundColor: ui.rankTint + "18",
+              borderWidth: 1,
+              borderColor: ui.rankTint + "55",
             }}
           >
+            <Ionicons
+              name={rank.icon as any}
+              size={RFPercentage(1.5)}
+              color={ui.rankTint}
+            />
             <Text
               numberOfLines={1}
               style={{
-                color: "#FFF",
-                fontSize: RFPercentage(1.2),
+                color: ui.rankTint,
+                fontSize: RFPercentage(1.3),
                 fontFamily: "Poppins_600SemiBold",
               }}
             >
               {rank.label}
-            </Text>
-          </LinearGradient>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Ionicons
-              name="trending-up"
-              size={RFPercentage(3)}
-              color="#4CAF50"
-            />
-            <Text
-              numberOfLines={1}
-              style={{ marginLeft: RFPercentage(0.5), color: theme.darkGrey }}
-            >
-              {/* success rate displayed by parent if needed */}
             </Text>
           </View>
         </View>
@@ -239,146 +296,85 @@ export default function ProfileHeader({
         >
           {translatedBio ??
             userBasic?.biography ??
-            `${t("profileRank.txt23")} ${0} tasks with high efficiency.`}
+            `${t("profileRank.txt23")} ${stats?.completedTasks} tasks with high efficiency.`}
         </Text>
 
         {applier && canConfirm ? (
           <View style={{ width: "100%", marginBottom: RFPercentage(2) }}>
             {!isConfirmed ? (
               <>
-                <TouchableOpacity
+                <PrimaryButton
                   onPress={handleConfirmApplicant}
                   disabled={confirming || slotInfo.isFull}
-                  style={{
-                    alignSelf: "center",
-                    width: "50%",
-                    borderRadius: RFPercentage(3),
-                    overflow: "hidden",
-                  }}
+                  backgroundColor={
+                    slotInfo.isFull ? ui.buttonDisabledBg : ui.buttonBg
+                  }
                 >
-                  <LinearGradient
-                    colors={
-                      slotInfo.isFull
-                        ? ["#CCCCCC", "#999999"]
-                        : [Colors.primary, "#314495"]
-                    }
-                    style={{
-                      paddingVertical: RFPercentage(1.5),
-                      alignItems: "center",
-                      paddingHorizontal: RFPercentage(2),
-                    }}
-                  >
-                    {confirming ? (
-                      <ActivityIndicator color="#FFF" />
-                    ) : (
-                      <Text
-                        numberOfLines={1}
-                        style={{
-                          color: "#FFF",
-                          fontSize: RFPercentage(1.6),
-                          fontFamily: "Poppins_700Bold",
-                        }}
-                      >
-                        {slotInfo.isFull
-                          ? t("offerDetail.full")
-                          : t("profile.confirmApplicant") ||
-                            t("offerDetail.cnf")}
-                      </Text>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
+                  {confirming ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text
+                      numberOfLines={1}
+                      style={{
+                        color: "#FFF",
+                        fontSize: RFPercentage(1.6),
+                        fontFamily: "Poppins_600SemiBold",
+                      }}
+                    >
+                      {slotInfo.isFull
+                        ? t("offerDetail.full")
+                        : t("profile.confirmApplicant") || t("offerDetail.cnf")}
+                    </Text>
+                  )}
+                </PrimaryButton>
                 <Text
                   style={{
                     textAlign: "center",
                     color: theme.darkGrey,
+                    fontSize: RFPercentage(1.3),
+                    fontFamily: "Poppins_400Regular",
                     marginTop: RFPercentage(1),
                   }}
                 >{`${slotInfo.filled}/${slotInfo.total} ${t("offerDetail.slt")} • ${slotInfo.remaining} ${t("offerDetail.lft")}`}</Text>
               </>
             ) : (
-              <TouchableOpacity
-                onPress={handleStartChat}
-                style={{
-                  width: "50%",
-                  alignSelf: "center",
-                  borderRadius: RFPercentage(3),
-                  overflow: "hidden",
-                }}
-              >
-                <LinearGradient
-                  colors={
-                    theme.mode === "dark"
-                      ? ["#594174ff", "#9279acff"]
-                      : [Colors.primary, "#4c669f"]
-                  }
+              <PrimaryButton onPress={handleStartChat}>
+                <Ionicons
+                  name="chatbubble-ellipses"
+                  size={RFPercentage(2)}
+                  color="#FFF"
+                />
+                <Text
+                  numberOfLines={1}
                   style={{
-                    paddingVertical: RFPercentage(1.8),
-                    alignItems: "center",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    gap: RFPercentage(1),
+                    color: "#FFF",
+                    fontSize: RFPercentage(1.6),
+                    fontFamily: "Poppins_600SemiBold",
                   }}
                 >
-                  <Ionicons
-                    name="chatbubble-ellipses"
-                    size={RFPercentage(2.2)}
-                    color="#FFF"
-                  />
-                  <Text
-                    numberOfLines={1}
-                    style={{
-                      color: "#FFF",
-                      fontSize: RFPercentage(1.6),
-                      fontFamily: "Poppins_600SemiBold",
-                    }}
-                  >
-                    {t("details.txt9")}
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
+                  {t("details.txt9")}
+                </Text>
+              </PrimaryButton>
             )}
           </View>
         ) : (
-          <TouchableOpacity
-            onPress={handleStartChat}
-            style={{
-              width: "50%",
-              alignSelf: "center",
-              borderRadius: RFPercentage(3),
-              overflow: "hidden",
-            }}
-          >
-            <LinearGradient
-              colors={
-                theme.mode === "dark"
-                  ? ["#6c4793ff", "#736087ff"]
-                  : [Colors.primary, "#4c669f"]
-              }
+          <PrimaryButton onPress={handleStartChat}>
+            <Ionicons
+              name="chatbubble-ellipses"
+              size={RFPercentage(2)}
+              color="#FFF"
+            />
+            <Text
+              numberOfLines={1}
               style={{
-                paddingVertical: RFPercentage(1.8),
-                alignItems: "center",
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: RFPercentage(1),
+                color: "#FFF",
+                fontSize: RFPercentage(1.6),
+                fontFamily: "Poppins_600SemiBold",
               }}
             >
-              <Ionicons
-                name="chatbubble-ellipses"
-                size={RFPercentage(2.2)}
-                color="#FFF"
-              />
-              <Text
-                numberOfLines={1}
-                style={{
-                  color: "#FFF",
-                  fontSize: RFPercentage(1.6),
-                  fontFamily: "Poppins_600SemiBold",
-                }}
-              >
-                {t("details.txt9")}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
+              {t("details.txt9")}
+            </Text>
+          </PrimaryButton>
         )}
       </View>
     </LinearGradient>

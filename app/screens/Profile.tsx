@@ -624,6 +624,11 @@ function Profile({ navigation }: any) {
       title: `${t("profile.txt4")}`,
       navigation: () => navigation.navigate("CompletedTasks"),
     },
+    {
+      iconSource: Icons.order,
+      title: `${t("profile.txt5")}`,
+      navigation: () => navigation.navigate("AcceptedTasks"),
+    },
   ];
 
   const hasInterests =
@@ -810,17 +815,16 @@ function Profile({ navigation }: any) {
           {/* Header */}
           <View style={styles.interestsHeader}>
             <View style={styles.interestsTitleRow}>
-              <LinearGradient
-                colors={["#233496ff", "#4F46E5"]}
-                style={styles.interestsIconBg}
+              <View
+                style={[styles.interestsIconBg,{backgroundColor: theme.mode === "dark" ? theme.border + "60" : "rgba(238,238,238,1)"}]}
               >
                 <FontAwesome5
                   name="heart"
                   size={RFPercentage(1.4)}
-                  color="#fff"
+                  color={Colors.primary}
                   solid
                 />
-              </LinearGradient>
+              </View>
               <Text style={[styles.interestsTitle, { color: theme.heading }]}>
                 {modalTx.myInterests}
               </Text>
@@ -934,13 +938,13 @@ function Profile({ navigation }: any) {
                     <View
                       style={[
                         styles.iconContainer,
-                        { backgroundColor: `${theme.primary}15` },
+                        { backgroundColor: theme.mode === "dark" ? theme.border + "60"  : `${theme.primary}15` },
                       ]}
                     >
                       <Image
                         style={styles.navigationIcon}
                         source={item.iconSource}
-                        tintColor={theme.primary}
+                        tintColor={theme.mode === "dark" ? "white" : theme.primary}
                       />
                     </View>
                     <Text
@@ -951,7 +955,7 @@ function Profile({ navigation }: any) {
                   </View>
                   <MaterialIcons
                     name="chevron-right"
-                    size={RFPercentage(2.2)}
+                    size={RFPercentage(2.5)}
                     color={theme.darkGrey}
                   />
                 </View>
@@ -1124,7 +1128,7 @@ function Profile({ navigation }: any) {
                 disabled={saving}
                 activeOpacity={0.9}
                 style={{
-                  width: "55%",
+                  width: "90%",
                   alignSelf: "center",
                   borderRadius: RFPercentage(100),
                 }}
@@ -1540,8 +1544,8 @@ const modalStyles = StyleSheet.create({
   },
   saveBtn: {
     width: "100%",
-    borderRadius: RFPercentage(100),
-    paddingVertical: RFPercentage(1.5),
+    borderRadius: RFPercentage(2),
+    paddingVertical: RFPercentage(1.8),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

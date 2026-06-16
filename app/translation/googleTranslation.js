@@ -49,17 +49,29 @@ const getTargetLanguage = async () => {
   }
 };
 
+const TRANSLATION_TIMEOUT_MS = 6000;
+
 export const translateText = async (text, targetLang) => {
+  // Abort the request if the network stalls so it can never block the JS
+  // queue / awaiting loops indefinitely.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TRANSLATION_TIMEOUT_MS);
+
   try {
     const encodedText = encodeURIComponent(text);
     const response = await fetch(
       `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodedText}`,
+      { signal: controller.signal },
     );
+
+    if (!response.ok) return text;
 
     const data = await response.json();
     return data[0]?.map((item) => item[0]).join("") || text;
   } catch (error) {
-    console.log("Translation error:", error);
+    // Timeouts/network errors fall back to the original text (non-blocking).
     return text;
+  } finally {
+    clearTimeout(timeoutId);
   }
 };

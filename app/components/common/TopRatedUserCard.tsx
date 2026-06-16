@@ -15,6 +15,7 @@ import { HomeGradients } from "../../config/Gradients";
 import { TopRatedUser } from "../../types/home.types";
 import { Icons } from "../../config/theme";
 import AvatarInitials from "./DefaultAvatars";
+import Colors from "../../config/Colors";
 
 interface TopRatedUserCardProps {
   user: TopRatedUser;
@@ -29,37 +30,38 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
   darkMode,
   t,
 }) => {
-  const getCardGradient = () => {
-    const dark = darkMode;
+  const getCardGradient = () =>
+    darkMode ? HomeGradients.topRatedBrandDark : HomeGradients.topRatedBrand;
+  const getRankAccent = () => {
     switch (user.category) {
       case "Top Rated":
-        return dark ? HomeGradients.topRatedDark : HomeGradients.topRated;
+        return {
+          name: "trophy",
+          color: "#bfa824ff",
+          bgColor: "rgba(255, 215, 0, 0.1)",
+        };
       case "Rising Talent":
-        return dark
-          ? HomeGradients.risingTalentDark
-          : HomeGradients.risingTalent;
+        return {
+          name: "trending-up",
+          color: "#79b7b0ff",
+          bgColor: "#71a58231",
+        };
       case "Beginner":
-        return dark ? HomeGradients.beginnerDark : HomeGradients.beginner;
+        return { name: "leaf", color: "#9b6fc1ff", bgColor: "#d3c2e23a" };
       default:
-        return dark ? HomeGradients.defaultCardDark : HomeGradients.defaultCard;
+        return { name: "person", color: "#4557B0" };
     }
   };
 
-  const getCategoryIcon = () => {
-    const icons = {
-      "Top Rated": { name: "trophy", color: "#FFD700" },
-      "Rising Talent": { name: "trending-up", color: "#FF9800" },
-      Beginner: { name: "leaf", color: "#4CAF50" },
-    };
-    const icon = icons[user.category] || { name: "person", color: "#FFF" };
-    return (
-      <Ionicons
-        name={icon.name as any}
-        size={RFPercentage(1.8)}
-        color={icon.color}
-      />
-    );
-  };
+  const rankAccent = getRankAccent();
+
+  const getCategoryIcon = () => (
+    <Ionicons
+      name={rankAccent.name as any}
+      size={RFPercentage(1.8)}
+      color={rankAccent.color}
+    />
+  );
 
   const getCategoryText = () => {
     switch (user.category) {
@@ -76,11 +78,52 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
 
   const cardGradient = getCardGradient();
 
+  // Theme-driven foreground palette so content stays legible on the
+  // light (light mode) vs muted-slate (dark mode) card surfaces.
+  const c = darkMode
+    ? {
+        title: "#FFFFFF",
+        handle: "rgba(255,255,255,0.7)",
+        badgeTint: "dark" as const,
+        badgeText: "#FFFFFF",
+        avatarBg: "rgba(255,255,255,0.16)",
+        avatarText: "#FFFFFF",
+        avatarBorder: "rgba(255,255,255,0.45)",
+        buttonTint: "light" as const,
+        buttonBg: Colors.white,
+        buttonBorder: "rgba(255,255,255,0.18)",
+        buttonText: "#FFFFFF",
+        meshLight: "rgba(255,255,255,0.06)",
+        meshDark: "rgba(0,0,0,0.18)",
+        shadow: "#0A0F26",
+        border: "rgba(255, 255, 255, 0.14)",
+      }
+    : {
+        title: "#61667dff",
+        handle: "#64748B",
+        badgeTint: "light" as const,
+        badgeText: "#253275",
+        avatarBg: "rgba(37,50,117,0.10)",
+        avatarText: "#253275",
+        avatarBorder: "rgba(37,50,117,0.25)",
+        buttonTint: "light" as const,
+        buttonBg: Colors.primary,
+        buttonBorder: "rgba(37,50,117,0.16)",
+        buttonText: "#253275",
+        meshLight: "rgba(255,255,255,0.35)",
+        meshDark: "rgba(37,50,117,0.06)",
+        shadow: "rgba(255, 255, 255, 0.98)",
+        border: "rgba(255, 255, 255, 0.14)",
+      };
+
   return (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={onPress}
-      style={[styles.cardWrapper, { shadowColor: cardGradient[2] }]}
+      style={[
+        styles.cardWrapper,
+        { shadowColor: c.shadow, borderColor: c.border },
+      ]}
     >
       <LinearGradient
         colors={cardGradient}
@@ -90,7 +133,7 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
       >
         {/* Mesh Overlay 1 */}
         <LinearGradient
-          colors={["rgba(255,255,255,0.4)", "transparent"]}
+          colors={[c.meshLight, "transparent"]}
           style={[
             StyleSheet.absoluteFill,
             { transform: [{ rotate: "45deg" }], top: -50 },
@@ -101,7 +144,7 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
 
         {/* Mesh Overlay 2 */}
         <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.15)"]}
+          colors={["transparent", c.meshDark]}
           style={StyleSheet.absoluteFill}
           start={{ x: 1, y: 0 }}
           end={{ x: 0, y: 1 }}
@@ -109,13 +152,18 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
 
         <View style={styles.cardContent}>
           {/* Category Badge */}
-          <View style={styles.categoryBadgeContainer}>
-            <BlurView intensity={40} tint="dark" style={styles.blurBadge}>
-              <View style={styles.badgeInner}>
-                {getCategoryIcon()}
-                <Text style={styles.categoryText}>{getCategoryText()}</Text>
-              </View>
-            </BlurView>
+          <View
+            style={[
+              styles.categoryBadgeContainer,
+              { backgroundColor: rankAccent?.bgColor },
+            ]}
+          >
+            <View style={styles.badgeInner}>
+              {getCategoryIcon()}
+              <Text style={[styles.categoryText, { color: rankAccent.color }]}>
+                {getCategoryText()}
+              </Text>
+            </View>
           </View>
 
           {/* Avatar */}
@@ -130,13 +178,13 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
             ) : (
               <AvatarInitials
                 name={user.name}
-                bgColor={cardGradient[1]}
-                textColor={cardGradient[2]}
+                bgColor={c.avatarBg}
+                textColor={c.avatarText}
                 style={[
                   styles.avatar,
                   {
                     borderWidth: RFPercentage(0.4),
-                    borderColor: cardGradient[2],
+                    borderColor: c.avatarBorder,
                   },
                 ]}
               />
@@ -145,26 +193,40 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
 
           {/* Name & Handle */}
           <View style={styles.nameContainer}>
-            <Text style={styles.userName} numberOfLines={1}>
+            <Text
+              style={[styles.userName, { color: c.title }]}
+              numberOfLines={1}
+            >
               {user.name || "User"}
             </Text>
-            <Text style={styles.userHandle}>
+            <Text style={[styles.userHandle, { color: c.handle }]}>
               @{user.name?.split(" ")[0]?.toLowerCase() || "user"}
             </Text>
           </View>
 
           {/* View Profile Button */}
           <TouchableOpacity
-            style={styles.viewProfileButton}
+            style={[
+              styles.buttonBlur,
+              {
+                backgroundColor: c.buttonBg + "20",
+                borderColor: c.buttonBorder,
+              },
+            ]}
             onPress={onPress}
             activeOpacity={0.8}
           >
-            <BlurView intensity={30} tint="light" style={styles.buttonBlur}>
-              <Text style={styles.viewProfileText}>
-                {t("profileRank.txt8")}
-              </Text>
-              <Ionicons name="chevron-forward-circle" size={18} color="#FFF" />
-            </BlurView>
+            <Text
+              style={[styles.viewProfileText, { color: c.buttonText }]}
+              numberOfLines={1}
+            >
+              {t("profileRank.txt8")}
+            </Text>
+            <Ionicons
+              name="chevron-forward-circle"
+              size={18}
+              color={c.buttonText}
+            />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -184,7 +246,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     // alignSelf: "flex-start",
 
-    // borderWidth: RFPercentage(0.1),
+    borderWidth: RFPercentage(0.1),
   },
   topRatedCard: {
     height: RFPercentage(30),
@@ -201,8 +263,12 @@ const styles = StyleSheet.create({
   },
   categoryBadgeContainer: {
     alignSelf: "flex-start",
-    borderRadius: 12,
+    borderRadius: 100,
     overflow: "hidden",
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.4),
+    alignItems: "center",
+    justifyContent: "center",
   },
   blurBadge: {
     paddingHorizontal: 10,
@@ -220,9 +286,10 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.1)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
+    lineHeight: RFPercentage(1.8),
   },
   avatarWrapper: {
-    marginVertical: 10,
+    // marginVertical: 10,
   },
   avatarShadow: {
     padding: 3,
@@ -238,10 +305,11 @@ const styles = StyleSheet.create({
   },
   nameContainer: {
     alignItems: "center",
+    // backgroundColor:"red"
   },
   userName: {
-    fontSize: RFPercentage(2),
-    fontFamily: "Poppins_700Bold",
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
     color: "#FFF",
   },
   userHandle: {
@@ -252,7 +320,6 @@ const styles = StyleSheet.create({
   },
   viewProfileButton: {
     width: "100%",
-    borderRadius: 10,
     overflow: "hidden",
     marginTop: 10,
   },
@@ -260,9 +327,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 5,
     gap: 5,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    paddingHorizontal: RFPercentage(2.5),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(0.7),
   },
   viewProfileText: {
     fontSize: RFPercentage(1.5),

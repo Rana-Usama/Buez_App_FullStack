@@ -35,8 +35,27 @@ import { initializeLanguage } from "./app/utils/cachedTranslations";
 import { useDeepLinking } from "./app/job-sharing/useDeepLinking";
 import { navigate } from "./app/router/navigationRef";
 import { initLiveRates } from "./app/utils/currencyChange";
+import { applyGlobalFontScaling } from "./app/utils/fontScaling";
 
 LogBox.ignoreAllLogs();
+
+// Cap OS-level text scaling app-wide so large accessibility font/display
+// settings don't break layouts. Runs once at module load, before first render.
+applyGlobalFontScaling();
+
+// Global safety net: log uncaught JS errors instead of letting them stall the
+// JS thread, while preserving React Native's default handling.
+const _ErrorUtils: any =
+  typeof (global as any).ErrorUtils !== "undefined"
+    ? (global as any).ErrorUtils
+    : undefined;
+if (_ErrorUtils?.setGlobalHandler && _ErrorUtils?.getGlobalHandler) {
+  const _defaultHandler = _ErrorUtils.getGlobalHandler();
+  _ErrorUtils.setGlobalHandler((error: any, isFatal?: boolean) => {
+    console.error("Global error:", isFatal ? "[FATAL]" : "", error?.message || error);
+    if (_defaultHandler) _defaultHandler(error, isFatal);
+  });
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -49,9 +68,11 @@ Notifications.setNotificationHandler({
 });
 
 async function getFCMToken() {
-  registerForPushNotificationsAsync().then((token) => {
-    if (token) console.log("Push token:", token);
-  });
+  registerForPushNotificationsAsync()
+    .then((token) => {
+      if (token) console.log("Push token:", token);
+    })
+    .catch(() => {});
 
   const authStatus = await messaging().requestPermission();
   const enabled =
@@ -123,13 +144,15 @@ export default function App() {
   const { showModal, checked, handleDone } = useLanguageOnboarding();
 
   useEffect(() => {
-    initLiveRates();
+    initLiveRates().catch(() => {});
   }, []);
 
   useEffect(() => {
-    getFCMToken().then((token) => {
-      if (token) console.log("FCM token:", token);
-    });
+    getFCMToken()
+      .then((token) => {
+        if (token) console.log("FCM token:", token);
+      })
+      .catch(() => {});
 
     Notifications.setNotificationChannelAsync("default", {
       name: "default",

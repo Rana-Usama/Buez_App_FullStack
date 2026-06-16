@@ -26,7 +26,6 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as Notifications from "expo-notifications";
-import RNFS from "react-native-fs";
 
 // components
 import Nav from "../components/common/Nav";
@@ -723,6 +722,19 @@ function PostRequest({ navigation, route }) {
     return images[randomIndex];
   }
 
+  // Shrink the (large) Unsplash default URLs for faster loading. The URL is
+  // stored directly — no upload — so this just trims width/quality params.
+  function optimizeRemoteImage(url: string) {
+    try {
+      if (/unsplash\.com/.test(url)) {
+        return url
+          .replace(/([?&])w=\d+/, "$1w=800")
+          .replace(/([?&])q=\d+/, "$1q=60");
+      }
+    } catch {}
+    return url;
+  }
+
   async function scheduleTaskReminder(postId, userToken) {
     const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
     const triggerDate = new Date(Date.now() + twoDaysInMs);
@@ -825,20 +837,12 @@ function PostRequest({ navigation, route }) {
       };
       const imgs = imageUris?.filter((img) => Boolean(img));
       if (imgs?.length === 0) {
+        // No photo uploaded → use a default category image URL directly.
+        // savePost keeps http(s) URLs as-is (no re-upload), so we skip the
+        // slow download → compress → upload round-trip entirely.
         const defaultImageUrl = getRandomImage(originalTaskType);
         if (defaultImageUrl) {
-          const localFile = `${RNFS.CachesDirectoryPath}/default.jpg`;
-          await RNFS.downloadFile({
-            fromUrl: defaultImageUrl,
-            toFile: localFile,
-          }).promise;
-
-          const compressed = await ImageManipulator.manipulateAsync(
-            localFile,
-            [],
-            { compress: 0.2, format: ImageManipulator.SaveFormat.JPEG },
-          );
-          imgs.push(compressed.uri);
+          imgs.push(optimizeRemoteImage(defaultImageUrl));
         }
       }
       if (!isEditing) {
@@ -896,6 +900,62 @@ function PostRequest({ navigation, route }) {
     setShowSubTaskDropdown(false);
   };
 
+  // ── MULTI-STEP WIZARD ──
+  const TOTAL_STEPS = 3;
+  const [step, setStep] = useState(1);
+  const isLastStep = step === TOTAL_STEPS;
+
+  // Validate the fields that belong to the current step before advancing.
+  const validateStep = (currentStep: number) => {
+    if (currentStep === 1) {
+      if (!selectedTask) return t("postRequest.validateStep1");
+      if (originalTaskType === "Other" && !customTaskTitle)
+        return t("postRequest.validateStep1");
+      if (!selectedCompensation) return t("postRequest.validateStep1");
+      return null;
+    }
+    if (currentStep === 2) {
+      if (!selectedDate || !selectedTime || !selectedDuration)
+        return t("postRequest.validateStep2");
+      if (numberOfWorkers < 1 || numberOfWorkers > MAX_WORKERS)
+        return t("postRequest.workersHelperText", { max: MAX_WORKERS });
+      return null;
+    }
+    if (currentStep === 3) {
+      if (!description) return t("postRequest.validateStep3");
+      if (!(location?.name || selectedLocation?.name))
+        return t("postRequest.validateStep3");
+      if (!compensation && !budget) return t("postRequest.validateStep3");
+      return null;
+    }
+    return null;
+  };
+
+  const goNext = () => {
+    dismissAll();
+    const error = validateStep(step);
+    if (error) {
+      Toast.show({ type: "info", text1: "Error", text2: error });
+      return;
+    }
+    setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+  };
+
+  const goBack = () => {
+    dismissAll();
+    if (step > 1) {
+      setStep((prev) => prev - 1);
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const stepTitles = [
+    t("postRequest.step1Title"),
+    t("postRequest.step2Title"),
+    t("postRequest.step3Title"),
+  ];
+
   return (
     <>
       <StatusBar
@@ -903,20 +963,14 @@ function PostRequest({ navigation, route }) {
         backgroundColor={"transparent"}
         translucent
       />
-
-      {title === `${t("postRequest.txt2")}` ? (
-        <>
-          <CustomNav showBack title={`${t("postRequest.txt2")}`} />
-        </>
-      ) : (
-        <>
-          <Nav
-            gradient
-            gradientColors={[Colors.primary, "#0b1544ff"]}
-            title={`${t("postRequest.txt1")}`}
-          />
-        </>
-      )}
+      <CustomNav
+        showBack
+        title={
+          title === `${t("postRequest.txt2")}`
+            ? `${t("postRequest.txt2")}`
+            : `${t("postRequest.txt1")}`
+        }
+      />
       <TouchableWithoutFeedback onPress={dismissAll}>
         <ScrollView
           style={[styles.screen, { backgroundColor: theme.white }]}
@@ -924,7 +978,7 @@ function PostRequest({ navigation, route }) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled
-          onScrollBeginDrag={dismissAll}
+          // onScrollBeginDrag={dismissAll}
         >
           <Pressable onPress={dismissAll} style={{ flex: 1 }}>
             <Animated.View
@@ -936,8 +990,54 @@ function PostRequest({ navigation, route }) {
                 },
               ]}
             >
+              {/* Step Progress Header */}
+              <View style={styles.stepperWrap}>
+                <View style={styles.progressHeaderRow}>
+                  <Text
+                    style={[styles.stepTitle, { color: theme.darkGrey }]}
+                    numberOfLines={1}
+                  >
+                    {stepTitles[step - 1]}
+                  </Text>
+                  <Text style={[styles.stepIndicator, { color: theme.primary }]}>
+                    {t("postRequest.stepIndicator", {
+                      current: step,
+                      total: TOTAL_STEPS,
+                    })}
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.progressTrack,
+                    { backgroundColor: theme.lightGrey },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.progressFill,
+                      {
+                        backgroundColor: theme.primary,
+                        width: `${(step / TOTAL_STEPS) * 100}%`,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+
+              {step === 1 && (
+                <>
               {/* Task Type */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -948,7 +1048,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="category"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : theme.primary}
                     />
                   </View>
                   <Text
@@ -963,11 +1063,11 @@ function PostRequest({ navigation, route }) {
                   style={[
                     styles.selectField,
                     {
-                      backgroundColor: theme.white,
+                      backgroundColor: theme.primary + "10",
                       borderColor: showTaskDropdown
                         ? theme.primary
-                        : theme.border,
-                      borderWidth: showTaskDropdown ? 1.5 : 1,
+                        : theme.lightWhite,
+                      borderWidth:  1,
                     },
                   ]}
                   onPress={() => toggleDropdown("task")}
@@ -1008,7 +1108,7 @@ function PostRequest({ navigation, route }) {
                         : "keyboard-arrow-down"
                     }
                     size={RFPercentage(2.5)}
-                    color={theme.primary}
+                    color={theme.mode === "dark" ? Colors.white : theme.primary}
                   />
                 </TouchableOpacity>
 
@@ -1018,7 +1118,7 @@ function PostRequest({ navigation, route }) {
                       styles.dropdownContainer,
                       {
                         backgroundColor: theme.white,
-                        borderColor: theme.border,
+                        borderColor: theme.lightWhite,
                         shadowColor: theme.black,
                         maxHeight: RFPercentage(38),
                       },
@@ -1072,7 +1172,7 @@ function PostRequest({ navigation, route }) {
                         width: "100%",
                         borderRadius: RFPercentage(1.2),
                         backgroundColor: theme.white,
-                        borderColor: theme.border,
+                        borderColor: theme.lightWhite,
                         height: RFPercentage(6),
                         marginTop: 0,
                       }}
@@ -1085,7 +1185,17 @@ function PostRequest({ navigation, route }) {
               {originalTaskType &&
                 originalTaskType !== "Other" &&
                 currentSubTasks.length > 0 && (
-                  <View style={styles.section}>
+                  <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                     <View style={styles.sectionHeader}>
                       <View
                         style={[
@@ -1096,7 +1206,7 @@ function PostRequest({ navigation, route }) {
                         <MaterialIcons
                           name="list"
                           size={RFPercentage(2)}
-                          color={theme.primary}
+                          color={theme.mode === "dark" ? Colors.white : theme.primary}
                         />
                       </View>
                       <Text
@@ -1164,11 +1274,11 @@ function PostRequest({ navigation, route }) {
                       style={[
                         styles.selectField,
                         {
-                          backgroundColor: theme.white,
+                          backgroundColor:  theme.primary + "10",
                           borderColor: showSubTaskDropdown
                             ? theme.primary
-                            : theme.border,
-                          borderWidth: showSubTaskDropdown ? 1.5 : 1,
+                            : theme.lightWhite,
+                          borderWidth:  1,
                           marginBottom: RFPercentage(1),
                         },
                       ]}
@@ -1191,7 +1301,7 @@ function PostRequest({ navigation, route }) {
                             : "keyboard-arrow-down"
                         }
                         size={RFPercentage(2.5)}
-                        color={theme.primary}
+                        color={theme.mode === "dark" ? Colors.white : Colors.primary }
                       />
                     </TouchableOpacity>
 
@@ -1201,7 +1311,7 @@ function PostRequest({ navigation, route }) {
                           styles.dropdownContainer,
                           {
                             backgroundColor: theme.white,
-                            borderColor: theme.border,
+                            borderColor: theme.lightWhite,
                             shadowColor: theme.black,
                             maxHeight: RFPercentage(30),
                             position: "relative",
@@ -1233,7 +1343,7 @@ function PostRequest({ navigation, route }) {
                                   name={subTask.icon}
                                   size={RFPercentage(1.8)}
                                   color={
-                                    isSelected ? theme.primary : theme.lightGrey
+                                    isSelected ? theme.mode === "dark" ? Colors.white : theme.primary : theme.lightGrey
                                   }
                                 />
                                 <Text
@@ -1241,7 +1351,7 @@ function PostRequest({ navigation, route }) {
                                     styles.optionText,
                                     {
                                       color: isSelected
-                                        ? theme.primary
+                                        ? theme.mode === "dark" ? Colors.white : theme.primary
                                         : theme.darkGrey,
                                       fontWeight: isSelected ? "600" : "400",
                                     },
@@ -1253,7 +1363,7 @@ function PostRequest({ navigation, route }) {
                                   <MaterialIcons
                                     name="check"
                                     size={RFPercentage(1.8)}
-                                    color={theme.primary}
+                                    color={theme.mode === "dark" ? Colors.white : Colors.primary }
                                     style={styles.checkIcon}
                                   />
                                 )}
@@ -1270,8 +1380,8 @@ function PostRequest({ navigation, route }) {
                         style={[
                           styles.customSubTaskInput,
                           {
-                            backgroundColor: theme.white,
-                            borderColor: theme.border,
+                            backgroundColor: theme.primary + "10",
+                            borderColor: theme.lightWhite,
                             color: theme.black,
                           },
                         ]}
@@ -1293,7 +1403,7 @@ function PostRequest({ navigation, route }) {
                         <MaterialIcons
                           name="add"
                           size={RFPercentage(2)}
-                          color={Colors.white}
+                          color={theme.mode === "dark" ? Colors.white : Colors.white }
                         />
                       </TouchableOpacity>
                     </View>
@@ -1301,7 +1411,17 @@ function PostRequest({ navigation, route }) {
                 )}
 
               {/* Compensation Type */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -1312,7 +1432,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="attach-money"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -1327,11 +1447,11 @@ function PostRequest({ navigation, route }) {
                   style={[
                     styles.selectField,
                     {
-                      backgroundColor: theme.white,
+                      backgroundColor: theme.primary + "10",
                       borderColor: showCompensationDropdown
                         ? theme.primary
-                        : theme.border,
-                      borderWidth: showCompensationDropdown ? 1.5 : 1,
+                        : theme.lightWhite,
+                      borderWidth:  1,
                     },
                   ]}
                   onPress={() => toggleDropdown("compensation")}
@@ -1346,7 +1466,7 @@ function PostRequest({ navigation, route }) {
                             )?.icon || "dollar-sign"
                           }
                           size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
+                          color={theme.mode === "dark" ? Colors.white : Colors.primary }
                           style={styles.optionIcon}
                         />
                         <Text
@@ -1373,7 +1493,7 @@ function PostRequest({ navigation, route }) {
                         : "keyboard-arrow-down"
                     }
                     size={RFPercentage(2.5)}
-                    color={theme.primary}
+                    color={theme.mode === "dark" ? Colors.white : Colors.primary }
                   />
                 </TouchableOpacity>
 
@@ -1383,7 +1503,7 @@ function PostRequest({ navigation, route }) {
                       styles.dropdownContainer,
                       {
                         backgroundColor: theme.white,
-                        borderColor: theme.border,
+                        borderColor: theme.lightWhite,
                         shadowColor: theme.black,
                       },
                     ]}
@@ -1405,7 +1525,7 @@ function PostRequest({ navigation, route }) {
                               ?.icon || "circle"
                           }
                           size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
+                          color={theme.mode === "dark" ? Colors.white : Colors.primary }
                         />
                         <Text
                           style={[styles.optionText, { color: theme.darkGrey }]}
@@ -1418,8 +1538,23 @@ function PostRequest({ navigation, route }) {
                 )}
               </View>
 
+                </>
+              )}
+
+              {step === 2 && (
+                <>
               {/* Number of Workers */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -1430,7 +1565,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="people"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -1460,7 +1595,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="remove"
                       size={RFPercentage(2)}
-                      color={theme.pureWhite}
+                      color={theme.mode === "dark" ? Colors.white : Colors.white }
                     />
                   </TouchableOpacity>
 
@@ -1503,7 +1638,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="add"
                       size={RFPercentage(2)}
-                      color={theme.pureWhite}
+                      color={theme.mode === "dark" ? Colors.white : Colors.white }
                     />
                   </TouchableOpacity>
                 </View>
@@ -1515,7 +1650,17 @@ function PostRequest({ navigation, route }) {
               </View>
 
               {/* Date Selection */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -1526,7 +1671,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="date-range"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -1664,7 +1809,17 @@ function PostRequest({ navigation, route }) {
               </View>
 
               {/* Time Selection */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -1675,7 +1830,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="access-time"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -1813,7 +1968,17 @@ function PostRequest({ navigation, route }) {
               </View>
 
               {/* Estimated Duration */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -1824,7 +1989,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="hourglass-empty"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -1839,10 +2004,10 @@ function PostRequest({ navigation, route }) {
                   style={[
                     styles.selectField,
                     {
-                      backgroundColor: theme.white,
+                      backgroundColor: theme.primary + "10",
                       borderColor: showDurationDropdown
                         ? theme.primary
-                        : theme.border,
+                        : theme.lightWhite,
                       borderWidth: showDurationDropdown ? 1.5 : 1,
                     },
                   ]}
@@ -1877,7 +2042,7 @@ function PostRequest({ navigation, route }) {
                         : "keyboard-arrow-down"
                     }
                     size={RFPercentage(2.5)}
-                    color={theme.primary}
+                    color={theme.mode === "dark" ? Colors.white : Colors.primary }
                   />
                 </TouchableOpacity>
 
@@ -1887,7 +2052,7 @@ function PostRequest({ navigation, route }) {
                       styles.dropdownContainer,
                       {
                         backgroundColor: theme.white,
-                        borderColor: theme.border,
+                        borderColor: theme.lightWhite,
                         shadowColor: theme.black,
                         maxHeight: RFPercentage(38),
                       },
@@ -1907,7 +2072,7 @@ function PostRequest({ navigation, route }) {
                         <FontAwesome5
                           name="clock"
                           size={RFPercentage(1.8)}
-                          color={theme.lightGrey}
+                          color={theme.mode === "dark" ? Colors.darkGrey : Colors.lightGrey }
                         />
                         <Text
                           style={[styles.optionText, { color: theme.darkGrey }]}
@@ -1920,8 +2085,23 @@ function PostRequest({ navigation, route }) {
                 )}
               </View>
 
+                </>
+              )}
+
+              {step === 3 && (
+                <>
               {/* Description */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -1932,7 +2112,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="description"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -1971,7 +2151,17 @@ function PostRequest({ navigation, route }) {
               </View>
 
               {/* Location */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -1982,7 +2172,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="location-on"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -2000,8 +2190,8 @@ function PostRequest({ navigation, route }) {
                   style={[
                     styles.locationField,
                     {
-                      backgroundColor: theme.white,
-                      borderColor: theme.border,
+                      backgroundColor: theme.primary + "10",
+                      borderColor: theme.lightWhite,
                     },
                   ]}
                 >
@@ -2026,13 +2216,23 @@ function PostRequest({ navigation, route }) {
                   <MaterialIcons
                     name="chevron-right"
                     size={RFPercentage(2.5)}
-                    color={theme.darkGrey}
+                    color={theme.mode === "dark" ? Colors.white : Colors.darkGrey }
                   />
                 </TouchableOpacity>
               </View>
 
               {/* Budget/Compensation */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -2043,7 +2243,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="monetization-on"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -2107,7 +2307,17 @@ function PostRequest({ navigation, route }) {
               </View>
 
               {/* Images */}
-              <View style={styles.section}>
+              <View
+                style={[
+                  styles.section,
+                  {
+                    backgroundColor:
+                      theme.mode === "dark" ? theme.white : Colors.pureWhite,
+                    borderColor:
+                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                  },
+                ]}
+              >
                 <View style={styles.sectionHeader}>
                   <View
                     style={[
@@ -2118,7 +2328,7 @@ function PostRequest({ navigation, route }) {
                     <MaterialIcons
                       name="photo-library"
                       size={RFPercentage(2)}
-                      color={theme.primary}
+                      color={theme.mode === "dark" ? Colors.white : Colors.primary }
                     />
                   </View>
                   <Text
@@ -2167,7 +2377,7 @@ function PostRequest({ navigation, route }) {
                             <MaterialIcons
                               name="close"
                               size={RFPercentage(1.8)}
-                              color={theme.white}
+                              color={theme.mode === "dark" ? Colors.white : Colors.white }
                             />
                           </TouchableOpacity>
                           <TouchableOpacity
@@ -2180,7 +2390,7 @@ function PostRequest({ navigation, route }) {
                             <MaterialIcons
                               name="edit"
                               size={RFPercentage(1.5)}
-                              color={theme.white}
+                              color={theme.mode === "dark" ? Colors.white : Colors.white }
                             />
                           </TouchableOpacity>
                         </>
@@ -2206,23 +2416,67 @@ function PostRequest({ navigation, route }) {
                 </View>
               </View>
 
-              {/* Submit Button */}
-              <View style={{ alignItems: "center" }}>
-                <MyAppButton
-                  disabled={indicator}
-                  loading={indicator}
-                  title={
-                    isEditing ? t("postRequest.txt13") : t("postRequest.txt14")
-                  }
-                  marginTop={RFPercentage(4)}
-                  onPress={submitPostData}
-                />
-              </View>
+                </>
+              )}
+
               <View style={styles.bottomSpace} />
             </Animated.View>
           </Pressable>
         </ScrollView>
       </TouchableWithoutFeedback>
+
+      {/* Step Navigation Footer */}
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor:
+              theme.mode === "dark" ? theme.white : Colors.pureWhite,
+            borderTopColor: theme.mode === "dark" ? theme.border : "#ECEFF9",
+          },
+        ]}
+      >
+        {step > 1 && (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={goBack}
+            style={[
+              styles.backStepButton,
+              {
+                backgroundColor:
+                  theme.mode === "dark" ? theme.white : `${theme.primary}10`,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            <MaterialIcons
+              name="arrow-back"
+              size={RFPercentage(2.2)}
+              color={ theme.mode === "dark" ? Colors.white : Colors.primary}
+            />
+            <Text style={[styles.backStepText, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
+              {t("postRequest.back")}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.footerPrimary}>
+          <MyAppButton
+            disabled={isLastStep ? indicator : false}
+            loading={isLastStep ? indicator : false}
+            title={
+              isLastStep
+                ? isEditing
+                  ? t("postRequest.txt13")
+                  : t("postRequest.txt14")
+                : t("buttons.next")
+            }
+            width={step > 1 ? "100%" : "100%"}
+            marginTop={0}
+            onPress={isLastStep ? submitPostData : goNext}
+          />
+        </View>
+      </View>
     </>
   );
 }
@@ -2239,20 +2493,20 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   numberButton: {
-    width: RFPercentage(4),
-    height: RFPercentage(4),
-    borderRadius: RFPercentage(100),
+    width: RFPercentage(4.8),
+    height: RFPercentage(4.8),
+    borderRadius: RFPercentage(1.4),
     justifyContent: "center",
     alignItems: "center",
   },
   numberInput: {
-    width: RFPercentage(7),
-    height: RFPercentage(5.5),
-    borderRadius: RFPercentage(1),
+    width: RFPercentage(8),
+    height: RFPercentage(5.8),
+    borderRadius: RFPercentage(1.4),
     borderWidth: 1,
     marginHorizontal: RFPercentage(2),
     fontSize: RFPercentage(2),
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "Poppins_600SemiBold",
   },
   helperText: {
     fontSize: RFPercentage(1.4),
@@ -2269,7 +2523,7 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(2),
     borderBottomWidth: 1,
     borderBottomColor: Colors.border + "30",
-    elevation: 2,
+    // elevation: 2,
     shadowColor: Colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -2304,27 +2558,36 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: "100%",
-    paddingHorizontal: RFPercentage(2.5),
+    paddingHorizontal: RFPercentage(2.2),
     paddingTop: RFPercentage(2),
   },
   section: {
-    marginBottom: RFPercentage(3),
+    marginBottom: RFPercentage(1.8),
+    borderRadius: RFPercentage(2.2),
+    borderWidth: 1,
+    paddingVertical: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    // elevation: 3,
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: RFPercentage(1.5),
+    marginBottom: RFPercentage(1.6),
   },
   iconContainer: {
-    width: RFPercentage(3.5),
-    height: RFPercentage(3.5),
-    borderRadius: RFPercentage(100),
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(1.2),
     justifyContent: "center",
     alignItems: "center",
-    marginRight: RFPercentage(1.2),
+    marginRight: RFPercentage(1.3),
   },
   sectionTitle: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.85),
     fontFamily: "Poppins_600SemiBold",
     flex: 1,
   },
@@ -2335,12 +2598,12 @@ const styles = StyleSheet.create({
   },
   selectField: {
     width: "100%",
-    height: RFPercentage(6),
-    borderRadius: RFPercentage(1.2),
+    height: RFPercentage(6.2),
+    borderRadius: RFPercentage(1.5),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: RFPercentage(2),
+    paddingHorizontal: RFPercentage(1.8),
   },
   selectFieldContent: {
     flex: 1,
@@ -2353,30 +2616,32 @@ const styles = StyleSheet.create({
     marginRight: RFPercentage(1.2),
   },
   selectedText: {
-    fontSize: RFPercentage(1.7),
-    fontFamily: "Poppins_400Regular",
+    fontSize: RFPercentage(1.65),
+    fontFamily: "Poppins_500Medium",
   },
   placeholderText: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.65),
     fontFamily: "Poppins_400Regular",
   },
   dropdownContainer: {
     width: "100%",
-    borderRadius: RFPercentage(1.2),
+    borderRadius: RFPercentage(1.5),
     borderWidth: 1,
-    marginTop: RFPercentage(0.5),
-    paddingVertical: RFPercentage(1),
-    elevation: 4,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginTop: RFPercentage(0.8),
+    paddingVertical: RFPercentage(0.8),
+    // elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
     zIndex: 1000,
   },
   optionItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: RFPercentage(1.2),
-    paddingHorizontal: RFPercentage(2),
+    paddingVertical: RFPercentage(1.3),
+    paddingHorizontal: RFPercentage(1.6),
+    marginHorizontal: RFPercentage(0.6),
+    borderRadius: RFPercentage(1),
   },
   optionText: {
     fontSize: RFPercentage(1.7),
@@ -2398,9 +2663,9 @@ const styles = StyleSheet.create({
   selectedTag: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: RFPercentage(1.2),
-    paddingVertical: RFPercentage(0.6),
-    borderRadius: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(1.3),
+    paddingVertical: RFPercentage(0.7),
+    borderRadius: RFPercentage(2.5),
     marginRight: RFPercentage(1),
     marginBottom: RFPercentage(1),
   },
@@ -2420,27 +2685,27 @@ const styles = StyleSheet.create({
   },
   customSubTaskInput: {
     flex: 1,
-    height: RFPercentage(5.5),
+    height: RFPercentage(6),
     borderWidth: 1,
-    borderRadius: RFPercentage(1.2),
-    paddingHorizontal: RFPercentage(2),
+    borderRadius: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(1.8),
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     marginRight: RFPercentage(1),
   },
   addCustomButton: {
-    width: RFPercentage(5.5),
-    height: RFPercentage(5.5),
-    borderRadius: RFPercentage(1.2),
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+    borderRadius: RFPercentage(1.5),
     justifyContent: "center",
     alignItems: "center",
   },
   descriptionContainer: {
     width: "100%",
-    height: RFPercentage(18),
-    borderRadius: RFPercentage(1.2),
+    height: RFPercentage(16),
+    borderRadius: RFPercentage(1.5),
     borderWidth: 1,
-    padding: RFPercentage(2),
+    padding: RFPercentage(1.8),
   },
   desc: {
     flex: 1,
@@ -2459,13 +2724,13 @@ const styles = StyleSheet.create({
   },
   locationField: {
     width: "100%",
-    height: RFPercentage(6),
-    borderRadius: RFPercentage(1.2),
+    height: RFPercentage(6.2),
+    borderRadius: RFPercentage(1.5),
     borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: RFPercentage(2),
+    paddingHorizontal: RFPercentage(1.8),
   },
   locationContent: {
     flexDirection: "row",
@@ -2495,9 +2760,9 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   imageContainer: {
-    width: (width - RFPercentage(8)) / 3,
-    height: (width - RFPercentage(8)) / 3,
-    borderRadius: RFPercentage(1.2),
+    width: (width - RFPercentage(15)) / 3,
+    height: (width - RFPercentage(15)) / 3,
+    borderRadius: RFPercentage(1.5),
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
@@ -2508,21 +2773,21 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     position: "absolute",
-    top: RFPercentage(0.5),
-    right: RFPercentage(0.5),
-    width: RFPercentage(2.5),
-    height: RFPercentage(2.5),
+    top: RFPercentage(0.6),
+    right: RFPercentage(0.6),
+    width: RFPercentage(2.9),
+    height: RFPercentage(2.9),
     borderRadius: RFPercentage(100),
     justifyContent: "center",
     alignItems: "center",
   },
   editButton: {
     position: "absolute",
-    top: RFPercentage(0.5),
-    left: RFPercentage(0.5),
-    width: RFPercentage(2.5),
-    height: RFPercentage(2.5),
-    borderRadius: RFPercentage(1.25),
+    top: RFPercentage(0.6),
+    left: RFPercentage(0.6),
+    width: RFPercentage(2.9),
+    height: RFPercentage(2.9),
+    borderRadius: RFPercentage(1.45),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -2540,7 +2805,74 @@ const styles = StyleSheet.create({
     height: RFPercentage(6.5),
   },
   bottomSpace: {
-    marginBottom: RFPercentage(6),
+    marginBottom: RFPercentage(3),
+  },
+  stepperWrap: {
+    marginBottom: RFPercentage(2.2),
+    width: "100%",
+    // height:RFPercentage(6),
+    // backgroundColor:"red"
+  },
+  progressHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: RFPercentage(1),
+       width: "100%",
+  },
+  progressTrack: {
+    width: "100%",
+    height: RFPercentage(0.9),
+    borderRadius: RFPercentage(0.6),
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: RFPercentage(0.6),
+  },
+  stepTitle: {
+    flex: 1,
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_700Bold",
+  },
+  stepIndicator: {
+    fontSize: RFPercentage(1.45),
+    fontFamily: "Poppins_500Medium",
+    marginLeft: RFPercentage(1),
+  },
+  footer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: RFPercentage(2.2),
+    paddingTop: RFPercentage(1.6),
+    paddingBottom:
+      Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(3),
+    borderTopWidth: 1,
+    gap: RFPercentage(1.4),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    // elevation: 12,
+  },
+  backStepButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
+    paddingHorizontal: RFPercentage(2.2),
+    borderRadius: RFPercentage(2),
+    borderWidth: 1,
+    gap: RFPercentage(0.5),
+  },
+  backStepText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  footerPrimary: {
+    flex: 1,
+    alignItems:"center"
+    
   },
 });
 

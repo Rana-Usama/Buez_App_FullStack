@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, Image, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../../config/Colors";
@@ -34,139 +34,77 @@ export default function WorkersCard({
   onViewApplications,
 }: Props) {
   if (!isBulkRequest) return null;
+
+  const isDark = theme.mode === "dark";
+  const cardBg = isDark ? "rgba(255,255,255,0.05)" : "#FFFFFF";
+  const cardBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(37,50,117,0.07)";
+  const chip = (hex: string) => (isDark ? "rgba(255,255,255,0.10)" : hex);
+
   return (
     <View
-      style={{
-        borderRadius: 16,
-        padding: RFPercentage(2),
-        marginBottom: RFPercentage(2),
-        borderWidth: 1,
-        borderColor: "rgba(0,0,0,0.05)",
-        backgroundColor:
-          theme.mode === "dark"
-            ? Colors.lightGrey + "10"
-            : Colors.primary + "05",
-      }}
+      style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}
     >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: RFPercentage(1.5),
-        }}
-      >
-        <Ionicons
-          name="people"
-          size={RFPercentage(2.2)}
-          color={Colors.primary}
-        />
-        <Text
-          style={{
-            marginLeft: RFPercentage(0.5),
-            fontSize: RFPercentage(1.8),
-            fontFamily: "Poppins_600SemiBold",
-            color: theme.heading,
-          }}
-        >
+      <View style={styles.header}>
+        <View style={[styles.headerChip, { backgroundColor: chip("#E8EBFA") }]}>
+          <Ionicons
+            name="people"
+            size={RFPercentage(2.2)}
+            color={isDark ? theme.darkGrey : Colors.primary}
+          />
+        </View>
+        <Text style={[styles.headerTitle, { color: theme.heading }]}>
           {t("offerDetail.helpersNeeded") || "Helpers Needed"}
         </Text>
       </View>
 
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-around",
-          width: "100%",
-          marginBottom: RFPercentage(1),
-        }}
-      >
-        <View style={{ alignItems: "center" }}>
-          <View
-            style={{
-              width: RFPercentage(4),
-              height: RFPercentage(4),
-              borderRadius: RFPercentage(2),
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: RFPercentage(0.5),
-              backgroundColor: Colors.primary + "20",
-            }}
-          >
+      <View style={styles.statsRow}>
+        <View
+          style={[
+            styles.statTile,
+            { backgroundColor: chip("#F4F6FB"), borderColor: cardBorder },
+          ]}
+        >
+          <View style={[styles.statIcon, { backgroundColor: chip("#E8EBFA") }]}>
             <Ionicons
               name="people-outline"
               size={RFPercentage(2)}
-              color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+              color={isDark ? theme.darkGrey : Colors.primary}
             />
           </View>
-          <Text
-            style={{
-              fontSize: RFPercentage(1.3),
-              color: theme.darkGrey,
-              fontFamily: "Poppins_400Regular",
-            }}
-          >
+          <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
             {t("offerDetail.totalHelpers") || "Total Helpers Needed"}
           </Text>
-          <Text
-            style={{
-              fontSize: RFPercentage(1.8),
-              color: theme.heading,
-              fontFamily: "Poppins_600SemiBold",
-            }}
-          >
+          <Text style={[styles.statValue, { color: theme.heading }]}>
             {numberOfWorkers}
           </Text>
         </View>
 
-        <View style={{ alignItems: "center" }}>
-          <View
-            style={{
-              width: RFPercentage(4),
-              height: RFPercentage(4),
-              borderRadius: RFPercentage(2),
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: RFPercentage(0.5),
-              backgroundColor: "#4CAF50" + "20",
-            }}
-          >
+        <View
+          style={[
+            styles.statTile,
+            { backgroundColor: chip("#EEF8EF"), borderColor: cardBorder },
+          ]}
+        >
+          <View style={[styles.statIcon, { backgroundColor: chip("#DDF1DE") }]}>
             <Ionicons
               name="checkmark-circle"
               size={RFPercentage(2)}
-              color="#4CAF50"
+              color="#34A853"
             />
           </View>
-          <Text
-            style={{
-              fontSize: RFPercentage(1.3),
-              color: theme.darkGrey,
-              fontFamily: "Poppins_400Regular",
-            }}
-          >
+          <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
             {t("offerDetail.confirmed") || "Confirmed"}
           </Text>
-          <Text
-            style={{
-              fontSize: RFPercentage(1.8),
-              color: "#4CAF50",
-              fontFamily: "Poppins_600SemiBold",
-            }}
-          >
+          <Text style={[styles.statValue, { color: "#34A853" }]}>
             {confirmedWorkers.length}
           </Text>
         </View>
       </View>
 
-      <View style={{ marginTop: RFPercentage(1) }}>
+      <View style={styles.statusWrap}>
         {currentUserId === null ? null : (
-          <View style={{ alignItems: "center" }}>
-            <Text
-              style={{
-                fontSize: RFPercentage(1.5),
-                color: theme.darkGrey,
-                fontFamily: "Poppins_400Regular",
-              }}
-            >
+          <View style={styles.statusInner}>
+            <Text style={[styles.statusText, { color: theme.darkGrey }]}>
               {currentUserId
                 ? currentUserId === (appliedWorkers[0]?.userId || null)
                   ? getRequesterStatusText()
@@ -176,103 +114,107 @@ export default function WorkersCard({
           </View>
         )}
       </View>
-
-      {appliedWorkers?.length > 0 && (
-        <>
-          <Text
-            style={{
-              fontSize: RFPercentage(1.3),
-              fontFamily: "Poppins_600SemiBold",
-              marginTop: RFPercentage(1),
-              marginBottom: RFPercentage(1),
-              color: theme.darkGrey,
-            }}
-          >
-            {t("offerDetail.applications") || "Applications"} (
-            {appliedWorkers.length})
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {appliedWorkers.map((worker, idx) => (
-              <View
-                key={worker.userId || idx}
-                style={{
-                  alignItems: "center",
-                  marginRight: RFPercentage(1.5),
-                  width: RFPercentage(8),
-                }}
-              >
-                {worker.profileImage ? (
-                  <Image
-                    source={
-                      worker.profileImage
-                        ? { uri: worker.profileImage }
-                        : Icons.dp
-                    }
-                    style={{
-                      width: RFPercentage(5),
-                      height: RFPercentage(5),
-                      borderRadius: RFPercentage(2.5),
-                      marginBottom: RFPercentage(0.5),
-                    }}
-                  />
-                ) : (
-                  <AvatarInitials
-                    name={worker.userName}
-                    style={{
-                      width: RFPercentage(5),
-                      height: RFPercentage(5),
-                      borderRadius: RFPercentage(2.5),
-                      marginBottom: RFPercentage(0.5),
-                    }}
-                    textStyle={{fontSize:RFPercentage(2)}}
-                  />
-                )}
-                <Text
-                  style={{
-                    fontSize: RFPercentage(1.1),
-                    textAlign: "center",
-                    color: theme.heading,
-                    fontFamily: "Poppins_600SemiBold",
-                  }}
-                >
-                  {worker.userName}
-                </Text>
-                <View
-                  style={{
-                    paddingHorizontal: RFPercentage(1),
-                    paddingVertical: RFPercentage(0.5),
-                    borderRadius: RFPercentage(0.8),
-                    marginTop: RFPercentage(0.4),
-                    backgroundColor:
-                      (confirmedWorkers.some((w) => w.userId === worker.userId)
-                        ? "#4CAF50"
-                        : Colors.primary) + "20",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: confirmedWorkers.some(
-                        (w) => w.userId === worker.userId,
-                      )
-                        ? "#4CAF50"
-                        : theme.mode === "dark"
-                          ? Colors.darkGrey
-                          : Colors.primary,
-                      fontSize: RFPercentage(0.9),
-                      fontFamily: "Poppins_600SemiBold",
-                      lineHeight:RFPercentage(1)
-                    }}
-                  >
-                    {confirmedWorkers.some((w) => w.userId === worker.userId)
-                      ? t("offerDetail.confirmed") || "Confirmed"
-                      : t("offerDetail.pending") || "Pending"}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </ScrollView>
-        </>
-      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 16,
+    padding: RFPercentage(2),
+    marginBottom: RFPercentage(1.6),
+    borderWidth: 1,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: RFPercentage(1.5),
+    gap: RFPercentage(1),
+  },
+  headerChip: {
+    width: RFPercentage(3.6),
+    height: RFPercentage(3.6),
+    borderRadius: RFPercentage(1.2),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: RFPercentage(1.5),
+  },
+  statTile: {
+    flex: 1,
+    alignItems: "center",
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: RFPercentage(1.4),
+    paddingHorizontal: RFPercentage(1),
+  },
+  statIcon: {
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(2),
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: RFPercentage(0.7),
+  },
+  statLabel: {
+    fontSize: RFPercentage(1.25),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+  },
+  statValue: {
+    fontSize: RFPercentage(2),
+    fontFamily: "Poppins_700Bold",
+    marginTop: RFPercentage(0.3),
+  },
+  statusWrap: {
+    marginTop: RFPercentage(1.5),
+  },
+  statusInner: {
+    alignItems: "center",
+  },
+  statusText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+  },
+  applicationsTitle: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_600SemiBold",
+    marginTop: RFPercentage(1.5),
+    marginBottom: RFPercentage(1),
+  },
+  workerCard: {
+    alignItems: "center",
+    marginRight: RFPercentage(1.5),
+    width: RFPercentage(8),
+  },
+  workerAvatar: {
+    width: RFPercentage(5),
+    height: RFPercentage(5),
+    borderRadius: RFPercentage(2.5),
+    marginBottom: RFPercentage(0.5),
+  },
+  workerName: {
+    fontSize: RFPercentage(1.1),
+    textAlign: "center",
+    fontFamily: "Poppins_600SemiBold",
+    width: "100%",
+  },
+  workerBadge: {
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: RFPercentage(0.8),
+    marginTop: RFPercentage(0.4),
+  },
+  workerBadgeText: {
+    fontSize: RFPercentage(0.95),
+    fontFamily: "Poppins_600SemiBold",
+    lineHeight: RFPercentage(1.2),
+  },
+});

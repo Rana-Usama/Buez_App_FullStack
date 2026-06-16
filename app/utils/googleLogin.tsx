@@ -262,8 +262,8 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       style={[
         styles.circleButton,
         {
-          backgroundColor: theme.white,
-          borderColor: theme.border,
+          // Match the Apple button: solid black in light mode, white in dark.
+          backgroundColor: theme.mode === "dark" ? "#FFFFFF" : "#000000ff",
         },
       ]}
     >
@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(3.5),
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1.5,
   },
   googleIcon: {
     width: RFPercentage(3),

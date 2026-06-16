@@ -98,12 +98,14 @@ function Settings({ navigation }) {
         </View>
 
         {/* Theme Toggle Card */}
-        <View
+        <TouchableOpacity
+        activeOpacity={0.6}
+        onPress={toggleTheme}
           style={[
             styles.card,
             {
               backgroundColor: theme.mode === "dark" ? "#050505ff" : "#F8F9FA",
-              borderColor: "#e4e8fbff",
+              borderColor: theme.mode === "dark" ? "#41444aff" : "#e4e8fbff",
             },
           ]}
         >
@@ -111,13 +113,13 @@ function Settings({ navigation }) {
             <View
               style={[
                 styles.iconContainer,
-                { backgroundColor: theme.primary + "15" },
+                { backgroundColor: theme.mode === "dark" ? "#26292fff" : theme.primary + "15" },
               ]}
             >
               <Feather
                 name={theme.mode === "dark" ? "moon" : "sun"}
                 size={18}
-                color={theme.primary}
+                color={theme.heading}
               />
             </View>
             <Text style={[styles.title, { color: theme.heading }]}>
@@ -131,7 +133,7 @@ function Settings({ navigation }) {
               onToggle={toggleTheme}
             />
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* General Settings List */}
         <View
@@ -140,7 +142,7 @@ function Settings({ navigation }) {
             {
               backgroundColor:
                 theme.mode === "dark" ? "#050505ff" : "#ffffffff",
-              borderColor: "#e4e8fbff",
+             borderColor: theme.mode === "dark" ? "#41444aff" : "#e4e8fbff",
             },
           ]}
         >
@@ -159,14 +161,14 @@ function Settings({ navigation }) {
                   styles.listItem,
                   i !== filteredList.length - 1 && {
                     borderBottomWidth: 1,
-                    borderBottomColor: "#e4e8fbff",
+                    borderBottomColor: theme.mode === "dark" ? "#41444aff" : "#e4e8fbff",
                   },
                 ]}
               >
                 <View
                   style={[
                     styles.iconContainer,
-                    { backgroundColor: theme.primary + "15" },
+                    { backgroundColor:  theme.mode === "dark" ? "#26292fff" : theme.primary + "15" },
                   ]}
                 >
                   {item.iconType === "feather" ? (

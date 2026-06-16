@@ -167,7 +167,7 @@ const AcceptanceSuccessModal = ({
               </Text>
             </TouchableOpacity>
 
-            {/* <TouchableOpacity
+            <TouchableOpacity
               activeOpacity={0.8}
               style={[
                 styles.secondaryModalButton,
@@ -181,9 +181,9 @@ const AcceptanceSuccessModal = ({
                   { color: theme.primary },
                 ]}
               >
-                 {t("modal.txt11")}
+                {t("modal.txt11")}
               </Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
           </View>
         </Animated.View>
       </View>

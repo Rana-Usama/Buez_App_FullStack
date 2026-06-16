@@ -37,7 +37,13 @@ export const HomeGradients = {
     "#4557B0",
   ] as const,
 
-  /* -------- Top Rated Cards -------- */
+  /* -------- Top Rated Cards (brand-aligned, soft) -------- */
+  // Single soft gradient for all rank cards — light periwinkle in light mode,
+  // muted slate-indigo in dark mode. Keeps the home screen consistent with the
+  // app theme without the heavy primary navy. Rank is shown via the badge.
+  topRatedBrand: ["#F5F7FE", "#EAEFFB", "#DCE3F6"] as const,
+  topRatedBrandDark: ["#2B3052", "#23273B", "#1A1D2C"] as const,
+
   topRated: ["#eeede4ff", "#EFEACE", "#967852ff"] as const,
 
   topRatedDark: ["#e2d9a6ff", "#1B1919", "#84643cff"] as const,

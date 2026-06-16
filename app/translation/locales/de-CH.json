@@ -278,7 +278,9 @@
     "noCompletedTasksDesc": "Dini erledigte Ufträg werde do aazeigt",
     "noReviews": "No kei Bewertige",
     "noReviewsDesc": "Bewertige vo de Uftraggeber werde do aazeigt",
-    "view": "Bewerber aaluege"
+    "view": "Bewerber aaluege",
+    "viewConfirmedHelpers": "Helfer azeige",
+    "txt14": "Vergangen"
   },
   "postRequest": {
     "txt1": "Aafrog veröffentliche",
@@ -310,7 +312,15 @@
     "photo-1": "Fotos uflade",
     "photo-2": "Optional",
     "date1": "Datum setze",
-    "time1": "Zyt setze"
+    "time1": "Zyt setze",
+    "step1Title": "Aufgabendetails",
+    "step2Title": "Zeitplan & Helfer",
+    "step3Title": "Beschreibung & Bezahlung",
+    "stepIndicator": "Schritt {{current}} von {{total}}",
+    "back": "Zurück",
+    "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
+    "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
+    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen"
   },
   "messages": {
     "txt1": "Nachrichte",
@@ -428,7 +438,8 @@
     "applicantProfile": "Bewerberprofil",
     "confirmApplicant": "Bestätige",
     "confirmed": "Bestätigt",
-    "confirmedOn": "Bestätigt am"
+    "confirmedOn": "Bestätigt am",
+    "txt5": "Angenommene Aufgaben"
   },
   "editProfile": {
     "txt1": "Gib din Name ii",
@@ -497,16 +508,15 @@
     "txt1": "Ufgabe erfolgriich akzeptiert!",
     "txt2": "Afah kommuniziere",
     "txt3": "Du chasch jetzt mit em Aafroger über Ufgabedetail chatte.",
-    "txt4": "Find i Mini Afroge",
-    "txt5": "Die Ufgabe isch under 'Akzeptiert' i Mini Afroge glistet.",
+    "txt4": "In angenommenen Aufgaben finden",
+    "txt5": "Diese Aufgabe ist in deinen angenommenen Aufgaben aufgeführt.",
     "txt6": "Bliib ufem aktuellste Stand",
     "txt7": "Du wirsch Benachrichtigunge für Aktualisierige oder Nachrichte übercho.",
     "txt8": "Nögschti Schritt",
     "txt9": "Koordiniere mit em Aafroger zum d Ufgabe abzschließe.",
     "txt10": "Verstande!",
-    "txt11": "Lueg mini Afroge aa"
+    "txt11": "Angenommene Aufgaben ansehen"
   },
-
   "faqs": {
     "txt1": "Wie chönne mir der helfe?",
     "txt2": " Find Antwort uf häufig gstellti Froge",
@@ -679,21 +689,17 @@
   "taskApplicants": {
     "title": "Aufgabe Bewerber",
     "loading": "Lade Aufgabedetails...",
-
     "helpersNeeded": "Helfer benötigt",
     "confirmed": "Bestätigt",
     "applicants": "Bewerber",
     "progress": "Helfer bestätigt",
     "applicantsTab": "Bewerber",
     "confirmedTab": "Bestätigt",
-
     "noEmail": "Kei E-Mail",
     "confirmedTime": "Bestätigt",
-
     "confirm": "Bestätige",
     "remove": "Entferne",
     "profile": "Profil",
-
     "group": "Ufgab-Broadcast",
     "member": "Mitglieder",
     "helper": "Hälfer",
@@ -701,21 +707,18 @@
     "joined": "Biitrete",
     "task": "Ufgab-Bsitzer",
     "exp": "Tippe uf s'Chat-Symbol näbe emne Mitglied, zum e private Chat mit ihm starte.",
-
     "confirmDialog": {
       "title": "Helfer bestätige",
       "message": "Bisch sicher, dass du {{name}} für d'Ufgab bestätige wetsch?",
       "cancel": "Abbräche",
       "confirm": "Bestätige"
     },
-
     "removeDialog": {
       "title": "Helfer entferne",
       "message": "Bisch sicher, dass du {{name}} us de bestätigte Helfer entferne wetsch?",
       "cancel": "Abbräche",
       "remove": "Entferne"
     },
-
     "toast": {
       "error": {
         "taskNotFound": "Ufgab nöd gfunde",
@@ -732,12 +735,10 @@
         "removedMessage": "{{name}} isch us de bestätigte Helfer entfernt worde"
       }
     },
-
     "empty": {
       "applicants": "No kei Bewerber",
       "confirmed": "No kei bestätigti Helfer"
     },
-
     "help": {
       "applicants": "Drück uf 'Bestätige' zum Helfer zum Team z'füege. Drück uf 'Profil' zum ihri Details z'gseh.",
       "confirmed": "Drück uf 'Entferne' zum e Helfer z'debestätige. Si chömed zrugg i d'Bewerberliste."
@@ -746,17 +747,14 @@
       "title": "Limit erreicht",
       "message": "Du hesch scho alli {{count}} benötigti Helfer bestätigt."
     },
-
     "cannotConfirm": {
       "title": "Chasch nüme meh Helfer bestätige",
       "message": "Die Ufgab brucht nur {{required}} Helfer. Du hesch scho {{confirmed}} bestätigt."
     },
-
     "alreadyConfirmed": {
       "title": "Schono bestätigt",
       "message": "{{name}} isch scho für die Ufgab bestätigt."
     },
-
     "noDescription": "Kei Beschriibig",
     "full": "Voll",
     "spotsLeft": "No {{spots}} Plätz frei",
@@ -786,19 +784,14 @@
     "title": "Bestätige dini E-Mail",
     "subtitle": "Mir hend en Bestätigungslink gschickt a:",
     "hint": "Klick uf de Link i de E-Mail, zum dis Konto z aktiviere. Lueg au i dim Spam-Ordner, falls du ihn nöd gsehsch.",
-
     "verifiedSuccessTitle": "E-Mail bestätigt!",
     "verifiedSuccessDesc": "Willkomme a Bord 🎉",
-
     "notVerifiedTitle": "No nöd bestätigt",
     "notVerifiedDesc": "Bitte klick uf de Link i dim E-Mail.",
-
     "emailSentTitle": "E-Mail gschickt!",
     "emailSentDesc": "Bestätigungs-E-Mail isch nomol gschickt worde.",
-
     "resendFailedTitle": "Nomol sende fehlgschlage",
     "resendFailedDesc": "Bitte versuech's spöter nomol.",
-
     "verifiedButton": "Ich ha mini E-Mail bestätigt",
     "resendButton": "E-Mail nomol sende",
     "resendCooldown": "Nomol sende i {{seconds}}s",
@@ -833,5 +826,16 @@
     "dc4": "Gli bereit für Buez…",
     "tag": "Täglichi Ufgabe eifach gmacht!",
     "footer": "Powered by Buez"
+  },
+  "postDashboard": {
+    "header": "Anfragen",
+    "overview": "Übersicht",
+    "emptyTitle": "Erstelle deine erste Aufgabe",
+    "emptyText": "Brauchst du Hilfe? Erstelle deine erste Anfrage und finde Menschen, die dir helfen können.",
+    "emptyCta": "Erste Aufgabe erstellen",
+    "newCta": "Neue Aufgabe",
+    "total": "Aufgaben gesamt",
+    "active": "Aktive Aufgaben",
+    "completed": "Abgeschlossene Aufgaben"
   }
 }

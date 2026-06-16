@@ -316,7 +316,7 @@ const TaskApplicantsScreen: React.FC<TaskApplicantsScreenProps> = ({
         translucent
       />
 
-      <CustomNav title={t("taskApplicants.title")} showBack />
+      {/* <CustomNav title={t("taskApplicants.title")} showBack /> */}
 
       {/* Modal */}
       <ConfirmationModal

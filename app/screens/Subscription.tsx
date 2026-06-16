@@ -415,12 +415,10 @@ function Subscription({ navigation, route }) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={isDark ? "light-content" : "dark-content"}
+        barStyle={isDark ? "light-content" : "light-content"}
         backgroundColor="transparent"
         translucent
       />
-
-     
 
       {/* Top glow strip */}
       <LinearGradient
@@ -872,15 +870,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   ctaOuter: {
-    width: "70%",
-    borderRadius: 100,
+    width: "90%",
+    borderRadius: RFPercentage(2),
     overflow: "hidden",
     shadowColor: "#253275",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 18,
     alignSelf: "center",
-    height: RFPercentage(6),
+    height: RFPercentage(6.4),
     // elevation: 12,
   },
   ctaBtn: {
@@ -888,8 +886,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: RFPercentage(1),
-    borderRadius: 100,
-    height: RFPercentage(6),
+     borderRadius: RFPercentage(2),
+    height: RFPercentage(6.4),
   },
   ctaBtnText: {
     fontFamily: "Poppins_600SemiBold",

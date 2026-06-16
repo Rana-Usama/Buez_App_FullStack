@@ -115,6 +115,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                   ? Linking.openURL("https://myaccount.google.com/security")
                   : Linking.openURL("https://appleid.apple.com/")
               }
+              width={"100%"}
             />
           </View>
         ) : (
@@ -228,6 +229,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                     onPress={() => handleSubmit()}
                     loading={indicator}
                     disabled={indicator}
+                    width={"100%"}
                   />
                 </View>
               </>
@@ -260,6 +262,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: RFPercentage(8),
+    width:"90%"
   },
   errorContainer: {
     width: "100%",
@@ -274,7 +277,7 @@ const styles = StyleSheet.create({
   },
   googleContainer: {
     marginTop: RFPercentage(10),
-    width: "88%",
+    width: "90%",
     alignSelf: "center",
     alignItems: "center",
   },

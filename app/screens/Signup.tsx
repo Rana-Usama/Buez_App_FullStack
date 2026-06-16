@@ -321,6 +321,7 @@ function Signup({ navigation }: any) {
                 onPress={() => handleSubmit()}
                 marginTop={RFPercentage(4.5)}
                 disabled={indicator}
+                 width={"90%"}
               />
             </>
           )}

@@ -13,16 +13,18 @@ export default function TaskCard({
   return (
     <View
       style={{
-        borderRadius: RFPercentage(2),
+        borderRadius: 16,
         overflow: "hidden",
-        marginBottom: RFPercentage(2),
+        marginBottom: RFPercentage(1.6),
         borderWidth: 1,
         width: "90%",
         alignSelf: "center",
+        backgroundColor:
+          theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "#FFFFFF",
         borderColor:
           theme.mode === "dark"
-            ? "rgba(35, 35, 51, 1)"
-            : "rgba(227, 227, 240, 1)",
+            ? "rgba(255,255,255,0.10)"
+            : "rgba(17,24,39,0.08)",
       }}
     >
       <Image
@@ -53,9 +55,12 @@ export default function TaskCard({
       </View>
       <View
         style={{
-          backgroundColor: "rgba(42, 42, 50, 0.31)",
-          paddingVertical: RFPercentage(1),
-          width: "25%",
+          backgroundColor: "rgba(17,24,39,0.55)",
+          borderWidth: 1,
+          borderColor: "rgba(255,255,255,0.22)",
+          paddingVertical: RFPercentage(0.6),
+          paddingHorizontal: RFPercentage(1.4),
+          maxWidth: "60%",
           borderRadius: RFPercentage(100),
           alignItems: "center",
           justifyContent: "center",
@@ -65,12 +70,11 @@ export default function TaskCard({
         }}
       >
         <Text
-        numberOfLines={1}
+          numberOfLines={1}
           style={{
-            fontSize: RFPercentage(1.4),
+            fontSize: RFPercentage(1.3),
             color: Colors.white,
-
-            fontFamily: "Poppins_500Medium",
+            fontFamily: "Poppins_600SemiBold",
           }}
         >
           {translatedTaskType ?? item.taskDetails.taskType}

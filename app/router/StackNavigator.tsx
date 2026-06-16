@@ -2,10 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import {
-  createStackNavigator,
-  CardStyleInterpolators,
-} from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import NetInfo from "@react-native-community/netinfo";
 import { RFPercentage } from "react-native-responsive-fontsize";
 
@@ -43,6 +40,7 @@ import Location from "../screens/Location";
 import Language from "../screens/Language";
 import Notifications from "../screens/Notifications";
 import CompletedTasks from "../screens/CompletedTasks";
+import AcceptedTasks from "../screens/AcceptedTasks";
 import AddReview from "../screens/AddReview";
 import InstagramBusinessLoginWebView from "../utils/InstagramLogin";
 import FacebookLoginWebView from "../utils/facebookLogin";
@@ -62,7 +60,7 @@ import GroupDetails from "../screens/GroupDetails";
 import EmailVerificationScreen from "../screens/EmailVerificationScreen";
 import InterestSelectionScreen from "../screens/InterestSelection";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 const StackNavigator = () => {
   const { theme } = useAppTheme();
@@ -89,10 +87,14 @@ const StackNavigator = () => {
         initialRouteName={"Decider"}
         screenOptions={{
           headerShown: false,
-          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          cardStyle: { backgroundColor: theme.white, flex: 1 },
-          presentation: "modal",
-          cardOverlay: () => <View style={{ backgroundColor: theme.white }} />,
+          animation: "slide_from_right",
+          // Screens draw under a translucent status bar (each renders its own
+          // <StatusBar translucent />). Tell native-stack the same so it does
+          // not reserve/offset status-bar space during transitions — that
+          // offset is what made the outgoing screen "drop down" before the
+          // next screen slid in.
+          statusBarTranslucent: true,
+          statusBarColor: "transparent",
         }}
       >
         {/* Auth + Onboarding */}
@@ -138,6 +140,7 @@ const StackNavigator = () => {
         <Stack.Screen name="Language" component={Language} />
         <Stack.Screen name="Notifications" component={Notifications} />
         <Stack.Screen name="CompletedTasks" component={CompletedTasks} />
+        <Stack.Screen name="AcceptedTasks" component={AcceptedTasks} />
         <Stack.Screen name="AddReview" component={AddReview} />
         <Stack.Screen
           name="TermsAndConditions"
@@ -171,8 +174,14 @@ const StackNavigator = () => {
           component={GroupDetails}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
-        <Stack.Screen name="InterestSelection" component={InterestSelectionScreen} />
+        <Stack.Screen
+          name="EmailVerification"
+          component={EmailVerificationScreen}
+        />
+        <Stack.Screen
+          name="InterestSelection"
+          component={InterestSelectionScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

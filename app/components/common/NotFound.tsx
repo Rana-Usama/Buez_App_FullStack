@@ -11,9 +11,21 @@ interface NotFoundProps {
 
 const NotFound: React.FC<NotFoundProps> = ({ title }) => {
   const {theme} = useAppTheme()
+  const isDark = theme.mode === "dark";
   return (
     <View style={styles.notFoundWrapper}>
-      <Image style={styles.notFoundImg} source={Icons.empty} />
+      <View
+        style={[
+          styles.emptyIllustrationWrap,
+          { backgroundColor: isDark ? theme.lightWhite : "#EEF1FB" },
+        ]}
+      >
+        <Image
+          source={Icons.empty}
+          style={styles.emptyIllustration}
+          resizeMode="contain"
+        />
+      </View>
       <Text style={[styles.notFoundText, {color:theme.darkGrey}]}>{title}</Text>
     </View>
   );
@@ -22,7 +34,18 @@ const NotFound: React.FC<NotFoundProps> = ({ title }) => {
 export default NotFound;
 
 const styles = StyleSheet.create({
-  notFoundWrapper: { marginTop: RFPercentage(22), justifyContent: "center", alignItems: "center" },
-  notFoundImg: { borderRadius: RFPercentage(1), width: RFPercentage(16), height: RFPercentage(16), marginBottom: RFPercentage(2) },
+  notFoundWrapper: { marginTop: RFPercentage(20), justifyContent: "center", alignItems: "center" },
+  emptyIllustrationWrap: {
+    width: RFPercentage(24),
+    height: RFPercentage(24),
+    borderRadius: RFPercentage(100),
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: RFPercentage(3),
+  },
+  emptyIllustration: {
+    width: RFPercentage(15),
+    height: RFPercentage(15),
+  },
   notFoundText: { color: Colors.darkGrey, fontSize: RFPercentage(1.8), fontFamily: "Poppins_400Regular" },
 });

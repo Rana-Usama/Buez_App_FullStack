@@ -195,7 +195,9 @@
     "txt12": "Akzeptierte Anfrage erfolgreich storniert.",
     "txt13": "Deine Anfragen werden geladen...",
     "repostSuccess": "Anfrage erneut gepostet!",
-    "repostAvailable": "Ihre Anfrage wurde erneut gepostet und steht nun anderen Nutzern zur Annahme zur Verfügung."
+    "repostAvailable": "Ihre Anfrage wurde erneut gepostet und steht nun anderen Nutzern zur Annahme zur Verfügung.",
+    "viewConfirmedHelpers": "Helfer azeige",
+    "txt14": "Vergangen"
   },
   "postRequest": {
     "txt1": "Uftrag poste",
@@ -211,7 +213,15 @@
     "txt11": "z. B. 100 Fr.",
     "txt12": "Fotos us Galerie ufelade",
     "txt13": "Bearbeite",
-    "txt14": "Poste"
+    "txt14": "Poste",
+    "step1Title": "Aufgabendetails",
+    "step2Title": "Zeitplan & Helfer",
+    "step3Title": "Beschreibung & Bezahlung",
+    "stepIndicator": "Schritt {{current}} von {{total}}",
+    "back": "Zurück",
+    "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
+    "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
+    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen"
   },
   "messages": {
     "txt1": "Nachrichte",
@@ -320,7 +330,8 @@
     "txt1": "Profil",
     "txt2": "Profil bearbeiten",
     "txt3": "Bewertungen & Rückmeldungen",
-    "txt4": "Abgeschlossene Aufgaben"
+    "txt4": "Abgeschlossene Aufgaben",
+    "txt5": "Angenommene Aufgaben"
   },
   "editProfile": {
     "txt1": "Gib deinen Namen ein",
@@ -386,13 +397,24 @@
     "txt1": "Aufgabe erfolgreich angenommen!",
     "txt2": "Kommunikation starten",
     "txt3": "Sie können jetzt mit dem Auftraggeber über die Aufgabendetails chatten.",
-    "txt4": "In Meine Anfragen ansehen",
-    "txt5": "Diese Aufgabe wird unter 'Akzeptiert' in Meine Anfragen angezeigt.",
+    "txt4": "In angenommenen Aufgaben finden",
+    "txt5": "Diese Aufgabe ist in deinen angenommenen Aufgaben aufgeführt.",
     "txt6": "Bleiben Sie auf dem Laufenden",
     "txt7": "Sie erhalten Benachrichtigungen über Updates oder Nachrichten.",
     "txt8": "Nächste Schritte",
     "txt9": "Arbeiten Sie mit dem Auftraggeber zusammen, um die Aufgabe abzuschließen.",
     "txt10": "Verstanden!",
-    "txt11": "Meine Anfragen ansehen"
+    "txt11": "Angenommene Aufgaben ansehen"
+  },
+  "postDashboard": {
+    "header": "Anfragen",
+    "overview": "Übersicht",
+    "emptyTitle": "Erstelle deine erste Aufgabe",
+    "emptyText": "Brauchst du Hilfe? Erstelle deine erste Anfrage und finde Menschen, die dir helfen können.",
+    "emptyCta": "Erste Aufgabe erstellen",
+    "newCta": "Neue Aufgabe",
+    "total": "Aufgaben gesamt",
+    "active": "Aktive Aufgaben",
+    "completed": "Abgeschlossene Aufgaben"
   }
 }

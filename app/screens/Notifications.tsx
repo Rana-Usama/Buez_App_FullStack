@@ -15,6 +15,7 @@ import {
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { getCachedData, setCachedData } from "../utils/screenDataCache";
 import { createNewChat } from "../services/Chat.service";
 import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
@@ -116,9 +117,15 @@ export default function Notifications({ navigation }) {
     bulkTaskCompleted: "",
     bulkTaskCompletedMessage: "",
   });
+  const NOTIF_CACHE_KEY =
+    "notifications_" + (getAuth().currentUser?.uid || "anon");
+
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [raw, setRaw] = useState([]);
+  // Seed raw notifications from cache → instant render on re-entry.
+  const [raw, setRaw] = useState<any[]>(
+    () => getCachedData<any[]>(NOTIF_CACHE_KEY) ?? [],
+  );
   const [sections, setSections] = useState([]);
   const [descCache, setDescCache] = useState({});
   const currentUserId = getAuth().currentUser?.uid;
@@ -136,7 +143,8 @@ export default function Notifications({ navigation }) {
 
   useEffect(() => {
     const init = async () => {
-      setBusy(true);
+      // Loader only on first-ever load; if we have cached data, refresh silently.
+      if (getCachedData(NOTIF_CACHE_KEY) === undefined) setBusy(true);
       const l = await getTargetLanguage();
       setLang(l);
       const phrases = {
@@ -186,7 +194,7 @@ export default function Notifications({ navigation }) {
   // Fetching Notifications------
   const fetchNotifications = async () => {
     if (!currentUserId) return;
-    setBusy(true);
+    if (getCachedData(NOTIF_CACHE_KEY) === undefined) setBusy(true);
     try {
       const q = query(
         collection(FIREBASE_DB, "notifications"),
@@ -196,6 +204,7 @@ export default function Notifications({ navigation }) {
       const snap = await getDocs(q);
       const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setRaw(docs);
+      setCachedData(NOTIF_CACHE_KEY, docs);
 
       // Fade in animation
       Animated.timing(fadeAnim, {
@@ -291,7 +300,7 @@ export default function Notifications({ navigation }) {
   );
 
   const getNotificationIcon = (type, isRead) => {
-    const iconColor = isRead ? theme.primary : Colors.primary;
+    const iconColor = theme.mode === "dark" ? Colors.white : Colors.primary;
 
     switch (type) {
       case "task_acceptance":
@@ -521,7 +530,7 @@ export default function Notifications({ navigation }) {
                 backgroundColor: theme.white,
                 borderLeftWidth: !item.isRead ? RFPercentage(0.5) : 1,
                 borderWidth: 1,
-                borderColor: "rgba(224, 223, 232, 0.6)",
+                borderColor: theme.mode === "dark" ?  "rgba(78, 76, 88, 0.6)" : "rgba(224, 223, 232, 0.6)",
                 borderLeftColor: !item.isRead
                   ? Colors.primary
                   : "rgba(224, 223, 232, 1)",
@@ -707,7 +716,7 @@ export default function Notifications({ navigation }) {
                         {
                           backgroundColor:
                             theme.mode === "dark"
-                              ? Colors.primary + "40"
+                              ? "rgba(37, 36, 42, 1)"
                               : Colors.primary + "15",
                         },
                       ]}
@@ -742,12 +751,7 @@ export default function Notifications({ navigation }) {
                             },
                           });
                         } else if (item.type === "bulk_request_confirmation") {
-                          navigation.navigate("MainApp", {
-                            screen: "MainTabs",
-                            params: {
-                              screen: t("bottomTab.txt1"),
-                            },
-                          });
+                          navigation.navigate("AcceptedTasks");
                         } else {
                           handleStartChat(item.sender);
                         }
@@ -906,7 +910,7 @@ export default function Notifications({ navigation }) {
             {
               backgroundColor:
                 theme.mode === "dark"
-                  ? "rgba(241, 244, 254, 0.05)"
+                  ? "rgba(241, 244, 254, 0.14)"
                   : "rgba(250, 250, 255, 1)",
             },
           ]}

@@ -192,9 +192,8 @@
     "info1": "Karte jetzt hinzufügen gewährleistet ununterbrochenen Service nach dem Test",
     "info2": "Deine Karte wird erst nach 14 Tagen belastet",
     "info3": "Du kannst während der Testphase jederzeit kündigen",
-     "importantNote": "Beginne deine Premium-Reise",
-  "automaticSubscription": "Genieße vollen Premium-Zugang 14 Tage kostenlos! Nach deiner Testphase wird dein monatliches Abonnement automatisch fortgesetzt, wenn du eine Karte hinzufügst, damit du nie den Zugang zu deinen Premium-Vorteilen verlierst."
-
+    "importantNote": "Beginne deine Premium-Reise",
+    "automaticSubscription": "Genieße vollen Premium-Zugang 14 Tage kostenlos! Nach deiner Testphase wird dein monatliches Abonnement automatisch fortgesetzt, wenn du eine Karte hinzufügst, damit du nie den Zugang zu deinen Premium-Vorteilen verlierst."
   },
   "subscription": {
     "txt1": "Deine 14-tägige kostenlose Testphase ist beendet.",
@@ -279,7 +278,9 @@
     "noCompletedTasksDesc": "Abgeschlossene Aufgaben werden hier angezeigt",
     "noReviews": "Noch keine Bewertungen",
     "noReviewsDesc": "Bewertungen von Auftraggebern werden hier angezeigt",
-    "view": "Bewerber anzeigen"
+    "view": "Bewerber anzeigen",
+    "viewConfirmedHelpers": "Helfer anzeigen",
+    "txt14": "Vergangen"
   },
   "postRequest": {
     "txt1": "Anfrage veröffentlichen",
@@ -310,8 +311,16 @@
     "photo": "Foto hinzufügen",
     "photo-1": "Fotos hochladen",
     "photo-2": "Optional",
-      "date1": "Datum festlegen",
-  "time1": "Zeit festlegen"
+    "date1": "Datum festlegen",
+    "time1": "Zeit festlegen",
+    "step1Title": "Aufgabendetails",
+    "step2Title": "Zeitplan & Helfer",
+    "step3Title": "Beschreibung & Bezahlung",
+    "stepIndicator": "Schritt {{current}} von {{total}}",
+    "back": "Zurück",
+    "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
+    "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
+    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen"
   },
   "messages": {
     "txt1": "Nachrichten",
@@ -429,7 +438,8 @@
     "applicantProfile": "Bewerberprofil",
     "confirmApplicant": "Bestätigen",
     "confirmed": "Bestätigt",
-    "confirmedOn": "Bestätigt am"
+    "confirmedOn": "Bestätigt am",
+    "txt5": "Angenommene Aufgaben"
   },
   "editProfile": {
     "txt1": "Deinen Namen eingeben",
@@ -472,7 +482,7 @@
     "txt1": "Lade Benachrichtigungen...",
     "txt2": "Wenn du Benachrichtigungen erhältst, erscheinen sie hier",
     "txt3": "Bewertung:",
-      "txt4": "Benachrichtigungen"
+    "txt4": "Benachrichtigungen"
   },
   "completed": {
     "txt1": "BEWERTET",
@@ -498,16 +508,15 @@
     "txt1": "Aufgabe erfolgreich angenommen!",
     "txt2": "Kommunikation starten",
     "txt3": "Du kannst jetzt mit dem Anfragenden über Aufgabendetails chatten.",
-    "txt4": "Finde unter Meine Anfragen",
-    "txt5": "Diese Aufgabe ist unter 'Akzeptiert' in Meine Anfragen gelistet.",
+    "txt4": "In angenommenen Aufgaben finden",
+    "txt5": "Diese Aufgabe ist in deinen angenommenen Aufgaben aufgeführt.",
     "txt6": "Bleib auf dem Laufenden",
     "txt7": "Du erhältst Benachrichtigungen für Updates oder Nachrichten.",
     "txt8": "Nächste Schritte",
     "txt9": "Koordiniere mit dem Anfragenden, um die Aufgabe abzuschließen.",
     "txt10": "Verstanden!",
-    "txt11": "Meine Anfragen ansehen"
+    "txt11": "Angenommene Aufgaben ansehen"
   },
-
   "faqs": {
     "txt1": "Wie können wir dir helfen?",
     "txt2": " Finde Antworten auf häufig gestellte Fragen",
@@ -680,21 +689,17 @@
   "taskApplicants": {
     "title": "Aufgabenbewerber",
     "loading": "Lade Aufgabendetails...",
-
     "helpersNeeded": "Helfer benötigt",
     "confirmed": "Bestätigt",
     "applicants": "Bewerber",
     "progress": "Helfer bestätigt",
     "applicantsTab": "Bewerber",
     "confirmedTab": "Bestätigt",
-
     "noEmail": "Keine E-Mail",
     "confirmedTime": "Bestätigt",
-
     "confirm": "Bestätigen",
     "remove": "Entfernen",
     "profile": "Profil",
-
     "group": "Aufgaben-Broadcast",
     "member": "Mitglieder",
     "helper": "Helfer",
@@ -708,14 +713,12 @@
       "cancel": "Abbrechen",
       "confirm": "Bestätigen"
     },
-
     "removeDialog": {
       "title": "Helfer entfernen",
       "message": "Sind Sie sicher, dass Sie {{name}} von den bestätigten Helfern entfernen möchten?",
       "cancel": "Abbrechen",
       "remove": "Entfernen"
     },
-
     "toast": {
       "error": {
         "taskNotFound": "Aufgabe nicht gefunden",
@@ -732,12 +735,10 @@
         "removedMessage": "{{name}} wurde von den bestätigten Helfern entfernt"
       }
     },
-
     "empty": {
       "applicants": "Noch keine Bewerber",
       "confirmed": "Noch keine bestätigten Helfer"
     },
-
     "help": {
       "applicants": "Tippen Sie auf 'Bestätigen', um Helfer zu Ihrem Team hinzuzufügen. Tippen Sie auf 'Profil', um deren Details anzuzeigen.",
       "confirmed": "Tippen Sie auf 'Entfernen', um einen Helfer zu deaktivieren. Er wird in die Bewerberliste zurückversetzt."
@@ -746,17 +747,14 @@
       "title": "Limit erreicht",
       "message": "Sie haben bereits alle {{count}} benötigten Helfer bestätigt."
     },
-
     "cannotConfirm": {
       "title": "Keine weiteren Helfer bestätigen",
       "message": "Diese Aufgabe benötigt nur {{required}} Helfer. Sie haben bereits {{confirmed}} bestätigt."
     },
-
     "alreadyConfirmed": {
       "title": "Bereits bestätigt",
       "message": "{{name}} ist bereits für diese Aufgabe bestätigt."
     },
-
     "noDescription": "Keine Beschreibung",
     "full": "Voll",
     "spotsLeft": "Noch {{spots}} Plätze frei",
@@ -765,73 +763,79 @@
     "allSlotsFilled": "Alle Plätze belegt"
   },
   "interestSelection": {
-  "personalizeExperience": "Personalisieren Sie Ihr Erlebnis",
-  "whatAreYouInterested": "Wofür interessieren Sie sich?",
-  "pickYourFavorites": "Wählen Sie Ihre bevorzugten Dienste aus und wir passen Buez für Sie an.",
-  "selectInterestsPrompt": "Wählen Sie 3 Interessen, um fortzufahren",
-  "selectedInterests": "{{total}} ausgewählt ✓",
-  "addCustomInterestTitle": "Eigenes Interesse hinzufügen",
-  "addCustomInterestSubtitle": "Sehen Sie nicht, was Sie brauchen? Fügen Sie es hier hinzu.",
-  "customInterestPlaceholder": "z.B. Poolreinigung, Yoga...",
-  "alreadyAdded": "Bereits hinzugefügt!",
-  "alreadyAddedDesc": "\"{interest}\" ist bereits in Ihrer Liste.",
-  "pickAFewMore": "Wählen Sie noch ein paar aus!",
-  "minSelectionDesc": "Wählen Sie mindestens {{min}} Interessen, um fortzufahren.",
-  "saving": "Speichert...",
-  "continueCTA": "Weiter zu Buez",
-  "selectMoreCTA": "Interessen auswählen",
-  "skipForNow": "Für jetzt überspringen"
-},
-"emailVerification": {
-  "title": "Bestätigen Sie Ihre E-Mail",
-  "subtitle": "Wir haben einen Bestätigungslink gesendet an:",
-  "hint": "Klicken Sie auf den Link in der E-Mail, um Ihr Konto zu aktivieren. Überprüfen Sie Ihren Spam-Ordner, falls Sie ihn nicht sehen.",
-
-  "verifiedSuccessTitle": "E-Mail bestätigt!",
-  "verifiedSuccessDesc": "Willkommen an Bord 🎉",
-
-  "notVerifiedTitle": "Noch nicht bestätigt",
-  "notVerifiedDesc": "Bitte klicken Sie auf den Link in Ihrer E-Mail.",
-
-  "emailSentTitle": "E-Mail gesendet!",
-  "emailSentDesc": "Bestätigungs-E-Mail wurde erneut gesendet.",
-
-  "resendFailedTitle": "Erneutes Senden fehlgeschlagen",
-  "resendFailedDesc": "Bitte versuchen Sie es später erneut.",
-
-  "verifiedButton": "Ich habe meine E-Mail bestätigt",
-  "resendButton": "E-Mail erneut senden",
-  "resendCooldown": "Erneut senden in {{seconds}}s",
-  "backToLogin": "Zurück zum Login"
-},
-"freeTrialBanner": {
-  "active": {
-    "label": "Kostenlose Testphase aktiv",
-    "title": "Premium-Funktionen geniessen"
+    "personalizeExperience": "Personalisieren Sie Ihr Erlebnis",
+    "whatAreYouInterested": "Wofür interessieren Sie sich?",
+    "pickYourFavorites": "Wählen Sie Ihre bevorzugten Dienste aus und wir passen Buez für Sie an.",
+    "selectInterestsPrompt": "Wählen Sie 3 Interessen, um fortzufahren",
+    "selectedInterests": "{{total}} ausgewählt ✓",
+    "addCustomInterestTitle": "Eigenes Interesse hinzufügen",
+    "addCustomInterestSubtitle": "Sehen Sie nicht, was Sie brauchen? Fügen Sie es hier hinzu.",
+    "customInterestPlaceholder": "z.B. Poolreinigung, Yoga...",
+    "alreadyAdded": "Bereits hinzugefügt!",
+    "alreadyAddedDesc": "\"{interest}\" ist bereits in Ihrer Liste.",
+    "pickAFewMore": "Wählen Sie noch ein paar aus!",
+    "minSelectionDesc": "Wählen Sie mindestens {{min}} Interessen, um fortzufahren.",
+    "saving": "Speichert...",
+    "continueCTA": "Weiter zu Buez",
+    "selectMoreCTA": "Interessen auswählen",
+    "skipForNow": "Für jetzt überspringen"
   },
-  "warning_no_card": {
-    "label": "Testphase endet bald",
-    "title": "Zahlungsmethode hinzufügen, um fortzufahren"
+  "emailVerification": {
+    "title": "Bestätigen Sie Ihre E-Mail",
+    "subtitle": "Wir haben einen Bestätigungslink gesendet an:",
+    "hint": "Klicken Sie auf den Link in der E-Mail, um Ihr Konto zu aktivieren. Überprüfen Sie Ihren Spam-Ordner, falls Sie ihn nicht sehen.",
+    "verifiedSuccessTitle": "E-Mail bestätigt!",
+    "verifiedSuccessDesc": "Willkommen an Bord 🎉",
+    "notVerifiedTitle": "Noch nicht bestätigt",
+    "notVerifiedDesc": "Bitte klicken Sie auf den Link in Ihrer E-Mail.",
+    "emailSentTitle": "E-Mail gesendet!",
+    "emailSentDesc": "Bestätigungs-E-Mail wurde erneut gesendet.",
+    "resendFailedTitle": "Erneutes Senden fehlgeschlagen",
+    "resendFailedDesc": "Bitte versuchen Sie es später erneut.",
+    "verifiedButton": "Ich habe meine E-Mail bestätigt",
+    "resendButton": "E-Mail erneut senden",
+    "resendCooldown": "Erneut senden in {{seconds}}s",
+    "backToLogin": "Zurück zum Login"
   },
-  "urgent_no_card": {
-    "label": "Test endet morgen!",
-    "title": "Jetzt upgraden, um fortzufahren"
-  },
-  "warning_with_card": {
-    "label": "Testphase endet bald",
-    "title": "Dein Abo startet automatisch"
-  },
-  "autorenew": {
-    "label": "Startet morgen",
-    "title": "Monatliches Abo startet automatisch"
-  }
-},
-"decider": {
-      "dc1": "Verbinde deine Community…",
-      "dc2": "Suche nach Möglichkeiten in deiner Nähe…",
-      "dc3": "Menschen dabei helfen, Dinge zu erledigen…",
-      "dc4": "Fast bereit für Buez…",
-      "tag": "Alltägliche Aufgaben leicht gemacht!",
-      "footer": "Bereitgestellt von Buez"
+  "freeTrialBanner": {
+    "active": {
+      "label": "Kostenlose Testphase aktiv",
+      "title": "Premium-Funktionen geniessen"
+    },
+    "warning_no_card": {
+      "label": "Testphase endet bald",
+      "title": "Zahlungsmethode hinzufügen, um fortzufahren"
+    },
+    "urgent_no_card": {
+      "label": "Test endet morgen!",
+      "title": "Jetzt upgraden, um fortzufahren"
+    },
+    "warning_with_card": {
+      "label": "Testphase endet bald",
+      "title": "Dein Abo startet automatisch"
+    },
+    "autorenew": {
+      "label": "Startet morgen",
+      "title": "Monatliches Abo startet automatisch"
     }
+  },
+  "decider": {
+    "dc1": "Verbinde deine Community…",
+    "dc2": "Suche nach Möglichkeiten in deiner Nähe…",
+    "dc3": "Menschen dabei helfen, Dinge zu erledigen…",
+    "dc4": "Fast bereit für Buez…",
+    "tag": "Alltägliche Aufgaben leicht gemacht!",
+    "footer": "Bereitgestellt von Buez"
+  },
+  "postDashboard": {
+    "header": "Anfragen",
+    "overview": "Übersicht",
+    "emptyTitle": "Erstelle deine erste Aufgabe",
+    "emptyText": "Brauchst du Hilfe? Erstelle deine erste Anfrage und finde Menschen, die dir helfen können.",
+    "emptyCta": "Erste Aufgabe erstellen",
+    "newCta": "Neue Aufgabe",
+    "total": "Aufgaben gesamt",
+    "active": "Aktive Aufgaben",
+    "completed": "Abgeschlossene Aufgaben"
+  }
 }

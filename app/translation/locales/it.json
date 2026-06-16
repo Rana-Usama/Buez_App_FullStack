@@ -278,7 +278,9 @@
     "noCompletedTasksDesc": "I compiti che completi appariranno qui",
     "noReviews": "Nessuna recensione ancora",
     "noReviewsDesc": "Le recensioni dei proprietari dei compiti appariranno qui",
-    "view": "Visualizza candidati"
+    "view": "Visualizza candidati",
+    "viewConfirmedHelpers": "Vedi aiutanti",
+    "txt14": "Passate"
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",
@@ -310,7 +312,15 @@
     "photo-1": "Carica foto",
     "photo-2": "Facoltativo",
     "date1": "Imposta la data",
-    "time1": "Imposta l'ora"
+    "time1": "Imposta l'ora",
+    "step1Title": "Dettagli attività",
+    "step2Title": "Orario e aiutanti",
+    "step3Title": "Descrizione e pagamento",
+    "stepIndicator": "Passaggio {{current}} di {{total}}",
+    "back": "Indietro",
+    "validateStep1": "Seleziona un tipo di attività e di compenso",
+    "validateStep2": "Scegli data, ora e durata stimata",
+    "validateStep3": "Aggiungi descrizione, luogo e compenso"
   },
   "messages": {
     "txt1": "Messaggi",
@@ -428,7 +438,8 @@
     "applicantProfile": "Profilo del candidato",
     "confirmApplicant": "Confermare",
     "confirmed": "Confermato",
-    "confirmedOn": "Confermato il"
+    "confirmedOn": "Confermato il",
+    "txt5": "Attività accettate"
   },
   "editProfile": {
     "txt1": "Inserisci il tuo nome",
@@ -497,16 +508,15 @@
     "txt1": "Attività accettata con successo!",
     "txt2": "Inizia a comunicare",
     "txt3": "Ora puoi chattare con il richiedente sui dettagli dell'attività.",
-    "txt4": "Trova in Le mie richieste",
-    "txt5": "Questa attività è elencata sotto 'Accettate' in Le mie richieste.",
+    "txt4": "Trova in Attività accettate",
+    "txt5": "Questa attività è elencata nelle tue Attività accettate.",
     "txt6": "Rimani aggiornato",
     "txt7": "Riceverai notifiche per aggiornamenti o messaggi.",
     "txt8": "Prossimi passi",
     "txt9": "Coordina con il richiedente per finire l'attività.",
     "txt10": "Capito!",
-    "txt11": "Vedi le mie richieste"
+    "txt11": "Vedi attività accettate"
   },
-
   "faqs": {
     "txt1": "Come possiamo aiutarti?",
     "txt2": " Trova risposte a domande frequenti",
@@ -679,21 +689,17 @@
   "taskApplicants": {
     "title": "Candidati per l'attività",
     "loading": "Caricamento dettagli attività...",
-
     "helpersNeeded": "Aiutanti necessari",
     "confirmed": "Confermati",
     "applicants": "Candidati",
     "progress": "aiutanti confermati",
     "applicantsTab": "Candidati",
     "confirmedTab": "Confermati",
-
     "noEmail": "Nessuna email",
     "confirmedTime": "Confermato",
-
     "confirm": "Conferma",
     "remove": "Rimuovi",
     "profile": "Profilo",
-
     "group": "Trasmissione attività",
     "member": "Membri",
     "helper": "Aiutanti",
@@ -701,21 +707,18 @@
     "joined": "Iscritto",
     "task": "Proprietario dell'attività",
     "exp": "Tocca l'icona della chat accanto a un membro per avviare una conversazione privata.",
-
     "confirmDialog": {
       "title": "Conferma aiutante",
       "message": "Sei sicuro di voler confermare {{name}} per questa attività?",
       "cancel": "Annulla",
       "confirm": "Conferma"
     },
-
     "removeDialog": {
       "title": "Rimuovi aiutante",
       "message": "Sei sicuro di voler rimuovere {{name}} dagli aiutanti confermati?",
       "cancel": "Annulla",
       "remove": "Rimuovi"
     },
-
     "toast": {
       "error": {
         "taskNotFound": "Attività non trovata",
@@ -732,12 +735,10 @@
         "removedMessage": "{{name}} è stato rimosso dagli aiutanti confermati"
       }
     },
-
     "empty": {
       "applicants": "Nessun candidato ancora",
       "confirmed": "Nessun aiutante confermato ancora"
     },
-
     "help": {
       "applicants": "Tocca 'Conferma' per aggiungere aiutanti al tuo team. Tocca 'Profilo' per vedere i loro dettagli.",
       "confirmed": "Tocca 'Rimuovi' per annullare la conferma di un aiutante. Tornerà nella lista dei candidati."
@@ -746,17 +747,14 @@
       "title": "Limite raggiunto",
       "message": "Hai già confermato tutti i {{count}} aiutanti necessari per questa attività."
     },
-
     "cannotConfirm": {
       "title": "Non puoi confermare più aiutanti",
       "message": "Questa attività richiede solo {{required}} aiutanti. Ne hai già confermati {{confirmed}}."
     },
-
     "alreadyConfirmed": {
       "title": "Già confermato",
       "message": "{{name}} è già confermato per questa attività."
     },
-
     "noDescription": "Nessuna descrizione",
     "full": "Completo",
     "spotsLeft": "Ancora {{spots}} posti liberi",
@@ -786,19 +784,14 @@
     "title": "Verifica la tua email",
     "subtitle": "Abbiamo inviato un link di verifica a:",
     "hint": "Clicca sul link nell'email per attivare il tuo account. Controlla la cartella spam se non lo vedi.",
-
     "verifiedSuccessTitle": "Email verificata!",
     "verifiedSuccessDesc": "Benvenuto a bordo 🎉",
-
     "notVerifiedTitle": "Non ancora verificata",
     "notVerifiedDesc": "Clicca sul link nella tua email.",
-
     "emailSentTitle": "Email inviata!",
     "emailSentDesc": "Email di verifica reinviata con successo.",
-
     "resendFailedTitle": "Invio non riuscito",
     "resendFailedDesc": "Riprova più tardi.",
-
     "verifiedButton": "Ho verificato la mia email",
     "resendButton": "Invia di nuovo",
     "resendCooldown": "Invia di nuovo tra {{seconds}}s",
@@ -833,5 +826,16 @@
     "dc4": "Quasi pronto per Buez…",
     "tag": "Le faccende quotidiane rese semplici!",
     "footer": "Offerto da Buez"
+  },
+  "postDashboard": {
+    "header": "Richieste",
+    "overview": "Panoramica",
+    "emptyTitle": "Pubblica la tua prima attività",
+    "emptyText": "Hai bisogno di aiuto? Crea la tua prima richiesta e trova persone pronte ad aiutarti.",
+    "emptyCta": "Pubblica la prima attività",
+    "newCta": "Nuova attività",
+    "total": "Totale attività pubblicate",
+    "active": "Attività attive",
+    "completed": "Attività completate"
   }
 }

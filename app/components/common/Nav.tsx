@@ -315,7 +315,7 @@ const Nav: React.FC<NavProps> = ({
             <TouchableOpacity
               onPress={handleBack}
               activeOpacity={0.7}
-              style={styles.backButton}
+              style={[styles.backButton,{backgroundColor:  theme.mode === "dark" ?  "rgba(53, 52, 57, 1)" : Colors.primary,}]}
             >
               <Ionicons
                 name="arrow-back"
@@ -439,7 +439,7 @@ const Nav: React.FC<NavProps> = ({
             style={[
               styles.gradientHeader,
               curvedBottom && styles.curvedBottom,
-              { borderBottomColor: "rgba(222, 219, 219, 0.25)" },
+              { borderBottomColor:theme.mode === "dark" ? "rgba(222, 219, 219, 0.35)" :  "rgba(222, 219, 219, 0.25)" },
             ]}
           >
             {showWave && <WaveEffect />}

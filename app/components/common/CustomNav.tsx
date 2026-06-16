@@ -24,7 +24,7 @@ const CustomNav = ({ title, showBack = true }: NavProps) => {
   const { theme } = useAppTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.white }]}>
+    <View style={[styles.container, { backgroundColor: theme.white , borderBottomColor:theme.mode === "dark" ? "rgba(222, 219, 219, 0.31)" :  "rgba(222, 219, 219, 0.25)"}]}>
       <View style={styles.content}>
         {/* Left Action: Back Button */}
         <View style={styles.actionContainer}>
@@ -36,7 +36,7 @@ const CustomNav = ({ title, showBack = true }: NavProps) => {
                 styles.backButton,
                 {
                   backgroundColor:
-                   Colors.primary,
+                  theme.mode === "dark" ?  "rgba(53, 52, 57, 1)" : Colors.primary,
                 },
               ]}
             >
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#FFF",
     fontSize: 16,
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "Poppins_700Bold",
     letterSpacing: 0.5,
   },
 });

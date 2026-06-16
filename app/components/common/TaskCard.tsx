@@ -320,7 +320,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             <Ionicons
               name="calendar-outline"
               size={RFPercentage(1.6)}
-              color={theme.primary}
+              color={theme.mode === "dark" ? Colors.white : Colors.primary}
             />
             <Text
               style={[styles.scheduledText, { color: theme.darkGrey }]}
@@ -334,7 +334,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             <Ionicons
               name="time-outline"
               size={RFPercentage(1.6)}
-              color={theme.primary}
+              color={theme.mode === "dark" ? Colors.white : Colors.primary}
             />
             <Text
               style={[styles.scheduledText, { color: theme.darkGrey }]}
@@ -408,7 +408,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   <Ionicons
                     name="list"
                     size={RFPercentage(1.6)}
-                    color={theme.primary}
+                    color={
+                      theme.mode === "dark" ? Colors.white : Colors.primary
+                    }
                   />
                   <Text
                     style={[styles.subTasksTitle, { color: theme.darkGrey }]}
@@ -422,7 +424,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                       key={subTask.id || idx}
                       style={[
                         styles.subTaskTag,
-                        { backgroundColor: `${theme.primary}15` },
+                        { backgroundColor: theme.mode === "dark" ? "rgba(255,255,255,0.1)" :  `${theme.primary}15` },
                       ]}
                     >
                       <FontAwesome5
@@ -500,7 +502,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     >
                       <Ionicons
                         name="people-outline"
-                        size={RFPercentage(1.4)}
+                        size={RFPercentage(1.7)}
                         color={
                           theme.mode === "dark"
                             ? Colors.darkGrey
@@ -533,7 +535,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     >
                       <Ionicons
                         name="checkmark-circle"
-                        size={RFPercentage(1.4)}
+                        size={RFPercentage(1.7)}
                         color="#4CAF50"
                       />
                     </View>
@@ -557,15 +559,17 @@ const TaskCard: React.FC<TaskCardProps> = ({
                         styles.statIconContainer,
                         {
                           backgroundColor:
-                            theme.mode === "dark"
-                              ? Colors.primary + "35"
-                              : Colors.primary + "20",
+                            remainingSlots <= 0
+                              ? Colors.red + "10"
+                              : theme.mode === "dark"
+                                ? Colors.primary + "35"
+                                : Colors.primary + "20",
                         },
                       ]}
                     >
                       <Ionicons
                         name={remainingSlots <= 0 ? "close-circle" : "time"}
-                        size={RFPercentage(1.4)}
+                        size={RFPercentage(1.7)}
                         color={slotStatus.color}
                       />
                     </View>

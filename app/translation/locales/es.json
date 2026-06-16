@@ -278,7 +278,9 @@
     "noCompletedTasksDesc": "Las tareas que completes aparecerán aquí",
     "noReviews": "Aún no hay reseñas",
     "noReviewsDesc": "Las reseñas de los propietarios de las tareas aparecerán aquí",
-    "view": "Ver solicitantes"
+    "view": "Ver solicitantes",
+    "viewConfirmedHelpers": "Ver ayudantes",
+    "txt14": "Pasadas"
   },
   "postRequest": {
     "txt1": "Publicar solicitud",
@@ -310,7 +312,15 @@
     "photo-1": "Subir fotos",
     "photo-2": "Opcional",
     "date1": "Establecer fecha",
-    "time1": "Establecer hora"
+    "time1": "Establecer hora",
+    "step1Title": "Detalles de la tarea",
+    "step2Title": "Horario y ayudantes",
+    "step3Title": "Descripción y pago",
+    "stepIndicator": "Paso {{current}} de {{total}}",
+    "back": "Atrás",
+    "validateStep1": "Selecciona un tipo de tarea y de compensación",
+    "validateStep2": "Elige fecha, hora y duración estimada",
+    "validateStep3": "Agrega una descripción, ubicación y compensación"
   },
   "messages": {
     "txt1": "Mensajes",
@@ -428,7 +438,8 @@
     "applicantProfile": "Perfil del solicitante",
     "confirmApplicant": "Confirmar",
     "confirmed": "Confirmado",
-    "confirmedOn": "Confirmado el"
+    "confirmedOn": "Confirmado el",
+    "txt5": "Tareas aceptadas"
   },
   "editProfile": {
     "txt1": "Ingresa tu nombre",
@@ -497,16 +508,15 @@
     "txt1": "¡Tarea aceptada exitosamente!",
     "txt2": "Comenzar a comunicarse",
     "txt3": "Ahora puedes chatear con el solicitante sobre los detalles de la tarea.",
-    "txt4": "Encontrar en Mis solicitudes",
-    "txt5": "Esta tarea está listada bajo 'Aceptadas' en Mis solicitudes.",
+    "txt4": "Buscar en Tareas aceptadas",
+    "txt5": "Esta tarea aparece en tus Tareas aceptadas.",
     "txt6": "Mantente actualizado",
     "txt7": "Recibirás notificaciones para actualizaciones o mensajes.",
     "txt8": "Próximos pasos",
     "txt9": "Coordina con el solicitante para terminar la tarea.",
     "txt10": "¡Entendido!",
-    "txt11": "Ver mis solicitudes"
+    "txt11": "Ver tareas aceptadas"
   },
-
   "faqs": {
     "txt1": "¿Cómo podemos ayudarte?",
     "txt2": " Encuentra respuestas a preguntas frecuentes",
@@ -679,21 +689,17 @@
   "taskApplicants": {
     "title": "Solicitantes de tarea",
     "loading": "Cargando detalles de la tarea...",
-
     "helpersNeeded": "Ayudantes necesarios",
     "confirmed": "Confirmados",
     "applicants": "Solicitantes",
     "progress": "ayudantes confirmados",
     "applicantsTab": "Solicitantes",
     "confirmedTab": "Confirmados",
-
     "noEmail": "Sin correo",
     "confirmedTime": "Confirmado",
-
     "confirm": "Confirmar",
     "remove": "Eliminar",
     "profile": "Perfil",
-
     "group": "Difusión de tarea",
     "member": "Miembros",
     "helper": "Ayudantes",
@@ -701,21 +707,18 @@
     "joined": "Unido",
     "task": "Propietario de la tarea",
     "exp": "Toca el ícono de chat junto a cualquier miembro para iniciar una conversación privada.",
-
     "confirmDialog": {
       "title": "Confirmar ayudante",
       "message": "¿Estás seguro de que quieres confirmar a {{name}} para esta tarea?",
       "cancel": "Cancelar",
       "confirm": "Confirmar"
     },
-
     "removeDialog": {
       "title": "Eliminar ayudante",
       "message": "¿Estás seguro de que quieres eliminar a {{name}} de los ayudantes confirmados?",
       "cancel": "Cancelar",
       "remove": "Eliminar"
     },
-
     "toast": {
       "error": {
         "taskNotFound": "Tarea no encontrada",
@@ -732,12 +735,10 @@
         "removedMessage": "{{name}} ha sido eliminado de los ayudantes confirmados"
       }
     },
-
     "empty": {
       "applicants": "Aún no hay solicitantes",
       "confirmed": "Aún no hay ayudantes confirmados"
     },
-
     "help": {
       "applicants": "Toca 'Confirmar' para agregar ayudantes a tu equipo. Toca 'Perfil' para ver sus detalles.",
       "confirmed": "Toca 'Eliminar' para anular la confirmación de un ayudante. Volverá a la lista de solicitantes."
@@ -746,17 +747,14 @@
       "title": "Límite alcanzado",
       "message": "Ya has confirmado todos los {{count}} ayudantes necesarios para esta tarea."
     },
-
     "cannotConfirm": {
       "title": "No se pueden confirmar más ayudantes",
       "message": "Esta tarea solo requiere {{required}} ayudantes. Ya has confirmado {{confirmed}}."
     },
-
     "alreadyConfirmed": {
       "title": "Ya confirmado",
       "message": "{{name}} ya está confirmado para esta tarea."
     },
-
     "noDescription": "Sin descripción",
     "full": "Completo",
     "spotsLeft": "Quedan {{spots}} plazas",
@@ -786,19 +784,14 @@
     "title": "Verifica tu correo electrónico",
     "subtitle": "Hemos enviado un enlace de verificación a:",
     "hint": "Haz clic en el enlace del correo para activar tu cuenta. Revisa tu carpeta de spam si no lo ves.",
-
     "verifiedSuccessTitle": "¡Correo verificado!",
     "verifiedSuccessDesc": "Bienvenido a bordo 🎉",
-
     "notVerifiedTitle": "Aún no verificado",
     "notVerifiedDesc": "Haz clic en el enlace de tu correo.",
-
     "emailSentTitle": "¡Correo enviado!",
     "emailSentDesc": "Correo de verificación reenviado con éxito.",
-
     "resendFailedTitle": "Error al reenviar",
     "resendFailedDesc": "Por favor intenta más tarde.",
-
     "verifiedButton": "He verificado mi correo",
     "resendButton": "Reenviar correo",
     "resendCooldown": "Reenviar en {{seconds}}s",
@@ -833,5 +826,16 @@
     "dc4": "Casi listo para Buez…",
     "tag": "¡Las tareas diarias hechas fáciles!",
     "footer": "Impulsado por Buez"
+  },
+  "postDashboard": {
+    "header": "Solicitudes",
+    "overview": "Resumen",
+    "emptyTitle": "Publica tu primera tarea",
+    "emptyText": "¿Necesitas ayuda con algo? Crea tu primera solicitud y conecta con personas que pueden ayudarte.",
+    "emptyCta": "Publicar mi primera tarea",
+    "newCta": "Nueva tarea",
+    "total": "Total de tareas publicadas",
+    "active": "Tareas activas",
+    "completed": "Tareas completadas"
   }
 }

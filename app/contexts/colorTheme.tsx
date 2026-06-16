@@ -20,7 +20,7 @@ export const lightTheme = {
   red: "#EF4444",
   cartsBackground: "#F8FAFC",
   cartsTitle: "#4B5563",
-  border: "rgba(208, 208, 208, 1)",
+  border: "rgba(233, 233, 233, 1)",
   stroke: "#D1D5DB",
   chat: "#A7ADCE",
   desc: "#64748B",

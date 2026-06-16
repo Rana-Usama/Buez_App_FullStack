@@ -3,8 +3,6 @@ import { View, Text } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
-import { Icons } from "../../config/theme";
-import { LinearGradient } from "expo-linear-gradient";
 const InterestPill = ({ item, isCustom, theme }: any) => {
   const CATEGORY_MAP: Record<string, { color: string; icon: string }> = {
     Cleaning: { color: "#4ECDC4", icon: "broom" },
@@ -96,17 +94,15 @@ export default function InterestsSection({
       style={{
         marginHorizontal: RFPercentage(3),
         marginTop: RFPercentage(3),
-        borderRadius: RFPercentage(2),
+        borderRadius: 16,
         padding: RFPercentage(2.2),
         borderWidth: 1,
         backgroundColor:
-          theme.mode === "dark"
-            ? "rgba(14, 14, 24, 1)"
-            : "rgba(235, 235, 235, 0.57)",
+          theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "#FFFFFF",
         borderColor:
           theme.mode === "dark"
-            ? "rgba(35, 35, 51, 1)"
-            : "rgba(235, 235, 235, 0.57)",
+            ? "rgba(255,255,255,0.10)"
+            : "rgba(17,24,39,0.08)",
       }}
     >
       <View
@@ -117,23 +113,26 @@ export default function InterestsSection({
           marginBottom: RFPercentage(1.8),
         }}
       >
-        <LinearGradient
-          colors={["#293596ff", "#918fb8ff"]}
+        <View
           style={{
-            width: RFPercentage(3),
-            height: RFPercentage(3),
-            borderRadius: RFPercentage(0.8),
+            width: RFPercentage(3.4),
+            height: RFPercentage(3.4),
+            borderRadius: RFPercentage(1),
             justifyContent: "center",
             alignItems: "center",
+            backgroundColor:
+              theme.mode === "dark"
+                ? "rgba(255,255,255,0.08)"
+                : Colors.primary + "0D",
           }}
         >
           <FontAwesome5
             name="heart"
-            size={RFPercentage(1.3)}
-            color="#fff"
+            size={RFPercentage(1.4)}
+            color={theme.mode === "dark" ? "#FFFFFF" : Colors.primary}
             solid
           />
-        </LinearGradient>
+        </View>
         <Text
           style={{
             fontSize: RFPercentage(1.8),
@@ -144,24 +143,7 @@ export default function InterestsSection({
         >
           Interests
         </Text>
-        <View
-          style={{
-            paddingHorizontal: RFPercentage(1.1),
-            paddingVertical: RFPercentage(0.3),
-            borderRadius: RFPercentage(5),
-            backgroundColor: Colors.primary + "18",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: RFPercentage(1.3),
-              fontFamily: "Poppins_600SemiBold",
-              color: Colors.primary,
-            }}
-          >
-            {total}
-          </Text>
-        </View>
+       
       </View>
       <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
         {translatedInterests.selectedCategories?.map((it: any) => (

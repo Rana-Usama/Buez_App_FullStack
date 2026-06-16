@@ -22,6 +22,7 @@ import { fetchCompletedTasksFromFirebase } from "../services/Review.service";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import { getCachedData, setCachedData } from "../utils/screenDataCache";
 import CustomNav from "../components/common/CustomNav";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import {
@@ -179,16 +180,22 @@ const statCellStyles = StyleSheet.create({
 export default function CompletedTasks({ navigation }: any) {
   const [tr, setTr] = useState<Partial<Translations>>({});
   const { t } = useTranslation();
-  const [tasks, setTasks] = useState<any[]>([]);
+  const currentUserId = getAuth().currentUser?.uid;
+  const CACHE_KEY = `completedTasks_${currentUserId || "anon"}`;
+
+  // Seed from cache → instant render on re-entry, refresh silently after.
+  const [tasks, setTasks] = useState<any[]>(
+    () => getCachedData<any[]>(CACHE_KEY) ?? [],
+  );
   const [cache, setCache] = useState<
     Record<string, { desc: string; category: string }>
   >({});
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(
+    () => getCachedData<any[]>(CACHE_KEY) === undefined,
+  );
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const { theme } = useAppTheme();
   const [userReviews, setUserReviews] = useState<Set<string>>(new Set());
-
-  const currentUserId = getAuth().currentUser?.uid;
 
   const isDark = theme.mode === "dark";
 
@@ -265,7 +272,7 @@ export default function CompletedTasks({ navigation }: any) {
 
   // ─── Fetch Tasks ──────────────────────────────────────────────────────────
   const fetchCompletedTasks = async () => {
-    setLoading(true);
+    // Loader only on first-ever load (seeded from cache); refreshes are silent.
     try {
       const records = await fetchCompletedTasksFromFirebase();
       const userReviewedTasks = await fetchUserReviews();
@@ -288,6 +295,7 @@ export default function CompletedTasks({ navigation }: any) {
       );
       setCache(newCache);
       setTasks(records);
+      setCachedData(CACHE_KEY, records);
     } catch (e) {
       console.log("Task fetch error:", e);
     } finally {
@@ -358,21 +366,7 @@ export default function CompletedTasks({ navigation }: any) {
             },
           ]}
         >
-          {/* ── Confirmed Helper Banner ── */}
-          {isBulkTask && userIsConfirmedHelper && (
-            <View
-              style={[styles.banner, { backgroundColor: token.bannerBg }]}
-            >
-              <Ionicons
-                name="shield-checkmark"
-                size={RFPercentage(1.8)}
-                color={token.accent}
-              />
-              <Text style={[styles.bannerText, { color: theme.mode  === "dark" ?  Colors.white : token.accent }]}>
-                {tr.cnf}
-              </Text>
-            </View>
-          )}
+         
 
           {/* ── Header Row ── */}
           <View style={styles.headerRow}>

@@ -1,6 +1,5 @@
 import {
   StyleSheet,
-  Platform,
   View,
   TouchableOpacity,
   Text,
@@ -16,13 +15,12 @@ import { useTranslation } from "react-i18next";
 import InputField from "../components/common/AuthInputField";
 import { fetchUsersWithTaskStats } from "../services/Review.service";
 import Colors from "../config/Colors";
-import { Icons } from "../config/theme";
 import { Ionicons, Feather, AntDesign } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { selectLocation } from "../redux/Actions";
 import CustomNav from "../components/common/CustomNav";
 import { LinearGradient } from "expo-linear-gradient";
-import { TopRatedUserGradients } from "../config/Gradients";
+import { HomeGradients } from "../config/Gradients";
 import AvatarInitials from "../components/common/DefaultAvatars";
 
 type ApiUser = {
@@ -160,37 +158,30 @@ const TopRatedUsers = ({ navigation }: any) => {
         return {
           icon: "star",
           text: t("profileRank.txt3"),
-          color: "#b697d1ff",
-          bgColor: "#d3c2e2ff",
+          color: "#9b6fc1ff",
+          bgColor: "#d3c2e23a",
         };
     }
   };
 
   const UserCard = ({ user }) => {
     const badge = getBadgeInfo(user.type);
-    const getUserCardGradient = (
-      type: "pro" | "rising" | "beginner",
-      isDark: boolean,
-    ) => {
-      const mode = isDark ? "dark" : "light";
+    const isDark = theme.mode === "dark";
 
-      switch (type) {
-        case "pro":
-          return TopRatedUserGradients.pro[mode];
-        case "rising":
-          return TopRatedUserGradients.rising[mode];
-        case "beginner":
-          return TopRatedUserGradients.beginner[mode];
-        default:
-          return TopRatedUserGradients.default[mode];
-      }
+    // Same soft brand surface as the home screen top-rated cards
+    const cardGradient = isDark
+      ? HomeGradients.topRatedBrandDark
+      : HomeGradients.topRatedBrand;
+    const ui = {
+      cardBorder: isDark ? "rgba(255,255,255,0.10)" : "rgba(37,50,117,0.10)",
+      softFill: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.60)",
+      divider: isDark ? "rgba(255,255,255,0.10)" : "rgba(37,50,117,0.12)",
+      chevronBg: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.70)",
     };
-
-    const cardGradient = getUserCardGradient(user.type, theme.mode === "dark");
 
     return (
       <TouchableOpacity
-        activeOpacity={0.9}
+        activeOpacity={0.85}
         onPress={() =>
           navigation.navigate("TopRatedUserProfile", {
             user: user.originalData || user,
@@ -198,44 +189,14 @@ const TopRatedUsers = ({ navigation }: any) => {
             postRequest: {},
           })
         }
-        style={[
-          styles.cardContainer,
-          { shadowColor: cardGradient[1] },
-          { borderColor: cardGradient[0] },
-        ]}
+        style={[styles.cardContainer, { borderColor: ui.cardBorder }]}
       >
         <LinearGradient
           colors={cardGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.gradientWrapper}
+          style={styles.cardSurface}
         >
-          <LinearGradient
-            colors={[
-              theme.mode === "dark"
-                ? "rgba(57, 51, 51, 0.4)"
-                : "rgba(255, 255, 255, 1)",
-              "transparent",
-            ]}
-            style={[
-              StyleSheet.absoluteFill,
-              { transform: [{ rotate: "45deg" }], top: -50 },
-            ]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-          />
-
-          {/* MESH OVERLAY 2 (Shadow Depth) */}
-          <LinearGradient
-            colors={
-              theme.mode === "dark"
-                ? ["transparent", "rgba(0,0,0,0.15)"]
-                : ["rgba(245, 246, 255, 0.12)", "rgba(241, 241, 255, 1)"]
-            }
-            style={StyleSheet.absoluteFill}
-            start={{ x: 1, y: 0 }}
-            end={{ x: 0, y: 1 }}
-          />
           <View style={styles.cardHeader}>
             {user?.profileImage ? (
               <Image
@@ -248,90 +209,74 @@ const TopRatedUsers = ({ navigation }: any) => {
             )}
 
             <View style={styles.headerInfo}>
-              <View style={styles.nameRow}>
-                {/* Added shadow to text for better legibility on gradients */}
-                <Text
-                  style={[
-                    styles.userName,
-                    styles.textShadow,
-                    {
-                      color:
-                        theme.mode === "dark" ? Colors.white : Colors.primary,
-                    },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {user.userName}
+              <View
+                style={[styles.badgeTag, { backgroundColor: badge.bgColor }]}
+              >
+                <Ionicons
+                  name={badge.icon as any}
+                  size={10}
+                  color={badge.color}
+                />
+                <Text style={[styles.badgeText, { color: badge.color }]} numberOfLines={1}>
+                  {badge.text}
                 </Text>
-                <View
-                  style={[styles.badgeTag, { backgroundColor: badge.bgColor }]}
-                >
-                  <Ionicons
-                    name={badge.icon as any}
-                    size={10}
-                    color={badge.color}
-                  />
-                  <Text style={[styles.badgeText, { color: badge.color }]}>
-                    {`  `}
-                    {badge.text}
-                  </Text>
-                </View>
               </View>
               <Text
                 style={[
-                  styles.memberSince,
-                  {
-                    color:
-                      theme.mode === "dark"
-                        ? "rgba(248, 249, 255, 1)"
-                        : "rgba(109, 110, 118, 1)",
-                  },
+                  styles.userName,
+                  { color: isDark ? Colors.white : theme.heading },
                 ]}
+                numberOfLines={1}
               >
-                {t("profileRank.txt9")} {user.memberSince}
+                {user.userName}
               </Text>
             </View>
-            <Feather
-              name="chevron-right"
-              size={20}
-              color={theme.mode === "dark" ? "#fff" : Colors.lightGrey}
-            />
+
+            <View
+              style={[styles.chevronChip, { backgroundColor: ui.chevronBg }]}
+            >
+              <Feather
+                name="chevron-right"
+                size={18}
+                color={isDark ? "#FFFFFF" : theme.darkGrey}
+              />
+            </View>
           </View>
 
-          <View style={[styles.statsIslandMesh]}>
+          <View style={[styles.statsStrip, { backgroundColor: ui.softFill }]}>
             <View style={styles.statBox}>
-              <Text style={[styles.statValMesh, { color: theme.grey }]}>
+              <Text style={[styles.statVal, { color: theme.heading }]}>
                 {user.activeTasks}
               </Text>
-              <Text style={[styles.statLabMesh, { color: theme.darkGrey }]}>
+              <Text style={[styles.statLab, { color: theme.darkGrey }]}>
                 {t("profileRank.txt6")}
               </Text>
             </View>
-            <View style={[styles.divider]} />
+            <View style={[styles.divider, { backgroundColor: ui.divider }]} />
             <View style={styles.statBox}>
               <Text
-                style={[styles.statValMesh, { color: theme.grey }]}
+                style={[styles.statVal, { color: theme.heading }]}
                 numberOfLines={1}
               >
                 {user.completedTasks}
               </Text>
               <Text
-                style={[styles.statLabMesh, { color: theme.darkGrey }]}
+                style={[styles.statLab, { color: theme.darkGrey }]}
                 numberOfLines={1}
               >
                 {t("profileRank.txt7")}
               </Text>
             </View>
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: ui.divider }]} />
             <View style={styles.statBox}>
               <Text
-                style={[styles.statValMesh, { color: theme.grey }]}
+                style={[styles.statVal, { color: theme.heading }]}
                 numberOfLines={1}
               >
                 {user.successRate}%
               </Text>
               <Text
-                style={[styles.statLabMesh, { color: theme.darkGrey }]}
+                style={[styles.statLab, { color: theme.darkGrey }]}
                 numberOfLines={1}
               >
                 {t("profileRank.txt31")}
@@ -341,8 +286,17 @@ const TopRatedUsers = ({ navigation }: any) => {
 
           {user.distance && (
             <View style={styles.distRow}>
-              <Ionicons name="location-outline" size={12} color="#fff" />
-              <Text style={[styles.distText, { color: "#fff" }]}>
+              <Ionicons
+                name="location-outline"
+                size={12}
+                color={isDark ? Colors.darkGrey : Colors.primary}
+              />
+              <Text
+                style={[
+                  styles.distText,
+                  { color: isDark ? Colors.darkGrey : Colors.primary },
+                ]}
+              >
                 {user.distance} km away
               </Text>
             </View>
@@ -584,47 +538,72 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  // Card UI
-  userCard: {
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
+  // Card UI (modern minimal)
+  cardContainer: {
+    marginBottom: 14,
+    borderRadius: 16,
     borderWidth: 1,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.04,
-        shadowRadius: 12,
-      },
-      android: { elevation: 2 },
-    }),
+    overflow: "hidden",
   },
-  cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
-  avatar: { width: RFPercentage(6), height: RFPercentage(6), borderRadius:RFPercentage(1.5) },
+  cardSurface: {
+    padding: 16,
+  },
+  cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 14 },
+  avatar: {
+    width: RFPercentage(6),
+    height: RFPercentage(6),
+    borderRadius: RFPercentage(1.5),
+  },
   headerInfo: { flex: 1, marginLeft: 12 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-
-  badgeText: { fontSize: 9, fontFamily: "Poppins_700Bold" },
-  memberSince: { fontSize: 11, fontFamily: "Poppins_400Regular", marginTop: 5 },
-
-  statsIsland: {
+  userName: {
+    fontSize: RFPercentage(1.8),
+    fontFamily: "Poppins_600SemiBold",
+    flexShrink: 1,
+    top:2
+  },
+  badgeTag: {
     flexDirection: "row",
-    borderRadius: 14,
-    paddingVertical: 12,
-    justifyContent: "space-around",
     alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 100,
+    gap: 4,
+    maxWidth:RFPercentage(12),
+    justifyContent:"center"
+  },
+  badgeText: { fontSize: 10, fontFamily: "Poppins_700Bold" },
+  memberSince: { fontSize: 11, fontFamily: "Poppins_400Regular", marginTop: 4 },
+  chevronChip: {
+    width: RFPercentage(3.6),
+    height: RFPercentage(3.6),
+    borderRadius: RFPercentage(100),
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
+  },
+
+  statsStrip: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderRadius: 12,
+    paddingVertical: RFPercentage(1.2),
+    paddingHorizontal: RFPercentage(1),
   },
   statBox: { alignItems: "center", flex: 1, paddingHorizontal: 5 },
-  statVal: { fontSize: 14, fontFamily: "Poppins_700Bold" },
-  statLab: {
-    fontSize: 9,
-    fontFamily: "Poppins_500Medium",
-    marginTop: 2,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  statVal: {
+    fontSize: RFPercentage(1.8),
+    textAlign: "center",
+    fontFamily: "Poppins_600SemiBold",
   },
-  divider: { width: 1, height: 20, backgroundColor: "#DEE2E6" },
+  statLab: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    marginTop: 1,
+  },
+  divider: { width: 1, height: 22 },
 
   distRow: {
     flexDirection: "row",
@@ -634,65 +613,10 @@ const styles = StyleSheet.create({
   },
   distText: {
     fontSize: 11,
-    color: Colors.primary,
     fontFamily: "Poppins_600SemiBold",
   },
   center: { alignItems: "center", justifyContent: "center", marginTop: 40 },
   emptyText: { marginTop: 10, fontSize: 14, fontFamily: "Poppins_400Regular" },
-
-  cardContainer: {
-    marginBottom: 15,
-    borderRadius: 16,
-    // elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    overflow: "hidden",
-    borderWidth: 1,
-  },
-  gradientWrapper: {
-    padding: 16,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  textShadow: {
-    textShadowColor: "rgba(0, 0, 0, 0.1)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  statsIslandMesh: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "rgba(173, 173, 184, 0.23)",
-    borderRadius: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1),
-    paddingHorizontal: RFPercentage(1),
-  },
-  statValMesh: {
-    fontSize: RFPercentage(1.8),
-    textAlign: "center",
-    color: "white",
-    fontFamily: "Poppins_600SemiBold",
-  },
-  statLabMesh: {
-    fontSize: RFPercentage(1.3),
-    color: "white",
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-  },
-  badgeTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    marginLeft: 8,
-  },
 });
 
 export default TopRatedUsers;

@@ -11,6 +11,7 @@ import { BlurView } from "expo-blur";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "./MyAppButton";
 import { MaterialIcons } from "@expo/vector-icons"; // You can use any icon library
+import Colors from "../../config/Colors";
 
 const ConfirmationModal = ({
   isVisible,
@@ -74,7 +75,7 @@ const ConfirmationModal = ({
             <View
               style={[
                 styles.iconCircle,
-                { backgroundColor: `${iconConfig.color}15` }, // 15 = ~10% opacity in hex
+                { backgroundColor: theme.mode === "dark" ?  Colors.darkGrey + "30" : `${iconConfig.color}15` }, 
               ]}
             >
               <MaterialIcons
@@ -190,7 +191,7 @@ const styles = StyleSheet.create({
       Platform.OS === "android" ? RFPercentage(5.8) : RFPercentage(5),
     width:
       Platform.OS === "android" ? RFPercentage(17) : RFPercentage(15),
-    borderRadius: RFPercentage(100),
+    borderRadius: RFPercentage(2),
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",

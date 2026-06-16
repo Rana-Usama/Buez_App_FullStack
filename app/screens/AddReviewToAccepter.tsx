@@ -521,15 +521,15 @@ function AddReviewToAccepter() {
                 </Text>
                 {/* Task type badge */}
                 {task.isBulkRequest && (
-                  <View style={styles.bulkBadge}>
-                    <Text style={styles.bulkBadgeText}>{tr.bulk}</Text>
+                  <View style={[styles.bulkBadge, {backgroundColor: theme.mode === "dark" ?  "rgba(255,255,255,0.3)" :  Colors.primary + "20"}]}>
+                    <Text style={[styles.bulkBadgeText,{color:theme.mode === "dark" ?  "rgba(255, 255, 255, 1)" :  Colors.primary }]}>{tr.bulk}</Text>
                   </View>
                 )}
               </View>
             </View>
 
             <View style={styles.taskSection}>
-              <Text style={[styles.taskLabel, { color: theme.primary }]}>
+              <Text style={[styles.taskLabel, { color:theme.mode === "dark" ?  "rgba(255, 255, 255, 1)" :  Colors.primary}]}>
                 {tr.taskCompleted || "Task Completed"} {recipientUser.userName}
               </Text>
               <Text style={[styles.taskDescription, { color: theme.heading }]}>
@@ -541,7 +541,7 @@ function AddReviewToAccepter() {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? Colors.primary + "20"
+                        ? Colors.darkGrey + "20"
                         : Colors.primary + "10",
                   },
                 ]}
@@ -549,9 +549,9 @@ function AddReviewToAccepter() {
                 <FontAwesome
                   name="calendar"
                   size={RFPercentage(1.6)}
-                  color={Colors.primary}
+                  color={theme.mode === "dark" ?  "rgba(255, 255, 255, 1)" :  Colors.primary}
                 />
-                <Text style={[styles.dateText, { color: Colors.primary }]}>
+                <Text style={[styles.dateText, { color: theme.mode === "dark" ?  "rgba(255, 255, 255, 1)" :  Colors.primary }]}>
                   {completedOn}
                 </Text>
               </View>
@@ -711,12 +711,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(0.8),
     paddingVertical: RFPercentage(0.3),
     borderRadius: RFPercentage(0.5),
-    marginTop: RFPercentage(0.3),
+    // marginTop: RFPercentage(0.3),
   },
   bulkBadgeText: {
     fontSize: RFPercentage(1),
     fontFamily: "Poppins_500Medium",
     color: Colors.primary,
+    lineHeight:RFPercentage(1.5)
   },
   locationRow: {
     flexDirection: "row",
@@ -752,6 +753,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
     marginLeft: RFPercentage(0.5),
+    lineHeight:RFPercentage(2)
   },
   ratingCard: {
     borderRadius: RFPercentage(2),
@@ -763,7 +765,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 16,
     elevation: 6,
-    borderWidth: 1,
+    borderBottomWidth: 1,
   },
   ratingTitle: {
     fontSize: RFPercentage(2),
@@ -796,13 +798,13 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderRadius: RFPercentage(1.5),
-    borderWidth: 1,
+    borderBottomWidth: 1,
     marginBottom: RFPercentage(1),
     overflow: "hidden",
   },
   reviewInput: {
     minHeight: RFPercentage(15),
-    padding: RFPercentage(2),
+    // padding: RFPercentage(2),
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
     textAlignVertical: "top",

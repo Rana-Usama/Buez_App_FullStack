@@ -240,8 +240,18 @@ export const useHomeScreen = () => {
         async ({ tasksArray, lastVisible }) => {
           if (!mounted) return;
 
-          // Filter by distance (100km radius)
+          const now = Date.now();
+
+          // Filter by distance (100km radius) and hide expired tasks
           const filteredTasks = tasksArray.filter((task: Task) => {
+            // Exclude tasks whose scheduled date/time has already passed.
+            // Tasks without a schedule (legacy posts) are always kept.
+            const scheduled = task.scheduledDateTime || task.scheduledDate;
+            if (scheduled) {
+              const scheduledTs = new Date(scheduled).getTime();
+              if (!isNaN(scheduledTs) && scheduledTs < now) return false;
+            }
+
             const taskLocation = task.address;
             if (!taskLocation?.latitude || !taskLocation?.longitude)
               return false;

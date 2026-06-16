@@ -30,34 +30,24 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onFilterPress,
   theme,
 }) => {
-  // ── GET CATEGORY COLORS ──
-  const getCategoryColors = useMemo(() => {
-    return (filterValue: string) => {
-      const isDarkMode = theme.mode === "dark";
-      const categoryKey = filterValue
-        .toLowerCase()
-        .replace(/\s+/g, "")
-        .replace("event setup", "eventSetup")
-        .replace(
-          "pet care",
-          "petCare",
-        ) as keyof typeof Colors.categoryColors.dark;
+  // ── NEUTRAL CATEGORY COLORS ──
+  // All categories share a single neutral, theme-driven palette to stay
+  // consistent with the design system. Active state uses filterActiveGradient.
+  const neutralCategoryColors = useMemo(
+    () => ({
+      backgroundColor: theme.lightWhite,
+      iconColor: theme.heading,
+      borderColor: theme.border,
+      backgroundColorHex: theme.lightWhite,
+      iconColorHex: theme.mode === "dark" ? theme.grey : theme.heading,
+    }),
+    [theme.mode, theme.lightWhite, theme.heading, theme.grey, theme.border],
+  );
 
-      const colorSet = isDarkMode
-        ? Colors.categoryColors.dark[categoryKey]
-        : Colors.categoryColors.light[categoryKey];
-
-      return (
-        colorSet || {
-          backgroundColor: theme.card || "#3b4a5eff",
-          iconColor: "#261249ff",
-          borderColor: theme.border,
-          backgroundColorHex: "#2e236525",
-          iconColorHex: "#4c14a1ff",
-        }
-      );
-    };
-  }, [theme.mode, theme.card, theme.text, theme.border]);
+  const getCategoryColors = useMemo(
+    () => (_filterValue: string) => neutralCategoryColors,
+    [neutralCategoryColors],
+  );
 
   // ── GET ICON ──
   const getIcon = useMemo(

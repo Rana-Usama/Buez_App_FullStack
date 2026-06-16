@@ -44,13 +44,15 @@ const styles = StyleSheet.create({
     marginHorizontal: RFPercentage(3),
     marginTop: RFPercentage(2),
     borderRadius: RFPercentage(2),
+    borderLeftWidth: RFPercentage(0.5),
+    borderLeftColor: Colors.primary,
     gap: RFPercentage(1),
   },
   helpText: {
     flex: 1,
-    fontSize: RFPercentage(1.2),
+    fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
-    lineHeight: RFPercentage(1.8),
+    lineHeight: RFPercentage(1.9),
   },
 });
 

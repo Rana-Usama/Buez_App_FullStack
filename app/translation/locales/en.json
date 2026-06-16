@@ -287,10 +287,11 @@
     "noReviews": "No Reviews Yet",
     "noReviewsDesc": "Reviews from task owners will appear here",
     "view": "View Applicants",
-    "viewConfirmedHelpers": "View Confirmed Helpers",
+    "viewConfirmedHelpers": "View Helpers",
     "confirmedHelpers": "Confirmed Helpers",
     "addReview": "Add Review",
-    "reviewed": "Reviewed"
+    "reviewed": "Reviewed",
+    "txt14": "Past"
   },
   "postRequest": {
     "txt1": "Post Request",
@@ -322,7 +323,15 @@
     "photo-1": "Upload Photos",
     "photo-2": "Optional",
     "date1": "Set Date",
-    "time1": "Set Time"
+    "time1": "Set Time",
+    "step1Title": "Task Details",
+    "step2Title": "Schedule & Helpers",
+    "step3Title": "Description & Payment",
+    "stepIndicator": "Step {{current}} of {{total}}",
+    "back": "Back",
+    "validateStep1": "Please select a task type and compensation type to continue",
+    "validateStep2": "Please choose a date, time and estimated duration",
+    "validateStep3": "Please add a description, location and compensation"
   },
   "messages": {
     "txt1": "Messages",
@@ -443,7 +452,8 @@
     "applicantProfile": "Applicant Profile",
     "confirmApplicant": "Confirm",
     "confirmed": "Confirmed",
-    "confirmedOn": "Confirmed on"
+    "confirmedOn": "Confirmed on",
+    "txt5": "Accepted Tasks"
   },
   "editProfile": {
     "txt1": "Enter your name",
@@ -517,16 +527,15 @@
     "txt1": "Task Accepted Successfully!",
     "txt2": "Start Communicating",
     "txt3": "You can now chat with the requester about task details.",
-    "txt4": "Find in My Requests",
-    "txt5": "This task is listed under 'Accepted' in My Requests.",
+    "txt4": "Find in Accepted Tasks",
+    "txt5": "This task is listed in your Accepted Tasks.",
     "txt6": "Stay Updated",
     "txt7": "You'll get notifications for updates or messages.",
     "txt8": "Next Steps",
     "txt9": "Coordinate with the requester to finish the task.",
     "txt10": "Got It!",
-    "txt11": "View My Requests"
+    "txt11": "View Accepted Tasks"
   },
-
   "faqs": {
     "txt1": "How can we help you?",
     "txt2": " Find answers to frequently asked questions",
@@ -696,21 +705,17 @@
     "oneTimePayment": "One-time payment, no monthly hassle",
     "exclusiveFeatures": "Access to exclusive features"
   },
-
   "taskApplicants": {
     "title": "Task Applicants",
     "loading": "Loading Task Details...",
-
     "helpersNeeded": "Helpers Needed",
     "confirmed": "Confirmed",
     "applicants": "Applicants",
     "progress": "Helpers Confirmed",
     "applicantsTab": "Applicants",
     "confirmedTab": "Confirmed",
-
     "noEmail": "No email",
     "confirmedTime": "Confirmed",
-
     "confirm": "Confirm",
     "remove": "Remove",
     "profile": "View Profile",
@@ -721,21 +726,18 @@
     "joined": "Joined",
     "task": "Task Owner",
     "exp": "Tap the chat icon next to any member to start a private conversation with them.",
-
     "confirmDialog": {
       "title": "Confirm Helper",
       "message": "Are you sure you want to confirm {{name}} for this task?",
       "cancel": "Cancel",
       "confirm": "Confirm"
     },
-
     "removeDialog": {
       "title": "Remove Helper",
       "message": "Are you sure you want to remove {{name}} from confirmed helpers?",
       "cancel": "Cancel",
       "remove": "Remove"
     },
-
     "toast": {
       "error": {
         "taskNotFound": "Task not found",
@@ -752,12 +754,10 @@
         "removedMessage": "{{name}} has been removed from confirmed helpers"
       }
     },
-
     "empty": {
       "applicants": "No applicants yet",
       "confirmed": "No confirmed helpers yet"
     },
-
     "help": {
       "applicants": "Tap 'Confirm' to add helpers to your team. Tap 'Profile' to view their details.",
       "confirmed": "Tap 'Remove' to unconfirm a helper. They'll be moved back to applicants list."
@@ -766,17 +766,14 @@
       "title": "Limit Reached",
       "message": "You have already confirmed all {{count}} helpers needed for this task."
     },
-
     "cannotConfirm": {
       "title": "Cannot Confirm More Helpers",
       "message": "This task only requires {{required}} helpers. You have already confirmed {{confirmed}}."
     },
-
     "alreadyConfirmed": {
       "title": "Already Confirmed",
       "message": "{{name}} is already confirmed for this task."
     },
-
     "noDescription": "No description",
     "full": "Full",
     "spotsLeft": "{{spots}} spots left",
@@ -784,7 +781,6 @@
     "allHelpersConfirmed": "All helpers confirmed! You can mark the task as completed.",
     "allSlotsFilled": "All Slots Filled"
   },
-
   "interestSelection": {
     "personalizeExperience": "Personalize Your Experience",
     "whatAreYouInterested": "What are you interested in?",
@@ -807,25 +803,19 @@
     "title": "Verify Your Email",
     "subtitle": "We've sent a verification link to:",
     "hint": "Click the link in the email to activate your account. Check your spam folder if you don't see it.",
-
     "verifiedSuccessTitle": "Email Verified!",
     "verifiedSuccessDesc": "Welcome aboard 🎉",
-
     "notVerifiedTitle": "Not Verified Yet",
     "notVerifiedDesc": "Please click the link in your email.",
-
     "emailSentTitle": "Email Sent!",
     "emailSentDesc": "Verification email resent successfully.",
-
     "resendFailedTitle": "Failed to resend",
     "resendFailedDesc": "Please try again later.",
-
     "verifiedButton": "I've Verified My Email",
     "resendButton": "Resend Email",
     "resendCooldown": "Resend in {{seconds}}s",
     "backToLogin": "Back to Login"
   },
-
   "freeTrialBanner": {
     "active": {
       "label": "Free trial active",
@@ -855,5 +845,16 @@
     "dc4": "Almost ready for Buez…",
     "tag": "Daily Chores Made Easy!",
     "footer": "Powered by Buez"
+  },
+  "postDashboard": {
+    "header": "Post Requests",
+    "overview": "Overview",
+    "emptyTitle": "Post Your First Task",
+    "emptyText": "Need help with something? Create your first request and connect with people who can help you.",
+    "emptyCta": "Post Your First Task",
+    "newCta": "Post New Task",
+    "total": "Total Tasks Posted",
+    "active": "Active Tasks",
+    "completed": "Completed Tasks"
   }
 }

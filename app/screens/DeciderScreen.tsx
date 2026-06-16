@@ -376,12 +376,12 @@ const DeciderScreen = () => {
               style={[
                 {
                   width:
-                    theme.mode === "dark" ? RFPercentage(20) : RFPercentage(15),
+                    theme.mode === "dark" ? RFPercentage(30) : RFPercentage(20),
                   height:
-                    theme.mode === "dark" ? RFPercentage(20) : RFPercentage(15),
+                    theme.mode === "dark" ? RFPercentage(15) : RFPercentage(15),
                 },
               ]}
-              resizeMode="contain"
+              resizeMode= {theme.mode === "dark" ? "cover" : "contain"}
             />
           </View>
         </Animated.View>
@@ -461,9 +461,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoPlaceholder: {
-    width: RFPercentage(14),
-    height: RFPercentage(14),
-    borderRadius: RFPercentage(3.5),
+    alignItems:"center",
+    justifyContent:"center"
   },
   logoImage: {
     width: RFPercentage(14),

@@ -161,11 +161,7 @@ const FilterButton = memo(({ title, isActive, onPress, theme }: any) => (
     >
       {title}
     </Text>
-    {isActive && (
-      <View
-        style={[styles.activeIndicator, { backgroundColor: theme.white }]}
-      />
-    )}
+    
   </TouchableOpacity>
 ));
 
@@ -632,8 +628,8 @@ function Messages({ navigation }: any) {
               <RefreshControl
                 refreshing={isRefreshing}
                 onRefresh={refreshChats}
-                colors={[theme.primary]}
-                tintColor={theme.primary}
+                colors={[theme.mode === "dark" ? Colors.white : theme.primary]}
+                tintColor={theme.mode === "dark" ? Colors.white : theme.primary}
                 progressBackgroundColor={theme.white}
               />
             }
@@ -658,7 +654,7 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingHorizontal: RFPercentage(3),
     paddingVertical: RFPercentage(1),
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(100),
     borderWidth: 1,
     marginRight: RFPercentage(1.5),
     position: "relative",
@@ -729,7 +725,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(0.5),
   },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { marginTop: RFPercentage(1.5), fontSize: RFPercentage(1.8) },
+  loadingText: { marginTop: RFPercentage(1.5), fontSize: RFPercentage(1.8) , fontFamily: "Poppins_400Regular"},
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
@@ -749,7 +745,8 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.6),
     textAlign: "center",
     marginTop: RFPercentage(1),
-    width: "80%",
+    width: "70%",
+    fontFamily: "Poppins_400Regular"
   },
   groupBadge: {
     position: "absolute",

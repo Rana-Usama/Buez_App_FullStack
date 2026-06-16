@@ -351,14 +351,16 @@ const styles = StyleSheet.create({
     bottom: RFPercentage(5),
     alignSelf: "center",
     alignItems: "center",
+    width:"100%",
   },
   applyButton: {
     paddingHorizontal: RFPercentage(2.8),
-    paddingVertical: RFPercentage(1.8),
-    borderRadius: RFPercentage(10),
+    paddingVertical: RFPercentage(2.1),
+    borderRadius: RFPercentage(2),
     justifyContent: "center",
     alignItems: "center",
     marginBottom: RFPercentage(1),
+     width: "90%",
   },
   applyButtonText: {
     color: "white",

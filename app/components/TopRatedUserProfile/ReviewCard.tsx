@@ -11,19 +11,17 @@ export default function ReviewCard({ item, translated, theme }: any) {
     <View
       style={{
         padding: RFPercentage(2),
-        borderRadius: RFPercentage(2),
+        borderRadius: 16,
         marginBottom: RFPercentage(1.5),
         borderWidth: 1,
         width: "90%",
         alignSelf: "center",
         borderColor:
           theme.mode === "dark"
-            ? "rgba(35, 35, 51, 1)"
-            : "rgba(239, 239, 242, 1)",
+            ? "rgba(255,255,255,0.10)"
+            : "rgba(17,24,39,0.08)",
         backgroundColor:
-          theme.mode === "dark"
-            ? "rgba(10, 10, 18, 1)"
-            : "rgba(239, 239, 246, 1)",
+          theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "#FFFFFF",
       }}
     >
       <View
@@ -76,7 +74,13 @@ export default function ReviewCard({ item, translated, theme }: any) {
             ))}
           </View>
         </View>
-        <Text style={{ color: Colors.primary, fontSize: 12 }}>
+        <Text
+          style={{
+            color: theme.darkGrey,
+            fontSize: 11,
+            fontFamily: "Poppins_400Regular",
+          }}
+        >
           {new Date(item.createdAt.seconds * 1000).toLocaleDateString()}
         </Text>
       </View>

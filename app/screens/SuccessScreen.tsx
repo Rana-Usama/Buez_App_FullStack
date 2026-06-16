@@ -33,24 +33,20 @@ function SuccessScreen({ navigation }) {
             theme.mode === "dark"
               ? "rgba(117, 123, 205, 0.05)"
               : "rgba(255,255,255,0.2)",
+              borderLeftColor: theme.mode === "dark" ? Colors.darkGrey2 : Colors.primary,
         },
       ]}
     >
-      <MaterialIcons
-        name={icon}
-        size={RFPercentage(3)}
-        color={ Colors.white}
-        style={styles.infoIcon}
-      />
+      <View style={styles.shareIconContainer}>
+        <MaterialIcons
+          name={icon}
+          size={RFPercentage(3)}
+          color={ Colors.white}
+          style={styles.infoIcon}
+        />
+      </View>
       <View style={styles.infoTextContainer}>
-        <Text
-          style={[
-            styles.infoTitle,
-            { color: Colors.white },
-          ]}
-        >
-          {title}
-        </Text>
+        <Text style={[styles.infoTitle, { color: Colors.white }]}>{title}</Text>
         <Text
           style={[
             styles.infoDescription,
@@ -81,7 +77,7 @@ function SuccessScreen({ navigation }) {
     >
       <StatusBar
         backgroundColor={"transparent"}
-        barStyle={"light-content"}
+        barStyle={"dark-content"}
         translucent
       />
 
@@ -90,7 +86,7 @@ function SuccessScreen({ navigation }) {
         <Octicons
           name={"check-circle"}
           style={styles.icon}
-          color={theme.mode === "dark" ? Colors.primary : Colors.white}
+          color={theme.mode === "dark" ? Colors.white : Colors.white}
         />
       </View>
 
@@ -98,7 +94,7 @@ function SuccessScreen({ navigation }) {
       <Text
         style={[
           styles.successTitle,
-          { color: theme.mode === "dark" ? Colors.primary : Colors.white },
+          { color: theme.mode === "dark" ? Colors.white : Colors.white },
         ]}
       >
         {t("successScreen.txt1")}
@@ -134,17 +130,7 @@ function SuccessScreen({ navigation }) {
           },
         ]}
       >
-        <View
-          style={[
-            styles.shareIconContainer,
-            {
-              backgroundColor:
-                theme.mode === "dark"
-                  ? "rgba(87, 84, 121, 0.34)"
-                  : "rgba(255,255,255,0.15)",
-            },
-          ]}
-        >
+        <View style={[styles.shareIconContainer]}>
           <Ionicons
             name="share-outline"
             size={RFPercentage(3)}
@@ -313,7 +299,7 @@ const styles = StyleSheet.create({
   },
   shareCard: {
     flexDirection: "row",
-    alignItems: "center",
+    // alignItems: "center",
     padding: RFPercentage(2),
     borderRadius: RFPercentage(2),
     marginBottom: RFPercentage(3),
@@ -367,8 +353,8 @@ const styles = StyleSheet.create({
     borderLeftColor: Colors.primary,
   },
   infoIcon: {
-    marginRight: RFPercentage(2),
-    marginTop: RFPercentage(0.5),
+    // marginRight: RFPercentage(2),
+    // marginTop: RFPercentage(0.5),
   },
   infoTextContainer: {
     flex: 1,

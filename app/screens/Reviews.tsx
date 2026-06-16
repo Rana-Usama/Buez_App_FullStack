@@ -27,6 +27,8 @@ import { cachedTranslate } from "../utils/cachedTranslations";
 import CustomNav from "../components/common/CustomNav";
 import AvatarInitials from "../components/common/DefaultAvatars";
 import { getAvatarColors } from "../config/avatarColors";
+import { LinearGradient } from "expo-linear-gradient";
+import { getCachedData, setCachedData } from "../utils/screenDataCache";
 
 const sameDay = (d1, d2) =>
   d1.getDate() === d2.getDate() &&
@@ -51,14 +53,27 @@ const getSectionTitle = (date, lang) => {
   });
 };
 
-const ACCENT_COLORS = [Colors.primary, Colors.secondary, Colors.green];
+// Sentiment-based accent so card colour reflects the rating instead of a
+// random rotation — cleaner and more professional.
+const getRatingColor = (rating: number) => {
+  if (rating >= 4) return Colors.green;
+  if (rating === 3) return Colors.secondary;
+  return Colors.primary;
+};
+
+const REVIEWS_CACHE_KEY = "reviewsSections";
 
 export default function Reviews({ navigation }) {
   const { t } = useTranslation();
-  const [sections, setSections] = useState([]);
+  // Seed from cache → instant render on re-entry; refresh silently after.
+  const [sections, setSections] = useState(
+    () => getCachedData<any[]>(REVIEWS_CACHE_KEY) ?? [],
+  );
   const [lang, setLang] = useState("en");
   const [translations, setTranslations] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(
+    () => getCachedData<any[]>(REVIEWS_CACHE_KEY) === undefined,
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -94,7 +109,7 @@ export default function Reviews({ navigation }) {
   }, []);
 
   const fetchMyReviews = async () => {
-    setLoading(true);
+    // Loader only on first-ever load (seeded from cache); refreshes are silent.
     try {
       const data = await fetchMyReviewsFromFirebase();
       const translationMap = { ...translations };
@@ -145,6 +160,7 @@ export default function Reviews({ navigation }) {
       }
       setTranslations(translationMap);
       setSections(finalSections);
+      setCachedData(REVIEWS_CACHE_KEY, finalSections);
     } catch (err) {
       console.error("Error fetching reviews:", err);
     } finally {
@@ -171,7 +187,7 @@ export default function Reviews({ navigation }) {
           key={i}
           style={{
             fontSize: size,
-            color: i <= rating ? Colors.star : isDark ? "#3a3a4a" : "#E2E8F0",
+            color: i <= rating ? Colors.star : isDark ? "#e0e0feff" : "#E2E8F0",
           }}
         >
           ★
@@ -241,7 +257,7 @@ export default function Reviews({ navigation }) {
     const translatedReview = translations[item.id] || labels.translating;
     const firstLetter = item?.reviewer?.userName?.trim()?.[0] ?? "?";
     const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
-    const accentColor = ACCENT_COLORS[index % ACCENT_COLORS.length];
+    const accentColor = getRatingColor(Math.round(item.rating || 0));
 
     return (
       <View
@@ -316,16 +332,7 @@ export default function Reviews({ navigation }) {
           {/* Footer */}
           <View style={styles.cardFooter}>
             <StarRow rating={Math.round(item.rating || 0)} />
-            <View
-              style={[
-                styles.verifiedPill,
-                { backgroundColor: theme.mode === "dark" ? accentColor + "40" : accentColor + "10" },
-              ]}
-            >
-              <Text style={[styles.verifiedText, { color: accentColor }]}>
-                Verified
-              </Text>
-            </View>
+           
           </View>
         </View>
       </View>
@@ -335,31 +342,21 @@ export default function Reviews({ navigation }) {
   // ── Section header ────────────────────────────────────────────────────────
   const renderHeader = ({ section: { title } }) => (
     <View style={styles.sectionHeaderContainer}>
-      <View
-        style={[
-          styles.sectionHeaderLine,
-          { backgroundColor: isDark ? "#2a2d45" : Colors.detailsBorder },
-        ]}
-      />
+      
       <Text
         style={[
           styles.sectionHeaderText,
           {
             color: isDark ? Colors.darkGrey : Colors.primary,
             backgroundColor: isDark
-              ? Colors.primary + "30"
+              ? Colors.white + "20"
               : Colors.primary + "12",
           },
         ]}
       >
         {title}
       </Text>
-      <View
-        style={[
-          styles.sectionHeaderLine,
-          { backgroundColor: isDark ? "#2a2d45" : Colors.detailsBorder },
-        ]}
-      />
+     
     </View>
   );
 
@@ -384,21 +381,24 @@ export default function Reviews({ navigation }) {
           ]}
         >
           <View style={styles.overviewRow}>
-            {/* Score box */}
-            <View style={styles.scoreBox}>
-              <Text style={styles.scoreNum}>{averageRating}</Text>
-              <Text style={styles.scoreDenom}>/ 5</Text>
-            </View>
-
-            <View style={styles.overviewRight}>
-              <Text
-                style={[
-                  styles.overviewTitle,
-                  { color: isDark ? Colors.white : Colors.primary },
-                ]}
+            {/* Score column */}
+            <View style={styles.scoreCol}>
+              <LinearGradient
+                colors={[Colors.primary, Colors.primary2]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.scoreBox}
               >
-                {t("reviews.txt5")}
-              </Text>
+                <Text style={styles.scoreNum}>{averageRating}</Text>
+                <Text style={styles.scoreDenom}>/ 5</Text>
+              </LinearGradient>
+
+              <View style={styles.scoreStars}>
+                <StarRow
+                  rating={Math.round(parseFloat(averageRating))}
+                  size={RFPercentage(1.9)}
+                />
+              </View>
               <Text
                 style={[
                   styles.overviewSub,
@@ -408,21 +408,29 @@ export default function Reviews({ navigation }) {
                 {t("reviews.txt6")} {totalReviews}{" "}
                 {totalReviews === 1 ? t("reviews.txt7") : t("reviews.txt8")}
               </Text>
-              <StarRow
-                rating={Math.round(parseFloat(averageRating))}
-                size={RFPercentage(2.2)}
-              />
+            </View>
+
+            {/* Vertical divider */}
+            <View
+              style={[
+                styles.vDivider,
+                { backgroundColor: isDark ? "#2a2d45" : Colors.detailsBorder },
+              ]}
+            />
+
+            {/* Distribution column */}
+            <View style={styles.barsCol}>
+              <Text
+                style={[
+                  styles.overviewTitle,
+                  { color: isDark ? Colors.white : Colors.primary },
+                ]}
+              >
+                {t("reviews.txt5")}
+              </Text>
+              <RatingBars />
             </View>
           </View>
-
-          {/* Distribution bars */}
-          <View
-            style={[
-              styles.divider,
-              { backgroundColor: isDark ? "#2a2d45" : Colors.detailsBorder },
-            ]}
-          />
-          <RatingBars />
         </View>
       )}
 
@@ -465,30 +473,38 @@ const styles = StyleSheet.create({
   // Overview card
   overviewCard: {
     margin: RFPercentage(2),
-    borderRadius: RFPercentage(2),
-    borderWidth: 0.5,
-    padding: RFPercentage(2),
-    shadowColor: "#a7a4eeff",
+    borderRadius: RFPercentage(2.4),
+    borderWidth: 1,
+    padding: RFPercentage(2.2),
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 5,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
     elevation: 5,
   },
   overviewRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: RFPercentage(1.8),
+  },
+  scoreCol: {
+    alignItems: "center",
+    width: RFPercentage(17),
   },
   scoreBox: {
-    backgroundColor: Colors.primary,
-    borderRadius: RFPercentage(1.5),
-    paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(1.5),
+    borderRadius: RFPercentage(1.8),
+    paddingHorizontal: RFPercentage(2.2),
+    paddingVertical: RFPercentage(1.4),
     alignItems: "center",
-    minWidth: RFPercentage(9),
+    justifyContent: "center",
+    minWidth: RFPercentage(11),
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   scoreNum: {
     fontSize: RFPercentage(4),
@@ -498,21 +514,34 @@ const styles = StyleSheet.create({
   },
   scoreDenom: {
     fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.6)",
+    fontFamily: "Poppins_500Medium",
+    color: "rgba(255,255,255,0.75)",
+    marginTop: -RFPercentage(0.4),
+  },
+  scoreStars: {
+    marginTop: RFPercentage(1),
   },
   overviewRight: { flex: 1 },
   overviewTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.75),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(0.3),
+    marginBottom: RFPercentage(1),
   },
   overviewSub: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.35),
     fontFamily: "Poppins_400Regular",
-    marginBottom: Platform.OS === "ios" ? RFPercentage(0.5) : RFPercentage(0),
+    textAlign: "center",
+    marginTop: RFPercentage(0.6),
   },
-  starsRow: { flexDirection: "row", gap: 2 },
+  vDivider: {
+    width: 1,
+    alignSelf: "stretch",
+    marginHorizontal: RFPercentage(2),
+  },
+  barsCol: {
+    flex: 1,
+  },
+  starsRow: { flexDirection: "row", gap: 0 },
   divider: { height: 0.5, marginVertical: RFPercentage(1.5) },
 
   // Rating bars
@@ -562,37 +591,37 @@ const styles = StyleSheet.create({
   // Card
   card: {
     marginHorizontal: RFPercentage(2),
-    marginBottom: RFPercentage(1.5),
-    borderRadius: RFPercentage(2),
-    borderWidth: 0.8,
-    shadowColor: "#a7a4eeff",
+    marginBottom: RFPercentage(1.6),
+    borderRadius: RFPercentage(2.2),
+    borderBottomWidth: 1,
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    // elevation: 3,
   },
   cardAccentBar: { height: 3, width: "100%" },
   cardBody: { padding: RFPercentage(2) },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: RFPercentage(1.4),
   },
   userInfo: { flexDirection: "row", alignItems: "center", flex: 1 },
   avatar: {
-    width: RFPercentage(5),
-    height: RFPercentage(5),
+    width: RFPercentage(5.4),
+    height: RFPercentage(5.4),
     borderRadius: RFPercentage(100),
-    borderWidth: 1,
-    marginRight: RFPercentage(1.2),
+    borderWidth: 2,
+    marginRight: RFPercentage(1.3),
   },
   userDetails: { flex: 1 },
   userName: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.75),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(0.2),
   },
@@ -601,24 +630,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: RFPercentage(0.3),
-    paddingHorizontal: RFPercentage(1.2),
-    borderRadius: RFPercentage(0.8),
+    paddingHorizontal: RFPercentage(1.3),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(1),
     justifyContent: "center",
   },
   ratingNumber: {
-    fontSize: RFPercentage(1.8),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_700Bold",
     color: "#fff",
-    lineHeight: RFPercentage(4),
+    lineHeight: RFPercentage(2.4),
   },
   ratingStar: { fontSize: RFPercentage(1.4), color: "#FFD700" },
 
   // Quote block
   quoteBlock: {
-    borderLeftWidth: 2.5,
-    borderRadius: 0,
+    borderLeftWidth: RFPercentage(0.4),
+    borderRadius: RFPercentage(0.4),
     paddingLeft: RFPercentage(1.4),
-    marginBottom: RFPercentage(1.4),
+    paddingVertical: RFPercentage(0.2),
+    marginBottom: RFPercentage(1.5),
   },
   reviewText: {
     fontSize: RFPercentage(1.6),
@@ -634,8 +665,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   verifiedPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.4),
     paddingHorizontal: RFPercentage(1.2),
-    paddingVertical: RFPercentage(0.3),
+    paddingVertical: RFPercentage(0.45),
     borderRadius: 100,
   },
   verifiedText: {

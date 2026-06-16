@@ -32,6 +32,7 @@ import { useAppTheme } from "../contexts/themeContext";
 import Home from "../screens/Home";
 import MyRequests from "../screens/MyRequests";
 import PostRequest from "../screens/PostRequest";
+import PostDashboard from "../screens/PostDashboard";
 import Messages from "../screens/Messages";
 import Settings from "../screens/Settings";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -111,6 +112,12 @@ const CustomDrawerContent = (props) => {
       icon: "check-circle-outline",
       iconType: "material",
       route: "CompletedTasks",
+    },
+    {
+      label: t("profile.txt5"),
+      icon: "briefcase-outline",
+      iconType: "ionicons",
+      route: "AcceptedTasks",
     },
 
     ...(isMonthlyPlan
@@ -262,8 +269,6 @@ const CustomDrawerContent = (props) => {
     }
   };
 
-
-
   return (
     <>
       <DrawerContentScrollView
@@ -306,7 +311,7 @@ const CustomDrawerContent = (props) => {
               ) : (
                 <AvatarInitials
                   name={user?.userName}
-                   style={styles.userImage}
+                  style={styles.userImage}
                   textStyle={{
                     fontSize: RFPercentage(4),
                     lineHeight: RFPercentage(6),
@@ -353,13 +358,14 @@ const CustomDrawerContent = (props) => {
                   <BlurView
                     intensity={60}
                     tint="light"
-                    style={styles.activeItemGlass}
+                    style={[styles.activeItemGlass,{backgroundColor: "rgba(255, 255, 255, 0.61)",}]}
                   >
                     <LinearGradient
-                      colors={[
-                        "rgba(69, 87, 176, 0.4)",
-                        "rgba(69, 87, 176, 0.2)",
-                      ]}
+                      colors={
+                        theme.mode === "dark"
+                          ? ["rgba(49, 53, 72, 0.4)", "rgba(88, 91, 105, 0.2)"]
+                          : ["rgba(69, 87, 176, 0.4)", "rgba(69, 87, 176, 0.2)"]
+                      }
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       style={styles.activeItemGradient}
@@ -399,7 +405,7 @@ const CustomDrawerContent = (props) => {
                       {
                         backgroundColor:
                           theme.mode === "dark"
-                            ? "rgba(87, 89, 109, 0.09)"
+                            ? "rgba(87, 89, 109, 0.34)"
                             : "rgba(214, 214, 214, 0.17)",
                       },
                     ]}
@@ -520,7 +526,7 @@ function MainTabNavigator() {
       }}
     >
       <Tab.Screen name={`${t("bottomTab.txt1")}`} component={MyRequests} />
-      <Tab.Screen name={`${t("bottomTab.txt2")}`} component={PostRequest} />
+      <Tab.Screen name={`${t("bottomTab.txt2")}`} component={PostDashboard} />
       <Tab.Screen name={`${t("bottomTab.txt3")}`} component={Home} />
       <Tab.Screen name={`${t("bottomTab.txt4")}`} component={Messages} />
       <Tab.Screen name={`${t("bottomTab.txt5")}`} component={Settings} />
@@ -559,7 +565,13 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
     <View
       style={[
         styles.tabBarContainer,
-        { paddingBottom: insets.bottom, backgroundColor: theme.detailsBorder },
+        {
+          // Expand the bar's total height by the safe-area inset and pad the
+          // content up so the tabs sit above Android gesture / nav buttons.
+          height: RFPercentage(10) + insets.bottom,
+          paddingBottom: insets.bottom,
+          backgroundColor: theme.detailsBorder,
+        },
       ]}
     >
       <View style={styles.labelContainer}>
@@ -691,7 +703,9 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     alignItems: "center",
     justifyContent: "center",
-    height: Platform.OS === "ios" ? RFPercentage(10) : RFPercentage(10),
+    // Height is set dynamically in the component as RFPercentage(10) + inset.
+    // No position:absolute / bottom:0 so the bar flows below screen content
+    // and never hides behind the Android gesture bar.
   },
   tabButton: {
     alignItems: "center",
@@ -821,8 +835,8 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   userEmail: {
-    fontSize:  RFPercentage(1.5),
-    marginTop:  RFPercentage(0.9),
+    fontSize: RFPercentage(1.5),
+    marginTop: RFPercentage(0.9),
   },
   drawerItemsContainer: {
     flex: 1,

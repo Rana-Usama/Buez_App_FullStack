@@ -572,13 +572,10 @@ function SubscriptionV2(props) {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={isDark ? "light-content" : "dark-content"}
+        barStyle={isDark ? "light-content" : "light-content"}
         backgroundColor="transparent"
         translucent
       />
-
-      
-
       {/* Top glow strip */}
       <LinearGradient
         colors={
@@ -1163,15 +1160,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   ctaOuter: {
-    width: "70%",
-    borderRadius: RFPercentage(100),
+    width: "90%",
+    borderRadius: RFPercentage(2),
     overflow: "hidden",
     shadowColor: "#253275",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 18,
     alignSelf: "center",
-    height: RFPercentage(6),
+    height: RFPercentage(6.4),
     // elevation: 12,
   },
   ctaBtn: {
@@ -1180,8 +1177,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     // paddingVertical: RFPercentage(1.85),
     gap: RFPercentage(1),
-    borderRadius: 100,
-    height: RFPercentage(6),
+    borderRadius: RFPercentage(2),
+    height: RFPercentage(6.4),
   },
   ctaBtnText: {
     fontFamily: "Poppins_600SemiBold",
@@ -1288,7 +1285,7 @@ const styles = StyleSheet.create({
   },
   modalPrimaryOuter: {
     flex: 1,
-    borderRadius: 100,
+    borderRadius: RFPercentage(2),
     overflow: "hidden",
     shadowColor: "#253275",
     shadowOffset: { width: 0, height: 6 },
@@ -1300,7 +1297,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1.6),
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 100,
+    borderRadius: RFPercentage(2),
   },
   modalPrimaryText: {
     fontFamily: "Poppins_600SemiBold",
@@ -1312,7 +1309,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1.6),
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 100,
+    borderRadius: RFPercentage(2),
     borderWidth: 1.5,
   },
   modalSecondaryText: {

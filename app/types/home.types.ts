@@ -60,6 +60,7 @@ export interface Task {
   status?: string;
   scheduledDate?: string;
   scheduledTime?: string;
+  scheduledDateTime?: string;
 }
 
 export interface TopRatedUser {

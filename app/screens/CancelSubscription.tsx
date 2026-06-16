@@ -178,7 +178,7 @@ function CancelSubscription({ navigation }: any) {
             >
               <View style={styles.priceContainer}>
                 <Image style={styles.starIconLeft} source={Icons.stars} />
-                <Text style={[styles.planTitle, { color: theme.primary }]}>
+                <Text style={[styles.planTitle, { color: theme.mode === "dark" ? Colors.white  : theme.primary }]}>
                   {currentPlanDetails?.title}
                 </Text>
 
@@ -249,13 +249,13 @@ function CancelSubscription({ navigation }: any) {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? Colors.primary + "40"
+                        ? Colors.darkGrey + "30"
                         : Colors.primary + "15",
                   },
                 ]}
               >
                 <Text
-                  style={[styles.cancellationTitle, { color: theme.primary }]}
+                  style={[styles.cancellationTitle, { color: theme.mode === "dark" ? Colors.white : theme.primary }]}
                 >
                   {t("cancelSubscription.cancellationNote") ||
                     "Cancellation Details"}

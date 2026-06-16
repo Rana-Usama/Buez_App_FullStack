@@ -51,13 +51,13 @@ const MessageItem = memo(
                 ? {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? "rgba(7, 7, 36, 1)"
+                        ? "rgba(54, 54, 65, 1)"
                         : Colors.primary,
                   }
                 : {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? "rgba(10,10,17,1)"
+                        ? "rgba(39, 39, 43, 1)"
                         : "rgba(240, 242, 245, 1)",
                   },
             ]}

@@ -152,6 +152,57 @@ export const getMyReuqests = async (
   }
 };
 
+// Counts of the current user's posted tasks, grouped by status.
+// Used by the Post dashboard tab. Single query, tallied locally.
+export const getMyRequestCounts = async () => {
+  const empty = { total: 0, active: 0, completed: 0, cancelled: 0 };
+  try {
+    const userId = getAuth().currentUser?.uid;
+    if (!userId) return empty;
+
+    const counts = { ...empty };
+    const now = Date.now();
+
+    // Total / completed / cancelled — whole collection for this user.
+    const allSnap = await getDocs(
+      query(
+        collection(FIREBASE_DB, "taskRequests"),
+        where("userId", "==", userId),
+      ),
+    );
+    allSnap.forEach((d) => {
+      const status = d.data()?.status;
+      counts.total += 1;
+      if (status === REQUEST_STATUS.Completed) counts.completed += 1;
+      else if (status === REQUEST_STATUS.Cancelled) counts.cancelled += 1;
+    });
+
+    // Active (not past) — use the SAME query shape as the My Requests
+    // "Active" tab (status == Active, ordered by createdAt) so the count
+    // always matches the cards shown there, then drop past-scheduled tasks.
+    const activeSnap = await getDocs(
+      query(
+        collection(FIREBASE_DB, "taskRequests"),
+        where("status", "==", REQUEST_STATUS.Active),
+        where("userId", "==", userId),
+        orderBy("createdAt", "desc"),
+      ),
+    );
+    activeSnap.forEach((d) => {
+      const data = d.data();
+      const scheduled = data?.scheduledDateTime || data?.scheduledDate;
+      const ts = scheduled ? new Date(scheduled).getTime() : NaN;
+      const isPast = !isNaN(ts) && ts < now;
+      if (!isPast) counts.active += 1;
+    });
+
+    return counts;
+  } catch (error) {
+    console.log("GET_MY_REQUEST_COUNTS:", error);
+    return empty;
+  }
+};
+
 // real-time version of getRequestList
 export const getRequestList = (
   taskType = "",

@@ -245,9 +245,11 @@ function ConfirmedHelpers({ route, navigation }) {
         style={[
           styles.helperCard,
           {
-            backgroundColor: theme.white,
+            backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
             borderWidth: 1,
-            borderColor: theme.lightWhite,
+            borderColor: isDark
+              ? "rgba(255,255,255,0.10)"
+              : "rgba(17,24,39,0.08)",
           },
         ]}
       >
@@ -259,25 +261,51 @@ function ConfirmedHelpers({ route, navigation }) {
               resizeMode="cover"
             />
           ) : (
-            <AvatarInitials name={item?.userName} style={[styles.helperImage,{borderColor:groupTextColor}]} />
+            <AvatarInitials
+              name={item?.userName}
+              style={[styles.helperImage, { borderColor: groupTextColor }]}
+            />
           )}
 
           <View style={styles.helperDetails}>
             <Text style={[styles.helperName, { color: theme.heading }]}>
               {item.userName || "Unknown User"}
             </Text>
-            <Text style={[styles.helperEmail, { color: theme.darkGrey }]}>
+            <Text
+              style={[styles.helperEmail, { color: theme.darkGrey }]}
+              numberOfLines={1}
+            >
               {item.email || ""}
             </Text>
 
             {item.confirmedAt && (
-              <Text style={[styles.confirmedDate, { color: theme.darkGrey }]}>
-                {t("offerDetail.confirmedOn")}:{" "}
-                {new Date(item.confirmedAt).toLocaleDateString()}
-              </Text>
+              <View style={styles.confirmedDateRow}>
+                <Ionicons
+                  name="calendar-outline"
+                  size={RFPercentage(1.3)}
+                  color={theme.darkGrey}
+                />
+                <Text
+                  style={[styles.confirmedDate, { color: theme.darkGrey }]}
+                >
+                  {t("offerDetail.confirmedOn")}:{" "}
+                  {new Date(item.confirmedAt).toLocaleDateString()}
+                </Text>
+              </View>
             )}
           </View>
         </View>
+
+        <View
+          style={[
+            styles.helperDivider,
+            {
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.08)"
+                : "rgba(17,24,39,0.06)",
+            },
+          ]}
+        />
 
         <View style={styles.actionButtons}>
           {item.canReview ? (
@@ -325,10 +353,13 @@ function ConfirmedHelpers({ route, navigation }) {
             style={[
               styles.messageButton,
               {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? Colors.primary + "05"
-                    : Colors.primary + "10",
+                backgroundColor: isDark
+                  ? "rgba(255,255,255,0.06)"
+                  : Colors.primary + "0D",
+                borderWidth: 1,
+                borderColor: isDark
+                  ? "rgba(255,255,255,0.12)"
+                  : Colors.primary + "33",
               },
             ]}
             onPress={() => handleStartChat(item)}
@@ -337,9 +368,9 @@ function ConfirmedHelpers({ route, navigation }) {
             <Ionicons
               name="chatbubble-outline"
               size={RFPercentage(1.5)}
-              color={Colors.primary}
+              color={isDark ? Colors.white : Colors.primary}
             />
-            <Text style={styles.messageButtonText}>
+            <Text style={[styles.messageButtonText,{color: isDark ? Colors.white : Colors.primary}]}>
               {t("details.txt9") || "Message"}
             </Text>
           </TouchableOpacity>
@@ -357,43 +388,64 @@ function ConfirmedHelpers({ route, navigation }) {
 
       <CustomNav title={t("myRequests.confirmedHelpers")} />
 
-      <View style={[styles.taskInfo]}>
+      {/* Compact task summary card */}
+      <View
+        style={[
+          styles.taskInfo,
+          {
+            backgroundColor:
+              theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+            borderColor:
+              theme.mode === "dark"
+                ? "rgba(255,255,255,0.10)"
+                : "rgba(17,24,39,0.08)",
+          },
+        ]}
+      >
         <Image
           source={{ uri: task?.imageUrls[0] }}
           resizeMode="cover"
-          style={{
-            width: "100%",
-            height: RFPercentage(30),
-            borderRadius: RFPercentage(2),
-          }}
+          style={styles.taskThumb}
         />
-        <Text style={[styles.taskTitle, { color: theme.heading }]}>
-          {task.taskType || task.title || "Task"}
-        </Text>
-
-        <Text style={[styles.taskDescription, { color: theme.darkGrey }]}>
-          {task.description?.substring(0, 100) || "No description"}
-          {task.description?.length > 100 ? "..." : ""}
-        </Text>
-
-        <View style={styles.taskStatusRow}>
-          <Text style={[styles.taskStatus, { color: theme.darkGrey }]}>
-            {t("taskApplicants.status")}:{" "}
-            <Text style={{ color: Colors.green }}>{task.status}</Text>
+        <View style={styles.taskMeta}>
+          <Text
+            style={[styles.taskTitle, { color: theme.heading }]}
+            numberOfLines={1}
+          >
+            {task.taskType || task.title || "Task"}
           </Text>
 
-          {task.reviewedAccepter && (
-            <View style={styles.taskReviewedBadge}>
-              <Ionicons
-                name="checkmark-circle"
-                size={RFPercentage(1.3)}
-                color={Colors.green}
-              />
-              <Text style={styles.taskReviewedText}>
-                {task.isBulkRequest ? "Some helpers reviewed" : "Task reviewed"}
+          <Text
+            style={[styles.taskDescription, { color: theme.darkGrey }]}
+            numberOfLines={2}
+          >
+            {task.description?.substring(0, 100) || "No description"}
+            {task.description?.length > 100 ? "..." : ""}
+          </Text>
+
+          <View style={styles.taskStatusRow}>
+            <View style={styles.taskStatusPill}>
+              <View style={styles.taskStatusDot} />
+              <Text style={styles.taskStatus} numberOfLines={1}>
+                {task.status}
               </Text>
             </View>
-          )}
+
+            {task.reviewedAccepter && (
+              <View style={styles.taskReviewedBadge}>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={RFPercentage(1.3)}
+                  color={Colors.green}
+                />
+                <Text style={styles.taskReviewedText} numberOfLines={1}>
+                  {task.isBulkRequest
+                    ? "Some helpers reviewed"
+                    : "Task reviewed"}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </View>
 
@@ -463,31 +515,62 @@ const styles = StyleSheet.create({
   taskInfo: {
     width: "90%",
     alignSelf: "center",
-    marginTop:RFPercentage(2)
-    // padding: RFPercentage(2),
+    marginTop: RFPercentage(2),
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: RFPercentage(1.4),
+    gap: RFPercentage(1.4),
+  },
+  taskThumb: {
+    width: RFPercentage(9),
+    height: RFPercentage(9),
+    borderRadius: 12,
+  },
+  taskMeta: {
+    flex: 1,
   },
   taskTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
-    marginTop: RFPercentage(1),
   },
   taskStatusRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: RFPercentage(0.5),
+    gap: RFPercentage(1),
+    marginTop: RFPercentage(0.8),
+  },
+  taskStatusPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.6),
+    backgroundColor: Colors.green + "15",
+    borderWidth: 1,
+    borderColor: Colors.green + "55",
+    paddingHorizontal: RFPercentage(1.2),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: RFPercentage(100),
+  },
+  taskStatusDot: {
+    width: RFPercentage(0.8),
+    height: RFPercentage(0.8),
+    borderRadius: RFPercentage(0.4),
+    backgroundColor: Colors.green,
   },
   taskStatus: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.green,
   },
   taskReviewedBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.green + "30",
+    flexShrink: 1,
+    backgroundColor: Colors.green + "15",
     paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(0.5),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: RFPercentage(100),
   },
   taskReviewedText: {
     fontSize: RFPercentage(1.2),
@@ -525,27 +608,21 @@ const styles = StyleSheet.create({
     padding: RFPercentage(2),
   },
   helperCard: {
-    borderRadius: RFPercentage(1.5),
-    padding: RFPercentage(2),
-    marginBottom: RFPercentage(1.5),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 16,
+    padding: RFPercentage(1.8),
+    marginBottom: RFPercentage(1.4),
   },
   helperInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: RFPercentage(1.5),
   },
   helperImage: {
     width: RFPercentage(6),
     height: RFPercentage(6),
-    borderRadius: RFPercentage(3),
-    marginRight: RFPercentage(2),
+    borderRadius: RFPercentage(1.6),
+    marginRight: RFPercentage(1.5),
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: Colors.primary + "33",
   },
   helperDetails: {
     flex: 1,
@@ -553,84 +630,98 @@ const styles = StyleSheet.create({
   helperName: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(0.3),
+    marginBottom: RFPercentage(0.2),
   },
   helperEmail: {
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
     marginBottom: RFPercentage(0.3),
   },
+  confirmedDateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.5),
+  },
   confirmedDate: {
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_400Regular",
-    fontStyle: "italic",
+  },
+  helperDivider: {
+    height: 1,
+    width: "100%",
+    marginVertical: RFPercentage(1.4),
   },
   actionButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: RFPercentage(1),
+    gap: RFPercentage(1.2),
   },
   reviewButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: RFPercentage(0.5),
     backgroundColor: Colors.primary,
+    height: RFPercentage(4.6),
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1.3),
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(1.4),
     flex: 1,
   },
   reviewButtonText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_600SemiBold",
     color: Colors.white,
-    marginLeft: RFPercentage(0.5),
   },
   reviewedBadge: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.green + "30",
+    gap: RFPercentage(0.5),
+    backgroundColor: Colors.green + "15",
+    borderWidth: 1,
+    borderColor: Colors.green + "55",
+    height: RFPercentage(4.6),
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1),
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(1.4),
     flex: 1,
   },
   reviewedText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_600SemiBold",
     color: Colors.green,
-    marginLeft: RFPercentage(0.5),
   },
   cannotReviewBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.lightGrey,
+    justifyContent: "center",
+    gap: RFPercentage(0.5),
+    backgroundColor: Colors.lightGrey + "40",
+    borderWidth: 1,
+    borderColor: Colors.lightGrey,
+    height: RFPercentage(4.6),
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1),
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(1.4),
     flex: 1,
   },
   cannotReviewText: {
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
     color: Colors.darkGrey,
-    marginLeft: RFPercentage(0.5),
   },
   messageButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1.3),
-    borderRadius: RFPercentage(1),
-    flex: 1,
     justifyContent: "center",
+    gap: RFPercentage(0.5),
+    height: RFPercentage(4.6),
+    paddingHorizontal: RFPercentage(1.5),
+    borderRadius: RFPercentage(1.4),
+    flex: 1,
   },
   messageButtonText: {
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_600SemiBold",
     color: Colors.primary,
-    marginLeft: RFPercentage(0.5),
   },
   loadingContainer: {
     flex: 1,
@@ -647,6 +738,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: RFPercentage(5),
+    bottom:RFPercentage(10)
   },
   emptyText: {
     fontSize: RFPercentage(2),

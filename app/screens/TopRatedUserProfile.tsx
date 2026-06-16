@@ -566,8 +566,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
   // UI Helpers
   const getRankData = (completedCount: number) => {
-
-    console.log("completedCount.....",completedCount)
+    console.log("completedCount.....", completedCount);
     if (completedCount >= 6)
       return {
         label: t("profileRank.txt39"),
@@ -627,7 +626,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
   return (
     <View style={[styles.container, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={"light-content"}
+        barStyle={theme.mode === "dark" ? "light-content" : "dark-content"}
         backgroundColor={"transparent"}
         translucent
       />
@@ -651,6 +650,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
           theme={theme}
           t={t}
           navigation={navigation}
+          stats={stats}
         />
 
         {/* FLOATING STATS STRIP */}
@@ -669,7 +669,13 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
             style={[
               styles.tabContainer,
               {
-                backgroundColor: theme.mode === "dark" ? "#1A1A1A" : "#F1F3F5",
+                backgroundColor:
+                  theme.mode === "dark" ? "rgba(255,255,255,0.06)" : "#F6F7F9",
+                borderWidth: 1,
+                borderColor:
+                  theme.mode === "dark"
+                    ? "rgba(255,255,255,0.10)"
+                    : "rgba(17,24,39,0.08)",
               },
             ]}
           >
@@ -726,9 +732,27 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                   !showAllCompleted && (
                     <TouchableOpacity
                       onPress={() => setShowAllCompleted(true)}
-                      style={styles.showMoreBtn}
+                      style={[
+                        styles.showMoreBtn,
+                        {
+                          borderColor:
+                            theme.mode === "dark"
+                              ? Colors.white
+                              : Colors.primary + "55",
+                        },
+                      ]}
                     >
-                      <Text style={styles.showMoreText}>
+                      <Text
+                        style={[
+                          styles.showMoreText,
+                          {
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : Colors.primary,
+                          },
+                        ]}
+                      >
                         +{tasks.completed.length - INITIAL_COUNT} more
                       </Text>
                     </TouchableOpacity>
@@ -764,9 +788,25 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               {reviews?.length > INITIAL_COUNT && !showAllReviews && (
                 <TouchableOpacity
                   onPress={() => setShowAllReviews(true)}
-                  style={styles.showMoreBtn}
+                  style={[
+                    styles.showMoreBtn,
+                    {
+                      borderColor:
+                        theme.mode === "dark"
+                          ? Colors.white
+                          : Colors.primary + "55",
+                    },
+                  ]}
                 >
-                  <Text style={styles.showMoreText}>
+                  <Text
+                    style={[
+                      styles.showMoreText,
+                      {
+                        color:
+                          theme.mode === "dark" ? Colors.white : Colors.primary,
+                      },
+                    ]}
+                  >
                     +{reviews?.length - INITIAL_COUNT} more
                   </Text>
                 </TouchableOpacity>
@@ -1193,22 +1233,17 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: "row",
-    borderRadius: RFPercentage(2),
-    padding: RFPercentage(0.3),
+    borderRadius: RFPercentage(1.8),
+    padding: RFPercentage(0.4),
   },
   tab: {
     flex: 1,
     paddingVertical: RFPercentage(1.2),
     alignItems: "center",
-    borderRadius: RFPercentage(1.7),
+    borderRadius: RFPercentage(1.4),
   },
   activeTab: {
     backgroundColor: Colors.primary,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
     paddingHorizontal: 10,
   },
   tabText: {
@@ -1326,10 +1361,12 @@ const styles = StyleSheet.create({
   showMoreBtn: {
     alignSelf: "center",
     marginVertical: RFPercentage(1.5),
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: Colors.primary + "20",
+    paddingVertical: 7,
+    paddingHorizontal: 16,
+    borderRadius: 100,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: Colors.primary + "55",
   },
   showMoreText: {
     color: Colors.primary,

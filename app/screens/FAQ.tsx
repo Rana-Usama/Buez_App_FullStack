@@ -173,11 +173,11 @@ function FAQ() {
   const getIconComponent = (iconType, iconName, color, size) => {
     switch (iconType) {
       case "fontawesome":
-        return <FontAwesome5 name={iconName} size={size} color={color} />;
+        return <FontAwesome5 name={iconName} size={size}  color={ theme.mode === "dark" ? Colors.white : theme.primary} />;
       case "ionicons":
-        return <Ionicons name={iconName} size={size} color={color} />;
+        return <Ionicons name={iconName} size={size}  color={ theme.mode === "dark" ? Colors.white : theme.primary} />;
       default:
-        return <MaterialIcons name={iconName} size={size} color={color} />;
+        return <MaterialIcons name={iconName} size={size}  color={ theme.mode === "dark" ? Colors.white : theme.primary} />;
     }
   };
 
@@ -221,7 +221,7 @@ function FAQ() {
               {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? Colors.primary + "40"
+                    ? Colors.white + "30"
                     : Colors.primary + "15",
               },
             ]}
@@ -229,7 +229,7 @@ function FAQ() {
             <Ionicons
               name="help-buoy"
               size={RFPercentage(4)}
-              color={theme.primary}
+               color={ theme.mode === "dark" ? Colors.white : theme.primary}
             />
           </View>
           <Text style={[styles.headerTitle, { color: theme.heading }]}>
@@ -279,7 +279,7 @@ function FAQ() {
                       styles.faqItem,
                       {
                         backgroundColor: cardBackground,
-                        borderColor: theme.stroke,
+                        borderColor: theme.lightWhite,
                         shadowColor: shadowColor,
                       },
                     ]}
@@ -304,7 +304,7 @@ function FAQ() {
                           <MaterialIcons
                             name="help-outline"
                             size={RFPercentage(2)}
-                            color={theme.primary}
+                            color={ theme.mode === "dark" ? Colors.white : theme.primary}
                           />
                         </View>
                         <Text
@@ -323,7 +323,7 @@ function FAQ() {
                             : "keyboard-arrow-down"
                         }
                         size={RFPercentage(2.5)}
-                        color={theme.primary}
+                        color={ theme.mode === "dark" ? Colors.white : theme.primary}
                       />
                     </TouchableOpacity>
 

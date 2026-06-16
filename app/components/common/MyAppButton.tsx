@@ -29,7 +29,7 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
   loading = false,
   disabled = false,
   height = Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
-  width = Platform.OS === "android" ? RFPercentage(21.5) : RFPercentage(18.5),
+  width = "100%",
   marginTop = RFPercentage(5),
   title = "Login",
   onPress,
@@ -43,7 +43,7 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
       style={{
         width,
         height,
-        borderRadius: RFPercentage(20),
+        borderRadius: RFPercentage(2),
         overflow: "hidden",
         marginTop,
       }}

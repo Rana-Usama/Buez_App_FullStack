@@ -129,6 +129,10 @@ function MyRequests({ navigation }) {
   const [groupChatMap, setGroupChatMap] = useState<Record<string, boolean>>({});
   // Animation values for each card
   const rotateAnims = useRef<{ [key: number]: Animated.Value }>({}).current;
+  // Tracks the last loaded status filter so we only show the full-screen loader
+  // (and clear the list) on first load or an actual filter change — not on every
+  // re-focus, where we keep showing current data and refresh silently.
+  const lastFilterRef = useRef<string | null>(null);
 
   const { location: currentLocation } = useLocation();
   useExitAppOnBack();
@@ -203,7 +207,8 @@ function MyRequests({ navigation }) {
   };
 
   const param =
-    activeFilter === `${t("myRequests.txt2")}`
+    activeFilter === `${t("myRequests.txt2")}` ||
+    activeFilter === `${t("myRequests.txt14")}`
       ? REQUEST_STATUS.Active
       : activeFilter === `${t("myRequests.txt3")}`
         ? REQUEST_STATUS.Completed
@@ -228,6 +233,15 @@ function MyRequests({ navigation }) {
       });
     }
     return null;
+  };
+
+  // A task is "past" once its scheduled date/time has elapsed.
+  // Tasks without a schedule (legacy posts) are never treated as past.
+  const isPastTask = (task) => {
+    const scheduled = task?.scheduledDateTime || task?.scheduledDate;
+    if (!scheduled) return false;
+    const ts = new Date(scheduled).getTime();
+    return !isNaN(ts) && ts < Date.now();
   };
 
   // Get duration label
@@ -276,8 +290,8 @@ function MyRequests({ navigation }) {
   };
 
   // Enhanced fetch function that includes confirmed worker tasks
-  const fetchRequests = async (islastVisiblePost = null) => {
-    setLoading(true);
+  const fetchRequests = async (islastVisiblePost = null, showLoader = true) => {
+    if (showLoader) setLoading(true);
 
     try {
       let newRecords = [];
@@ -310,9 +324,14 @@ function MyRequests({ navigation }) {
         })) as TaskRecord[];
         newRecords = [...singleAcceptedMapped, ...bulkConfirmedMapped];
       } else {
+        // Active & Past tabs both query Active status and then split
+        // client-side by schedule date. Load a large page so past tasks
+        // don't consume the page and hide future ones (keeps the Active
+        // count consistent with the Post dashboard).
         const { tasksArray, lastVisible: lv } = await getMyReuqests(
           param,
           islastVisiblePost,
+          param === REQUEST_STATUS.Active ? 200 : undefined,
         );
         newRecords = tasksArray;
         lastVisible = lv;
@@ -363,12 +382,16 @@ function MyRequests({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
+      const filterChanged = lastFilterRef.current !== param;
+      lastFilterRef.current = param;
       setInitialLoadDone(false);
-      setTaskRecords([]);
       setLastVisiblePost(null);
       setExpandedCards({});
       setGroupChatMap({});
-      fetchRequests(null).then(async (records) => {
+      // Only clear + show loader on first load or a real filter change.
+      // On a plain re-focus, keep current cards and refresh in the background.
+      if (filterChanged) setTaskRecords([]);
+      fetchRequests(null, filterChanged).then(async (records) => {
         setInitialLoadDone(true);
         // Check group chat existence for confirmed bulk tasks in Accepted tab
         if (activeFilter === `${t("myRequests.txt10")}`) {
@@ -532,11 +555,9 @@ function MyRequests({ navigation }) {
     setLoader(true);
     try {
       await updateReqestStatus(item.id, status, item);
-      setTaskRecords((p) => {
-        const newRecords = [...p];
-        newRecords.splice(i, 1);
-        return newRecords;
-      });
+      // Remove by id (the rendered list is filtered, so positional index
+      // is not safe against the full taskRecords array).
+      setTaskRecords((p) => p.filter((r) => r.id !== item.id));
 
       let action;
       if (status === REQUEST_STATUS.Completed) {
@@ -580,17 +601,19 @@ function MyRequests({ navigation }) {
         appliedWorkers: [],
       });
 
-      setTaskRecords((prev) => {
-        const newRecords = [...prev];
-        newRecords[index] = {
-          ...newRecords[index],
-          status: REQUEST_STATUS.Active,
-          acceptedBy: null,
-          confirmedWorkers: [],
-          appliedWorkers: [],
-        };
-        return newRecords;
-      });
+      setTaskRecords((prev) =>
+        prev.map((r) =>
+          r.id === item.id
+            ? {
+                ...r,
+                status: REQUEST_STATUS.Active,
+                acceptedBy: null,
+                confirmedWorkers: [],
+                appliedWorkers: [],
+              }
+            : r,
+        ),
+      );
 
       setActiveFilter(t("myRequests.txt2"));
       setRepostModalVisible(true);
@@ -833,6 +856,16 @@ function MyRequests({ navigation }) {
     });
   };
 
+  // Active and Past share the same Active-status data; split it by schedule:
+  // Active tab → upcoming/undated tasks, Past tab → tasks whose time elapsed.
+  const isActiveTab = activeFilter === `${t("myRequests.txt2")}`;
+  const isPastTab = activeFilter === `${t("myRequests.txt14")}`;
+  const visibleRecords = taskRecords.filter((cart) => {
+    if (isActiveTab) return !isPastTask(cart);
+    if (isPastTab) return isPastTask(cart);
+    return true;
+  });
+
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -867,7 +900,7 @@ function MyRequests({ navigation }) {
         >
           {[
             `${t("myRequests.txt2")}`,
-            `${t("myRequests.txt10")}`,
+            `${t("myRequests.txt14")}`,
             `${t("myRequests.txt3")}`,
             `${t("myRequests.txt8")}`,
           ].map((title, index) => (
@@ -881,7 +914,7 @@ function MyRequests({ navigation }) {
         </ScrollView>
 
         {/* Cards */}
-        {taskRecords.map((cart, index) => {
+        {visibleRecords.map((cart, index) => {
           const isConfirmedWorker = checkUserConfirmedStatus(cart);
           const isAppliedWorker = checkUserAppliedStatus(cart);
           const isTaskOwner = cart.userId === currentUserId;
@@ -890,6 +923,18 @@ function MyRequests({ navigation }) {
             (cart.appliedWorkers?.length || 0) +
             (cart.confirmedWorkers?.length || 0);
           const hasApplicants = totalApplicants > 0;
+
+          // Bottom card actions (presentation grouping only — conditions unchanged)
+          const canRepost =
+            (activeFilter === `${t("myRequests.txt3")}` ||
+              activeFilter === `${t("myRequests.txt8")}`) &&
+            !isConfirmedWorker && // Workers can't repost
+            !isAppliedWorker; // Applied workers can't repost
+          const canViewHelpers =
+            activeFilter === `${t("myRequests.txt3")}` && // Completed filter
+            cart.status === REQUEST_STATUS.Completed &&
+            isTaskOwner &&
+            cart.confirmedWorkers?.length > 0;
 
           const scheduledDateTime = formatScheduledDateTime(cart);
           const durationLabel = getDurationLabel(cart);
@@ -979,6 +1024,7 @@ function MyRequests({ navigation }) {
                       )}
 
                     {cart.status === REQUEST_STATUS.Active &&
+                      !isPastTask(cart) &&
                       !isConfirmedWorker &&
                       !isAppliedWorker &&
                       isTaskOwner && (
@@ -1116,7 +1162,7 @@ function MyRequests({ navigation }) {
                           <Ionicons
                             name="calendar-outline"
                             size={RFPercentage(1.5)}
-                            color={theme.primary}
+                            color={ theme.mode === "dark" ? Colors.white : theme.primary}
                           />
                           <Text
                             style={[
@@ -1133,7 +1179,7 @@ function MyRequests({ navigation }) {
                           <Ionicons
                             name="time-outline"
                             size={RFPercentage(1.5)}
-                            color={theme.primary}
+                            color={ theme.mode === "dark" ? Colors.white : theme.primary}
                           />
                           <Text
                             style={[
@@ -1155,7 +1201,7 @@ function MyRequests({ navigation }) {
                         <Ionicons
                           name="list"
                           size={RFPercentage(1.5)}
-                          color={theme.primary}
+                           color={ theme.mode === "dark" ? Colors.white : theme.primary}
                         />
                         <Text
                           style={[
@@ -1172,17 +1218,13 @@ function MyRequests({ navigation }) {
                             key={subTask.id || idx}
                             style={[
                               styles.subTaskTag,
-                              { backgroundColor: `${Colors.primary}15` },
+                              { backgroundColor: theme.mode === "dark" ?  "rgba(255,255,255,0.1)"  : `${Colors.primary}15` },
                             ]}
                           >
                             <FontAwesome5
                               name={subTask.icon || "tag"}
                               size={RFPercentage(1.1)}
-                              color={
-                                theme.mode === "dark"
-                                  ? Colors.darkGrey
-                                  : Colors.primary
-                              }
+                              color={ theme.mode === "dark" ? Colors.darkGrey : theme.primary}
                             />
                             <Text
                               style={[
@@ -1222,107 +1264,25 @@ function MyRequests({ navigation }) {
                     </View>
                   )}
 
-                  {/* Bulk Request Info */}
-                  {isBulkRequest && (
+                  {/* Bulk Request Info — "You are confirmed" badge only */}
+                  {isBulkRequest && isConfirmedWorker && (
                     <View
                       style={[
-                        styles.bulkRequestInfo,
-                        {
-                          backgroundColor:
-                            theme.mode === "dark"
-                              ? theme.white + "10"
-                              : Colors.primary + "08",
-                        },
+                        styles.confirmedBadge,
+                        { backgroundColor: "#4CAF50" + "20" },
                       ]}
                     >
-                      <View style={styles.bulkInfoRow}>
-                        <Ionicons
-                          name="people"
-                          size={RFPercentage(1.5)}
-                          color={theme.darkGrey}
-                        />
-                        <Text
-                          style={[
-                            styles.bulkInfoText,
-                            { color: theme.darkGrey },
-                          ]}
-                        >
-                          {t("offerDetail.helpersNeeded") || "Helpers needed"}:{" "}
-                          {cart.numberOfWorkers || 1}
-                        </Text>
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={RFPercentage(1.5)}
-                          color="#4CAF50"
-                          style={{ marginLeft: RFPercentage(1) }}
-                        />
-                        <Text
-                          style={[styles.bulkInfoText, { color: "#4CAF50" }]}
-                        >
-                          {t("offerDetail.confirmed") || "Confirmed"}:{" "}
-                          {cart.confirmedWorkers?.length || 0}
-                        </Text>
-                      </View>
-                      {isConfirmedWorker && (
-                        <View
-                          style={[
-                            styles.confirmedBadge,
-                            { backgroundColor: "#4CAF50" + "20" },
-                          ]}
-                        >
-                          <Ionicons
-                            name="checkmark-circle"
-                            size={RFPercentage(1.3)}
-                            color="#4CAF50"
-                          />
-                          <Text
-                            style={[styles.confirmedText, { color: "#4CAF50" }]}
-                          >
-                            {t("offerDetail.youAreConfirmed") ||
-                              "You are confirmed"}
-                          </Text>
-                        </View>
-                      )}
-
-                      {/* Applications Badge */}
-                      {isTaskOwner &&
-                        hasApplicants &&
-                        activeFilter === `${t("myRequests.txt2")}` && (
-                          <TouchableOpacity
-                            style={styles.applicantsBadge}
-                            onPress={(event) =>
-                              navigateToApplicantsScreen(cart.id, event)
-                            }
-                            activeOpacity={0.8}
-                          >
-                            <Ionicons
-                              name="person-add"
-                              size={RFPercentage(1.3)}
-                              color={
-                                theme.mode === "dark"
-                                  ? Colors.darkGrey
-                                  : Colors.primary
-                              }
-                            />
-                            <Text
-                              numberOfLines={1}
-                              style={[
-                                styles.applicantsText,
-                                {
-                                  color:
-                                    theme.mode === "dark"
-                                      ? Colors.darkGrey
-                                      : Colors.primary,
-                                },
-                              ]}
-                            >
-                              {totalApplicants}{" "}
-                              {totalApplicants === 1
-                                ? "Applicant"
-                                : "Applicants"}
-                            </Text>
-                          </TouchableOpacity>
-                        )}
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={RFPercentage(1.3)}
+                        color="#4CAF50"
+                      />
+                      <Text
+                        style={[styles.confirmedText, { color: "#4CAF50" }]}
+                      >
+                        {t("offerDetail.youAreConfirmed") ||
+                          "You are confirmed"}
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -1371,36 +1331,6 @@ function MyRequests({ navigation }) {
                         </TouchableOpacity>
                       ))}
 
-                    {/* For bulk tasks with confirmed helpers */}
-                    {(cart.confirmedWorkers?.length > 0 ||
-                      (cart.isBulkRequest &&
-                        cart.confirmedWorkers?.length > 0)) && (
-                      <TouchableOpacity
-                        style={[
-                          styles.viewConfirmedHelpersButton,
-                          { backgroundColor: Colors.primary + "10" },
-                        ]}
-                        onPress={(event) =>
-                          navigateToConfirmedHelpers(cart, event)
-                        }
-                        activeOpacity={0.8}
-                      >
-                        <Ionicons
-                          name="people"
-                          size={RFPercentage(1.5)}
-                          color={Colors.primary}
-                        />
-                        <Text
-                          style={[
-                            styles.viewConfirmedHelpersText,
-                            { color: Colors.primary },
-                          ]}
-                        >
-                          {t("myRequests.viewConfirmedHelpers") ||
-                            "View Helpers"}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
                   </View>
                 )}
 
@@ -1426,36 +1356,89 @@ function MyRequests({ navigation }) {
                   </Text>
                 </Text>
 
-                {/* Repost only for Completed or Cancelled filter and active after someone accepted */}
-                {(activeFilter === `${t("myRequests.txt3")}` ||
-                  activeFilter === `${t("myRequests.txt8")}` ||
-                  (activeFilter === `${t("myRequests.txt2")}` &&
-                    cart?.acceptedBy)) &&
-                  !isConfirmedWorker && // Workers can't repost
-                  !isAppliedWorker && // Applied workers can't repost
-                  (repostingIndex === index ? (
-                    <View style={styles.repostWrap}>
-                      <ActivityIndicator size="small" color={theme.heading} />
-                    </View>
-                  ) : (
+              </View>
+
+              {/* Bottom card actions: View Helpers (secondary) + Repost (primary) */}
+              {(canRepost || canViewHelpers) && (
+                <View style={styles.cardActionsRow}>
+                  {canViewHelpers && (
+                    <TouchableOpacity
+                      style={[
+                        styles.viewHelpersButton,
+                        {
+                          borderColor: Colors.primary + "55",
+                          backgroundColor:
+                            theme.mode === "dark"
+                              ? "rgba(255,255,255,0.1)"
+                              : Colors.primary + "0D",
+                        },
+                      ]}
+                      onPress={(event) =>
+                        navigateToConfirmedHelpers(cart, event)
+                      }
+                      activeOpacity={0.85}
+                    >
+                      <Ionicons
+                        name="people"
+                        size={RFPercentage(1.9)}
+                        color={
+                          theme.mode === "dark"
+                            ? Colors.white
+                            : Colors.primary
+                        }
+                      />
+                      <Text
+                        style={[
+                          styles.viewHelpersButtonText,
+                          {
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : Colors.primary,
+                          },
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {t("myRequests.viewConfirmedHelpers") ||
+                          "View Helpers"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {canRepost && (
                     <TouchableOpacity
                       onPress={(event) => {
                         event.stopPropagation();
                         repostRequest(index, cart);
                       }}
-                      activeOpacity={0.8}
-                      style={styles.repostInner}
-                      disabled={markLoaderIndex === index}
+                      activeOpacity={0.85}
+                      style={[
+                        styles.repostButton,
+                        (markLoaderIndex === index ||
+                          repostingIndex === index) && { opacity: 0.7 },
+                      ]}
+                      disabled={
+                        markLoaderIndex === index || repostingIndex === index
+                      }
                     >
-                      <Text style={styles.txt}>{t("myRequests.txt9")}</Text>
-                      <Feather
-                        name="repeat"
-                        size={RFPercentage(1.3)}
-                        color={Colors.white}
-                      />
+                      {repostingIndex === index ? (
+                        <ActivityIndicator size="small" color={Colors.white} />
+                      ) : (
+                        <>
+                          <Feather
+                            name="repeat"
+                            size={RFPercentage(1.9)}
+                            color={Colors.white}
+                          />
+                          <Text style={styles.repostButtonText}>
+                            {t("myRequests.txt9")}
+                          </Text>
+                        </>
+                      )}
                     </TouchableOpacity>
-                  ))}
-              </View>
+                  )}
+                </View>
+              )}
 
               {/* For Accepted Tab - Show user's role */}
               {(cart?.acceptedBy || isConfirmedWorker) &&
@@ -1637,37 +1620,14 @@ function MyRequests({ navigation }) {
                   <View style={styles.cartContainer2}>
                     <TouchableOpacity
                       activeOpacity={0.8}
-                      disabled={
-                        markLoaderIndex === index || repostingIndex === index
+                      style={[styles.markButton]}
+                      onPress={(event) =>
+                        navigateToApplicantsScreen(cart.id, event)
                       }
-                      style={[
-                        styles.markButton,
-                        {
-                          opacity:
-                            markLoaderIndex === index ||
-                            repostingIndex === index
-                              ? 0.5
-                              : 1,
-                        },
-                      ]}
-                      onPress={async (event) => {
-                        event.stopPropagation();
-                        setMarkLoaderIndex(index);
-                        await changeReqestStatus(
-                          index,
-                          REQUEST_STATUS.Completed,
-                          cart,
-                        );
-                        setMarkLoaderIndex(null);
-                      }}
                     >
-                      {markLoaderIndex === index ? (
-                        <ActivityIndicator size="small" color={Colors.white} />
-                      ) : (
-                        <Text numberOfLines={1} style={styles.text2}>
-                          {t("myRequests.txt5")}
-                        </Text>
-                      )}
+                      <Text numberOfLines={1} style={styles.text2}>
+                        {t("myRequests.view")}
+                      </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -1687,9 +1647,7 @@ function MyRequests({ navigation }) {
                         styles.cancel,
                         {
                           borderColor:
-                            theme.mode === "dark"
-                              ? theme.lightGrey
-                              : theme.lightGrey,
+                            theme.darkGrey,
                         },
                       ]}
                     >
@@ -1705,9 +1663,7 @@ function MyRequests({ navigation }) {
                             styles.text3,
                             {
                               color:
-                                theme.mode === "dark"
-                                  ? theme.lightGrey
-                                  : theme.lightGrey,
+                                theme.darkGrey,
                             },
                           ]}
                         >
@@ -1744,6 +1700,63 @@ function MyRequests({ navigation }) {
                     />
                   </View>
                 )}
+
+              {/* Past tab actions: View Helpers + Mark as Done */}
+              {activeFilter === `${t("myRequests.txt14")}` &&
+                cart?.status === REQUEST_STATUS.Active &&
+                isTaskOwner &&
+                !isConfirmedWorker &&
+                !isAppliedWorker && (
+                  <View style={styles.cartContainer2}>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={[
+                        styles.cancel,
+                        { width: "48%", borderColor:  theme.darkGrey },
+                      ]}
+                      onPress={(event) =>
+                        navigateToConfirmedHelpers(cart, event)
+                      }
+                    >
+                      <Text
+                        numberOfLines={1}
+                        style={[styles.text3, { color: theme.darkGrey }]}
+                      >
+                        {t("myRequests.viewConfirmedHelpers")}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      disabled={markLoaderIndex === index}
+                      style={[
+                        styles.markButton,
+                        {
+                          width: "48%",
+                          opacity: markLoaderIndex === index ? 0.5 : 1,
+                        },
+                      ]}
+                      onPress={async (event) => {
+                        event.stopPropagation();
+                        setMarkLoaderIndex(index);
+                        await changeReqestStatus(
+                          index,
+                          REQUEST_STATUS.Completed,
+                          cart,
+                        );
+                        setMarkLoaderIndex(null);
+                      }}
+                    >
+                      {markLoaderIndex === index ? (
+                        <ActivityIndicator size="small" color={Colors.white} />
+                      ) : (
+                        <Text numberOfLines={1} style={styles.text2}>
+                          {t("myRequests.txt5")}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
             </TouchableOpacity>
           );
         })}
@@ -1768,7 +1781,7 @@ function MyRequests({ navigation }) {
           </View>
         )}
 
-        {!loading && taskRecords.length === 0 && (
+        {!loading && visibleRecords.length === 0 && (
           <NotFound title={`${t("home.txt11")}`} />
         )}
 
@@ -1845,20 +1858,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_600SemiBold",
   },
-  viewConfirmedHelpersButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: RFPercentage(1),
-    paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(1),
-    gap: RFPercentage(0.5),
-  },
-  viewConfirmedHelpersText: {
-    color: Colors.white,
-    fontSize: RFPercentage(1.3),
-    fontFamily: "Poppins_600SemiBold",
-  },
-
   cartContainer: {
     width: "90%",
     borderColor: Colors.border,
@@ -1908,23 +1907,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_600SemiBold",
   },
-  bulkRequestInfo: {
-    width: "100%",
-    marginVertical: RFPercentage(0),
-    padding: RFPercentage(1),
-    borderRadius: RFPercentage(1),
-  },
-  bulkInfoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: RFPercentage(0.5),
-    flexWrap: "wrap",
-  },
-  bulkInfoText: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_500Medium",
-    marginLeft: RFPercentage(0.5),
-  },
   confirmedBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -1938,22 +1920,6 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_600SemiBold",
     marginLeft: RFPercentage(0.5),
-  },
-  applicantsBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    backgroundColor: Colors.primary + "20",
-    paddingHorizontal: RFPercentage(1),
-    paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
-    marginTop: RFPercentage(0.5),
-    gap: RFPercentage(0.3),
-  },
-  applicantsText: {
-    fontSize: RFPercentage(1.2),
-    fontFamily: "Poppins_600SemiBold",
-    color: Colors.primary,
   },
   dotsContainer: {
     flexDirection: "row",
@@ -2180,27 +2146,42 @@ const styles = StyleSheet.create({
     width: "45%",
     alignSelf: "center",
   },
-  repostWrap: {
-    position: "absolute",
-    right: 0,
-    bottom: 2,
-    height: RFPercentage(2.8),
-    width: RFPercentage(12),
-    borderRadius: RFPercentage(100),
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  repostInner: {
-    position: "absolute",
-    right: 0,
+  cardActionsRow: {
+    width: "90%",
+    alignSelf: "center",
     flexDirection: "row",
-    bottom: 2,
     alignItems: "center",
-    backgroundColor: Colors.primary,
-    borderRadius: RFPercentage(100),
-    paddingHorizontal: RFPercentage(1.5),
-    height: RFPercentage(2.8),
+    gap: RFPercentage(1.2),
+    marginTop: RFPercentage(1.5),
+  },
+  repostButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
+    gap: RFPercentage(0.8),
+    backgroundColor: Colors.primary,
+    height: RFPercentage(5.2),
+    borderRadius: RFPercentage(1.8),
+  },
+  repostButtonText: {
+    color: Colors.white,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.7),
+  },
+  viewHelpersButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: RFPercentage(0.8),
+    height: RFPercentage(5.2),
+    borderRadius: RFPercentage(1.8),
+    borderWidth: 1,
+  },
+  viewHelpersButtonText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.6),
   },
   txt: {
     color: Colors.white,
