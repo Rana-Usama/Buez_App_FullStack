@@ -291,7 +291,8 @@
     "confirmedHelpers": "Confirmed Helpers",
     "addReview": "Add Review",
     "reviewed": "Reviewed",
-    "txt14": "Past"
+    "txt14": "Past",
+    "rateHelper": "Rate Helper"
   },
   "postRequest": {
     "txt1": "Post Request",
@@ -331,7 +332,8 @@
     "back": "Back",
     "validateStep1": "Please select a task type and compensation type to continue",
     "validateStep2": "Please choose a date, time and estimated duration",
-    "validateStep3": "Please add a description, location and compensation"
+    "validateStep3": "Please add a description, location and compensation",
+    "repostTitle": "Repost Request"
   },
   "messages": {
     "txt1": "Messages",
@@ -442,7 +444,9 @@
     "txt12": "View My Requests",
     "shareTitle": "Share Your Task",
     "shareDescription": "Share this opportunity with friends and family to find helpers faster!",
-    "shareButton": "Share Now"
+    "shareButton": "Share Now",
+    "editedTitle": "Request Edited Successfully",
+    "editedSubtitle": "Your task has been updated successfully!"
   },
   "profile": {
     "txt1": "Profile",
@@ -855,6 +859,21 @@
     "newCta": "Post New Task",
     "total": "Total Tasks Posted",
     "active": "Active Tasks",
-    "completed": "Completed Tasks"
+    "completed": "Completed Tasks",
+    "cancelled": "Cancelled",
+    "allTasks": "All Tasks",
+    "completionRate": "Completion Rate",
+    "completionSummary": "{{completed}} of {{total}} tasks completed",
+    "quickActions": "Quick Actions",
+    "viewRequests": "My Requests"
+  },
+  "acceptedTasks": {
+    "cancelTask": "Cancel Task",
+    "cancelConfirmTitle": "Cancel this task?",
+    "cancelConfirmMessage": "You'll be removed from this task and the owner will be notified.",
+    "cancelConfirmYes": "Yes, Cancel",
+    "cancelConfirmNo": "Keep Task",
+    "cancelSuccess": "You've cancelled this task",
+    "cancelError": "Couldn't cancel the task. Please try again."
   }
 }

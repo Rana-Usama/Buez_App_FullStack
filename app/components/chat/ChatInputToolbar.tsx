@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     borderTopWidth: RFPercentage(0.1),
     alignSelf: "center",
     width: "90%",
-    paddingVertical: RFPercentage(1.5),
+    paddingVertical: RFPercentage(1.8),
   },
   customTextInput: {
     fontSize: RFPercentage(1.8),
@@ -89,9 +89,9 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     justifyContent: "center",
     textAlignVertical: "top",
-    paddingTop: 5,
+    // paddingTop: 5,
     // backgroundColor:"red",
-    lineHeight:RFPercentage(3)
+    // lineHeight:RFPercentage(3)
   },
   sendButton: {
     justifyContent: "center",

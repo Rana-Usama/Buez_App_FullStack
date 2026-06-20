@@ -316,6 +316,10 @@ function PostRequest({ navigation, route }) {
   const title = route.params?.title;
   const isEditing = !!route.params?.postRequest;
   const currentPostRequest = route.params?.postRequest;
+  // Repost mode: reactivate a completed/cancelled task as a fresh request.
+  // Applicants/acceptedBy are reset on submit (the data object always does
+  // that), and we force the user to choose a NEW schedule by not prefilling it.
+  const isRepost = !!route.params?.repost;
   const [numberOfWorkers, setNumberOfWorkers] = useState(1);
   const MAX_WORKERS = 10;
 
@@ -465,14 +469,18 @@ function PostRequest({ navigation, route }) {
             setSelectedSubTasks(hydrated);
           }
 
-          if (currentPostRequest.selectedDate) {
-            setSelectedDate(new Date(currentPostRequest.selectedDate));
-          }
-          if (currentPostRequest.selectedTime) {
-            setSelectedTime(new Date(currentPostRequest.selectedTime));
-          }
-          if (currentPostRequest.estimatedDuration) {
-            setSelectedDuration(currentPostRequest.estimatedDuration);
+          // On repost, do NOT prefill the previous schedule — the user must
+          // pick a fresh date/time/duration for the reposted task.
+          if (!route.params?.repost) {
+            if (currentPostRequest.selectedDate) {
+              setSelectedDate(new Date(currentPostRequest.selectedDate));
+            }
+            if (currentPostRequest.selectedTime) {
+              setSelectedTime(new Date(currentPostRequest.selectedTime));
+            }
+            if (currentPostRequest.estimatedDuration) {
+              setSelectedDuration(currentPostRequest.estimatedDuration);
+            }
           }
           const temp = [...imageUris];
           currentPostRequest.imageUrls.forEach((imgUrl, i) => {
@@ -874,6 +882,59 @@ function PostRequest({ navigation, route }) {
         }
       } else {
         await updatePost(currentPostRequest.id, data, imgs);
+
+        // Reposting reactivates the task as fresh (status Active, applicants
+        // cleared via `data`) with the new schedule — confirm via SuccessScreen.
+        if (isRepost) {
+          navigation.navigate("SuccessScreen", {
+            taskData: {
+              id: currentPostRequest.id,
+              taskType:
+                originalTaskType === "Other"
+                  ? customTaskTitle
+                  : originalTaskType,
+              description: description,
+              compensationType: originalCompensationType,
+              monitarily: numericBudget || "0",
+              currencyInfo: currencyInfo,
+              otherCompensation: compensation,
+              address: selectedLocation,
+              numberOfWorkers: numberOfWorkers,
+              isBulkRequest: numberOfWorkers > 1,
+              imageUrls: imgs || [],
+              createdAt: new Date().toISOString(),
+              user: user?.userData || {},
+            },
+          });
+          if (user?.token) {
+            await scheduleTaskReminder(currentPostRequest.id, user?.token);
+          }
+        } else {
+          // Normal edit (not a repost) — confirm via SuccessScreen with the
+          // "edited" copy.
+          navigation.navigate("SuccessScreen", {
+            isEdit: true,
+            taskData: {
+              id: currentPostRequest.id,
+              taskType:
+                originalTaskType === "Other"
+                  ? customTaskTitle
+                  : originalTaskType,
+              description: description,
+              compensationType: originalCompensationType,
+              monitarily: numericBudget || "0",
+              currencyInfo: currencyInfo,
+              otherCompensation: compensation,
+              address: selectedLocation,
+              numberOfWorkers: numberOfWorkers,
+              isBulkRequest: numberOfWorkers > 1,
+              imageUrls: imgs || [],
+              createdAt:
+                currentPostRequest.createdAt || new Date().toISOString(),
+              user: user?.userData || {},
+            },
+          });
+        }
       }
     } catch (error) {
       console.log("Error stack:", error?.stack);
@@ -966,12 +1027,14 @@ function PostRequest({ navigation, route }) {
       <CustomNav
         showBack
         title={
-          title === `${t("postRequest.txt2")}`
-            ? `${t("postRequest.txt2")}`
-            : `${t("postRequest.txt1")}`
+          isRepost
+            ? `${t("postRequest.repostTitle")}`
+            : title === `${t("postRequest.txt2")}`
+              ? `${t("postRequest.txt2")}`
+              : `${t("postRequest.txt1")}`
         }
       />
-      <TouchableWithoutFeedback onPress={dismissAll}>
+      <TouchableWithoutFeedback >
         <ScrollView
           style={[styles.screen, { backgroundColor: theme.white }]}
           contentContainerStyle={styles.scrollViewContent}
@@ -994,12 +1057,12 @@ function PostRequest({ navigation, route }) {
               <View style={styles.stepperWrap}>
                 <View style={styles.progressHeaderRow}>
                   <Text
-                    style={[styles.stepTitle, { color: theme.darkGrey }]}
+                    style={[styles.stepTitle, { color: theme.mode === "dark" ? Colors.white : Colors.darkGrey }]}
                     numberOfLines={1}
                   >
                     {stepTitles[step - 1]}
                   </Text>
-                  <Text style={[styles.stepIndicator, { color: theme.primary }]}>
+                  <Text style={[styles.stepIndicator, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}>
                     {t("postRequest.stepIndicator", {
                       current: step,
                       total: TOTAL_STEPS,
@@ -2555,6 +2618,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     alignItems: "center",
+    paddingBottom:RFPercentage(10)
   },
   formContainer: {
     width: "100%",
@@ -2859,7 +2923,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
+    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(6.5),
     paddingHorizontal: RFPercentage(2.2),
     borderRadius: RFPercentage(2),
     borderWidth: 1,

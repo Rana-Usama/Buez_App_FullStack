@@ -210,14 +210,14 @@ const TopRatedUsers = ({ navigation }: any) => {
 
             <View style={styles.headerInfo}>
               <View
-                style={[styles.badgeTag, { backgroundColor: badge.bgColor }]}
+                style={[styles.badgeTag, { backgroundColor: isDark ? badge.bgColor : badge.color }]}
               >
                 <Ionicons
                   name={badge.icon as any}
                   size={10}
-                  color={badge.color}
+                  color={isDark ? badge.color : Colors.white}
                 />
-                <Text style={[styles.badgeText, { color: badge.color }]} numberOfLines={1}>
+                <Text style={[styles.badgeText, { color: isDark ? badge.color : Colors.white}]} numberOfLines={1}>
                   {badge.text}
                 </Text>
               </View>
@@ -482,7 +482,7 @@ const TopRatedUsers = ({ navigation }: any) => {
 
           {loading ? (
             <View style={styles.center}>
-              <ActivityIndicator size="large" color={Colors.primary} />
+              <ActivityIndicator size="large" color={theme.darkGrey} />
             </View>
           ) : filteredUsers.length > 0 ? (
             filteredUsers.map((user) => <UserCard key={user.id} user={user} />)

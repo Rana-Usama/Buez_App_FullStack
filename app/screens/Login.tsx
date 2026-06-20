@@ -334,7 +334,7 @@ function Login({ navigation }) {
                 {t("login.txt5")}
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-                <Text style={[styles.signupLink, { color: theme.primary }]}>
+                <Text style={[styles.signupLink, { color: theme.mode === "dark" ? Colors.white : theme.primary }]}>
                   {t("buttons.signup")}
                 </Text>
               </TouchableOpacity>

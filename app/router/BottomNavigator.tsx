@@ -18,7 +18,7 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
 } from "@react-navigation/drawer";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUnreadMessages } from "../contexts/unread-messages.context";
 import { Ionicons } from "@expo/vector-icons";
@@ -540,26 +540,21 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
-  const screenFocused = useIsFocused();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { theme } = useAppTheme();
   const { totalUnreadCount } = useUnreadMessages();
 
   useEffect(() => {
-    const backAction = () => {
-      if (screenFocused) {
-        navigation.goBack();
-        return true;
-      }
-      return false;
-    };
+    // Device back navigation is disabled app-wide. Swallow the hardware back
+    // press here too so it never triggers goBack on the tab navigator.
+    const backAction = () => true;
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       backAction,
     );
     return () => backHandler.remove();
-  }, [screenFocused, navigation]);
+  }, []);
 
   return (
     <View
@@ -607,7 +602,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     bottom:
                       Platform.OS === "android"
                         ? RFPercentage(3.5)
-                        : RFPercentage(2.5),
+                        : RFPercentage(3.5),
                   }}
                 >
                   <Image
@@ -723,8 +718,8 @@ const styles = StyleSheet.create({
     top: Platform.OS === "ios" ? RFPercentage(0.6) : 0,
   },
   middle: {
-    width: Platform.OS === "ios" ? RFPercentage(7.5) : RFPercentage(8.5),
-    height: Platform.OS === "ios" ? RFPercentage(7.5) : RFPercentage(8.5),
+    width: Platform.OS === "ios" ? RFPercentage(8.5) : RFPercentage(8.5),
+    height: Platform.OS === "ios" ? RFPercentage(8.5) : RFPercentage(8.5),
   },
   imgStyle: {
     width: RFPercentage(3),

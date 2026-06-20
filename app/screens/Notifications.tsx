@@ -88,6 +88,7 @@ interface Translations {
   helpersNeeded: string;
   bulkTaskCompleted: string;
   bulkTaskCompletedMessage: string;
+  cancelledTask: string;
 }
 
 export default function Notifications({ navigation }) {
@@ -171,6 +172,7 @@ export default function Notifications({ navigation }) {
         helpersNeeded: "Helpers needed",
         bulkTaskCompleted: "marked the bulk task as completed!",
         bulkTaskCompletedMessage: "All confirmed helpers have been notified",
+        cancelledTask: "cancelled their confirmed spot on your task",
       };
 
       const translatedVals = await Promise.all(
@@ -347,6 +349,14 @@ export default function Notifications({ navigation }) {
             color={iconColor}
           />
         );
+      case "task_cancellation":
+        return (
+          <Ionicons
+            name="close-circle"
+            size={RFPercentage(2)}
+            color={iconColor}
+          />
+        );
       default:
         return (
           <Ionicons
@@ -492,6 +502,10 @@ export default function Notifications({ navigation }) {
       mainText = `${tr.bulkConfirmation} ${item.task?.title || item?.task?.customTaskTitle} Task, ${tr.bulkview}`;
       previewText = item.message || "";
       actionType = "view_post";
+    } else if (item.type === "task_cancellation") {
+      mainText = `${senderName} ${tr.cancelledTask}`;
+      previewText = shortText;
+      actionType = "chat";
     } else {
       mainText = `${senderName} ${tr.sentNotification}`;
       previewText = shortText;
@@ -518,19 +532,17 @@ export default function Notifications({ navigation }) {
           ],
         }}
       >
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => handleToggleExpand(item)}
-          style={styles.touchableCard}
-        >
+        <View style={styles.touchableCard}>
           <View
             style={[
               styles.card,
               {
                 backgroundColor: theme.white,
-                borderLeftWidth: !item.isRead ? RFPercentage(0.5) : 1,
-                borderWidth: 1,
-                borderColor: theme.mode === "dark" ?  "rgba(78, 76, 88, 0.6)" : "rgba(224, 223, 232, 0.6)",
+                borderBottomWidth: 1,
+                borderColor:
+                  theme.mode === "dark"
+                    ? "rgba(78, 76, 88, 0.6)"
+                    : "rgba(224, 223, 232, 0.6)",
                 borderLeftColor: !item.isRead
                   ? Colors.primary
                   : "rgba(224, 223, 232, 1)",
@@ -554,7 +566,10 @@ export default function Notifications({ navigation }) {
                     style={styles.avatar}
                   />
                 ) : (
-                  <AvatarInitials name={senderName} textStyle={{fontSize:RFPercentage(1.8)}} />
+                  <AvatarInitials
+                    name={senderName}
+                    textStyle={{ fontSize: RFPercentage(1.8) }}
+                  />
                 )}
 
                 <View
@@ -572,7 +587,7 @@ export default function Notifications({ navigation }) {
                   style={[
                     styles.title,
                     {
-                      color: !item.isRead ? theme.primary : theme.heading,
+                      color: !item.isRead ? theme.mode === "dark" ? Colors.white : theme.primary : theme.heading,
                       fontFamily: !item.isRead
                         ? "Poppins_600SemiBold"
                         : "Poppins_400Regular",
@@ -592,305 +607,163 @@ export default function Notifications({ navigation }) {
               </View>
             </View>
 
-            <Animated.View
-              style={{
-                height: animation.height,
-                opacity: animation.opacity,
-                overflow: "hidden",
-              }}
-            >
-              <View
-                onLayout={(event) => measureContentHeight(event, item.id)}
-                style={styles.expandedContent}
-              >
-                <View style={styles.contentBody}>
-                  {item.type === "review_added" ? (
-                    <View style={styles.reviewContent}>
-                      <View style={styles.ratingContainer}>
-                        <Text style={styles.ratingLabel}>
-                          {t("notifications.txt3")}
-                        </Text>
-                        <View style={styles.stars}>
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Ionicons
-                              key={star}
-                              name={
-                                star <= (item.review?.rating || 0)
-                                  ? "star"
-                                  : "star-outline"
-                              }
-                              size={RFPercentage(2)}
-                              color={Colors.star}
-                              style={styles.star}
-                            />
-                          ))}
-                        </View>
-                        <Text style={styles.ratingText}>
-                          {item.review?.rating || 0}/5
-                        </Text>
-                      </View>
-                      <Text
-                        style={[styles.reviewText, { color: theme.darkGrey }]}
-                        numberOfLines={1}
-                      >
-                        {translatedText.length > 50
-                          ? `${translatedText.substring(0, 50)}…`
-                          : translatedText || tr.noReviewText}
-                      </Text>
-                    </View>
-                  ) : (
-                    <>
-                      <Text
-                        style={[styles.description, { color: theme.darkGrey }]}
-                        numberOfLines={
-                          item.type === "bulk_task_completion" ? 3 : 1
-                        }
-                      >
-                        {item.type === "bulk_task_completion" ? (
-                          <>
-                            {item.message ||
-                              tr.bulkTaskCompletedMessage ||
-                              "All confirmed helpers have been notified"}
-                            {"\n\n"}
-                            <Text style={{ fontFamily: "Poppins_600SemiBold" }}>
-                              {t("common.task")}{" "}
-                              {item.task?.taskType ||
-                                item.task?.description ||
-                                "Unknown task"}
-                            </Text>
-                          </>
-                        ) : translatedText.length > 50 ? (
-                          `${translatedText.substring(0, 50)}…`
-                        ) : (
-                          translatedText
-                        )}
-                      </Text>
-
-                      {/* Show bulk task helpers info */}
-                      {showHelpersInfo && item.task?.isBulkRequest && (
-                        <View
+            {/* Content + CTA always visible (no expand/collapse) */}
+            <View style={styles.expandedContent}>
+              <View style={styles.contentBody}>
+                <View style={styles.footer}>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    style={[
+                      styles.actionButton,
+                     {borderColor: theme.mode === "dark" ? theme.darkGrey : Colors.primary}
+                    ]}
+                    onPress={() => {
+                      // Tapping the CTA marks the notification read (the
+                      // expand interaction that used to do this is gone).
+                      // Update the context AND the local list optimistically so
+                      // the row's read styling (dot, border, title) flips
+                      // immediately instead of waiting for a context re-render.
+                      if (!item.isRead) {
+                        markAsRead(item.id);
+                        setRaw((prev) =>
+                          prev.map((n) =>
+                            n.id === item.id ? { ...n, isRead: true } : n,
+                          ),
+                        );
+                      }
+                      if (item.type === "review_added") {
+                        navigation.navigate("Reviews");
+                      } else if (
+                        item.type === "task_completion" ||
+                        item.type === "bulk_task_completion"
+                      ) {
+                        navigation.navigate("CompletedTasks", {
+                          taskId: item.task?.taskId,
+                          isBulk: item.type === "bulk_task_completion",
+                        });
+                      } else if (item.type === "bulk_request_application") {
+                        navigation.navigate("TopRatedUserProfile", {
+                          user: item.sender,
+                          applier: true,
+                          postRequest: item.task || {
+                            id: item.task?.id,
+                            taskType: item.task?.taskType,
+                            description: item.task?.description,
+                            numberOfWorkers: item.task?.numberOfWorkers || 1,
+                            confirmedWorkers: item.task?.confirmedWorkers || [],
+                            appliedWorkers: item.task?.appliedWorkers || [],
+                            compensationType: item.task?.compensationType,
+                            address: item.task?.address,
+                            userId: item.receiver?.userId,
+                            user: item.receiver,
+                            isBulkRequest: true,
+                          },
+                        });
+                      } else if (item.type === "bulk_request_confirmation") {
+                        navigation.navigate("AcceptedTasks");
+                      } else {
+                        handleStartChat(item.sender);
+                      }
+                    }}
+                  >
+                    {item.type === "review_added" ? (
+                      <>
+                        <Feather
+                          name="eye"
+                          size={RFPercentage(1.8)}
+                          color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                        />
+                        <Text
                           style={[
-                            styles.bulkTaskInfo,
-                            { backgroundColor: Colors.primary + "10" },
+                            styles.actionButtonText,
+                            {
+                              color:theme.mode === "dark" ? Colors.white : Colors.primary,
+                            },
                           ]}
                         >
-                          <View style={styles.bulkInfoRow}>
-                            <Ionicons
-                              name="people"
-                              size={RFPercentage(1.4)}
-                              color={Colors.primary}
-                            />
-                            <Text
-                              style={[
-                                styles.bulkInfoText,
-                                { color: Colors.primary },
-                              ]}
-                            >
-                              {t("common.bulk")}
-                            </Text>
-                          </View>
-                          {item.task?.totalHelpers > 0 && (
-                            <Text
-                              style={[
-                                styles.bulkInfoDetail,
-                                { color: theme.darkGrey },
-                              ]}
-                            >
-                              {item.task?.totalHelpers}{" "}
-                              {item.task?.totalHelpers === 1
-                                ? t("common.helper")
-                                : t("common.helpers")}{" "}
-                              {t("offerDetail.confirmed")}
-                            </Text>
-                          )}
-                        </View>
-                      )}
-                    </>
-                  )}
-
-                  <View style={styles.footer}>
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      style={[
-                        styles.actionButton,
-                        {
-                          backgroundColor:
-                            theme.mode === "dark"
-                              ? "rgba(37, 36, 42, 1)"
-                              : Colors.primary + "15",
-                        },
-                      ]}
-                      onPress={() => {
-                        if (item.type === "review_added") {
-                          navigation.navigate("Reviews");
-                        } else if (
-                          item.type === "task_completion" ||
-                          item.type === "bulk_task_completion"
-                        ) {
-                          navigation.navigate("CompletedTasks", {
-                            taskId: item.task?.taskId,
-                            isBulk: item.type === "bulk_task_completion",
-                          });
-                        } else if (item.type === "bulk_request_application") {
-                          navigation.navigate("TopRatedUserProfile", {
-                            user: item.sender,
-                            applier: true,
-                            postRequest: item.task || {
-                              id: item.task?.id,
-                              taskType: item.task?.taskType,
-                              description: item.task?.description,
-                              numberOfWorkers: item.task?.numberOfWorkers || 1,
-                              confirmedWorkers:
-                                item.task?.confirmedWorkers || [],
-                              appliedWorkers: item.task?.appliedWorkers || [],
-                              compensationType: item.task?.compensationType,
-                              address: item.task?.address,
-                              userId: item.receiver?.userId,
-                              user: item.receiver,
-                              isBulkRequest: true,
+                          {tr.view || "View"}
+                        </Text>
+                      </>
+                    ) : item.type === "task_completion" ||
+                      item.type === "bulk_task_completion" ? (
+                      <>
+                        <Feather
+                          name="check-circle"
+                          size={RFPercentage(1.8)}
+                          color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                        />
+                        <Text
+                          style={[
+                            styles.actionButtonText,
+                            {
+                              color: theme.mode === "dark" ? Colors.white : Colors.primary,
                             },
-                          });
-                        } else if (item.type === "bulk_request_confirmation") {
-                          navigation.navigate("AcceptedTasks");
-                        } else {
-                          handleStartChat(item.sender);
-                        }
-                      }}
-                    >
-                      {item.type === "review_added" ? (
-                        <>
-                          <Feather
-                            name="eye"
-                            size={RFPercentage(1.8)}
-                            color={
-                              theme.mode === "dark"
-                                ? Colors.darkGrey
-                                : Colors.primary
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.actionButtonText,
-                              {
-                                color:
-                                  theme.mode === "dark"
-                                    ? Colors.darkGrey
-                                    : Colors.primary,
-                              },
-                            ]}
-                          >
-                            {tr.view || "View"}
-                          </Text>
-                        </>
-                      ) : item.type === "task_completion" ||
-                        item.type === "bulk_task_completion" ? (
-                        <>
-                          <Feather
-                            name="check-circle"
-                            size={RFPercentage(1.8)}
-                            color={
-                              theme.mode === "dark"
-                                ? Colors.darkGrey
-                                : Colors.primary
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.actionButtonText,
-                              {
-                                color:
-                                  theme.mode === "dark"
-                                    ? Colors.darkGrey
-                                    : Colors.primary,
-                              },
-                            ]}
-                          >
-                            {tr.viewTask || "View Task"}
-                          </Text>
-                        </>
-                      ) : item.type === "bulk_request_application" ? (
-                        <>
-                          <Ionicons
-                            name="people"
-                            size={RFPercentage(1.8)}
-                            color={
-                              theme.mode === "dark"
-                                ? Colors.darkGrey
-                                : Colors.primary
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.actionButtonText,
-                              {
-                                color:
-                                  theme.mode === "dark"
-                                    ? Colors.darkGrey
-                                    : Colors.primary,
-                              },
-                            ]}
-                          >
-                            {tr.viewApplications || "View Applications"}
-                          </Text>
-                        </>
-                      ) : item.type === "bulk_request_confirmation" ? (
-                        <>
-                          <Feather
-                            name="external-link"
-                            size={RFPercentage(1.8)}
-                            color={
-                              theme.mode === "dark"
-                                ? Colors.darkGrey
-                                : Colors.primary
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.actionButtonText,
-                              {
-                                color:
-                                  theme.mode === "dark"
-                                    ? Colors.darkGrey
-                                    : Colors.primary,
-                              },
-                            ]}
-                          >
-                            {tr.viewPost || "View Post"}
-                          </Text>
-                        </>
-                      ) : (
-                        <>
-                          <Feather
-                            name="message-circle"
-                            size={RFPercentage(1.8)}
-                            color={
-                              theme.mode === "dark"
-                                ? Colors.darkGrey
-                                : Colors.primary
-                            }
-                          />
-                          <Text
-                            style={[
-                              styles.actionButtonText,
-                              {
-                                color:
-                                  theme.mode === "dark"
-                                    ? Colors.darkGrey
-                                    : Colors.primary,
-                              },
-                            ]}
-                          >
-                            {tr.message || "Message"}
-                          </Text>
-                        </>
-                      )}
-                    </TouchableOpacity>
-                  </View>
+                          ]}
+                        >
+                          {tr.viewTask || "View Task"}
+                        </Text>
+                      </>
+                    ) : item.type === "bulk_request_application" ? (
+                      <>
+                        <Ionicons
+                          name="people"
+                          size={RFPercentage(1.8)}
+                          color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                        />
+                        <Text
+                          style={[
+                            styles.actionButtonText,
+                            {
+                              color: theme.mode === "dark" ? Colors.white : Colors.primary,
+                            },
+                          ]}
+                        >
+                          {tr.viewApplications || "View Applications"}
+                        </Text>
+                      </>
+                    ) : item.type === "bulk_request_confirmation" ? (
+                      <>
+                        <Feather
+                          name="external-link"
+                          size={RFPercentage(1.8)}
+                          color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                        />
+                        <Text
+                          style={[
+                            styles.actionButtonText,
+                            {
+                              color: theme.mode === "dark" ? Colors.white : Colors.primary,
+                            },
+                          ]}
+                        >
+                          {tr.viewPost || "View Post"}
+                        </Text>
+                      </>
+                    ) : (
+                      <>
+                        <Feather
+                          name="message-circle"
+                          size={RFPercentage(1.8)}
+                          color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                        />
+                        <Text
+                          style={[
+                            styles.actionButtonText,
+                            {
+                              color: theme.mode === "dark" ? Colors.white : Colors.primary,
+                            },
+                          ]}
+                        >
+                          {tr.message || "Message"}
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
                 </View>
               </View>
-            </Animated.View>
+            </View>
           </View>
-        </TouchableOpacity>
+        </View>
       </Animated.View>
     );
   };
@@ -1118,7 +991,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.5),
   },
   expandedContent: {
-    position: "absolute",
+    // position: "absolute",
     width: "100%",
   },
   contentBody: {
@@ -1187,13 +1060,17 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: "row",
     justifyContent: "flex-end",
+    // backgroundColor:"red",
+    // width: "75%",
+    // alignSelf: "center",
   },
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: RFPercentage(1.5),
-    paddingVertical: RFPercentage(0.8),
-    borderRadius: RFPercentage(1),
+    paddingVertical: RFPercentage(1),
+    borderRadius: RFPercentage(100),
+    borderWidth:1
   },
   actionButtonText: {
     color: Colors.primary,

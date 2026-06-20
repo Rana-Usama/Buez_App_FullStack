@@ -6,17 +6,16 @@ import React from 'react';
 export const useExitAppOnBack = () => {
   useFocusEffect(
     React.useCallback(() => {
-      const onBackPress = () => {
-        BackHandler.exitApp(); 
-        return true;
-      };
+      // Device back navigation is disabled app-wide. Swallow the hardware back
+      // press (return true) so it neither pops the stack nor exits the app.
+      const onBackPress = () => true;
 
       const subscription = BackHandler.addEventListener(
         'hardwareBackPress',
         onBackPress
       );
 
-      return () => subscription.remove(); 
+      return () => subscription.remove();
     }, [])
   );
 };

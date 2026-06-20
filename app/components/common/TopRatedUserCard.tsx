@@ -16,12 +16,14 @@ import { TopRatedUser } from "../../types/home.types";
 import { Icons } from "../../config/theme";
 import AvatarInitials from "./DefaultAvatars";
 import Colors from "../../config/Colors";
+import { useAppTheme } from "../../contexts/themeContext";
 
 interface TopRatedUserCardProps {
   user: TopRatedUser;
   onPress: () => void;
   darkMode: boolean;
   t: (key: string) => string;
+
 }
 
 const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
@@ -59,7 +61,7 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
     <Ionicons
       name={rankAccent.name as any}
       size={RFPercentage(1.8)}
-      color={rankAccent.color}
+      color={darkMode ? rankAccent.color : Colors.white}
     />
   );
 
@@ -155,12 +157,12 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
           <View
             style={[
               styles.categoryBadgeContainer,
-              { backgroundColor: rankAccent?.bgColor },
+              { backgroundColor: darkMode ?  rankAccent?.bgColor : rankAccent.color },
             ]}
           >
             <View style={styles.badgeInner}>
               {getCategoryIcon()}
-              <Text style={[styles.categoryText, { color: rankAccent.color }]}>
+              <Text style={[styles.categoryText, { color: darkMode ? rankAccent.color  : Colors.white}]}>
                 {getCategoryText()}
               </Text>
             </View>

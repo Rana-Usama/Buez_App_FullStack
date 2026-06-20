@@ -280,7 +280,9 @@
     "noReviewsDesc": "Las reseñas de los propietarios de las tareas aparecerán aquí",
     "view": "Ver solicitantes",
     "viewConfirmedHelpers": "Ver ayudantes",
-    "txt14": "Pasadas"
+    "txt14": "Pasadas",
+    "rateHelper": "Calificar ayudante",
+    "reviewed": "Evaluado"
   },
   "postRequest": {
     "txt1": "Publicar solicitud",
@@ -320,7 +322,8 @@
     "back": "Atrás",
     "validateStep1": "Selecciona un tipo de tarea y de compensación",
     "validateStep2": "Elige fecha, hora y duración estimada",
-    "validateStep3": "Agrega una descripción, ubicación y compensación"
+    "validateStep3": "Agrega una descripción, ubicación y compensación",
+    "repostTitle": "Volver a publicar"
   },
   "messages": {
     "txt1": "Mensajes",
@@ -428,7 +431,9 @@
     "txt9": "Si no se concreta ningún acuerdo, república desde 'Mis Sol' en 'Activas'.",
     "txt10": "Mantente actualizado",
     "txt11": "Recibirás notificaciones cuando alguien esté interesado o envíe una oferta.",
-    "txt12": "Ver mis solicitudes"
+    "txt12": "Ver mis solicitudes",
+    "editedTitle": "Solicitud editada exitosamente",
+    "editedSubtitle": "¡Tu tarea ha sido actualizada exitosamente!"
   },
   "profile": {
     "txt1": "Perfil",
@@ -836,6 +841,21 @@
     "newCta": "Nueva tarea",
     "total": "Total de tareas publicadas",
     "active": "Tareas activas",
-    "completed": "Tareas completadas"
+    "completed": "Tareas completadas",
+    "cancelled": "Cancelado",
+    "allTasks": "Todas las tareas",
+    "completionRate": "Tasa de finalización",
+    "completionSummary": "{{completed}} de {{total}} tareas completadas",
+    "quickActions": "Acciones rápidas",
+    "viewRequests": "Mis solicitudes"
+  },
+  "acceptedTasks": {
+    "cancelTask": "Cancelar tarea",
+    "cancelConfirmTitle": "¿Cancelar esta tarea?",
+    "cancelConfirmMessage": "Se te eliminará de esta tarea y se notificará al propietario.",
+    "cancelConfirmYes": "Sí, cancelar",
+    "cancelConfirmNo": "Mantener tarea",
+    "cancelSuccess": "Has cancelado esta tarea",
+    "cancelError": "No se pudo cancelar la tarea. Inténtalo de nuevo."
   }
 }

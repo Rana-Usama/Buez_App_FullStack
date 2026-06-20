@@ -2,7 +2,7 @@
   "expo": {
     "name": "Buez",
     "slug": "Buez",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "newArchEnabled": true,
@@ -51,7 +51,8 @@
         ]
       },
       "bundleIdentifier": "com.adamburg.Buez",
-      "appleTeamId": "34G27X37J4"
+      "appleTeamId": "34G27X37J4",
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {

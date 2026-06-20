@@ -282,9 +282,6 @@ const FreeTrial = ({ navigation }: any) => {
         backgroundColor="transparent"
         translucent
       />
-
-   
-
       {/* ── Top glow ── */}
       <LinearGradient
         colors={
@@ -505,7 +502,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1.2),
   },
   ctaOuter: {
-    width: "90%",
+    width: "100%",
     borderRadius: RFPercentage(2),
     overflow: "hidden",
     shadowColor: "#253275",

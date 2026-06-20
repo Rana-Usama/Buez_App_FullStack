@@ -23,6 +23,9 @@ function SuccessScreen({ navigation }) {
   const { theme } = useAppTheme();
   const route = useRoute();
   const taskData = route.params?.taskData || null;
+  // When navigated here after editing an existing task, swap the headline copy
+  // to an "edited" confirmation instead of the default "posted" message.
+  const isEdit = route.params?.isEdit === true;
 
   const InfoCard = ({ icon, title, description }) => (
     <View
@@ -31,9 +34,9 @@ function SuccessScreen({ navigation }) {
         {
           backgroundColor:
             theme.mode === "dark"
-              ? "rgba(117, 123, 205, 0.05)"
+              ? "rgba(21, 23, 47, 0.73)"
               : "rgba(255,255,255,0.2)",
-              borderLeftColor: theme.mode === "dark" ? Colors.darkGrey2 : Colors.primary,
+              borderLeftColor: theme.mode === "dark" ? Colors.darkGrey : Colors.white,
         },
       ]}
     >
@@ -68,7 +71,7 @@ function SuccessScreen({ navigation }) {
     <LinearGradient
       colors={
         theme.mode === "dark"
-          ? ["#000000", "#1a1a1a"]
+          ? ["#000000", "#000000"]
           : [Colors.primary, Colors.success2]
       }
       start={{ x: 1, y: 0 }}
@@ -97,7 +100,7 @@ function SuccessScreen({ navigation }) {
           { color: theme.mode === "dark" ? Colors.white : Colors.white },
         ]}
       >
-        {t("successScreen.txt1")}
+        {isEdit ? t("successScreen.editedTitle") : t("successScreen.txt1")}
       </Text>
 
       <Text
@@ -111,7 +114,7 @@ function SuccessScreen({ navigation }) {
           },
         ]}
       >
-        {t("successScreen.txt3")}
+        {isEdit ? t("successScreen.editedSubtitle") : t("successScreen.txt3")}
       </Text>
 
       {/* Share Card - Prominent CTA */}

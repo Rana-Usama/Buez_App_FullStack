@@ -100,8 +100,8 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
               t("taskApplicants.noDescription")}
           </Text>
 
-          {/* Group Chat Button */}
-          {confirmedWorkers?.length > 0 && (
+          {/* Group/Broadcast chat — bulk tasks only (single tasks use 1:1 chat) */}
+          {requiredWorkers > 1 && confirmedWorkers?.length > 0 && (
             <GroupChatButton
               style={{ marginTop: RFPercentage(0.5), width: "55%" }}
               onPress={() =>

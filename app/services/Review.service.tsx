@@ -495,6 +495,14 @@ export const fetchAllConfirmedTasksAsWorker = async (userId) => {
       const taskData = doc.data();
       const taskId = doc.id;
 
+      // Skip tasks that are no longer active for the worker. Once the owner
+      // marks a (bulk) task Completed/Cancelled it must drop out of the
+      // worker's "Accepted Tasks" list and surface only under "Completed".
+      const taskStatus = taskData.status;
+      if (taskStatus === "Completed" || taskStatus === "Cancelled") {
+        return;
+      }
+
       // Check if user is in confirmedWorkers
       const confirmedWorkers = taskData.confirmedWorkers || [];
       const userConfirmed = confirmedWorkers.some(

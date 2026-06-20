@@ -13,7 +13,7 @@ import { Text, TextInput, PixelRatio } from "react-native";
  * constant to make the app more (higher) or less (lower) responsive to large
  * text settings.
  */
-export const MAX_FONT_SIZE_MULTIPLIER = 1.3;
+export const MAX_FONT_SIZE_MULTIPLIER = 1.1;
 
 type ScalableDefaults = {
   defaultProps?: {

@@ -366,7 +366,7 @@ function Signup({ navigation }: any) {
             activeOpacity={0.8}
             onPress={() => navigation.navigate("Login")}
           >
-            <Text style={[styles.loginText, { color: theme.primary }]}>{`${t(
+            <Text style={[styles.loginText, { color: theme.mode === "dark" ? Colors.white : theme.primary }]}>{`${t(
               "buttons.login",
             )}`}</Text>
           </TouchableOpacity>

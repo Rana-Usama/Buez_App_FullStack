@@ -280,7 +280,9 @@
     "noReviewsDesc": "Le recensioni dei proprietari dei compiti appariranno qui",
     "view": "Visualizza candidati",
     "viewConfirmedHelpers": "Vedi aiutanti",
-    "txt14": "Passate"
+    "txt14": "Passate",
+    "rateHelper": "Valuta l'aiutante",
+    "reviewed": "Valutato"
   },
   "postRequest": {
     "txt1": "Pubblica richiesta",
@@ -320,7 +322,8 @@
     "back": "Indietro",
     "validateStep1": "Seleziona un tipo di attività e di compenso",
     "validateStep2": "Scegli data, ora e durata stimata",
-    "validateStep3": "Aggiungi descrizione, luogo e compenso"
+    "validateStep3": "Aggiungi descrizione, luogo e compenso",
+    "repostTitle": "Ripubblica richiesta"
   },
   "messages": {
     "txt1": "Messaggi",
@@ -428,7 +431,9 @@
     "txt9": "Se nessun accordo è concluso, ripubblica da 'Le mie rich' sotto 'Attive'.",
     "txt10": "Rimani aggiornato",
     "txt11": "Riceverai notifiche quando qualcuno è interessato o invia un'offerta.",
-    "txt12": "Vedi le mie richieste"
+    "txt12": "Vedi le mie richieste",
+    "editedTitle": "Richiesta modificata con successo",
+    "editedSubtitle": "La tua attività è stata aggiornata con successo!"
   },
   "profile": {
     "txt1": "Profilo",
@@ -836,6 +841,21 @@
     "newCta": "Nuova attività",
     "total": "Totale attività pubblicate",
     "active": "Attività attive",
-    "completed": "Attività completate"
+    "completed": "Attività completate",
+    "cancelled": "Annullato",
+    "allTasks": "Tutte le attività",
+    "completionRate": "Tasso di completamento",
+    "completionSummary": "{{completed}} di {{total}} attività completate",
+    "quickActions": "Azioni rapide",
+    "viewRequests": "Le mie richieste"
+  },
+  "acceptedTasks": {
+    "cancelTask": "Annulla attività",
+    "cancelConfirmTitle": "Annullare questa attività?",
+    "cancelConfirmMessage": "Sarai rimosso da questa attività e il proprietario verrà avvisato.",
+    "cancelConfirmYes": "Sì, annulla",
+    "cancelConfirmNo": "Mantieni attività",
+    "cancelSuccess": "Hai annullato questa attività",
+    "cancelError": "Impossibile annullare l'attività. Riprova."
   }
 }

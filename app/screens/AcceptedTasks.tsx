@@ -13,6 +13,8 @@ import {
   StatusBar,
   Dimensions,
 } from "react-native";
+import Toast from "react-native-toast-message";
+import ConfirmationModal from "../components/common/ConfirmationModal";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
 import { getAuth } from "firebase/auth";
@@ -31,6 +33,10 @@ import {
   fetchActiveTasksFromFirebase,
   fetchAllConfirmedTasksAsWorker,
 } from "../services/Review.service";
+import {
+  cancelConfirmedTask,
+  sendTaskCancellationNotification,
+} from "../services/Post.service";
 import { groupChatExists } from "../services/GroupChat.service";
 import { createNewChat } from "../services/Chat.service";
 import { getRelativeConfirmedTime } from "../services/Shared.service";
@@ -77,6 +83,10 @@ export default function AcceptedTasks({ navigation }) {
   const [activeIndices, setActiveIndices] = useState<Record<number, number>>(
     {},
   );
+  // Tracks which card is mid-cancellation so we can show a per-card spinner.
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  // The task pending cancellation confirmation (drives the confirm modal).
+  const [cancelTarget, setCancelTarget] = useState<any | null>(null);
 
   // ── Fetch accepted + confirmed-as-worker tasks ──
   const fetchAccepted = async () => {
@@ -110,10 +120,16 @@ export default function AcceptedTasks({ navigation }) {
         }),
       );
 
-      const combined = [...singleAcceptedMapped, ...bulkConfirmedMapped];
+      // Defensive guard: never surface a task that has already been completed
+      // or cancelled here. The service queries should exclude these, but this
+      // keeps the Accepted list consistent against any stale/cached entry.
+      const activeOnly = [...singleAcceptedMapped, ...bulkConfirmedMapped].filter(
+        (item: any) =>
+          item?.status !== "Completed" && item?.status !== "Cancelled",
+      );
 
       const translated = await Promise.all(
-        combined.map(async (item: any) => ({
+        activeOnly.map(async (item: any) => ({
           ...item,
           description: await cachedTranslate(item?.description || ""),
           taskType: await cachedTranslate(item?.taskType || ""),
@@ -233,6 +249,62 @@ export default function AcceptedTasks({ navigation }) {
 
   const navigateToOfferDetail = (task: any) => {
     navigation.navigate("OfferDetail", { postRequest: task });
+  };
+
+  // ── Cancel / withdraw from a confirmed task ──
+  const confirmCancel = async (cart: any) => {
+    if (!currentUserId) return;
+    setCancellingId(cart.id);
+    try {
+      const owner = {
+        userId: cart.userId || cart.user?.userId,
+        userName: cart.user?.userName,
+        email: cart.user?.email,
+        token: cart.user?.token,
+        profileImage: cart.user?.profileImage,
+      };
+
+      await cancelConfirmedTask({ task: cart, userId: currentUserId });
+      await sendTaskCancellationNotification({
+        task: cart,
+        owner,
+        canceller: {
+          userId: currentUserId,
+          userName: currentUser?.userData?.userName,
+          email: getAuth().currentUser?.email || "",
+          token: currentUser?.userData?.token,
+          profileImage: currentUser?.userData?.profileImage,
+        },
+      });
+
+      // Optimistically drop the cancelled task from the list + cache so the UI
+      // updates immediately.
+      setRecords((prev) => {
+        const next = prev.filter((r) => r !== cart);
+        setCachedData(CACHE_KEY, next);
+        return next;
+      });
+
+      Toast.show({
+        type: "success",
+        text1: t("acceptedTasks.cancelSuccess"),
+      });
+    } catch (err) {
+      console.log("Cancel task error:", err);
+      Toast.show({
+        type: "error",
+        text1: t("acceptedTasks.cancelError"),
+      });
+    } finally {
+      setCancellingId(null);
+      setCancelTarget(null);
+    }
+  };
+
+  // Open the confirmation modal for the chosen task.
+  const handleCancelTask = (cart: any, event?: any) => {
+    if (event) event.stopPropagation();
+    setCancelTarget(cart);
   };
 
   // ── Card ──
@@ -549,6 +621,44 @@ export default function AcceptedTasks({ navigation }) {
             />
           </View>
         </View>
+
+        {/* Cancel / withdraw */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          disabled={cancellingId === cart.id}
+          onPress={(e) => handleCancelTask(cart, e)}
+          style={[
+            styles.cancelButton,
+            {
+              borderColor: Colors.statusAlertError + "55",
+              backgroundColor: Colors.statusAlertError + "12",
+              opacity: cancellingId === cart.id ? 0.6 : 1,
+            },
+          ]}
+        >
+          {cancellingId === cart.id ? (
+            <ActivityIndicator
+              size="small"
+              color={Colors.statusAlertError}
+            />
+          ) : (
+            <>
+              <Ionicons
+                name="close-circle-outline"
+                size={RFPercentage(2)}
+                color={Colors.statusAlertError}
+              />
+              <Text
+                style={[
+                  styles.cancelButtonText,
+                  { color: Colors.statusAlertError },
+                ]}
+              >
+                {t("acceptedTasks.cancelTask")}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
       </TouchableOpacity>
     );
   };
@@ -587,6 +697,22 @@ export default function AcceptedTasks({ navigation }) {
           <View style={{ height: RFPercentage(6) }} />
         </ScrollView>
       )}
+
+      <ConfirmationModal
+        isVisible={!!cancelTarget}
+        onClose={() => {
+          // Block dismiss while the cancellation is in flight.
+          if (cancellingId) return;
+          setCancelTarget(null);
+        }}
+        onConfirm={() => cancelTarget && confirmCancel(cancelTarget)}
+        title={t("acceptedTasks.cancelConfirmTitle")}
+        message={t("acceptedTasks.cancelConfirmMessage")}
+        theme={theme}
+        t={t}
+        loading={!!cancellingId}
+        type="delete"
+      />
     </View>
   );
 }
@@ -741,5 +867,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  cancelButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: RFPercentage(0.8),
+    marginTop: RFPercentage(1.4),
+    paddingVertical: RFPercentage(1.1),
+    borderRadius: RFPercentage(1.4),
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_600SemiBold",
   },
 });

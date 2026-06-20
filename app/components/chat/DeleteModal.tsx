@@ -11,45 +11,47 @@ type Props = {
   t: any;
 };
 
-const DeleteModal = memo(({ visible, onConfirm, onCancel, theme, t }: Props) => {
-  if (!visible) return null;
-  return (
-    <View style={styles.modalOverlay}>
-      <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
-        <Text style={[styles.modalTitle, { color: theme.heading }]}>
-          {t("chat.txt3")}
-        </Text>
-        <Text style={[styles.modalText, { color: theme.darkGrey }]}>
-          {t("chat.txt4")}
-        </Text>
-        <View style={styles.modalButtons}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={[styles.cancel, { borderColor: theme.lightGrey }]}
-            onPress={onCancel}
-          >
-            <Text
-              style={{
-                color: theme.heading,
-                fontFamily: "Poppins_500Medium",
-                fontSize: RFPercentage(1.7),
-              }}
+const DeleteModal = memo(
+  ({ visible, onConfirm, onCancel, theme, t }: Props) => {
+    if (!visible) return null;
+    return (
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+          <Text style={[styles.modalTitle, { color: theme.heading }]}>
+            {t("chat.txt3")}
+          </Text>
+          <Text style={[styles.modalText, { color: theme.darkGrey }]}>
+            {t("chat.txt4")}
+          </Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[styles.cancel, { borderColor: theme.lightGrey }]}
+              onPress={onCancel}
             >
-              {t("buttons.cancel")}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.markButton}
-            onPress={onConfirm}
-          >
-            <Text style={styles.txt}>{t("chat.txt5")}</Text>
-          </TouchableOpacity>
+              <Text
+                style={{
+                  color: theme.heading,
+                  fontFamily: "Poppins_500Medium",
+                  fontSize: RFPercentage(1.7),
+                }}
+              >
+                {t("buttons.cancel")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.markButton}
+              onPress={onConfirm}
+            >
+              <Text style={styles.txt}>{t("chat.txt5")}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
-  );
-});
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -71,16 +73,19 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(1),
+    textAlign: "center",
   },
   modalText: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
     marginBottom: RFPercentage(2),
+    textAlign: "center",
   },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
+    width: "90%",
+    alignSelf: "center",
   },
   cancel: {
     borderRadius: RFPercentage(100),

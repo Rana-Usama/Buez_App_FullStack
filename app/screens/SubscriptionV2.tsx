@@ -752,14 +752,6 @@ function SubscriptionV2(props) {
                   { backgroundColor: isDark ? "#04081cff" : "#fff" },
                 ]}
               >
-                {/* Modal top bar */}
-                <LinearGradient
-                  colors={["#253275", "#4557B0", "#DD53A8"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.modalTopBar}
-                />
-
                 <View style={styles.modalBody}>
                   {/* Header */}
                   <View style={styles.modalHeader}>
@@ -793,7 +785,6 @@ function SubscriptionV2(props) {
                         backgroundColor: isDark
                           ? "rgba(37,50,117,0.15)"
                           : "rgba(37,50,117,0.05)",
-                        borderLeftColor: "#253275",
                       },
                     ]}
                   >
@@ -817,9 +808,6 @@ function SubscriptionV2(props) {
                       </Text>
                     </View>
                   </View>
-
-                  {/* Benefit bullets */}
-                 
 
                   {/* Divider */}
                   <View
@@ -1153,7 +1141,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: RFPercentage(3),
+    // paddingHorizontal: RFPercentage(3),
     paddingTop: RFPercentage(1.6),
     paddingBottom:
       Platform.OS === "ios" ? RFPercentage(4.5) : RFPercentage(2.8),
@@ -1247,7 +1235,6 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1.2),
     padding: RFPercentage(1.8),
     borderRadius: 14,
-    borderLeftWidth: 3,
     marginBottom: RFPercentage(2),
   },
   infoIcon: { fontSize: RFPercentage(2) },
@@ -1285,19 +1272,13 @@ const styles = StyleSheet.create({
   },
   modalPrimaryOuter: {
     flex: 1,
-    borderRadius: RFPercentage(2),
-    overflow: "hidden",
-    shadowColor: "#253275",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    // elevation: 8,
+    borderRadius: RFPercentage(100),
   },
   modalPrimaryBtn: {
     paddingVertical: RFPercentage(1.6),
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(100),
   },
   modalPrimaryText: {
     fontFamily: "Poppins_600SemiBold",
@@ -1309,8 +1290,8 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1.6),
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: RFPercentage(2),
-    borderWidth: 1.5,
+    borderRadius: RFPercentage(100),
+    borderWidth: 1,
   },
   modalSecondaryText: {
     fontFamily: "Poppins_600SemiBold",

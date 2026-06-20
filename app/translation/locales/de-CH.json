@@ -280,7 +280,9 @@
     "noReviewsDesc": "Bewertige vo de Uftraggeber werde do aazeigt",
     "view": "Bewerber aaluege",
     "viewConfirmedHelpers": "Helfer azeige",
-    "txt14": "Vergangen"
+    "txt14": "Vergangen",
+    "rateHelper": "Hälfer bewerte",
+    "reviewed": "Bewertet"
   },
   "postRequest": {
     "txt1": "Aafrog veröffentliche",
@@ -320,7 +322,8 @@
     "back": "Zurück",
     "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
     "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
-    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen"
+    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen",
+    "repostTitle": "Anfrage erneut posten"
   },
   "messages": {
     "txt1": "Nachrichte",
@@ -428,7 +431,9 @@
     "txt9": "Wenn kei Deal gmacht wird, veröffentlich sie neu vo 'Mini Afr' under 'Aktiv'.",
     "txt10": "Bliib ufem aktuellste Stand",
     "txt11": "Du wirsch Benachrichtigunge übercho, wenn öpper interessiert isch oder es Aagebot schickt.",
-    "txt12": "Lueg mini Afroge aa"
+    "txt12": "Lueg mini Afroge aa",
+    "editedTitle": "Aafrog erfolgriich bearbeitet",
+    "editedSubtitle": "Dini Ufgabe isch erfolgriich aktualisiert worde!"
   },
   "profile": {
     "txt1": "Profil",
@@ -836,6 +841,21 @@
     "newCta": "Neue Aufgabe",
     "total": "Aufgaben gesamt",
     "active": "Aktive Aufgaben",
-    "completed": "Abgeschlossene Aufgaben"
+    "completed": "Abgeschlossene Aufgaben",
+    "cancelled": "Storniert",
+    "allTasks": "Alli Ufgabe",
+    "completionRate": "Abschlussrate",
+    "completionSummary": "{{completed}} vo {{total}} Ufgabe abgschlosse",
+    "quickActions": "Schnällaktione",
+    "viewRequests": "Mini Afroge"
+  },
+  "acceptedTasks": {
+    "cancelTask": "Ufgab stornier",
+    "cancelConfirmTitle": "Die Ufgab stornier?",
+    "cancelConfirmMessage": "Du wirsch vo dere Ufgab entfernt und de Ersteller wird benachrichtigt.",
+    "cancelConfirmYes": "Ja, stornier",
+    "cancelConfirmNo": "Ufgab behalte",
+    "cancelSuccess": "Du hesch die Ufgab storniert",
+    "cancelError": "D'Ufgab het nöd chönne storniert werde. Bitte versuechs nomal."
   }
 }

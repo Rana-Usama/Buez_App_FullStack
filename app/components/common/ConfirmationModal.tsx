@@ -126,6 +126,8 @@ const ConfirmationModal = ({
               }
               onPress={onConfirm}
               loading={loading}
+              borderRadius={RFPercentage(100)}
+
               // You can add color prop to MyAppButton based on type if needed
               // backgroundColor={iconConfig.color}
             />
@@ -183,7 +185,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: RFPercentage(1),
-    width: "100%",
+    width: "90%",
     paddingHorizontal: RFPercentage(2),
   },
   cancelButton: {
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
       Platform.OS === "android" ? RFPercentage(5.8) : RFPercentage(5),
     width:
       Platform.OS === "android" ? RFPercentage(17) : RFPercentage(15),
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(100),
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",

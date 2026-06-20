@@ -411,6 +411,7 @@ const Chat = ({ navigation, route }: any) => {
             marginVertical: isFromSameUser
               ? RFPercentage(0.3)
               : RFPercentage(1),
+              width:"90%"
           }}
         >
           <Bubble
@@ -538,11 +539,11 @@ const Chat = ({ navigation, route }: any) => {
               />
             )}
             renderDay={renderDay}
-            // renderAvatar={renderAvatar}
+            renderAvatar={renderAvatar}
             renderBubble={renderBubble}
             listViewProps={listViewProps as any}
             maxInputLength={500}
-            // showUserAvatar={false}
+            showUserAvatar={false}
             alwaysShowSend
             // scrollToBottom
           />

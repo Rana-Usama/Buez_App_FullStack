@@ -9,6 +9,8 @@ import {
   query,
   where,
   getDocs,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { reload } from "firebase/auth";
@@ -18,6 +20,12 @@ import { deepLinkState } from "./deepLinkState";
 
 // ─── Must match the key used in DeciderScreen.tsx ────────────────────────────
 const PENDING_JOB_KEY = "pendingDeepLinkJobId";
+
+// Hosts that serve short share links of the form https://<host>/<shortCode>.
+// iOS Universal Links hand this raw short URL straight to the app, so we must
+// resolve the shortCode → jobId ourselves (the share page's button-fired
+// buez://job/<jobId> deep link never runs in that flow).
+const SHARE_HOSTS = ["buez-server-khaki.vercel.app"];
 
 type DeepLinkHandler = (jobId: string) => void;
 
@@ -238,23 +246,69 @@ export const useDeepLinking = ({
     }
   }, []); // empty deps — reads live values via refs
 
-  // ─── Parse URL and extract jobId ──────────────────────────────────────────
-  const handleDeepLink = useCallback((url: string) => {
-    console.log("[DeepLink] Deep link received:", url);
-
-    const jobIdMatch = url.match(
+  // ─── Direct deep link → jobId (buez://job/<id> or https://host/job/<id>) ──
+  const extractJobId = (url: string): string | null =>
+    url.match(
       /(?:buez:\/\/job\/|https?:\/\/[^/]+\/job\/)([a-zA-Z0-9]+)/
-    );
-    const jobId = jobIdMatch?.[1];
+    )?.[1] ?? null;
 
-    if (!jobId) {
-      console.log("[DeepLink] Invalid deep link format:", url);
-      return;
-    }
+  // ─── Short link → shortCode (https://<shareHost>/<shortCode>) ─────────────
+  const extractShortCode = (url: string): string | null => {
+    const m = url.match(/^https?:\/\/([^/?#]+)\/([a-zA-Z0-9]+)\/?(?:[?#].*)?$/);
+    if (m && SHARE_HOSTS.includes(m[1])) return m[2];
+    return null;
+  };
 
-    console.log("[DeepLink] jobId extracted:", jobId);
-    resolveAndNavigate(jobId);
-  }, [resolveAndNavigate]);
+  // ─── Resolve a shortCode → jobId via the shareLinks collection ────────────
+  const resolveShortCode = useCallback(
+    async (shortCode: string): Promise<string | null> => {
+      try {
+        const snap = await getDoc(doc(db, "shareLinks", shortCode));
+        if (!snap.exists()) {
+          console.log("[DeepLink] shareLinks doc not found:", shortCode);
+          return null;
+        }
+        const data = snap.data();
+        if (data?.isActive === false) {
+          console.log("[DeepLink] share link is inactive:", shortCode);
+          return null;
+        }
+        return data?.jobId ?? null;
+      } catch (error) {
+        console.log("[DeepLink] Error resolving shortCode:", error);
+        return null;
+      }
+    },
+    [db]
+  );
+
+  // ─── Parse URL and extract jobId ──────────────────────────────────────────
+  const handleDeepLink = useCallback(
+    async (url: string) => {
+      console.log("[DeepLink] Deep link received:", url);
+
+      // 1) Direct deep link (Android web-page button, in-app browsers, etc.)
+      let jobId = extractJobId(url);
+
+      // 2) iOS Universal Link short form — resolve shortCode → jobId.
+      if (!jobId) {
+        const shortCode = extractShortCode(url);
+        if (shortCode) {
+          console.log("[DeepLink] Resolving short code:", shortCode);
+          jobId = await resolveShortCode(shortCode);
+        }
+      }
+
+      if (!jobId) {
+        console.log("[DeepLink] Invalid deep link format:", url);
+        return;
+      }
+
+      console.log("[DeepLink] jobId extracted:", jobId);
+      resolveAndNavigate(jobId);
+    },
+    [resolveAndNavigate, resolveShortCode]
+  );
 
   useEffect(() => {
     if (userLoading) return;

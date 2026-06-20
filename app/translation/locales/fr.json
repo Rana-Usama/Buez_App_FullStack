@@ -280,7 +280,9 @@
     "noReviewsDesc": "Les avis des propriétaires des tâches apparaîtront ici",
     "view": "Voir les candidats",
     "viewConfirmedHelpers": "Voir les aides",
-    "txt14": "Passées"
+    "txt14": "Passées",
+    "rateHelper": "Évaluer l'assistant",
+    "reviewed": "Évalué"
   },
   "postRequest": {
     "txt1": "Publier une demande",
@@ -320,7 +322,8 @@
     "back": "Retour",
     "validateStep1": "Veuillez sélectionner un type de tâche et de rémunération",
     "validateStep2": "Veuillez choisir une date, une heure et une durée estimée",
-    "validateStep3": "Veuillez ajouter une description, un lieu et une rémunération"
+    "validateStep3": "Veuillez ajouter une description, un lieu et une rémunération",
+    "repostTitle": "Republier la demande"
   },
   "messages": {
     "txt1": "Messages",
@@ -428,7 +431,9 @@
     "txt9": "Si aucun accord n'est conclu, republiez-la depuis 'Mes Dem' sous 'Actives'.",
     "txt10": "Restez informé",
     "txt11": "Vous recevrez des notifications quand quelqu'un est intéressé ou envoie une offre.",
-    "txt12": "Voir mes demandes"
+    "txt12": "Voir mes demandes",
+    "editedTitle": "Demande modifiée avec succès",
+    "editedSubtitle": "Votre tâche a été mise à jour avec succès !"
   },
   "profile": {
     "txt1": "Profil",
@@ -836,6 +841,21 @@
     "newCta": "Nouvelle tâche",
     "total": "Total des tâches publiées",
     "active": "Tâches actives",
-    "completed": "Tâches terminées"
+    "completed": "Tâches terminées",
+    "cancelled": "Annulé",
+    "allTasks": "Toutes les tâches",
+    "completionRate": "Taux d'achèvement",
+    "completionSummary": "{{completed}} tâches sur {{total}} terminées",
+    "quickActions": "Actions rapides",
+    "viewRequests": "Mes demandes"
+  },
+  "acceptedTasks": {
+    "cancelTask": "Annuler la tâche",
+    "cancelConfirmTitle": "Annuler cette tâche ?",
+    "cancelConfirmMessage": "Vous serez retiré de cette tâche et le propriétaire en sera informé.",
+    "cancelConfirmYes": "Oui, annuler",
+    "cancelConfirmNo": "Garder la tâche",
+    "cancelSuccess": "Vous avez annulé cette tâche",
+    "cancelError": "Impossible d'annuler la tâche. Veuillez réessayer."
   }
 }

@@ -863,7 +863,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: RFPercentage(3),
+    // paddingHorizontal: RFPercentage(3),
     paddingTop: RFPercentage(1.6),
     paddingBottom:
       Platform.OS === "ios" ? RFPercentage(4.5) : RFPercentage(2.8),

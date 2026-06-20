@@ -17,12 +17,14 @@ import {
   limit,
   startAfter,
   writeBatch, // Add this import
+  deleteDoc,
 } from "firebase/firestore";
 // FIREBASE config
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 // shared
 import { uploadImage } from "./Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
+import { removeMemberFromGroupChat } from "./GroupChat.service";
 
 const db = FIREBASE_DB;
 const PAGE_SIZE = 10;
@@ -283,8 +285,8 @@ export const createCompletedTaskForWorkers = async (taskId, taskData) => {
     const isBulkRequest = task.numberOfWorkers > 1 || task.isBulkRequest;
     const confirmedWorkers = task.confirmedWorkers || [];
 
-    if (!isBulkRequest || confirmedWorkers.length === 0) {
-      return; // Not a bulk request or no confirmed workers
+    if (confirmedWorkers.length === 0) {
+      return; // No confirmed workers → nothing to create
     }
 
     // Create completedTask entries for each confirmed worker
@@ -313,7 +315,9 @@ export const createCompletedTaskForWorkers = async (taskId, taskData) => {
             requester: task.user, // Add requester for consistency
             confirmedWorkers: confirmedWorkers,
             appliedWorkers: task.appliedWorkers || [],
-            isBulkRequest: true,
+            // Reflect the real request type so the helper's Completed card
+            // renders correctly (single-helper tasks must not show bulk UI).
+            isBulkRequest: isBulkRequest,
             status: "Completed", // IMPORTANT: Set status to Completed
             completedAt: new Date().toISOString(), // Add completion timestamp
           },
@@ -322,7 +326,7 @@ export const createCompletedTaskForWorkers = async (taskId, taskData) => {
           completedAt: new Date().toISOString(),
           acceptedAt:
             worker.confirmedAt || task.createdAt || new Date().toISOString(),
-          isBulkTask: true,
+          isBulkTask: isBulkRequest,
           isConfirmedHelper: true,
           workerConfirmation: {
             confirmedAt: worker.confirmedAt,
@@ -362,12 +366,12 @@ export const updateReqestStatus = async (taskId, status, taskData) => {
       const taskDoc = await getDoc(taskRef);
       const task = { id: taskDoc.id, ...taskDoc.data() };
 
-      // Check if this is a bulk request
-      const isBulkRequest = task?.numberOfWorkers > 1 || task?.isBulkRequest;
       const confirmedWorkers = task?.confirmedWorkers || [];
 
-      if (isBulkRequest && confirmedWorkers.length > 0) {
-        // Create completedTask entries for all confirmed workers
+      if (confirmedWorkers.length > 0) {
+        // Create completedTask entries for every confirmed worker. This covers
+        // BOTH multi-helper tasks and single-helper tasks that were filled via
+        // the confirm flow (numberOfWorkers === 1, no acceptedBy).
         await createCompletedTaskForWorkers(taskId, task);
       } else if (task?.acceptedBy) {
         // For single tasks, ensure completedTask entry exists
@@ -397,11 +401,16 @@ export const updateReqestStatus = async (taskId, status, taskData) => {
             isBulkTask: false,
           });
         } else {
-          // Update existing entry
+          // Update existing entry. Sync the nested taskDetails.status too so
+          // the worker's record is internally consistent (UI labels / future
+          // reads that look at taskDetails won't show a stale "Active").
           const completedTaskDoc = completedTasks.docs[0];
+          const completedAt = new Date().toISOString();
           await updateDoc(completedTaskDoc.ref, {
             status: "Completed",
-            completedAt: new Date().toISOString(),
+            completedAt,
+            "taskDetails.status": "Completed",
+            "taskDetails.completedAt": completedAt,
           });
         }
       }
@@ -410,6 +419,158 @@ export const updateReqestStatus = async (taskId, status, taskData) => {
     console.log("Task status updated successfully");
   } catch (error) {
     console.error("Error updating task status:", error);
+    throw error;
+  }
+};
+
+// ─── Cancel a confirmed/accepted task (worker withdraws) ──────────────────────
+// Works for both single-helper (direct-accept via acceptedBy) and multi-helper
+// (confirm flow via confirmedWorkers) tasks, keeping the task doc and the
+// worker's completedTask entry in sync.
+export const cancelConfirmedTask = async ({
+  task,
+  userId,
+}: {
+  task: any;
+  userId: string;
+}) => {
+  if (!task?.id || !userId) {
+    throw new Error("Missing task id or user id for cancellation");
+  }
+
+  const taskRef = doc(db, "taskRequests", task.id);
+  const snap = await getDoc(taskRef);
+  if (!snap.exists()) throw new Error("Task not found");
+  const data: any = snap.data();
+
+  const updates: any = {};
+
+  // Capture the worker's stored details (for group-chat removal) before we
+  // filter them out.
+  const removedWorker = Array.isArray(data.confirmedWorkers)
+    ? data.confirmedWorkers.find((w: any) => w?.userId === userId)
+    : null;
+
+  // Free the worker's slot by removing them from both arrays.
+  const confirmedWorkers = Array.isArray(data.confirmedWorkers)
+    ? data.confirmedWorkers.filter((w: any) => w?.userId !== userId)
+    : [];
+  const appliedWorkers = Array.isArray(data.appliedWorkers)
+    ? data.appliedWorkers.filter((w: any) => w?.userId !== userId)
+    : [];
+  updates.confirmedWorkers = confirmedWorkers;
+  updates.appliedWorkers = appliedWorkers;
+
+  // Keep any stored slot count in sync (UI also derives this from the array).
+  const totalWorkers = data.numberOfWorkers || 1;
+  if (typeof data.slotsAvailable === "number") {
+    updates.slotsAvailable = Math.max(0, totalWorkers - confirmedWorkers.length);
+  }
+
+  // Single-helper direct-accept: clear acceptedBy and reopen the task so it
+  // becomes available to other helpers again.
+  if (data.acceptedBy?.userId === userId) {
+    updates.acceptedBy = null;
+    updates.status = REQUEST_STATUS.Active;
+  }
+
+  await updateDoc(taskRef, updates);
+
+  // Remove any pending completedTask entry this worker holds for the task so it
+  // disappears from their Accepted list (and never surfaces as completed).
+  const ctQuery = query(
+    collection(db, "completedTask"),
+    where("taskId", "==", task.id),
+    where("acceptedBy.userId", "==", userId),
+    where("status", "==", "pending"),
+  );
+  const ctSnap = await getDocs(ctQuery);
+  await Promise.all(ctSnap.docs.map((d) => deleteDoc(d.ref)));
+
+  // Remove the worker from the task's group chat (best-effort; no-op if the
+  // group chat doesn't exist). Never let this block the cancellation.
+  if (removedWorker) {
+    try {
+      await removeMemberFromGroupChat(task.id, {
+        userId,
+        userName: removedWorker.userName || removedWorker.name || "",
+        profileImage:
+          removedWorker.profileImage || removedWorker.image || "",
+        token: removedWorker.token || "",
+      });
+    } catch (error) {
+      console.log("cancelConfirmedTask group-chat removal error:", error);
+    }
+  }
+
+  return { confirmedWorkers, appliedWorkers };
+};
+
+// ─── Notify the task owner that a confirmed worker has cancelled ──────────────
+export const sendTaskCancellationNotification = async ({
+  task,
+  owner,
+  canceller,
+}: {
+  task: any;
+  owner: any;
+  canceller: any;
+}) => {
+  const taskTitle =
+    task?.taskType === "Other"
+      ? task?.customTaskTitle || task?.taskType
+      : task?.taskType || "your task";
+  const message = `${
+    canceller?.userName || "A helper"
+  } has cancelled their confirmed spot for "${taskTitle}"`;
+
+  // Push notification (best-effort; never block the cancel on this).
+  try {
+    if (owner?.token) {
+      await fetch("https://buez-server-khaki.vercel.app/api/send-notification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fcmToken: owner.token,
+          title: "Spot Cancelled",
+          body: message,
+        }),
+      });
+    }
+  } catch (error) {
+    console.log("sendTaskCancellationNotification push error:", error);
+  }
+
+  // Persist the in-app notification for the owner.
+  try {
+    await addDoc(collection(db, "notifications"), {
+      sender: {
+        userId: canceller?.userId,
+        userName: canceller?.userName,
+        email: canceller?.email || "",
+        profileImage: canceller?.profileImage || null,
+        token: canceller?.token || "",
+      },
+      receiver: {
+        userId: owner?.userId,
+        name: owner?.userName,
+        email: owner?.email || "",
+        token: owner?.token || "",
+      },
+      task: {
+        taskId: task?.id,
+        taskType: task?.taskType,
+        customTaskTitle: task?.customTaskTitle || "",
+        description: task?.description || "",
+      },
+      type: "task_cancellation",
+      title: "Spot Cancelled",
+      message,
+      timestamp: new Date().toISOString(),
+      isRead: false,
+    });
+  } catch (error) {
+    console.log("sendTaskCancellationNotification save error:", error);
     throw error;
   }
 };

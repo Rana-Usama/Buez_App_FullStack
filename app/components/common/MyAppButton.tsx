@@ -23,17 +23,19 @@ interface MyAppButtonProps {
   title?: string;
   onPress?: (event: GestureResponderEvent) => void;
   navigation?: any;
+  borderRadius? :any
 }
 
 const MyAppButton: React.FC<MyAppButtonProps> = ({
   loading = false,
   disabled = false,
-  height = Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
+  height = Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(6.5),
   width = "100%",
   marginTop = RFPercentage(5),
   title = "Login",
   onPress,
   navigation,
+  borderRadius
 }) => {
   const { theme } = useAppTheme();
   return (
@@ -43,7 +45,7 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
       style={{
         width,
         height,
-        borderRadius: RFPercentage(2),
+        borderRadius: borderRadius ? borderRadius : RFPercentage(2),
         overflow: "hidden",
         marginTop,
       }}

@@ -7,6 +7,7 @@ import {
   Modal,
   TouchableOpacity,
   Dimensions,
+  ScrollView
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
@@ -382,7 +383,7 @@ function ForgotPassword(props: any) {
 
       <CustomNav showBack title={`${t("forgetPassword.txt1")}`} />
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} >
         {/* Lock icon */}
         <LockIcon />
 
@@ -498,11 +499,7 @@ function ForgotPassword(props: any) {
                     <Text style={styles.btnText} numberOfLines={1}>
                       {loader ? "Sending…" : t("forgetPassword.txt2")}
                     </Text>
-                    {!loader && (
-                      <View style={styles.arrowBubble}>
-                        <Text style={styles.arrowText}>→</Text>
-                      </View>
-                    )}
+                   
                   </LinearGradient>
                 </TouchableOpacity>
 
@@ -519,14 +516,14 @@ function ForgotPassword(props: any) {
                     ]}
                   >
                     Remember your password?{" "}
-                    <Text style={styles.backLink}>Sign in</Text>
+                    <Text style={[styles.backLink,{color: theme.mode === "dark" ? Colors.white : theme.primary }]}>Sign in</Text>
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
           )}
         </Formik>
-      </View>
+      </ScrollView>
 
       {/* Success Modal */}
       <SuccessModal
@@ -554,6 +551,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: RFPercentage(5),
     alignSelf: "center",
+    paddingBottom:RFPercentage(20)
   },
   title: {
     fontFamily: "Poppins_700Bold",
@@ -630,7 +628,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: RFPercentage(1.6),
     gap: 10,
-
   },
   btnText: {
     fontFamily: "Poppins_600SemiBold",
@@ -641,7 +638,7 @@ const styles = StyleSheet.create({
   arrowBubble: {
     width: 26,
     height: 26,
-    borderRadius: 13,
+    borderRadius: 100,
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
@@ -649,7 +646,10 @@ const styles = StyleSheet.create({
   arrowText: {
     color: "#fff",
     fontSize: RFPercentage(2.2),
-    lineHeight: RFPercentage(2),
+    textAlign: "center",
+    fontFamily: "Poppins_400Regular",
+
+    // lineHeight: RFPercentage(2),
   },
   backRow: {
     marginTop: RFPercentage(2.2),

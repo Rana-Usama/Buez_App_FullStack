@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexDirection: "row",
     paddingHorizontal: RFPercentage(1.5),
-    height: Platform.OS === "android" ? RFPercentage(6.5) : RFPercentage(5.8),
+    height: Platform.OS === "android" ? RFPercentage(6.5) : RFPercentage(6.5),
   },
   textInput: {
     width: "92%",

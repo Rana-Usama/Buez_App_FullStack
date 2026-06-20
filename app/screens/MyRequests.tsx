@@ -55,6 +55,7 @@ import {
   query,
   doc,
   updateDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import RepostSuccessModal from "../components/common/RepostModal";
 import { Ionicons } from "@expo/vector-icons";
@@ -409,6 +410,53 @@ function MyRequests({ navigation }) {
     }, [param]),
   );
 
+  // Live-patch volatile fields on the owner's Active tasks so confirmations,
+  // cancellations and completions reflect immediately without a manual refocus.
+  // We only patch fields that change at runtime and never touch the translated
+  // text fields produced by fetchRequests, and we don't add/remove rows (the
+  // paginated list composition stays owned by fetchRequests).
+  useFocusEffect(
+    useCallback(() => {
+      // param is REQUEST_STATUS.Active for both the Active and Past tabs.
+      if (!currentUserId || param !== REQUEST_STATUS.Active) return;
+
+      const liveQuery = query(
+        collection(db, "taskRequests"),
+        where("userId", "==", currentUserId),
+        where("status", "==", REQUEST_STATUS.Active),
+      );
+
+      const unsubscribe = onSnapshot(
+        liveQuery,
+        (snap) => {
+          const freshById: Record<string, any> = {};
+          snap.forEach((d) => {
+            freshById[d.id] = d.data();
+          });
+          setTaskRecords((prev) =>
+            prev.map((rec) => {
+              const fresh = freshById[rec.id];
+              if (!fresh) return rec;
+              return {
+                ...rec,
+                confirmedWorkers:
+                  fresh.confirmedWorkers ?? rec.confirmedWorkers,
+                appliedWorkers: fresh.appliedWorkers ?? rec.appliedWorkers,
+                acceptedBy: fresh.acceptedBy ?? null,
+                status: fresh.status ?? rec.status,
+                slotsAvailable: fresh.slotsAvailable ?? rec.slotsAvailable,
+                numberOfWorkers: fresh.numberOfWorkers ?? rec.numberOfWorkers,
+              };
+            }),
+          );
+        },
+        (err) => console.log("MyRequests live-patch error:", err),
+      );
+
+      return () => unsubscribe();
+    }, [currentUserId, param]),
+  );
+
   const refreshRequests = async () => {
     setRefreshing(true);
     setLastVisiblePost(null);
@@ -458,10 +506,11 @@ function MyRequests({ navigation }) {
   // Add this function to send notifications to all confirmed helpers
   const sendBulkTaskCompletionNotification = async (task) => {
     try {
-      const isBulkRequest = task.numberOfWorkers > 1 || task.isBulkRequest;
       const hasConfirmedHelpers =
         task.confirmedWorkers && task.confirmedWorkers.length > 0;
-      if (!isBulkRequest || !hasConfirmedHelpers) {
+      // Notify every confirmed helper regardless of single/multi-helper. Only
+      // fall back to the acceptedBy path when there are no confirmed helpers.
+      if (!hasConfirmedHelpers) {
         if (task.acceptedBy) {
           await sendTaskCompletionPushNotification(task);
           await saveTaskCompletionNotification(task);
@@ -562,7 +611,8 @@ function MyRequests({ navigation }) {
       let action;
       if (status === REQUEST_STATUS.Completed) {
         action = `${t("toast.myRequests.three")}`;
-        if (item.numberOfWorkers > 1 || item.isBulkRequest) {
+        if (item.confirmedWorkers?.length > 0) {
+          // Confirm-flow tasks (single- or multi-helper) notify each helper.
           await sendBulkTaskCompletionNotification(item);
         } else if (item.acceptedBy) {
           await sendTaskCompletionNotification(item);
@@ -589,43 +639,15 @@ function MyRequests({ navigation }) {
     }
   };
 
-  const repostRequest = async (index, item) => {
-    setRepostingIndex(index);
-    try {
-      const taskRef = doc(db, "taskRequests", item.id);
-
-      await updateDoc(taskRef, {
-        status: REQUEST_STATUS.Active,
-        acceptedBy: null,
-        confirmedWorkers: [],
-        appliedWorkers: [],
-      });
-
-      setTaskRecords((prev) =>
-        prev.map((r) =>
-          r.id === item.id
-            ? {
-                ...r,
-                status: REQUEST_STATUS.Active,
-                acceptedBy: null,
-                confirmedWorkers: [],
-                appliedWorkers: [],
-              }
-            : r,
-        ),
-      );
-
-      setActiveFilter(t("myRequests.txt2"));
-      setRepostModalVisible(true);
-    } catch (e) {
-      Toast.show({
-        type: "error",
-        text1: t("toast.myRequests.five"),
-        text2: t("toast.myRequests.six"),
-      });
-    } finally {
-      setRepostingIndex(null);
-    }
+  const repostRequest = (index, item) => {
+    // Reposting opens the post form in "repost" mode so the user picks a NEW
+    // schedule. On submit it reactivates this task fresh (status Active,
+    // applicants/acceptedBy cleared) with the new date/time.
+    navigation.navigate("PostRequest", {
+      postRequest: item,
+      title: `${t("postRequest.repostTitle")}`,
+      repost: true,
+    });
   };
 
   const FilterButton = ({ title, isActive, isFirst }) => (
@@ -935,6 +957,15 @@ function MyRequests({ navigation }) {
             cart.status === REQUEST_STATUS.Completed &&
             isTaskOwner &&
             cart.confirmedWorkers?.length > 0;
+          // Single-helper completed tasks (accepted via acceptedBy, not the
+          // confirm flow) let the owner rate the one accepter directly.
+          const canReviewSingleHelper =
+            activeFilter === `${t("myRequests.txt3")}` && // Completed filter
+            cart.status === REQUEST_STATUS.Completed &&
+            isTaskOwner &&
+            !!cart.acceptedBy?.userId &&
+            !(cart.confirmedWorkers?.length > 0);
+          const singleHelperReviewed = reviewedSingleTasks[cart.id];
 
           const scheduledDateTime = formatScheduledDateTime(cart);
           const durationLabel = getDurationLabel(cart);
@@ -1162,7 +1193,11 @@ function MyRequests({ navigation }) {
                           <Ionicons
                             name="calendar-outline"
                             size={RFPercentage(1.5)}
-                            color={ theme.mode === "dark" ? Colors.white : theme.primary}
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : theme.primary
+                            }
                           />
                           <Text
                             style={[
@@ -1179,7 +1214,11 @@ function MyRequests({ navigation }) {
                           <Ionicons
                             name="time-outline"
                             size={RFPercentage(1.5)}
-                            color={ theme.mode === "dark" ? Colors.white : theme.primary}
+                            color={
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : theme.primary
+                            }
                           />
                           <Text
                             style={[
@@ -1201,7 +1240,9 @@ function MyRequests({ navigation }) {
                         <Ionicons
                           name="list"
                           size={RFPercentage(1.5)}
-                           color={ theme.mode === "dark" ? Colors.white : theme.primary}
+                          color={
+                            theme.mode === "dark" ? Colors.white : theme.primary
+                          }
                         />
                         <Text
                           style={[
@@ -1218,13 +1259,22 @@ function MyRequests({ navigation }) {
                             key={subTask.id || idx}
                             style={[
                               styles.subTaskTag,
-                              { backgroundColor: theme.mode === "dark" ?  "rgba(255,255,255,0.1)"  : `${Colors.primary}15` },
+                              {
+                                backgroundColor:
+                                  theme.mode === "dark"
+                                    ? "rgba(255,255,255,0.1)"
+                                    : `${Colors.primary}15`,
+                              },
                             ]}
                           >
                             <FontAwesome5
                               name={subTask.icon || "tag"}
                               size={RFPercentage(1.1)}
-                              color={ theme.mode === "dark" ? Colors.darkGrey : theme.primary}
+                              color={
+                                theme.mode === "dark"
+                                  ? Colors.darkGrey
+                                  : theme.primary
+                              }
                             />
                             <Text
                               style={[
@@ -1288,51 +1338,7 @@ function MyRequests({ navigation }) {
                 </View>
               )}
 
-              {activeFilter === `${t("myRequests.txt3")}` && // Completed filter
-                cart.status === REQUEST_STATUS.Completed &&
-                isTaskOwner && (
-                  <View style={styles.completedActionsContainer}>
-                    {/* For single accepted tasks */}
-                    {cart.acceptedBy &&
-                      !cart.isBulkRequest &&
-                      (cart.reviewedAccepter ? (
-                        <View style={[styles.addReviewButton]}>
-                          <Ionicons
-                            name="checkmark-circle"
-                            size={RFPercentage(1.5)}
-                            color="#4CAF50"
-                          />
-                          <Text
-                            style={[styles.addReviewText, { color: "#4CAF50" }]}
-                          >
-                            {t("myRequests.reviewed") || "Reviewed"}
-                          </Text>
-                        </View>
-                      ) : (
-                        /* ➕ ADD REVIEW */
-                        <TouchableOpacity
-                          style={styles.addReviewButton}
-                          onPress={(event) => {
-                            event.stopPropagation();
-                            navigation.navigate("AddReviewToAccepter", {
-                              task: cart,
-                            });
-                          }}
-                          activeOpacity={0.8}
-                        >
-                          <Ionicons
-                            name="star"
-                            size={RFPercentage(1.5)}
-                            color={Colors.primary}
-                          />
-                          <Text style={styles.addReviewText}>
-                            {t("myRequests.addReview") || "Add Review"}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-
-                  </View>
-                )}
+              
 
               {/* Compensation + Repost + View Applicants Button */}
               <View style={styles.taskInfoContainer}>
@@ -1355,12 +1361,84 @@ function MyRequests({ navigation }) {
                         (cart.otherCompensation?.length > 15 ? "..." : "")}
                   </Text>
                 </Text>
-
               </View>
 
               {/* Bottom card actions: View Helpers (secondary) + Repost (primary) */}
-              {(canRepost || canViewHelpers) && (
+              {(canRepost || canViewHelpers || canReviewSingleHelper) && (
                 <View style={styles.cardActionsRow}>
+                  {canReviewSingleHelper &&
+                    (singleHelperReviewed ? (
+                      <View
+                        style={[
+                          styles.viewHelpersButton,
+                          {
+                            borderColor: Colors.statusAlertSuccess + "55",
+                            backgroundColor: Colors.statusAlertSuccess + "12",
+                          },
+                        ]}
+                      >
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={RFPercentage(1.9)}
+                          color={Colors.statusAlertSuccess}
+                        />
+                        <Text
+                          style={[
+                            styles.viewHelpersButtonText,
+                            { color: Colors.statusAlertSuccess },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {t("myRequests.reviewed")}
+                        </Text>
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        style={[
+                          styles.viewHelpersButton,
+                          {
+                            borderColor: Colors.primary + "55",
+                            backgroundColor:
+                              theme.mode === "dark"
+                                ? "rgba(255,255,255,0.1)"
+                                : Colors.primary + "0D",
+                          },
+                        ]}
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          navigation.navigate("AddReviewToAccepter", {
+                            // AddReviewToAccepter reads task.taskId; cart uses
+                            // `id`, so pass it explicitly to link the review.
+                            task: { ...cart, taskId: cart.id },
+                          });
+                        }}
+                        activeOpacity={0.85}
+                      >
+                        <Ionicons
+                          name="star"
+                          size={RFPercentage(1.9)}
+                          color={
+                            theme.mode === "dark"
+                              ? Colors.white
+                              : Colors.primary
+                          }
+                        />
+                        <Text
+                          style={[
+                            styles.viewHelpersButtonText,
+                            {
+                              color:
+                                theme.mode === "dark"
+                                  ? Colors.white
+                                  : Colors.primary,
+                            },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {t("myRequests.rateHelper")}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
                   {canViewHelpers && (
                     <TouchableOpacity
                       style={[
@@ -1382,9 +1460,7 @@ function MyRequests({ navigation }) {
                         name="people"
                         size={RFPercentage(1.9)}
                         color={
-                          theme.mode === "dark"
-                            ? Colors.white
-                            : Colors.primary
+                          theme.mode === "dark" ? Colors.white : Colors.primary
                         }
                       />
                       <Text
@@ -1399,8 +1475,7 @@ function MyRequests({ navigation }) {
                         ]}
                         numberOfLines={1}
                       >
-                        {t("myRequests.viewConfirmedHelpers") ||
-                          "View Helpers"}
+                        {t("myRequests.viewConfirmedHelpers") || "View Helpers"}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -1430,7 +1505,10 @@ function MyRequests({ navigation }) {
                             size={RFPercentage(1.9)}
                             color={Colors.white}
                           />
-                          <Text style={styles.repostButtonText}>
+                          <Text
+                            numberOfLines={1}
+                            style={styles.repostButtonText}
+                          >
                             {t("myRequests.txt9")}
                           </Text>
                         </>
@@ -1647,7 +1725,9 @@ function MyRequests({ navigation }) {
                         styles.cancel,
                         {
                           borderColor:
-                            theme.darkGrey,
+                            theme.mode === "dark"
+                              ? theme.border
+                              : theme.darkGrey,
                         },
                       ]}
                     >
@@ -1662,8 +1742,7 @@ function MyRequests({ navigation }) {
                           style={[
                             styles.text3,
                             {
-                              color:
-                                theme.darkGrey,
+                              color: theme.darkGrey,
                             },
                           ]}
                         >
@@ -1712,7 +1791,7 @@ function MyRequests({ navigation }) {
                       activeOpacity={0.8}
                       style={[
                         styles.cancel,
-                        { width: "48%", borderColor:  theme.darkGrey },
+                        { width: "48%", borderColor: theme.darkGrey },
                       ]}
                       onPress={(event) =>
                         navigateToConfirmedHelpers(cart, event)

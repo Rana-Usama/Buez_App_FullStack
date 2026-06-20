@@ -550,13 +550,14 @@ function AddReview() {
                 </Text>
               </View>
             </View>
-            <View style={{ alignSelf: "center" }}>
+            <View style={{ alignSelf: "center" , width:"100%"}}>
               <MyAppButton
                 title={tr.addReview || "Add Review"}
                 disabled={submitting || reviewText.trim().length === 0}
                 loading={submitting}
                 onPress={submitReview}
                 marginTop={RFPercentage(1)}
+                width={"100%"}
               />
             </View>
           </View>

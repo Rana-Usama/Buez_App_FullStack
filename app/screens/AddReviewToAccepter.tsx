@@ -356,6 +356,23 @@ function AddReviewToAccepter() {
 
       // 1. Save review to database
       const reviewData = {
+        // Canonical nested schema consumed by the reviewee's Reviews screen:
+        // fetchMyReviewsFromFirebase() queries recipient.userId and the card
+        // renders reviewer.*. Without these the owner→accepter review never
+        // surfaced on the accepter's profile.
+        reviewer: {
+          userId: currentUserId,
+          userName: userData?.userName || "Anonymous",
+          profileImage: userData?.profileImage || null,
+        },
+        recipient: {
+          userId: reviewedUserId,
+          userName: recipientUser.userName,
+          profileImage: recipientUser.profileImage || null,
+        },
+        reviewKey: `${currentUserId}_${taskId}_${reviewedUserId}`,
+        // Flat fields kept for existing consumers (ConfirmedHelpers,
+        // MyRequests single-task "already reviewed" check).
         reviewerId: currentUserId,
         reviewerName: userData?.userName || "Anonymous",
         reviewerProfileImage: userData?.profileImage || null,
@@ -636,13 +653,14 @@ function AddReviewToAccepter() {
                 </Text>
               </View>
             </View>
-            <View style={{ alignSelf: "center" }}>
+            <View style={{ alignSelf: "center", width:"100%" }}>
               <MyAppButton
                 title={tr.addReview || "Add Review"}
                 disabled={submitting || reviewText.trim().length === 0}
                 loading={submitting}
                 onPress={submitReview}
                 marginTop={RFPercentage(1)}
+                  width={"100%"}
               />
             </View>
           </View>

@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: Colors.primary,
-    borderRadius: RFPercentage(100),
+    borderRadius: RFPercentage(2),
     height: RFPercentage(6.5),
     flexDirection: "row",
     justifyContent: "center",

@@ -1129,7 +1129,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: RFPercentage(2.5),
+    // paddingHorizontal: RFPercentage(2.5),
     paddingTop: RFPercentage(1.8),
     paddingBottom: Platform.OS === "ios" ? RFPercentage(4) : RFPercentage(2.5),
     borderTopWidth: 1,

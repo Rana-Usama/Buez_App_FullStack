@@ -19,6 +19,7 @@ import Colors from "../config/Colors";
 import { Icons } from "../config/theme";
 import Nav from "../components/common/Nav";
 import MyAppButton from "../components/common/MyAppButton";
+import TaskDonutChart from "../components/common/TaskDonutChart";
 import { useAppTheme } from "../contexts/themeContext";
 import { getMyRequestCounts } from "../services/Post.service";
 
@@ -73,36 +74,64 @@ export default function PostDashboard({ navigation }) {
   const cardBg = isDark ? theme.white : Colors.pureWhite;
   const cardBorder = isDark ? theme.border : "#ECEFF9";
 
-  // ── Summary card ──
-  const StatCard = ({
-    icon,
+  // ── Chart colours (theme-aware) ──
+  const ACTIVE_COLOR = "#3B82F6";
+  const COMPLETED_COLOR = Colors.statusAlertSuccess;
+  const CANCELLED_COLOR = Colors.statusAlertError;
+  const trackColor = isDark ? "rgba(255,255,255,0.08)" : "#ECEFF9";
+
+  // Tasks that are neither active/completed/cancelled (e.g. expired-but-active)
+  // so the ring always sums to the total.
+  const otherCount = Math.max(
+    0,
+    counts.total - counts.active - counts.completed - counts.cancelled,
+  );
+
+  const chartSegments = [
+    { value: counts.active, color: ACTIVE_COLOR },
+    { value: counts.completed, color: COMPLETED_COLOR },
+    { value: counts.cancelled, color: CANCELLED_COLOR },
+    ...(otherCount > 0
+      ? [
+          {
+            value: otherCount,
+            color: isDark ? "rgba(255,255,255,0.18)" : "#D8DCEC",
+          },
+        ]
+      : []),
+  ];
+
+  const completionRate =
+    counts.total > 0 ? Math.round((counts.completed / counts.total) * 100) : 0;
+
+  // ── Legend row ──
+  const LegendRow = ({
+    color,
     label,
     value,
-    accent,
     onPress,
-    big,
   }: {
-    icon: any;
+    color: string;
     label: string;
     value: number;
-    accent: string;
-    onPress: () => void;
-    big?: boolean;
+    onPress?: () => void;
   }) => (
     <TouchableOpacity
-      activeOpacity={0.85}
+      activeOpacity={onPress ? 0.7 : 1}
+      disabled={!onPress}
       onPress={onPress}
-      style={[
-        styles.statCard,
-        big ? styles.statCardBig : styles.statCardHalf,
-        { backgroundColor: cardBg, borderColor: cardBorder },
-      ]}
+      style={styles.legendRow}
     >
-      <View style={[styles.statIcon, { backgroundColor: theme.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : accent + "1A" }]}>
-        <Ionicons name={icon} size={RFPercentage(2.6)} color={accent} />
-      </View>
-      <Text style={[styles.statValue, { color: theme.heading }]}>{value}</Text>
-      <Text style={[styles.statLabel, { color: theme.darkGrey }]}>{label}</Text>
+      <View style={[styles.legendDot, { backgroundColor: color }]} />
+      <Text
+        style={[styles.legendLabel, { color: theme.darkGrey }]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+      <Text style={[styles.legendValue, { color: theme.heading }]}>
+        {value}
+      </Text>
     </TouchableOpacity>
   );
 
@@ -183,33 +212,104 @@ export default function PostDashboard({ navigation }) {
               {t("postDashboard.overview")}
             </Text>
 
-            <StatCard
-              icon="albums"
-              label={t("postDashboard.total")}
-              value={counts.total}
-              accent={theme.mode === "dark" ? Colors.white : Colors.primary}
-              onPress={goMyRequests}
-              big
-            />
+            {/* Consolidated task breakdown chart */}
+            <View
+              style={[
+                styles.chartCard,
+                { backgroundColor: cardBg, borderColor: cardBorder },
+              ]}
+            >
+              <View style={styles.chartRow}>
+                <TaskDonutChart
+                  segments={chartSegments}
+                  total={counts.total}
+                  size={RFPercentage(20)}
+                  centerValue={counts.total}
+                  centerLabel={t("postDashboard.allTasks")}
+                  valueColor={theme.heading}
+                  labelColor={theme.darkGrey}
+                  trackColor={trackColor}
+                />
 
-            <View style={styles.statRow}>
-              <StatCard
-                icon="time"
-                label={t("postDashboard.active")}
-                value={counts.active}
-                accent="#3B82F6"
-                onPress={goMyRequests}
-              />
-              <StatCard
-                icon="checkmark-done-circle"
-                label={t("postDashboard.completed")}
-                value={counts.completed}
-                accent={Colors.statusAlertSuccess}
-                onPress={goCompleted}
-              />
+                <View style={styles.legend}>
+                  <LegendRow
+                    color={ACTIVE_COLOR}
+                    label={t("postDashboard.active")}
+                    value={counts.active}
+                    onPress={goMyRequests}
+                  />
+                  <LegendRow
+                    color={COMPLETED_COLOR}
+                    label={t("postDashboard.completed")}
+                    value={counts.completed}
+                    onPress={goCompleted}
+                  />
+                  {counts.cancelled > 0 && (
+                    <LegendRow
+                      color={CANCELLED_COLOR}
+                      label={t("postDashboard.cancelled")}
+                      value={counts.cancelled}
+                      onPress={goMyRequests}
+                    />
+                  )}
+                </View>
+              </View>
             </View>
 
-            <View style={{ height: RFPercentage(10) }} />
+            {/* Completion rate insight */}
+            <View
+              style={[
+                styles.insightCard,
+                { backgroundColor: cardBg, borderColor: cardBorder },
+              ]}
+            >
+              <View style={styles.insightHeader}>
+                <View style={styles.insightTitleWrap}>
+                  <View
+                    style={[
+                      styles.insightIcon,
+                      {
+                        backgroundColor:
+                          COMPLETED_COLOR + (isDark ? "26" : "1A"),
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name="trending-up"
+                      size={RFPercentage(2.2)}
+                      color={COMPLETED_COLOR}
+                    />
+                  </View>
+                  <Text style={[styles.insightTitle, { color: theme.heading }]}>
+                    {t("postDashboard.completionRate")}
+                  </Text>
+                </View>
+                <Text style={[styles.insightPct, { color: COMPLETED_COLOR }]}>
+                  {completionRate}%
+                </Text>
+              </View>
+
+              <View
+                style={[styles.progressTrack, { backgroundColor: trackColor }]}
+              >
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      width: `${completionRate}%`,
+                      backgroundColor: COMPLETED_COLOR,
+                    },
+                  ]}
+                />
+              </View>
+
+              <Text style={[styles.insightSub, { color: theme.darkGrey }]}>
+                {t("postDashboard.completionSummary", {
+                  completed: counts.completed,
+                  total: counts.total,
+                })}
+              </Text>
+            </View>
           </ScrollView>
 
           {/* Floating "Post New Task" CTA */}
@@ -239,7 +339,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: RFPercentage(4),
     paddingVertical: RFPercentage(6),
-    paddingBottom:RFPercentage(15)
+    paddingBottom: RFPercentage(15),
   },
   emptyIllustrationWrap: {
     width: RFPercentage(24),
@@ -316,6 +416,126 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.3),
   },
 
+  // Consolidated chart card
+  chartCard: {
+    borderRadius: RFPercentage(2.2),
+    borderWidth: 1,
+    padding: RFPercentage(2.2),
+    marginTop: RFPercentage(0.5),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+  },
+  chartRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  legend: {
+    flex: 1,
+    marginLeft: RFPercentage(2),
+    gap: RFPercentage(1.2),
+  },
+  legendRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  legendDot: {
+    width: RFPercentage(1.4),
+    height: RFPercentage(1.4),
+    borderRadius: RFPercentage(0.7),
+    marginRight: RFPercentage(1),
+  },
+  legendLabel: {
+    flex: 1,
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
+  },
+  legendValue: {
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_700Bold",
+    marginLeft: RFPercentage(0.8),
+  },
+
+  // Completion-rate insight
+  insightCard: {
+    borderRadius: RFPercentage(2.2),
+    borderWidth: 1,
+    padding: RFPercentage(2.2),
+    marginTop: RFPercentage(1.6),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+  },
+  insightHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: RFPercentage(1.4),
+  },
+  insightTitleWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  insightIcon: {
+    width: RFPercentage(4),
+    height: RFPercentage(4),
+    borderRadius: RFPercentage(1.2),
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: RFPercentage(1.2),
+  },
+  insightTitle: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_600SemiBold",
+  },
+  insightPct: {
+    fontSize: RFPercentage(2.4),
+    fontFamily: "Poppins_700Bold",
+  },
+  progressTrack: {
+    height: RFPercentage(1.1),
+    borderRadius: 100,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 100,
+  },
+  insightSub: {
+    fontSize: RFPercentage(1.4),
+    fontFamily: "Poppins_400Regular",
+    marginTop: RFPercentage(1),
+  },
+
+  // Quick action cards
+  actionCard: {
+    flex: 1,
+    borderRadius: RFPercentage(2.2),
+    borderWidth: 1,
+    padding: RFPercentage(2),
+    alignItems: "flex-start",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+  },
+  actionIcon: {
+    width: RFPercentage(4.6),
+    height: RFPercentage(4.6),
+    borderRadius: RFPercentage(1.4),
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: RFPercentage(1.2),
+  },
+  actionLabel: {
+    fontSize: RFPercentage(1.6),
+    fontFamily: "Poppins_600SemiBold",
+  },
+
   // Floating CTA
   fab: {
     position: "absolute",
@@ -331,8 +551,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,
-    width:"90%",
-    justifyContent:"center"
+    width: "90%",
+    justifyContent: "center",
     // elevation: 8,
   },
   fabText: {

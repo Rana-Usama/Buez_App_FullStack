@@ -304,14 +304,10 @@ export default function Reviews({ navigation }) {
                 </Text>
               </View>
             </View>
+          </View>
 
-            {/* Rating badge */}
-            <View
-              style={[styles.ratingBadge, { backgroundColor: accentColor }]}
-            >
-              <Text style={styles.ratingNumber}>{item.rating || 0}</Text>
-              <Text style={styles.ratingStar}>★</Text>
-            </View>
+          <View style={styles.cardFooter}>
+            <StarRow rating={Math.round(item.rating || 0)} />
           </View>
 
           {/* Quote */}
@@ -328,12 +324,6 @@ export default function Reviews({ navigation }) {
               "{translatedReview}"
             </Text>
           </View>
-
-          {/* Footer */}
-          <View style={styles.cardFooter}>
-            <StarRow rating={Math.round(item.rating || 0)} />
-           
-          </View>
         </View>
       </View>
     );
@@ -342,7 +332,6 @@ export default function Reviews({ navigation }) {
   // ── Section header ────────────────────────────────────────────────────────
   const renderHeader = ({ section: { title } }) => (
     <View style={styles.sectionHeaderContainer}>
-      
       <Text
         style={[
           styles.sectionHeaderText,
@@ -356,7 +345,6 @@ export default function Reviews({ navigation }) {
       >
         {title}
       </Text>
-     
     </View>
   );
 
@@ -483,7 +471,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.08,
     shadowRadius: 14,
-    elevation: 5,
+    // elevation: 5,
   },
   overviewRow: {
     flexDirection: "row",
@@ -504,7 +492,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 4,
+    // elevation: 4,
   },
   scoreNum: {
     fontSize: RFPercentage(4),
@@ -645,15 +633,11 @@ const styles = StyleSheet.create({
 
   // Quote block
   quoteBlock: {
-    borderLeftWidth: RFPercentage(0.4),
-    borderRadius: RFPercentage(0.4),
-    paddingLeft: RFPercentage(1.4),
-    paddingVertical: RFPercentage(0.2),
-    marginBottom: RFPercentage(1.5),
+ 
   },
   reviewText: {
     fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "Poppins_400Regular_Italic",
     lineHeight: RFPercentage(2.5),
     fontStyle: "italic",
   },
@@ -663,6 +647,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    alignSelf:"flex-end",
+    position:"absolute",
+    top:RFPercentage(3),
+    right:RFPercentage(2)
   },
   verifiedPill: {
     flexDirection: "row",

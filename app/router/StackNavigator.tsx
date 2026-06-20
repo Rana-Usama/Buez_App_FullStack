@@ -1,6 +1,6 @@
 // navigation/StackNavigator.js
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { View, BackHandler } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import NetInfo from "@react-native-community/netinfo";
@@ -73,6 +73,18 @@ const StackNavigator = () => {
     return unsubscribe;
   }, []);
 
+  // Globally disable the Android hardware/gesture back button. Returning true
+  // swallows every hardware back press app-wide so it never pops the stack or
+  // exits the app. The iOS swipe-back gesture is disabled via screenOptions
+  // (gestureEnabled: false) below.
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => true,
+    );
+    return () => subscription.remove();
+  }, []);
+
   // Network error handling
   if (!isConnected) return <NetworkError />;
 
@@ -87,6 +99,8 @@ const StackNavigator = () => {
         initialRouteName={"Decider"}
         screenOptions={{
           headerShown: false,
+          // Disable the iOS edge swipe-back gesture across all screens.
+          gestureEnabled: false,
           animation: "slide_from_right",
           // Screens draw under a translucent status bar (each renders its own
           // <StatusBar translucent />). Tell native-stack the same so it does

@@ -127,6 +127,7 @@ const CustomAppButton: React.FC<CustomAppButtonProps> = ({
             />
           )}
           <Text
+            numberOfLines={1}
             style={[customButtonStyles.text, { color: textColor }, textStyle]}
           >
             {title}
@@ -140,10 +141,11 @@ const CustomAppButton: React.FC<CustomAppButtonProps> = ({
 const customButtonStyles = StyleSheet.create({
   button: {
     flex: 1,
-    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(5.5),
+    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(6.5),
     borderRadius: RFPercentage(1.8),
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: RFPercentage(1.8),
   },
   content: {
     flexDirection: "row",
@@ -240,11 +242,15 @@ function OfferDetail({ navigation, route }) {
   };
 
   useEffect(() => {
-    if (initialPostRequest) return; // already have full object
-    if (!jobId) return;
+    // Subscribe whenever we can resolve a task id — even when navigated here
+    // with a full postRequest object — so confirmations/cancellations/
+    // completions update this screen live. The initial object (if any) still
+    // seeds the first render via useState, so there's no loading flash.
+    const taskId = jobId || initialPostRequest?.id;
+    if (!taskId) return;
 
-    setIsLoadingTask(true);
-    const taskDocRef = doc(db, "taskRequests", jobId);
+    if (!initialPostRequest) setIsLoadingTask(true);
+    const taskDocRef = doc(db, "taskRequests", taskId);
 
     const unsubscribe = onSnapshot(
       taskDocRef,
@@ -252,7 +258,8 @@ function OfferDetail({ navigation, route }) {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setPostRequest({ id: docSnap.id, ...data });
-        } else {
+        } else if (!initialPostRequest) {
+          // Only clear if we never had a seeded object (task truly missing).
           setPostRequest(null);
         }
         setIsLoadingTask(false);
@@ -1050,8 +1057,15 @@ function OfferDetail({ navigation, route }) {
           backgroundColor: theme.white,
         }}
       >
-        <ActivityIndicator size={"large"} color={theme.white}  />
-        <Text style={{ color: theme.darkGrey , fontSize:RFPercentage(1.8), fontFamily:"Poppins_400Regular", marginTop:RFPercentage(0.8)}}>
+        <ActivityIndicator size={"large"} color={theme.white} />
+        <Text
+          style={{
+            color: theme.darkGrey,
+            fontSize: RFPercentage(1.8),
+            fontFamily: "Poppins_400Regular",
+            marginTop: RFPercentage(0.8),
+          }}
+        >
           {t("taskApplicants.loading") || "Loading..."}
         </Text>
       </View>
@@ -1227,30 +1241,6 @@ function OfferDetail({ navigation, route }) {
               </Text>
             </View>
           </View>
-
-          {/* Hero Compensation Badge */}
-          {!!heroCompensation && (
-            <View style={styles.heroPriceBadge}>
-              <BlurView
-                intensity={40}
-                tint="dark"
-                style={styles.heroPriceBlur}
-              >
-                <Ionicons
-                  name={
-                    postRequest?.compensationType === "Monitarely"
-                      ? "cash"
-                      : "gift"
-                  }
-                  size={RFPercentage(2)}
-                  color="#FFFFFF"
-                />
-                <Text style={styles.heroPriceText} numberOfLines={1}>
-                  {heroCompensation}
-                </Text>
-              </BlurView>
-            </View>
-          )}
         </View>
 
         {/* Main Content */}
@@ -1301,7 +1291,7 @@ function OfferDetail({ navigation, route }) {
                 <Ionicons
                   name="document-text"
                   size={RFPercentage(2.2)}
-                 color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                  color={theme.mode === "dark" ? Colors.white : Colors.primary}
                 />
               </View>
               <Text style={[styles.sectionTitle, { color: theme.heading }]}>
@@ -1350,7 +1340,9 @@ function OfferDetail({ navigation, route }) {
                   <Ionicons
                     name="list"
                     size={RFPercentage(2.2)}
-                   color={theme.mode === "dark" ? Colors.white : Colors.primary}
+                    color={
+                      theme.mode === "dark" ? Colors.white : Colors.primary
+                    }
                   />
                 </View>
                 <Text style={[styles.sectionTitle, { color: theme.heading }]}>
@@ -1372,10 +1364,20 @@ function OfferDetail({ navigation, route }) {
                     <FontAwesome5
                       name={subTask.icon || "tag"}
                       size={RFPercentage(1.2)}
-                      color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+                      color={
+                        theme.mode === "dark" ? Colors.darkGrey : Colors.primary
+                      }
                     />
                     <Text
-                      style={[styles.subTaskText, { color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary }]}
+                      style={[
+                        styles.subTaskText,
+                        {
+                          color:
+                            theme.mode === "dark"
+                              ? Colors.darkGrey
+                              : Colors.primary,
+                        },
+                      ]}
                       numberOfLines={1}
                     >
                       {subTask.name}
@@ -1421,8 +1423,9 @@ function OfferDetail({ navigation, route }) {
                   <Ionicons
                     name="calendar"
                     size={RFPercentage(2.2)}
-                   color={theme.mode === "dark" ? Colors.white : Colors.primary}
-
+                    color={
+                      theme.mode === "dark" ? Colors.white : Colors.primary
+                    }
                   />
                 </View>
                 <Text style={[styles.sectionTitle, { color: theme.heading }]}>
@@ -1436,7 +1439,9 @@ function OfferDetail({ navigation, route }) {
                     <Ionicons
                       name="calendar-outline"
                       size={RFPercentage(2)}
-                      color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+                      color={
+                        theme.mode === "dark" ? Colors.darkGrey : Colors.primary
+                      }
                     />
                     <Text
                       style={[styles.scheduledText, { color: theme.darkGrey }]}
@@ -1451,7 +1456,9 @@ function OfferDetail({ navigation, route }) {
                     <Ionicons
                       name="time-outline"
                       size={RFPercentage(2)}
-                     color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
+                      color={
+                        theme.mode === "dark" ? Colors.darkGrey : Colors.primary
+                      }
                     />
                     <Text
                       style={[styles.scheduledText, { color: theme.darkGrey }]}
@@ -1475,7 +1482,7 @@ function OfferDetail({ navigation, route }) {
                 <View
                   style={[
                     styles.sectionIconChip,
-                    { backgroundColor: ui.iconChip  },
+                    { backgroundColor: ui.iconChip },
                   ]}
                 >
                   <Ionicons
@@ -1588,7 +1595,15 @@ function OfferDetail({ navigation, route }) {
                       style={styles.viewAllButton}
                     >
                       <Text
-                        style={[styles.viewAllText, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}
+                        style={[
+                          styles.viewAllText,
+                          {
+                            color:
+                              theme.mode === "dark"
+                                ? Colors.white
+                                : Colors.primary,
+                          },
+                        ]}
                       >
                         +{hiddenCount} {t("details.txt11")}
                       </Text>
@@ -1684,6 +1699,7 @@ function OfferDetail({ navigation, route }) {
                               : theme.lightGrey,
                         },
                       ]}
+                      numberOfLines={1}
                     >
                       {t("taskApplicants.group")}
                     </Text>
@@ -1711,7 +1727,10 @@ function OfferDetail({ navigation, route }) {
                       size={RFPercentage(2.5)}
                       color="#4CAF50"
                     />
-                    <Text style={[styles.appliedText, { color: "#4CAF50" }]}>
+                    <Text
+                      style={[styles.appliedText, { color: "#4CAF50" }]}
+                      numberOfLines={1}
+                    >
                       {confirmed
                         ? t("offerDetail.confirmed")
                         : t("offerDetail.applied")}
@@ -1767,6 +1786,7 @@ function OfferDetail({ navigation, route }) {
                       color={isChatEnabled() ? theme.darkGrey : theme.lightGrey}
                     />
                     <Text
+                      numberOfLines={1}
                       style={[
                         styles.secondaryButtonText,
                         {
@@ -1821,7 +1841,10 @@ function OfferDetail({ navigation, route }) {
                       size={RFPercentage(2.5)}
                       color={Colors.red}
                     />
-                    <Text style={[styles.disabledText, { color: Colors.red }]}>
+                    <Text
+                      style={[styles.disabledText, { color: Colors.red }]}
+                      numberOfLines={1}
+                    >
                       {t("offerDetail.cannotApply") || "Cannot apply"}
                     </Text>
                   </View>
@@ -2215,6 +2238,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1.8),
     borderWidth: 1,
     gap: RFPercentage(0.8),
+    paddingHorizontal: RFPercentage(1.8),
   },
   secondaryButtonText: {
     fontSize: RFPercentage(1.4),
@@ -2459,7 +2483,7 @@ const styles = StyleSheet.create({
   },
   scheduledContainer: {
     width: "95%",
-    alignSelf:'center'
+    alignSelf: "center",
   },
   scheduledItem: {
     flexDirection: "row",

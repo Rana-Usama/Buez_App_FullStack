@@ -280,7 +280,9 @@
     "noReviewsDesc": "Bewertungen von Auftraggebern werden hier angezeigt",
     "view": "Bewerber anzeigen",
     "viewConfirmedHelpers": "Helfer anzeigen",
-    "txt14": "Vergangen"
+    "txt14": "Vergangen",
+    "rateHelper": "Helfer bewerten",
+    "reviewed": "Bewertet"
   },
   "postRequest": {
     "txt1": "Anfrage veröffentlichen",
@@ -320,7 +322,8 @@
     "back": "Zurück",
     "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
     "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
-    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen"
+    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen",
+    "repostTitle": "Anfrage erneut posten"
   },
   "messages": {
     "txt1": "Nachrichten",
@@ -428,7 +431,9 @@
     "txt9": "Wenn kein Deal zustande kommt, veröffentliche sie erneut unter 'Meine Anf' bei 'Aktiv'.",
     "txt10": "Bleib auf dem Laufenden",
     "txt11": "Du erhältst Benachrichtigungen, wenn jemand interessiert ist oder ein Angebot sendet.",
-    "txt12": "Meine Anfragen ansehen"
+    "txt12": "Meine Anfragen ansehen",
+    "editedTitle": "Anfrage erfolgreich bearbeitet",
+    "editedSubtitle": "Deine Aufgabe wurde erfolgreich aktualisiert!"
   },
   "profile": {
     "txt1": "Profil",
@@ -836,6 +841,21 @@
     "newCta": "Neue Aufgabe",
     "total": "Aufgaben gesamt",
     "active": "Aktive Aufgaben",
-    "completed": "Abgeschlossene Aufgaben"
+    "completed": "Abgeschlossene Aufgaben",
+    "cancelled": "Storniert",
+    "allTasks": "Alle Aufgaben",
+    "completionRate": "Abschlussrate",
+    "completionSummary": "{{completed}} von {{total}} Aufgaben abgeschlossen",
+    "quickActions": "Schnellaktionen",
+    "viewRequests": "Meine Anfragen"
+  },
+  "acceptedTasks": {
+    "cancelTask": "Aufgabe stornieren",
+    "cancelConfirmTitle": "Diese Aufgabe stornieren?",
+    "cancelConfirmMessage": "Du wirst von dieser Aufgabe entfernt und der Ersteller wird benachrichtigt.",
+    "cancelConfirmYes": "Ja, stornieren",
+    "cancelConfirmNo": "Aufgabe behalten",
+    "cancelSuccess": "Du hast diese Aufgabe storniert",
+    "cancelError": "Aufgabe konnte nicht storniert werden. Bitte versuche es erneut."
   }
 }

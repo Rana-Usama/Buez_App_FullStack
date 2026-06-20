@@ -100,7 +100,7 @@ const StarRating = ({ rating }: { rating: number }) => (
         key={i}
         style={[
           starStyles.star,
-          { color: i <= rating ? "#F5A623" : "rgba(0,0,0,0.12)" },
+          { color: i <= rating ? "#F5A623" :  "rgba(179, 179, 179, 1)" },
         ]}
       >
         ★
@@ -148,17 +148,46 @@ const StatCell = ({
   value,
   label,
   accent,
-  theme
+  theme,
+  onPress,
+  active,
 }: {
   value: number;
   label: string;
   accent: string;
-  theme:any
+  theme: any;
+  onPress?: () => void;
+  active?: boolean;
 }) => (
-  <View style={statCellStyles.cell}>
+  <TouchableOpacity
+    style={statCellStyles.cell}
+    onPress={onPress}
+    disabled={!onPress}
+    activeOpacity={onPress ? 0.6 : 1}
+  >
     <Text style={[statCellStyles.value, { color: theme?.mode === "dark" ? Colors.white :  accent }]}>{value}</Text>
-    <Text style={[statCellStyles.label,{color: theme?.mode === "dark" ? Colors.darkGrey : "rgba(0,0,0,0.45)",}]}>{label}</Text>
-  </View>
+    <Text
+      style={[
+        statCellStyles.label,
+        {
+          color: active
+            ? accent
+            : theme?.mode === "dark"
+              ? Colors.darkGrey
+              : "rgba(0,0,0,0.45)",
+        },
+        active && statCellStyles.labelActive,
+      ]}
+    >
+      {label}
+    </Text>
+    <View
+      style={[
+        statCellStyles.activeBar,
+        { backgroundColor: active ? accent : "transparent" },
+      ]}
+    />
+  </TouchableOpacity>
 );
 
 const statCellStyles = StyleSheet.create({
@@ -173,6 +202,15 @@ const statCellStyles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     color: "rgba(0,0,0,0.45)",
     textAlign: "center",
+  },
+  labelActive: {
+    fontFamily: "Poppins_600SemiBold",
+  },
+  activeBar: {
+    marginTop: RFPercentage(0.4),
+    height: RFPercentage(0.35),
+    width: RFPercentage(3.2),
+    borderRadius: RFPercentage(0.3),
   },
 });
 
@@ -196,16 +234,21 @@ export default function CompletedTasks({ navigation }: any) {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const { theme } = useAppTheme();
   const [userReviews, setUserReviews] = useState<Set<string>>(new Set());
+  // Active stat filter: "all" → every completed task, "reviewed" → already
+  // reviewed, "pending" → awaiting the user's review.
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "reviewed" | "pending"
+  >("all");
 
   const isDark = theme.mode === "dark";
 
   // ─── Tokens ──────────────────────────────────────────────────────────────
   const token = {
     bg: isDark ? "#0E0F14" : "#F6F7FB",
-    card: isDark ? "#18191F" : "#FFFFFF",
-    border: isDark ? "rgba(255,255,255,0.07)" : "rgba(235, 235, 255, 0.81)",
+    card: isDark ? "#050507ff" : "#FFFFFF",
+    border: isDark ? "rgba(255, 255, 255, 0.13)" : "rgba(235, 235, 255, 0.81)",
     heading: isDark ? "#FFFFFF" : "#0D0E14",
-    body: isDark ? "rgba(255,255,255,0.55)" : "rgba(13,14,20,0.55)",
+    body: isDark ? "rgba(255, 255, 255, 0.68)" : "rgba(13,14,20,0.55)",
     accent: Colors.primary,
     success: "#22C55E",
     warning: "#F5A623",
@@ -335,6 +378,14 @@ export default function CompletedTasks({ navigation }: any) {
   ).length;
   const pendingCount = tasks.length - reviewedCount;
 
+  // ─── Filtered list driven by the tapped stat ───────────────────────────────
+  const visibleTasks =
+    activeFilter === "reviewed"
+      ? tasks.filter((t) => hasUserReviewedTask(t.taskId || t.id, t))
+      : activeFilter === "pending"
+        ? tasks.filter((t) => !hasUserReviewedTask(t.taskId || t.id, t))
+        : tasks;
+
   // ─── Render Card ──────────────────────────────────────────────────────────
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     const details = item.taskDetails || {};
@@ -384,21 +435,13 @@ export default function CompletedTasks({ navigation }: any) {
                   textStyle={{ fontSize: RFPercentage(2.1) }}
                 />
               )}
-              {/* Online-style dot reused as bulk indicator */}
-              {isBulkTask && (
-                <View
-                  style={[
-                    styles.bulkDot,
-                    { backgroundColor: token.accent },
-                  ]}
-                />
-              )}
+             
             </View>
 
             {/* Name + Category */}
             <View style={styles.metaBlock}>
               <Text
-                style={[styles.userName, { color: Colors.darkGrey2 }]}
+                style={[styles.userName, { color: theme.mode === "dark" ? Colors.white : Colors.darkGrey2 }]}
                 numberOfLines={1}
               >
                 {owner.userName || "User"}
@@ -456,7 +499,7 @@ export default function CompletedTasks({ navigation }: any) {
           </Text>
 
           {/* ── Bulk Stats Row ── */}
-          {isBulkTask && (
+          {/* {isBulkTask && (
             <View
               style={[styles.bulkRow, { backgroundColor: token.bulkBg }]}
             >
@@ -488,7 +531,7 @@ export default function CompletedTasks({ navigation }: any) {
                 </Text>
               </View>
             </View>
-          )}
+          )} */}
 
           {/* ── Divider ── */}
           <View style={[styles.divider, { backgroundColor: token.divider }]} />
@@ -581,7 +624,9 @@ export default function CompletedTasks({ navigation }: any) {
             value={tasks.length}
             label={`${t("completed.txt4")}`}
             accent={token.accent}
-            theme ={theme}
+            theme={theme}
+            active={activeFilter === "all"}
+            onPress={() => setActiveFilter("all")}
           />
           <View
             style={[styles.statsDivider, { backgroundColor: token.divider }]}
@@ -590,8 +635,9 @@ export default function CompletedTasks({ navigation }: any) {
             value={reviewedCount}
             label={`${t("completed.txt5")}`}
             accent={token.success}
-                        theme ={theme}
-
+            theme={theme}
+            active={activeFilter === "reviewed"}
+            onPress={() => setActiveFilter("reviewed")}
           />
           <View
             style={[styles.statsDivider, { backgroundColor: token.divider }]}
@@ -600,8 +646,9 @@ export default function CompletedTasks({ navigation }: any) {
             value={pendingCount}
             label={`${t("completed.txt6")}`}
             accent={token.warning}
-                        theme ={theme}
-
+            theme={theme}
+            active={activeFilter === "pending"}
+            onPress={() => setActiveFilter("pending")}
           />
         </View>
       )}
@@ -621,9 +668,21 @@ export default function CompletedTasks({ navigation }: any) {
           </View>
         ) : tasks.length === 0 ? (
           <NotFound title={tr.noTasks || "No completed tasks yet"} />
+        ) : visibleTasks.length === 0 ? (
+          <NotFound
+            title={
+              activeFilter === "reviewed"
+                ? tr.reviewAdded
+                  ? `No ${tr.reviewAdded} tasks`
+                  : "No reviewed tasks yet"
+                : tr.alreadyReviewed
+                  ? `No tasks ${tr.alreadyReviewed}`
+                  : "No tasks pending review"
+            }
+          />
         ) : (
           <FlatList
-            data={tasks}
+            data={visibleTasks}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             refreshControl={

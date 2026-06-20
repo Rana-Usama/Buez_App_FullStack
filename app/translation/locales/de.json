@@ -221,7 +221,8 @@
     "back": "Zurück",
     "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
     "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
-    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen"
+    "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen",
+    "repostTitle": "Anfrage erneut posten"
   },
   "messages": {
     "txt1": "Nachrichte",

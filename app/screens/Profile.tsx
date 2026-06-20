@@ -976,7 +976,7 @@ function Profile({ navigation }: any) {
       >
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          // behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           {/* Backdrop */}
           <Animated.View
@@ -1167,7 +1167,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 3,
+    // elevation: 3,
   },
   imageSection: { alignItems: "center", marginBottom: RFPercentage(2) },
   imageContainer: {
@@ -1252,7 +1252,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 2,
+    // elevation: 2,
   },
   interestsHeader: {
     flexDirection: "row",
@@ -1325,7 +1325,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 1,
+    // elevation: 1,
   },
   navigationItem: {
     paddingVertical: RFPercentage(2),
@@ -1429,6 +1429,7 @@ const modalStyles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: RFPercentage(2.5),
     paddingTop: RFPercentage(2),
+    paddingBottom:RFPercentage(40)
   },
   sectionLabel: {
     fontSize: RFPercentage(1.5),
