@@ -1,5 +1,5 @@
 import { getAuth } from "firebase/auth";
-import { serverTimestamp, doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import Toast from "react-native-toast-message";
 import { saveSubscription } from "./User.service";
 import { FIREBASE_DB } from "../../firebaseConfig";
@@ -9,35 +9,21 @@ const db = FIREBASE_DB;
 /**
  * Update the user's subscription status in Firestore
  */
-export const updateSubscriptionStatus = async (start, end, planType, trial) => {
+export const updateSubscriptionStatus = async (start, end, planType) => {
   const userId = getAuth()?.currentUser?.uid;
   if (!userId) return;
 
   const userRef = doc(db, "users", userId);
 
   try {
-    if (trial) {
-      // Free Trial User
-      await updateDoc(userRef, {
-        isSubscribed: false, // <<< USER IS NOT SUBSCRIBED YET
-        isFreeTrial: true, // <<< MARK TRIAL ACTIVE
-        freeTrialStartedAt: serverTimestamp(),
-        subscriptionStart: start,
-        subscriptionEnd: end,
-        planType: "free",
-        isCancelled: false,
-      });
-    } else {
-      // Paid Subscription User
-      await updateDoc(userRef, {
-        isSubscribed: true,
-        isFreeTrial: false,
-        subscriptionStart: start,
-        subscriptionEnd: end,
-        planType: planType,
-        isCancelled: false,
-      });
-    }
+    // Paid Subscription User
+    await updateDoc(userRef, {
+      isSubscribed: true,
+      subscriptionStart: start,
+      subscriptionEnd: end,
+      planType: planType,
+      isCancelled: false,
+    });
   } catch (error) {
     console.log("Failed to update subscription status:", error);
   }
@@ -127,8 +113,7 @@ export const handlePaymentSheet = async ({
     await updateSubscriptionStatus(
       result.currentPeriodStart,
       result.currentPeriodEnd,
-      selectedPlan,
-      false
+      selectedPlan
     );
     await saveSubscription(userId, result.subscriptionId);
     Toast.show({
@@ -142,66 +127,4 @@ export const handlePaymentSheet = async ({
   }
 
   return result;
-};
-
-/**
- * Create subscription (used for "Add Card Now" in free trial)
- */
-export const createSubscription = async ({
-  customerId,
-  setupIntentId,
-  planType = "monthly",
-  userCurrency,
-  t,
-}) => {
-  try {
-    const userId = getAuth()?.currentUser?.uid;
-    const res = await fetch(
-      "https://buez-server-khaki.vercel.app/api/create-subscription",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerId,
-          setupIntentId,
-          userId,
-          planType,
-          currency: userCurrency,
-        }),
-      }
-    );
-
-    const result = await res.json();
-    if (result.success) {
-      await updateSubscriptionStatus(
-        result.currentPeriodStart,
-        result.currentPeriodEnd,
-        planType,
-        true
-      );
-      await saveSubscription(userId, result.subscriptionId);
-
-      Toast.show({
-        type: "success",
-        text1: t("toast.subscriptionV2.subscriptionActive"),
-        text2: t("toast.subscriptionV2.enjoyPremium"),
-      });
-    } else {
-      Toast.show({
-        type: "error",
-        text1: t("toast.subscriptionV2.paymentFailed"),
-        text2: t("toast.subscriptionV2.tryAgain"),
-      });
-    }
-
-    return result;
-  } catch (error) {
-    console.error("Create subscription error:", error);
-    Toast.show({
-      type: "error",
-      text1: t("toast.subscriptionV2.error"),
-      text2: t("toast.subscriptionV2.tryAgain"),
-    });
-    return { success: false };
-  }
 };

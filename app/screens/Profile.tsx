@@ -688,6 +688,8 @@ function Profile({ navigation }: any) {
                     borderRadius: RFPercentage(10),
                     width: RFPercentage(12),
                     height: RFPercentage(12),
+                    borderWidth : 2,
+                    borderColor:Colors.primary
                   }}
                   textStyle={{
                     fontSize: RFPercentage(3.5),
@@ -695,6 +697,8 @@ function Profile({ navigation }: any) {
                   }}
                 />
               )}
+
+              <Image source={Icons.founderBadge} resizeMode="contain" style={{width:RFPercentage(6), height:RFPercentage(6), position:"absolute", right:RFPercentage(-2), bottom:0}} />
             </TouchableOpacity>
           </View>
 

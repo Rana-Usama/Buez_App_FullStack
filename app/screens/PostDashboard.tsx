@@ -75,10 +75,11 @@ export default function PostDashboard({ navigation }) {
   const cardBorder = isDark ? theme.border : "#ECEFF9";
 
   // ── Chart colours (theme-aware) ──
-  const ACTIVE_COLOR = "#3B82F6";
-  const COMPLETED_COLOR = Colors.statusAlertSuccess;
-  const CANCELLED_COLOR = Colors.statusAlertError;
+  const ACTIVE_COLOR = "#b390d1ff";
+  const COMPLETED_COLOR = "#83c1baff";
+  const CANCELLED_COLOR = "#e36056ff";
   const trackColor = isDark ? "rgba(255,255,255,0.08)" : "#ECEFF9";
+
 
   // Tasks that are neither active/completed/cancelled (e.g. expired-but-active)
   // so the ring always sums to the total.

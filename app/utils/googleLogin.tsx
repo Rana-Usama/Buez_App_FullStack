@@ -6,16 +6,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import {
-  getDoc,
-  doc,
-  setDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-} from "firebase/firestore";
+import { getDoc, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
@@ -23,8 +14,8 @@ import * as SecureStore from "expo-secure-store";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { saveCredentials } from "../services/Auth.service";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
+import { hasCompletedFounderIntro } from "../utils/founderIntro";
 import { Icons } from "../config/theme";
-import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import DeviceInfo from "react-native-device-info";
 import { useAppTheme } from "../contexts/themeContext";
@@ -56,22 +47,6 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
       setExpoPushToken(token);
     })();
   }, []);
-
-  const hasDeviceAvailedFreeTrial = async (deviceId: string) => {
-    if (!deviceId) return false;
-    try {
-      const q = query(
-        collection(FIREBASE_DB, "freeTrials"),
-        where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true),
-      );
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      console.log("Error fetching freeTrials:", error);
-      return false;
-    }
-  };
 
   // Helper function to parse dates consistently
   const parseFirestoreTimestamp = (timestamp: any) => {
@@ -126,11 +101,9 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
             phoneNumber: user.phoneNumber || existingData.phoneNumber,
             email: user.email || existingData.email,
             isSubscribed: existingData.isSubscribed ?? false,
-            isFreeTrial: existingData.isFreeTrial ?? false,
             // Preserve existing subscription dates if they exist
             subscriptionStart: existingData.subscriptionStart || null,
             subscriptionEnd: existingData.subscriptionEnd || null,
-            freeTrialStartedAt: existingData.freeTrialStartedAt || null,
             webhook: existingData.webhook ?? true,
             updatedAt: serverTimestamp(),
             createdAt: existingData.createdAt || serverTimestamp(),
@@ -148,10 +121,8 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
           phoneNumber: user.phoneNumber || "",
           token: pushToken,
           isSubscribed: false,
-          isFreeTrial: false,
           subscriptionStart: null,
           subscriptionEnd: null,
-          freeTrialStartedAt: null,
           webhook: true,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -201,36 +172,17 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
 
       console.log("Is within paid period:", isWithinPaidPeriod);
 
-      // Check trial validity
-      let isTrialValid = false;
-      const trialStartDate = parseFirestoreTimestamp(
-        existingUser.freeTrialStartedAt,
-      );
-      if (existingUser.isFreeTrial && trialStartDate) {
-        const trialDays = differenceInDays(now, trialStartDate);
-        console.log("Trial days:", trialDays);
-        isTrialValid = trialDays >= 0 && trialDays <= 14;
-        console.log("Is trial valid:", isTrialValid);
-      }
-
-      // Check if device has already used free trial
-      const deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
-      console.log("Device used trial:", deviceUsedTrial);
-
-    
       console.log("Navigation Decision:");
       if (existingUser?.isSubscribed && isWithinPaidPeriod) {
         console.log("Navigating to TabNavigator (paid subscription)");
         navigation.replace("TabNavigator");
-      } else if (isTrialValid) {
-        console.log("Navigating to TabNavigator (active trial)");
-        navigation.replace("TabNavigator");
-      } else if (!deviceUsedTrial) {
-        console.log("Navigating to FreeTrial (new device)");
-        navigation.replace("FreeTrial");
       } else {
-        console.log("Navigating to Subscription (device used trial)");
-        navigation.replace("Subscription");
+        const founderIntroDone = await hasCompletedFounderIntro();
+        console.log(
+          "Navigating to",
+          founderIntroDone ? "TabNavigator" : "FounderIntro",
+        );
+        navigation.replace(founderIntroDone ? "TabNavigator" : "FounderIntro");
       }
 
       Toast.show({

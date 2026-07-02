@@ -29,7 +29,7 @@ import TopRatedExplore from "../components/common/TopRatedExplore";
 import { useHomeScreen } from "../hooks/useHomeScreen";
 import { useExitAppOnBack } from "../utils/appBack";
 import { usePostContext } from "../contexts/PostContext";
-import FreeTrialBanner from "../components/common/FreeTrialBanner";
+import FounderBanner from "../components/common/FounderBanner";
 // Utils & Config
 import {
   formatCurrency,
@@ -37,7 +37,6 @@ import {
   convertCurrency,
 } from "../utils/currencyChange";
 import Colors from "../config/Colors";
-import FreeTrialBannerTest from "../components/common/FreeTrialBannerTest";
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -184,9 +183,7 @@ const HomeScreen: React.FC = () => {
         gradientColors={[Colors.primary, "#0b1544ff"]}
         title={t("home.txt1")}
       />
-      <FreeTrialBanner />
-      {/* <FreeTrialBannerTest  theme = {theme} /> */}
-
+      {/* <FounderBanner /> */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           style={[styles.scrollView, { backgroundColor: theme.white }]}
@@ -276,7 +273,7 @@ const HomeScreen: React.FC = () => {
                       user={item}
                       onPress={() => handleUserPress(item)}
                       // onPress={() => {
-                      //   navigation.navigate("InterestSelection");
+                      //   navigation.navigate("FounderIntro");
                       // }}
                       darkMode={theme.mode === "dark"}
                       t={t}

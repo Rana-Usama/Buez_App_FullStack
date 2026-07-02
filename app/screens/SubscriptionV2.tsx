@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -12,8 +12,6 @@ import {
   ScrollView,
   FlatList,
   Dimensions,
-  Modal,
-  TouchableWithoutFeedback,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -21,82 +19,36 @@ import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
 import Screen from "../components/Screen";
 import MyAppButton from "../components/common/MyAppButton";
-import {
-  getFirestore,
-  doc,
-  updateDoc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
 import Colors from "../config/Colors";
 import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
-import { scheduleFreeTrialNotification } from "../utils/notificationService";
 import * as Localization from "expo-localization";
-import {
-  handlePaymentSheet,
-  fetchSetupIntent,
-  createSubscription,
-} from "../services/Subscription.service";
+import { handlePaymentSheet } from "../services/Subscription.service";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 import { Icons } from "../config/theme";
-import DeviceInfo from "react-native-device-info";
-import { FIREBASE_DB } from "../../firebaseConfig";
 import { LinearGradient } from "expo-linear-gradient";
 import Feather from "@expo/vector-icons/Feather";
-import { BlurView } from "expo-blur";
 
 const { width: screenWidth } = Dimensions.get("window");
-const db = FIREBASE_DB;
 
 function SubscriptionV2(props) {
   const { t } = useTranslation();
   const { userData } = useUser();
   const userId = getAuth()?.currentUser?.uid;
-  const firestore = getFirestore();
   const { initPaymentSheet, presentPaymentSheet, confirmPayment } = useStripe();
   const [loading, setLoading] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const { theme } = useAppTheme();
-  const [loader, setLoader] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("free");
-  const [freeTrialModalVisible, setFreeTrialModalVisible] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("monthly");
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [deviceId, setDeviceId] = useState("");
 
   const isDark = theme.mode === "dark";
-
-  // ── ALL ORIGINAL LOGIC BELOW — UNTOUCHED ─────────────────────────────────
-
-  useEffect(() => {
-    const fetchId = async () => {
-      const id = await DeviceInfo.getUniqueId();
-      setDeviceId(id);
-      console.log("Device ID:", id);
-    };
-    fetchId();
-  }, []);
-
-  const createFreeTrialRecord = async ({ userId, deviceId }) => {
-    try {
-      const freeTrialRef = doc(db, "freeTrials", `${deviceId}`);
-      await setDoc(freeTrialRef, {
-        userId,
-        deviceId,
-        freeTrial: true,
-        freeTrialStartedAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.log("Error creating free trial record:", error);
-    }
-  };
 
   const prices = {
     monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
     yearly: { USD: 95, EUR: 89, CHF: 79 },
-    free: { USD: 0, EUR: 0, CHF: 0 },
   };
 
   const locale = Localization.locale;
@@ -108,10 +60,6 @@ function SubscriptionV2(props) {
   };
 
   const openPaymentSheet = async () => {
-    if (selectedPlan === "free") {
-      setFreeTrialModalVisible(true);
-      return;
-    }
     setLoading(true);
     try {
       const result = await handlePaymentSheet({
@@ -141,79 +89,6 @@ function SubscriptionV2(props) {
     }
   };
 
-  const handleFreeTrial = async () => {
-    if (!userId) return;
-    try {
-      setLoader(true);
-      const userRef = doc(firestore, "users", userId);
-      await updateDoc(userRef, {
-        isFreeTrial: true,
-        freeTrialStartedAt: serverTimestamp(),
-        planType: "free",
-        hasPaymentMethod: false,
-      });
-      await createFreeTrialRecord({ userId, deviceId });
-      await scheduleFreeTrialNotification(10);
-      setFreeTrialModalVisible(false);
-      props.navigation.navigate("InterestSelection");
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Failed to start free trial. Please try again.",
-      });
-    } finally {
-      setLoader(false);
-    }
-  };
-
-  const handleAddCardNow = async () => {
-    setFreeTrialModalVisible(false);
-    setLoading(true);
-    try {
-      const setupData = await fetchSetupIntent(userData?.email, userId);
-      if (!setupData) return;
-      const { setupIntentClientSecret, customerId } = setupData;
-      const { error: initError } = await initPaymentSheet({
-        setupIntentClientSecret,
-        merchantDisplayName: "BUEZ",
-        returnURL: "buez://payment-complete",
-      });
-      if (initError) return;
-      const { error: paymentError } = await presentPaymentSheet();
-      if (paymentError) {
-        Toast.show({
-          type: "info",
-          text1: t("toast.subscriptionV2.one"),
-          text2: t("toast.subscriptionV2.two"),
-        });
-        return;
-      }
-      const setupIntentId = setupIntentClientSecret.split("_secret")[0];
-      await createSubscription({
-        customerId,
-        setupIntentId,
-        planType: "monthly",
-        userCurrency,
-        t,
-      });
-      await updateDoc(doc(firestore, "users", userId), {
-        hasPaymentMethod: true,
-      });
-      await createFreeTrialRecord({ userId, deviceId });
-      props.navigation.navigate("InterestSelection");
-    } catch (error) {
-      console.log(error);
-      Toast.show({
-        type: "error",
-        text1: t("toast.subscriptionV2.error"),
-        text2: t("toast.subscriptionV2.tryAgain"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const yearlyPrice = priceLabelForPlan("yearly");
   const monthlyPrice = priceLabelForPlan("monthly");
 
@@ -225,21 +100,6 @@ function SubscriptionV2(props) {
   const highlightText = `Save ${Math.round(savingsPercentage)}%`;
 
   const plans = [
-    {
-      id: "free",
-      title: t("subscriptionV2.freeTrial"),
-      price: "$0",
-      period: t("subscriptionV2.for7Days"),
-      description: t("subscriptionV2.tryPremium"),
-      features: [
-        t("subscriptionV2.txt3"),
-        t("subscriptionV2.txt4"),
-        t("subscriptionV2.txt5"),
-        t("subscriptionV2.txt6"),
-      ],
-      popular: false,
-      highlight: t("subscriptionV2.noCreditCard"),
-    },
     {
       id: "monthly",
       title: t("subscriptionV2.monthly"),
@@ -312,12 +172,7 @@ function SubscriptionV2(props) {
   // ── PLAN CARD RENDERER ────────────────────────────────────────────────────
   const renderPlanCard = ({ item, index }) => {
     const isSelected = selectedPlan === item.id;
-    const accentColor =
-      item.id === "free"
-        ? "#4557B0"
-        : item.id === "monthly"
-          ? "#253275"
-          : "#DD53A8";
+    const accentColor = item.id === "monthly" ? "#253275" : "#DD53A8";
 
     return (
       <TouchableOpacity
@@ -346,11 +201,9 @@ function SubscriptionV2(props) {
         {/* Top accent bar */}
         <LinearGradient
           colors={
-            item.id === "free"
-              ? ["#4557B0", "#253275"]
-              : item.id === "monthly"
-                ? ["#253275", "#4557B0"]
-                : ["#253275", "#DD53A8"]
+            item.id === "monthly"
+              ? ["#253275", "#4557B0"]
+              : ["#253275", "#DD53A8"]
           }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -392,13 +245,7 @@ function SubscriptionV2(props) {
               style={styles.planIconBubble}
             >
               <Feather
-                name={
-                  item.id === "free"
-                    ? "gift"
-                    : item.id === "monthly"
-                      ? "calendar"
-                      : "star"
-                }
+                name={item.id === "monthly" ? "calendar" : "star"}
                 size={RFPercentage(2)}
                 color="#fff"
               />
@@ -660,7 +507,7 @@ function SubscriptionV2(props) {
         <View
           style={[
             styles.indicatorsContainer,
-            { marginTop: selectedPlan === "free" ? -30 : -15 },
+            { marginTop: -15 },
           ]}
         >
           {plans.map((plan, index) => (
@@ -717,9 +564,7 @@ function SubscriptionV2(props) {
             ) : (
               <>
                 <Text style={styles.ctaBtnText}>
-                  {selectedPlan === "free"
-                    ? t("subscriptionV2.startFreeTrial")
-                    : `${t("subscriptionV2.continueWith")} ${plans.find((p) => p.id === selectedPlan)?.title}`}
+                  {`${t("subscriptionV2.continueWith")} ${plans.find((p) => p.id === selectedPlan)?.title}`}
                 </Text>
                 <View style={styles.ctaArrow}>
                   <Feather
@@ -733,162 +578,6 @@ function SubscriptionV2(props) {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-
-      {/* ── Free Trial Modal ── */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={freeTrialModalVisible}
-        onRequestClose={() => setFreeTrialModalVisible(false)}
-      >
-        <TouchableWithoutFeedback
-          onPress={() => setFreeTrialModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View
-                style={[
-                  styles.modalContent,
-                  { backgroundColor: isDark ? "#04081cff" : "#fff" },
-                ]}
-              >
-                <View style={styles.modalBody}>
-                  {/* Header */}
-                  <View style={styles.modalHeader}>
-                    <LinearGradient
-                      colors={["#253275", "#4557B0"]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.modalIconCircle}
-                    >
-                      <Feather
-                        name="gift"
-                        size={RFPercentage(2.2)}
-                        color="#fff"
-                      />
-                    </LinearGradient>
-                    <Text
-                      style={[
-                        styles.modalTitle,
-                        { color: isDark ? "#eef0ff" : "#1a1e4a" },
-                      ]}
-                    >
-                      {t("freeTrialModal.title")}
-                    </Text>
-                  </View>
-
-                  {/* Info card */}
-                  <View
-                    style={[
-                      styles.infoCard,
-                      {
-                        backgroundColor: isDark
-                          ? "rgba(37,50,117,0.15)"
-                          : "rgba(37,50,117,0.05)",
-                      },
-                    ]}
-                  >
-                    <Text style={styles.infoIcon}>ℹ️</Text>
-                    <View style={styles.infoContent}>
-                      <Text
-                        style={[
-                          styles.infoTitle,
-                          { color: isDark ? "#dde3ff" : "#253275" },
-                        ]}
-                      >
-                        {t("freeTrialModal.importantNote")}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.infoText,
-                          { color: isDark ? "#6b7db3" : "#64748B" },
-                        ]}
-                      >
-                        {t("freeTrialModal.automaticSubscription")}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Divider */}
-                  <View
-                    style={[
-                      styles.modalDivider,
-                      {
-                        backgroundColor: isDark
-                          ? "rgba(69,87,176,0.15)"
-                          : "rgba(37,50,117,0.08)",
-                      },
-                    ]}
-                  />
-
-                  {/* Buttons */}
-                  <View style={styles.modalButtonsContainer}>
-                    <TouchableOpacity
-                      onPress={handleAddCardNow}
-                      disabled={loading}
-                      activeOpacity={0.88}
-                      style={styles.modalPrimaryOuter}
-                    >
-                      <LinearGradient
-                        colors={["#253275", "#4557B0"]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.modalPrimaryBtn}
-                      >
-                        {loading ? (
-                          <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                          <Text
-                            style={styles.modalPrimaryText}
-                            numberOfLines={1}
-                          >
-                            {t("freeTrialModal.addCardNow")}
-                          </Text>
-                        )}
-                      </LinearGradient>
-                    </TouchableOpacity>
-
-                    {/* Skip */}
-                    <TouchableOpacity
-                      onPress={handleFreeTrial}
-                      disabled={loader}
-                      activeOpacity={0.75}
-                      style={[
-                        styles.modalSecondaryBtn,
-                        {
-                          borderColor: isDark
-                            ? "rgba(69,87,176,0.4)"
-                            : "rgba(37,50,117,0.25)",
-                          backgroundColor: isDark
-                            ? "rgba(37,50,117,0.1)"
-                            : "rgba(37,50,117,0.05)",
-                        },
-                      ]}
-                    >
-                      {loader ? (
-                        <ActivityIndicator
-                          size="small"
-                          color={isDark ? "#4557B0" : "#253275"}
-                        />
-                      ) : (
-                        <Text
-                          style={[
-                            styles.modalSecondaryText,
-                            { color: isDark ? "#7a8fd4" : "#253275" },
-                          ]}
-                          numberOfLines={1}
-                        >
-                          {t("freeTrialModal.skipForNow")}
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
     </View>
   );
 }

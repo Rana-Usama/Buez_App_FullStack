@@ -35,15 +35,7 @@ import { useAppTheme } from "../contexts/themeContext";
 import { BlurView } from "expo-blur";
 import AppleLoginButton from "../utils/appleLogin";
 import DeviceInfo from "react-native-device-info";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-} from "firebase/firestore";
-import { FIREBASE_DB } from "../../firebaseConfig";
+import { serverTimestamp } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 
 function Signup({ navigation }: any) {
@@ -78,23 +70,6 @@ function Signup({ navigation }: any) {
     };
     fetchId();
   }, []);
-
-  const hasDeviceAvailedFreeTrial = async (deviceId) => {
-    try {
-      const q = query(
-        collection(FIREBASE_DB, "freeTrials"),
-        where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true),
-      );
-      const snapshot = await getDocs(q);
-      console.log("snapppppp..................", snapshot);
-      // If snapshot is NOT empty → device already used a free trial
-      return !snapshot.empty;
-    } catch (error) {
-      console.log("Error fetching freeTrials:", error);
-      return false;
-    }
-  };
 
   useEffect(() => {
     async function getToken() {
@@ -135,7 +110,6 @@ function Signup({ navigation }: any) {
           email: email,
           isSubscribed: false,
           token: expoPushToken || null,
-          isFreeTrial: false,
           emailVerified: false,
           createdAt: serverTimestamp(),
         };
@@ -150,15 +124,6 @@ function Signup({ navigation }: any) {
 
       // Navigate to verification screen, pass email for display
       navigation.navigate("EmailVerification", { email, password, deviceId });
-
-      // const alreadyUsed = await hasDeviceAvailedFreeTrial(deviceId);
-      // console.log("alreadyUsed............", alreadyUsed);
-
-      // if (alreadyUsed) {
-      //   navigation.navigate("Subscription");
-      // } else {
-      //   navigation.navigate("FreeTrial");
-      // }
     } catch (error) {
       console.log("error.......", error);
       Toast.show({

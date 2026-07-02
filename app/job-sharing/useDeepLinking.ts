@@ -2,20 +2,12 @@ import { useEffect, useRef, useCallback } from "react";
 import { Linking } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import DeviceInfo from "react-native-device-info";
-import { differenceInDays } from "date-fns";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { reload } from "firebase/auth";
 import { navigate } from "../router/navigationRef";
 import { deepLinkState } from "./deepLinkState";
+import { hasCompletedFounderIntro } from "../utils/founderIntro";
 
 
 // ─── Must match the key used in DeciderScreen.tsx ────────────────────────────
@@ -67,24 +59,6 @@ export const useDeepLinking = ({
     return null;
   };
 
-  // ─── Check if this device has already used a free trial ──────────────────
-  const hasDeviceAvailedFreeTrial = async (
-    deviceId: string
-  ): Promise<boolean> => {
-    try {
-      const q = query(
-        collection(db, "freeTrials"),
-        where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true)
-      );
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      console.log("[DeepLink] Error fetching freeTrials:", error);
-      return false;
-    }
-  };
-
   // ─── Core navigation resolver ─────────────────────────────────────────────
   const resolveAndNavigate = useCallback(async (jobId: string) => {
     try {
@@ -97,8 +71,6 @@ export const useDeepLinking = ({
       console.log("[DeepLink] userData snapshot:", JSON.stringify({
         userId: currentUserData?.userId,
         isSubscribed: currentUserData?.isSubscribed,
-        isFreeTrial: currentUserData?.isFreeTrial,
-        freeTrialStartedAt: currentUserData?.freeTrialStartedAt,
         subscriptionStart: currentUserData?.subscriptionStart,
         subscriptionEnd: currentUserData?.subscriptionEnd,
       }));
@@ -153,13 +125,8 @@ export const useDeepLinking = ({
         }
       }
 
-      const {
-        isSubscribed,
-        subscriptionStart,
-        subscriptionEnd,
-        isFreeTrial,
-        freeTrialStartedAt,
-      } = currentUserData;
+      const { isSubscribed, subscriptionStart, subscriptionEnd } =
+        currentUserData;
 
       const subStartDate = parseDate(subscriptionStart);
       const subEndDate = parseDate(subscriptionEnd);
@@ -176,70 +143,17 @@ export const useDeepLinking = ({
         return;
       }
 
-      const deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
-
-      // ── New user, no trial on this device → FreeTrial screen
-      if (!isSubscribed && !isFreeTrial && !deviceUsedTrial) {
-        console.log("[DeepLink] → FreeTrial (no trial used)");
-        navigate("FreeTrial", { pendingJobId: jobId });
+      // ── Founder Phase: first-time users see the intro once; afterwards
+      //    they continue into the app and the requested job opens.
+      const founderIntroDone = await hasCompletedFounderIntro();
+      if (!founderIntroDone) {
+        console.log("[DeepLink] → FounderIntro (intro not completed)");
+        navigate("FounderIntro");
         return;
       }
 
-      // ── Compute trial validity (safe for Timestamp + ISO string)
-      let isTrialValid = false;
-      if (isFreeTrial && freeTrialStartedAt) {
-        const trialStart = parseDate(freeTrialStartedAt);
-        if (trialStart) {
-          const trialDays = differenceInDays(now, trialStart);
-          console.log(
-            "[DeepLink] trialDays:", trialDays,
-            "| trialStart:", trialStart.toISOString()
-          );
-          isTrialValid = trialDays >= 0 && trialDays <= 14;
-        } else {
-          console.warn(
-            "[DeepLink] Could not parse freeTrialStartedAt:",
-            freeTrialStartedAt
-          );
-        }
-      } else {
-        console.log(
-          "[DeepLink] Trial check skipped — isFreeTrial:", isFreeTrial,
-          "| freeTrialStartedAt:", freeTrialStartedAt
-        );
-      }
-
-      // ── Active free trial → open job
-      if (isTrialValid) {
-        console.log("[DeepLink] → onJobLink (active free trial)");
-        onJobLinkRef.current?.(jobId);
-        return;
-      }
-
-      // ── Trial expired
-      if (isFreeTrial && !isTrialValid) {
-        console.log("[DeepLink] → Subscription (trial expired)");
-        navigate("Subscription", { pendingJobId: jobId });
-        return;
-      }
-
-      // ── Device used trial before, not subscribed
-      if (!isSubscribed && deviceUsedTrial) {
-        console.log("[DeepLink] → Subscription (device trial used, not subscribed)");
-        navigate("Subscription", { pendingJobId: jobId });
-        return;
-      }
-
-      // ── No subscription catch-all
-      if (!isSubscribed) {
-        console.log("[DeepLink] → Subscription (no subscription)");
-        navigate("Subscription", { pendingJobId: jobId });
-        return;
-      }
-
-      // ── Fallback
-      console.log("[DeepLink] → OnBoarding (fallback)");
-      navigate("OnBoarding");
+      console.log("[DeepLink] → onJobLink (founder / intro completed)");
+      onJobLinkRef.current?.(jobId);
     } catch (error) {
       console.error("[DeepLink] Error in resolveAndNavigate:", error);
       navigate("OnBoarding");

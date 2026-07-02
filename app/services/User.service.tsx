@@ -26,7 +26,6 @@ export const addUser = async (
     profileImage = "",
     isSubscribed,
     token,
-    isFreeTrial,
     createdAt,
   },
 ) => {
@@ -39,7 +38,6 @@ export const addUser = async (
       email,
       isSubscribed,
       token,
-      isFreeTrial,
       createdAt,
       userId: id,
     };

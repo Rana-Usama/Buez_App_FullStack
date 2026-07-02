@@ -5,25 +5,16 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import {
-  getDoc,
-  doc,
-  setDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-} from "firebase/firestore";
+import { getDoc, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { signInWithCredential, OAuthProvider } from "firebase/auth";
 import appleAuth from "@invertase/react-native-apple-authentication";
 import Toast from "react-native-toast-message";
 import * as SecureStore from "expo-secure-store";
 import { useTranslation } from "react-i18next";
-import { differenceInDays } from "date-fns";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
+import { hasCompletedFounderIntro } from "../utils/founderIntro";
 import { saveCredentials } from "../services/Auth.service";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useAppTheme } from "../contexts/themeContext";
@@ -42,22 +33,6 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
     };
     fetchId();
   }, []);
-
-  const hasDeviceAvailedFreeTrial = async (deviceId: string) => {
-    if (!deviceId) return false;
-    try {
-      const q = query(
-        collection(FIREBASE_DB, "freeTrials"),
-        where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true),
-      );
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      console.log("Error fetching freeTrials:", error);
-      return false;
-    }
-  };
 
   // Consistent date parsing helper (same as in GoogleLoginButton)
   const parseFirestoreTimestamp = (timestamp: any) => {
@@ -152,12 +127,10 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
             appleId: appleUserId,
             // Note: never store identityToken in Firestore (security)
             isSubscribed: existingData.isSubscribed ?? false,
-            isFreeTrial: existingData.isFreeTrial ?? false,
             subscriptionStart: existingData.subscriptionStart || null,
             subscriptionEnd: existingData.subscriptionEnd || null,
             subscriptionId: existingData.subscriptionId || null,
             planType: existingData.planType || null,
-            freeTrialStartedAt: existingData.freeTrialStartedAt || null,
             webhook: existingData.webhook ?? true,
             lastLocationUpdate:
               existingData.lastLocationUpdate || serverTimestamp(),
@@ -177,12 +150,10 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
           phoneNumber: user.phoneNumber || "",
           appleId: appleUserId,
           isSubscribed: false,
-          isFreeTrial: false,
           subscriptionStart: null,
           subscriptionEnd: null,
           subscriptionId: null,
           planType: null,
-          freeTrialStartedAt: null,
           webhook: true,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -210,27 +181,13 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       const isWithinPaidPeriod =
         subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
-      let isTrialValid = false;
-      const trialStartDate = parseFirestoreTimestamp(
-        existingUser.freeTrialStartedAt,
-      );
-      if (existingUser.isFreeTrial && trialStartDate) {
-        const trialDays = differenceInDays(now, trialStartDate);
-        isTrialValid = trialDays >= 0 && trialDays <= 14;
-      }
-
-      const deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
-
       // 5️⃣ Determine target route
       let targetRoute: string;
       if (existingUser.isSubscribed && isWithinPaidPeriod) {
         targetRoute = "TabNavigator";
-      } else if (isTrialValid) {
-        targetRoute = "TabNavigator";
-      } else if (!deviceUsedTrial) {
-        targetRoute = "FreeTrial";
       } else {
-        targetRoute = "Subscription";
+        const founderIntroDone = await hasCompletedFounderIntro();
+        targetRoute = founderIntroDone ? "TabNavigator" : "FounderIntro";
       }
 
       console.log("Apple Sign-In → navigating to:", targetRoute);

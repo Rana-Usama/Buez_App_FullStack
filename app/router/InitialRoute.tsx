@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import * as SecureStore from "expo-secure-store";
 import { getCredentials } from "../services/Auth.service";
-import { differenceInDays } from "date-fns";
 
 export const useInitialRoute = (userData, userLoading) => {
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
@@ -41,7 +40,6 @@ export const useInitialRoute = (userData, userLoading) => {
         if (userData) {
           console.log("📊 User data for decision:", {
             isSubscribed: userData.isSubscribed,
-            isFreeTrial: userData.isFreeTrial,
             subscriptionStart: userData.subscriptionStart,
             subscriptionEnd: userData.subscriptionEnd,
           });
@@ -86,17 +84,8 @@ export const useInitialRoute = (userData, userLoading) => {
         }
 
         // Subscription logic
-        const {
-          isSubscribed,
-          isFreeTrial,
-          subscriptionStart,
-          subscriptionEnd,
-          freeTrialStartedAt,
-        } = userData;
+        const { isSubscribed, subscriptionStart, subscriptionEnd } = userData;
 
-        // Handle null/undefined isFreeTrial
-        const isFreeTrialBool = Boolean(isFreeTrial); // Convert null to false
-        
         const subStartDate = parseFirestoreTimestamp(subscriptionStart);
         const subEndDate = parseFirestoreTimestamp(subscriptionEnd);
 
@@ -104,7 +93,7 @@ export const useInitialRoute = (userData, userLoading) => {
         console.log("Parsed subscription start:", subStartDate);
         console.log("Parsed subscription end:", subEndDate);
         console.log("Current date:", now);
-        
+
         const isWithinPaidPeriod =
           subStartDate &&
           subEndDate &&
@@ -120,34 +109,10 @@ export const useInitialRoute = (userData, userLoading) => {
           console.log("🎯 Route: TabNavigator (active subscription)");
           route = "TabNavigator";
         }
-        // 2. Active free trial
-        else if (isFreeTrialBool && freeTrialStartedAt?.seconds) {
-          const trialStart = new Date(freeTrialStartedAt.seconds * 1000);
-          const trialDays = differenceInDays(now, trialStart);
-          console.log("📅 Trial days:", trialDays);
-          
-          if (trialDays >= 0 && trialDays <= 14) {
-            console.log("🎯 Route: TabNavigator (active trial)");
-            route = "TabNavigator";
-          } else {
-            console.log("🎯 Route: Subscription (trial expired)");
-            route = "Subscription";
-          }
-        }
-        // 3. No subscription and no trial (handle null as false)
-        else if (!isSubscribed && !isFreeTrialBool) {
-          console.log("🎯 Route: FreeTrial (new user)");
-          route = "FreeTrial";
-        }
-        // 4. Subscribed but not within paid period
-        else if (isSubscribed && !isWithinPaidPeriod) {
-          console.log("🎯 Route: Subscription (subscription expired)");
-          route = "Subscription";
-        }
-        // 5. Default fallback
+        // 2. No active subscription → subscription screen
         else {
-          console.log("🎯 Route: OnBoarding (fallback)");
-          route = "OnBoarding";
+          console.log("🎯 Route: Subscription (no active subscription)");
+          route = "Subscription";
         }
 
         console.log("🏁 Final route decision:", route);

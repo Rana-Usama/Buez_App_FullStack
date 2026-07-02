@@ -33,7 +33,6 @@ import Chat from "../screens/Chat";
 import InitialScreen from "../screens/InitialScreen";
 import DeciderScreen from "../screens/DeciderScreen";
 import TabNavigator from "./BottomNavigator";
-import FreeTrial from "../screens/FreeTrial";
 import SubscriptionV2 from "../screens/SubscriptionV2";
 import CancelSubscription from "../screens/CancelSubscription";
 import Location from "../screens/Location";
@@ -59,6 +58,7 @@ import GroupChat from "../screens/GroupChat";
 import GroupDetails from "../screens/GroupDetails";
 import EmailVerificationScreen from "../screens/EmailVerificationScreen";
 import InterestSelectionScreen from "../screens/InterestSelection";
+import FounderIntro from "../screens/FounderIntro";
 
 const Stack = createNativeStackNavigator();
 
@@ -133,7 +133,6 @@ const StackNavigator = () => {
         <Stack.Screen name="TabNavigator" component={TabNavigator} />
 
         {/* Other screens */}
-        <Stack.Screen name="FreeTrial" component={FreeTrial} />
         <Stack.Screen name="Subscription" component={Subscription} />
         <Stack.Screen name="SubscriptionV2" component={SubscriptionV2} />
         <Stack.Screen
@@ -196,6 +195,7 @@ const StackNavigator = () => {
           name="InterestSelection"
           component={InterestSelectionScreen}
         />
+        <Stack.Screen name="FounderIntro" component={FounderIntro} />
       </Stack.Navigator>
     </NavigationContainer>
   );

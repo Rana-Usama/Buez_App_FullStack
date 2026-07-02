@@ -328,7 +328,6 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
         subscriptionEnd: userData.subscriptionEnd || null,
         token: userData?.token,
         userId: userData?.userId,
-        freeTrialStartedAt: userData.freeTrialStartedAt,
         latitude: userData.latitude || null,
         longitude: userData.longitude || null,
         memberSince: userData?.createdAt

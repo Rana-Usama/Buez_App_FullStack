@@ -1,8 +1,8 @@
 import { getDoc, doc, setDoc } from "firebase/firestore";
 import Toast from "react-native-toast-message";
-import { differenceInDays } from "date-fns";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { saveCredentials } from "../services/Auth.service";
+import { hasCompletedFounderIntro } from "./founderIntro";
 import { FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import * as SecureStore from "expo-secure-store";
 
@@ -54,7 +54,6 @@ export const handleInstagramLogin = async ({
         pageToken,
         token: pushToken || null,
         isSubscribed: false,
-        isFreeTrial: false,
         createdAt: new Date().toISOString(),
       });
     }
@@ -72,9 +71,6 @@ export const handleInstagramLogin = async ({
     const userData = userSnapshot.data() || {};
 
     const now = new Date();
-    const trialStart = userData?.freeTrialStartedAt?.seconds
-      ? new Date(userData.freeTrialStartedAt.seconds * 1000)
-      : null;
     const subStartDate = userData?.subscriptionStart
       ? new Date(userData.subscriptionStart)
       : null;
@@ -82,20 +78,14 @@ export const handleInstagramLogin = async ({
       ? new Date(userData.subscriptionEnd)
       : null;
 
-    const trialDays = trialStart ? differenceInDays(now, trialStart) : null;
-    const isTrialValid =
-      trialDays !== null && trialDays >= 0 && trialDays <= 14;
     const isWithinPaidPeriod =
       subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
     if (userData?.isSubscribed || isWithinPaidPeriod) {
       navigation.navigate("TabNavigator");
-    } else if (isTrialValid) {
-      navigation.navigate("TabNavigator");
-    } else if (userData?.isFreeTrial && (trialDays < 0 || trialDays > 14)) {
-      navigation.navigate("Subscription");
     } else {
-      navigation.navigate("FreeTrial");
+      const founderIntroDone = await hasCompletedFounderIntro();
+      navigation.navigate(founderIntroDone ? "TabNavigator" : "FounderIntro");
     }
 
     return { success: true };

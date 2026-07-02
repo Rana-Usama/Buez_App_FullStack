@@ -1178,8 +1178,8 @@ function MyRequests({ navigation }) {
                 <Text
                   style={[styles.briefDescription, { color: theme.darkGrey }]}
                 >
-                  {cart?.description?.substr(0, 60)}
-                  {cart?.description?.length > 60 ? "..." : ""}
+                  {cart?.description?.substr(0, 100)}
+                  {cart?.description?.length > 100 ? "..." : ""}
                 </Text>
               </View>
 
@@ -2172,7 +2172,7 @@ const styles = StyleSheet.create({
     top: RFPercentage(2),
   },
   markButton: {
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(1),
     height: RFPercentage(5),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.2),
@@ -2183,7 +2183,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1),
   },
   cancel: {
-    borderRadius: RFPercentage(2),
+    borderRadius: RFPercentage(1),
     width: "38%",
     height: RFPercentage(5),
     borderWidth: RFPercentage(0.15),

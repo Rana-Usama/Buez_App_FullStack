@@ -5,7 +5,7 @@ import { FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { registerForPushNotificationsAsync } from "./notificationService";
-import { differenceInDays } from "date-fns";
+import { hasCompletedFounderIntro } from "./founderIntro";
 import { saveCredentials } from "../services/Auth.service";
 import { checkExistingEmailLoginType, saveEmailLoginType } from "./loginType";
 import * as SecureStore from "expo-secure-store";
@@ -107,7 +107,6 @@ const FacebookLoginWebView = ({ navigation }: any) => {
           token: pushToken || null,
           createdAt: new Date().toISOString(),
           isSubscribed: false,
-          isFreeTrial: false,
         });
       }
 
@@ -119,9 +118,6 @@ const FacebookLoginWebView = ({ navigation }: any) => {
       const userData = userSnapshot.exists() ? userSnapshot.data() : null;
 
       const now = new Date();
-      const trialStart = userData?.freeTrialStartedAt?.seconds
-        ? new Date(userData.freeTrialStartedAt.seconds * 1000)
-        : null;
       const subStartDate = userData?.subscriptionStart
         ? new Date(userData.subscriptionStart)
         : null;
@@ -129,20 +125,14 @@ const FacebookLoginWebView = ({ navigation }: any) => {
         ? new Date(userData.subscriptionEnd)
         : null;
 
-      const trialDays = trialStart ? differenceInDays(now, trialStart) : null;
-      const isTrialValid =
-        trialDays !== null && trialDays >= 0 && trialDays <= 14;
       const isWithinPaidPeriod =
         subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
       if (userData?.isSubscribed || isWithinPaidPeriod) {
         navigation.navigate("TabNavigator");
-      } else if (isTrialValid) {
-        navigation.navigate("TabNavigator");
-      } else if (userData?.isFreeTrial && (trialDays < 0 || trialDays > 14)) {
-        navigation.navigate("Subscription");
       } else {
-        navigation.navigate("FreeTrial");
+        const founderIntroDone = await hasCompletedFounderIntro();
+        navigation.navigate(founderIntroDone ? "TabNavigator" : "FounderIntro");
       }
     } catch (error) {
       Alert.alert("Login Error", error.message);

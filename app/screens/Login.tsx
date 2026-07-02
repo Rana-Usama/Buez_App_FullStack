@@ -124,7 +124,7 @@ function Login({ navigation }) {
       const userRef = doc(FIREBASE_DB, "users", user.uid);
       const userSnap = await getDoc(userRef);
       const userData = userSnap.exists() ? userSnap.data() : null;
-      const nextRoute = decideUserRoute(userData);
+      const nextRoute = await decideUserRoute(userData);
 
       Toast.show({
         type: "success",

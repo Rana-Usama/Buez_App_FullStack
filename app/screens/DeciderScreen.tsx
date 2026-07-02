@@ -11,19 +11,11 @@ import {
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useNavigation } from "@react-navigation/native";
-import { differenceInDays } from "date-fns";
 import * as SecureStore from "expo-secure-store";
 import DeviceInfo from "react-native-device-info";
 import { useAppTheme } from "../contexts/themeContext";
 import { useUser } from "../contexts/user.context";
 import { getCredentials } from "../services/Auth.service";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { reload } from "firebase/auth";
 
@@ -31,6 +23,7 @@ const PENDING_JOB_KEY = "pendingDeepLinkJobId";
 import { deepLinkState } from "../job-sharing/deepLinkState";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
+import { hasCompletedFounderIntro } from "../utils/founderIntro";
 
 const isUserDataReady = (userData: any): boolean => {
   return !!(userData && userData.userId);
@@ -52,8 +45,6 @@ const DeciderScreen = () => {
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const taglineOpacity = useRef(new Animated.Value(0)).current;
   const messageOpacity = useRef(new Animated.Value(1)).current;
-
-  const db = getFirestore();
 
   // ─── Logo + tagline entrance ──────────────────────────────────────────────
   useEffect(() => {
@@ -147,37 +138,6 @@ const DeciderScreen = () => {
     fetchDeviceId();
   }, []);
 
-  // ─── Free Trial Checks ────────────────────────────────────────────────────
-  const hasDeviceAvailedFreeTrial = async (id: string): Promise<boolean> => {
-    try {
-      const q = query(
-        collection(db, "freeTrials"),
-        where("deviceId", "==", id),
-        where("freeTrial", "==", true),
-      );
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      console.log("[Decider] Error fetching freeTrials by deviceId:", error);
-      return false;
-    }
-  };
-
-  const hasUserAvailedFreeTrial = async (userId: string): Promise<boolean> => {
-    try {
-      const q = query(
-        collection(db, "freeTrials"),
-        where("userId", "==", userId),
-        where("freeTrial", "==", true),
-      );
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      console.log("[Decider] Error fetching freeTrials by userId:", error);
-      return false;
-    }
-  };
-
   // ─── Date Parser ──────────────────────────────────────────────────────────
   const parseDate = (date: any): Date | null => {
     if (!date) return null;
@@ -235,13 +195,7 @@ const DeciderScreen = () => {
         }
       }
 
-      const {
-        isSubscribed,
-        subscriptionStart,
-        subscriptionEnd,
-        isFreeTrial,
-        freeTrialStartedAt,
-      } = userData;
+      const { isSubscribed, subscriptionStart, subscriptionEnd } = userData;
 
       const subStartDate = parseDate(subscriptionStart);
       const subEndDate = parseDate(subscriptionEnd);
@@ -254,53 +208,9 @@ const DeciderScreen = () => {
         return;
       }
 
-      // ── Expired paid subscription ──────────────────────────────────────────
-      if (isSubscribed && !isWithinPaidPeriod) {
-        completeAndNavigate("Subscription");
-        return;
-      }
-
-      // ── Free trial eligibility (device + user both checked) ───────────────
-      let deviceUsedTrial = false;
-      let userUsedTrial = false;
-
-      if (deviceId) {
-        deviceUsedTrial = await hasDeviceAvailedFreeTrial(deviceId);
-      }
-      // Short-circuit: skip userId query if device already blocked
-      if (!deviceUsedTrial && userData?.userId) {
-        userUsedTrial = await hasUserAvailedFreeTrial(userData.userId);
-      }
-
-      const alreadyUsedTrial = deviceUsedTrial || userUsedTrial;
-
-      if (!isSubscribed && !isFreeTrial && !alreadyUsedTrial) {
-        completeAndNavigate("FreeTrial");
-        return;
-      }
-
-      // ── Validate ongoing free trial ────────────────────────────────────────
-      let isTrialValid = false;
-      if (isFreeTrial && freeTrialStartedAt) {
-        const trialStart = parseDate(freeTrialStartedAt);
-        if (trialStart) {
-          const trialDays = differenceInDays(now, trialStart);
-          isTrialValid = trialDays >= 0 && trialDays <= 14;
-        }
-      }
-
-      if (isTrialValid) {
-        completeAndNavigate("TabNavigator");
-        return;
-      }
-
-      // ── No valid subscription or trial ────────────────────────────────────
-      if (!isSubscribed) {
-        completeAndNavigate("Subscription");
-        return;
-      }
-
-      completeAndNavigate("OnBoarding");
+      // ── Founder Phase: show the intro only once, otherwise go to the app ──
+      const founderIntroDone = await hasCompletedFounderIntro();
+      completeAndNavigate(founderIntroDone ? "TabNavigator" : "FounderIntro");
     } catch (error) {
       console.log("[Decider] Error deciding initial route:", error);
       if (!hasNavigated.current) {

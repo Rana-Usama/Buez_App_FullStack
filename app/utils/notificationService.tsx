@@ -40,18 +40,3 @@ export async function registerForPushNotificationsAsync() {
     return null;
   }
 }
-
-// Example local notification
-export async function scheduleFreeTrialNotification(daysAfter = 10) {
-  const triggerDate = new Date();
-  triggerDate.setDate(triggerDate.getDate() + daysAfter);
-
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "⏰ Free Trial Ending Soon",
-      body: "Your free trial ends in 4 days. Stay subscribed to maintain full access.",
-      sound: true,
-    },
-    trigger: triggerDate,
-  });
-}

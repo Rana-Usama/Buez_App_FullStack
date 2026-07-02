@@ -13,9 +13,9 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import Toast from "react-native-toast-message";
 import { updateDoc, doc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
-import { collection, query, where, getDocs } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { hasCompletedFounderIntro } from "../utils/founderIntro";
 
 function EmailVerificationScreen({ navigation, route }: any) {
   const { email, password, deviceId } = route.params;
@@ -40,51 +40,6 @@ function EmailVerificationScreen({ navigation, route }: any) {
     };
   }, []);
 
-  // ─── Free trial check by deviceId ────────────────────────────────────────
-  const hasDeviceAvailedFreeTrial = async (deviceId: string): Promise<boolean> => {
-    try {
-      const q = query(
-        collection(FIREBASE_DB, "freeTrials"),
-        where("deviceId", "==", deviceId),
-        where("freeTrial", "==", true),
-      );
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      console.log("[EmailVerification] Error checking deviceId free trial:", error);
-      return false;
-    }
-  };
-
-  // ─── Free trial check by userId ───────────────────────────────────────────
-  const hasUserAvailedFreeTrial = async (userId: string): Promise<boolean> => {
-    try {
-      const q = query(
-        collection(FIREBASE_DB, "freeTrials"),
-        where("userId", "==", userId),
-        where("freeTrial", "==", true),
-      );
-      const snapshot = await getDocs(q);
-      return !snapshot.empty;
-    } catch (error) {
-      console.log("[EmailVerification] Error checking userId free trial:", error);
-      return false;
-    }
-  };
-
-  // ─── Combined free trial eligibility ─────────────────────────────────────
-  // Returns true if EITHER the device OR the user has already used a trial
-  const hasAlreadyUsedFreeTrial = async (
-    deviceId: string,
-    userId: string,
-  ): Promise<boolean> => {
-    const deviceUsed = await hasDeviceAvailedFreeTrial(deviceId);
-    // Short-circuit: skip userId query if device already blocked
-    if (deviceUsed) return true;
-    const userUsed = await hasUserAvailedFreeTrial(userId);
-    return userUsed;
-  };
-
   // ─── Verification check ───────────────────────────────────────────────────
   const checkVerification = async (silent = false) => {
     if (!silent) setChecking(true);
@@ -108,14 +63,12 @@ function EmailVerificationScreen({ navigation, route }: any) {
           text2: t("emailVerification.verifiedSuccessDesc"),
         });
 
-        // Check both deviceId and userId before offering free trial
-        const alreadyUsed = await hasAlreadyUsedFreeTrial(deviceId, user.uid);
-
-        if (alreadyUsed) {
-          navigation.navigate("Subscription", { newUser: true });
-        } else {
-          navigation.navigate("FreeTrial");
-        }
+        // First-time verified users see the Founder Phase intro once;
+        // afterwards they go straight into the app.
+        const founderIntroDone = await hasCompletedFounderIntro();
+        navigation.navigate(
+          founderIntroDone ? "TabNavigator" : "FounderIntro",
+        );
       } else {
         if (!silent) {
           Toast.show({
@@ -194,14 +147,14 @@ function EmailVerificationScreen({ navigation, route }: any) {
       {/* Resend button with cooldown */}
       <TouchableOpacity
         activeOpacity={0.8}
-        style={[styles.secondaryButton, cooldown > 0 && styles.disabledButton]}
+        style={[styles.secondaryButton, cooldown > 0 && styles.disabledButton, { borderColor: theme.mode === "dark" ? Colors.darkGrey : Colors.primary,}]}
         onPress={resendVerificationEmail}
         disabled={resending || cooldown > 0}
       >
         {resending ? (
           <ActivityIndicator color={Colors.primary} />
         ) : (
-          <Text style={styles.secondaryButtonText}>
+          <Text style={[styles.secondaryButtonText,{color:theme.mode === "dark" ? Colors.darkGrey : Colors.primary}]}>
             {cooldown > 0
               ? t("emailVerification.resendCooldown", { seconds: cooldown })
               : t("emailVerification.resendButton")}
