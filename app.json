@@ -112,6 +112,9 @@
         {
           "ios": {
             "useFrameworks": "static"
+          },
+          "android": {
+            "ndkVersion": "27.1.12297006"
           }
         }
       ],

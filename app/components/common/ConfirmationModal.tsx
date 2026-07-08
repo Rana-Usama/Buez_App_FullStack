@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: RFPercentage(1),
     width: "90%",
-    paddingHorizontal: RFPercentage(2),
+    // paddingHorizontal: RFPercentage(2),
   },
   cancelButton: {
     height:
