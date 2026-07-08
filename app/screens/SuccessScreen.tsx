@@ -27,6 +27,12 @@ function SuccessScreen({ navigation }) {
   // to an "edited" confirmation instead of the default "posted" message.
   const isEdit = route.params?.isEdit === true;
 
+  // Bulk vs single drives the info-card copy below: bulk tasks need N
+  // confirmed helpers (apply → owner confirms up to numberOfWorkers), while
+  // single tasks are assigned to exactly one confirmed helper.
+  const numberOfWorkers = taskData?.numberOfWorkers || 1;
+  const isBulkRequest = taskData?.isBulkRequest === true || numberOfWorkers > 1;
+
   const InfoCard = ({ icon, title, description }) => (
     <View
       style={[
@@ -114,7 +120,11 @@ function SuccessScreen({ navigation }) {
           },
         ]}
       >
-        {isEdit ? t("successScreen.editedSubtitle") : t("successScreen.txt3")}
+        {isEdit
+          ? t("successScreen.editedSubtitle")
+          : isBulkRequest
+            ? t("successScreen.bulkSubtitle", { count: numberOfWorkers })
+            : t("successScreen.txt3")}
       </Text>
 
       {/* Share Card - Prominent CTA */}
@@ -195,13 +205,39 @@ function SuccessScreen({ navigation }) {
         <InfoCard
           icon="visibility"
           title={t("successScreen.txt4")}
-          description={t("successScreen.txt5")}
+          description={
+            isBulkRequest
+              ? t("successScreen.bulkVisibilityDesc", {
+                  count: numberOfWorkers,
+                })
+              : t("successScreen.txt5")
+          }
         />
 
         <InfoCard
           icon="person-add"
-          title={t("successScreen.txt6")}
-          description={t("successScreen.txt7")}
+          title={
+            isBulkRequest
+              ? t("successScreen.bulkApplyTitle")
+              : t("successScreen.txt6")
+          }
+          description={
+            isBulkRequest
+              ? t("successScreen.bulkApplyDesc", { count: numberOfWorkers })
+              : t("successScreen.txt7")
+          }
+        />
+
+        <InfoCard
+          icon="how-to-reg"
+          title={t("successScreen.confirmTitle")}
+          description={
+            isBulkRequest
+              ? t("successScreen.bulkConfirmDesc", {
+                  count: numberOfWorkers,
+                })
+              : t("successScreen.singleConfirmDesc")
+          }
         />
 
         <InfoCard

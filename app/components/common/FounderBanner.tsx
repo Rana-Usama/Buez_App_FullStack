@@ -44,6 +44,7 @@ const FounderBanner: React.FC = () => {
   // Not a founder → render nothing.
   if (!founder) return null;
 
+
   const statusText = !active
     ? t("founderBanner.expired")
     : daysLeft === 1

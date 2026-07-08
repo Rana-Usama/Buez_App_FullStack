@@ -183,7 +183,7 @@ const HomeScreen: React.FC = () => {
         gradientColors={[Colors.primary, "#0b1544ff"]}
         title={t("home.txt1")}
       />
-      {/* <FounderBanner /> */}
+      <FounderBanner />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           style={[styles.scrollView, { backgroundColor: theme.white }]}

@@ -19,9 +19,15 @@ import Toast from "react-native-toast-message";
 import DeviceInfo from "react-native-device-info";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
+import { useUser } from "../contexts/user.context";
 import { Icons } from "../config/theme";
 import { markFounderIntroCompleted } from "../utils/founderIntro";
-import { claimFounderSpot } from "../services/Founder.service";
+import {
+  claimFounderSpot,
+  subscribeFounderStats,
+  FOUNDER_TOTAL_SPOTS,
+  FounderStats,
+} from "../services/Founder.service";
 
 // Cap content width so the layout stays elegant on tablets / large devices.
 const CONTENT_MAX_WIDTH = 560;
@@ -31,28 +37,6 @@ const ACCENT_PRIMARY = "#253275";
 const ACCENT_PRIMARY_2 = "#4557B0";
 const ACCENT_PINK = "#DD53A8";
 const GOLD = "#F4B740";
-
-/**
- * Static placeholder founder-slot data.
- *
- * TODO(next step): replace this object with live data fetched from the backend
- * (e.g. a `useFounderSlots()` hook). The screen already reads every value from
- * this single source + a `loading` flag, so swapping in an API response will
- * not require any UI changes.
- */
-interface FounderSlots {
-  total: number;
-  filled: number;
-  remaining: number;
-  yourNumber: number | null;
-}
-
-const FOUNDER_SLOTS: FounderSlots = {
-  total: 100,
-  filled: 37,
-  remaining: 63,
-  yourNumber: 38,
-};
 
 // ── Benefit row (staggered entrance) ─────────────────────────────────────────
 interface Benefit {
@@ -205,10 +189,15 @@ const SlotStat = ({
 const FounderIntro = ({ navigation }: any) => {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
+  const { userData } = useUser();
   const isDark = theme.mode === "dark";
 
   const [claiming, setClaiming] = useState(false);
   const [deviceId, setDeviceId] = useState("");
+
+  // ── Live founder stats (driven by Firebase) ──
+  const [stats, setStats] = useState<FounderStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Resolve the device id up-front so the per-device claim check is reliable.
   useEffect(() => {
@@ -219,15 +208,28 @@ const FounderIntro = ({ navigation }: any) => {
       );
   }, []);
 
-  // Future-proofing: when slot data comes from an API this flag will reflect
-  // the request state. It is `false` today because the data is static.
-  const [loading] = useState(false);
-  const slots = FOUNDER_SLOTS;
+  // Subscribe to real-time founder stats.
+  useEffect(() => {
+    const unsubscribe = subscribeFounderStats((next) => {
+      setStats(next);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const total = slots?.total ?? 100;
-  const filled = slots?.filled ?? 0;
-  const remaining = slots?.remaining ?? Math.max(total - filled, 0);
+  const total = stats?.total ?? FOUNDER_TOTAL_SPOTS;
+  const filled = stats?.filled ?? 0;
+  const remaining = stats?.remaining ?? Math.max(total - filled, 0);
   const progress = total > 0 ? Math.min(Math.max(filled / total, 0), 1) : 0;
+
+  // Founder number: a claimed founder keeps their assigned number; otherwise
+  // show the next available number they would receive on claiming (null when
+  // the program is full).
+  const claimedNumber =
+    userData?.isFounder === true && userData?.founderNumber != null
+      ? userData.founderNumber
+      : null;
+  const yourNumber = claimedNumber ?? (remaining > 0 ? filled + 1 : null);
 
   // Hero entrance animations
   const badgeScale = useRef(new Animated.Value(0.8)).current;
@@ -258,15 +260,17 @@ const FounderIntro = ({ navigation }: any) => {
         useNativeDriver: true,
       }),
     ]).start();
+  }, [badgeScale, badgeOpacity, headerOpacity]);
 
+  // Animate the progress bar whenever the live fill ratio changes.
+  useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: progress,
       duration: 900,
-      delay: 400,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     }).start();
-  }, [badgeScale, badgeOpacity, headerOpacity, progressAnim, progress]);
+  }, [progress, progressAnim]);
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
@@ -323,7 +327,7 @@ const FounderIntro = ({ navigation }: any) => {
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
-        barStyle={isDark ? "light-content" : "light-content"}
+        barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
         translucent
       />
@@ -410,16 +414,15 @@ const FounderIntro = ({ navigation }: any) => {
               >
                 {t("founderIntro.slotsTitle")}
               </Text>
-              {slots?.yourNumber != null && (
+              {!loading && yourNumber != null && (
                 <LinearGradient
                   colors={[ACCENT_PRIMARY, ACCENT_PRIMARY_2]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.yourNumberPill}
                 >
-                  <Feather name="hash" size={RFPercentage(1.4)} color="#fff" />
                   <Text style={styles.yourNumberText}>
-                    {t("founderIntro.yourNumber")} #{slots.yourNumber}
+                    {t("founderIntro.yourNumber")} #{yourNumber}
                   </Text>
                 </LinearGradient>
               )}
@@ -659,7 +662,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: "Poppins_700Bold",
-    fontSize: RFPercentage(3.2),
+    fontSize: RFPercentage(2.4),
     letterSpacing: -0.5,
     textAlign: "center",
   },
@@ -672,10 +675,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontFamily: "Poppins_500Medium",
-    fontSize: RFPercentage(1.85),
-    lineHeight: RFPercentage(2.9),
+    fontSize: RFPercentage(1.7),
+    lineHeight: RFPercentage(2),
     textAlign: "center",
     paddingHorizontal: RFPercentage(1.5),
+    marginTop:RFPercentage(0.6)
   },
 
   // Slots card
@@ -830,9 +834,8 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.95),
+    fontSize: RFPercentage(1.8),
     color: "#fff",
-    letterSpacing: 0.2,
   },
   ctaArrow: {
     width: RFPercentage(3.2),
