@@ -23,6 +23,10 @@ import ConfirmationModal from "../components/common/ConfirmationModal";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 import * as Localization from "expo-localization";
 import CustomNav from "../components/common/CustomNav";
+import {
+  SUBSCRIPTION_PRICES,
+  getPlanAmount,
+} from "../config/subscriptionPricing";
 
 function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
@@ -40,23 +44,33 @@ function CancelSubscription({ navigation }: any) {
   const locale = Localization.locale;
   const userCurrency = getCurrencyFromLocale(locale);
 
-  const prices = {
-    monthly: {
-      USD: 9.5,
-      EUR: 8.9,
-      CHF: 7.9,
-    },
-    yearly: {
-      USD: 95,
-      EUR: 89,
-      CHF: 79,
-    },
-  };
+  // Shared display pricing (kept in sync with Stripe via subscriptionPricing).
+  const prices = SUBSCRIPTION_PRICES;
 
-  const formattedPrice = formatCurrency(
-    prices[currentPlan][userCurrency],
+  const basePlanAmount = getPlanAmount(
+    currentPlan === "yearly" ? "yearly" : "monthly",
     userCurrency,
   );
+
+  // Prefer the amount the user is actually being billed (saved by the Stripe
+  // webhook) — during the 3 intro months this is the discounted $3.90, and
+  // from cycle 4 it is the standard $7.90. Falls back to the base price.
+  const paidAmount =
+    typeof userData?.subscription?.amountPaid === "number" &&
+    userData.subscription.amountPaid > 0
+      ? userData.subscription.amountPaid
+      : basePlanAmount;
+  const paidCurrency = (
+    userData?.subscription?.currency || userCurrency
+  ).toUpperCase();
+
+  const formattedPrice = formatCurrency(paidAmount, paidCurrency);
+
+  // On the intro discount (monthly only) → surface the standard renewal
+  // price so the user knows what the plan renews at after 3 months.
+  const isOnIntroPricing =
+    currentPlan !== "yearly" && paidAmount < basePlanAmount;
+  const standardMonthlyPrice = formatCurrency(basePlanAmount, userCurrency);
 
   const cancelSubscription = async () => {
     if (!userData?.subscriptionId) {
@@ -191,6 +205,18 @@ function CancelSubscription({ navigation }: any) {
                 <Text style={[styles.periodText, { color: theme.darkGrey }]}>
                   {currentPlanDetails?.period}
                 </Text>
+
+                {/* Intro offer: show the standard renewal price */}
+                {isOnIntroPricing && (
+                  <Text
+                    style={[styles.renewalNote, { color: theme.darkGrey }]}
+                    numberOfLines={2}
+                  >
+                    {t("subscriptionV2.thenAfter", {
+                      price: standardMonthlyPrice,
+                    })}
+                  </Text>
+                )}
               </View>
 
               {currentPlanDetails?.savings && (
@@ -412,6 +438,12 @@ const styles = StyleSheet.create({
   priceDecimal: {
     fontSize: RFPercentage(2),
     fontFamily: "Poppins_600SemiBold",
+  },
+  renewalNote: {
+    fontSize: RFPercentage(1.45),
+    fontFamily: "Poppins_500Medium",
+    marginTop: RFPercentage(0.6),
+    textAlign: "center",
   },
   periodText: {
     fontSize: RFPercentage(1.6),

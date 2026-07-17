@@ -33,7 +33,7 @@ import MyAppButton from "../components/common/MyAppButton";
 
 // config
 import Colors from "../config/Colors";
-import { savePost, updatePost } from "../services/Post.service";
+import { savePost, updatePost, repostTask } from "../services/Post.service";
 import { useFocusEffect } from "@react-navigation/native";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { useUser } from "../contexts/user.context";
@@ -41,7 +41,8 @@ import { Icons } from "../config/theme";
 import Toast from "react-native-toast-message";
 import InputFieldNew from "../components/common/NewField";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setLocation as setReduxLocation } from "../redux/Actions";
 import { fetchMyReviewsFromFirebase } from "../services/Review.service";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
@@ -88,7 +89,12 @@ function PostRequest({ navigation, route }) {
   const [imageUris, setImageUris] = useState([null, null, null]);
   const [indicator, showIndicator] = useState(false);
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState({});
+  const [location, setLocation] = useState<{
+    latitude?: number;
+    longitude?: number;
+    name?: string;
+    countryCode?: string;
+  }>({});
   const [budget, setBudget] = useState("");
   const [numericBudget, setNumericBudget] = useState("");
   const { location: currentLocation, getCurrentLocation } = useLocation();
@@ -96,7 +102,16 @@ function PostRequest({ navigation, route }) {
   const [reviews, setReviews] = useState([]);
   const { theme } = useAppTheme();
   const selectedLocation = useSelector((state: any) => state.location);
+  const dispatch = useDispatch();
   const inputRef = useRef(null);
+  // Edit mode hydration guards:
+  // - hydratedEditRef: prefill the form from the task ONCE per mount, so
+  //   returning from the Location picker (re-focus) doesn't wipe in-progress
+  //   edits by re-hydrating from the original task.
+  // - isHydratingRef: prevents the "clear sub-tasks on task type change"
+  //   effect from wiping the sub-tasks we just hydrated.
+  const hydratedEditRef = useRef(false);
+  const isHydratingRef = useRef(false);
   const [customTaskTitle, setCustomTaskTitle] = useState("");
 
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -360,8 +375,10 @@ function PostRequest({ navigation, route }) {
     }
   }, [selectedTime]);
 
-  // Clear sub-tasks when task type changes
+  // Clear sub-tasks when task type changes (skipped while hydrating an
+  // existing task, so prefilled sub-tasks aren't wiped)
   useEffect(() => {
+    if (isHydratingRef.current) return;
     setSelectedSubTasks([]);
     setCustomSubTask("");
   }, [originalTaskType]);
@@ -433,62 +450,118 @@ function PostRequest({ navigation, route }) {
         );
         setTranslatedCompensationOptions(translatedCompensations);
 
-        if (currentPostRequest) {
-          setOriginalTaskType(currentPostRequest.taskType);
-          setSelectedTask(await cachedTranslate(currentPostRequest.taskType));
-          setOriginalCompensationType(currentPostRequest.compensationType);
-          setSelectedCompensation(
-            await cachedTranslate(currentPostRequest.compensationType),
-          );
-          setLocation(currentPostRequest.address);
-          setCompensation(
-            await cachedTranslate(currentPostRequest.otherCompensation),
-          );
-          if (currentPostRequest.monitarily) {
-            const numericValue = extractNumericValue(
-              currentPostRequest.monitarily.toString(),
+        if (currentPostRequest && !hydratedEditRef.current) {
+          hydratedEditRef.current = true;
+          isHydratingRef.current = true;
+          try {
+            setOriginalTaskType(currentPostRequest.taskType);
+            setSelectedTask(await cachedTranslate(currentPostRequest.taskType));
+            setOriginalCompensationType(currentPostRequest.compensationType);
+            setSelectedCompensation(
+              await cachedTranslate(currentPostRequest.compensationType),
             );
-            setNumericBudget(numericValue.toString());
-            setBudget(formatCurrency(numericValue, selectedLocation));
-          }
-          if (currentPostRequest.taskType === "Other") {
-            setCustomTaskTitle(currentPostRequest.customTaskTitle || "");
-          }
 
-          // Load sub-tasks if they exist
-          if (currentPostRequest.selectedSubTasks) {
-            const hydrated = await Promise.all(
-              currentPostRequest.selectedSubTasks.map(async (st) => ({
-                ...st,
-                originalName: st.originalName || st.name,
-                translatedName: st.isCustom
-                  ? st.name
-                  : await cachedTranslate(st.name),
-              })),
+            // Prefill the location display AND sync it into redux: submit
+            // reads the redux location, so without this the task's address
+            // would be lost/corrupted unless the user re-picked it.
+            if (currentPostRequest.address) {
+              setLocation(currentPostRequest.address);
+              dispatch(setReduxLocation(currentPostRequest.address));
+            }
+
+            if (currentPostRequest.otherCompensation) {
+              setCompensation(
+                await cachedTranslate(currentPostRequest.otherCompensation),
+              );
+            }
+            if (
+              currentPostRequest.monitarily &&
+              currentPostRequest.monitarily.toString() !== "0"
+            ) {
+              const numericValue = extractNumericValue(
+                currentPostRequest.monitarily.toString(),
+              );
+              setNumericBudget(numericValue.toString());
+              setBudget(
+                formatCurrency(
+                  numericValue,
+                  selectedLocation?.name
+                    ? selectedLocation
+                    : currentPostRequest.address,
+                ),
+              );
+            }
+            if (currentPostRequest.taskType === "Other") {
+              setCustomTaskTitle(currentPostRequest.customTaskTitle || "");
+            }
+
+            // Load sub-tasks if they exist
+            if (currentPostRequest.selectedSubTasks?.length) {
+              const hydrated = await Promise.all(
+                currentPostRequest.selectedSubTasks.map(async (st) => ({
+                  ...st,
+                  originalName: st.originalName || st.name,
+                  translatedName: st.isCustom
+                    ? st.name
+                    : await cachedTranslate(st.name),
+                })),
+              );
+              setSelectedSubTasks(hydrated);
+            }
+
+            // On repost, do NOT prefill the previous schedule — the user must
+            // pick a fresh date/time/duration for the reposted task.
+            if (!route.params?.repost) {
+              // Saved tasks store the schedule as scheduledDate/scheduledTime
+              // (legacy tasks used selectedDate/selectedTime); support both,
+              // with scheduledDateTime as a last resort.
+              const rawDate =
+                currentPostRequest.scheduledDate ??
+                currentPostRequest.selectedDate ??
+                currentPostRequest.scheduledDateTime;
+              const rawTime =
+                currentPostRequest.scheduledTime ??
+                currentPostRequest.selectedTime ??
+                currentPostRequest.scheduledDateTime;
+              if (rawDate) {
+                const parsedDate = new Date(rawDate);
+                if (!isNaN(parsedDate.getTime())) setSelectedDate(parsedDate);
+              }
+              if (rawTime) {
+                const parsedTime = new Date(rawTime);
+                if (!isNaN(parsedTime.getTime())) setSelectedTime(parsedTime);
+              }
+              if (currentPostRequest.estimatedDuration) {
+                setSelectedDuration(currentPostRequest.estimatedDuration);
+              } else if (currentPostRequest.durationLabel) {
+                // Fallback for tasks that only stored the label
+                const match = durationOptions.find(
+                  (d) => d.label === currentPostRequest.durationLabel,
+                );
+                if (match) setSelectedDuration(match.value);
+              }
+            }
+
+            const savedImages = (currentPostRequest.imageUrls || []).slice(
+              0,
+              3,
             );
-            setSelectedSubTasks(hydrated);
+            if (savedImages.length) {
+              const temp = [null, null, null];
+              savedImages.forEach((imgUrl, i) => {
+                temp[i] = imgUrl;
+              });
+              setImageUris(temp);
+            }
+            if (currentPostRequest.description) {
+              setDescription(
+                await cachedTranslate(currentPostRequest.description),
+              );
+            }
+            setNumberOfWorkers(currentPostRequest.numberOfWorkers || 1);
+          } finally {
+            isHydratingRef.current = false;
           }
-
-          // On repost, do NOT prefill the previous schedule — the user must
-          // pick a fresh date/time/duration for the reposted task.
-          if (!route.params?.repost) {
-            if (currentPostRequest.selectedDate) {
-              setSelectedDate(new Date(currentPostRequest.selectedDate));
-            }
-            if (currentPostRequest.selectedTime) {
-              setSelectedTime(new Date(currentPostRequest.selectedTime));
-            }
-            if (currentPostRequest.estimatedDuration) {
-              setSelectedDuration(currentPostRequest.estimatedDuration);
-            }
-          }
-          const temp = [...imageUris];
-          currentPostRequest.imageUrls.forEach((imgUrl, i) => {
-            temp[i] = imgUrl;
-          });
-          setImageUris(temp);
-          setDescription(await cachedTranslate(currentPostRequest.description));
-          setNumberOfWorkers(currentPostRequest.numberOfWorkers || 1);
         }
       };
       translateAndSet();
@@ -880,61 +953,58 @@ function PostRequest({ navigation, route }) {
         if (user?.token) {
           await scheduleTaskReminder(savedPost?.id, user?.token);
         }
-      } else {
-        await updatePost(currentPostRequest.id, data, imgs);
+      } else if (isRepost) {
+        // Repost = a completely new posting. A brand-new document (fresh ID)
+        // is created with only the task details, so it starts with a clean
+        // lifecycle: no applicants, no confirmed helpers, no review state,
+        // no group chat, and no ties to the previous run — which stays
+        // intact as history under the old ID.
+        const savedPost = await repostTask(currentPostRequest.id, data, imgs);
 
-        // Reposting reactivates the task as fresh (status Active, applicants
-        // cleared via `data`) with the new schedule — confirm via SuccessScreen.
-        if (isRepost) {
-          navigation.navigate("SuccessScreen", {
-            taskData: {
-              id: currentPostRequest.id,
-              taskType:
-                originalTaskType === "Other"
-                  ? customTaskTitle
-                  : originalTaskType,
-              description: description,
-              compensationType: originalCompensationType,
-              monitarily: numericBudget || "0",
-              currencyInfo: currencyInfo,
-              otherCompensation: compensation,
-              address: selectedLocation,
-              numberOfWorkers: numberOfWorkers,
-              isBulkRequest: numberOfWorkers > 1,
-              imageUrls: imgs || [],
-              createdAt: new Date().toISOString(),
-              user: user?.userData || {},
-            },
-          });
-          if (user?.token) {
-            await scheduleTaskReminder(currentPostRequest.id, user?.token);
-          }
-        } else {
-          // Normal edit (not a repost) — confirm via SuccessScreen with the
-          // "edited" copy.
-          navigation.navigate("SuccessScreen", {
-            isEdit: true,
-            taskData: {
-              id: currentPostRequest.id,
-              taskType:
-                originalTaskType === "Other"
-                  ? customTaskTitle
-                  : originalTaskType,
-              description: description,
-              compensationType: originalCompensationType,
-              monitarily: numericBudget || "0",
-              currencyInfo: currencyInfo,
-              otherCompensation: compensation,
-              address: selectedLocation,
-              numberOfWorkers: numberOfWorkers,
-              isBulkRequest: numberOfWorkers > 1,
-              imageUrls: imgs || [],
-              createdAt:
-                currentPostRequest.createdAt || new Date().toISOString(),
-              user: user?.userData || {},
-            },
-          });
+        navigation.navigate("SuccessScreen", {
+          taskData: {
+            id: savedPost.id,
+            taskType:
+              originalTaskType === "Other" ? customTaskTitle : originalTaskType,
+            description: description,
+            compensationType: originalCompensationType,
+            monitarily: numericBudget || "0",
+            currencyInfo: currencyInfo,
+            otherCompensation: compensation,
+            address: selectedLocation,
+            numberOfWorkers: numberOfWorkers,
+            isBulkRequest: numberOfWorkers > 1,
+            imageUrls: savedPost.imageUrls || imgs || [],
+            createdAt: savedPost.createdAt || new Date().toISOString(),
+            user: user?.userData || {},
+          },
+        });
+        if (user?.token) {
+          await scheduleTaskReminder(savedPost?.id, user?.token);
         }
+      } else {
+        // Normal edit (not a repost) — update in place and confirm via
+        // SuccessScreen with the "edited" copy.
+        await updatePost(currentPostRequest.id, data, imgs);
+        navigation.navigate("SuccessScreen", {
+          isEdit: true,
+          taskData: {
+            id: currentPostRequest.id,
+            taskType:
+              originalTaskType === "Other" ? customTaskTitle : originalTaskType,
+            description: description,
+            compensationType: originalCompensationType,
+            monitarily: numericBudget || "0",
+            currencyInfo: currencyInfo,
+            otherCompensation: compensation,
+            address: selectedLocation,
+            numberOfWorkers: numberOfWorkers,
+            isBulkRequest: numberOfWorkers > 1,
+            imageUrls: imgs || [],
+            createdAt: currentPostRequest.createdAt || new Date().toISOString(),
+            user: user?.userData || {},
+          },
+        });
       }
     } catch (error) {
       console.log("Error stack:", error?.stack);
@@ -1057,7 +1127,7 @@ function PostRequest({ navigation, route }) {
               <View style={styles.stepperWrap}>
                 <View style={styles.progressHeaderRow}>
                   <Text
-                    style={[styles.stepTitle, { color: theme.mode === "dark" ? Colors.white : Colors.darkGrey }]}
+                    style={[styles.stepTitle, { color: theme.mode === "dark" ? Colors.white : Colors.primary }]}
                     numberOfLines={1}
                   >
                     {stepTitles[step - 1]}
@@ -2271,8 +2341,8 @@ function PostRequest({ navigation, route }) {
                         },
                       ]}
                     >
-                      {location?.name ||
-                        selectedLocation?.name ||
+                      {selectedLocation?.name ||
+                        location?.name ||
                         t("postRequest.txt9")}
                     </Text>
                   </View>

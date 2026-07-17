@@ -23,7 +23,7 @@ const PENDING_JOB_KEY = "pendingDeepLinkJobId";
 import { deepLinkState } from "../job-sharing/deepLinkState";
 import { Icons } from "../config/theme";
 import { useTranslation } from "react-i18next";
-import { hasCompletedFounderIntro } from "../utils/founderIntro";
+import { resolveFounderRoute } from "../services/Founder.service";
 
 const isUserDataReady = (userData: any): boolean => {
   return !!(userData && userData.userId);
@@ -208,9 +208,10 @@ const DeciderScreen = () => {
         return;
       }
 
-      // ── Founder Phase: show the intro only once, otherwise go to the app ──
-      const founderIntroDone = await hasCompletedFounderIntro();
-      completeAndNavigate(founderIntroDone ? "TabNavigator" : "FounderIntro");
+      // ── Founder Phase routing (intro once; device already claimed by
+      //    another account → standard plans) ──
+      const founderRoute = await resolveFounderRoute(deviceId, userData);
+      completeAndNavigate(founderRoute);
     } catch (error) {
       console.log("[Decider] Error deciding initial route:", error);
       if (!hasNavigated.current) {

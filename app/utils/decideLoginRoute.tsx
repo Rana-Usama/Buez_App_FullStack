@@ -1,4 +1,4 @@
-import { hasCompletedFounderIntro } from "./founderIntro";
+import { resolveFounderRoute } from "../services/Founder.service";
 
 export const decideUserRoute = async (userData) => {
   const now = new Date();
@@ -28,7 +28,7 @@ export const decideUserRoute = async (userData) => {
     return "TabNavigator";
   }
 
-  // 2️⃣ Founder Phase: show the intro only once, otherwise go to the app
-  const founderIntroDone = await hasCompletedFounderIntro();
-  return founderIntroDone ? "TabNavigator" : "FounderIntro";
+  // 2️⃣ Founder Phase routing: intro shown once; if this device already
+  // claimed a founder spot for another account → standard plans.
+  return await resolveFounderRoute(null, userData);
 };

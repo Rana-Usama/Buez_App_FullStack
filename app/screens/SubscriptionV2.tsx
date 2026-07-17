@@ -26,6 +26,10 @@ import { useAppTheme } from "../contexts/themeContext";
 import * as Localization from "expo-localization";
 import { handlePaymentSheet } from "../services/Subscription.service";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
+import {
+  SUBSCRIPTION_PRICES,
+  getIntroMonthlyAmount,
+} from "../config/subscriptionPricing";
 import { Icons } from "../config/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import Feather from "@expo/vector-icons/Feather";
@@ -46,10 +50,8 @@ function SubscriptionV2(props) {
 
   const isDark = theme.mode === "dark";
 
-  const prices = {
-    monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
-    yearly: { USD: 95, EUR: 89, CHF: 79 },
-  };
+  // Shared display pricing (single source of truth for all pricing screens).
+  const prices = SUBSCRIPTION_PRICES;
 
   const locale = Localization.locale;
   const userCurrency = getCurrencyFromLocale(locale);
@@ -58,6 +60,19 @@ function SubscriptionV2(props) {
     const amount = prices[planId]?.[userCurrency] ?? prices[planId]?.USD ?? 0;
     return formatCurrency(amount, userCurrency);
   };
+
+  // Intro pricing: the Stripe coupon takes 4.00 (in the billing currency) off
+  // the first 3 monthly cycles, so the advertised monthly price is the
+  // discounted one ($3.90) with the standard price ($7.90) shown below it.
+  const introMonthlyPrice = formatCurrency(
+    getIntroMonthlyAmount(userCurrency),
+    userCurrency,
+  );
+
+  // Monthly shows the intro price as the primary figure; other plans show
+  // their standard price.
+  const displayPriceForPlan = (planId) =>
+    planId === "monthly" ? introMonthlyPrice : priceLabelForPlan(planId);
 
   const openPaymentSheet = async () => {
     setLoading(true);
@@ -114,7 +129,7 @@ function SubscriptionV2(props) {
         t("subscriptionV2.prioritySupport"),
       ],
       popular: false,
-      highlight: t("subscriptionV2.prioritySupport"),
+      highlight: t("subscriptionV2.introOffer"),
     },
     {
       id: "yearly",
@@ -288,7 +303,7 @@ function SubscriptionV2(props) {
           <View style={styles.priceSection}>
             <View style={styles.priceContainer}>
               {(() => {
-                const priceStr = priceLabelForPlan(item.id);
+                const priceStr = displayPriceForPlan(item.id);
                 const [integerPart, decimalPart] = priceStr.split(".");
                 return (
                   <Text
@@ -350,7 +365,9 @@ function SubscriptionV2(props) {
                   },
                 ]}
               >
-                {item.highlight}
+                {item.id === "yearly"
+                  ? `${item.highlight}`
+                  : t("subscriptionV2.thenAfter", { price: monthlyPrice })}
               </Text>
             </View>
             {item.originalPrice && (
@@ -504,12 +521,7 @@ function SubscriptionV2(props) {
         </View>
 
         {/* ── Dot indicators ── */}
-        <View
-          style={[
-            styles.indicatorsContainer,
-            { marginTop: -15 },
-          ]}
-        >
+        <View style={[styles.indicatorsContainer, { marginTop: -15 }]}>
           {plans.map((plan, index) => (
             <LinearGradient
               key={plan.id}
@@ -756,6 +768,12 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     paddingBottom: RFPercentage(0.5),
+  },
+  introNote: {
+    fontSize: RFPercentage(1.45),
+    fontFamily: "Poppins_500Medium",
+    marginTop: -RFPercentage(0.6),
+    marginBottom: RFPercentage(1),
   },
 
   // Highlight

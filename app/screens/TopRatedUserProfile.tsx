@@ -98,9 +98,28 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     ? completedTasks
     : completedTasks.slice(0, INITIAL_COUNT);
 
-  const visibleReviews = showAllReviews
-    ? reviewsList
-    : reviewsList.slice(0, INITIAL_COUNT);
+  // Group reviews by reviewer so a user with multiple reviews renders as a
+  // single card: profile shown once, all their reviews listed beneath it.
+  // Group order follows first appearance in the existing sort order; reviews
+  // within a group also keep the existing order. Presentation-only change.
+  const groupedReviews = reviewsList.reduce(
+    (groups, review: any) => {
+      const key =
+        review?.reviewer?.userId || review?.reviewer?.userName || "unknown";
+      const existing = groups.find((g) => g.key === key);
+      if (existing) {
+        existing.reviews.push(review);
+      } else {
+        groups.push({ key, reviewer: review?.reviewer, reviews: [review] });
+      }
+      return groups;
+    },
+    [] as { key: string; reviewer: any; reviews: any[] }[],
+  );
+
+  const visibleReviewGroups = showAllReviews
+    ? groupedReviews
+    : groupedReviews.slice(0, INITIAL_COUNT);
 
   // Fetch latest task data and update slot info
   const fetchTaskData = async () => {
@@ -777,15 +796,16 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         ) : reviews && reviews.length > 0 ? (
           <>
             <View style={{ marginTop: RFPercentage(3) }}>
-              {visibleReviews.map((r, i) => (
+              {visibleReviewGroups.map((group, i) => (
                 <ReviewCard
-                  key={r.id || i}
-                  item={r}
-                  translated={translatedReviews[r.id]}
+                  key={group.key || i}
+                  group={group}
+                  translatedMap={translatedReviews}
                   theme={theme}
+                  t={t}
                 />
               ))}
-              {reviews?.length > INITIAL_COUNT && !showAllReviews && (
+              {groupedReviews.length > INITIAL_COUNT && !showAllReviews && (
                 <TouchableOpacity
                   onPress={() => setShowAllReviews(true)}
                   style={[
@@ -807,7 +827,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
                       },
                     ]}
                   >
-                    +{reviews?.length - INITIAL_COUNT} more
+                    +{groupedReviews.length - INITIAL_COUNT} more
                   </Text>
                 </TouchableOpacity>
               )}

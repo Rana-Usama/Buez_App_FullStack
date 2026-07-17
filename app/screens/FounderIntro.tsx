@@ -277,6 +277,24 @@ const FounderIntro = ({ navigation }: any) => {
     outputRange: ["0%", "100%"],
   });
 
+  // Program full and this user isn't a founder → no claim possible; the
+  // screen switches to an informative sold-out state that routes the user to
+  // the standard subscription plans instead.
+  const soldOut =
+    !loading && remaining <= 0 && userData?.isFounder !== true;
+
+  // Sold-out path: mark the intro as seen and continue to the standard plans.
+  const handleContinueToPlans = async () => {
+    if (claiming) return;
+    setClaiming(true);
+    try {
+      await markFounderIntroCompleted();
+    } catch (error) {
+      console.log("[FounderIntro] Failed to persist intro flag:", error);
+    }
+    navigation.reset({ index: 0, routes: [{ name: "SubscriptionV2" }] });
+  };
+
   // CTA — claim the founder spot, persist enrollment, then continue to Home.
   const handleClaim = async () => {
     // Prevent duplicate requests from rapid taps.
@@ -308,14 +326,26 @@ const FounderIntro = ({ navigation }: any) => {
         return;
       }
 
+      // ── Race: last spot taken while the user was on this screen ──
+      if (result.reason === "sold_out") {
+        await markFounderIntroCompleted();
+        Toast.show({ type: "info", text1: t("founderIntro.soldOutTitle") });
+        navigation.reset({ index: 0, routes: [{ name: "SubscriptionV2" }] });
+        return;
+      }
+
+      // ── One founder per device: this device already claimed for another
+      //    account → inform the user and send them to the standard plans.
+      //    (Intro flag intentionally NOT set: routing re-resolves via the
+      //    device check, so this screen won't be shown here again.)
+      if (result.reason === "device_claimed") {
+        Toast.show({ type: "info", text1: t("founderIntro.deviceClaimed") });
+        navigation.reset({ index: 0, routes: [{ name: "SubscriptionV2" }] });
+        return;
+      }
+
       // ── Failure: stay on screen, re-enable CTA, do NOT mark as completed ──
-      Toast.show({
-        type: "error",
-        text1:
-          result.reason === "device_claimed"
-            ? t("founderIntro.deviceClaimed")
-            : t("founderIntro.claimError"),
-      });
+      Toast.show({ type: "error", text1: t("founderIntro.claimError") });
       setClaiming(false);
     } catch (error) {
       console.log("[FounderIntro] Claim failed:", error);
@@ -455,14 +485,27 @@ const FounderIntro = ({ navigation }: any) => {
                   </Animated.View>
                 </View>
 
-                <Text
-                  style={[
-                    styles.slotsCaption,
-                    { color: isDark ? "#8892b0" : "#64748B" },
-                  ]}
-                >
-                  {t("founderIntro.slotsCaption", { remaining, total })}
-                </Text>
+                {soldOut ? (
+                  <View style={styles.soldOutRow}>
+                    <Feather
+                      name="info"
+                      size={RFPercentage(1.7)}
+                      color={ACCENT_PINK}
+                    />
+                    <Text style={[styles.soldOutText, { color: ACCENT_PINK }]}>
+                      {t("founderIntro.soldOutTitle")}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text
+                    style={[
+                      styles.slotsCaption,
+                      { color: isDark ? "#8892b0" : "#64748B" },
+                    ]}
+                  >
+                    {t("founderIntro.slotsCaption", { remaining, total })}
+                  </Text>
+                )}
 
                 {/* Stats */}
                 <View style={styles.slotStatsRow}>
@@ -548,8 +591,8 @@ const FounderIntro = ({ navigation }: any) => {
         ]}
       >
         <TouchableOpacity
-          onPress={handleClaim}
-          disabled={claiming}
+          onPress={soldOut ? handleContinueToPlans : handleClaim}
+          disabled={claiming || loading}
           activeOpacity={0.88}
           style={styles.ctaOuter}
         >
@@ -559,11 +602,15 @@ const FounderIntro = ({ navigation }: any) => {
             end={{ x: 1, y: 0 }}
             style={styles.ctaBtn}
           >
-            {claiming ? (
+            {claiming || loading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <>
-                <Text style={styles.ctaText}>{t("founderIntro.cta")}</Text>
+                <Text style={styles.ctaText}>
+                  {soldOut
+                    ? t("founderIntro.soldOutCta")
+                    : t("founderIntro.cta")}
+                </Text>
                 <View style={styles.ctaArrow}>
                   <Feather
                     name="arrow-right"
@@ -578,14 +625,16 @@ const FounderIntro = ({ navigation }: any) => {
 
         <View style={styles.ctaNoteRow}>
           <Feather
-            name="shield"
+            name={soldOut ? "info" : "shield"}
             size={RFPercentage(1.4)}
             color={isDark ? "#3a4570" : "#94a3b8"}
           />
           <Text
             style={[styles.ctaNote, { color: isDark ? "#5a648f" : "#94a3b8" }]}
           >
-            {t("founderIntro.ctaNote")}
+            {soldOut
+              ? t("founderIntro.soldOutDesc")
+              : t("founderIntro.ctaNote")}
           </Text>
         </View>
       </View>
@@ -739,6 +788,17 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.5),
     marginBottom: RFPercentage(1.8),
+  },
+  soldOutRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.7),
+    marginBottom: RFPercentage(1.8),
+  },
+  soldOutText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: RFPercentage(1.5),
+    flex: 1,
   },
   slotStatsRow: {
     flexDirection: "row",

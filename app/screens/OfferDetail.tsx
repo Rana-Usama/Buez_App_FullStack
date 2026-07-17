@@ -833,10 +833,28 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
-  const visibleReviews = showAll
-    ? translatedReviews
-    : translatedReviews.slice(0, 3);
-  const hiddenCount = translatedReviews.length - 3;
+  // Group reviews by reviewer so a user with multiple reviews renders as a
+  // single card: profile shown once, all their reviews listed beneath it.
+  // Group order follows first appearance in the existing sort order; reviews
+  // within a group also keep the existing order. Presentation-only change.
+  const groupedReviews = translatedReviews.reduce(
+    (groups, review: any) => {
+      const key =
+        review?.reviewer?.userId || review?.reviewer?.userName || "unknown";
+      const existing = groups.find((g) => g.key === key);
+      if (existing) {
+        existing.reviews.push(review);
+      } else {
+        groups.push({ key, reviewer: review?.reviewer, reviews: [review] });
+      }
+      return groups;
+    },
+    [] as { key: string; reviewer: any; reviews: any[] }[],
+  );
+  const visibleReviewGroups = showAll
+    ? groupedReviews
+    : groupedReviews.slice(0, 3);
+  const hiddenCount = groupedReviews.length - 3;
 
   // Handle worker applying to bulk request
   const handleApply = async () => {
@@ -1506,88 +1524,145 @@ function OfferDetail({ navigation, route }) {
 
               {translatedReviews?.length > 0 ? (
                 <>
-                  {visibleReviews.map((review, index) => (
-                    <View
-                      key={review.id || index}
-                      style={[
-                        styles.reviewItem,
-                        {
-                          backgroundColor: ui.softFill,
-                          borderWidth: 1,
-                          borderColor: ui.divider,
-                        },
-                      ]}
-                    >
-                      <View style={styles.reviewHeader}>
-                        <Image
-                          source={
-                            review?.reviewer?.profileImage
-                              ? { uri: review.reviewer.profileImage }
-                              : Icons.dp
-                          }
-                          style={styles.reviewerAvatar}
-                        />
-                        <View style={styles.reviewerInfo}>
-                          <Text
-                            style={[
-                              styles.reviewerName,
-                              { color: theme.heading },
-                            ]}
-                          >
-                            {review?.reviewer?.userName}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.reviewDate,
-                              { color: theme.darkGrey },
-                            ]}
-                          >
-                            {getDateTime(review.createdAt)}
-                          </Text>
-                        </View>
-                        <View style={styles.starsContainer}>
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Ionicons
-                              key={star}
-                              name="star"
-                              size={RFPercentage(1.4)}
-                              color={
-                                star <= (review.rating || 0)
-                                  ? "#FFD700"
-                                  : theme.border
-                              }
-                            />
-                          ))}
-                        </View>
-                      </View>
+                  {visibleReviewGroups.map((group, index) => {
+                    const isMulti = group.reviews.length > 1;
+                    const headerRating = isMulti
+                      ? Math.round(
+                          group.reviews.reduce(
+                            (sum, r) => sum + (r.rating || 0),
+                            0,
+                          ) / group.reviews.length,
+                        )
+                      : group.reviews[0]?.rating || 0;
+                    return (
                       <View
+                        key={group.key || index}
                         style={[
-                          styles.reviewTextContainer,
+                          styles.reviewItem,
                           {
-                            backgroundColor: isDark
-                              ? "rgba(32, 37, 52, 0.5)"
-                              : "#FFFFFF",
+                            backgroundColor: ui.softFill,
                             borderWidth: 1,
                             borderColor: ui.divider,
                           },
                         ]}
                       >
-                        <Text
-                          style={[styles.reviewText, { color: theme.darkGrey }]}
-                        >
-                          {review.translatedText || review.reviewText}
-                        </Text>
+                        {/* Reviewer profile — rendered once per user */}
+                        <View style={styles.reviewHeader}>
+                          <Image
+                            source={
+                              group.reviewer?.profileImage
+                                ? { uri: group.reviewer.profileImage }
+                                : Icons.dp
+                            }
+                            style={styles.reviewerAvatar}
+                          />
+                          <View style={styles.reviewerInfo}>
+                            <Text
+                              style={[
+                                styles.reviewerName,
+                                { color: theme.heading },
+                              ]}
+                            >
+                              {group.reviewer?.userName}
+                            </Text>
+                            <Text
+                              style={[
+                                styles.reviewDate,
+                                { color: theme.darkGrey },
+                              ]}
+                            >
+                              {isMulti
+                                ? `${group.reviews.length} ${t("profile.txt3")}`
+                                : getDateTime(group.reviews[0]?.createdAt)}
+                            </Text>
+                          </View>
+                          <View style={styles.starsContainer}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Ionicons
+                                key={star}
+                                name="star"
+                                size={RFPercentage(1.4)}
+                                color={
+                                  star <= headerRating
+                                    ? "#FFD700"
+                                    : theme.border
+                                }
+                              />
+                            ))}
+                          </View>
+                        </View>
+
+                        {/* All of this user's reviews, in the existing order */}
+                        {group.reviews.map((review, reviewIndex) => (
+                          <View
+                            key={review.id || reviewIndex}
+                            style={
+                              reviewIndex > 0
+                                ? styles.groupedReviewSpacing
+                                : null
+                            }
+                          >
+                            {isMulti && (
+                              <View style={styles.reviewMetaRow}>
+                                <Text
+                                  style={[
+                                    styles.reviewDate,
+                                    { color: theme.darkGrey },
+                                  ]}
+                                >
+                                  {getDateTime(review.createdAt)}
+                                </Text>
+                                <View style={styles.starsContainer}>
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Ionicons
+                                      key={star}
+                                      name="star"
+                                      size={RFPercentage(1.2)}
+                                      color={
+                                        star <= (review.rating || 0)
+                                          ? "#FFD700"
+                                          : theme.border
+                                      }
+                                    />
+                                  ))}
+                                </View>
+                              </View>
+                            )}
+                            <View
+                              style={[
+                                styles.reviewTextContainer,
+                                {
+                                  backgroundColor: isDark
+                                    ? "rgba(32, 37, 52, 0.5)"
+                                    : "#FFFFFF",
+                                  borderWidth: 1,
+                                  borderColor: ui.divider,
+                                },
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.reviewText,
+                                  { color: theme.darkGrey },
+                                ]}
+                              >
+                                {review.translatedText || review.reviewText}
+                              </Text>
+                            </View>
+                          </View>
+                        ))}
+
+                        {index < visibleReviewGroups.length - 1 && (
+                          <View
+                            style={[
+                              styles.reviewDivider,
+                              { backgroundColor: theme.border },
+                            ]}
+                          />
+                        )}
                       </View>
-                      {index < visibleReviews.length - 1 && (
-                        <View
-                          style={[
-                            styles.reviewDivider,
-                            { backgroundColor: theme.border },
-                          ]}
-                        />
-                      )}
-                    </View>
-                  ))}
+                    );
+                  })}
 
                   {!showAll && hiddenCount > 0 && (
                     <TouchableOpacity
@@ -2183,6 +2258,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: RFPercentage(1),
     marginTop: RFPercentage(0.5),
+  },
+  groupedReviewSpacing: {
+    marginTop: RFPercentage(1.2),
+  },
+  reviewMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: RFPercentage(0.3),
+    marginBottom: RFPercentage(0.2),
   },
   reviewText: {
     fontSize: RFPercentage(1.4),

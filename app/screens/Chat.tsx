@@ -102,6 +102,54 @@ const Chat = ({ navigation, route }: any) => {
     null,
   );
 
+  // ── Deleted-account guard ──────────────────────────────────────────────────
+  // If the other participant deleted their account, the conversation history
+  // stays visible but new messages can no longer be sent.
+  const [otherUserDeleted, setOtherUserDeleted] = useState(false);
+  const [deletedNotice, setDeletedNotice] = useState(
+    "You can no longer reply to this conversation",
+  );
+
+  useEffect(() => {
+    if (!chatId || !currentUserId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const chatSnap = await getDoc(doc(FIREBASE_DB, "chats", chatId));
+        const chatData: any = chatSnap.exists() ? chatSnap.data() : null;
+        const deletedUsers: string[] = chatData?.deletedUsers || [];
+        let deleted = deletedUsers.some((id) => id !== currentUserId);
+
+        if (!deleted) {
+          const otherId =
+            receiver?.userId ||
+            chatData?.participants?.find((id: string) => id !== currentUserId);
+          if (otherId) {
+            const otherSnap = await getDoc(
+              doc(FIREBASE_DB, "users", otherId),
+            );
+            deleted = !!(otherSnap.exists() && otherSnap.data()?.isDeleted);
+          }
+        }
+
+        if (deleted && !cancelled) {
+          setOtherUserDeleted(true);
+          try {
+            const translated = await cachedTranslate(
+              "You can no longer reply to this conversation",
+            );
+            if (translated && !cancelled) setDeletedNotice(translated);
+          } catch {}
+        }
+      } catch (err) {
+        console.log("deleted-account check error:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [chatId, currentUserId, receiver?.userId]);
+
   const lastDocRef = useRef<any>(null);
   const listenerAttachedRef = useRef(false);
   const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -243,6 +291,7 @@ const Chat = ({ navigation, route }: any) => {
     async (msgs: any[] = []) => {
       const msg = msgs[0];
       if (!msg?.text?.trim()) return;
+      if (otherUserDeleted) return; // recipient's account no longer exists
 
       const newMessage = {
         text: msg.text,
@@ -270,7 +319,7 @@ const Chat = ({ navigation, route }: any) => {
         console.error("onSend error:", err);
       }
     },
-    [chatId, currentUserId, senderName],
+    [chatId, currentUserId, senderName, otherUserDeleted],
   );
 
   // ── Push notification (fire-and-forget) ──────────────────────────────────
@@ -529,15 +578,38 @@ const Chat = ({ navigation, route }: any) => {
             onLoadEarlier={loadMoreMessages}
             isLoadingEarlier={loadingMore}
             renderLoadEarlier={renderLoadEarlier}
-            renderInputToolbar={(props) => (
-              <ChatInputToolbar
-                inputText={inputText}
-                setInputText={setInputText}
-                onSendText={sendText}
-                theme={theme}
-                t={t}
-              />
-            )}
+            renderInputToolbar={(props) =>
+              otherUserDeleted ? (
+                <View
+                  style={[
+                    styles.deletedNotice,
+                    {
+                      backgroundColor: theme.lightWhite,
+                      borderColor: theme.border,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={RFPercentage(2)}
+                    color={theme.lightGrey}
+                  />
+                  <Text
+                    style={[styles.deletedNoticeText, { color: theme.lightGrey }]}
+                  >
+                    {deletedNotice}
+                  </Text>
+                </View>
+              ) : (
+                <ChatInputToolbar
+                  inputText={inputText}
+                  setInputText={setInputText}
+                  onSendText={sendText}
+                  theme={theme}
+                  t={t}
+                />
+              )
+            }
             renderDay={renderDay}
             renderAvatar={renderAvatar}
             renderBubble={renderBubble}
@@ -602,6 +674,23 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "90%",
     paddingVertical: RFPercentage(1.5),
+  },
+  deletedNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: RFPercentage(0.7),
+    alignSelf: "center",
+    width: "90%",
+    borderWidth: 1,
+    borderRadius: RFPercentage(4),
+    paddingVertical: RFPercentage(1.5),
+    paddingHorizontal: RFPercentage(2),
+    marginBottom: RFPercentage(1),
+  },
+  deletedNoticeText: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_400Regular",
   },
   customTextInput: {
     fontSize: RFPercentage(1.8),

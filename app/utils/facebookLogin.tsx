@@ -5,7 +5,7 @@ import { FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { registerForPushNotificationsAsync } from "./notificationService";
-import { hasCompletedFounderIntro } from "./founderIntro";
+import { resolveFounderRoute } from "../services/Founder.service";
 import { saveCredentials } from "../services/Auth.service";
 import { checkExistingEmailLoginType, saveEmailLoginType } from "./loginType";
 import * as SecureStore from "expo-secure-store";
@@ -131,8 +131,10 @@ const FacebookLoginWebView = ({ navigation }: any) => {
       if (userData?.isSubscribed || isWithinPaidPeriod) {
         navigation.navigate("TabNavigator");
       } else {
-        const founderIntroDone = await hasCompletedFounderIntro();
-        navigation.navigate(founderIntroDone ? "TabNavigator" : "FounderIntro");
+        // Founder routing: intro once; device claimed by another account →
+        // standard plans (SubscriptionV2).
+        const founderRoute = await resolveFounderRoute(null, userData);
+        navigation.navigate(founderRoute);
       }
     } catch (error) {
       Alert.alert("Login Error", error.message);

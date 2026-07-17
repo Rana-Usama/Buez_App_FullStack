@@ -1,4 +1,4 @@
-import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
+import { FIREBASE_AUTH } from "../../firebaseConfig";
 import {
   sendEmailVerification,
   signOut,
@@ -10,15 +10,7 @@ import {
   OAuthProvider
 } from "firebase/auth";
 import { deleteUser } from "firebase/auth";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  deleteDoc,
-  doc,
-  writeBatch,
-} from "firebase/firestore";
+import { purgeUserAccountData } from "./AccountDeletion.service";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
@@ -129,26 +121,14 @@ export const deleteCurrentUser = async (currentPassword) => {
     );
     await reauthenticateWithCredential(user, credential);
     const userId = user.uid;
-    await deleteDoc(doc(FIREBASE_DB, "users", userId));
 
-    const batchDelete = async (colName, field, op, value) => {
-      const q = query(
-        collection(FIREBASE_DB, colName),
-        where(field, op, value)
-      );
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        const batch = writeBatch(FIREBASE_DB);
-        snapshot.forEach((docSnap) => batch.delete(docSnap.ref));
-        await batch.commit();
-      }
-    };
+    // 🧹 Step 2: Clean up Firestore/Storage data. Deletes private data and
+    // active tasks, cancels active acceptances (owners are notified), and
+    // anonymizes everything other users still rely on (chats, completed task
+    // history, reviews written) as "Deleted User".
+    await purgeUserAccountData(userId);
 
-    await batchDelete("taskRequests", "userId", "==", userId);
-    await batchDelete("chats", "participants", "array-contains", userId);
-    await batchDelete("completedTask", "taskOwnerId", "==", userId);
-
-    // 🚀 Step 3: Delete the user
+    // 🚀 Step 3: Delete the auth account
     await deleteUser(user);
     console.log("User account deleted successfully");
   } catch (error) {
@@ -184,23 +164,9 @@ export async function deleteGoogleAccount() {
     await reauthenticateWithCredential(user, googleCredential);
     const userId = user.uid;
 
-    await deleteDoc(doc(FIREBASE_DB, "users", userId));
-    const batchDelete = async (colName, field, op, value) => {
-      const q = query(
-        collection(FIREBASE_DB, colName),
-        where(field, op, value)
-      );
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        const batch = writeBatch(FIREBASE_DB);
-        snapshot.forEach((docSnap) => batch.delete(docSnap.ref));
-        await batch.commit();
-      }
-    };
-
-    await batchDelete("taskRequests", "userId", "==", userId);
-    await batchDelete("chats", "participants", "array-contains", userId);
-    await batchDelete("completedTask", "taskOwnerId", "==", userId);
+    // Clean up Firestore/Storage data (delete + anonymize strategy), then
+    // remove the auth account.
+    await purgeUserAccountData(userId);
     await deleteUser(user);
     console.log("Google account deleted ✅");
   } catch (error) {
@@ -237,30 +203,8 @@ export async function deleteAppleAccount() {
 
     const userId = user.uid;
 
-    // 3️⃣ Delete user-related documents in Firestore (batch delete utility)
-    const batchDelete = async (
-      colName: string,
-      field: string,
-      op: any,
-      value: any
-    ) => {
-      const q = query(
-        collection(FIREBASE_DB, colName),
-        where(field, op, value)
-      );
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        const batch = writeBatch(FIREBASE_DB);
-        snapshot.forEach((docSnap) => batch.delete(docSnap.ref));
-        await batch.commit();
-      }
-    };
-
-    // Delete all related collections
-    await deleteDoc(doc(FIREBASE_DB, "users", userId));
-    await batchDelete("taskRequests", "userId", "==", userId);
-    await batchDelete("chats", "participants", "array-contains", userId);
-    await batchDelete("completedTask", "taskOwnerId", "==", userId);
+    // 3️⃣ Clean up Firestore/Storage data (delete + anonymize strategy)
+    await purgeUserAccountData(userId);
 
     // if (authorizationCode) {
     //   await revokeToken(FIREBASE_AUTH, authorizationCode);

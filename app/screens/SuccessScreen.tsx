@@ -86,7 +86,7 @@ function SuccessScreen({ navigation }) {
     >
       <StatusBar
         backgroundColor={"transparent"}
-        barStyle={"dark-content"}
+        barStyle={"light-content"}
         translucent
       />
 

@@ -7,7 +7,9 @@ import {
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
+import DeviceInfo from "react-native-device-info";
 import { FIREBASE_DB } from "../../firebaseConfig";
+import { hasCompletedFounderIntro } from "../utils/founderIntro";
 
 const db = FIREBASE_DB;
 
@@ -50,6 +52,7 @@ export type FounderClaimReason =
   | "device_claimed"
   | "sold_out"
   | "no_user"
+  | "no_device"
   | "error";
 
 export interface FounderClaimResult {
@@ -101,6 +104,19 @@ export const getFounderInfo = (userData: any): FounderInfo | null => {
 };
 
 /**
+ * Whether the user owns the Founder Badge.
+ *
+ * BADGE ≠ PREMIUM ACCESS. The badge is a permanent honor awarded to the first
+ * 100 founders and depends ONLY on `isFounder`. It deliberately ignores
+ * `founderStatus`, `founderExpiresAt`, and every subscription field — expiry
+ * of the 60-day free period, cancelling, or changing a subscription must
+ * never remove it. Use `isFounderActive` for premium-access decisions instead.
+ */
+export const hasFounderBadge = (userData: any): boolean => {
+  return userData?.isFounder === true;
+};
+
+/**
  * Whether the user's founder benefits are currently active (not expired).
  */
 export const isFounderActive = (userData: any): boolean => {
@@ -121,6 +137,65 @@ export const getFounderDaysRemaining = (userData: any): number => {
   if (!expires) return 0;
   const ms = expires.getTime() - Date.now();
   return ms <= 0 ? 0 : Math.ceil(ms / DAY_MS);
+};
+
+/**
+ * Whether this device has already been used to claim a Founder spot by a
+ * DIFFERENT account. Used to skip the Founder claim screen entirely for any
+ * additional accounts on the same device (one Founder per device).
+ *
+ * Fails open (false) on read errors — the claim transaction remains the
+ * authoritative enforcement, so a missed pre-check can never create a second
+ * founder on the device.
+ */
+export const isDeviceFounderClaimed = async (
+  deviceId?: string | null,
+  userId?: string | null,
+): Promise<boolean> => {
+  try {
+    const id = deviceId || (await DeviceInfo.getUniqueId());
+    if (!id) return false;
+    const snap = await getDoc(doc(db, FOUNDER_DEVICES_COLLECTION, id));
+    if (!snap.exists()) return false;
+    const claimedBy = snap.data()?.userId;
+    const currentUid = userId ?? getAuth()?.currentUser?.uid ?? null;
+    return claimedBy != null && claimedBy !== currentUid;
+  } catch (error) {
+    console.log("[Founder] isDeviceFounderClaimed error:", error);
+    return false;
+  }
+};
+
+export type FounderRoute = "TabNavigator" | "SubscriptionV2" | "FounderIntro";
+
+/**
+ * Single routing decision for the Founder flow, shared by every entry point
+ * (app launch, logins, email verification, deep links):
+ *
+ *  1. Existing founders and users who already completed the intro → app.
+ *  2. Device already used by ANOTHER account to claim → SubscriptionV2
+ *     (standard plans; the Founder claim screen is never shown again on
+ *     that device).
+ *  3. Otherwise → FounderIntro (first eligible user on the device).
+ */
+export const resolveFounderRoute = async (
+  deviceId?: string | null,
+  userData?: any,
+): Promise<FounderRoute> => {
+  try {
+    if (userData?.isFounder === true) return "TabNavigator";
+
+    const introDone = await hasCompletedFounderIntro();
+    if (introDone) return "TabNavigator";
+
+    const deviceClaimed = await isDeviceFounderClaimed(deviceId);
+    if (deviceClaimed) return "SubscriptionV2";
+
+    return "FounderIntro";
+  } catch (error) {
+    console.log("[Founder] resolveFounderRoute error:", error);
+    return "FounderIntro";
+  }
 };
 
 /**
@@ -197,10 +272,18 @@ export const claimFounderSpot = async (
       };
     }
 
+    // Device eligibility is mandatory: without a device id we cannot enforce
+    // the one-claim-per-device rule, so the claim is rejected outright.
+    if (!deviceId) {
+      return {
+        success: false,
+        reason: "no_device",
+        message: "Device could not be identified.",
+      };
+    }
+
     const userRef = doc(db, "users", userId);
-    const deviceRef = deviceId
-      ? doc(db, FOUNDER_DEVICES_COLLECTION, deviceId)
-      : null;
+    const deviceRef = doc(db, FOUNDER_DEVICES_COLLECTION, deviceId);
     const cfgRef = configRef();
 
     const outcome = await runTransaction(db, async (tx) => {

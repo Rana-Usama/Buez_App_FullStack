@@ -176,7 +176,10 @@
     "successTitle": "Willkommen im Founder-Programm!",
     "alreadyFounder": "Du bist bereits ein Founder.",
     "deviceClaimed": "Auf diesem Gerät wurde bereits ein Founder-Platz beansprucht.",
-    "claimError": "Founder-Platz konnte nicht beansprucht werden. Bitte versuche es erneut."
+    "claimError": "Founder-Platz konnte nicht beansprucht werden. Bitte versuche es erneut.",
+    "soldOutTitle": "Alle 100 Founder-Plätze sind vergeben",
+    "soldOutDesc": "Das Founder-Programm ist voll, aber du kannst mit einem Standard-Plan fortfahren.",
+    "soldOutCta": "Abo-Pläne ansehen"
   },
   "founderBanner": {
     "badge": "Founder",
@@ -230,6 +233,7 @@
     "txt12": "Akzeptierte Anfrage erfolgreich storniert.",
     "txt13": "Deine Anfragen werden geladen...",
     "repostSuccess": "Anfrage erneut gepostet!",
+    "repostedBadge": "Erneut gepostet",
     "repostAvailable": "Ihre Anfrage wurde erneut gepostet und steht nun anderen Nutzern zur Annahme zur Verfügung.",
     "viewConfirmedHelpers": "Helfer azeige",
     "txt14": "Vergangen"

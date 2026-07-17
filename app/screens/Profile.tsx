@@ -30,6 +30,7 @@ import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
 import Toast from "react-native-toast-message";
 import AvatarInitials from "../components/common/DefaultAvatars";
 import { getAvatarColors } from "../config/avatarColors";
+import FounderBadge from "../components/common/FounderBadge";
 
 // ─── Category master list (always English — source of truth) ──────────────────
 const taskOptions = [
@@ -698,7 +699,16 @@ function Profile({ navigation }: any) {
                 />
               )}
 
-              <Image source={Icons.founderBadge} resizeMode="contain" style={{width:RFPercentage(6), height:RFPercentage(6), position:"absolute", right:RFPercentage(-2), bottom:0}} />
+              {/* Permanent Founder Badge — driven only by isFounder, never by
+                  subscription or trial-expiry state. */}
+              <FounderBadge
+                variant="avatar"
+                style={{
+                  position: "absolute",
+                  right: RFPercentage(-2),
+                  bottom: 0,
+                }}
+              />
             </TouchableOpacity>
           </View>
 
@@ -706,6 +716,9 @@ function Profile({ navigation }: any) {
             <Text style={[styles.userName, { color: theme.heading }]}>
               {userName}
             </Text>
+
+            {/* "Founder #N" chip — permanent, independent of subscription. */}
+            <FounderBadge variant="pill" />
 
             {userBadge && (
               <View

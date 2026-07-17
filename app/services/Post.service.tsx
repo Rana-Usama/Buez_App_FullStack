@@ -237,6 +237,20 @@ export const getRequestList = (
           ...doc.data(),
         }));
 
+        // Hide tasks that already have every required helper confirmed.
+        // Single-helper tasks are already excluded server-side via the
+        // `acceptedBy == null` filter above; this covers bulk-request tasks
+        // (acceptedBy is never set for those) so they disappear from the
+        // browse feed the moment the last slot is confirmed — same behavior
+        // as single tasks — instead of lingering as "All slots filled".
+        tasksArray = tasksArray.filter((task: any) => {
+          const requiredWorkers = task?.numberOfWorkers || 1;
+          const confirmedCount = Array.isArray(task?.confirmedWorkers)
+            ? task.confirmedWorkers.length
+            : 0;
+          return confirmedCount < requiredWorkers;
+        });
+
         if (searchQuery.trim()) {
           const qLower = searchQuery.toLowerCase();
           tasksArray = tasksArray.filter(
@@ -421,6 +435,36 @@ export const updateReqestStatus = async (taskId, status, taskData) => {
     console.error("Error updating task status:", error);
     throw error;
   }
+};
+
+// ─── Repost a task as a completely new posting ────────────────────────────────
+// Creates a brand-new taskRequests document (fresh ID) carrying only the task
+// details, so the repost starts with a clean lifecycle: no applicants, no
+// confirmed/accepted helpers, no review state, no group chat, and no other
+// association with the previous run. The previous task document is left
+// untouched as history — its reviews, completed records, and chats all stay
+// attached to the old ID — and receives a pointer to its repost.
+export const repostTask = async (
+  previousTaskId: string,
+  data: any,
+  imageUris: any,
+) => {
+  if (!previousTaskId) throw new Error("Missing task id for repost");
+
+  // Create the new task first — if this fails, the old task is untouched.
+  const savedPost = await savePost(data, imageUris);
+
+  // Traceability marker on the old task (best-effort; never blocks the repost).
+  try {
+    await updateDoc(doc(db, "taskRequests", previousTaskId), {
+      repostedTo: savedPost.id,
+      repostedAt: Timestamp.now(),
+    });
+  } catch (error) {
+    console.log("repostTask: could not mark previous task:", error);
+  }
+
+  return savedPost;
 };
 
 // ─── Cancel a confirmed/accepted task (worker withdraws) ──────────────────────

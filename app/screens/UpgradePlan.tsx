@@ -27,6 +27,10 @@ import { useNavigation } from "@react-navigation/native";
 import * as Localization from "expo-localization";
 import { handlePaymentSheet } from "../services/Subscription.service";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
+import {
+  SUBSCRIPTION_PRICES,
+  getPlanAmount,
+} from "../config/subscriptionPricing";
 import CustomNav from "../components/common/CustomNav";
 import { LinearGradient } from "expo-linear-gradient";
 import Feather from "@expo/vector-icons/Feather";
@@ -47,11 +51,8 @@ function UpgradePlan(props) {
 
   // ── ALL ORIGINAL LOGIC — UNTOUCHED ────────────────────────────────────────
 
-  const prices = {
-    monthly: { USD: 9.5, EUR: 8.9, CHF: 7.9 },
-    yearly: { USD: 95, EUR: 89, CHF: 79 },
-    free: { USD: 0, EUR: 0, CHF: 0 },
-  };
+  // Shared display pricing (kept in sync with Stripe via subscriptionPricing).
+  const prices = SUBSCRIPTION_PRICES;
 
   const locale = Localization.locale;
   const userCurrency = getCurrencyFromLocale(locale);
@@ -63,6 +64,21 @@ function UpgradePlan(props) {
 
   const currentPlan =
     userData?.planType || userData?.subscription?.planInterval || "free";
+
+  // Intro pricing awareness: during the first 3 discounted monthly cycles the
+  // user is billed the coupon price (saved by the Stripe webhook), then the
+  // standard monthly price automatically.
+  const baseMonthlyAmount = getPlanAmount("monthly", userCurrency);
+  const paidAmount =
+    typeof userData?.subscription?.amountPaid === "number" &&
+    userData.subscription.amountPaid > 0
+      ? userData.subscription.amountPaid
+      : baseMonthlyAmount;
+  const paidCurrency = (
+    userData?.subscription?.currency || userCurrency
+  ).toUpperCase();
+  const isOnIntroPricing =
+    currentPlan !== "yearly" && paidAmount < baseMonthlyAmount;
 
   const updateSubscriptionStatus = async (start, end) => {
     if (!userId) return;
@@ -354,7 +370,12 @@ function UpgradePlan(props) {
           <View style={styles.priceSection}>
             <View style={styles.priceContainer}>
               {(() => {
-                const priceStr = priceLabelForPlan(item.id);
+                // Current monthly plan on intro pricing → show what the user
+                // is actually billed right now ($3.90 during intro months).
+                const priceStr =
+                  item.id === "monthly" && isOnIntroPricing
+                    ? formatCurrency(paidAmount, paidCurrency)
+                    : priceLabelForPlan(item.id);
                 const [integerPart, decimalPart] = priceStr.split(".");
                 return (
                   <Text
@@ -387,6 +408,19 @@ function UpgradePlan(props) {
               </Text>
             </View>
           </View>
+
+          {/* Intro pricing note — standard price after the first 3 months */}
+          {item.id === "monthly" && isOnIntroPricing && (
+            <Text
+              style={[
+                styles.introNote,
+                { color: isDark ? "#8892b0" : "#64748B" },
+              ]}
+              numberOfLines={2}
+            >
+              {t("subscriptionV2.thenAfter", { price: monthlyPrice })}
+            </Text>
+          )}
 
           {/* Savings badge + original price */}
           <View style={styles.highlightRow}>
@@ -946,6 +980,12 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     paddingBottom: RFPercentage(0.5),
+  },
+  introNote: {
+    fontSize: RFPercentage(1.45),
+    fontFamily: "Poppins_500Medium",
+    marginTop: -RFPercentage(0.6),
+    marginBottom: RFPercentage(1),
   },
 
   highlightRow: {

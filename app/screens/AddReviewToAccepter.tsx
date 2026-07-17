@@ -508,13 +508,13 @@ function AddReviewToAccepter() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
+          {/* Recipient & Task Card */}
           <View
             style={[
-              styles.userCard,
+              styles.card,
               {
                 backgroundColor: theme.white,
-                borderColor:
-                  theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
+                borderColor: isDark ? theme.border : Colors.cardBorderLight,
               },
             ]}
           >
@@ -533,20 +533,55 @@ function AddReviewToAccepter() {
               )}
 
               <View style={styles.userInfo}>
-                <Text style={[styles.userName, { color: theme.heading }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.userName, { color: theme.heading }]}
+                >
                   {recipientUser.userName}
                 </Text>
                 {/* Task type badge */}
                 {task.isBulkRequest && (
-                  <View style={[styles.bulkBadge, {backgroundColor: theme.mode === "dark" ?  "rgba(255,255,255,0.3)" :  Colors.primary + "20"}]}>
-                    <Text style={[styles.bulkBadgeText,{color:theme.mode === "dark" ?  "rgba(255, 255, 255, 1)" :  Colors.primary }]}>{tr.bulk}</Text>
+                  <View
+                    style={[
+                      styles.bulkBadge,
+                      {
+                        backgroundColor: isDark
+                          ? "rgba(255,255,255,0.15)"
+                          : Colors.primary + "15",
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.bulkBadgeText,
+                        { color: isDark ? Colors.pureWhite : Colors.primary },
+                      ]}
+                    >
+                      {tr.bulk}
+                    </Text>
                   </View>
                 )}
               </View>
             </View>
 
+            <View
+              style={[
+                styles.divider,
+                {
+                  backgroundColor: isDark
+                    ? theme.border
+                    : Colors.cardBorderLight,
+                },
+              ]}
+            />
+
             <View style={styles.taskSection}>
-              <Text style={[styles.taskLabel, { color:theme.mode === "dark" ?  "rgba(255, 255, 255, 1)" :  Colors.primary}]}>
+              <Text
+                style={[
+                  styles.taskLabel,
+                  { color: isDark ? Colors.white : Colors.primary },
+                ]}
+              >
                 {tr.taskCompleted || "Task Completed"} {recipientUser.userName}
               </Text>
               <Text style={[styles.taskDescription, { color: theme.heading }]}>
@@ -554,21 +589,25 @@ function AddReviewToAccepter() {
               </Text>
               <View
                 style={[
-                  styles.dateContainer,
+                  styles.dateChip,
                   {
-                    backgroundColor:
-                      theme.mode === "dark"
-                        ? Colors.darkGrey + "20"
-                        : Colors.primary + "10",
+                    backgroundColor: isDark
+                      ? Colors.primary + "35"
+                      : Colors.primary + "10",
                   },
                 ]}
               >
                 <FontAwesome
                   name="calendar"
                   size={RFPercentage(1.6)}
-                  color={theme.mode === "dark" ?  "rgba(255, 255, 255, 1)" :  Colors.primary}
+                  color={isDark ? Colors.white : Colors.primary}
                 />
-                <Text style={[styles.dateText, { color: theme.mode === "dark" ?  "rgba(255, 255, 255, 1)" :  Colors.primary }]}>
+                <Text
+                  style={[
+                    styles.dateText,
+                    { color: isDark ? Colors.white : Colors.primary },
+                  ]}
+                >
                   {completedOn}
                 </Text>
               </View>
@@ -578,11 +617,11 @@ function AddReviewToAccepter() {
           {/* Rating Section */}
           <View
             style={[
+              styles.card,
               styles.ratingCard,
               {
                 backgroundColor: theme.white,
-                borderColor:
-                  theme.mode === "dark" ? theme.border : Colors.cardBorderLight,
+                borderColor: isDark ? theme.border : Colors.cardBorderLight,
               },
             ]}
           >
@@ -595,27 +634,47 @@ function AddReviewToAccepter() {
                   key={index}
                   activeOpacity={0.8}
                   onPress={() => toggleStar(index)}
+                  hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
                 >
                   <Animated.View
                     style={{ transform: [{ scale: starAnimations[index] }] }}
                   >
                     <FontAwesome
                       name="star"
-                      size={RFPercentage(4)}
+                      size={RFPercentage(4.2)}
                       color={getStarColor(selected)}
-                      style={{ margin: 2 }}
+                      style={styles.star}
                     />
                   </Animated.View>
                 </TouchableOpacity>
               ))}
             </View>
-            <Text style={[styles.ratingHint, { color: theme.lightGrey }]}>
-              {tr.tap} {rating.filter(Boolean).length}/5
-            </Text>
+            <View
+              style={[
+                styles.ratingHintChip,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(255,255,255,0.08)"
+                    : Colors.lightWhite,
+                },
+              ]}
+            >
+              <Text style={[styles.ratingHint, { color: theme.lightGrey }]}>
+                {tr.tap} {rating.filter(Boolean).length}/5
+              </Text>
+            </View>
           </View>
 
           {/* Review Input Section */}
-          <View style={[styles.reviewCard, { backgroundColor: theme.white }]}>
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor: theme.white,
+                borderColor: isDark ? theme.border : Colors.cardBorderLight,
+              },
+            ]}
+          >
             <Text style={[styles.reviewTitle, { color: theme.heading }]}>
               {tr.writeReview || "Write your review"}
             </Text>
@@ -623,8 +682,8 @@ function AddReviewToAccepter() {
               style={[
                 styles.inputContainer,
                 {
-                  backgroundColor: theme.white,
-                  borderColor: theme.border,
+                  backgroundColor: theme.inputFieldBackgroundColor,
+                  borderColor: isDark ? theme.border : Colors.cardBorderLight,
                 },
               ]}
             >
@@ -653,16 +712,14 @@ function AddReviewToAccepter() {
                 </Text>
               </View>
             </View>
-            <View style={{ alignSelf: "center", width:"100%" }}>
-              <MyAppButton
-                title={tr.addReview || "Add Review"}
-                disabled={submitting || reviewText.trim().length === 0}
-                loading={submitting}
-                onPress={submitReview}
-                marginTop={RFPercentage(1)}
-                  width={"100%"}
-              />
-            </View>
+            <MyAppButton
+              title={tr.addReview || "Add Review"}
+              disabled={submitting || reviewText.trim().length === 0}
+              loading={submitting}
+              onPress={submitReview}
+              marginTop={RFPercentage(1.5)}
+              width={"100%"}
+            />
           </View>
         </View>
       </ScrollView>
@@ -679,114 +736,93 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     flexGrow: 1,
-  },
-  header: {
-    shadowColor: Colors.primary + "20",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    paddingBottom: RFPercentage(3),
   },
   content: {
     flex: 1,
-    padding: RFPercentage(2),
+    paddingHorizontal: RFPercentage(2),
+    paddingTop: RFPercentage(1.5),
   },
-  userCard: {
-    borderRadius: RFPercentage(2),
-    padding: RFPercentage(2.5),
-    marginBottom: RFPercentage(2),
-    shadowColor: Colors.primary + "30",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 6,
+  card: {
+    borderRadius: RFPercentage(2.2),
+    padding: RFPercentage(2.2),
+    marginBottom: RFPercentage(1.8),
     borderWidth: 1,
+    shadowColor: Colors.pureBlack,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 3,
   },
   userHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: RFPercentage(2),
   },
   profileImage: {
-    width: RFPercentage(8),
-    height: RFPercentage(8),
-    borderRadius: RFPercentage(4),
+    width: RFPercentage(7.5),
+    height: RFPercentage(7.5),
+    borderRadius: RFPercentage(3.75),
     borderWidth: 2,
     borderColor: Colors.primary,
   },
   userInfo: {
-    marginLeft: RFPercentage(2),
+    marginLeft: RFPercentage(1.8),
     flex: 1,
   },
   userName: {
     fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(0.5),
+    marginBottom: RFPercentage(0.4),
   },
   bulkBadge: {
     alignSelf: "flex-start",
-    backgroundColor: Colors.primary + "20",
-    paddingHorizontal: RFPercentage(0.8),
-    paddingVertical: RFPercentage(0.3),
-    borderRadius: RFPercentage(0.5),
-    // marginTop: RFPercentage(0.3),
+    paddingHorizontal: RFPercentage(1.1),
+    paddingVertical: RFPercentage(0.35),
+    borderRadius: RFPercentage(5),
   },
   bulkBadgeText: {
-    fontSize: RFPercentage(1),
+    fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_500Medium",
-    color: Colors.primary,
-    lineHeight:RFPercentage(1.5)
+    lineHeight: RFPercentage(1.8),
   },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
+  divider: {
+    height: 1,
+    marginVertical: RFPercentage(1.8),
   },
-  locationText: {
-    fontSize: RFPercentage(1.6),
-    fontFamily: "Poppins_400Regular",
-    marginLeft: RFPercentage(0.5),
-  },
-  taskSection: {
-    marginTop: RFPercentage(1),
-  },
+  taskSection: {},
   taskLabel: {
-    fontSize: RFPercentage(1.5),
-    fontFamily: "Poppins_500Medium",
-    marginBottom: RFPercentage(0.5),
+    fontSize: RFPercentage(1.35),
+    fontFamily: "Poppins_600SemiBold",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginBottom: RFPercentage(0.8),
   },
   taskDescription: {
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
-    lineHeight: RFPercentage(2.2),
+    lineHeight: RFPercentage(2.6),
     marginBottom: RFPercentage(1.5),
   },
-  dateContainer: {
+  dateChip: {
     flexDirection: "row",
     alignItems: "center",
-    padding: RFPercentage(1.2),
-    borderRadius: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1.4),
+    paddingVertical: RFPercentage(0.7),
+    borderRadius: RFPercentage(5),
     alignSelf: "flex-start",
   },
   dateText: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
-    marginLeft: RFPercentage(0.5),
-    lineHeight:RFPercentage(2)
+    marginLeft: RFPercentage(0.7),
+    lineHeight: RFPercentage(2),
   },
   ratingCard: {
-    borderRadius: RFPercentage(2),
-    padding: RFPercentage(2.5),
-    marginBottom: RFPercentage(2),
     alignItems: "center",
-    shadowColor: Colors.primary + "30",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 6,
-    borderBottomWidth: 1,
+    paddingVertical: RFPercentage(2.8),
   },
   ratingTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: "Poppins_600SemiBold",
     marginBottom: RFPercentage(2),
     textAlign: "center",
@@ -794,50 +830,47 @@ const styles = StyleSheet.create({
   starsContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: RFPercentage(1),
+    marginBottom: RFPercentage(1.6),
+  },
+  star: {
+    marginHorizontal: RFPercentage(0.7),
+  },
+  ratingHintChip: {
+    paddingHorizontal: RFPercentage(1.6),
+    paddingVertical: RFPercentage(0.5),
+    borderRadius: RFPercentage(5),
   },
   ratingHint: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
   },
-  reviewCard: {
-    borderRadius: RFPercentage(2),
-    padding: RFPercentage(2.5),
-    shadowColor: Colors.primary + "30",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 6,
-  },
   reviewTitle: {
-    fontSize: RFPercentage(2),
+    fontSize: RFPercentage(2.1),
     fontFamily: "Poppins_600SemiBold",
-    marginBottom: RFPercentage(1.5),
+    marginBottom: RFPercentage(1.4),
   },
   inputContainer: {
-    borderRadius: RFPercentage(1.5),
-    borderBottomWidth: 1,
-    marginBottom: RFPercentage(1),
+    borderRadius: RFPercentage(1.8),
+    borderWidth: 1,
     overflow: "hidden",
   },
   reviewInput: {
-    minHeight: RFPercentage(15),
-    // padding: RFPercentage(2),
+    minHeight: RFPercentage(14),
+    padding: RFPercentage(1.8),
+    paddingTop: RFPercentage(1.8),
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2.5),
     textAlignVertical: "top",
   },
   counterContainer: {
-    paddingHorizontal: RFPercentage(2),
-    paddingBottom: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1.8),
+    paddingBottom: RFPercentage(1.2),
     alignItems: "flex-end",
   },
   counterText: {
-    fontSize: RFPercentage(1.5),
+    fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
-  },
-  submitButton: {
-    marginTop: RFPercentage(1),
   },
 });
 

@@ -165,6 +165,8 @@
     "yearly": "Annuale",
     "for7Days": "per 14 giorni",
     "perMonth": "al mese",
+    "introOffer": "3,90 $/mese per i primi 3 mesi",
+    "thenAfter": "{{price}}/mese dopo 3 mesi",
     "perYear": "all'anno",
     "tryPremium": "Prova tutte le funzionalità premium",
     "fullAccess": "Accesso completo a tutte le funzionalità",
@@ -273,6 +275,7 @@
     "txt12": "Richiesta accettata annullata con successo.",
     "txt13": "Caricamento delle tue richieste...",
     "repostSuccess": "Richiesta ripubblicata!",
+    "repostedBadge": "Ripubblicata",
     "repostAvailable": "La tua richiesta è stata ripubblicata ed è ora disponibile per essere accettata da altri utenti.",
     "noCompletedTasks": "Nessun compito completato",
     "noCompletedTasksDesc": "I compiti che completi appariranno qui",
@@ -857,7 +860,10 @@
     "successTitle": "Benvenuto nel Programma Founder!",
     "alreadyFounder": "Sei già un Founder.",
     "deviceClaimed": "Un posto Founder è già stato reclamato su questo dispositivo.",
-    "claimError": "Impossibile reclamare il tuo posto Founder. Riprova."
+    "claimError": "Impossibile reclamare il tuo posto Founder. Riprova.",
+    "soldOutTitle": "Tutti i 100 posti Founder sono stati reclamati",
+    "soldOutDesc": "Il Programma Founder è al completo, ma puoi continuare con un piano standard.",
+    "soldOutCta": "Vedi i piani di abbonamento"
   },
   "founderBanner": {
     "badge": "Founder",

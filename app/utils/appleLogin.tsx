@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
-import { hasCompletedFounderIntro } from "../utils/founderIntro";
+import { resolveFounderRoute } from "../services/Founder.service";
 import { saveCredentials } from "../services/Auth.service";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useAppTheme } from "../contexts/themeContext";
@@ -181,13 +181,13 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       const isWithinPaidPeriod =
         subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
 
-      // 5️⃣ Determine target route
+      // 5️⃣ Determine target route (founder intro once; device claimed by
+      // another account → standard plans)
       let targetRoute: string;
       if (existingUser.isSubscribed && isWithinPaidPeriod) {
         targetRoute = "TabNavigator";
       } else {
-        const founderIntroDone = await hasCompletedFounderIntro();
-        targetRoute = founderIntroDone ? "TabNavigator" : "FounderIntro";
+        targetRoute = await resolveFounderRoute(deviceId, existingUser);
       }
 
       console.log("Apple Sign-In → navigating to:", targetRoute);

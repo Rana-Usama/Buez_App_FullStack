@@ -14,7 +14,7 @@ import * as SecureStore from "expo-secure-store";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { saveCredentials } from "../services/Auth.service";
 import { registerForPushNotificationsAsync } from "../utils/notificationService";
-import { hasCompletedFounderIntro } from "../utils/founderIntro";
+import { resolveFounderRoute } from "../services/Founder.service";
 import { Icons } from "../config/theme";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import DeviceInfo from "react-native-device-info";
@@ -177,12 +177,11 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
         console.log("Navigating to TabNavigator (paid subscription)");
         navigation.replace("TabNavigator");
       } else {
-        const founderIntroDone = await hasCompletedFounderIntro();
-        console.log(
-          "Navigating to",
-          founderIntroDone ? "TabNavigator" : "FounderIntro",
-        );
-        navigation.replace(founderIntroDone ? "TabNavigator" : "FounderIntro");
+        // Founder routing: intro once; device claimed by another account →
+        // standard plans (SubscriptionV2).
+        const founderRoute = await resolveFounderRoute(deviceId, existingUser);
+        console.log("Navigating to", founderRoute);
+        navigation.replace(founderRoute);
       }
 
       Toast.show({

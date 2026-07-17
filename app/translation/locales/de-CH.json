@@ -165,6 +165,8 @@
     "yearly": "Jährlich",
     "for7Days": "für 14 Täg",
     "perMonth": "pro Monät",
+    "introOffer": "3.90 $/Monät für di erste 3 Monät",
+    "thenAfter": "{{price}}/Monät ab em 4. Monät",
     "perYear": "pro Jahr",
     "tryPremium": "Probier all Premium-Funktione",
     "fullAccess": "Volli Zugriff uf all Funktionä",
@@ -273,6 +275,7 @@
     "txt12": "Akzeptierti Aafrog erfolgriich abbroche.",
     "txt13": "Lade vo dine Afroge...",
     "repostSuccess": "Aafrog neu veröffentlicht!",
+    "repostedBadge": "Neu veröffentlicht",
     "repostAvailable": "Dini Aafrog isch neu veröffentlicht worde und isch jetzt für anderi Benutzer verfüegbar zum akzeptiere.",
     "noCompletedTasks": "Kei fertigi Ufträg",
     "noCompletedTasksDesc": "Dini erledigte Ufträg werde do aazeigt",
@@ -857,7 +860,10 @@
     "successTitle": "Willkomme im Founder-Programm!",
     "alreadyFounder": "Du bisch scho en Founder.",
     "deviceClaimed": "Uf däm Grät isch scho en Founder-Platz beanspruecht worde.",
-    "claimError": "Founder-Platz het nöd chöne beanspruecht werde. Bitte versuechs nomal."
+    "claimError": "Founder-Platz het nöd chöne beanspruecht werde. Bitte versuechs nomal.",
+    "soldOutTitle": "Alli 100 Founder-Plätz sind vergeh",
+    "soldOutDesc": "S'Founder-Programm isch voll, aber du chasch mit eme Standard-Plan wiitermache.",
+    "soldOutCta": "Abo-Plän aaluege"
   },
   "founderBanner": {
     "badge": "Founder",

@@ -2,7 +2,7 @@ import { getDoc, doc, setDoc } from "firebase/firestore";
 import Toast from "react-native-toast-message";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { saveCredentials } from "../services/Auth.service";
-import { hasCompletedFounderIntro } from "./founderIntro";
+import { resolveFounderRoute } from "../services/Founder.service";
 import { FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import * as SecureStore from "expo-secure-store";
 
@@ -84,8 +84,10 @@ export const handleInstagramLogin = async ({
     if (userData?.isSubscribed || isWithinPaidPeriod) {
       navigation.navigate("TabNavigator");
     } else {
-      const founderIntroDone = await hasCompletedFounderIntro();
-      navigation.navigate(founderIntroDone ? "TabNavigator" : "FounderIntro");
+      // Founder routing: intro once; device claimed by another account →
+      // standard plans (SubscriptionV2).
+      const founderRoute = await resolveFounderRoute(null, userData);
+      navigation.navigate(founderRoute);
     }
 
     return { success: true };

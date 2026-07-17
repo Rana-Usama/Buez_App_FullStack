@@ -108,6 +108,9 @@ type TaskRecord = {
   scheduledDateTime?: string;
   estimatedDuration?: string;
   durationLabel?: string;
+  slotsAvailable?: number;
+  repostedTo?: string;
+  repostedAt?: any;
 };
 
 function MyRequests({ navigation }) {
@@ -951,7 +954,8 @@ function MyRequests({ navigation }) {
             (activeFilter === `${t("myRequests.txt3")}` ||
               activeFilter === `${t("myRequests.txt8")}`) &&
             !isConfirmedWorker && // Workers can't repost
-            !isAppliedWorker; // Applied workers can't repost
+            !isAppliedWorker && // Applied workers can't repost
+            !cart.repostedTo; // Already reposted — the new task exists
           const canViewHelpers =
             activeFilter === `${t("myRequests.txt3")}` && // Completed filter
             cart.status === REQUEST_STATUS.Completed &&
@@ -1011,6 +1015,22 @@ function MyRequests({ navigation }) {
                           : cart?.taskType}
                       </Text>
                     </View>
+
+                    {/* Reposted badge — this task was reposted as a new one;
+                        this card is the preserved history of the previous run */}
+                    {!!cart.repostedTo && (
+                      <View style={styles.repostedBadge}>
+                        <Ionicons
+                          name="refresh-circle"
+                          size={RFPercentage(1.5)}
+                          color={Colors.white}
+                          style={{ marginRight: RFPercentage(0.3) }}
+                        />
+                        <Text style={styles.repostedBadgeText}>
+                          {t("myRequests.repostedBadge")}
+                        </Text>
+                      </View>
+                    )}
 
                     {/* Worker Status Badge - Only for Accepted tab where user is worker */}
                     {activeFilter === `${t("myRequests.txt10")}` &&
@@ -1971,6 +1991,22 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
+  },
+  repostedBadge: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    borderBottomRightRadius: RFPercentage(1),
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.6),
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primary2,
+  },
+  repostedBadgeText: {
+    fontSize: RFPercentage(1.2),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.white,
   },
   workerStatusBadge: {
     position: "absolute",

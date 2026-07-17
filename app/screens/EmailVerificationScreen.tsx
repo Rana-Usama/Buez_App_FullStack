@@ -15,7 +15,7 @@ import { updateDoc, doc } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
-import { hasCompletedFounderIntro } from "../utils/founderIntro";
+import { resolveFounderRoute } from "../services/Founder.service";
 
 function EmailVerificationScreen({ navigation, route }: any) {
   const { email, password, deviceId } = route.params;
@@ -63,12 +63,12 @@ function EmailVerificationScreen({ navigation, route }: any) {
           text2: t("emailVerification.verifiedSuccessDesc"),
         });
 
-        // First-time verified users see the Founder Phase intro once;
-        // afterwards they go straight into the app.
-        const founderIntroDone = await hasCompletedFounderIntro();
-        navigation.navigate(
-          founderIntroDone ? "TabNavigator" : "FounderIntro",
-        );
+        // Founder routing: the first eligible user on this device sees the
+        // Founder claim screen once. If this device already claimed a spot
+        // for another account, the new user goes straight to the standard
+        // subscription plans instead.
+        const founderRoute = await resolveFounderRoute(deviceId);
+        navigation.navigate(founderRoute);
       } else {
         if (!silent) {
           Toast.show({

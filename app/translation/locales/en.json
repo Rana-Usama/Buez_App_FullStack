@@ -171,6 +171,8 @@
     "yearly": "Yearly",
     "for7Days": "for 14 days",
     "perMonth": "per month",
+    "introOffer": "$3.90/mo for first 3 months",
+    "thenAfter": "{{price}}/month after 3 months",
     "perYear": "per year",
     "tryPremium": "Try all premium features",
     "fullAccess": "Full access to all features",
@@ -281,6 +283,7 @@
     "txt12": "Accepted request cancelled successfully.",
     "txt13": "Loading Your Requests...",
     "repostSuccess": "Request Reposted!",
+    "repostedBadge": "Reposted",
     "repostAvailable": "Your request has been reposted and is now available for other users to accept.",
     "noCompletedTasks": "No Completed Tasks",
     "noCompletedTasksDesc": "Tasks you complete will appear here",
@@ -875,7 +878,10 @@
     "successTitle": "Welcome to the Founder Program!",
     "alreadyFounder": "You're already a Founder.",
     "deviceClaimed": "A Founder Spot has already been claimed on this device.",
-    "claimError": "Couldn't claim your Founder Spot. Please try again."
+    "claimError": "Couldn't claim your Founder Spot. Please try again.",
+    "soldOutTitle": "All 100 Founder spots have been claimed",
+    "soldOutDesc": "The Founder Program is now full, but you can continue with a standard plan.",
+    "soldOutCta": "View Subscription Plans"
   },
   "founderBanner": {
     "badge": "Founder",

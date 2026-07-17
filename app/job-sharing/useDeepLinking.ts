@@ -7,7 +7,7 @@ import { FIREBASE_AUTH } from "../../firebaseConfig";
 import { reload } from "firebase/auth";
 import { navigate } from "../router/navigationRef";
 import { deepLinkState } from "./deepLinkState";
-import { hasCompletedFounderIntro } from "../utils/founderIntro";
+import { resolveFounderRoute } from "../services/Founder.service";
 
 
 // ─── Must match the key used in DeciderScreen.tsx ────────────────────────────
@@ -143,12 +143,13 @@ export const useDeepLinking = ({
         return;
       }
 
-      // ── Founder Phase: first-time users see the intro once; afterwards
-      //    they continue into the app and the requested job opens.
-      const founderIntroDone = await hasCompletedFounderIntro();
-      if (!founderIntroDone) {
-        console.log("[DeepLink] → FounderIntro (intro not completed)");
-        navigate("FounderIntro");
+      // ── Founder Phase routing: first eligible user on the device sees the
+      //    intro once; a device already claimed by another account goes to
+      //    the standard plans; otherwise continue and open the job.
+      const founderRoute = await resolveFounderRoute(deviceId, currentUserData);
+      if (founderRoute !== "TabNavigator") {
+        console.log(`[DeepLink] → ${founderRoute}`);
+        navigate(founderRoute, { pendingJobId: jobId });
         return;
       }
 
