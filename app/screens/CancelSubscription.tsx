@@ -305,9 +305,8 @@ function CancelSubscription({ navigation }: any) {
                 title={t("buttons.cancel")}
                 marginTop={RFPercentage(2)}
                 onPress={() => setModalVisible2(true)}
-                width={"45%"}
+                width={"90%"}
                 loading={isloading}
-                // backgroundColor={theme.red}
               />
             </View>
           </>

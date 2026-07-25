@@ -25,7 +25,11 @@ import moment from "moment";
 import Toast from "react-native-toast-message";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 // Service imports
-import { fetchUserDetailedProfile } from "../services/User.service";
+import {
+  fetchUserDetailedProfile,
+  isUserDeleted,
+} from "../services/User.service";
+import { sendPushToUser } from "../utils/pushNotify";
 import { createNewChat } from "../services/Chat.service";
 import { getAuth } from "firebase/auth";
 import { useUser } from "../contexts/user.context";
@@ -38,6 +42,7 @@ import {
   addDoc,
   getDoc,
   onSnapshot,
+  arrayRemove,
 } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { createOrUpdateGroupChat } from "../services/GroupChat.service";
@@ -87,7 +92,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
   const db = FIREBASE_DB;
 
   const INITIAL_COUNT = 3;
-  const { userBasic, stats, tasks, reviews } = userDetailedData || {};
+  const { userBasic, stats, tasks, reviews } : any= userDetailedData || {};
 
   const [showAllCompleted, setShowAllCompleted] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -103,10 +108,10 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
   // Group order follows first appearance in the existing sort order; reviews
   // within a group also keep the existing order. Presentation-only change.
   const groupedReviews = reviewsList.reduce(
-    (groups, review: any) => {
+    (groups : any, review: any) => {
       const key =
         review?.reviewer?.userId || review?.reviewer?.userName || "unknown";
-      const existing = groups.find((g) => g.key === key);
+      const existing = groups.find((g: any) => g.key === key);
       if (existing) {
         existing.reviews.push(review);
       } else {
@@ -405,6 +410,32 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         latestData = docSnap.data();
       }
 
+      // Guard: never confirm a helper who has deleted their account (covers
+      // confirming from an old application notification). Prune them from the
+      // applicants list and abort.
+      if (await isUserDeleted(user.userId)) {
+        try {
+          const applied = Array.isArray(latestData?.appliedWorkers)
+            ? latestData.appliedWorkers.filter(
+                (a: any) => a && a.userId !== user.userId,
+              )
+            : [];
+          await updateDoc(taskDocRef, {
+            appliedWorkers: applied,
+            appliedWorkerIds: arrayRemove(user.userId),
+          });
+        } catch (pruneError) {
+          console.log("Failed to prune deleted applicant:", pruneError);
+        }
+        Toast.show({
+          type: "error",
+          text1: t("taskApplicants.deletedUser.title"),
+          text2: t("taskApplicants.deletedUser.message"),
+        });
+        setConfirming(false);
+        return;
+      }
+
       // Check slots one more time
       const requiredWorkers = latestData?.numberOfWorkers || 1;
       const confirmedCount = Array.isArray(latestData.confirmedWorkers)
@@ -450,6 +481,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       await updateDoc(taskDocRef, {
         confirmedWorkers: updatedConfirmed,
         appliedWorkers: updatedApplied,
+        appliedWorkerIds: arrayRemove(user.userId),
       });
       // Send confirmation notification
       await sendConfirmationNotification(confirmationData);
@@ -498,31 +530,18 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     }
   };
 
-  // Send confirmation notification
+  // Send confirmation notification (skips deleted accounts / stale tokens)
   const sendConfirmationNotification = async (worker) => {
-    try {
-      const response = await fetch(
-        "https://buez-server-khaki.vercel.app/api/send-notification",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fcmToken: worker.token,
-            title: "🎉 Application Confirmed!",
-            body: `You have been confirmed for "${postRequest?.taskType}" task`,
-            data: {
-              type: "bulk_request_confirmation",
-              postId: postRequest.id,
-            },
-          }),
-        },
-      );
-      return await response.text();
-    } catch (error) {
-      console.log("Confirmation notification error:", error);
-    }
+    await sendPushToUser({
+      userId: worker.userId,
+      token: worker.token,
+      title: "🎉 Application Confirmed!",
+      body: `You have been confirmed for "${postRequest?.taskType}" task`,
+      data: {
+        type: "bulk_request_confirmation",
+        postId: postRequest.id,
+      },
+    });
   };
 
   // Save confirmation notification
@@ -589,22 +608,22 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
     if (completedCount >= 6)
       return {
         label: t("profileRank.txt39"),
-        icon: "trophy",
-        color: "#FFD700",
-        gradient: ["#FFD700", "#FFA500"],
+        icon: "diamond",
+        color: "#bfa824ff",
+        gradient: ["rgba(255, 215, 0, 0.1)","rgba(255, 215, 0, 0.1)"],
       };
     if (completedCount >= 2)
       return {
         label: t("profileRank.txt40"),
-        icon: "trending-up",
-        color: "#FF9800",
-        gradient: ["#FF9800", "#FF5722"],
+        icon: "rocket",
+        color: "#79b7b0ff",
+        gradient: ["#71a5821a", "#71a5821a"],
       };
     return {
       label: t("profileRank.txt41"),
       icon: "leaf",
-      color: "#4CAF50",
-      gradient: ["#4CAF50", "#2E7D32"],
+      color: "#9b6fc1ff",
+      gradient: ["#d3c2e23a", "#d3c2e23a"],
     };
   };
 

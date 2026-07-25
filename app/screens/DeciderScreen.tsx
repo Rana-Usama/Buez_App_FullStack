@@ -195,7 +195,8 @@ const DeciderScreen = () => {
         }
       }
 
-      const { isSubscribed, subscriptionStart, subscriptionEnd } = userData;
+      const { isSubscribed, subscriptionStart, subscriptionEnd }: any =
+        userData;
 
       const subStartDate = parseDate(subscriptionStart);
       const subEndDate = parseDate(subscriptionEnd);
@@ -244,9 +245,23 @@ const DeciderScreen = () => {
 
   // ─── Safety timeout fallback ──────────────────────────────────────────────
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!hasNavigated.current && !deepLinkState.isHandlingDeepLink) {
-        console.warn("[Decider] Timeout — forcing OnBoarding");
+    const timeout = setTimeout(async () => {
+      if (hasNavigated.current || deepLinkState.isHandlingDeepLink) return;
+      console.warn(
+        "[Decider] Timeout — checking stored session before deciding",
+      );
+      try {
+        const creds = await getCredentials();
+        const loggedOutFlag = await SecureStore.getItemAsync("loggedOut");
+        const hasStoredSession =
+          !!(creds?.email || creds?.password) && loggedOutFlag !== "true";
+        if (hasStoredSession || FIREBASE_AUTH.currentUser) {
+          completeAndNavigate("TabNavigator");
+        } else {
+          completeAndNavigate("OnBoarding");
+        }
+      } catch (e) {
+        console.log("[Decider] Timeout fallback error:", e);
         completeAndNavigate("OnBoarding");
       }
     }, 8000);
@@ -292,7 +307,7 @@ const DeciderScreen = () => {
                     theme.mode === "dark" ? RFPercentage(15) : RFPercentage(15),
                 },
               ]}
-              resizeMode= {theme.mode === "dark" ? "cover" : "contain"}
+              resizeMode={theme.mode === "dark" ? "cover" : "contain"}
             />
           </View>
         </Animated.View>
@@ -372,8 +387,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoPlaceholder: {
-    alignItems:"center",
-    justifyContent:"center"
+    alignItems: "center",
+    justifyContent: "center",
   },
   logoImage: {
     width: RFPercentage(14),

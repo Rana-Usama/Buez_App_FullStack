@@ -156,7 +156,7 @@ const TopRatedUsers = ({ navigation }: any) => {
         };
       default:
         return {
-          icon: "star",
+          icon: "leaf",
           text: t("profileRank.txt3"),
           color: "#9b6fc1ff",
           bgColor: "#d3c2e23a",
@@ -164,7 +164,7 @@ const TopRatedUsers = ({ navigation }: any) => {
     }
   };
 
-  const UserCard = ({ user }) => {
+  const UserCard = ({ user }: any) => {
     const badge = getBadgeInfo(user.type);
     const isDark = theme.mode === "dark";
 
@@ -210,26 +210,38 @@ const TopRatedUsers = ({ navigation }: any) => {
 
             <View style={styles.headerInfo}>
               <View
-                style={[styles.badgeTag, { backgroundColor: isDark ? badge.bgColor : badge.color }]}
+                style={[
+                  styles.badgeTag,
+                  { backgroundColor: isDark ? badge.bgColor : badge.color },
+                ]}
               >
                 <Ionicons
                   name={badge.icon as any}
                   size={10}
                   color={isDark ? badge.color : Colors.white}
                 />
-                <Text style={[styles.badgeText, { color: isDark ? badge.color : Colors.white}]} numberOfLines={1}>
+                <Text
+                  style={[
+                    styles.badgeText,
+                    { color: isDark ? badge.color : Colors.white },
+                  ]}
+                  numberOfLines={1}
+                >
                   {badge.text}
                 </Text>
               </View>
-              <Text
-                style={[
-                  styles.userName,
-                  { color: isDark ? Colors.white : theme.heading },
-                ]}
-                numberOfLines={1}
-              >
-                {user.userName}
-              </Text>
+
+              <View>
+                <Text
+                  style={[
+                    styles.userName,
+                    { color: isDark ? Colors.white : theme.heading },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {user.userName}
+                </Text>
+              </View>
             </View>
 
             <View
@@ -554,25 +566,23 @@ const styles = StyleSheet.create({
     height: RFPercentage(6),
     borderRadius: RFPercentage(1.5),
   },
-  headerInfo: { flex: 1, marginLeft: 12 },
-  nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  headerInfo: { marginLeft: 12,  flex:1 },
   userName: {
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
-    flexShrink: 1,
-    top:2
+    top: 2,
   },
-  badgeTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 100,
-    gap: 4,
-    maxWidth:RFPercentage(12),
-    justifyContent:"center"
-  },
-  badgeText: { fontSize: 10, fontFamily: "Poppins_700Bold" },
+ badgeTag: {
+  flexDirection: "row",
+  alignItems: "center",
+  alignSelf: "flex-start",   
+  paddingHorizontal: 8,      
+  paddingVertical: 3,
+  borderRadius: 100,
+  gap: 4,
+  justifyContent: "center",
+},
+  badgeText: { fontSize: 10, fontFamily: "Poppins_700Bold", lineHeight:14 },
   memberSince: { fontSize: 11, fontFamily: "Poppins_400Regular", marginTop: 4 },
   chevronChip: {
     width: RFPercentage(3.6),
@@ -580,7 +590,8 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 8,
+    position: "absolute",
+    right: 0,
   },
 
   statsStrip: {

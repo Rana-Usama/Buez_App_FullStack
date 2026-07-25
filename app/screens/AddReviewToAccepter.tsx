@@ -514,7 +514,7 @@ function AddReviewToAccepter() {
               styles.card,
               {
                 backgroundColor: theme.white,
-                borderColor: isDark ? theme.border : Colors.cardBorderLight,
+                borderColor: isDark ? theme.border2 : Colors.cardBorderLight,
               },
             ]}
           >
@@ -569,7 +569,7 @@ function AddReviewToAccepter() {
                 styles.divider,
                 {
                   backgroundColor: isDark
-                    ? theme.border
+                    ? theme.border2
                     : Colors.cardBorderLight,
                 },
               ]}
@@ -621,7 +621,7 @@ function AddReviewToAccepter() {
               styles.ratingCard,
               {
                 backgroundColor: theme.white,
-                borderColor: isDark ? theme.border : Colors.cardBorderLight,
+                borderColor: isDark ? theme.border2 : Colors.cardBorderLight,
               },
             ]}
           >
@@ -671,7 +671,7 @@ function AddReviewToAccepter() {
               styles.card,
               {
                 backgroundColor: theme.white,
-                borderColor: isDark ? theme.border : Colors.cardBorderLight,
+                borderColor: isDark ? theme.border2 : Colors.cardBorderLight,
               },
             ]}
           >
@@ -682,8 +682,8 @@ function AddReviewToAccepter() {
               style={[
                 styles.inputContainer,
                 {
-                  backgroundColor: theme.inputFieldBackgroundColor,
-                  borderColor: isDark ? theme.border : Colors.cardBorderLight,
+                  backgroundColor: theme.white,
+                  borderColor: isDark ? theme.border2 : Colors.cardBorderLight,
                 },
               ]}
             >

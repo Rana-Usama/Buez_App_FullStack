@@ -24,7 +24,10 @@
     "task": "Aufgabe",
     "bulk": "Gruppenaufgabe mit mehreren Helfern",
     "helper": "Helfer",
-    "helpers": "Helfer"
+    "helpers": "Helfer",
+    "subTasks": "Teilaufgaben",
+    "scheduledDateTime": "Geplantes Datum & Uhrzeit",
+    "more": "mehr"
   },
   "validations": {
     "inValid": "Ungültige E-Mail",
@@ -32,7 +35,8 @@
     "passwordReq": "Passwort ist erforderlich",
     "userReq": "Benutzername ist erforderlich",
     "passwordLen": "Passwort muss mindestens 6 Zeichen lang sein",
-    "passwordMatch": "Passwörter müssen übereinstimmen"
+    "passwordMatch": "Passwörter müssen übereinstimmen",
+    "samePassword": "Das neue Passwort muss sich vom alten unterscheiden"
   },
   "toast": {
     "login": {
@@ -82,7 +86,9 @@
       "one": "Passwort geändert",
       "two": "Passwort wurde erfolgreich geändert!",
       "three": "Fehler",
-      "four": "Etwas ist schief gelaufen!"
+      "four": "Etwas ist schief gelaufen!",
+      "five": "Das alte Passwort ist falsch",
+      "six": "Zu viele Versuche. Bitte versuchen Sie es später erneut."
     },
     "editProfile": {
       "one": "Profil aktualisiert",
@@ -326,7 +332,8 @@
     "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
     "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
     "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen",
-    "repostTitle": "Anfrage erneut posten"
+    "repostTitle": "Anfrage erneut posten",
+    "reduceHelpersError": "Sie können die Anzahl der Helfer nicht unter die Anzahl der bestätigten Helfer reduzieren."
   },
   "messages": {
     "txt1": "Nachrichten",
@@ -362,7 +369,13 @@
     "txt11": "Bist du sicher, dass du dich von diesem\nKonto abmelden möchtest?",
     "txt12": "Sprache ändern",
     "txt13": "Dunkles Design",
-    "txt14": "Upgrade-Plan"
+    "txt14": "Upgrade-Plan",
+    "deleteBlocked": {
+      "ownerTitle": "Aktive Aufgaben gefunden",
+      "ownerMessage": "Sie haben {{count}} aktive selbst erstellte Aufgabe(n). Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "helperTitle": "Aktive Zuweisungen gefunden",
+      "helperMessage": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe(n). Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen."
+    }
   },
   "cancelSubscription": {
     "txt1": "Dein aktuelles Abonnement",
@@ -775,7 +788,11 @@
     "spotsLeft": "Noch {{spots}} Plätze frei",
     "status": "Status",
     "allHelpersConfirmed": "Alle Helfer bestätigt! Sie können die Aufgabe als abgeschlossen markieren.",
-    "allSlotsFilled": "Alle Plätze belegt"
+    "allSlotsFilled": "Alle Plätze belegt",
+    "deletedUser": {
+      "title": "Bewerber nicht verfügbar",
+      "message": "Dieser Bewerber hat sein Konto gelöscht und kann nicht mehr bestätigt werden."
+    }
   },
   "interestSelection": {
     "personalizeExperience": "Personalisieren Sie Ihr Erlebnis",

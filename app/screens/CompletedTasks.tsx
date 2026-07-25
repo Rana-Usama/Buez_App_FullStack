@@ -246,7 +246,7 @@ export default function CompletedTasks({ navigation }: any) {
   const token = {
     bg: isDark ? "#0E0F14" : "#F6F7FB",
     card: isDark ? "#050507ff" : "#FFFFFF",
-    border: isDark ? "rgba(255, 255, 255, 0.13)" : "rgba(235, 235, 255, 0.81)",
+    border: isDark ? "rgba(50, 53, 72, 0.38)" : "rgba(235, 235, 255, 0.81)",
     heading: isDark ? "#FFFFFF" : "#0D0E14",
     body: isDark ? "rgba(255, 255, 255, 0.68)" : "rgba(13,14,20,0.55)",
     accent: Colors.primary,
@@ -257,7 +257,7 @@ export default function CompletedTasks({ navigation }: any) {
     bulkBg: isDark ? "rgba(99,102,241,0.10)" : "rgba(99,102,241,0.06)",
     dateBg: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
     reviewBg: isDark ? "rgba(255,255,255,0.04)" : "rgba(13,14,20,0.03)",
-    divider: isDark ? "rgba(255, 255, 255, 0.27)" : "rgba(0,0,0,0.06)",
+    divider: isDark ? "rgba(73, 88, 117, 0.27)" : "rgba(0,0,0,0.06)",
   };
 
   // ─── Translations ─────────────────────────────────────────────────────────

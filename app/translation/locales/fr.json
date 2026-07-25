@@ -24,7 +24,10 @@
     "task": "Tâche",
     "bulk": "Tâche collective avec plusieurs aides",
     "helper": "aide",
-    "helpers": "aides"
+    "helpers": "aides",
+    "subTasks": "Sous-tâches",
+    "scheduledDateTime": "Date et heure prévues",
+    "more": "de plus"
   },
   "validations": {
     "inValid": "E-mail invalide",
@@ -32,7 +35,8 @@
     "passwordReq": "Le mot de passe est requis",
     "userReq": "Le nom d'utilisateur est requis",
     "passwordLen": "Le mot de passe doit contenir au moins 6 caractères",
-    "passwordMatch": "Les mots de passe doivent correspondre"
+    "passwordMatch": "Les mots de passe doivent correspondre",
+    "samePassword": "Le nouveau mot de passe doit être différent de l'ancien"
   },
   "toast": {
     "login": {
@@ -82,7 +86,9 @@
       "one": "Mot de passe modifié",
       "two": "Le mot de passe a été modifié avec succès !",
       "three": "Erreur",
-      "four": "Quelque chose s'est mal passé !"
+      "four": "Quelque chose s'est mal passé !",
+      "five": "L'ancien mot de passe est incorrect",
+      "six": "Trop de tentatives. Veuillez réessayer plus tard."
     },
     "editProfile": {
       "one": "Profil mis à jour",
@@ -326,7 +332,8 @@
     "validateStep1": "Veuillez sélectionner un type de tâche et de rémunération",
     "validateStep2": "Veuillez choisir une date, une heure et une durée estimée",
     "validateStep3": "Veuillez ajouter une description, un lieu et une rémunération",
-    "repostTitle": "Republier la demande"
+    "repostTitle": "Republier la demande",
+    "reduceHelpersError": "Vous ne pouvez pas réduire le nombre d'aides en dessous du nombre d'aides confirmées."
   },
   "messages": {
     "txt1": "Messages",
@@ -362,7 +369,13 @@
     "txt11": "Êtes-vous sûr de vouloir vous déconnecter\nde ce compte ?",
     "txt12": "Changer la langue",
     "txt13": "Thème sombre",
-    "txt14": "Plan de mise à niveau"
+    "txt14": "Plan de mise à niveau",
+    "deleteBlocked": {
+      "ownerTitle": "Tâches actives trouvées",
+      "ownerMessage": "Vous avez {{count}} tâche(s) active(s) que vous avez créée(s). Veuillez les terminer ou les annuler avant de supprimer votre compte.",
+      "helperTitle": "Affectations actives trouvées",
+      "helperMessage": "Vous êtes une aide confirmée sur {{count}} tâche(s) active(s). Veuillez terminer ou annuler ces affectations avant de supprimer votre compte."
+    }
   },
   "cancelSubscription": {
     "txt1": "Votre abonnement actuel",
@@ -775,7 +788,11 @@
     "spotsLeft": "Encore {{spots}} places disponibles",
     "status": "Statut",
     "allHelpersConfirmed": "Toutes les aides confirmées ! Vous pouvez marquer la tâche comme terminée.",
-    "allSlotsFilled": "Toutes les places occupées"
+    "allSlotsFilled": "Toutes les places occupées",
+    "deletedUser": {
+      "title": "Candidat indisponible",
+      "message": "Ce candidat a supprimé son compte et ne peut plus être confirmé."
+    }
   },
   "interestSelection": {
     "personalizeExperience": "Personnalisez votre expérience",

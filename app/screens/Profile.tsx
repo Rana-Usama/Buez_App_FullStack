@@ -540,30 +540,30 @@ function Profile({ navigation }: any) {
         let badge: any = null;
         if (count >= 3)
           badge = {
-            icon: "trophy",
+            icon: "diamond",
             text: `${t("profileRank.txt5")}`,
-            color: "#FFD700",
+            color: "#bfa824ff",
             bgColor: "#41403462",
-            borderColor: "#FFD700",
-            bgColor2: "#dfddc562",
+            borderColor: "#bfa824ff",
+            bgColor2: "rgba(233, 226, 182, 0.25)",
           };
         else if (count >= 2)
           badge = {
-            icon: "trending-up",
+            icon: "rocket",
             text: `${t("profileRank.txt4")}`,
-            color: "#FF9800",
-            bgColor: "#a4937685",
-            borderColor: "#FF9800",
-            bgColor2: "#d2c8b773",
+            color: "#79b7b0ff",
+            bgColor: "rgb(97, 124, 121)",
+            borderColor: "#79b7b0ff",
+            bgColor2: "rgba(187, 218, 214, 0.33)",
           };
         else if (count >= 1)
           badge = {
             icon: "leaf",
             text: `${t("profileRank.txt3")}`,
-            color: "#4CAF50",
-            bgColor: "#679d6793",
-            borderColor: "#4CAF50",
-            bgColor2: "#bcd7bc93",
+            color: "#9b6fc1ff",
+            bgColor: "rgb(39, 34, 43)",
+            borderColor: "#9b6fc1ff",
+            bgColor2: "rgba(89, 84, 92, 0.26)",
           };
         setUserBadge(badge);
       } catch (e) {
@@ -665,6 +665,9 @@ function Profile({ navigation }: any) {
             },
           ]}
         >
+          <View style={{position:"absolute", left:RFPercentage(1), top:RFPercentage(1)}}>
+            <FounderBadge variant="pill" />
+          </View>
           <View style={styles.imageSection}>
             <TouchableOpacity
               activeOpacity={0.8}
@@ -716,10 +719,6 @@ function Profile({ navigation }: any) {
             <Text style={[styles.userName, { color: theme.heading }]}>
               {userName}
             </Text>
-
-            {/* "Founder #N" chip — permanent, independent of subscription. */}
-            <FounderBadge variant="pill" />
-
             {userBadge && (
               <View
                 style={[
@@ -749,7 +748,7 @@ function Profile({ navigation }: any) {
                 <Ionicons
                   name="checkmark-done-circle"
                   size={RFPercentage(1.6)}
-                  color={Colors.primary}
+                  color={userBadge.color}
                 />
                 <Text
                   style={[styles.tasksCountText, { color: theme.darkGrey }]}
@@ -1210,7 +1209,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: RFPercentage(1.2),
     paddingVertical: RFPercentage(0.5),
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(100),
     borderWidth: 1,
     marginBottom: RFPercentage(1),
   },
@@ -1230,7 +1229,7 @@ const styles = StyleSheet.create({
     marginLeft: RFPercentage(0.5),
   },
 
-  biographySection: { width: "100%", alignItems: "center" },
+  biographySection: { width: "100%", alignItems: "center" ,},
   biographyText: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",

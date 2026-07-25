@@ -49,6 +49,22 @@ export const addUser = async (
   }
 };
 
+// Returns true only when the user's account has been explicitly deleted
+// (anonymized profile carries `isDeleted: true`). Fails open on transient
+// read errors / missing docs so a flaky read never blocks a valid action.
+export const isUserDeleted = async (
+  userId?: string | null,
+): Promise<boolean> => {
+  if (!userId) return false;
+  try {
+    const snap = await getDoc(doc(db, "users", userId));
+    return snap.exists() ? snap.data()?.isDeleted === true : false;
+  } catch (error) {
+    console.log("isUserDeleted check failed:", error);
+    return false;
+  }
+};
+
 export const subscribeToUserData = (userId: any, callback: any) => {
   if (userId) {
     const docRef = doc(db, "users", userId);

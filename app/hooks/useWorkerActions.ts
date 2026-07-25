@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, arrayRemove } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { useTranslation } from "react-i18next";
 import Toast from "react-native-toast-message";
@@ -8,7 +8,9 @@ import {
   createOrUpdateGroupChat,
   removeMemberFromGroupChat,
 } from "../services/GroupChat.service";
-import{ NOTIFICATION_ENDPOINTS, NOTIFICATION_TYPES, FIRESTORE_COLLECTIONS } from "../config/constants";
+import { isUserDeleted } from "../services/User.service";
+import { sendPushToUser } from "../utils/pushNotify";
+import{ NOTIFICATION_TYPES, FIRESTORE_COLLECTIONS } from "../config/constants";
 
 interface UseWorkerActionsProps {
   taskId: string;
@@ -33,46 +35,32 @@ export const useWorkerActions = ({
   const [removingWorker, setRemovingWorker] = useState<string | null>(null);
 
   // ── SEND NOTIFICATIONS ──
+  // Routed through sendPushToUser so deleted accounts (and stale tokens) are
+  // never notified.
   const sendConfirmationNotification = async (worker: Worker) => {
-    try {
-      const response = await fetch(NOTIFICATION_ENDPOINTS.SEND, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fcmToken: worker.token,
-          title: "🎉 Application Confirmed!",
-          body: `You have been confirmed for "${taskData?.taskType}" task`,
-          data: {
-            type: NOTIFICATION_TYPES.CONFIRMATION,
-            postId: taskId,
-          },
-        }),
-      });
-      return await response.text();
-    } catch (error) {
-      console.log("Confirmation notification error:", error);
-    }
+    await sendPushToUser({
+      userId: worker.userId,
+      token: worker.token,
+      title: "🎉 Application Confirmed!",
+      body: `You have been confirmed for "${taskData?.taskType}" task`,
+      data: {
+        type: NOTIFICATION_TYPES.CONFIRMATION,
+        postId: taskId,
+      },
+    });
   };
 
   const sendRemovalNotification = async (worker: Worker) => {
-    try {
-      const response = await fetch(NOTIFICATION_ENDPOINTS.SEND, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fcmToken: worker.token,
-          title: "Helper Status Updated",
-          body: `Your confirmation for task "${taskData?.taskType}" has been removed`,
-          data: {
-            type: NOTIFICATION_TYPES.REMOVAL,
-            postId: taskId,
-          },
-        }),
-      });
-      return await response.text();
-    } catch (error) {
-      console.log("Removal notification error:", error);
-    }
+    await sendPushToUser({
+      userId: worker.userId,
+      token: worker.token,
+      title: "Helper Status Updated",
+      body: `Your confirmation for task "${taskData?.taskType}" has been removed`,
+      data: {
+        type: NOTIFICATION_TYPES.REMOVAL,
+        postId: taskId,
+      },
+    });
   };
 
   // ── CONFIRM WORKER ──
@@ -99,6 +87,28 @@ export const useWorkerActions = ({
       const taskDocRef = doc(db, FIRESTORE_COLLECTIONS.TASK_REQUESTS, taskId);
 
       const updatedApplied = appliedWorkers.filter((w) => w.userId !== worker.userId);
+
+      // Guard: a helper who deleted their account must never be confirmable
+      // (covers stale applicants lists and old application notifications).
+      // Prune them from the task and abort.
+      if (await isUserDeleted(worker.userId)) {
+        try {
+          await updateDoc(taskDocRef, {
+            appliedWorkers: updatedApplied,
+            appliedWorkerIds: arrayRemove(worker.userId),
+          });
+        } catch (pruneError) {
+          console.log("Failed to prune deleted applicant:", pruneError);
+        }
+        Toast.show({
+          type: "error",
+          text1: t("taskApplicants.deletedUser.title"),
+          text2: t("taskApplicants.deletedUser.message"),
+        });
+        setConfirmingWorker(null);
+        return;
+      }
+
       const confirmationData = {
         ...worker,
         confirmedAt: new Date().toISOString(),
@@ -114,6 +124,7 @@ export const useWorkerActions = ({
 
       const updatePayload: any = {
         appliedWorkers: updatedApplied,
+        appliedWorkerIds: arrayRemove(worker.userId),
         confirmedWorkers: updatedConfirmed,
       };
       if (isSingle) {

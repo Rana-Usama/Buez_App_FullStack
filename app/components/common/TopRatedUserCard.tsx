@@ -44,7 +44,7 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
         };
       case "Rising Talent":
         return {
-          name: "trending-up",
+          name: "rocket",
           color: "#79b7b0ff",
           bgColor: "#71a58231",
         };

@@ -24,7 +24,10 @@
     "task": "Tarea",
     "bulk": "Tarea grupal con múltiples ayudantes",
     "helper": "ayudante",
-    "helpers": "ayudantes"
+    "helpers": "ayudantes",
+    "subTasks": "Subtareas",
+    "scheduledDateTime": "Fecha y hora programadas",
+    "more": "más"
   },
   "validations": {
     "inValid": "Correo electrónico inválido",
@@ -32,7 +35,8 @@
     "passwordReq": "La contraseña es requerida",
     "userReq": "El nombre de usuario es requerido",
     "passwordLen": "La contraseña debe tener al menos 6 caracteres",
-    "passwordMatch": "Las contraseñas deben coincidir"
+    "passwordMatch": "Las contraseñas deben coincidir",
+    "samePassword": "La nueva contraseña debe ser diferente de la anterior"
   },
   "toast": {
     "login": {
@@ -82,7 +86,9 @@
       "one": "Contraseña cambiada",
       "two": "¡La contraseña ha sido cambiada exitosamente!",
       "three": "Error",
-      "four": "¡Algo salió mal!"
+      "four": "¡Algo salió mal!",
+      "five": "La contraseña actual es incorrecta",
+      "six": "Demasiados intentos. Inténtalo de nuevo más tarde."
     },
     "editProfile": {
       "one": "Perfil actualizado",
@@ -326,7 +332,8 @@
     "validateStep1": "Selecciona un tipo de tarea y de compensación",
     "validateStep2": "Elige fecha, hora y duración estimada",
     "validateStep3": "Agrega una descripción, ubicación y compensación",
-    "repostTitle": "Volver a publicar"
+    "repostTitle": "Volver a publicar",
+    "reduceHelpersError": "No puedes reducir el número de ayudantes por debajo del número de ayudantes confirmados."
   },
   "messages": {
     "txt1": "Mensajes",
@@ -362,7 +369,13 @@
     "txt11": "¿Estás seguro de que quieres cerrar sesión\nde esta cuenta?",
     "txt12": "Cambiar idioma",
     "txt13": "Tema oscuro",
-    "txt14": "Plan de actualización"
+    "txt14": "Plan de actualización",
+    "deleteBlocked": {
+      "ownerTitle": "Tareas activas encontradas",
+      "ownerMessage": "Tienes {{count}} tarea(s) activa(s) que creaste. Complétalas o cancélalas antes de eliminar tu cuenta.",
+      "helperTitle": "Asignaciones activas encontradas",
+      "helperMessage": "Eres un ayudante confirmado en {{count}} tarea(s) activa(s). Completa o cancela esas asignaciones antes de eliminar tu cuenta."
+    }
   },
   "cancelSubscription": {
     "txt1": "Tu suscripción actual",
@@ -775,7 +788,11 @@
     "spotsLeft": "Quedan {{spots}} plazas",
     "status": "Estado",
     "allHelpersConfirmed": "¡Todos los ayudantes confirmados! Puedes marcar la tarea como completada.",
-    "allSlotsFilled": "Todas las plazas ocupadas"
+    "allSlotsFilled": "Todas las plazas ocupadas",
+    "deletedUser": {
+      "title": "Solicitante no disponible",
+      "message": "Este solicitante ha eliminado su cuenta y ya no puede ser confirmado."
+    }
   },
   "interestSelection": {
     "personalizeExperience": "Personaliza tu experiencia",

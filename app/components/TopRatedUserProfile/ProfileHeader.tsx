@@ -28,7 +28,7 @@ type Props = {
   t: any;
   user?: any;
   navigation?: any;
-  stats? : any
+  stats?: any;
 };
 
 export default function ProfileHeader({
@@ -46,7 +46,7 @@ export default function ProfileHeader({
   t,
   user,
   navigation,
-  stats
+  stats,
 }: Props) {
   const isDark = theme.mode === "dark";
 
@@ -260,22 +260,21 @@ export default function ProfileHeader({
               paddingHorizontal: RFPercentage(1.5),
               paddingVertical: RFPercentage(0.6),
               borderRadius: RFPercentage(100),
-              backgroundColor: ui.rankTint + "18",
-              borderWidth: 1,
-              borderColor: ui.rankTint + "55",
+              backgroundColor: ui.rankTint,
             }}
           >
             <Ionicons
               name={rank.icon as any}
               size={RFPercentage(1.5)}
-              color={ui.rankTint}
+              color={Colors.white}
             />
             <Text
               numberOfLines={1}
               style={{
-                color: ui.rankTint,
+                color: Colors.white,
                 fontSize: RFPercentage(1.3),
                 fontFamily: "Poppins_600SemiBold",
+                lineHeight: RFPercentage(1.7),
               }}
             >
               {rank.label}

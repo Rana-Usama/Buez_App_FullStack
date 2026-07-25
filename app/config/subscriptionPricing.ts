@@ -18,8 +18,8 @@ export const SUBSCRIPTION_PRICES: Record<
   "monthly" | "yearly",
   Record<PlanCurrency, number>
 > = {
-  monthly: { USD: 7.9, EUR: 7.4, CHF: 6.9 },
-  yearly: { USD: 79, EUR: 74, CHF: 69 },
+  monthly: { USD: 7.9, EUR: 7.9, CHF: 7.9 },
+  yearly: { USD: 79, EUR: 79, CHF: 79 },
 };
 
 /** Amount the intro coupon takes off each of the first 3 monthly cycles. */

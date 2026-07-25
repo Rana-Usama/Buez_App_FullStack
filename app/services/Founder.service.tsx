@@ -183,7 +183,15 @@ export const resolveFounderRoute = async (
   userData?: any,
 ): Promise<FounderRoute> => {
   try {
-    if (userData?.isFounder === true) return "TabNavigator";
+    // Active founder benefits (badge + still within the free window) → app.
+    if (userData && isFounderActive(userData)) return "TabNavigator";
+
+    // Founder badge exists but the 60-day window has ended (or status was
+    // flipped to expired elsewhere). Badge is permanent, but ACCESS is not —
+    // DeciderScreen already ruled out an active paid subscription before
+    // calling this function, so reaching here with isFounder === true means
+    // their free access has run out and they must subscribe.
+    if (userData?.isFounder === true) return "SubscriptionV2";
 
     const introDone = await hasCompletedFounderIntro();
     if (introDone) return "TabNavigator";

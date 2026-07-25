@@ -376,7 +376,7 @@ function AddReview() {
               styles.card,
               {
                 backgroundColor: theme.white,
-                borderColor: isDark ? theme.border : Colors.cardBorderLight,
+                borderColor: isDark ? theme.border2 : Colors.cardBorderLight,
               },
             ]}
           >
@@ -423,7 +423,7 @@ function AddReview() {
                 styles.divider,
                 {
                   backgroundColor: isDark
-                    ? theme.border
+                    ? theme.border2
                     : Colors.cardBorderLight,
                 },
               ]}
@@ -475,7 +475,7 @@ function AddReview() {
               styles.ratingCard,
               {
                 backgroundColor: theme.white,
-                borderColor: isDark ? theme.border : Colors.cardBorderLight,
+                borderColor: isDark ? theme.border2 : Colors.cardBorderLight,
               },
             ]}
           >
@@ -525,7 +525,7 @@ function AddReview() {
               styles.card,
               {
                 backgroundColor: theme.white,
-                borderColor: isDark ? theme.border : Colors.cardBorderLight,
+                borderColor: isDark ? theme.border2 : Colors.cardBorderLight,
               },
             ]}
           >
@@ -536,8 +536,8 @@ function AddReview() {
               style={[
                 styles.inputContainer,
                 {
-                  backgroundColor: theme.inputFieldBackgroundColor,
-                  borderColor: isDark ? theme.border : Colors.cardBorderLight,
+                  backgroundColor: theme.white,
+                  borderColor: isDark ? theme.border2 : Colors.cardBorderLight,
                 },
               ]}
             >

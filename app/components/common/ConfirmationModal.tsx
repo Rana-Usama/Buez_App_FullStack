@@ -79,7 +79,7 @@ const ConfirmationModal = ({
               ]}
             >
               <MaterialIcons
-                name={iconConfig.name}
+                name={iconConfig.name as any}
                 size={RFPercentage(3.5)}
                 color={iconConfig.color}
               />
@@ -115,14 +115,10 @@ const ConfirmationModal = ({
               title={t("buttons.yes")}
               marginTop={RFPercentage(0)}
               height={
-                Platform.OS === "android"
-                  ? RFPercentage(5.8)
-                  : RFPercentage(5)
+                 RFPercentage(5)
               }
               width={
-                Platform.OS === "android"
-                  ? RFPercentage(17)
-                  : RFPercentage(15)
+                 RFPercentage(15)
               }
               onPress={onConfirm}
               loading={loading}
@@ -190,9 +186,9 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     height:
-      Platform.OS === "android" ? RFPercentage(5.8) : RFPercentage(5),
+       RFPercentage(5),
     width:
-      Platform.OS === "android" ? RFPercentage(17) : RFPercentage(15),
+     RFPercentage(15),
     borderRadius: RFPercentage(100),
     borderWidth: 1,
     justifyContent: "center",

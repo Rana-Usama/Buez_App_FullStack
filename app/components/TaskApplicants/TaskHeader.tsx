@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -7,6 +13,13 @@ import { useAppTheme } from "../../contexts/themeContext";
 import Colors from "../../config/Colors";
 import { TaskData, TranslatedTaskData } from "../../types/TaskApplicants/types";
 import GroupChatButton from "./GroupChatButton";
+
+const { width } = Dimensions.get("window");
+
+// Refined, app-aligned header gradient (kept local so the shared
+// Colors.heroGradient* tokens used by GroupDetails stay untouched).
+const HEADER_GRADIENT_LIGHT = ["#253275d5", "#2b367f65", "#3e4fadb0"];
+const HEADER_GRADIENT_DARK = ["#20233F", "#191C33", "#111325"];
 
 interface TaskHeaderProps {
   taskData: TaskData | null;
@@ -40,70 +53,73 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
     100,
   );
 
-  const heroColors =
-    theme.mode === "dark" ? Colors.heroGradientDark : Colors.heroGradientLight;
+  const headerColors =
+    theme.mode === "dark" ? HEADER_GRADIENT_DARK : HEADER_GRADIENT_LIGHT;
+
+  const taskTypeLabel =
+    taskData.taskType === "Other"
+      ? translatedTaskData.customTaskTitle || taskData.customTaskTitle
+      : translatedTaskData.taskType || taskData.taskType;
 
   return (
     <View style={styles.wrapper}>
       <LinearGradient
-        colors={heroColors as any}
+        colors={headerColors as any}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.taskHeader}
       >
-        <View style={styles.taskHeaderContent}>
+        {/* Subtle decorative depth */}
+        <View style={styles.decorCircle1} pointerEvents="none" />
+        <View style={styles.decorCircle2} pointerEvents="none" />
+
+        {/* Top bar: back + title */}
+        <View style={styles.topBar}>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => {
-              navigation.goBack();
-            }}
-            style={[
-              styles.headerBackBtn,
-              {
-                backgroundColor:
-                  theme.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.27)"
-                    : Colors.primary + "30",
-              },
-            ]}
+            onPress={() => navigation.goBack()}
+            style={styles.backBtn}
           >
             <Feather
               name="arrow-left"
               color={Colors.white}
-              size={RFPercentage(2.5)}
+              size={RFPercentage(2.4)}
             />
           </TouchableOpacity>
 
+          <Text style={styles.topBarTitle} numberOfLines={1}>
+            {t("taskApplicants.title")}
+          </Text>
+
+          <View style={styles.backBtnSpacer} />
+        </View>
+
+        <View style={styles.taskHeaderContent}>
           {/* Task Type Badge */}
-          <View
-            style={[
-              styles.taskTypeBadge,
-              { backgroundColor: Colors.categoryBadgeBg },
-            ]}
-          >
-            <Ionicons
-              name="briefcase"
-              size={RFPercentage(1.8)}
-              color={Colors.heroTitleColor}
-            />
-            <Text style={styles.taskTypeText} numberOfLines={1}>
-              {taskData.taskType === "Other"
-                ? translatedTaskData.customTaskTitle || taskData.customTaskTitle
-                : translatedTaskData.taskType || taskData.taskType}
-            </Text>
-          </View>
+          {!!taskTypeLabel && (
+            <View style={styles.taskTypeBadge}>
+              <Ionicons
+                name="briefcase"
+                size={RFPercentage(1.6)}
+                color={Colors.heroTitleColor}
+              />
+              <Text style={styles.taskTypeText} numberOfLines={1}>
+                {taskTypeLabel}
+              </Text>
+            </View>
+          )}
 
           {/* Task Description */}
-          <Text style={styles.taskTitle} numberOfLines={2}>
+          {/* <Text style={styles.taskTitle} numberOfLines={2}>
             {translatedTaskData.description ||
               taskData.description ||
               t("taskApplicants.noDescription")}
-          </Text>
+          </Text> */}
 
           {/* Group/Broadcast chat — bulk tasks only (single tasks use 1:1 chat) */}
           {requiredWorkers > 1 && confirmedWorkers?.length > 0 && (
             <GroupChatButton
-              style={{ marginTop: RFPercentage(0.5), width: "55%" }}
+              style={{ marginTop: RFPercentage(0.5), width: "58%" }}
               onPress={() =>
                 navigation.navigate("GroupChat", {
                   groupChatId: taskId,
@@ -122,7 +138,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
             <View style={styles.statItem}>
               <Ionicons
                 name="people"
-                size={RFPercentage(2.4)}
+                size={RFPercentage(2.2)}
                 color={Colors.heroTitleColor}
               />
               <Text style={styles.statValue} numberOfLines={1}>
@@ -138,7 +154,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
             <View style={styles.statItem}>
               <Ionicons
                 name="checkmark-circle"
-                size={RFPercentage(2.4)}
+                size={RFPercentage(2.2)}
                 color={Colors.heroTitleColor}
               />
               <Text style={styles.statValue} numberOfLines={1}>
@@ -154,7 +170,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
             <View style={styles.statItem}>
               <Ionicons
                 name={isFull ? "checkmark-done-circle" : "alert-circle"}
-                size={RFPercentage(2.4)}
+                size={RFPercentage(2.2)}
                 color={Colors.heroTitleColor}
               />
               <Text style={styles.statValue} numberOfLines={1}>
@@ -166,7 +182,9 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
                 {t("taskApplicants.status")}
               </Text>
             </View>
-          </View>         
+          </View>
+
+         
         </View>
       </LinearGradient>
     </View>
@@ -175,29 +193,63 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 
 const styles = StyleSheet.create({
   wrapper: {
-    shadowColor: "#000",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
+    shadowOpacity: 0.22,
+    shadowRadius: 16,
     elevation: 8,
   },
   taskHeader: {
-    paddingTop: RFPercentage(15),
+    paddingTop: RFPercentage(7),
     paddingBottom: RFPercentage(3),
-    paddingHorizontal: RFPercentage(3),
-    borderBottomLeftRadius: RFPercentage(4),
-    borderBottomRightRadius: RFPercentage(4),
+    paddingHorizontal: RFPercentage(2.6),
+    borderBottomLeftRadius: RFPercentage(3.5),
+    borderBottomRightRadius: RFPercentage(3.5),
     overflow: "hidden",
   },
-  headerBackBtn: {
-    width: RFPercentage(4.6),
-    height: RFPercentage(4.6),
+  decorCircle1: {
+    position: "absolute",
+    width: width * 0.5,
+    height: width * 0.5,
+    borderRadius: width * 0.25,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    top: -width * 0.2,
+    right: -width * 0.15,
+  },
+  decorCircle2: {
+    position: "absolute",
+    width: width * 0.32,
+    height: width * 0.32,
+    borderRadius: width * 0.16,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    bottom: -width * 0.12,
+    left: -width * 0.1,
+  },
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: RFPercentage(2),
+  },
+  backBtn: {
+    width: RFPercentage(4.4),
+    height: RFPercentage(4.4),
     borderRadius: RFPercentage(100),
     alignItems: "center",
     justifyContent: "center",
-    position: "absolute",
-    top: -RFPercentage(6),
-    left: 0,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  backBtnSpacer: {
+    width: RFPercentage(4.4),
+  },
+  topBarTitle: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: RFPercentage(1.9),
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.heroTitleColor,
   },
   taskHeaderContent: {
     alignItems: "center",
@@ -205,24 +257,27 @@ const styles = StyleSheet.create({
   taskTypeBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: RFPercentage(1.8),
-    paddingVertical: RFPercentage(0.7),
+    paddingHorizontal: RFPercentage(1.6),
+    paddingVertical: RFPercentage(0.6),
     borderRadius: RFPercentage(3),
-    marginBottom: RFPercentage(1.5),
+    marginBottom: RFPercentage(1.4),
     gap: RFPercentage(0.6),
     maxWidth: "90%",
+    backgroundColor: Colors.categoryBadgeBg,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
   },
   taskTypeText: {
-    fontSize: RFPercentage(1.4),
+    fontSize: RFPercentage(1.35),
     fontFamily: "Poppins_600SemiBold",
     color: Colors.heroTitleColor,
   },
   taskTitle: {
-    fontSize: RFPercentage(2.1),
+    fontSize: RFPercentage(2.15),
     fontFamily: "Poppins_700Bold",
     textAlign: "center",
     marginBottom: RFPercentage(2),
-    lineHeight: RFPercentage(2.8),
+    lineHeight: RFPercentage(2.9),
     color: Colors.heroTitleColor,
   },
   taskStats: {
@@ -230,11 +285,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    borderRadius: RFPercentage(2.5),
-    paddingVertical: RFPercentage(2),
-    paddingHorizontal: RFPercentage(1.5),
-    marginVertical: RFPercentage(2),
-    backgroundColor: Colors.heroStatsBg,
+    borderRadius: RFPercentage(2.2),
+    paddingVertical: RFPercentage(1.8),
+    paddingHorizontal: RFPercentage(1.2),
+    marginTop: RFPercentage(1.5),
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.16)",
   },
   statItem: {
     alignItems: "center",
@@ -250,54 +307,36 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   statLabel: {
-    fontSize: RFPercentage(1.25),
+    fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_500Medium",
     textAlign: "center",
     color: Colors.heroStatsLabel,
   },
   statDivider: {
     width: 1,
-    height: "60%",
+    height: "58%",
     backgroundColor: Colors.heroStatsDivider,
   },
   progressContainer: {
     width: "100%",
-    marginTop: RFPercentage(0.5),
+    marginTop: RFPercentage(1.6),
   },
   progressBar: {
-    height: RFPercentage(1.1),
+    height: RFPercentage(0.9),
     borderRadius: RFPercentage(0.6),
     overflow: "hidden",
-    marginBottom: RFPercentage(0.5),
-    backgroundColor: Colors.white15,
+    backgroundColor: "rgba(255,255,255,0.18)",
   },
   progressFill: {
     height: "100%",
     borderRadius: RFPercentage(0.6),
   },
   progressText: {
-    fontSize: RFPercentage(1.25),
+    fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_500Medium",
     textAlign: "center",
     marginTop: RFPercentage(0.8),
     color: Colors.heroStatsLabel,
-  },
-  statusAlert: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: RFPercentage(1.3),
-    paddingHorizontal: RFPercentage(2),
-    borderRadius: RFPercentage(2),
-    marginTop: RFPercentage(2),
-    gap: RFPercentage(0.8),
-    width: "100%",
-    backgroundColor: Colors.heroStatsBg,
-  },
-  statusAlertText: {
-    fontSize: RFPercentage(1.35),
-    fontFamily: "Poppins_600SemiBold",
-    color: Colors.heroTitleColor,
   },
 });
 

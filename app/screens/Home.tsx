@@ -164,7 +164,7 @@ const HomeScreen: React.FC = () => {
           <View style={styles.notFoundContainer}>
             <NotFound title={t("home.txt11")} />
           </View>
-        )
+        ) as any
       }
     />
   );
@@ -183,7 +183,7 @@ const HomeScreen: React.FC = () => {
         gradientColors={[Colors.primary, "#0b1544ff"]}
         title={t("home.txt1")}
       />
-      <FounderBanner />
+      
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           style={[styles.scrollView, { backgroundColor: theme.white }]}
@@ -199,6 +199,7 @@ const HomeScreen: React.FC = () => {
             />
           }
         >
+          <FounderBanner />
           <View style={[styles.screen, { backgroundColor: theme.white }]}>
             {/* Search Input */}
             <View style={styles.searchContainer}>
@@ -266,6 +267,7 @@ const HomeScreen: React.FC = () => {
                   horizontal
                   data={topRatedUsers}
                   keyExtractor={(item, index) => `${item.userId}-${index}`}
+                  style={styles.topRatedList}
                   contentContainerStyle={styles.topRatedContainer}
                   showsHorizontalScrollIndicator={false}
                   renderItem={({ item }) => (
@@ -378,15 +380,15 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
   },
+  topRatedList: {
+    width: "100%",
+    alignSelf: "stretch",
+  },
   topRatedContainer: {
     paddingHorizontal: RFPercentage(2),
     paddingVertical: RFPercentage(1),
     alignItems: "flex-start",
     justifyContent: "flex-start",
-    alignSelf: "flex-start",
-    // backgroundColor:"red",
-    // flex:1,
-    // width:"100%"
   },
   locationContainer: {
     flexDirection: "row",

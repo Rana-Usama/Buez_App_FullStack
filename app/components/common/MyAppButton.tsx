@@ -48,6 +48,7 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
         borderRadius: borderRadius ? borderRadius : RFPercentage(2),
         overflow: "hidden",
         marginTop,
+        opacity: disabled ? 0.5 : 1,
       }}
       onPress={onPress}
     >

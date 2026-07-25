@@ -39,6 +39,7 @@ import { useAppTheme } from "../contexts/themeContext";
 import ConfirmationModal from "../components/common/ConfirmationModal";
 import Feather from "@expo/vector-icons/Feather";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import { sendPushToUser } from "../utils/pushNotify";
 import { createNewChat } from "../services/Chat.service";
 const { width: screenWidth } = Dimensions.get("window");
 import { getAuth } from "firebase/auth";
@@ -524,36 +525,28 @@ function MyRequests({ navigation }) {
       task?.confirmedWorkers.forEach((worker) => {
         if (worker && worker.token) {
           notificationPromises.push(
-            fetch(
-              "https://buez-server-khaki.vercel.app/api/send-notification",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  fcmToken: worker.token,
-                  title:
-                    t("pushNotifications.bulkTaskCompleted.title") ||
-                    "Task Completed!",
-                  body:
-                    t("pushNotifications.bulkTaskCompleted.body", {
-                      taskName: task.taskType,
-                      requesterName: task.user?.userName || "The requester",
-                    }) ||
-                    `The task "${
-                      task.taskType
-                    }" has been marked as completed by ${
-                      task.user?.userName || "the requester"
-                    }`,
-                  data: {
-                    type: "bulk_task_completion",
-                    taskId: task.id,
-                    taskType: task.taskType,
-                  },
-                }),
+            sendPushToUser({
+              userId: worker.userId,
+              token: worker.token,
+              title:
+                t("pushNotifications.bulkTaskCompleted.title") ||
+                "Task Completed!",
+              body:
+                t("pushNotifications.bulkTaskCompleted.body", {
+                  taskName: task.taskType,
+                  requesterName: task.user?.userName || "The requester",
+                }) ||
+                `The task "${
+                  task.taskType
+                }" has been marked as completed by ${
+                  task.user?.userName || "the requester"
+                }`,
+              data: {
+                type: "bulk_task_completion",
+                taskId: task.id,
+                taskType: task.taskType,
               },
-            ),
+            }),
           );
         }
       });
@@ -765,30 +758,19 @@ function MyRequests({ navigation }) {
     });
   };
 
-  // Function to send push notification to task accepter
+  // Function to send push notification to task accepter (skips deleted accounts)
   async function sendTaskCompletionPushNotification(task) {
     try {
-      const response = await fetch(
-        "https://buez-server-khaki.vercel.app/api/send-notification",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fcmToken: task.acceptedBy?.token,
-            title: t("pushNotifications.txt3"),
-            body: `${t("pushNotifications.txt4")} "${task.taskType}" ${t(
-              "pushNotifications.txt5",
-            )} ${task.user?.userName}`,
-          }),
-        },
-      );
-      const data = await response.text();
-      return data;
+      await sendPushToUser({
+        userId: task.acceptedBy?.userId,
+        token: task.acceptedBy?.token,
+        title: t("pushNotifications.txt3"),
+        body: `${t("pushNotifications.txt4")} "${task.taskType}" ${t(
+          "pushNotifications.txt5",
+        )} ${task.user?.userName}`,
+      });
     } catch (error) {
       console.log("sendTaskCompletionPushNotification error:", error);
-      throw error;
     }
   }
 
@@ -1270,7 +1252,7 @@ function MyRequests({ navigation }) {
                             { color: theme.darkGrey },
                           ]}
                         >
-                          {"Sub-tasks"}:
+                          {t("common.subTasks")}:
                         </Text>
                       </View>
                       <View style={styles.subTasksList}>
@@ -1326,7 +1308,7 @@ function MyRequests({ navigation }) {
                                 { color: theme.darkGrey },
                               ]}
                             >
-                              +{selectedSubTasks.length - 3} more
+                              +{selectedSubTasks.length - 3} {t("common.more")}
                             </Text>
                           </TouchableOpacity>
                         )}
@@ -2208,7 +2190,7 @@ const styles = StyleSheet.create({
     top: RFPercentage(2),
   },
   markButton: {
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(2),
     height: RFPercentage(5),
     borderColor: Colors.primary,
     borderWidth: RFPercentage(0.2),
@@ -2219,7 +2201,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1),
   },
   cancel: {
-    borderRadius: RFPercentage(1),
+    borderRadius: RFPercentage(2),
     width: "38%",
     height: RFPercentage(5),
     borderWidth: RFPercentage(0.15),

@@ -24,7 +24,10 @@
     "task": "Attività",
     "bulk": "Attività collettiva con più aiutanti",
     "helper": "aiutante",
-    "helpers": "aiutanti"
+    "helpers": "aiutanti",
+    "subTasks": "Sotto-attività",
+    "scheduledDateTime": "Data e ora programmate",
+    "more": "in più"
   },
   "validations": {
     "inValid": "Email non valida",
@@ -32,7 +35,8 @@
     "passwordReq": "La password è obbligatoria",
     "userReq": "Il nome utente è obbligatorio",
     "passwordLen": "La password deve essere di almeno 6 caratteri",
-    "passwordMatch": "Le password devono corrispondere"
+    "passwordMatch": "Le password devono corrispondere",
+    "samePassword": "La nuova password deve essere diversa dalla precedente"
   },
   "toast": {
     "login": {
@@ -82,7 +86,9 @@
       "one": "Password cambiata",
       "two": "La password è stata cambiata con successo!",
       "three": "Errore",
-      "four": "Qualcosa è andato storto!"
+      "four": "Qualcosa è andato storto!",
+      "five": "La vecchia password non è corretta",
+      "six": "Troppi tentativi. Riprova più tardi."
     },
     "editProfile": {
       "one": "Profilo aggiornato",
@@ -326,7 +332,8 @@
     "validateStep1": "Seleziona un tipo di attività e di compenso",
     "validateStep2": "Scegli data, ora e durata stimata",
     "validateStep3": "Aggiungi descrizione, luogo e compenso",
-    "repostTitle": "Ripubblica richiesta"
+    "repostTitle": "Ripubblica richiesta",
+    "reduceHelpersError": "Non puoi ridurre il numero di aiutanti al di sotto del numero di aiutanti confermati."
   },
   "messages": {
     "txt1": "Messaggi",
@@ -362,7 +369,13 @@
     "txt11": "Sei sicuro di voler disconnetterti\nda questo account?",
     "txt12": "Cambia lingua",
     "txt13": "Tema scuro",
-    "txt14": "Piano di aggiornamento"
+    "txt14": "Piano di aggiornamento",
+    "deleteBlocked": {
+      "ownerTitle": "Attività attive trovate",
+      "ownerMessage": "Hai {{count}} attività attiva/e che hai creato. Completale o annullale prima di eliminare il tuo account.",
+      "helperTitle": "Assegnazioni attive trovate",
+      "helperMessage": "Sei un aiutante confermato su {{count}} attività attiva/e. Completa o annulla tali assegnazioni prima di eliminare il tuo account."
+    }
   },
   "cancelSubscription": {
     "txt1": "Il tuo abbonamento attuale",
@@ -775,7 +788,11 @@
     "spotsLeft": "Ancora {{spots}} posti liberi",
     "status": "Stato",
     "allHelpersConfirmed": "Tutti gli aiutanti confermati! Puoi segnare l'attività come completata.",
-    "allSlotsFilled": "Tutti i posti occupati"
+    "allSlotsFilled": "Tutti i posti occupati",
+    "deletedUser": {
+      "title": "Candidato non disponibile",
+      "message": "Questo candidato ha eliminato il proprio account e non può più essere confermato."
+    }
   },
   "interestSelection": {
     "personalizeExperience": "Personalizza la tua esperienza",

@@ -33,14 +33,14 @@ interface UserProviderProps {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [authUser, setAuthUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [authChecked, setAuthChecked] = useState<boolean>(false); // NEW
+  const [userDataLoading, setUserDataLoading] = useState<boolean>(false); // NEW
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(FIREBASE_AUTH, (user) => {
       try {
         if (user) {
-          console.log("🔥 User data from Firestore:", user);
           setAuthUser(user);
         } else {
           setAuthUser(null);
@@ -48,36 +48,41 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
       } catch (err) {
         setError((err as Error).message);
-        console.log("🔥 User data from Firestore:", err);
       } finally {
-        setLoading(false);
+        setAuthChecked(true); // mark auth as resolved, not "loading" directly
       }
     });
-
     return () => unsubscribeAuth();
   }, []);
 
   useEffect(() => {
+    if (!authChecked) return;
+
     let unsubscribeUserData: (() => void) | undefined;
     if (authUser) {
-      setLoading(true);
+      setUserDataLoading(true);
       try {
-        unsubscribeUserData = subscribeToUserData(authUser.uid, (data) => {
-          setUserData(data);
-          setLoading(false);
-        });
+        unsubscribeUserData = subscribeToUserData(
+          authUser.uid,
+          (data: UserData | null) => {
+            setUserData(data);
+            setUserDataLoading(false);
+          },
+        );
       } catch (err) {
         setError((err as Error).message);
-        setLoading(false);
+        setUserDataLoading(false);
       }
     } else {
-      setLoading(false);
+      setUserData(null);
+      setUserDataLoading(false);
     }
     return () => {
       if (unsubscribeUserData) unsubscribeUserData();
     };
-  }, [authUser]);
+  }, [authUser, authChecked]);
 
+  const loading = !authChecked || userDataLoading;
   const isAuthenticated = !!authUser;
 
   return (

@@ -377,7 +377,7 @@ const TaskApplicantsScreen: React.FC<TaskApplicantsScreenProps> = ({
         </View>
 
         {/* Help Text */}
-        <HelpText message={helpMessage} />
+        {/* <HelpText message={helpMessage} /> */}
       </ScrollView>
     </View>
   );

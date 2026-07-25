@@ -16,16 +16,10 @@ import Colors from "../../config/Colors";
 
 const { width } = Dimensions.get("window");
 
+// Premium founder accent (warm gold) — reused across the banner.
 const GOLD = "#F4B740";
-const GOLD_DEEP = "#E08C2F";
+const GOLD_SOFT = "rgba(244,183,64,0.35)";
 
-/**
- * Founder status banner shown on the Home screen.
- *
- * Renders only for founders. Reads everything from the user context (kept in
- * sync with Firestore), so it updates automatically right after a claim and
- * reflects expiry without any extra work.
- */
 const FounderBanner: React.FC = () => {
   const { userData } = useUser();
   const { theme } = useAppTheme();
@@ -44,7 +38,6 @@ const FounderBanner: React.FC = () => {
   // Not a founder → render nothing.
   if (!founder) return null;
 
-
   const statusText = !active
     ? t("founderBanner.expired")
     : daysLeft === 1
@@ -56,52 +49,54 @@ const FounderBanner: React.FC = () => {
       <LinearGradient
         colors={
           isDark
-            ? ["#736eb11c", "#2b2f5326"]
-            : ["rgba(35, 50, 124, 0.11)", "rgba(35, 50, 124, 0.12)"]
+            ? ["#2A2E52", "#1E2140", "#141628"]
+            : ["#2e3d8648", "#253275db", "#1A2358"]
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.banner}
       >
-        <View style={styles.content}>
-          {/* Founder badge */}
+        {/* Decorative depth */}
+        <View style={styles.decorCircle1} pointerEvents="none" />
+        <View style={styles.decorCircle2} pointerEvents="none" />
+     
 
-          <Image
-            source={Icons.founderBadge}
-            style={styles.badgeIcon}
-            resizeMode="contain"
-          />
+        <View style={styles.content}>
+          {/* Founder badge (unchanged icon) inside a subtle glass ring */}
+          <View style={styles.badgeRing}>
+            <Image
+              source={Icons.founderBadge}
+              style={styles.badgeIcon}
+              resizeMode="contain"
+            />
+          </View>
 
           {/* Text */}
           <View style={styles.textBlock}>
-            {/* <View style={styles.pillRow}>
-              <Feather name="award" size={RFPercentage(2)} color={Colors.primary} />
-              <Text style={[styles.pillText,{color:Colors.primary}]} numberOfLines={1}>
+            <View style={styles.pillRow}>
+              <Feather name="award" size={RFPercentage(1.5)} color={GOLD} />
+              <Text style={styles.pillText} numberOfLines={1}>
                 {t("founderBanner.badge")}
               </Text>
-            </View> */}
-            <Text
-              style={[
-                styles.title,
-                {
-                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
-                },
-              ]}
-              numberOfLines={2}
-            >
+            </View>
+
+            <Text style={styles.title} numberOfLines={2}>
               {t("founderBanner.title")}
             </Text>
-            <Text
-              style={[
-                styles.status,
-                {
-                  color: theme.mode === "dark" ? Colors.white : Colors.primary,
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {statusText}
-            </Text>
+
+            <View style={styles.statusRow}>
+              <Feather
+                name={active ? "clock" : "alert-circle"}
+                size={RFPercentage(1.4)}
+                color={active ? "rgba(255,255,255,0.65)" : GOLD}
+              />
+              <Text
+                style={[styles.status, !active && styles.statusExpired]}
+                numberOfLines={1}
+              >
+                {statusText}
+              </Text>
+            </View>
           </View>
         </View>
       </LinearGradient>
@@ -112,7 +107,7 @@ const FounderBanner: React.FC = () => {
 const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
-    paddingHorizontal: RFPercentage(2),
+    paddingHorizontal: RFPercentage(1.7),
     marginTop: RFPercentage(1.5),
     marginBottom: RFPercentage(0.5),
   },
@@ -120,79 +115,104 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.5),
     overflow: "hidden",
     position: "relative",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    elevation: 6,
+    borderWidth: 1,
+    borderColor: GOLD_SOFT,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  accentRail: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: RFPercentage(0.5),
+    backgroundColor: GOLD,
   },
   decorCircle1: {
     position: "absolute",
-    width: width * 0.32,
-    height: width * 0.32,
-    borderRadius: width * 0.16,
-    backgroundColor: "rgba(244,183,64,0.12)",
-    top: -width * 0.14,
-    right: -width * 0.08,
+    width: width * 0.34,
+    height: width * 0.34,
+    borderRadius: width * 0.17,
+    backgroundColor: "rgba(244,183,64,0.14)",
+    top: -width * 0.15,
+    right: -width * 0.09,
   },
   decorCircle2: {
     position: "absolute",
-    width: width * 0.22,
-    height: width * 0.22,
-    borderRadius: width * 0.11,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    bottom: -width * 0.1,
-    left: -width * 0.04,
+    width: width * 0.24,
+    height: width * 0.24,
+    borderRadius: width * 0.12,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    bottom: -width * 0.12,
+    right: width * 0.18,
   },
   content: {
     flexDirection: "row",
     alignItems: "center",
+    paddingVertical: RFPercentage(1.5),
     paddingHorizontal: RFPercentage(2),
-    paddingVertical: RFPercentage(1.8),
-    gap: RFPercentage(1.6),
+    gap: RFPercentage(1.7),
   },
-  badge: {
-    width: RFPercentage(6),
-    height: RFPercentage(6),
-    borderRadius: RFPercentage(100),
+  badgeRing: {
+    width: RFPercentage(9.4),
+    height: RFPercentage(9.4),
+    borderRadius: RFPercentage(4.7),
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: GOLD,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: GOLD_SOFT,
   },
   badgeIcon: {
-    width: RFPercentage(9),
-    height: RFPercentage(9),
+    width: RFPercentage(7),
+    height: RFPercentage(7),
   },
   textBlock: {
     flex: 1,
-    gap: RFPercentage(0.3),
   },
   pillRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: RFPercentage(0.5),
+    alignSelf: "flex-start",
+    gap: RFPercentage(0.6),
+    paddingHorizontal: RFPercentage(1),
+    paddingVertical: RFPercentage(0.35),
+    borderRadius: RFPercentage(100),
+    backgroundColor: "rgba(244,183,64,0.14)",
+    borderWidth: 1,
+    borderColor: GOLD_SOFT,
+    marginBottom: RFPercentage(0.8),
   },
   pillText: {
     color: GOLD,
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.6),
-    letterSpacing: 0.6,
+    fontSize: RFPercentage(1.15),
+    letterSpacing: 1,
     textTransform: "uppercase",
   },
   title: {
-    color: "#fff",
+    color: Colors.white,
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.75),
-    letterSpacing: -0.2,
+    lineHeight: RFPercentage(2.3),
+  },
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: RFPercentage(0.6),
+    marginTop: RFPercentage(0.6),
   },
   status: {
-    color: "rgba(255,255,255,0.8)",
+    color: "rgba(255,255,255,0.82)",
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.45),
+  },
+  statusExpired: {
+    color: GOLD,
+    fontFamily: "Poppins_500Medium",
   },
 });
 

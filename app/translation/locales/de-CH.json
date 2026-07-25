@@ -24,7 +24,10 @@
     "task": "Ufgab",
     "bulk": "Gruppeuftrag mit mehrere Helfer",
     "helper": "Helfer",
-    "helpers": "Helfer"
+    "helpers": "Helfer",
+    "subTasks": "Teilaufgaben",
+    "scheduledDateTime": "Geplantes Datum & Uhrzeit",
+    "more": "mehr"
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -32,7 +35,8 @@
     "passwordReq": "Passwort isch erforderlich",
     "userReq": "Benutzername isch erforderlich",
     "passwordLen": "Passwort muess mindeschtens 6 Zeiche ha",
-    "passwordMatch": "Passwörter müesse überiistimme"
+    "passwordMatch": "Passwörter müesse überiistimme",
+    "samePassword": "Das neue Passwort muss sich vom alten unterscheiden"
   },
   "toast": {
     "login": {
@@ -82,7 +86,9 @@
       "one": "Passwort gänderet",
       "two": "Passwort isch erfolgriich gänderet worde!",
       "three": "Fähler",
-      "four": "Öppis isch schief gloffe!"
+      "four": "Öppis isch schief gloffe!",
+      "five": "Das alte Passwort ist falsch",
+      "six": "Zu viele Versuche. Bitte versuchen Sie es später erneut."
     },
     "editProfile": {
       "one": "Profil aktualisiert",
@@ -326,7 +332,8 @@
     "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
     "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
     "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen",
-    "repostTitle": "Anfrage erneut posten"
+    "repostTitle": "Anfrage erneut posten",
+    "reduceHelpersError": "Sie können die Anzahl der Helfer nicht unter die Anzahl der bestätigten Helfer reduzieren."
   },
   "messages": {
     "txt1": "Nachrichte",
@@ -362,7 +369,13 @@
     "txt11": "Bisch sicher, dass du dich\nvom Account abmelde wotsch?",
     "txt12": "Sprach ändere",
     "txt13": "Dunks Thema",
-    "txt14": "Upgrade-Plan"
+    "txt14": "Upgrade-Plan",
+    "deleteBlocked": {
+      "ownerTitle": "Aktive Aufgaben gefunden",
+      "ownerMessage": "Sie haben {{count}} aktive selbst erstellte Aufgabe(n). Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "helperTitle": "Aktive Zuweisungen gefunden",
+      "helperMessage": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe(n). Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen."
+    }
   },
   "cancelSubscription": {
     "txt1": "Dini aktuell Abonnemänt",
@@ -775,7 +788,11 @@
     "spotsLeft": "No {{spots}} Plätz frei",
     "status": "Status",
     "allHelpersConfirmed": "Alli Helfer bestätigt! Du chasch d'Ufgab als abgschlosse markiere.",
-    "allSlotsFilled": "Alli Plätz besetzt"
+    "allSlotsFilled": "Alli Plätz besetzt",
+    "deletedUser": {
+      "title": "Bewerber nicht verfügbar",
+      "message": "Dieser Bewerber hat sein Konto gelöscht und kann nicht mehr bestätigt werden."
+    }
   },
   "interestSelection": {
     "personalizeExperience": "Personalisier Dini Erfahrung",

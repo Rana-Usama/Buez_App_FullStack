@@ -15,7 +15,11 @@
     "confirm": "Passwort bestätige",
     "currency": "z.B. 90€",
     "sign": "€",
-    "gotIt": "Verstanden"
+    "gotIt": "Verstanden",
+    "subTasks": "Teilaufgaben",
+    "scheduledDateTime": "Geplantes Datum & Uhrzeit",
+    "more": "mehr",
+    "error": "Fehler"
   },
   "validations": {
     "inValid": "Ungültigi E-Mail",
@@ -23,7 +27,8 @@
     "passwordReq": "Passwort wird bruucht",
     "userReq": "Benutzername wird bruucht",
     "passwordLen": "Passwort mues mindestens 6 Zeiche lang sii",
-    "passwordMatch": "Passwörter müend übereinstimme"
+    "passwordMatch": "Passwörter müend übereinstimme",
+    "samePassword": "Das neue Passwort muss sich vom alten unterscheiden"
   },
   "toast": {
     "login": {
@@ -74,7 +79,9 @@
       "one": "Passwort gändere",
       "two": "S Passwort isch erfolgrich gänderet worde!",
       "three": "Fehler",
-      "four": "Öppis isch schief gange!"
+      "four": "Öppis isch schief gange!",
+      "five": "Das alte Passwort ist falsch",
+      "six": "Zu viele Versuche. Bitte versuchen Sie es später erneut."
     },
     "editProfile": {
       "one": "Profil aktualisiert",
@@ -261,7 +268,8 @@
     "validateStep1": "Bitte Aufgabentyp und Vergütungsart auswählen",
     "validateStep2": "Bitte Datum, Uhrzeit und geschätzte Dauer wählen",
     "validateStep3": "Bitte Beschreibung, Ort und Vergütung hinzufügen",
-    "repostTitle": "Anfrage erneut posten"
+    "repostTitle": "Anfrage erneut posten",
+    "reduceHelpersError": "Sie können die Anzahl der Helfer nicht unter die Anzahl der bestätigten Helfer reduzieren."
   },
   "messages": {
     "txt1": "Nachrichte",
@@ -291,7 +299,13 @@
     "txt10": "Bisch sicher, dass du die Konto wotsch lösche?",
     "txt11": "Bisch sicher, dass du dich uslogge wotsch us däm Konto?",
     "txt12": "Sprache ändern",
-    "txt13": "Dunkles Thema"
+    "txt13": "Dunkles Thema",
+    "deleteBlocked": {
+      "ownerTitle": "Aktive Aufgaben gefunden",
+      "ownerMessage": "Sie haben {{count}} aktive selbst erstellte Aufgabe(n). Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "helperTitle": "Aktive Zuweisungen gefunden",
+      "helperMessage": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe(n). Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen."
+    }
   },
   "cancelSubscription": {
     "txt1": "Premium-Abo kündige",
@@ -456,5 +470,11 @@
     "total": "Aufgaben gesamt",
     "active": "Aktive Aufgaben",
     "completed": "Abgeschlossene Aufgaben"
+  },
+  "taskApplicants": {
+    "deletedUser": {
+      "title": "Bewerber nicht verfügbar",
+      "message": "Dieser Bewerber hat sein Konto gelöscht und kann nicht mehr bestätigt werden."
+    }
   }
 }

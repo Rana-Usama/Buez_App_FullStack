@@ -44,6 +44,10 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
     password: yup
       .string()
       .min(6, `${t("validations.passwordLen")}`)
+      .notOneOf(
+        [yup.ref("oldPassword")],
+        `${t("validations.samePassword")}`
+      )
       .required(`${t("validations.passwordReq")}`),
     confirmPassword: yup
       .string()
@@ -51,11 +55,37 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
       .required(`${t("validations.passwordMatch")}`),
   });
 
+  // Map Firebase auth error codes to user-friendly messages
+  const getPasswordErrorMessage = (error: any): string => {
+    switch (error?.code) {
+      case "auth/invalid-credential":
+      case "auth/wrong-password":
+        return `${t("toast.changePassword.five")}`; // Old password is incorrect
+      case "auth/too-many-requests":
+        return `${t("toast.changePassword.six")}`; // Too many attempts
+      case "auth/weak-password":
+        return `${t("validations.passwordLen")}`;
+      default:
+        return `${t("toast.changePassword.four")}`; // Something went wrong
+    }
+  };
+
   const handlePasswordChange = async (values: any) => {
     try {
       showIndicator(true);
       const currentPassword = values.oldPassword;
       const newPassword = values.password;
+
+      // Defensive guard: never allow reusing the current password
+      if (currentPassword === newPassword) {
+        Toast.show({
+          type: "error",
+          text1: `${t("toast.changePassword.three")}`,
+          text2: `${t("validations.samePassword")}`,
+        });
+        return;
+      }
+
       await updatePassword(currentPassword, newPassword);
       Toast.show({
         type: "success",
@@ -64,13 +94,15 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
       });
       navigation.navigate("Login");
     } catch (error: any) {
+      console.log("Change password failed:", error?.code, error?.message);
       Toast.show({
         type: "error",
         text1: `${t("toast.changePassword.three")}`,
-        text2: `${t("toast.changePassword.four")}`,
+        text2: getPasswordErrorMessage(error),
       });
+    } finally {
+      showIndicator(false);
     }
-    showIndicator(false);
   };
 
   return (

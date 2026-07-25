@@ -172,7 +172,7 @@ function RequestCard({
             <View style={{ marginBottom: RFPercentage(1.5) }}>
               <View style={{ flexDirection: "row", alignItems: "center", marginBottom: RFPercentage(0.8) }}>
                 <Ionicons name="list" size={RFPercentage(1.5)} color={theme.primary} />
-                <Text style={{ marginLeft: RFPercentage(0.5), color: theme.darkGrey }}>Sub-tasks:</Text>
+                <Text style={{ marginLeft: RFPercentage(0.5), color: theme.darkGrey }}>{t("common.subTasks")}:</Text>
               </View>
               <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
                 {selectedSubTasks.slice(0, 3).map((st, si) => (
@@ -183,7 +183,7 @@ function RequestCard({
                 ))}
                 {selectedSubTasks.length > 3 && (
                   <View style={{ paddingHorizontal: RFPercentage(0.8), paddingVertical: RFPercentage(0.4), borderRadius: RFPercentage(1.2), marginRight: RFPercentage(0.8), marginBottom: RFPercentage(0.5), backgroundColor: theme.darkGrey + "10" }}>
-                    <Text style={{ color: theme.darkGrey }}>+{selectedSubTasks.length - 3} more</Text>
+                    <Text style={{ color: theme.darkGrey }}>+{selectedSubTasks.length - 3} {t("common.more")}</Text>
                   </View>
                 )}
               </View>

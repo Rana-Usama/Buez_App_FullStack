@@ -229,16 +229,11 @@ function ConfirmedHelpers({ route, navigation }) {
     });
   };
 
-
-  
-
   const renderHelperItem = ({ item, index }) => {
+    const isDark = theme.mode === "dark";
 
-      const isDark = theme.mode === "dark";
-    
-      const firstLetter = item?.userName.trim()?.[0];
-      const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
-
+    const firstLetter = item?.userName.trim()?.[0];
+    const [, groupTextColor] = getAvatarColors(firstLetter, isDark);
 
     return (
       <View
@@ -285,9 +280,7 @@ function ConfirmedHelpers({ route, navigation }) {
                   size={RFPercentage(1.3)}
                   color={theme.darkGrey}
                 />
-                <Text
-                  style={[styles.confirmedDate, { color: theme.darkGrey }]}
-                >
+                <Text style={[styles.confirmedDate, { color: theme.darkGrey }]}>
                   {t("offerDetail.confirmedOn")}:{" "}
                   {new Date(item.confirmedAt).toLocaleDateString()}
                 </Text>
@@ -334,20 +327,7 @@ function ConfirmedHelpers({ route, navigation }) {
                 {t("myRequests.reviewed") || "Reviewed"}
               </Text>
             </View>
-          ) : (
-            <View style={styles.cannotReviewBadge}>
-              <Ionicons
-                name="time-outline"
-                size={RFPercentage(1.8)}
-                color={Colors.darkGrey}
-              />
-              <Text style={styles.cannotReviewText}>
-                {task.status !== "Completed"
-                  ? "Task not completed"
-                  : "Cannot Review"}
-              </Text>
-            </View>
-          )}
+          ) : null}
 
           <TouchableOpacity
             style={[
@@ -370,7 +350,12 @@ function ConfirmedHelpers({ route, navigation }) {
               size={RFPercentage(1.5)}
               color={isDark ? Colors.white : Colors.primary}
             />
-            <Text style={[styles.messageButtonText,{color: isDark ? Colors.white : Colors.primary}]}>
+            <Text
+              style={[
+                styles.messageButtonText,
+                { color: isDark ? Colors.white : Colors.primary },
+              ]}
+            >
               {t("details.txt9") || "Message"}
             </Text>
           </TouchableOpacity>
@@ -738,7 +723,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: RFPercentage(5),
-    bottom:RFPercentage(10)
+    bottom: RFPercentage(10),
   },
   emptyText: {
     fontSize: RFPercentage(2),

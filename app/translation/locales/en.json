@@ -24,7 +24,10 @@
     "task": "Task",
     "bulk": "Bulk Task with multiple helpers",
     "helper": "helper",
-    "helpers": "helpers"
+    "helpers": "helpers",
+    "subTasks": "Sub-tasks",
+    "scheduledDateTime": "Scheduled Date & Time",
+    "more": "more"
   },
   "validations": {
     "inValid": "Invalid email",
@@ -32,7 +35,8 @@
     "passwordReq": "Password is required",
     "userReq": "Username is required",
     "passwordLen": "Password must be at least 6 characters long",
-    "passwordMatch": "Passwords must match"
+    "passwordMatch": "Passwords must match",
+    "samePassword": "New password must be different from your old password"
   },
   "toast": {
     "login": {
@@ -88,7 +92,9 @@
       "one": "Password Changed",
       "two": "Password has been changed successfully!",
       "three": "Error",
-      "four": "Some thing went wrong!"
+      "four": "Some thing went wrong!",
+      "five": "Old password is incorrect",
+      "six": "Too many attempts. Please try again later."
     },
     "editProfile": {
       "one": "Profile Updated",
@@ -336,7 +342,8 @@
     "validateStep1": "Please select a task type and compensation type to continue",
     "validateStep2": "Please choose a date, time and estimated duration",
     "validateStep3": "Please add a description, location and compensation",
-    "repostTitle": "Repost Request"
+    "repostTitle": "Repost Request",
+    "reduceHelpersError": "You cannot reduce the number of helpers below the number of confirmed helpers."
   },
   "messages": {
     "txt1": "Messages",
@@ -372,7 +379,13 @@
     "txt11": "Are you sure you want to logout\nfrom this account?",
     "txt12": "Change Language",
     "txt13": "Dark Theme",
-    "txt14": "Upgrade Plan"
+    "txt14": "Upgrade Plan",
+    "deleteBlocked": {
+      "ownerTitle": "Active Tasks Found",
+      "ownerMessage": "You have {{count}} active task(s) you created. Please complete or cancel them before deleting your account.",
+      "helperTitle": "Active Assignments Found",
+      "helperMessage": "You are a confirmed helper on {{count}} active task(s). Please complete or cancel those assignments before deleting your account."
+    }
   },
   "cancelSubscription": {
     "txt1": "Your Current BUEZ Subscription",
@@ -793,7 +806,11 @@
     "spotsLeft": "{{spots}} spots left",
     "status": "Status",
     "allHelpersConfirmed": "All helpers confirmed! You can mark the task as completed.",
-    "allSlotsFilled": "All Slots Filled"
+    "allSlotsFilled": "All Slots Filled",
+    "deletedUser": {
+      "title": "Applicant Unavailable",
+      "message": "This applicant has deleted their account and can no longer be confirmed."
+    }
   },
   "interestSelection": {
     "personalizeExperience": "Personalize Your Experience",
@@ -890,7 +907,6 @@
     "dayLeft": "1 day of free access left",
     "expired": "Your founder access has ended"
   },
-
   "decider": {
     "dc1": "Connecting your community…",
     "dc2": "Finding opportunities nearby…",

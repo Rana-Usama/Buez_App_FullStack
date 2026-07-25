@@ -58,7 +58,6 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
         },
       ]}
     >
-    
 
       {/* Worker Info */}
       <TouchableOpacity

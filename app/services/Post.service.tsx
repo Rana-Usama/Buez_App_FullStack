@@ -25,6 +25,7 @@ import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { uploadImage } from "./Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { removeMemberFromGroupChat } from "./GroupChat.service";
+import { sendPushToUser } from "../utils/pushNotify";
 
 const db = FIREBASE_DB;
 const PAGE_SIZE = 10;
@@ -569,18 +570,14 @@ export const sendTaskCancellationNotification = async ({
   } has cancelled their confirmed spot for "${taskTitle}"`;
 
   // Push notification (best-effort; never block the cancel on this).
+  // Skips deleted accounts / stale tokens via the shared helper.
   try {
-    if (owner?.token) {
-      await fetch("https://buez-server-khaki.vercel.app/api/send-notification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fcmToken: owner.token,
-          title: "Spot Cancelled",
-          body: message,
-        }),
-      });
-    }
+    await sendPushToUser({
+      userId: owner?.userId,
+      token: owner?.token,
+      title: "Spot Cancelled",
+      body: message,
+    });
   } catch (error) {
     console.log("sendTaskCancellationNotification push error:", error);
   }

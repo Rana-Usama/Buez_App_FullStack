@@ -23,6 +23,7 @@ import {
   updateDoc,
   doc,
   onSnapshot,
+  arrayUnion,
 } from "firebase/firestore";
 import { BlurView } from "expo-blur";
 import { useTranslation } from "react-i18next";
@@ -47,6 +48,7 @@ import { createNewChat } from "../services/Chat.service";
 import { useUser } from "../contexts/user.context";
 import { useAppTheme } from "../contexts/themeContext";
 import { cachedTranslate } from "../utils/cachedTranslations";
+import { sendPushToUser } from "../utils/pushNotify";
 import {
   formatCurrency,
   convertCurrency,
@@ -688,28 +690,17 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
-  // Send push notification
+  // Send push notification (skips deleted accounts / stale tokens)
   async function sendPushNotification() {
     try {
-      const response = await fetch(
-        "https://buez-server-khaki.vercel.app/api/send-notification",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fcmToken: postRequest?.user?.token,
-            title: currentUser?.userData?.userName,
-            body: t("pushNotifications.txt1"),
-          }),
-        },
-      );
-      const data = await response.text();
-      return data;
+      await sendPushToUser({
+        userId: postRequest?.userId,
+        token: postRequest?.user?.token,
+        title: currentUser?.userData?.userName,
+        body: t("pushNotifications.txt1"),
+      });
     } catch (error) {
       console.log("sendPushNotification error:", error);
-      throw error;
     }
   }
 
@@ -891,6 +882,9 @@ function OfferDetail({ navigation, route }) {
       const taskDocRef = doc(db, "taskRequests", postRequest.id);
       const updateData = {
         appliedWorkers: updatedAppliedWorkers,
+        // Queryable mirror of applicant IDs — lets account deletion strip this
+        // user from every task's applicants list.
+        appliedWorkerIds: arrayUnion(currentUserId),
       };
       await saveApplicationNotification(cleanApplication);
       await updateDoc(taskDocRef, updateData);
@@ -1036,30 +1030,21 @@ function OfferDetail({ navigation, route }) {
     }
   };
 
-  // Send notification to requester for application
+  // Send notification to requester for application (skips deleted accounts)
   const sendApplicationNotification = async () => {
     try {
-      const response = await fetch(
-        "https://buez-server-khaki.vercel.app/api/send-notification",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fcmToken: postRequest?.user?.token,
-            title: "New Application",
-            body: `${
-              currentUser?.userData?.userName || "Someone"
-            } has applied to your "${
-              postRequest?.taskType === "Other"
-                ? postRequest?.customTaskTitle
-                : postRequest?.taskType
-            }" request`,
-          }),
-        },
-      );
-      return response.text();
+      await sendPushToUser({
+        userId: postRequest?.userId,
+        token: postRequest?.user?.token,
+        title: "New Application",
+        body: `${
+          currentUser?.userData?.userName || "Someone"
+        } has applied to your "${
+          postRequest?.taskType === "Other"
+            ? postRequest?.customTaskTitle
+            : postRequest?.taskType
+        }" request`,
+      });
     } catch (error) {
       console.log("Notification error:", error);
     }
@@ -1364,7 +1349,7 @@ function OfferDetail({ navigation, route }) {
                   />
                 </View>
                 <Text style={[styles.sectionTitle, { color: theme.heading }]}>
-                  {"Sub-tasks"}
+                  {t("common.subTasks")}
                 </Text>
               </View>
               <View style={styles.subTasksList}>
@@ -1416,7 +1401,7 @@ function OfferDetail({ navigation, route }) {
                     <Text
                       style={[styles.subTaskText, { color: theme.darkGrey }]}
                     >
-                      +{selectedSubTasks.length - 5} more
+                      +{selectedSubTasks.length - 5} {t("common.more")}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -1447,7 +1432,7 @@ function OfferDetail({ navigation, route }) {
                   />
                 </View>
                 <Text style={[styles.sectionTitle, { color: theme.heading }]}>
-                  {"Scheduled Date & Time"}
+                  {t("common.scheduledDateTime")}
                 </Text>
               </View>
 

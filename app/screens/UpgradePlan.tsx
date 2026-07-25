@@ -195,15 +195,31 @@ function UpgradePlan(props) {
     }
   };
 
-  const yearlyPrice = priceLabelForPlan("yearly");
   const monthlyPrice = priceLabelForPlan("monthly");
 
-  const savingsPercentage =
-    ((prices.monthly[userCurrency] * 12 - prices.yearly[userCurrency]) /
-      (prices.monthly[userCurrency] * 12)) *
-    100;
+  const monthlyRegular = prices.monthly[userCurrency];
+  const yearlyPrice = prices.yearly[userCurrency];
 
+  // Amount discounted each month for the intro offer
+  const introDiscount = 4.0;
+
+  // First 3 months intro price
+  const introMonthly = monthlyRegular - introDiscount;
+
+  // Cost of first year on monthly plan
+  const firstYearMonthlyCost = introMonthly * 3 + monthlyRegular * 9;
+
+  const savingsAmount = firstYearMonthlyCost - yearlyPrice;
+
+  const savingsPercentage = (savingsAmount / firstYearMonthlyCost) * 100;
   const highlightText = `Save ${Math.round(savingsPercentage)}%`;
+
+    const yearlySavings = {
+    monthlyCost: formatCurrency(firstYearMonthlyCost, userCurrency),
+    yearlyCost: formatCurrency(yearlyPrice, userCurrency),
+    savings: formatCurrency(savingsAmount, userCurrency),
+    savingsPercentage: Math.round(savingsPercentage),
+  };
 
   const plans = [
     {
@@ -227,10 +243,7 @@ function UpgradePlan(props) {
       title: t("subscriptionV2.yearly"),
       price: yearlyPrice,
       period: t("subscriptionV2.perYear"),
-      originalPrice: formatCurrency(
-        prices.monthly[userCurrency] * 12,
-        userCurrency,
-      ),
+      originalPrice: yearlySavings?.monthlyCost,
       description: `${t("upgradePlan.bestValue")} ${highlightText}`,
       features: [
         t("subscriptionV2.txt3"),
@@ -246,17 +259,6 @@ function UpgradePlan(props) {
     },
   ];
 
-  const monthlyAmount = prices.monthly[userCurrency] ?? prices.monthly.USD;
-  const yearlyAmount = prices.yearly[userCurrency] ?? prices.yearly.USD;
-
-  const yearlySavings = {
-    monthlyCost: formatCurrency(monthlyAmount * 12, userCurrency),
-    yearlyCost: formatCurrency(yearlyAmount, userCurrency),
-    savings: formatCurrency(monthlyAmount * 12 - yearlyAmount, userCurrency),
-    savingsPercentage: Math.round(
-      ((monthlyAmount * 12 - yearlyAmount) / (monthlyAmount * 12)) * 100,
-    ),
-  };
 
   // ── PLAN CARD RENDERER ─────────────────────────────────────────────────────
   const renderPlanCard = ({ item, index }) => {
@@ -612,8 +614,6 @@ function UpgradePlan(props) {
               },
             ]}
           >
-            
-
             <View style={styles.comparisonBody}>
               <Text
                 style={[

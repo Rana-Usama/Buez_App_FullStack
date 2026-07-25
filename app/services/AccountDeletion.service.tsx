@@ -10,6 +10,7 @@ import {
   updateDoc,
   setDoc,
   arrayUnion,
+  arrayRemove,
   Query,
 } from "firebase/firestore";
 import { getStorage, ref, deleteObject } from "firebase/storage";
@@ -219,6 +220,38 @@ const handlePostedTasks = async (
   }
 
   await commitOps(ops, "posted tasks");
+};
+
+// ─── Step 2b: remove the user from tasks they applied to (as an applicant) ───
+// Applications are stored inline in `appliedWorkers` (an object array, not
+// directly queryable), so we key off the `appliedWorkerIds` mirror. Removing
+// the user here means they can no longer appear in — or be confirmed from — any
+// task's Applicants list.
+const removeUserFromApplications = async (userId: string) => {
+  const docs = await safeGetDocs(
+    query(
+      collection(db, "taskRequests"),
+      where("appliedWorkerIds", "array-contains", userId),
+    ),
+    "taskRequests applied",
+  );
+  const ops: PendingOp[] = [];
+  for (const d of docs) {
+    const data: any = d.data();
+    if (data?.userId === userId) continue; // own task handled elsewhere
+    const applied = Array.isArray(data?.appliedWorkers)
+      ? data.appliedWorkers.filter((w: any) => w?.userId !== userId)
+      : [];
+    ops.push({
+      type: "update",
+      ref: d.ref,
+      data: {
+        appliedWorkers: applied,
+        appliedWorkerIds: arrayRemove(userId),
+      },
+    });
+  }
+  await commitOps(ops, "remove from applications");
 };
 
 // ─── Step 3: completed-task history involving the user ───────────────────────
@@ -481,6 +514,92 @@ const anonymizeUserProfile = async (userId: string) => {
   }
 };
 
+// ─── Pre-deletion guard ───────────────────────────────────────────────────────
+// A user must resolve active responsibilities before deleting their account:
+//  • active tasks they own, and
+//  • active tasks where they are a confirmed helper.
+// Detection mirrors cancelActiveAcceptances: acceptedBy (single-helper accepts)
+// plus pending completedTask entries (confirm-flow acceptances).
+export interface DeletionBlockers {
+  ownsActiveTasks: boolean;
+  isConfirmedHelper: boolean;
+  ownedActiveCount: number;
+  confirmedHelperCount: number;
+}
+
+export const getActiveDeletionBlockers = async (
+  userId: string,
+): Promise<DeletionBlockers> => {
+  const result: DeletionBlockers = {
+    ownsActiveTasks: false,
+    isConfirmedHelper: false,
+    ownedActiveCount: 0,
+    confirmedHelperCount: 0,
+  };
+  if (!userId) return result;
+
+  // Active tasks owned by the user.
+  const owned = await safeGetDocs(
+    query(collection(db, "taskRequests"), where("userId", "==", userId)),
+    "blockers owned",
+  );
+  owned.forEach((d) => {
+    if (!isFinishedStatus(d.data()?.status)) result.ownedActiveCount += 1;
+  });
+
+  // Active tasks where the user is a confirmed helper.
+  const handledTasks = new Set<string>();
+
+  // Single-helper direct accepts.
+  const accepted = await safeGetDocs(
+    query(
+      collection(db, "taskRequests"),
+      where("acceptedBy.userId", "==", userId),
+    ),
+    "blockers acceptedBy",
+  );
+  accepted.forEach((d) => {
+    const data: any = d.data();
+    if (data?.userId === userId) return; // own task, already counted above
+    if (isFinishedStatus(data?.status)) return;
+    if (handledTasks.has(d.id)) return;
+    handledTasks.add(d.id);
+    result.confirmedHelperCount += 1;
+  });
+
+  // Confirm-flow acceptances (bulk & single confirm) via pending completedTask.
+  const pendingCts = await safeGetDocs(
+    query(
+      collection(db, "completedTask"),
+      where("acceptedBy.userId", "==", userId),
+      where("status", "==", "pending"),
+    ),
+    "blockers pending completedTask",
+  );
+  for (const ct of pendingCts) {
+    const taskId = ct.data()?.taskId;
+    if (!taskId || handledTasks.has(taskId)) continue;
+    try {
+      const taskSnap = await getDoc(doc(db, "taskRequests", taskId));
+      const taskData: any = taskSnap.exists() ? taskSnap.data() : null;
+      if (
+        taskData &&
+        taskData.userId !== userId &&
+        !isFinishedStatus(taskData.status)
+      ) {
+        handledTasks.add(taskId);
+        result.confirmedHelperCount += 1;
+      }
+    } catch (error) {
+      console.log("getActiveDeletionBlockers: pending completedTask read:", error);
+    }
+  }
+
+  result.ownsActiveTasks = result.ownedActiveCount > 0;
+  result.isConfirmedHelper = result.confirmedHelperCount > 0;
+  return result;
+};
+
 // ─── Main entry point ─────────────────────────────────────────────────────────
 // Cleans up all Firestore/Storage data for the account. Callers are
 // responsible for re-authentication before and deleteUser(auth) after.
@@ -506,6 +625,7 @@ export const purgeUserAccountData = async (userId: string) => {
   // owner notifications; the profile is anonymized last.
   await cancelActiveAcceptances(userId, userData);
   await handlePostedTasks(userId, storageUrlsToDelete);
+  await removeUserFromApplications(userId);
   await anonymizeCompletedHistory(userId);
   await markChatsUserDeleted(userId);
   await anonymizeGroupChatMembership(userId);

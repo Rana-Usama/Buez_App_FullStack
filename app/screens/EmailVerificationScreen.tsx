@@ -62,13 +62,11 @@ function EmailVerificationScreen({ navigation, route }: any) {
           text1: t("emailVerification.verifiedSuccessTitle"),
           text2: t("emailVerification.verifiedSuccessDesc"),
         });
-
-        // Founder routing: the first eligible user on this device sees the
-        // Founder claim screen once. If this device already claimed a spot
-        // for another account, the new user goes straight to the standard
-        // subscription plans instead.
         const founderRoute = await resolveFounderRoute(deviceId);
-        navigation.navigate(founderRoute);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: founderRoute }],
+        });
       } else {
         if (!silent) {
           Toast.show({
@@ -147,14 +145,28 @@ function EmailVerificationScreen({ navigation, route }: any) {
       {/* Resend button with cooldown */}
       <TouchableOpacity
         activeOpacity={0.8}
-        style={[styles.secondaryButton, cooldown > 0 && styles.disabledButton, { borderColor: theme.mode === "dark" ? Colors.darkGrey : Colors.primary,}]}
+        style={[
+          styles.secondaryButton,
+          cooldown > 0 && styles.disabledButton,
+          {
+            borderColor:
+              theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+          },
+        ]}
         onPress={resendVerificationEmail}
         disabled={resending || cooldown > 0}
       >
         {resending ? (
           <ActivityIndicator color={Colors.primary} />
         ) : (
-          <Text style={[styles.secondaryButtonText,{color:theme.mode === "dark" ? Colors.darkGrey : Colors.primary}]}>
+          <Text
+            style={[
+              styles.secondaryButtonText,
+              {
+                color: theme.mode === "dark" ? Colors.darkGrey : Colors.primary,
+              },
+            ]}
+          >
             {cooldown > 0
               ? t("emailVerification.resendCooldown", { seconds: cooldown })
               : t("emailVerification.resendButton")}

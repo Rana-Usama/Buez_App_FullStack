@@ -1,4 +1,3 @@
-// navigation/BottomNavigator.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -46,6 +45,7 @@ import {
 import { updateDoc, doc, deleteField } from "firebase/firestore";
 import Toast from "react-native-toast-message";
 import ConfirmationModal from "../components/common/ConfirmationModal";
+import { getActiveDeletionBlockers } from "../services/AccountDeletion.service";
 import DeviceInfo from "react-native-device-info";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
@@ -71,6 +71,12 @@ const CustomDrawerContent = (props) => {
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
   const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
     useState(false);
+  // Blocks account deletion when the user has active responsibilities.
+  const [deleteBlockedModal, setDeleteBlockedModal] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+  }>({ visible: false, title: "", message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [appVersion, setAppVersion] = useState("");
   const [buildNumber, setBuildNumber] = useState("");
@@ -227,6 +233,32 @@ const CustomDrawerContent = (props) => {
   const handleDeleteAccount = async () => {
     try {
       setIsLoading(true);
+
+      // Block deletion while the user still has active responsibilities. Owner
+      // check takes priority so the message is unambiguous.
+      const uid = FIREBASE_AUTH.currentUser?.uid;
+      if (uid) {
+        const blockers = await getActiveDeletionBlockers(uid);
+        if (blockers.ownsActiveTasks || blockers.isConfirmedHelper) {
+          setIsDeleteAccountModalVisible(false);
+          setDeleteBlockedModal({
+            visible: true,
+            title: blockers.ownsActiveTasks
+              ? t("settings.deleteBlocked.ownerTitle")
+              : t("settings.deleteBlocked.helperTitle"),
+            message: blockers.ownsActiveTasks
+              ? t("settings.deleteBlocked.ownerMessage", {
+                  count: blockers.ownedActiveCount,
+                })
+              : t("settings.deleteBlocked.helperMessage", {
+                  count: blockers.confirmedHelperCount,
+                }),
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const password2 = await SecureStore.getItemAsync("password2");
       await cancelUserSubscription();
       if (provider === "apple.com") {
@@ -478,6 +510,23 @@ const CustomDrawerContent = (props) => {
           message={false}
         />
       </View>
+      <View>
+        <ConfirmationModal
+          isVisible={deleteBlockedModal.visible}
+          loading={false}
+          onClose={() =>
+            setDeleteBlockedModal((prev) => ({ ...prev, visible: false }))
+          }
+          onConfirm={() =>
+            setDeleteBlockedModal((prev) => ({ ...prev, visible: false }))
+          }
+          title={deleteBlockedModal.title}
+          message={deleteBlockedModal.message}
+          type="warning"
+          theme={theme}
+          t={t}
+        />
+      </View>
     </>
   );
 };
@@ -582,7 +631,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
             const event = navigation.emit({
               type: "tabPress",
               target: route.key,
-            });
+            } as any);
 
             if (!isFocused && !event.defaultPrevented) {
               navigation.navigate(route.name);
@@ -600,9 +649,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                 <View
                   style={{
                     bottom:
-                      Platform.OS === "android"
-                        ? RFPercentage(3.5)
-                        : RFPercentage(3.5),
+                      RFPercentage(3.5),
                   }}
                 >
                   <Image
@@ -718,8 +765,8 @@ const styles = StyleSheet.create({
     top: Platform.OS === "ios" ? RFPercentage(0.6) : 0,
   },
   middle: {
-    width: Platform.OS === "ios" ? RFPercentage(8.5) : RFPercentage(8.5),
-    height: Platform.OS === "ios" ? RFPercentage(8.5) : RFPercentage(8.5),
+    width: RFPercentage(8.5),
+    height: RFPercentage(8.5),
   },
   imgStyle: {
     width: RFPercentage(3),
@@ -857,7 +904,7 @@ const styles = StyleSheet.create({
   },
   inactiveItemContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    // alignItems: "center",
     paddingVertical: 14,
     paddingHorizontal: 16,
     backgroundColor: "rgba(255, 255, 255, 0.09)",
@@ -866,13 +913,12 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 24,
     height: 24,
-    marginRight: 12,
-    justifyContent: "center",
-    alignItems: "center",
+    marginRight: 8,
   },
   drawerItemText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: RFPercentage(1.6),
+    lineHeight:RFPercentage(2.2)
   },
   activeIndicator: {
     width: 6,
@@ -896,8 +942,10 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 12,
     marginBottom: 5,
+    textAlign:"center"
   },
   copyrightText: {
     fontSize: 11,
+    textAlign:"center"
   },
 });

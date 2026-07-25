@@ -338,6 +338,24 @@ function PostRequest({ navigation, route }) {
   const [numberOfWorkers, setNumberOfWorkers] = useState(1);
   const MAX_WORKERS = 10;
 
+  // A real in-place edit (not a repost, which starts a fresh task lifecycle).
+  const isRealEdit = isEditing && !isRepost;
+
+  // Helpers already confirmed on this task (edit mode). The required helper
+  // count can be increased freely but never dropped below this floor.
+  const confirmedHelpersCount = Array.isArray(
+    currentPostRequest?.confirmedWorkers,
+  )
+    ? currentPostRequest.confirmedWorkers.length
+    : 0;
+  const minWorkers = isRealEdit ? Math.max(1, confirmedHelpersCount) : 1;
+
+  // Dirty tracking (edit mode): baseline snapshot of the form captured once,
+  // right after the task is hydrated, so the Update button stays disabled
+  // until the user actually changes something.
+  const initialFormSnapshotRef = useRef<string | null>(null);
+  const [editHydrated, setEditHydrated] = useState(false);
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -561,6 +579,9 @@ function PostRequest({ navigation, route }) {
             setNumberOfWorkers(currentPostRequest.numberOfWorkers || 1);
           } finally {
             isHydratingRef.current = false;
+            // Signal that prefill is done so the baseline snapshot (used for
+            // change detection) can be captured on the next commit.
+            setEditHydrated(true);
           }
         }
       };
@@ -833,7 +854,68 @@ function PostRequest({ navigation, route }) {
     });
   }
 
+  // Serialized snapshot of every editable field. Used to detect whether the
+  // edit form differs from the originally loaded task.
+  const buildFormSnapshot = useCallback(() => {
+    return JSON.stringify({
+      taskType: originalTaskType,
+      compensationType: originalCompensationType,
+      customTaskTitle: (customTaskTitle || "").trim(),
+      description: (description || "").trim(),
+      budget: numericBudget || "",
+      compensation: (compensation || "").trim(),
+      numberOfWorkers,
+      duration: selectedDuration,
+      date: selectedDate ? new Date(selectedDate).toISOString() : "",
+      time: selectedTime ? new Date(selectedTime).toISOString() : "",
+      location: {
+        name: selectedLocation?.name || "",
+        latitude: selectedLocation?.latitude ?? null,
+        longitude: selectedLocation?.longitude ?? null,
+      },
+      subTasks: [...selectedSubTasks]
+        .map((st) => st.id ?? st.name)
+        .sort(),
+      images: imageUris.filter(Boolean),
+    });
+  }, [
+    originalTaskType,
+    originalCompensationType,
+    customTaskTitle,
+    description,
+    numericBudget,
+    compensation,
+    numberOfWorkers,
+    selectedDuration,
+    selectedDate,
+    selectedTime,
+    selectedLocation,
+    selectedSubTasks,
+    imageUris,
+  ]);
+
+  // Capture the baseline exactly once, after the edit form finishes hydrating.
+  useEffect(() => {
+    if (
+      isRealEdit &&
+      editHydrated &&
+      initialFormSnapshotRef.current === null
+    ) {
+      initialFormSnapshotRef.current = buildFormSnapshot();
+    }
+  }, [isRealEdit, editHydrated, buildFormSnapshot]);
+
+  // In edit mode the Update button is only active once something changed.
+  // In create/repost mode the button is always active.
+  const hasUnsavedChanges = isRealEdit
+    ? initialFormSnapshotRef.current !== null &&
+      buildFormSnapshot() !== initialFormSnapshotRef.current
+    : true;
+
   const submitPostData = async () => {
+    // Guard: nothing changed on edit → no API call.
+    if (isRealEdit && !hasUnsavedChanges) return;
+
     if (
       !selectedTask ||
       !selectedCompensation ||
@@ -857,6 +939,15 @@ function PostRequest({ navigation, route }) {
         type: "info",
         text1: "Error",
         text2: `Number of workers must be between 1 and ${MAX_WORKERS}`,
+      });
+      return;
+    }
+    // Editing: never allow reducing helpers below already-confirmed helpers.
+    if (isRealEdit && numberOfWorkers < confirmedHelpersCount) {
+      Toast.show({
+        type: "error",
+        text1: `${t("common.error")}`,
+        text2: `${t("postRequest.reduceHelpersError")}`,
       });
       return;
     }
@@ -985,7 +1076,21 @@ function PostRequest({ navigation, route }) {
       } else {
         // Normal edit (not a repost) — update in place and confirm via
         // SuccessScreen with the "edited" copy.
-        await updatePost(currentPostRequest.id, data, imgs);
+        //
+        // The shared `data` object always resets the task lifecycle
+        // (acceptedBy/confirmedWorkers/appliedWorkers/slotsAvailable/status),
+        // which is correct for create + repost but would wipe an already
+        // accepted task on edit. Strip those fields so updateDoc merges only
+        // the edited details and preserves applicants / confirmed helpers.
+        const {
+          acceptedBy: _acceptedBy,
+          confirmedWorkers: _confirmedWorkers,
+          appliedWorkers: _appliedWorkers,
+          slotsAvailable: _slotsAvailable,
+          status: _status,
+          ...editData
+        } = data;
+        await updatePost(currentPostRequest.id, editData, imgs);
         navigation.navigate("SuccessScreen", {
           isEdit: true,
           taskData: {
@@ -1712,18 +1817,26 @@ function PostRequest({ navigation, route }) {
                 <View style={styles.numberInputContainer}>
                   <TouchableOpacity
                     onPress={() => {
-                      if (numberOfWorkers > 1) {
-                        setNumberOfWorkers(numberOfWorkers - 1);
+                      if (numberOfWorkers <= minWorkers) {
+                        if (isRealEdit && confirmedHelpersCount > 0) {
+                          Toast.show({
+                            type: "error",
+                            text1: `${t("common.error")}`,
+                            text2: `${t("postRequest.reduceHelpersError")}`,
+                          });
+                        }
+                        return;
                       }
+                      setNumberOfWorkers(numberOfWorkers - 1);
                     }}
                     style={[
                       styles.numberButton,
                       {
                         backgroundColor: theme.primary,
-                        opacity: numberOfWorkers <= 1 ? 0.5 : 1,
+                        opacity: numberOfWorkers <= minWorkers ? 0.5 : 1,
                       },
                     ]}
-                    disabled={numberOfWorkers <= 1}
+                    disabled={numberOfWorkers <= minWorkers}
                   >
                     <MaterialIcons
                       name="remove"
@@ -1744,7 +1857,18 @@ function PostRequest({ navigation, route }) {
                     value={numberOfWorkers.toString()}
                     onChangeText={(text) => {
                       const num = parseInt(text.replace(/[^\d]/g, "")) || 1;
-                      if (num >= 1 && num <= MAX_WORKERS) {
+                      if (num < minWorkers) {
+                        if (isRealEdit && confirmedHelpersCount > 0) {
+                          Toast.show({
+                            type: "error",
+                            text1: `${t("common.error")}`,
+                            text2: `${t("postRequest.reduceHelpersError")}`,
+                          });
+                        }
+                        setNumberOfWorkers(minWorkers);
+                        return;
+                      }
+                      if (num <= MAX_WORKERS) {
                         setNumberOfWorkers(num);
                       }
                     }}
@@ -2595,7 +2719,11 @@ function PostRequest({ navigation, route }) {
 
         <View style={styles.footerPrimary}>
           <MyAppButton
-            disabled={isLastStep ? indicator : false}
+            disabled={
+              isLastStep
+                ? indicator || (isRealEdit && !hasUnsavedChanges)
+                : false
+            }
             loading={isLastStep ? indicator : false}
             title={
               isLastStep

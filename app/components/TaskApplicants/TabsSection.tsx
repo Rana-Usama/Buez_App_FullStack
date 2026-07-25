@@ -54,6 +54,8 @@ const TabsSection: React.FC<TabsSectionProps> = ({
               theme.mode === "dark"
                 ? Colors.tabsBackgroundDark
                 : Colors.tabsBackgroundLight,
+                borderWidth:1,
+                borderColor:theme.border
           },
         ]}
       >
@@ -66,7 +68,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
           <LinearGradient
             colors={
               activeTab === TABS.APPLIED
-                ? ["#717793ff", "#465493ff"]
+                ? ["#465493ff", "#465493ff"]
                 : ["transparent", "transparent"]
             }
             style={styles.tabGradient}
@@ -102,7 +104,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
           <LinearGradient
             colors={
               activeTab === TABS.CONFIRMED
-                ? [Colors.statusAlertSuccess, "#2E7D32"]
+                  ? ["#465493ff", "#465493ff"]
                 : ["transparent", "transparent"]
             }
             style={styles.tabGradient}
