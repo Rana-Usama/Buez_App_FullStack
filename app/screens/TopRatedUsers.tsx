@@ -22,6 +22,7 @@ import CustomNav from "../components/common/CustomNav";
 import { LinearGradient } from "expo-linear-gradient";
 import { HomeGradients } from "../config/Gradients";
 import AvatarInitials from "../components/common/DefaultAvatars";
+import FounderBadgeById from "../components/common/FounderBadgeById";
 
 type ApiUser = {
   userId: string;
@@ -198,15 +199,26 @@ const TopRatedUsers = ({ navigation }: any) => {
           style={styles.cardSurface}
         >
           <View style={styles.cardHeader}>
-            {user?.profileImage ? (
-              <Image
-                source={{ uri: user.profileImage }}
-                style={styles.avatar}
-                resizeMode="cover"
+            <View style={styles.avatarWrapper}>
+              {user?.profileImage ? (
+                <Image
+                  source={{ uri: user.profileImage }}
+                  style={styles.avatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <AvatarInitials name={user.userName} style={styles.avatar} />
+              )}
+
+              {/* Founder Badge — originalData is the full record from
+                  fetchUsersWithTaskStats, which carries isFounder. */}
+              <FounderBadgeById
+                user={user.originalData}
+                userId={user.id}
+                size={RFPercentage(2.6)}
+                style={styles.founderBadge}
               />
-            ) : (
-              <AvatarInitials name={user.userName} style={styles.avatar} />
-            )}
+            </View>
 
             <View style={styles.headerInfo}>
               <View
@@ -561,6 +573,14 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 14 },
+  avatarWrapper: {
+    position: "relative",
+  },
+  founderBadge: {
+    position: "absolute",
+    right: -RFPercentage(0.5),
+    bottom: -RFPercentage(0.4),
+  },
   avatar: {
     width: RFPercentage(6),
     height: RFPercentage(6),

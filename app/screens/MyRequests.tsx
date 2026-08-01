@@ -860,6 +860,10 @@ function MyRequests({ navigation }) {
   const navigateToOfferDetail = (task) => {
     navigation.navigate("OfferDetail", {
       postRequest: task,
+      // Lets OfferDetail send its Back button here instead of Home — this
+      // flag is only ever set on this navigation call, so every other route
+      // into OfferDetail keeps its existing back behavior.
+      fromMyRequests: true,
     });
   };
 

@@ -6,6 +6,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../../config/Colors";
 import { ShareButton } from "../../job-sharing/ShareButton";
 import AvatarInitials from "../common/DefaultAvatars";
+import FounderBadgeById from "../common/FounderBadgeById";
 import { getAvatarColors } from "../../config/avatarColors";
 
 type Props = {
@@ -62,6 +63,15 @@ export default function UserCard({
               style={styles.avatarPlain}
             />
           )}
+
+          {/* Founder Badge for the task poster — resolved from the
+              authoritative postRequest.userId, since the embedded user
+              snapshot's founder fields can be stale. */}
+          <FounderBadgeById
+            userId={postRequest?.userId || postRequest?.user?.userId}
+            size={RFPercentage(2.6)}
+            style={styles.founderBadge}
+          />
         </View>
 
         <View style={styles.info}>
@@ -131,6 +141,12 @@ const styles = StyleSheet.create({
   },
   avatarWrap: {
     marginRight: RFPercentage(1.5),
+    position: "relative",
+  },
+  founderBadge: {
+    position: "absolute",
+    right: -RFPercentage(0.5),
+    bottom: -RFPercentage(0.3),
   },
   avatarRing: {
     width: RFPercentage(6.5),

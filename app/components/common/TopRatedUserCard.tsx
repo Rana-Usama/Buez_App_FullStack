@@ -15,6 +15,7 @@ import { HomeGradients } from "../../config/Gradients";
 import { TopRatedUser } from "../../types/home.types";
 import { Icons } from "../../config/theme";
 import AvatarInitials from "./DefaultAvatars";
+import FounderBadgeById from "./FounderBadgeById";
 import Colors from "../../config/Colors";
 import { useAppTheme } from "../../contexts/themeContext";
 
@@ -191,6 +192,15 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
                 ]}
               />
             )}
+
+            {/* Founder Badge — `user` already carries isFounder (the Top Rated
+                service reads full `users` docs), so this needs no extra read. */}
+            <FounderBadgeById
+              user={user}
+              userId={(user as any)?.userId}
+              size={RFPercentage(3.2)}
+              style={styles.founderBadge}
+            />
           </View>
 
           {/* Name & Handle */}
@@ -292,6 +302,11 @@ const styles = StyleSheet.create({
   },
   avatarWrapper: {
     // marginVertical: 10,
+  },
+  founderBadge: {
+    position: "absolute",
+    right: -RFPercentage(0.6),
+    bottom: -RFPercentage(0.2),
   },
   avatarShadow: {
     padding: 3,

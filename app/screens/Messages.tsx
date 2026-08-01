@@ -45,6 +45,7 @@ import { formatChatTimestamp } from "../services/Shared.service";
 import { cachedTranslate } from "../utils/cachedTranslations";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import AvatarInitials from "../components/common/DefaultAvatars";
+import FounderBadgeById from "../components/common/FounderBadgeById";
 import { getAvatarColors } from "../config/avatarColors";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -226,6 +227,15 @@ const ChatItem = memo(({ item, userId, theme, onPress, t }: any) => {
                 }}
               />
             )}
+
+            {/* Founder Badge — item.user is a full `users` doc (resolved via
+                fetchOtherUserProfile), so isFounder is already present. */}
+            <FounderBadgeById
+              user={item.user}
+              userId={item.user?.userId}
+              size={RFPercentage(2.6)}
+              style={styles.founderBadge}
+            />
           </View>
         )}
 
@@ -678,6 +688,11 @@ const styles = StyleSheet.create({
   },
   chatItemContent: { flexDirection: "row", alignItems: "center" },
   avatarContainer: { position: "relative" },
+  founderBadge: {
+    position: "absolute",
+    right: -RFPercentage(0.5),
+    bottom: -RFPercentage(0.3),
+  },
   avatar: {
     width: RFPercentage(6.5),
     height: RFPercentage(6.5),

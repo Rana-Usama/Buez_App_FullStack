@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { useUser } from "../contexts/user.context";
 import { usePostContext } from "../contexts/PostContext";
 import { useTranslation } from "react-i18next";
@@ -12,6 +13,18 @@ import { updateUserLocation } from "../services/User.service";
 import { fetchUsersWithTaskStats } from "../services/Review.service";
 import haversine from "haversine";
 import { FilterOption, Task, TopRatedUser } from "../types/home.types";
+
+// Module-level cache for Top Rated Users — persists across Home screen
+// focus/blur cycles (and remounts) within the same app session. This is what
+// lets the Home screen show the last-known list instantly on focus instead of
+// an empty/loading state, while a fresh copy is fetched silently underneath.
+let topRatedUsersCache: TopRatedUser[] | null = null;
+
+// Cheap fingerprint used to skip redundant state updates (and the re-render/
+// flicker that would come with them) when a background refresh returns data
+// that's identical to what's already on screen.
+const fingerprintTopRatedUsers = (users: TopRatedUser[]) =>
+  users.map((u: any) => `${u.userId}:${u.rating ?? ""}`).join(",");
 
 export const useHomeScreen = () => {
   const { t } = useTranslation();
@@ -37,7 +50,16 @@ export const useHomeScreen = () => {
   const [activeFilter, setActiveFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [allTasks, setAllTasks] = useState<Task[]>([]);
-  const [topRatedUsers, setTopRatedUsers] = useState<TopRatedUser[]>([]);
+  // Hydrate instantly from the module-level cache (if any) so returning to
+  // Home never shows an empty section while the background refresh runs.
+  const [topRatedUsers, setTopRatedUsers] = useState<TopRatedUser[]>(
+    topRatedUsersCache || [],
+  );
+  // Only true before the very first successful fetch (no cache yet). Once we
+  // have data, subsequent focuses refresh silently and this stays false.
+  const [topRatedLoading, setTopRatedLoading] = useState<boolean>(
+    topRatedUsersCache === null,
+  );
   const [activeIndices, setActiveIndices] = useState<Record<number, number>>(
     {},
   );
@@ -308,19 +330,32 @@ export const useHomeScreen = () => {
     };
   }, [activeFilter, searchQuery, selectedLocation, filterMap, currentLocation]);
 
-  // Load top rated users
-  useEffect(() => {
-    const loadTopRatedUsers = async () => {
-      try {
-        const users = await fetchUsersWithTaskStats();
-        setTopRatedUsers(users);
-      } catch (error) {
-        console.error("Error loading top rated users:", error);
-      }
-    };
-
-    loadTopRatedUsers();
+  // Load top rated users — cache-first, silent background refresh.
+  // Runs on mount AND every time the Home screen regains focus, but never
+  // clears the existing list or flips the loading flag once cached data
+  // exists: the list stays on screen and updates seamlessly when fresh data
+  // arrives. The loading flag is only ever true before the first-ever fetch.
+  const loadTopRatedUsers = useCallback(async () => {
+    try {
+      const users = await fetchUsersWithTaskStats();
+      setTopRatedUsers((prev) =>
+        fingerprintTopRatedUsers(prev) === fingerprintTopRatedUsers(users)
+          ? prev
+          : users,
+      );
+      topRatedUsersCache = users;
+    } catch (error) {
+      console.error("Error loading top rated users:", error);
+    } finally {
+      setTopRatedLoading(false);
+    }
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTopRatedUsers();
+    }, [loadTopRatedUsers]),
+  );
 
   // Update active indices for image carousels
   useEffect(() => {
@@ -401,6 +436,7 @@ export const useHomeScreen = () => {
     setActiveFilter,
     allTasks,
     topRatedUsers,
+    topRatedLoading,
     displayTasks,
     activeIndices,
     setActiveIndices,

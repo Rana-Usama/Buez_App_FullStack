@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getAuth } from "firebase/auth";
 import {
   getFirestore,
@@ -140,10 +141,18 @@ const CustomAppButton: React.FC<CustomAppButtonProps> = ({
   );
 };
 
+// Every control in the sticky action bar (CustomAppButton, the chat pill,
+// the "Applied"/"Confirmed" status pill, the disabled-apply pill) must share
+// this exact height. They used to size themselves from paddingVertical +
+// their own icon/text content instead, so the row's height visibly changed
+// depending on which state was showing. Centralizing it here fixes that.
+const ACTION_BUTTON_HEIGHT =
+  Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(6.5);
+
 const customButtonStyles = StyleSheet.create({
   button: {
     flex: 1,
-    height: Platform.OS === "android" ? RFPercentage(6.2) : RFPercentage(6.5),
+    height: ACTION_BUTTON_HEIGHT,
     borderRadius: RFPercentage(1.8),
     justifyContent: "center",
     alignItems: "center",
@@ -182,9 +191,44 @@ function OfferDetail({ navigation, route }) {
   const currentUserId = getAuth().currentUser?.uid;
   const currentUserId2 = getAuth().currentUser;
   const { location: currentLocation } = useLocation();
+  const insets = useSafeAreaInsets();
+
+  // The action bar is position:absolute / bottom:0, and targetSdk 35
+  // (Android 15) forces edge-to-edge — so it draws underneath the gesture
+  // bar / nav bar and the buttons get clipped on Samsung devices. Pad by the
+  // real inset, with a floor that preserves the previous spacing wherever no
+  // inset is reported.
+  const footerPaddingBottom = Math.max(
+    insets.bottom + RFPercentage(1.2),
+    Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(1.8),
+  );
 
   const jobId = route.params?.jobId;
   const initialPostRequest = route.params?.postRequest;
+  const cameFromMyRequests = route.params?.fromMyRequests === true;
+  const cameFromAcceptedTasks = route.params?.fromAcceptedTasks === true;
+
+  // Back navigation target: My Requests / Accepted Tasks when opened from
+  // one of those, Home (the existing default) for every other entry point —
+  // Home, chat deep links, etc.
+  const goBackToOrigin = () => {
+    deepLinkState.isHandlingDeepLink = false;
+    if (cameFromMyRequests) {
+      navigation.navigate("TabNavigator", {
+        screen: "MainTabs",
+        params: {
+          screen: `${t("bottomTab.txt1")}`,
+        },
+      });
+    } else if (cameFromAcceptedTasks) {
+      // AcceptedTasks is a plain root Stack screen (unlike My Requests,
+      // which lives inside the tab/drawer navigators), so a direct navigate
+      // is enough — same pattern already used in BottomNavigator.tsx.
+      navigation.navigate("AcceptedTasks");
+    } else {
+      navigation.navigate("TabNavigator");
+    }
+  };
 
   const [postRequest, setPostRequest] = useState<any>(
     initialPostRequest ?? null,
@@ -1088,12 +1132,7 @@ function OfferDetail({ navigation, route }) {
         <Text style={{ color: theme.darkGrey }}>
           {t("offerDetail.notFound") || "This task is no longer available."}
         </Text>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("TabNavigator");
-          }}
-          style={{ marginTop: 12 }}
-        >
+        <TouchableOpacity onPress={goBackToOrigin} style={{ marginTop: 12 }}>
           <Text style={{ color: theme.primary }}>
             {t("common.goBack") || "Go back"}
           </Text>
@@ -1158,10 +1197,7 @@ function OfferDetail({ navigation, route }) {
       >
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => {
-            deepLinkState.isHandlingDeepLink = false;
-            navigation.navigate("TabNavigator");
-          }}
+          onPress={goBackToOrigin}
           style={[styles.headerBackBtn, { backgroundColor: ui.iconChip }]}
         >
           <Feather
@@ -1182,7 +1218,11 @@ function OfferDetail({ navigation, route }) {
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          // Keep content clear of the (now inset-aware) absolute action bar.
+          { paddingBottom: RFPercentage(16) + insets.bottom },
+        ]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true },
@@ -1223,10 +1263,7 @@ function OfferDetail({ navigation, route }) {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => {
-              deepLinkState.isHandlingDeepLink = false;
-              navigation.navigate("TabNavigator");
-            }}
+            onPress={goBackToOrigin}
             style={styles.back}
           >
             <Feather name="arrow-left" color="white" size={RFPercentage(2.4)} />
@@ -1262,7 +1299,7 @@ function OfferDetail({ navigation, route }) {
             theme={theme}
             t={t}
             translatedOffer={translatedOffer}
-            onBack={() => navigation.goBack()}
+            onBack={goBackToOrigin}
             onOpenViewer={() => setIsVisible(true)}
             activeIndex={activeIndex}
           />
@@ -1697,7 +1734,11 @@ function OfferDetail({ navigation, route }) {
         <View
           style={[
             styles.stickyFooter,
-            { backgroundColor: ui.footerBg, borderTopColor: ui.cardBorder },
+            {
+              backgroundColor: ui.footerBg,
+              borderTopColor: ui.cardBorder,
+              paddingBottom: footerPaddingBottom,
+            },
           ]}
         >
           <View style={styles.actionButtons}>
@@ -1811,7 +1852,10 @@ function OfferDetail({ navigation, route }) {
                       size={RFPercentage(2.5)}
                       color={Colors.red}
                     />
-                    <Text style={[styles.disabledText, { color: Colors.red }]}>
+                    <Text
+                      style={[styles.disabledText, { color: Colors.red }]}
+                      numberOfLines={1}
+                    >
                       {getRemainingSlots() <= 0
                         ? t("offerDetail.full") || "All slots filled"
                         : t("offerDetail.cannotApply") || "Cannot apply"}
@@ -1880,7 +1924,10 @@ function OfferDetail({ navigation, route }) {
                       size={RFPercentage(2.5)}
                       color="#4CAF50"
                     />
-                    <Text style={[styles.appliedText, { color: "#4CAF50" }]}>
+                    <Text
+                      style={[styles.appliedText, { color: "#4CAF50" }]}
+                      numberOfLines={1}
+                    >
                       {confirmed
                         ? t("offerDetail.confirmed")
                         : t("offerDetail.applied")}
@@ -1985,7 +2032,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: RFPercentage(16),
+    // paddingBottom is applied at runtime (base + safe-area inset).
   },
   heroSection: {
     height: RFPercentage(40),
@@ -2291,8 +2338,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: RFPercentage(2),
     paddingTop: RFPercentage(1.4),
-    paddingBottom:
-      Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(1.8),
+    // paddingBottom is applied at runtime (base + safe-area inset).
     borderTopWidth: 1,
   },
   actionButtons: {
@@ -2301,10 +2347,10 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     flex: 1,
+    height: ACTION_BUTTON_HEIGHT,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: RFPercentage(1.2),
     borderRadius: RFPercentage(1.8),
     borderWidth: 1,
     gap: RFPercentage(0.8),
@@ -2496,9 +2542,9 @@ const styles = StyleSheet.create({
   },
   appliedStatusContainer: {
     flex: 1,
+    height: ACTION_BUTTON_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: RFPercentage(1.5),
     borderRadius: RFPercentage(1.8),
     backgroundColor: "#4CAF50" + "18",
     gap: RFPercentage(0.5),
@@ -2517,9 +2563,9 @@ const styles = StyleSheet.create({
   },
   disabledApplyContainer: {
     flex: 1,
+    height: ACTION_BUTTON_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: RFPercentage(1.6),
     borderRadius: RFPercentage(1.8),
     backgroundColor: Colors.red + "15",
     borderWidth: 1,

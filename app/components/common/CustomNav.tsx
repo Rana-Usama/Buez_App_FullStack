@@ -17,9 +17,13 @@ import { useAppTheme } from "../../contexts/themeContext";
 interface NavProps {
   title: string;
   showBack?: boolean;
+  // Optional override for the back button — defaults to navigation.goBack().
+  // Use this when a screen needs Back to land on a specific route instead
+  // (e.g. always going Home) rather than just popping the stack.
+  onBack?: () => void;
 }
 
-const CustomNav = ({ title, showBack = true }: NavProps) => {
+const CustomNav = ({ title, showBack = true, onBack }: NavProps) => {
   const navigation = useNavigation();
   const { theme } = useAppTheme();
 
@@ -31,7 +35,7 @@ const CustomNav = ({ title, showBack = true }: NavProps) => {
           {showBack && (
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => navigation.goBack()}
+              onPress={onBack || (() => navigation.goBack())}
               style={[
                 styles.backButton,
                 {

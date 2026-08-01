@@ -119,12 +119,12 @@
       "Desc": "Suivez vos demandes, mettez à jour vos publications et discutez avec vos supporters – le tout au même endroit."
     },
     "onBoarding4": {
-      "Title": "Profitez de 14 jours d'accès complet",
-      "Desc": "Essayez toutes les fonctionnalités de Büez gratuitement. Aucune restriction, aucun engagement."
+      "Title": "Rejoignez le programme Founder",
+      "Desc": "Faites partie des 100 premiers Buez Founders et profitez de 60 jours d'accès complet, entièrement gratuit."
     },
     "onBoarding5": {
       "Title": "Poursuivez avec un abonnement",
-      "Desc": "Après votre essai gratuit de 14 jours, continuez à profiter de Büez avec le forfait mensuel à 8.90 €. Annulez à tout moment."
+      "Desc": "Commencez pour seulement 3.40 € par mois pendant vos 3 premiers mois, puis 7.90 € par mois ensuite."
     }
   },
   "login": {
@@ -147,29 +147,15 @@
     "txt5": "Ok",
     "txt6": "Aucun compte n'est associé à cette adresse e-mail."
   },
-  "freeTrial": {
-    "txt1": "Commencez votre essai gratuit de 14 jours",
-    "txt2": "Comment fonctionne votre essai gratuit",
-    "txt3": "Aujourd'hui",
-    "txt4": "Profitez d'un accès illimité à toutes nos fonctionnalités premium pendant 14 jours, complètement gratuit.",
-    "txt5": "Après 10 jours",
-    "txt6": "Nous vous enverrons un rappel amical car votre période d'essai se termine dans 4 jours.",
-    "txt7": "Continuer après l'essai",
-    "txt8": "Votre abonnement continuera automatiquement après 14 jours. Vous pouvez annuler à tout moment.",
-    "txt9": "Commencer mon essai gratuit"
-  },
   "subscriptionV2": {
     "txt1": "Achetez notre premium pour accéder aux services complets",
-    "txt2": ",99/mois",
     "txt3": "Publiez des demandes de tâches quotidiennes",
     "txt4": "Voir les demandes quotidiennement",
     "txt5": "Gagnez de l'argent en faisant des tâches quotidiennes",
     "txt6": "Annulez à tout moment",
     "txt7": "Ajouter une carte",
-    "freeTrial": "Essai gratuit",
     "monthly": "Mensuel",
     "yearly": "Annuel",
-    "for7Days": "pendant 14 jours",
     "perMonth": "par mois",
     "introOffer": "3,90 $/mois les 3 premiers mois",
     "thenAfter": "{{price}}/mois après 3 mois",
@@ -178,33 +164,22 @@
     "fullAccess": "Accès complet à toutes les fonctionnalités",
     "bestValue": "Meilleur rapport qualité-prix",
     "choosePlan": "Choisissez votre BUEZ forfait",
-    "startFree": "Commencez par un essai gratuit, mettez à niveau à tout moment",
+    "startFree": "Choisissez le forfait qui vous convient",
     "mostPopular": "LE PLUS POPULAIRE",
-    "save30": "Économisez 36%",
     "noCreditCard": "Aucune carte de crédit",
     "securePayment": "Paiement sécurisé",
     "cancelAnytime": "Annulez à tout moment",
-    "startFreeTrial": "Commencer l'essai gratuit",
     "continueWith": "Continuer avec",
     "maybeLater": "Peut-être plus tard",
     "prioritySupport": "Support prioritaire",
     "exclusiveContent": "Contenu exclusif",
     "selected": "Sélectionné",
-    "select": "Sélectionner"
-  },
-  "freeTrialModal": {
-    "title": "Commencez votre essai gratuit",
-    "subtitle": "Choisissez comment vous souhaitez commencer votre essai gratuit de 14 jours",
-    "addCardNow": "Ajouter une carte maintenant",
-    "skipForNow": "Passer pour l'instant",
-    "info1": "Ajouter une carte maintenant assure un service sans interruption après l'essai",
-    "info2": "Votre carte ne sera pas débitée avant 14 jours",
-    "info3": "Vous pouvez annuler à tout moment pendant la période d'essai",
-    "importantNote": "Commencez votre aventure Premium",
-    "automaticSubscription": "Profitez d’un accès Premium complet pendant 14 jours gratuitement ! Après votre période d’essai, votre abonnement mensuel se poursuivra automatiquement si vous ajoutez une carte, afin que vous ne perdiez jamais vos avantages Premium."
+    "select": "Sélectionner",
+    "introOfferDynamic": "{{price}}/mois les {{months}} premiers mois",
+    "saveLabel": "Économisez {{percent}}%",
+    "yearlySavingsCaption": "Vous économisez {{amount}} par an"
   },
   "subscription": {
-    "txt1": "Votre essai gratuit de 14 jours est terminé.",
     "txt2": "Passez à Premium pour débloquer l'accès complet.",
     "txt3": "Paiement",
     "renewSubscription": "BUEZ l'abonnement",
@@ -372,10 +347,25 @@
     "txt14": "Plan de mise à niveau",
     "deleteBlocked": {
       "ownerTitle": "Tâches actives trouvées",
-      "ownerMessage": "Vous avez {{count}} tâche(s) active(s) que vous avez créée(s). Veuillez les terminer ou les annuler avant de supprimer votre compte.",
+      "ownerMessage_one": "Vous avez {{count}} tâche active que vous avez créée. Veuillez la terminer ou l'annuler avant de supprimer votre compte.",
+      "ownerMessage_other": "Vous avez {{count}} tâches actives que vous avez créées. Veuillez les terminer ou les annuler avant de supprimer votre compte.",
       "helperTitle": "Affectations actives trouvées",
-      "helperMessage": "Vous êtes une aide confirmée sur {{count}} tâche(s) active(s). Veuillez terminer ou annuler ces affectations avant de supprimer votre compte."
-    }
+      "helperMessage_one": "Vous êtes une aide confirmée sur {{count}} tâche active. Veuillez terminer ou annuler cette affectation avant de supprimer votre compte.",
+      "helperMessage_other": "Vous êtes une aide confirmée sur {{count}} tâches actives. Veuillez terminer ou annuler ces affectations avant de supprimer votre compte.",
+      "ownerPastTitle": "Tâches actives passées trouvées",
+      "ownerPastMessage_one": "Vous avez {{count}} tâche active passée qui doit être terminée ou annulée avant de supprimer votre compte.",
+      "ownerPastMessage_other": "Vous avez {{count}} tâches actives passées qui doivent être terminées ou annulées avant de supprimer votre compte.",
+      "ownerBothTitle": "Tâches actives trouvées",
+      "futureTaskCount_one": "{{count}} tâche active future",
+      "futureTaskCount_other": "{{count}} tâches actives futures",
+      "pastTaskCount_one": "{{count}} tâche active passée",
+      "pastTaskCount_other": "{{count}} tâches actives passées",
+      "ownerBothMessage": "Vous avez {{futurePart}} et {{pastPart}} qui doivent être terminées ou annulées avant de supprimer votre compte.",
+      "ownerCta": "Tâches actives",
+      "helperCta": "Tâches acceptées"
+    },
+    "deleteFailed": "Échec de la suppression",
+    "tryAgain": "Veuillez réessayer."
   },
   "cancelSubscription": {
     "txt1": "Votre abonnement actuel",
@@ -383,7 +373,6 @@
     "txt10": "Annuler l'abonnement",
     "monthlyPlan": "FORFAIT MENSUEL",
     "yearlyPlan": "FORFAIT ANNUEL",
-    "save36": "Économisez",
     "cancellationNote": "Détails de l'annulation",
     "monthlyCancellation": "Votre abonnement restera actif jusqu'à la fin de votre période de facturation actuelle. Vous ne serez plus facturé.",
     "yearlyCancellation": "Votre abonnement annuel restera actif jusqu'à la fin de votre cycle de facturation actuel. Aucun remboursement ne sera accordé pour la période non utilisée.",
@@ -392,7 +381,10 @@
     "confirmCancel": "Oui, annuler",
     "keepSubscription": "Garder l'abonnement",
     "monthlyCancelled": "Abonnement mensuel annulé avec succès",
-    "yearlyCancelled": "Abonnement annuel annulé avec succès"
+    "yearlyCancelled": "Abonnement annuel annulé avec succès",
+    "renewsOn": "Se renouvelle le {{date}}",
+    "expiresOn": "Expire le {{date}}",
+    "savingLabel": "Économisez {{percent}}%"
   },
   "chnagePassword": {
     "txt1": "Entrez l'ancien mot de passe",
@@ -462,7 +454,7 @@
     "txt1": "Profil",
     "txt2": "Modifier le profil",
     "txt3": "Notes et avis",
-    "txt4": "Tâches terminées",
+    "txt4": "Aides terminées",
     "applicantProfile": "Profil du candidat",
     "confirmApplicant": "Confirmer",
     "confirmed": "Confirmé",
@@ -516,10 +508,10 @@
     "txt1": "NOTÉ",
     "txt2": "TERMINÉ",
     "txt3": "Votre avis",
-    "txt4": "Tâches terminées",
+    "txt4": "Aides terminées",
     "txt5": " Noté",
     "txt6": "Avis en attente",
-    "txt7": "Chargement de vos tâches terminées..."
+    "txt7": "Chargement de vos aides terminées..."
   },
   "pushNotifications": {
     "txt1": "a accepté votre demande de tâche.",
@@ -528,9 +520,7 @@
     "txt4": "Votre tâche acceptée",
     "txt5": "a été marquée comme terminée par",
     "txt6": "Suivi de tâche !",
-    "txt7": "Ceci est un rappel concernant votre récente publication de tâche. Veuillez examiner votre progression et mettre à jour le statut si terminé.",
-    "txt8": "⏰ Essai gratuit bientôt terminé",
-    "txt9": "Votre essai gratuit se termine dans 4 jours. Restez abonné pour conserver un accès complet."
+    "txt7": "Ceci est un rappel concernant votre récente publication de tâche. Veuillez examiner votre progression et mettre à jour le statut si terminé."
   },
   "modal": {
     "txt1": "Tâche acceptée avec succès !",
@@ -568,9 +558,9 @@
       "title": "Compte & Abonnement",
       "questions": {
         "q1": "Ai-je besoin d'un abonnement pour utiliser BUEZ ?",
-        "a1": "Oui, BUEZ fonctionne sur un modèle basé sur l'abonnement. Vous avez besoin d'un abonnement actif pour parcourir et publier des demandes. Cependant, vous pouvez vous inscrire et créer un compte avec un essai gratuit de 14 jours.",
+        "a1": "Oui, BUEZ fonctionne sur un modèle basé sur l'abonnement. Vous avez besoin d'un abonnement actif pour parcourir et publier des demandes. Les utilisateurs éligibles peuvent toutefois rejoindre le programme Founder pour bénéficier de 60 jours d'accès gratuit.",
         "q2": "Combien coûte l'abonnement BUEZ ?",
-        "a2": "BUEZ propose un forfait d'abonnement mensuel à 12,99 $. Vous pouvez commencer par un essai gratuit de 14 jours pour explorer toutes les fonctionnalités.",
+        "a2": "BUEZ propose un forfait d'abonnement mensuel à 3,40 $ par mois pendant les 3 premiers mois, puis 7,90 $ par mois ensuite. Les utilisateurs éligibles peuvent aussi rejoindre le programme Founder pour profiter de 60 jours d'accès gratuit avant tout frais.",
         "q3": "Puis-je annuler mon abonnement ?",
         "a3": "Oui, vous pouvez annuler votre abonnement à tout moment via les paramètres de l'application. Vous conserverez l'accès jusqu'à la fin de votre période de facturation.",
         "q4": "Que se passe-t-il si je ne m'abonne pas ?",
@@ -630,12 +620,12 @@
       }
     },
     "section7": {
-      "title": "Gestion de l'essai gratuit",
+      "title": "Programme Founder",
       "questions": {
-        "q1": "Comment fonctionne l'essai gratuit de 14 jours ?",
-        "a1": "Les nouveaux utilisateurs bénéficient d'un accès complet à toutes les fonctionnalités de BUEZ pendant 14 jours, complètement gratuit. Aucune carte de crédit n'est requise au préalable.",
-        "q2": "Serai-je facturé après l'essai gratuit ?",
-        "a2": "Si vous n'annulez pas avant la fin de l'essai, votre abonnement continuera automatiquement au tarif mensuel de 12,99 $.",
+        "q1": "Comment fonctionne le programme Founder ?",
+        "a1": "Les 100 premiers utilisateurs éligibles bénéficient d'un accès complet à toutes les fonctionnalités de BUEZ pendant 60 jours, entièrement gratuit. Aucune carte de crédit n'est requise au préalable.",
+        "q2": "Serai-je facturé une fois mon accès Founder terminé ?",
+        "a2": "Si vous n'annulez pas avant la fin de vos 60 jours d'accès Founder, votre abonnement continuera automatiquement à 3,40 $ par mois pendant les 3 premiers mois, puis 7,90 $ par mois ensuite.",
         "q3": "Comment annuler mon abonnement ?",
         "a3": "Allez dans Paramètres → Annuler l'abonnement. Vous conserverez l'accès jusqu'à la fin de votre période de facturation actuelle.",
         "q4": "Puis-je obtenir un remboursement ?",
@@ -828,28 +818,6 @@
     "resendButton": "Renvoyer l'e-mail",
     "resendCooldown": "Renvoyer dans {{seconds}}s",
     "backToLogin": "Retour à la connexion"
-  },
-  "freeTrialBanner": {
-    "active": {
-      "label": "Essai gratuit actif",
-      "title": "Profitez des fonctionnalités premium"
-    },
-    "warning_no_card": {
-      "label": "Essai bientôt terminé",
-      "title": "Ajoutez un moyen de paiement pour continuer"
-    },
-    "urgent_no_card": {
-      "label": "Essai expire demain !",
-      "title": "Passez à l’abonnement pour continuer"
-    },
-    "warning_with_card": {
-      "label": "Essai bientôt terminé",
-      "title": "Votre abonnement démarrera automatiquement"
-    },
-    "autorenew": {
-      "label": "Démarre demain",
-      "title": "L’abonnement mensuel commencera automatiquement"
-    }
   },
   "founderIntro": {
     "badge": "Limité · 100 premiers",

@@ -328,6 +328,14 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
         subscriptionEnd: userData.subscriptionEnd || null,
         token: userData?.token,
         userId: userData?.userId,
+        // Carried through so Top Rated surfaces can show the Founder Badge
+        // without a second lookup (this map is already built from full
+        // `users` docs).
+        isFounder: userData?.isFounder === true,
+        founderNumber:
+          typeof userData?.founderNumber === "number"
+            ? userData.founderNumber
+            : null,
         latitude: userData.latitude || null,
         longitude: userData.longitude || null,
         memberSince: userData?.createdAt
@@ -402,6 +410,8 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
           category: "Beginner",
           email: usersDataMap[helperUserId]?.email || "",
           isSubscribed: usersDataMap[helperUserId]?.isSubscribed || false,
+          isFounder: usersDataMap[helperUserId]?.isFounder === true,
+          founderNumber: usersDataMap[helperUserId]?.founderNumber ?? null,
           memberSince: usersDataMap[helperUserId]?.memberSince || "Recently",
           latitude: usersDataMap[helperUserId]?.latitude || null,
           longitude: usersDataMap[helperUserId]?.longitude || null,

@@ -153,7 +153,14 @@ function Login({ navigation }) {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: theme.white }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      // Android is deliberately left with NO behavior. The manifest sets
+      // android:windowSoftInputMode="adjustPan", so the OS already pans the
+      // window to keep the focused field visible. Stacking behavior="height"
+      // on top of that made KeyboardAvoidingView also shrink itself by the
+      // keyboard height, and on hide it doesn't reliably restore — which is
+      // exactly the blank strip left at the bottom after dismissing the
+      // keyboard. iOS has no adjustPan equivalent, so it keeps "padding".
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
         <Screen style={[styles.screen, { backgroundColor: theme.white }]}>

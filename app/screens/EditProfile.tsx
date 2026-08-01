@@ -412,8 +412,6 @@ function EditProfile({ navigation }) {
                     maxLength={300}
                     style={[styles.biographyInput, { color: theme.black }]}
                     textAlignVertical="top"
-                    cursorColor={theme.primary}
-                    selectionColor={`${theme.primary}40`}
                     numberOfLines={5}
                   />
                 )}

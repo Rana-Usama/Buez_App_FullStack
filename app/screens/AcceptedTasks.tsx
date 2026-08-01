@@ -25,6 +25,7 @@ import Colors from "../config/Colors";
 import CustomNav from "../components/common/CustomNav";
 import NotFound from "../components/common/NotFound";
 import AvatarInitials from "../components/common/DefaultAvatars";
+import FounderBadgeById from "../components/common/FounderBadgeById";
 import { useAppTheme } from "../contexts/themeContext";
 import { useUser } from "../contexts/user.context";
 import { useLocation } from "../utils/useLocation";
@@ -248,7 +249,13 @@ export default function AcceptedTasks({ navigation }) {
   };
 
   const navigateToOfferDetail = (task: any) => {
-    navigation.navigate("OfferDetail", { postRequest: task });
+    navigation.navigate("OfferDetail", {
+      postRequest: task,
+      // Lets OfferDetail send its Back button here instead of Home — only
+      // ever set on this navigation call, so every other route into
+      // OfferDetail keeps its existing back behavior.
+      fromAcceptedTasks: true,
+    });
   };
 
   // ── Cancel / withdraw from a confirmed task ──
@@ -403,21 +410,31 @@ export default function AcceptedTasks({ navigation }) {
 
         {/* Owner row */}
         <View style={styles.ownerRow}>
-          {cart?.user?.profileImage ? (
-            <Image
-              style={styles.ownerAvatar}
-              source={{ uri: cart.user.profileImage }}
+          <View style={styles.avatarWrapper}>
+            {cart?.user?.profileImage ? (
+              <Image
+                style={styles.ownerAvatar}
+                source={{ uri: cart.user.profileImage }}
+              />
+            ) : (
+              <AvatarInitials
+                name={cart?.user?.userName}
+                textStyle={{
+                  fontSize: RFPercentage(1.8),
+                  lineHeight: RFPercentage(4),
+                }}
+                style={styles.ownerAvatar}
+              />
+            )}
+
+            {/* Founder Badge for the task owner — resolved by id, since the
+                embedded owner snapshot carries no isFounder. */}
+            <FounderBadgeById
+              userId={cart?.userId || cart?.user?.userId}
+              size={RFPercentage(2.2)}
+              style={styles.founderBadge}
             />
-          ) : (
-            <AvatarInitials
-              name={cart?.user?.userName}
-              textStyle={{
-                fontSize: RFPercentage(1.8),
-                lineHeight: RFPercentage(4),
-              }}
-              style={styles.ownerAvatar}
-            />
-          )}
+          </View>
           <View style={{ flex: 1 }}>
             <Text
               style={[styles.ownerName, { color: theme.heading }]}
@@ -670,7 +687,16 @@ export default function AcceptedTasks({ navigation }) {
         backgroundColor="transparent"
         translucent
       />
-      <CustomNav title={`${t("profile.txt5")}`} showBack />
+      <CustomNav
+        title={`${t("profile.txt5")}`}
+        showBack
+        // Back always lands on Home instead of just popping the stack —
+        // AcceptedTasks can be reached from several places (drawer, OfferDetail
+        // deep-link back, delete-account blocked modal CTA, etc.), so a plain
+        // goBack() could land somewhere unexpected depending on how the user
+        // got here.
+        onBack={() => navigation.navigate("TabNavigator")}
+      />
 
       {loading ? (
         <ActivityIndicator
@@ -784,6 +810,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: RFPercentage(1.2),
     marginTop: RFPercentage(1.4),
+  },
+  avatarWrapper: {
+    position: "relative",
+  },
+  founderBadge: {
+    position: "absolute",
+    right: -RFPercentage(0.5),
+    bottom: -RFPercentage(0.3),
   },
   ownerAvatar: {
     width: RFPercentage(5),

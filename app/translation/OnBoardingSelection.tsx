@@ -10,6 +10,10 @@ import {
   StatusBar,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import i18n from "./i18n";
 import Colors from "../config/Colors";
@@ -123,8 +127,53 @@ const LanguageOnboardingModal = ({
         backgroundColor="rgba(0,0,0,0.5)"
         translucent
       />
+      {/*
+        A React Native <Modal> renders in its OWN native window, so it sits
+        outside the app's safe-area context — useSafeAreaInsets() there would
+        report zeros. Scoping a provider to the modal is the supported way to
+        get real insets inside it, and keeps this fix local to this file
+        (the app has no root SafeAreaProvider; screens get theirs from
+        NavigationContainer, which this modal is mounted outside of).
+      */}
+      <SafeAreaProvider>
+        <LanguageSheet
+          selected={selected}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          onConfirm={handleConfirm}
+        />
+      </SafeAreaProvider>
+    </Modal>
+  );
+};
+
+// ─── Sheet body (inside SafeAreaProvider so insets resolve) ───────────────────
+const LanguageSheet = ({
+  selected,
+  renderItem,
+  keyExtractor,
+  onConfirm,
+}: {
+  selected: string;
+  renderItem: ({ item }: { item: (typeof LANGUAGES)[0] }) => JSX.Element;
+  keyExtractor: (item: (typeof LANGUAGES)[0]) => string;
+  onConfirm: () => void;
+}) => {
+  const insets = useSafeAreaInsets();
+
+  // Sit the CTA above the gesture bar / nav bar. targetSdk 35 (Android 15)
+  // forces edge-to-edge, so the sheet now draws underneath the system nav
+  // area — which is what was clipping the button on Samsung devices. The
+  // floor keeps the previous spacing on devices that report no inset (older
+  // Android with hardware keys), so nothing regresses.
+  const bottomPadding = Math.max(
+    insets.bottom + RFPercentage(2),
+    Platform.OS === "ios" ? RFPercentage(5) : RFPercentage(3),
+  );
+
+  return (
       <View style={styles.overlay}>
-        <View style={styles.sheet}>
+        <View style={[styles.sheet, { paddingBottom: bottomPadding }]}>
           {/* Handle bar */}
           <View style={styles.handle} />
 
@@ -140,20 +189,25 @@ const LanguageOnboardingModal = ({
             </Text>
           </View>
 
-          {/* Language list */}
+          {/* Language list — allowed to shrink and scroll so that on short
+              screens the list gives way instead of pushing the CTA off the
+              bottom. On normal screens everything still fits and it never
+              scrolls, so the layout is visually unchanged. */}
           <FlatList
             data={LANGUAGES}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
-            scrollEnabled={false}
+            extraData={selected}
             style={styles.list}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
           />
 
           {/* Confirm button */}
           <TouchableOpacity
             activeOpacity={0.85}
             style={styles.confirmButton}
-            onPress={handleConfirm}
+            onPress={onConfirm}
           >
             <Text style={styles.confirmText}>Continue</Text>
             <Ionicons
@@ -165,7 +219,6 @@ const LanguageOnboardingModal = ({
           </TouchableOpacity>
         </View>
       </View>
-    </Modal>
   );
 };
 
@@ -200,8 +253,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: RFPercentage(3),
     borderTopRightRadius: RFPercentage(3),
     paddingHorizontal: RFPercentage(2.5),
-    paddingBottom: Platform.OS === "ios" ? RFPercentage(5) : RFPercentage(3),
+    // paddingBottom is applied at runtime from the safe-area inset so the CTA
+    // always clears the gesture bar / navigation bar.
     paddingTop: RFPercentage(1.5),
+    // Never taller than the screen: on short devices the list scrolls instead
+    // of the sheet growing and pushing the Continue button out of view.
+    maxHeight: "92%",
   },
   handle: {
     width: RFPercentage(5),
@@ -239,6 +296,9 @@ const styles = StyleSheet.create({
   },
   list: {
     marginBottom: RFPercentage(2),
+    // Lets the list yield space to the CTA when the sheet hits its maxHeight.
+    flexShrink: 1,
+    flexGrow: 0,
   },
   languageRow: {
     flexDirection: "row",

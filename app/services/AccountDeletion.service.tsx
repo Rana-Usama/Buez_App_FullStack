@@ -514,9 +514,22 @@ const anonymizeUserProfile = async (userId: string) => {
   }
 };
 
+// Resolves the best-available scheduled timestamp for a task doc, mirroring
+// the fallback order used when hydrating/editing a task (scheduledDate /
+// scheduledTime legacy fields, then the combined scheduledDateTime).
+const getTaskScheduledTime = (data: any): number | null => {
+  const raw =
+    data?.scheduledDateTime ?? data?.scheduledDate ?? data?.selectedDate;
+  if (!raw) return null;
+  const parsed = new Date(raw).getTime();
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
 // ─── Pre-deletion guard ───────────────────────────────────────────────────────
 // A user must resolve active responsibilities before deleting their account:
-//  • active tasks they own, and
+//  • active tasks they own — split into "future" (still scheduled ahead) and
+//    "past" (scheduled date already elapsed but never completed/cancelled),
+//    and
 //  • active tasks where they are a confirmed helper.
 // Detection mirrors cancelActiveAcceptances: acceptedBy (single-helper accepts)
 // plus pending completedTask entries (confirm-flow acceptances).
@@ -524,6 +537,8 @@ export interface DeletionBlockers {
   ownsActiveTasks: boolean;
   isConfirmedHelper: boolean;
   ownedActiveCount: number;
+  futureOwnedCount: number;
+  pastOwnedCount: number;
   confirmedHelperCount: number;
 }
 
@@ -534,17 +549,30 @@ export const getActiveDeletionBlockers = async (
     ownsActiveTasks: false,
     isConfirmedHelper: false,
     ownedActiveCount: 0,
+    futureOwnedCount: 0,
+    pastOwnedCount: 0,
     confirmedHelperCount: 0,
   };
   if (!userId) return result;
 
-  // Active tasks owned by the user.
+  // Active tasks owned by the user, split into future vs. past by scheduled
+  // date. Tasks with no resolvable schedule default to "future" so they're
+  // never misreported as overdue.
+  const now = Date.now();
   const owned = await safeGetDocs(
     query(collection(db, "taskRequests"), where("userId", "==", userId)),
     "blockers owned",
   );
   owned.forEach((d) => {
-    if (!isFinishedStatus(d.data()?.status)) result.ownedActiveCount += 1;
+    const data: any = d.data();
+    if (isFinishedStatus(data?.status)) return;
+    result.ownedActiveCount += 1;
+    const scheduledAt = getTaskScheduledTime(data);
+    if (scheduledAt !== null && scheduledAt < now) {
+      result.pastOwnedCount += 1;
+    } else {
+      result.futureOwnedCount += 1;
+    }
   });
 
   // Active tasks where the user is a confirmed helper.
@@ -567,7 +595,34 @@ export const getActiveDeletionBlockers = async (
     result.confirmedHelperCount += 1;
   });
 
-  // Confirm-flow acceptances (bulk & single confirm) via pending completedTask.
+  // Confirm-flow acceptances via confirmedWorkerIds — the queryable mirror
+  // of the confirmedWorkers array (arrays of objects aren't queryable by
+  // userId directly). This is the reliable path for BOTH bulk tasks (several
+  // confirmed workers, no acceptedBy at all) and single tasks confirmed
+  // through apply→confirm, so it catches confirmed helpers the acceptedBy
+  // check above can miss.
+  const confirmedViaArray = await safeGetDocs(
+    query(
+      collection(db, "taskRequests"),
+      where("confirmedWorkerIds", "array-contains", userId),
+    ),
+    "blockers confirmedWorkerIds",
+  );
+  confirmedViaArray.forEach((d) => {
+    const data: any = d.data();
+    if (data?.userId === userId) return; // own task, already counted above
+    if (isFinishedStatus(data?.status)) return;
+    if (handledTasks.has(d.id)) return;
+    handledTasks.add(d.id);
+    result.confirmedHelperCount += 1;
+  });
+
+  // Legacy/defensive: older confirm-flow acceptances were meant to be
+  // tracked via a "pending" completedTask entry mirroring the acceptance.
+  // In practice nothing in the current confirm flow creates one (completedTask
+  // docs are only ever written at actual task completion), so this will
+  // normally match nothing — kept only in case any historical data relies
+  // on it. confirmedWorkerIds above is the authoritative check.
   const pendingCts = await safeGetDocs(
     query(
       collection(db, "completedTask"),

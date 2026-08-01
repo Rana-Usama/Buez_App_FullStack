@@ -119,12 +119,12 @@
       "Desc": "Behalte deine Anfragen im Blick, aktualisiere deine Beiträge und chatte mit Unterstützern – alles an einem Ort."
     },
     "onBoarding4": {
-      "Title": "Genieße 14 Tage Vollzugriff",
-      "Desc": "Teste alle Funktionen von Büez komplett kostenlos. Keine Einschränkungen, keine Verpflichtungen."
+      "Title": "Werde Teil des Founder-Programms",
+      "Desc": "Sei einer der ersten 100 Buez Founder und genieße 60 Tage Vollzugriff, komplett kostenlos."
     },
     "onBoarding5": {
       "Title": "Fahre mit Abonnement fort",
-      "Desc": "Nach deinem 14-tägigen kostenlosen Test genieße Büez weiterhin mit dem monatlichen Plan für 8.90 €. Jederzeit kündbar."
+      "Desc": "Starte für nur 3.40 € im Monat für deine ersten 3 Monate, danach 7.90 € im Monat."
     }
   },
   "login": {
@@ -147,29 +147,15 @@
     "txt5": "Ok",
     "txt6": "Kein Konto ist mit dieser E-Mail-Adresse verknüpft."
   },
-  "freeTrial": {
-    "txt1": "Beginne deine 14-tägige kostenlose Testphase",
-    "txt2": "So funktioniert deine kostenlose Testphase",
-    "txt3": "Heute",
-    "txt4": "Genieße unbegrenzten Zugang zu allen unseren Premium-Funktionen für 14 Tage, komplett kostenlos.",
-    "txt5": "Nach 10 Tagen",
-    "txt6": "Wir senden dir eine freundliche Erinnerung, da deine Testphase in 4 Tagen endet.",
-    "txt7": "Nach Testphase fortfahren",
-    "txt8": "Dein Abonnement wird nach 14 Tagen automatisch fortgesetzt. Du kannst jederzeit kündigen.",
-    "txt9": "Kostenlose Testphase starten"
-  },
   "subscriptionV2": {
     "txt1": "Kaufe unser Premium für vollen Service-Zugang",
-    "txt2": ",99/Monat",
     "txt3": "Tägliche Aufgabenanfragen posten",
     "txt4": "Täglich Anfragen sehen",
     "txt5": "Geld verdienen mit täglichen Aufgaben",
     "txt6": "Jederzeit kündbar",
     "txt7": "Karte hinzufügen",
-    "freeTrial": "Kostenlos testen",
     "monthly": "Monatlich",
     "yearly": "Jährlich",
-    "for7Days": "für 14 Tage",
     "perMonth": "pro Monat",
     "introOffer": "3,90 $/Monat für die ersten 3 Monate",
     "thenAfter": "{{price}}/Monat ab dem 4. Monat",
@@ -178,33 +164,22 @@
     "fullAccess": "Voller Zugang zu allen Funktionen",
     "bestValue": "Bester Wert",
     "choosePlan": "Wähle deinen BUEZ Plan",
-    "startFree": "Starte mit kostenlosem Test, upgrade jederzeit",
+    "startFree": "Wähle den Plan, der zu dir passt",
     "mostPopular": "BELIEBTESTE",
-    "save30": "Spare 36%",
     "noCreditCard": "Keine Kreditkarte",
     "securePayment": "Sichere Zahlungsabwicklung",
     "cancelAnytime": "Jederzeit kündbar",
-    "startFreeTrial": "Kostenlosen Test starten",
     "continueWith": "Fortfahren mit",
     "maybeLater": "Vielleicht später",
     "prioritySupport": "Prioritärer Support",
     "exclusiveContent": "Exklusive Inhalte",
     "selected": "Ausgewählt",
-    "select": "Auswählen"
-  },
-  "freeTrialModal": {
-    "title": "Starte deine kostenlose Testphase",
-    "subtitle": "Wähle, wie du deine 14-tägige kostenlose Testphase starten möchtest",
-    "addCardNow": "Jetzt Karte hinzufügen",
-    "skipForNow": "Jetzt überspringen",
-    "info1": "Karte jetzt hinzufügen gewährleistet ununterbrochenen Service nach dem Test",
-    "info2": "Deine Karte wird erst nach 14 Tagen belastet",
-    "info3": "Du kannst während der Testphase jederzeit kündigen",
-    "importantNote": "Beginne deine Premium-Reise",
-    "automaticSubscription": "Genieße vollen Premium-Zugang 14 Tage kostenlos! Nach deiner Testphase wird dein monatliches Abonnement automatisch fortgesetzt, wenn du eine Karte hinzufügst, damit du nie den Zugang zu deinen Premium-Vorteilen verlierst."
+    "select": "Auswählen",
+    "introOfferDynamic": "{{price}}/Monat für die ersten {{months}} Monate",
+    "saveLabel": "Spare {{percent}}%",
+    "yearlySavingsCaption": "Du sparst {{amount}} pro Jahr"
   },
   "subscription": {
-    "txt1": "Deine 14-tägige kostenlose Testphase ist beendet.",
     "txt2": "Upgrade auf Premium, um vollen Zugang zu erhalten.",
     "txt3": "Zur Kasse",
     "renewSubscription": "BUEZ Abonnement",
@@ -372,10 +347,25 @@
     "txt14": "Upgrade-Plan",
     "deleteBlocked": {
       "ownerTitle": "Aktive Aufgaben gefunden",
-      "ownerMessage": "Sie haben {{count}} aktive selbst erstellte Aufgabe(n). Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerMessage_one": "Sie haben {{count}} aktive selbst erstellte Aufgabe. Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerMessage_other": "Sie haben {{count}} aktive selbst erstellte Aufgaben. Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
       "helperTitle": "Aktive Zuweisungen gefunden",
-      "helperMessage": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe(n). Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen."
-    }
+      "helperMessage_one": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe. Bitte schließen Sie diese Zuweisung ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "helperMessage_other": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgaben. Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerPastTitle": "Vergangene aktive Aufgaben gefunden",
+      "ownerPastMessage_one": "Sie haben {{count}} vergangene aktive Aufgabe, die abgeschlossen oder storniert werden muss, bevor Sie Ihr Konto löschen.",
+      "ownerPastMessage_other": "Sie haben {{count}} vergangene aktive Aufgaben, die abgeschlossen oder storniert werden müssen, bevor Sie Ihr Konto löschen.",
+      "ownerBothTitle": "Aktive Aufgaben gefunden",
+      "futureTaskCount_one": "{{count}} zukünftige aktive Aufgabe",
+      "futureTaskCount_other": "{{count}} zukünftige aktive Aufgaben",
+      "pastTaskCount_one": "{{count}} vergangene aktive Aufgabe",
+      "pastTaskCount_other": "{{count}} vergangene aktive Aufgaben",
+      "ownerBothMessage": "Sie haben {{futurePart}} und {{pastPart}}, die abgeschlossen oder storniert werden müssen, bevor Sie Ihr Konto löschen.",
+      "ownerCta": "Aktive Aufgaben",
+      "helperCta": "Angenommene Aufgaben"
+    },
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "tryAgain": "Bitte versuchen Sie es erneut."
   },
   "cancelSubscription": {
     "txt1": "Dein aktuelles Abonnement",
@@ -383,7 +373,6 @@
     "txt10": "Abonnement kündigen",
     "monthlyPlan": "MONATSPLAN",
     "yearlyPlan": "JAHRESPLAN",
-    "save36": "Spare",
     "cancellationNote": "Kündigungsdetails",
     "monthlyCancellation": "Dein Abonnement bleibt bis zum Ende deiner aktuellen Abrechnungsperiode aktiv. Du wirst nicht erneut belastet.",
     "yearlyCancellation": "Dein Jahresabonnement bleibt bis zum Ende deines aktuellen Abrechnungszyklus aktiv. Keine Rückerstattung für ungenutzte Zeit.",
@@ -392,7 +381,10 @@
     "confirmCancel": "Ja, kündigen",
     "keepSubscription": "Abonnement behalten",
     "monthlyCancelled": "Monatsabonnement erfolgreich gekündigt",
-    "yearlyCancelled": "Jahresabonnement erfolgreich gekündigt"
+    "yearlyCancelled": "Jahresabonnement erfolgreich gekündigt",
+    "renewsOn": "Verlängert sich am {{date}}",
+    "expiresOn": "Läuft am {{date}} ab",
+    "savingLabel": "Spare {{percent}}%"
   },
   "chnagePassword": {
     "txt1": "Altes Passwort eingeben",
@@ -462,7 +454,7 @@
     "txt1": "Profil",
     "txt2": "Profil bearbeiten",
     "txt3": "Bewertungen & Rezensionen",
-    "txt4": "Abgeschlossene Aufgaben",
+    "txt4": "Abgeschlossene Hilfe",
     "applicantProfile": "Bewerberprofil",
     "confirmApplicant": "Bestätigen",
     "confirmed": "Bestätigt",
@@ -516,10 +508,10 @@
     "txt1": "BEWERTET",
     "txt2": "ABGESCHLOSSEN",
     "txt3": "Deine Bewertung",
-    "txt4": "Abgeschlossene Aufgaben",
+    "txt4": "Abgeschlossene Hilfe",
     "txt5": " Bewertet",
     "txt6": "Ausstehende Bewertung",
-    "txt7": "Lade deine abgeschlossenen Aufgaben..."
+    "txt7": "Lade deine abgeschlossene Hilfe..."
   },
   "pushNotifications": {
     "txt1": "hat deine Aufgabenanfrage angenommen.",
@@ -528,9 +520,7 @@
     "txt4": "Deine angenommene Aufgabe",
     "txt5": "wurde von als abgeschlossen markiert",
     "txt6": "Aufgaben-Follow-up!",
-    "txt7": "Dies ist eine Erinnerung an deine kürzliche Aufgabenveröffentlichung. Bitte überprüfe deinen Fortschritt und aktualisiere den Status falls abgeschlossen.",
-    "txt8": "⏰ Kostenloser Test endet bald",
-    "txt9": "Dein kostenloser Test endet in 4 Tagen. Bleib abonniert, um vollen Zugang zu behalten."
+    "txt7": "Dies ist eine Erinnerung an deine kürzliche Aufgabenveröffentlichung. Bitte überprüfe deinen Fortschritt und aktualisiere den Status falls abgeschlossen."
   },
   "modal": {
     "txt1": "Aufgabe erfolgreich angenommen!",
@@ -568,9 +558,9 @@
       "title": "Konto & Abonnement",
       "questions": {
         "q1": "Benötige ich ein Abonnement, um BUEZ zu nutzen?",
-        "a1": "Ja, BUEZ operiert auf einem abonnementbasierten Modell. Du benötigst ein aktives Abonnement, um Anfragen zu durchsuchen und zu veröffentlichen. Du kannst dich jedoch mit einem 14-tägigen kostenlosen Test registrieren und ein Konto erstellen.",
+        "a1": "Ja, BUEZ basiert auf einem Abonnement-Modell. Du benötigst ein aktives Abonnement, um Anfragen zu durchsuchen und zu veröffentlichen. Berechtigte Nutzer können jedoch dem Founder-Programm beitreten und 60 Tage kostenlosen Zugang erhalten.",
         "q2": "Wie viel kostet das BUEZ-Abonnement?",
-        "a2": "BUEZ bietet einen monatlichen Abonnementplan für 12,99 $ an. Du kannst mit einem 14-tägigen kostenlosen Test beginnen, um alle Funktionen zu erkunden.",
+        "a2": "BUEZ bietet einen monatlichen Abonnementplan für 3,40 $ im Monat für die ersten 3 Monate, danach 7,90 $ im Monat. Berechtigte Nutzer können außerdem dem Founder-Programm beitreten und erhalten 60 Tage kostenlosen Zugang, bevor Kosten anfallen.",
         "q3": "Kann ich mein Abonnement kündigen?",
         "a3": "Ja, du kannst dein Abonnement jederzeit über die App-Einstellungen kündigen. Du behältst den Zugang bis zum Ende deiner Abrechnungsperiode.",
         "q4": "Was passiert, wenn ich nicht abonniere?",
@@ -630,12 +620,12 @@
       }
     },
     "section7": {
-      "title": "Kostenlose Testphase Verwaltung",
+      "title": "Founder-Programm",
       "questions": {
-        "q1": "Wie funktioniert der 14-tägige kostenlose Test?",
-        "a1": "Neue Benutzer erhalten vollen Zugang zu allen BUEZ-Funktionen für 14 Tage komplett kostenlos. Keine Kreditkarte im Voraus erforderlich.",
-        "q2": "Werde ich nach dem kostenlosen Test belastet?",
-        "a2": "Wenn du nicht vor Testende kündigst, wird dein Abonnement automatisch zum monatlichen Satz von 12,99 $ fortgesetzt.",
+        "q1": "Wie funktioniert das Founder-Programm?",
+        "a1": "Die ersten 100 berechtigten Nutzer erhalten vollen Zugang zu allen BUEZ-Funktionen für 60 Tage, komplett kostenlos. Keine Kreditkarte im Voraus erforderlich.",
+        "q2": "Werde ich belastet, nachdem mein Founder-Zugang endet?",
+        "a2": "Wenn du nicht kündigst, bevor deine 60 Tage Founder-Zugang enden, wird dein Abonnement automatisch zu 3,40 $ im Monat für die ersten 3 Monate und danach 7,90 $ im Monat fortgesetzt.",
         "q3": "Wie kündige ich mein Abonnement?",
         "a3": "Gehe zu Einstellungen → Abonnement kündigen. Du behältst den Zugang bis zum Ende deiner aktuellen Abrechnungsperiode.",
         "q4": "Kann ich eine Rückerstattung erhalten?",
@@ -828,28 +818,6 @@
     "resendButton": "E-Mail erneut senden",
     "resendCooldown": "Erneut senden in {{seconds}}s",
     "backToLogin": "Zurück zum Login"
-  },
-  "freeTrialBanner": {
-    "active": {
-      "label": "Kostenlose Testphase aktiv",
-      "title": "Premium-Funktionen geniessen"
-    },
-    "warning_no_card": {
-      "label": "Testphase endet bald",
-      "title": "Zahlungsmethode hinzufügen, um fortzufahren"
-    },
-    "urgent_no_card": {
-      "label": "Test endet morgen!",
-      "title": "Jetzt upgraden, um fortzufahren"
-    },
-    "warning_with_card": {
-      "label": "Testphase endet bald",
-      "title": "Dein Abo startet automatisch"
-    },
-    "autorenew": {
-      "label": "Startet morgen",
-      "title": "Monatliches Abo startet automatisch"
-    }
   },
   "founderIntro": {
     "badge": "Limitiert · Erste 100",

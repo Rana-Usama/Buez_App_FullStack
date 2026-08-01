@@ -119,12 +119,12 @@
       "Desc": "Behalt dini Aafroge im Blick, aktualisier dini Beiträg und chatte mit Understützer – alles an einem Ort."
     },
     "onBoarding4": {
-      "Title": "Geniess 14 Tag volli Zugriff",
-      "Desc": "Probier all Funktionä vo Büez komplett gratis. Kei Iischränkige, kei Verpflichtige."
+      "Title": "Mach mit bim Founder-Programm",
+      "Desc": "Sig eini vo de erschte 100 Buez Founders und geniess 60 Tag volle Zuegriff, komplett gratis."
     },
     "onBoarding5": {
       "Title": "Fahr mit Abonnemänt witer",
-      "Desc": "Nach dinere 14-tägige gratis Testphase fahr mit Büez witer mit em monätliche Plan für 7.90 CHF. Chasch jederziit kündige."
+      "Desc": "Starte für nur 3.40 CHF im Monat für dini erschte 3 Monät, nachher 7.90 CHF im Monat."
     }
   },
   "login": {
@@ -147,29 +147,15 @@
     "txt5": "Ok",
     "txt6": "Es git kei Account mit dere E-Mail Adräss."
   },
-  "freeTrial": {
-    "txt1": "Start dini 14-tägig gratis Testphase",
-    "txt2": "Wie dini gratis Testphase funktioniert",
-    "txt3": "Hüt",
-    "txt4": "Geniess uneingeschränkti Zugriff uf all üsi Premium-Funktione für 14 Tag, komplett gratis.",
-    "txt5": "Nach 10 Täg",
-    "txt6": "Mir schicked der en fründliche Erinnerig, wil dini Testphase in 4 Täg ablaufet.",
-    "txt7": "Witermache nach dr Testphase",
-    "txt8": "Dini Abonnemänt goht automatisch witer nach 14 Täg. Du chasch jederziit kündige.",
-    "txt9": "Start mini gratis Testphase"
-  },
   "subscriptionV2": {
     "txt1": "Kauf üses Premium für Zugriff uf all Dienstleistige",
-    "txt2": ".99/Monät",
     "txt3": "Veröffentlich täglichi Ufgabeafroge",
     "txt4": "Gseh täglichi Afroge",
     "txt5": "Verdien Geld mit tägliche Ufgabe",
     "txt6": "Chasch jederziit kündige",
     "txt7": "Charte hinzfüege",
-    "freeTrial": "Gratis Test",
     "monthly": "Monätlich",
     "yearly": "Jährlich",
-    "for7Days": "für 14 Täg",
     "perMonth": "pro Monät",
     "introOffer": "3.90 $/Monät für di erste 3 Monät",
     "thenAfter": "{{price}}/Monät ab em 4. Monät",
@@ -178,33 +164,22 @@
     "fullAccess": "Volli Zugriff uf all Funktionä",
     "bestValue": "Beschts Preis-Leistigs-Verhältnis",
     "choosePlan": "Wähl din BUEZ Plan",
-    "startFree": "Start mit eme gratis Test, upgrade jederziit",
+    "startFree": "Wähl dr Plan, wo zu dir passt",
     "mostPopular": "AM BELIEBTESTE",
-    "save30": "Spar 36%",
     "noCreditCard": "Kei Kreditkarte",
     "securePayment": "Sichers Zahligsabwicklig",
     "cancelAnytime": "Chasch jederziit kündige",
-    "startFreeTrial": "Start Gratis Test",
     "continueWith": "Witermache mit",
     "maybeLater": "Villech später",
     "prioritySupport": "Prioritäre Support",
     "exclusiveContent": "Exklusivs Inhalt",
     "selected": "Usgwählt",
-    "select": "Uswähle"
-  },
-  "freeTrialModal": {
-    "title": "Start dini gratis Testphase",
-    "subtitle": "Wähl, wie wottsch dini 14-tägig gratis Testphase starte",
-    "addCardNow": "Jetzt Charte hinzfüege",
-    "skipForNow": "Für jetzt überspringe",
-    "info1": "E Charte jetzt hinzfüege garantiert underbrochene Dienst nach em Test",
-    "info2": "Dini Charte wird erst nach 14 Täg belaschtet",
-    "info3": "Du chasch während dr Testphase jederziit kündige",
-    "importantNote": "Starte dini Premium-Reis",
-    "automaticSubscription": "Gnüss volle Premium-Zugang für 14 Täg gratis! Nach dim Trial wird dini monatligi Abonnemänt automatisch witerfüehrt, wänn du e Karte hinzufügsch, so verlürsch nie dini Premium-Vorteil."
+    "select": "Uswähle",
+    "introOfferDynamic": "{{price}}/Monät für di erste {{months}} Monät",
+    "saveLabel": "Spar {{percent}}%",
+    "yearlySavingsCaption": "Du sparsch {{amount}} pro Jahr"
   },
   "subscription": {
-    "txt1": "Dini 14-tägig gratis Testphase isch beendet.",
     "txt2": "Upgrade uf Premium zum volli Zugriff freischalte.",
     "txt3": "Zahle",
     "renewSubscription": "BUEZ Abonnemänt",
@@ -372,10 +347,25 @@
     "txt14": "Upgrade-Plan",
     "deleteBlocked": {
       "ownerTitle": "Aktive Aufgaben gefunden",
-      "ownerMessage": "Sie haben {{count}} aktive selbst erstellte Aufgabe(n). Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerMessage_one": "Sie haben {{count}} aktive selbst erstellte Aufgabe. Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerMessage_other": "Sie haben {{count}} aktive selbst erstellte Aufgaben. Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
       "helperTitle": "Aktive Zuweisungen gefunden",
-      "helperMessage": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe(n). Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen."
-    }
+      "helperMessage_one": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe. Bitte schließen Sie diese Zuweisung ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "helperMessage_other": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgaben. Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerPastTitle": "Vergangene aktive Aufgaben gefunden",
+      "ownerPastMessage_one": "Sie haben {{count}} vergangene aktive Aufgabe, die abgeschlossen oder storniert werden muss, bevor Sie Ihr Konto löschen.",
+      "ownerPastMessage_other": "Sie haben {{count}} vergangene aktive Aufgaben, die abgeschlossen oder storniert werden müssen, bevor Sie Ihr Konto löschen.",
+      "ownerBothTitle": "Aktive Aufgaben gefunden",
+      "futureTaskCount_one": "{{count}} zukünftige aktive Aufgabe",
+      "futureTaskCount_other": "{{count}} zukünftige aktive Aufgaben",
+      "pastTaskCount_one": "{{count}} vergangene aktive Aufgabe",
+      "pastTaskCount_other": "{{count}} vergangene aktive Aufgaben",
+      "ownerBothMessage": "Sie haben {{futurePart}} und {{pastPart}}, die abgeschlossen oder storniert werden müssen, bevor Sie Ihr Konto löschen.",
+      "ownerCta": "Aktive Aufgaben",
+      "helperCta": "Angenommene Aufgaben"
+    },
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "tryAgain": "Bitte versuchen Sie es erneut."
   },
   "cancelSubscription": {
     "txt1": "Dini aktuell Abonnemänt",
@@ -383,7 +373,6 @@
     "txt10": "Abonnemänt kündige",
     "monthlyPlan": "MONÄTLICHE PLAN",
     "yearlyPlan": "JÄHRLICHE PLAN",
-    "save36": "Spar",
     "cancellationNote": "Kündigungsdetail",
     "monthlyCancellation": "Dini Abonnemänt bliibt aktiv bis zum End vo dinere aktuelle Abrechnigsperiode. Du wirsch nid meh belaschtet.",
     "yearlyCancellation": "Dini jährlich Abonnemänt bliibt aktiv bis zum End vo dinere aktuelle Abrechnigszyklus. Kei Rückerstattig für unbenutzti Ziit.",
@@ -392,7 +381,10 @@
     "confirmCancel": "Ja, kündige",
     "keepSubscription": "Abonnemänt behalte",
     "monthlyCancelled": "Monätlich Abonnemänt erfolgriich gkündigt",
-    "yearlyCancelled": "Jährlich Abonnemänt erfolgriich gkündigt"
+    "yearlyCancelled": "Jährlich Abonnemänt erfolgriich gkündigt",
+    "renewsOn": "Verlängeret sich am {{date}}",
+    "expiresOn": "Lauft am {{date}} us",
+    "savingLabel": "Spar {{percent}}%"
   },
   "chnagePassword": {
     "txt1": "Gib s alt Passwort ii",
@@ -462,7 +454,7 @@
     "txt1": "Profil",
     "txt2": "Profil bearbeite",
     "txt3": "Bewertig & Rezensionä",
-    "txt4": "Abgschlosseni Ufgabe",
+    "txt4": "Abgschlosseni Hilf",
     "applicantProfile": "Bewerberprofil",
     "confirmApplicant": "Bestätige",
     "confirmed": "Bestätigt",
@@ -516,10 +508,10 @@
     "txt1": "REZENSIERT",
     "txt2": "ABGSCHLOSSE",
     "txt3": "Dini Rezension",
-    "txt4": "Abgschlosseni Ufgabe",
+    "txt4": "Abgschlosseni Hilf",
     "txt5": " Rezensiert",
     "txt6": "Ausstahndi Rezension",
-    "txt7": "Lade vo dine abgschlossene Ufgabe..."
+    "txt7": "Lade vo dinere abgschlossene Hilf..."
   },
   "pushNotifications": {
     "txt1": "het dini Ufgabeafrog akzeptiert.",
@@ -528,9 +520,7 @@
     "txt4": "Dini akzeptierti Ufgabe",
     "txt5": "isch als abgschlosse markiert worde vo",
     "txt6": "Ufgabe Follow-up!",
-    "txt7": "Das isch en Erinnerig über dini jüngschti Ufgabeveröffentlichig. Bitte überprüef dini Fortschritt und aktualisier dr Status falls abgschlosse.",
-    "txt8": "⏰ Gratis Test lauft bald ab",
-    "txt9": "Dini gratis Testphase endet in 4 Täg. Bliib abonniert zum volli Zugriff z'behalte."
+    "txt7": "Das isch en Erinnerig über dini jüngschti Ufgabeveröffentlichig. Bitte überprüef dini Fortschritt und aktualisier dr Status falls abgschlosse."
   },
   "modal": {
     "txt1": "Ufgabe erfolgriich akzeptiert!",
@@ -568,9 +558,9 @@
       "title": "Account & Abonnemänt",
       "questions": {
         "q1": "Bruuch i es Abonnemänt zum BUEZ z'verwende?",
-        "a1": "Ja, BUEZ operiert uf eme abonnemänt-basierte Modell. Du bruuchsch es aktives Abonnemänt zum Afroge z'durchblättere und z'veröffentliche. Aber du chasch dich mit eme 14-tägige gratis Test registriere und en Account erstelle.",
+        "a1": "Ja, BUEZ basiert uf eme Abonnemänt-Modell. Du bruuchsch es aktives Abonnemänt zum Afroge z'durchblättere und z'veröffentliche. Berechtigti Nutzer chönd aber am Founder-Programm teilnäh und übercho 60 Tag gratis Zuegriff.",
         "q2": "Wie viel koschtet s BUEZ Abonnemänt?",
-        "a2": "BUEZ bietet en monätliche Abonnemäntsplan für $12.99 aa. Du chasch mit eme 14-tägige gratis Test afah zum all Funktionä z'erkunde.",
+        "a2": "BUEZ bietet en monätliche Abonnemäntsplan für $3.40 pro Monet für di erschte 3 Monet aa, nachher $7.90 pro Monet. Berechtigti Nutzer chönd zuesätzlich am Founder-Programm teilnäh und übercho 60 Tag gratis Zuegriff, bevor öppis chostet.",
         "q3": "Chan i mis Abonnemänt kündige?",
         "a3": "Ja, du chasch dini Abonnemänt jederziit durch d'App Istellige kündige. Du behaltisch Zugriff bis zum End vo dinere Abrechnigsperiode.",
         "q4": "Was passiert wenn i nid abonniere?",
@@ -630,12 +620,12 @@
       }
     },
     "section7": {
-      "title": "Gratis Test Verwaltig",
+      "title": "Founder-Programm",
       "questions": {
-        "q1": "Wie funktioniert dr 14-tägig gratis Test?",
-        "a1": "Neui Benutzer bechömmed volli Zugriff uf all BUEZ Funktionä für 14 Tag komplett gratis. Kei Kreditkarte voraus verlangt.",
-        "q2": "Werd i nach em gratis Test belaschtet?",
-        "a2": "Wenn du nid kündigsch bevor dr Test endet, goht dini Abonnemänt automatisch witer zum monätliche Satz vo $12.99.",
+        "q1": "Wie funktioniert s'Founder-Programm?",
+        "a1": "Di erschte 100 berechtigte Nutzer übercho volli Zugriff uf all BUEZ Funktionä für 60 Tag, komplett gratis. Kei Kreditkarte voraus verlangt.",
+        "q2": "Werd i belaschtet, wenn mi Founder-Zuegriff ändet?",
+        "a2": "Wenn du nid kündigsch bevor dini 60 Tag Founder-Zuegriff ändet, goht dini Abonnemänt automatisch witer zu $3.40 pro Monet für di erschte 3 Monet und nachher $7.90 pro Monet.",
         "q3": "Wie kündigi i mis Abonnemänt?",
         "a3": "Gang zu Istellige → Abonnemänt kündige. Du behaltisch Zugriff bis zum End vo dinere aktuelle Abrechnigsperiode.",
         "q4": "Chan i en Rückerstattig übercho?",
@@ -828,28 +818,6 @@
     "resendButton": "E-Mail nomol sende",
     "resendCooldown": "Nomol sende i {{seconds}}s",
     "backToLogin": "Zurück zum Login"
-  },
-  "freeTrialBanner": {
-    "active": {
-      "label": "Gratis-Test aktiv",
-      "title": "Premium-Funktionen geniessen"
-    },
-    "warning_no_card": {
-      "label": "Test endet bald",
-      "title": "Zahlungsmethode hinzufügen, um fortzufahren"
-    },
-    "urgent_no_card": {
-      "label": "Test endet morgen!",
-      "title": "Jetzt upgraden, um weiterzumachen"
-    },
-    "warning_with_card": {
-      "label": "Test endet bald",
-      "title": "Dein Abo startet automatisch"
-    },
-    "autorenew": {
-      "label": "Startet morgen",
-      "title": "Monatliches Abo startet automatisch"
-    }
   },
   "founderIntro": {
     "badge": "Limitiert · Erschti 100",

@@ -12,6 +12,7 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
 import { HomeGradients } from "../../config/Gradients";
 import AvatarInitials from "../common/DefaultAvatars";
+import FounderBadgeById from "../common/FounderBadgeById";
 
 type Props = {
   userBasic: any;
@@ -210,6 +211,10 @@ export default function ProfileHeader({
         >
           {userBasic?.userName}
         </Text>
+
+       <View style={{position:"absolute", right:RFPercentage(3), top:RFPercentage(5)}}>
+        <FounderBadgeById user={userBasic} variant="pill" />
+        </View>
 
         {applier && isConfirmed && (
           <View

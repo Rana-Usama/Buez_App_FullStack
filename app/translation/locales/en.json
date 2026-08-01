@@ -125,12 +125,12 @@
       "Desc": "Keep track of your requests, update your posts, and chat with supporters – all in one place."
     },
     "onBoarding4": {
-      "Title": "Enjoy 14 days of full access",
-      "Desc": "Try all features of Büez completely free. No restrictions, no commitments."
+      "Title": "Join the Founder Program",
+      "Desc": "Be one of the first 100 Buez Founders and enjoy 60 days of full access, completely free."
     },
     "onBoarding5": {
       "Title": "Continue with subscription",
-      "Desc": "After your 14-day free trial, continue enjoying Büez with the $9.50 monthly plan. Cancel anytime."
+      "Desc": "Start for just $3.40/month for your first 3 months, then $7.90/month thereafter."
     }
   },
   "login": {
@@ -153,29 +153,15 @@
     "txt5": "Ok",
     "txt6": "No account is associated with this email address."
   },
-  "freeTrial": {
-    "txt1": "Begin Your 14-Day Free Trial",
-    "txt2": "How Your Free Trial Works",
-    "txt3": "Today",
-    "txt4": "Enjoy unlimited access to all our premium features for 14 days, completely free.",
-    "txt5": "Atfer 10 Days",
-    "txt6": "We'll send you a friendly reminder as your trial period ends in 4 days.",
-    "txt7": "Continue after trial",
-    "txt8": "Your subscription will continue automatically after 14 days. You can cancel anytime.",
-    "txt9": "Start Free Trial"
-  },
   "subscriptionV2": {
     "txt1": "Buy our premium to access full services",
-    "txt2": ".99/month",
     "txt3": "Post daily chore requests",
     "txt4": "See requests daily",
     "txt5": "Earn money by doing daily chores",
     "txt6": "Cancel anytime",
     "txt7": "Add Card",
-    "freeTrial": "Free Trial",
     "monthly": "Monthly",
     "yearly": "Yearly",
-    "for7Days": "for 14 days",
     "perMonth": "per month",
     "introOffer": "$3.90/mo for first 3 months",
     "thenAfter": "{{price}}/month after 3 months",
@@ -186,31 +172,20 @@
     "choosePlan": "Choose Your BUEZ Plan",
     "startFree": "Choose the plan that works for you",
     "mostPopular": "MOST POPULAR",
-    "save30": "Save 36%",
     "noCreditCard": "No credit card",
     "securePayment": "Secure payment processing",
     "cancelAnytime": "Cancel anytime",
-    "startFreeTrial": "Start Free Trial",
     "continueWith": "Continue with",
     "maybeLater": "Maybe Later",
     "prioritySupport": "Priority support",
     "exclusiveContent": "Exclusive content",
     "selected": "Selected",
-    "select": "Select"
-  },
-  "freeTrialModal": {
-    "title": "Start Your 14-Day Free Trial",
-    "subtitle": "Choose how you'd like to start your free trial",
-    "importantNote": "Start Your Premium Journey",
-    "automaticSubscription": "Enjoy full premium access for 14 days free! After your trial, Your monthly subscription will automatically continue if you add card, so you never lose access to your premium benefits.",
-    "addCardNow": "Add Card",
-    "skipForNow": "Skip Card",
-    "noChargeDuringTrial": "• No charges during 14-day trial",
-    "cancelAnytime": "• Cancel anytime during trial to avoid charges",
-    "fullAccess": "• Full access to all premium features during trial"
+    "select": "Select",
+    "introOfferDynamic": "{{price}}/mo for first {{months}} months",
+    "saveLabel": "Save {{percent}}%",
+    "yearlySavingsCaption": "You save {{amount}} per year"
   },
   "subscription": {
-    "txt1": "Your 14-day free trial has ended.",
     "txt2": "Upgrade to Premium to unlock full access.",
     "txt3": "Checkout",
     "renewSubscription": "BUEZ Subscription",
@@ -382,10 +357,25 @@
     "txt14": "Upgrade Plan",
     "deleteBlocked": {
       "ownerTitle": "Active Tasks Found",
-      "ownerMessage": "You have {{count}} active task(s) you created. Please complete or cancel them before deleting your account.",
+      "ownerMessage_one": "You have {{count}} active task you created. Please complete or cancel it before deleting your account.",
+      "ownerMessage_other": "You have {{count}} active tasks you created. Please complete or cancel them before deleting your account.",
       "helperTitle": "Active Assignments Found",
-      "helperMessage": "You are a confirmed helper on {{count}} active task(s). Please complete or cancel those assignments before deleting your account."
-    }
+      "helperMessage_one": "You are a confirmed helper on {{count}} active task. Please complete or cancel that assignment before deleting your account.",
+      "helperMessage_other": "You are a confirmed helper on {{count}} active tasks. Please complete or cancel those assignments before deleting your account.",
+      "ownerPastTitle": "Past Active Tasks Found",
+      "ownerPastMessage_one": "You have {{count}} past active task that must be completed or cancelled before deleting your account.",
+      "ownerPastMessage_other": "You have {{count}} past active tasks that must be completed or cancelled before deleting your account.",
+      "ownerBothTitle": "Active Tasks Found",
+      "futureTaskCount_one": "{{count}} future active task",
+      "futureTaskCount_other": "{{count}} future active tasks",
+      "pastTaskCount_one": "{{count}} past active task",
+      "pastTaskCount_other": "{{count}} past active tasks",
+      "ownerBothMessage": "You have {{futurePart}} and {{pastPart}} that must be completed or cancelled before deleting your account.",
+      "ownerCta": "Active Tasks",
+      "helperCta": "Accepted Tasks"
+    },
+    "deleteFailed": "Delete Failed",
+    "tryAgain": "Please try again."
   },
   "cancelSubscription": {
     "txt1": "Your Current BUEZ Subscription",
@@ -393,7 +383,6 @@
     "txt10": "Cancel Subscription",
     "monthlyPlan": "MONTHLY PLAN",
     "yearlyPlan": "YEARLY PLAN",
-    "save36": "Saving",
     "cancellationNote": "Cancellation Details",
     "monthlyCancellation": "If you cancel your monthly subscription now, it will stay active until the end of your current billing period. You won’t be charged again.",
     "yearlyCancellation": "If you cancel your yearly subscription now, it will remain active until the end of your current billing cycle. No refunds will be issued for unused time.",
@@ -402,7 +391,10 @@
     "confirmCancel": "Yes, Cancel",
     "keepSubscription": "Keep Subscription",
     "monthlyCancelled": "Monthly subscription cancelled successfully",
-    "yearlyCancelled": "Yearly subscription cancelled successfully"
+    "yearlyCancelled": "Yearly subscription cancelled successfully",
+    "renewsOn": "Renews on {{date}}",
+    "expiresOn": "Expires on {{date}}",
+    "savingLabel": "Saving {{percent}}%"
   },
   "chnagePassword": {
     "txt1": "Enter Old Password",
@@ -475,7 +467,7 @@
     "txt1": "Profile",
     "txt2": "Edit Profile",
     "txt3": "Rating & Reviews",
-    "txt4": "Completed Tasks",
+    "txt4": "Completed Help",
     "applicantProfile": "Applicant Profile",
     "confirmApplicant": "Confirm",
     "confirmed": "Confirmed",
@@ -529,10 +521,10 @@
     "txt1": "REVIEWED",
     "txt2": "COMPLETED",
     "txt3": "Your Review",
-    "txt4": "Completed Tasks",
+    "txt4": "Completed Help",
     "txt5": " Reviewed",
     "txt6": "Pending Review",
-    "txt7": "Loading your completed tasks..."
+    "txt7": "Loading your completed help..."
   },
   "pushNotifications": {
     "txt1": "Accepted your task request.",
@@ -542,8 +534,6 @@
     "txt5": "has been marked as completed by",
     "txt6": "Task Follow-up!",
     "txt7": "This is a reminder about your recent task posting. Please review your progress and update the status if completed.",
-    "txt8": "⏰ Free Trial Ending Soon",
-    "txt9": "Your free trial ends in 4 days. Stay subscribed to maintain full access.",
     "bulkTaskCompleted": {
       "title": "Task Completed!",
       "body": "The task \"{{taskName}}\" has been marked as completed by {{requesterName}}",
@@ -586,9 +576,9 @@
       "title": "Account & Subscription",
       "questions": {
         "q1": "Do I need a subscription to use BUEZ?",
-        "a1": "Yes, BUEZ operates on a subscription-based model. You need an active subscription to browse and post requests. However, you can register and create an account with a 14-day free trial.",
+        "a1": "Yes, BUEZ operates on a subscription-based model. You need an active subscription to browse and post requests. However, eligible users can join the Founder Program for 60 days of free access.",
         "q2": "How much does BUEZ subscription cost?",
-        "a2": "BUEZ offers a monthly subscription plan at $12.99. You can start with a 14-day free trial to explore all features.",
+        "a2": "BUEZ offers a monthly subscription plan at $3.40/month for the first 3 months, then $7.90/month thereafter. Eligible users can also join the Founder Program to get 60 days of free access before any charges apply.",
         "q3": "Can I cancel my subscription?",
         "a3": "Yes, you can cancel your subscription at any time through the app settings. You'll maintain access until the end of your billing period.",
         "q4": "What happens if I don't subscribe?",
@@ -648,12 +638,12 @@
       }
     },
     "section7": {
-      "title": "Free Trial Management",
+      "title": "Founder Program",
       "questions": {
-        "q1": "How does the 14-day free trial work?",
-        "a1": "New users get full access to all BUEZ features for 14 days completely free. No credit card required upfront.",
-        "q2": "Will I be charged after the free trial?",
-        "a2": "If you don't cancel before the trial ends, your subscription will automatically continue at the monthly rate of $12.99.",
+        "q1": "How does the Founder Program work?",
+        "a1": "The first 100 eligible users get full access to all BUEZ features for 60 days, completely free. No credit card required upfront.",
+        "q2": "Will I be charged after my Founder access ends?",
+        "a2": "If you don't cancel before your 60 days of Founder access end, your subscription will automatically continue at $3.40/month for the first 3 months, then $7.90/month thereafter.",
         "q3": "How do I cancel my subscription?",
         "a3": "Go to Settings → Cancel Subscription. You'll maintain access until the end of your current billing period.",
         "q4": "Can I get a refund?",
@@ -846,28 +836,6 @@
     "resendButton": "Resend Email",
     "resendCooldown": "Resend in {{seconds}}s",
     "backToLogin": "Back to Login"
-  },
-  "freeTrialBanner": {
-    "active": {
-      "label": "Free trial active",
-      "title": "Enjoying premium features"
-    },
-    "warning_no_card": {
-      "label": "Trial expiring soon",
-      "title": "Add payment method to continue"
-    },
-    "urgent_no_card": {
-      "label": "Trial expires tomorrow!",
-      "title": "Upgrade now to continue"
-    },
-    "warning_with_card": {
-      "label": "Trial ending soon",
-      "title": "Your plan will start automatically"
-    },
-    "autorenew": {
-      "label": "Starting tomorrow",
-      "title": "Monthly plan will begin automatically"
-    }
   },
   "founderIntro": {
     "badge": "Limited · First 100",

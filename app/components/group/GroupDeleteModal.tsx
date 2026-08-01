@@ -32,6 +32,8 @@ const GroupDeleteModal = memo(
                 style={{
                   color: theme.heading,
                   fontFamily: "Poppins_500Medium",
+                  fontSize: RFPercentage(1.6),
+                  lineHeight: RFPercentage(2),
                 }}
               >
                 {t("buttons.cancel")}
@@ -76,22 +78,25 @@ const styles = StyleSheet.create({
   },
   cancelBtn: {
     flex: 1,
-    paddingVertical: RFPercentage(1.2),
     borderRadius: RFPercentage(100),
     borderWidth: 1,
     alignItems: "center",
+    justifyContent: "center",
+    height: RFPercentage(5),
   },
   deleteBtn: {
     flex: 1,
-    paddingVertical: RFPercentage(1.2),
     borderRadius: RFPercentage(100),
     backgroundColor: Colors.primary,
     alignItems: "center",
+    justifyContent: "center",
+    height: RFPercentage(5),
   },
   deleteBtnText: {
     color: "#FFF",
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.6),
+    lineHeight: RFPercentage(2),
   },
 });
 

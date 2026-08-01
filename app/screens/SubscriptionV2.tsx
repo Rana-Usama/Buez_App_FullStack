@@ -29,14 +29,18 @@ import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 import {
   SUBSCRIPTION_PRICES,
   getIntroMonthlyAmount,
+  getRegularYearlyEquivalent,
+  getYearlySavings,
+  INTRO_MONTHS,
 } from "../config/subscriptionPricing";
 import { Icons } from "../config/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import Feather from "@expo/vector-icons/Feather";
+import { useNavigation } from "@react-navigation/native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-function SubscriptionV2(props) {
+function SubscriptionV2(props: any) {
   const { t } = useTranslation();
   const { userData } = useUser();
   const userId = getAuth()?.currentUser?.uid;
@@ -47,7 +51,7 @@ function SubscriptionV2(props) {
   const [selectedPlan, setSelectedPlan] = useState("monthly");
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-
+  const navigation = useNavigation();
   const isDark = theme.mode === "dark";
 
   // Shared display pricing (single source of truth for all pricing screens).
@@ -56,7 +60,7 @@ function SubscriptionV2(props) {
   const locale = Localization.locale;
   const userCurrency = getCurrencyFromLocale(locale);
 
-  const priceLabelForPlan = (planId) => {
+  const priceLabelForPlan = (planId : any) => {
     const amount = prices[planId]?.[userCurrency] ?? prices[planId]?.USD ?? 0;
     return formatCurrency(amount, userCurrency);
   };
@@ -71,7 +75,7 @@ function SubscriptionV2(props) {
 
   // Monthly shows the intro price as the primary figure; other plans show
   // their standard price.
-  const displayPriceForPlan = (planId) =>
+  const displayPriceForPlan = (planId : any) =>
     planId === "monthly" ? introMonthlyPrice : priceLabelForPlan(planId);
 
   const openPaymentSheet = async () => {
@@ -107,12 +111,35 @@ function SubscriptionV2(props) {
   const yearlyPrice = priceLabelForPlan("yearly");
   const monthlyPrice = priceLabelForPlan("monthly");
 
-  const savingsPercentage =
-    ((prices.monthly[userCurrency] * 12 - prices.yearly[userCurrency]) /
-      (prices.monthly[userCurrency] * 12)) *
-    100;
+  // Intro highlight for the Monthly plan — built from the configured intro
+  // price/duration instead of a hardcoded "$3.90 for first 3 months" string,
+  // so it stays correct for every currency and if the offer ever changes.
+  const introHighlightText = t("subscriptionV2.introOfferDynamic", {
+    price: introMonthlyPrice,
+    months: INTRO_MONTHS,
+  });
 
-  const highlightText = `Save ${Math.round(savingsPercentage)}%`;
+  // Original yearly price (regular monthly price × 12) and the savings from
+  // choosing yearly instead — both amount and percentage — computed from the
+  // centralized SUBSCRIPTION_PRICES config for the user's currency. No
+  // hardcoded numbers: change the config and this recalculates everywhere.
+  const originalYearlyPrice = formatCurrency(
+    getRegularYearlyEquivalent(userCurrency),
+    userCurrency,
+  );
+  const { amount: yearlySavingsAmount, percentage: savingsPercentage } =
+    getYearlySavings(userCurrency);
+  const savingsAmountFormatted = formatCurrency(
+    yearlySavingsAmount,
+    userCurrency,
+  );
+  const savingsPercentRounded = Math.round(savingsPercentage);
+  const highlightText = t("subscriptionV2.saveLabel", {
+    percent: savingsPercentRounded,
+  });
+  const savingsCaption = t("subscriptionV2.yearlySavingsCaption", {
+    amount: savingsAmountFormatted,
+  });
 
   const plans = [
     {
@@ -129,17 +156,15 @@ function SubscriptionV2(props) {
         t("subscriptionV2.prioritySupport"),
       ],
       popular: false,
-      highlight: t("subscriptionV2.introOffer"),
+      highlight: introHighlightText,
     },
     {
       id: "yearly",
       title: t("subscriptionV2.yearly"),
       price: yearlyPrice,
       period: t("subscriptionV2.perYear"),
-      originalPrice: formatCurrency(
-        prices.monthly[userCurrency] * 12,
-        userCurrency,
-      ),
+      originalPrice: originalYearlyPrice,
+      savingsCaption,
       description: t("subscriptionV2.bestValue"),
       features: [
         t("subscriptionV2.txt3"),
@@ -154,7 +179,7 @@ function SubscriptionV2(props) {
     },
   ];
 
-  const handleScroll = (event) => {
+  const handleScroll = (event : any) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(
       contentOffsetX / (screenWidth * 0.8 + RFPercentage(2)),
@@ -176,7 +201,7 @@ function SubscriptionV2(props) {
     };
   };
 
-  const getBorderGradient = (isSelected) => {
+  const getBorderGradient = (isSelected : any) => {
     if (!isSelected)
       return {
         borderColor: isDark ? "rgba(69,87,176,0.18)" : "rgba(37,50,117,0.1)",
@@ -381,6 +406,20 @@ function SubscriptionV2(props) {
               </Text>
             )}
           </View>
+
+          {/* Absolute savings amount (yearly only) — computed alongside the
+              percentage badge above from the same centralized pricing config. */}
+          {item.savingsCaption && (
+            <Text
+              style={[
+                styles.savingsCaption,
+                { color: isDark ? "#838aa8ff" : "#94a3b8" },
+              ]}
+              numberOfLines={1}
+            >
+              {item.savingsCaption}
+            </Text>
+          )}
 
           {/* Divider */}
           <View
@@ -588,6 +627,37 @@ function SubscriptionV2(props) {
               </>
             )}
           </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate("Login")}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            alignSelf: "center",
+            marginTop: RFPercentage(1.5),
+          }}
+        >
+          <View
+            style={{
+              height: RFPercentage(3),
+              width: RFPercentage(3),
+              borderRadius: RFPercentage(100),
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: theme.mode === "dark" ? "#050505ff" : "#e8eaff",
+            }}
+          >
+            <Feather
+              name="arrow-left"
+              size={RFPercentage(2)}
+              color={Colors.primary}
+            />
+          </View>
+          <Text style={styles.loginText}>
+            {t("emailVerification.backToLogin")}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -798,6 +868,12 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     textDecorationLine: "line-through",
   },
+  savingsCaption: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_400Regular",
+    marginTop: -RFPercentage(0.4),
+    marginBottom: RFPercentage(0.6),
+  },
 
   // Features
   featuresContainer: { gap: RFPercentage(0.9), marginTop: RFPercentage(0.4) },
@@ -1003,6 +1079,12 @@ const styles = StyleSheet.create({
   modalSecondaryText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.65),
+  },
+  loginText: {
+    color: Colors.darkGrey,
+    fontFamily: "Poppins_500Medium",
+    fontSize: RFPercentage(1.8),
+    marginLeft: RFPercentage(1),
   },
 });
 

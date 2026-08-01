@@ -36,6 +36,7 @@ import {
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { getAuth } from "firebase/auth";
 import AvatarInitials from "../components/common/DefaultAvatars";
+import FounderBadgeById from "../components/common/FounderBadgeById";
 import { getAvatarColors } from "../config/avatarColors";
 
 type Translations = {
@@ -264,12 +265,15 @@ export default function CompletedTasks({ navigation }: any) {
   useEffect(() => {
     (async () => {
       const base: Translations = {
-        completedTasks: "Completed Tasks",
+        // "Help" (not "Tasks") throughout — this screen only ever lists tasks
+        // the user completed FOR OTHERS, as distinct from the "Completed"
+        // filter on My Requests (tasks they created themselves).
+        completedTasks: "Completed Help",
         category: "Category",
         completedOn: "Completed on",
         review: "Add Review",
         reviewed: "Reviewed",
-        noTasks: "No completed tasks",
+        noTasks: "No completed help yet",
         translating: "Translating...",
         helpers: "Helpers",
         confirmedHelpers: "Confirmed Helpers",
@@ -435,7 +439,14 @@ export default function CompletedTasks({ navigation }: any) {
                   textStyle={{ fontSize: RFPercentage(2.1) }}
                 />
               )}
-             
+
+              {/* Founder Badge for the task owner — the completedTask
+                  snapshot has no isFounder, so resolve by id. */}
+              <FounderBadgeById
+                userId={owner?.userId || item?.taskOwnerId}
+                size={RFPercentage(2.2)}
+                style={styles.founderBadge}
+              />
             </View>
 
             {/* Name + Category */}
@@ -667,7 +678,7 @@ export default function CompletedTasks({ navigation }: any) {
             </Text>
           </View>
         ) : tasks.length === 0 ? (
-          <NotFound title={tr.noTasks || "No completed tasks yet"} />
+          <NotFound title={tr.noTasks || "No completed help yet"} />
         ) : visibleTasks.length === 0 ? (
           <NotFound
             title={
@@ -785,6 +796,11 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.4),
   },
   avatarWrap: { position: "relative" },
+  founderBadge: {
+    position: "absolute",
+    right: -RFPercentage(0.5),
+    bottom: -RFPercentage(0.3),
+  },
   avatar: {
     width: RFPercentage(6.2),
     height: RFPercentage(6.2),

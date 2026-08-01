@@ -119,12 +119,12 @@
       "Desc": "Realiza un seguimiento de tus solicitudes, actualiza tus publicaciones y chatea con tus seguidores – todo en un solo lugar."
     },
     "onBoarding4": {
-      "Title": "Disfruta 14 días de acceso completo",
-      "Desc": "Prueba todas las funciones de Büez completamente gratis. Sin restricciones, sin compromisos."
+      "Title": "Únete al Programa Founder",
+      "Desc": "Sé uno de los primeros 100 Buez Founders y disfruta de 60 días de acceso completo, totalmente gratis."
     },
     "onBoarding5": {
       "Title": "Continúa con la suscripción",
-      "Desc": "Después de tu prueba gratuita de 14 días, continúa disfrutando de Büez con el plan mensual de 8.90 €. Cancela en cualquier momento."
+      "Desc": "Empieza por solo 3.40 € al mes durante tus primeros 3 meses, y luego 7.90 € al mes."
     }
   },
   "login": {
@@ -147,29 +147,15 @@
     "txt5": "Ok",
     "txt6": "No hay ninguna cuenta asociada con esta dirección de correo electrónico."
   },
-  "freeTrial": {
-    "txt1": "Comienza tu prueba gratuita de 14 días",
-    "txt2": "Cómo funciona tu prueba gratuita",
-    "txt3": "Hoy",
-    "txt4": "Disfruta acceso ilimitado a todas nuestras funciones premium durante 14 días, completamente gratis.",
-    "txt5": "Después de 10 días",
-    "txt6": "Te enviaremos un recordatorio amable ya que tu período de prueba termina en 4 días.",
-    "txt7": "Continuar después de la prueba",
-    "txt8": "Tu suscripción continuará automáticamente después de 14 días. Puedes cancelar en cualquier momento.",
-    "txt9": "Comenzar mi prueba gratuita"
-  },
   "subscriptionV2": {
     "txt1": "Compra nuestro premium para acceder a todos los servicios",
-    "txt2": ".99/mes",
     "txt3": "Publica solicitudes de tareas diarias",
     "txt4": "Ve solicitudes diariamente",
     "txt5": "Gana dinero haciendo tareas diarias",
     "txt6": "Cancela en cualquier momento",
     "txt7": "Agregar tarjeta",
-    "freeTrial": "Prueba gratuita",
     "monthly": "Mensual",
     "yearly": "Anual",
-    "for7Days": "por 14 días",
     "perMonth": "por mes",
     "introOffer": "3,90 $/mes los primeros 3 meses",
     "thenAfter": "{{price}}/mes después de 3 meses",
@@ -178,33 +164,22 @@
     "fullAccess": "Acceso completo a todas las funciones",
     "bestValue": "Mejor valor",
     "choosePlan": "Elige tu BUEZ plan",
-    "startFree": "Comienza con una prueba gratuita, actualiza en cualquier momento",
+    "startFree": "Elige el plan que más te convenga",
     "mostPopular": "MÁS POPULAR",
-    "save30": "Ahorra 36%",
     "noCreditCard": "Sin tarjeta de crédito",
     "securePayment": "Procesamiento de pago seguro",
     "cancelAnytime": "Cancela en cualquier momento",
-    "startFreeTrial": "Comenzar prueba gratuita",
     "continueWith": "Continuar con",
     "maybeLater": "Quizás después",
     "prioritySupport": "Soporte prioritario",
     "exclusiveContent": "Contenido exclusivo",
     "selected": "Seleccionado",
-    "select": "Seleccionar"
-  },
-  "freeTrialModal": {
-    "title": "Comienza tu prueba gratuita",
-    "subtitle": "Elige cómo quieres comenzar tu prueba gratuita de 14 días",
-    "addCardNow": "Agregar tarjeta ahora",
-    "skipForNow": "Omitir por ahora",
-    "info1": "Agregar una tarjeta ahora asegura un servicio ininterrumpido después de la prueba",
-    "info2": "Tu tarjeta no será cobrada hasta después de 14 días",
-    "info3": "Puedes cancelar en cualquier momento durante el período de prueba",
-    "importantNote": "Comienza tu viaje Premium",
-    "automaticSubscription": "¡Disfruta del acceso completo a Premium durante 14 días gratis! Después de tu prueba, tu suscripción mensual continuará automáticamente si agregas una tarjeta, para que nunca pierdas tus beneficios Premium."
+    "select": "Seleccionar",
+    "introOfferDynamic": "{{price}}/mes los primeros {{months}} meses",
+    "saveLabel": "Ahorra {{percent}}%",
+    "yearlySavingsCaption": "Ahorras {{amount}} al año"
   },
   "subscription": {
-    "txt1": "Tu prueba gratuita de 14 días ha terminado.",
     "txt2": "Actualiza a Premium para desbloquear el acceso completo.",
     "txt3": "Pagar",
     "renewSubscription": "BUEZ suscripción",
@@ -372,10 +347,25 @@
     "txt14": "Plan de actualización",
     "deleteBlocked": {
       "ownerTitle": "Tareas activas encontradas",
-      "ownerMessage": "Tienes {{count}} tarea(s) activa(s) que creaste. Complétalas o cancélalas antes de eliminar tu cuenta.",
+      "ownerMessage_one": "Tienes {{count}} tarea activa que creaste. Complétala o cancélala antes de eliminar tu cuenta.",
+      "ownerMessage_other": "Tienes {{count}} tareas activas que creaste. Complétalas o cancélalas antes de eliminar tu cuenta.",
       "helperTitle": "Asignaciones activas encontradas",
-      "helperMessage": "Eres un ayudante confirmado en {{count}} tarea(s) activa(s). Completa o cancela esas asignaciones antes de eliminar tu cuenta."
-    }
+      "helperMessage_one": "Eres un ayudante confirmado en {{count}} tarea activa. Completa o cancela esa asignación antes de eliminar tu cuenta.",
+      "helperMessage_other": "Eres un ayudante confirmado en {{count}} tareas activas. Completa o cancela esas asignaciones antes de eliminar tu cuenta.",
+      "ownerPastTitle": "Tareas activas pasadas encontradas",
+      "ownerPastMessage_one": "Tienes {{count}} tarea activa pasada que debe completarse o cancelarse antes de eliminar tu cuenta.",
+      "ownerPastMessage_other": "Tienes {{count}} tareas activas pasadas que deben completarse o cancelarse antes de eliminar tu cuenta.",
+      "ownerBothTitle": "Tareas activas encontradas",
+      "futureTaskCount_one": "{{count}} tarea activa futura",
+      "futureTaskCount_other": "{{count}} tareas activas futuras",
+      "pastTaskCount_one": "{{count}} tarea activa pasada",
+      "pastTaskCount_other": "{{count}} tareas activas pasadas",
+      "ownerBothMessage": "Tienes {{futurePart}} y {{pastPart}} que deben completarse o cancelarse antes de eliminar tu cuenta.",
+      "ownerCta": "Tareas activas",
+      "helperCta": "Tareas aceptadas"
+    },
+    "deleteFailed": "Error al eliminar",
+    "tryAgain": "Inténtalo de nuevo."
   },
   "cancelSubscription": {
     "txt1": "Tu suscripción actual",
@@ -383,7 +373,6 @@
     "txt10": "Cancelar suscripción",
     "monthlyPlan": "PLAN MENSUAL",
     "yearlyPlan": "PLAN ANUAL",
-    "save36": "Ahorra",
     "cancellationNote": "Detalles de cancelación",
     "monthlyCancellation": "Tu suscripción permanecerá activa hasta el final de tu período de facturación actual. No se te cobrará nuevamente.",
     "yearlyCancellation": "Tu suscripción anual permanecerá activa hasta el final de tu ciclo de facturación actual. No se proporcionarán reembolsos por tiempo no utilizado.",
@@ -392,7 +381,10 @@
     "confirmCancel": "Sí, cancelar",
     "keepSubscription": "Mantener suscripción",
     "monthlyCancelled": "Suscripción mensual cancelada exitosamente",
-    "yearlyCancelled": "Suscripción anual cancelada exitosamente"
+    "yearlyCancelled": "Suscripción anual cancelada exitosamente",
+    "renewsOn": "Se renueva el {{date}}",
+    "expiresOn": "Caduca el {{date}}",
+    "savingLabel": "Ahorra {{percent}}%"
   },
   "chnagePassword": {
     "txt1": "Ingresa la contraseña anterior",
@@ -462,7 +454,7 @@
     "txt1": "Perfil",
     "txt2": "Editar perfil",
     "txt3": "Calificación y reseñas",
-    "txt4": "Tareas completadas",
+    "txt4": "Ayudas completadas",
     "applicantProfile": "Perfil del solicitante",
     "confirmApplicant": "Confirmar",
     "confirmed": "Confirmado",
@@ -516,10 +508,10 @@
     "txt1": "RESEÑADO",
     "txt2": "COMPLETADO",
     "txt3": "Tu reseña",
-    "txt4": "Tareas completadas",
+    "txt4": "Ayudas completadas",
     "txt5": " Reseñado",
     "txt6": "Reseña pendiente",
-    "txt7": "Cargando tus tareas completadas..."
+    "txt7": "Cargando tus ayudas completadas..."
   },
   "pushNotifications": {
     "txt1": "aceptó tu solicitud de tarea.",
@@ -528,9 +520,7 @@
     "txt4": "Tu tarea aceptada",
     "txt5": "ha sido marcada como completada por",
     "txt6": "¡Seguimiento de tarea!",
-    "txt7": "Este es un recordatorio sobre tu publicación de tarea reciente. Por favor, revisa tu progreso y actualiza el estado si está completada.",
-    "txt8": "⏰ Prueba gratuita terminando pronto",
-    "txt9": "Tu prueba gratuita termina en 4 días. Mantén tu suscripción para conservar el acceso completo."
+    "txt7": "Este es un recordatorio sobre tu publicación de tarea reciente. Por favor, revisa tu progreso y actualiza el estado si está completada."
   },
   "modal": {
     "txt1": "¡Tarea aceptada exitosamente!",
@@ -568,9 +558,9 @@
       "title": "Cuenta y suscripción",
       "questions": {
         "q1": "¿Necesito una suscripción para usar BUEZ?",
-        "a1": "Sí, BUEZ opera bajo un modelo basado en suscripción. Necesitas una suscripción activa para navegar y publicar solicitudes. Sin embargo, puedes registrarte y crear una cuenta con una prueba gratuita de 14 días.",
+        "a1": "Sí, BUEZ opera bajo un modelo basado en suscripción. Necesitas una suscripción activa para navegar y publicar solicitudes. Sin embargo, los usuarios elegibles pueden unirse al Programa Founder para obtener 60 días de acceso gratuito.",
         "q2": "¿Cuánto cuesta la suscripción a BUEZ?",
-        "a2": "BUEZ ofrece un plan de suscripción mensual por $12.99. Puedes comenzar con una prueba gratuita de 14 días para explorar todas las funciones.",
+        "a2": "BUEZ ofrece un plan de suscripción mensual de $3.40 al mes durante los primeros 3 meses, y luego $7.90 al mes. Los usuarios elegibles también pueden unirse al Programa Founder para obtener 60 días de acceso gratuito antes de cualquier cargo.",
         "q3": "¿Puedo cancelar mi suscripción?",
         "a3": "Sí, puedes cancelar tu suscripción en cualquier momento a través de la configuración de la aplicación. Mantendrás el acceso hasta el final de tu período de facturación.",
         "q4": "¿Qué pasa si no me suscribo?",
@@ -630,12 +620,12 @@
       }
     },
     "section7": {
-      "title": "Gestión de prueba gratuita",
+      "title": "Programa Founder",
       "questions": {
-        "q1": "¿Cómo funciona la prueba gratuita de 14 días?",
-        "a1": "Los nuevos usuarios obtienen acceso completo a todas las funciones de BUEZ durante 14 días completamente gratis. No se requiere tarjeta de crédito por adelantado.",
-        "q2": "¿Me cobrarán después de la prueba gratuita?",
-        "a2": "Si no cancelas antes de que termine la prueba, tu suscripción continuará automáticamente a la tarifa mensual de $12.99.",
+        "q1": "¿Cómo funciona el Programa Founder?",
+        "a1": "Los primeros 100 usuarios elegibles obtienen acceso completo a todas las funciones de BUEZ durante 60 días, completamente gratis. No se requiere tarjeta de crédito por adelantado.",
+        "q2": "¿Me cobrarán cuando termine mi acceso Founder?",
+        "a2": "Si no cancelas antes de que terminen tus 60 días de acceso Founder, tu suscripción continuará automáticamente a $3.40 al mes durante los primeros 3 meses, y luego $7.90 al mes.",
         "q3": "¿Cómo cancelo mi suscripción?",
         "a3": "Ve a Configuración → Cancelar suscripción. Mantendrás el acceso hasta el final de tu período de facturación actual.",
         "q4": "¿Puedo obtener un reembolso?",
@@ -828,28 +818,6 @@
     "resendButton": "Reenviar correo",
     "resendCooldown": "Reenviar en {{seconds}}s",
     "backToLogin": "Volver al inicio de sesión"
-  },
-  "freeTrialBanner": {
-    "active": {
-      "label": "Prueba gratuita activa",
-      "title": "Disfruta de funciones premium"
-    },
-    "warning_no_card": {
-      "label": "La prueba termina pronto",
-      "title": "Añade un método de pago para continuar"
-    },
-    "urgent_no_card": {
-      "label": "¡La prueba termina mañana!",
-      "title": "Actualiza ahora para continuar"
-    },
-    "warning_with_card": {
-      "label": "La prueba termina pronto",
-      "title": "Tu plan comenzará automáticamente"
-    },
-    "autorenew": {
-      "label": "Empieza mañana",
-      "title": "El plan mensual comenzará automáticamente"
-    }
   },
   "founderIntro": {
     "badge": "Limitado · Primeros 100",

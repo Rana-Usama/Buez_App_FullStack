@@ -31,6 +31,7 @@ import { createNewChat } from "../services/Chat.service";
 import { useUser } from "../contexts/user.context";
 import CustomNav from "../components/common/CustomNav";
 import AvatarInitials from "../components/common/DefaultAvatars";
+import FounderBadgeById from "../components/common/FounderBadgeById";
 import { getAvatarColors } from "../config/avatarColors";
 
 interface ReviewType {
@@ -249,18 +250,30 @@ function ConfirmedHelpers({ route, navigation }) {
         ]}
       >
         <View style={styles.helperInfo}>
-          {item?.profileImage ? (
-            <Image
-              style={styles.helperImage}
-              source={{ uri: item.profileImage }}
-              resizeMode="cover"
+          <View style={styles.avatarWrapper}>
+            {item?.profileImage ? (
+              <Image
+                style={styles.helperImage}
+                source={{ uri: item.profileImage }}
+                resizeMode="cover"
+              />
+            ) : (
+              <AvatarInitials
+                name={item?.userName}
+                style={[styles.helperImage, { borderColor: groupTextColor }]}
+              />
+            )}
+
+            {/* Founder Badge — each helper row is merged with their full
+                `users` doc in fetchConfirmedHelpers, so isFounder is
+                already on `item` and no extra read is needed. */}
+            <FounderBadgeById
+              user={item}
+              userId={item?.userId}
+              size={RFPercentage(2.4)}
+              style={styles.founderBadge}
             />
-          ) : (
-            <AvatarInitials
-              name={item?.userName}
-              style={[styles.helperImage, { borderColor: groupTextColor }]}
-            />
-          )}
+          </View>
 
           <View style={styles.helperDetails}>
             <Text style={[styles.helperName, { color: theme.heading }]}>
@@ -601,11 +614,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  // marginRight moved to avatarWrapper so the absolutely-positioned founder
+  // badge anchors to the avatar's edge rather than the far side of the gap.
+  avatarWrapper: {
+    position: "relative",
+    marginRight: RFPercentage(1.5),
+  },
+  founderBadge: {
+    position: "absolute",
+    right: -RFPercentage(0.5),
+    bottom: -RFPercentage(0.4),
+  },
   helperImage: {
     width: RFPercentage(6),
     height: RFPercentage(6),
     borderRadius: RFPercentage(1.6),
-    marginRight: RFPercentage(1.5),
     borderWidth: 1,
     borderColor: Colors.primary + "33",
   },

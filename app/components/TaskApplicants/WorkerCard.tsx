@@ -14,6 +14,7 @@ import Colors from "../../config/Colors";
 import { Icons } from "../../config/theme";
 import { Worker } from "../../types/TaskApplicants/types";
 import AvatarInitials from "../common/DefaultAvatars";
+import FounderBadgeById from "../common/FounderBadgeById";
 import { getAvatarColors } from "../../config/avatarColors";
 
 interface WorkerCardProps {
@@ -98,6 +99,16 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
               />
             </View>
           )}
+
+          {/* Founder Badge — top-left, so it never collides with the
+              confirmed checkmark at bottom-right. Applicant/confirmed
+              entries are stored snapshots without isFounder, so this is
+              resolved by userId. */}
+          <FounderBadgeById
+            userId={worker.userId}
+            size={RFPercentage(2.4)}
+            style={styles.founderBadge}
+          />
         </View>
 
         <View style={styles.workerDetails}>
@@ -270,6 +281,12 @@ const styles = StyleSheet.create({
   },
   avatarWrapper: {
     marginRight: RFPercentage(1.5),
+    position: "relative",
+  },
+  founderBadge: {
+    position: "absolute",
+    top: -RFPercentage(0.4),
+    left: -RFPercentage(0.4),
   },
   workerAvatar: {
     width: RFPercentage(6.2),

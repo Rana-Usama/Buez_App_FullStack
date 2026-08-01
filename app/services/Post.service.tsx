@@ -18,6 +18,7 @@ import {
   startAfter,
   writeBatch, // Add this import
   deleteDoc,
+  arrayRemove,
 } from "firebase/firestore";
 // FIREBASE config
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
@@ -505,6 +506,9 @@ export const cancelConfirmedTask = async ({
     : [];
   updates.confirmedWorkers = confirmedWorkers;
   updates.appliedWorkers = appliedWorkers;
+  // Keep the queryable mirror in sync — account deletion's active-helper
+  // check relies on this to know the worker is no longer confirmed here.
+  updates.confirmedWorkerIds = arrayRemove(userId);
 
   // Keep any stored slot count in sync (UI also derives this from the array).
   const totalWorkers = data.numberOfWorkers || 1;

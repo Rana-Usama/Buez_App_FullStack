@@ -170,35 +170,66 @@ export type FounderRoute = "TabNavigator" | "SubscriptionV2" | "FounderIntro";
 
 /**
  * Single routing decision for the Founder flow, shared by every entry point
- * (app launch, logins, email verification, deep links):
+ * (app launch, logins, email verification, deep links).
  *
- *  1. Existing founders and users who already completed the intro → app.
- *  2. Device already used by ANOTHER account to claim → SubscriptionV2
- *     (standard plans; the Founder claim screen is never shown again on
- *     that device).
- *  3. Otherwise → FounderIntro (first eligible user on the device).
+ * ACCESS RULE: every caller rules out an active paid subscription BEFORE
+ * calling this function. So anyone reaching here has no active subscription,
+ * and the ONLY outcome that may return "TabNavigator" is an ACTIVE FOUNDER.
+ * Every other case must land on FounderIntro (can still claim) or
+ * SubscriptionV2 (must pay) — never the app.
+ *
+ *  1. Active founder (badge + still inside the 60-day window) → app.
+ *  2. Founder badge but window expired → SubscriptionV2.
+ *  3. Already saw the intro without becoming a founder → SubscriptionV2.
+ *  4. Device already used by ANOTHER account to claim → SubscriptionV2
+ *     (the Founder claim screen is never shown again on that device).
+ *  5. Otherwise → FounderIntro (first eligible user on the device).
  */
 export const resolveFounderRoute = async (
   deviceId?: string | null,
   userData?: any,
 ): Promise<FounderRoute> => {
   try {
-    // Active founder benefits (badge + still within the free window) → app.
-    if (userData && isFounderActive(userData)) return "TabNavigator";
+    // Not every entry point has userData to hand (e.g. EmailVerificationScreen
+    // calls this with only a deviceId). Load it so the founder checks below
+    // can never be silently skipped and mis-route an actual founder.
+    let user = userData;
+    if (!user) {
+      const uid = getAuth()?.currentUser?.uid;
+      if (uid) {
+        try {
+          const snap = await getDoc(doc(db, "users", uid));
+          user = snap.exists() ? snap.data() : null;
+        } catch (error) {
+          console.log("[Founder] resolveFounderRoute user read error:", error);
+        }
+      }
+    }
 
-    // Founder badge exists but the 60-day window has ended (or status was
+    // 1. Active founder benefits (badge + still within the free window) → app.
+    if (user && isFounderActive(user)) return "TabNavigator";
+
+    // 2. Founder badge exists but the 60-day window has ended (or status was
     // flipped to expired elsewhere). Badge is permanent, but ACCESS is not —
-    // DeciderScreen already ruled out an active paid subscription before
-    // calling this function, so reaching here with isFounder === true means
-    // their free access has run out and they must subscribe.
-    if (userData?.isFounder === true) return "SubscriptionV2";
+    // an active paid subscription was already ruled out by the caller, so
+    // reaching here with isFounder === true means their free access has run
+    // out and they must subscribe.
+    if (user?.isFounder === true) return "SubscriptionV2";
 
+    // 3. They have already been through the Founder intro but are not a
+    // founder — i.e. the program was sold out (or the device was already
+    // claimed) and they left via "View Subscription Plans" without paying.
+    // Seeing the intro grants NO app access on its own; they must subscribe.
     const introDone = await hasCompletedFounderIntro();
-    if (introDone) return "TabNavigator";
+    if (introDone) return "SubscriptionV2";
 
+    // 4. Device already used by another account to claim → standard plans.
     const deviceClaimed = await isDeviceFounderClaimed(deviceId);
     if (deviceClaimed) return "SubscriptionV2";
 
+    // 5. First eligible user on this device — they can still try to claim.
+    // (If the program is full, FounderIntro renders its sold-out state, which
+    // routes on to SubscriptionV2 — so this is never an access bypass.)
     return "FounderIntro";
   } catch (error) {
     console.log("[Founder] resolveFounderRoute error:", error);

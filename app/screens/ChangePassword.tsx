@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   Platform,
   ScrollView,
@@ -11,6 +12,7 @@ import {
 import { RFPercentage } from "react-native-responsive-fontsize";
 import MyAppButton from "../components/common/MyAppButton";
 import Colors from "../config/Colors";
+import { Icons } from "../config/theme";
 import { updatePassword } from "../services/Auth.service";
 import Toast from "react-native-toast-message";
 import * as yup from "yup";
@@ -20,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { FIREBASE_AUTH } from "../../firebaseConfig";
 import CustomNav from "../components/common/CustomNav";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 interface ChangePasswordProps {
   navigation: any;
@@ -44,10 +47,7 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
     password: yup
       .string()
       .min(6, `${t("validations.passwordLen")}`)
-      .notOneOf(
-        [yup.ref("oldPassword")],
-        `${t("validations.samePassword")}`
-      )
+      .notOneOf([yup.ref("oldPassword")], `${t("validations.samePassword")}`)
       .required(`${t("validations.passwordReq")}`),
     confirmPassword: yup
       .string()
@@ -120,6 +120,35 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
         {/* If Google login → show message + manage account link */}
         {provider === "google.com" || provider === "apple.com" ? (
           <View style={styles.googleContainer}>
+            {/* Provider badge — same circular treatment for both Google and
+                Apple so the two variants stay visually identical. A fixed
+                white backdrop (not theme-swapped) keeps each brand mark
+                rendering correctly in both Light and Dark mode. */}
+            <View
+              style={[
+                styles.providerIconCircle,
+                {
+                  backgroundColor: theme.cartsBackground,
+                  borderColor: theme.border,
+                },
+              ]}
+            >
+              {provider === "google.com" ? (
+                <Image
+                  source={Icons.google}
+                  style={styles.providerIcon}
+                  resizeMode="contain"
+                />
+              ) : (
+                <FontAwesome
+                  name="apple"
+                  size={RFPercentage(6)}
+                  color={theme.mode === "dark" ? "#FFFFFF" : "#1b1717"}
+                  style={{ marginTop: -RFPercentage(0.3) }}
+                />
+              )}
+            </View>
+
             <Text
               style={[
                 styles.title,
@@ -294,7 +323,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: RFPercentage(8),
-    width:"90%"
+    width: "90%",
   },
   errorContainer: {
     width: "100%",
@@ -308,10 +337,22 @@ const styles = StyleSheet.create({
     left: RFPercentage(0.2),
   },
   googleContainer: {
-    marginTop: RFPercentage(10),
+    marginTop: RFPercentage(8),
     width: "90%",
     alignSelf: "center",
     alignItems: "center",
+  },
+  providerIconCircle: {
+    width: RFPercentage(11),
+    height: RFPercentage(11),
+    borderRadius: RFPercentage(100),
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: RFPercentage(2),
+  },
+  providerIcon: {
+    width: RFPercentage(6),
+    height: RFPercentage(6),
   },
 });
 

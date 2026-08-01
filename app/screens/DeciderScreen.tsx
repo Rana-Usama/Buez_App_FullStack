@@ -39,6 +39,17 @@ const DeciderScreen = () => {
   const [messageIndex, setMessageIndex] = useState(0);
   const hasNavigated = useRef(false);
 
+  // Latest values for the safety-timeout effect below, which runs with empty
+  // deps and would otherwise only ever see the first render's values.
+  const userDataRef = useRef(userData);
+  const deviceIdRef = useRef(deviceId);
+  useEffect(() => {
+    userDataRef.current = userData;
+  }, [userData]);
+  useEffect(() => {
+    deviceIdRef.current = deviceId;
+  }, [deviceId]);
+
   // ─── Animation values ─────────────────────────────────────────────────────
   const progressAnim = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.85)).current;
@@ -147,6 +158,27 @@ const DeciderScreen = () => {
     return null;
   };
 
+  // ─── Access gate ──────────────────────────────────────────────────────────
+  // The main app is only reachable with an active paid subscription or active
+  // Founder access. Everything else is handed to resolveFounderRoute, which
+  // returns FounderIntro (can still claim) or SubscriptionV2 (must pay).
+  // Takes its inputs as arguments so the safety timeout can reuse it without
+  // capturing stale state.
+  const resolveAccessRoute = async (
+    data: any,
+    device: string | null,
+  ): Promise<string> => {
+    const now = new Date();
+    const subStartDate = parseDate(data?.subscriptionStart);
+    const subEndDate = parseDate(data?.subscriptionEnd);
+    const isWithinPaidPeriod =
+      subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
+
+    if (data?.isSubscribed && isWithinPaidPeriod) return "TabNavigator";
+
+    return await resolveFounderRoute(device, data);
+  };
+
   // ─── Main Navigation Decision ─────────────────────────────────────────────
   const decideAndNavigate = useCallback(async () => {
     if (hasNavigated.current) return;
@@ -165,7 +197,6 @@ const DeciderScreen = () => {
       }
 
       const loggedOut = await SecureStore.getItemAsync("loggedOut");
-      const now = new Date();
 
       if (loggedOut === "true") {
         completeAndNavigate("Login");
@@ -195,24 +226,8 @@ const DeciderScreen = () => {
         }
       }
 
-      const { isSubscribed, subscriptionStart, subscriptionEnd }: any =
-        userData;
-
-      const subStartDate = parseDate(subscriptionStart);
-      const subEndDate = parseDate(subscriptionEnd);
-      const isWithinPaidPeriod =
-        subStartDate && subEndDate && now >= subStartDate && now <= subEndDate;
-
-      // ── Active paid subscription ───────────────────────────────────────────
-      if (isSubscribed && isWithinPaidPeriod) {
-        completeAndNavigate("TabNavigator");
-        return;
-      }
-
-      // ── Founder Phase routing (intro once; device already claimed by
-      //    another account → standard plans) ──
-      const founderRoute = await resolveFounderRoute(deviceId, userData);
-      completeAndNavigate(founderRoute);
+      // ── Active paid subscription, else Founder Phase routing ──────────────
+      completeAndNavigate(await resolveAccessRoute(userData, deviceId));
     } catch (error) {
       console.log("[Decider] Error deciding initial route:", error);
       if (!hasNavigated.current) {
@@ -255,8 +270,18 @@ const DeciderScreen = () => {
         const loggedOutFlag = await SecureStore.getItemAsync("loggedOut");
         const hasStoredSession =
           !!(creds?.email || creds?.password) && loggedOutFlag !== "true";
-        if (hasStoredSession || FIREBASE_AUTH.currentUser) {
-          completeAndNavigate("TabNavigator");
+        const latestUserData = userDataRef.current;
+
+        // Timing out must never hand out app access — apply the same
+        // subscription/Founder gate as the normal path. If userData never
+        // loaded we can't evaluate it, so fall back to Login (which re-runs
+        // the gate) rather than dropping the user into the app.
+        if (isUserDataReady(latestUserData)) {
+          completeAndNavigate(
+            await resolveAccessRoute(latestUserData, deviceIdRef.current),
+          );
+        } else if (hasStoredSession || FIREBASE_AUTH.currentUser) {
+          completeAndNavigate("Login");
         } else {
           completeAndNavigate("OnBoarding");
         }

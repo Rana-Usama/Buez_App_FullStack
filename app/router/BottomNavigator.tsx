@@ -72,11 +72,14 @@ const CustomDrawerContent = (props) => {
   const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
     useState(false);
   // Blocks account deletion when the user has active responsibilities.
+  // `kind` drives the CTA: "owner" → jump to My Requests (their active
+  // tasks), "helper" → jump to Accepted Tasks (their confirmed assignments).
   const [deleteBlockedModal, setDeleteBlockedModal] = useState<{
     visible: boolean;
     title: string;
     message: string;
-  }>({ visible: false, title: "", message: "" });
+    kind: "owner" | "helper" | null;
+  }>({ visible: false, title: "", message: "", kind: null });
   const [isLoading, setIsLoading] = useState(false);
   const [appVersion, setAppVersion] = useState("");
   const [buildNumber, setBuildNumber] = useState("");
@@ -235,25 +238,58 @@ const CustomDrawerContent = (props) => {
       setIsLoading(true);
 
       // Block deletion while the user still has active responsibilities. Owner
-      // check takes priority so the message is unambiguous.
+      // check takes priority so the message is unambiguous; owned tasks are
+      // further split into "future" (still scheduled ahead) vs. "past"
+      // (scheduled date already elapsed) so the messaging tells the user
+      // exactly which tasks need attention.
       const uid = FIREBASE_AUTH.currentUser?.uid;
       if (uid) {
         const blockers = await getActiveDeletionBlockers(uid);
         if (blockers.ownsActiveTasks || blockers.isConfirmedHelper) {
-          setIsDeleteAccountModalVisible(false);
-          setDeleteBlockedModal({
-            visible: true,
-            title: blockers.ownsActiveTasks
-              ? t("settings.deleteBlocked.ownerTitle")
-              : t("settings.deleteBlocked.helperTitle"),
-            message: blockers.ownsActiveTasks
-              ? t("settings.deleteBlocked.ownerMessage", {
-                  count: blockers.ownedActiveCount,
-                })
-              : t("settings.deleteBlocked.helperMessage", {
-                  count: blockers.confirmedHelperCount,
+          let title: string;
+          let message: string;
+          const kind: "owner" | "helper" = blockers.ownsActiveTasks
+            ? "owner"
+            : "helper";
+
+          if (blockers.ownsActiveTasks) {
+            const hasFuture = blockers.futureOwnedCount > 0;
+            const hasPast = blockers.pastOwnedCount > 0;
+
+            if (hasFuture && hasPast) {
+              title = t("settings.deleteBlocked.ownerBothTitle");
+              // Each count is pluralized independently (task/tasks) via its
+              // own _one/_other keys, then stitched into the sentence.
+              message = t("settings.deleteBlocked.ownerBothMessage", {
+                futurePart: t("settings.deleteBlocked.futureTaskCount", {
+                  count: blockers.futureOwnedCount,
                 }),
-          });
+                pastPart: t("settings.deleteBlocked.pastTaskCount", {
+                  count: blockers.pastOwnedCount,
+                }),
+              });
+            } else if (hasPast) {
+              title = t("settings.deleteBlocked.ownerPastTitle");
+              message = t("settings.deleteBlocked.ownerPastMessage", {
+                count: blockers.pastOwnedCount,
+              });
+            } else {
+              // Future-only (or unscheduled, defaulted to future) — existing
+              // message, unchanged.
+              title = t("settings.deleteBlocked.ownerTitle");
+              message = t("settings.deleteBlocked.ownerMessage", {
+                count: blockers.futureOwnedCount,
+              });
+            }
+          } else {
+            title = t("settings.deleteBlocked.helperTitle");
+            message = t("settings.deleteBlocked.helperMessage", {
+              count: blockers.confirmedHelperCount,
+            });
+          }
+
+          setIsDeleteAccountModalVisible(false);
+          setDeleteBlockedModal({ visible: true, title, message, kind });
           setIsLoading(false);
           return;
         }
@@ -283,6 +319,35 @@ const CustomDrawerContent = (props) => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // CTA on the delete-blocked modal: dismiss it, then jump straight to the
+  // screen where the user can resolve the blocking task(s).
+  const handleDeleteBlockedCta = () => {
+    const kind = deleteBlockedModal.kind;
+    setDeleteBlockedModal((prev) => ({ ...prev, visible: false }));
+
+    if (kind === "owner") {
+      // The `navigation` object here is the root Stack Navigator's (this
+      // drawer content isn't a Screen itself, so useNavigation() resolves to
+      // the Stack, not the Drawer — confirmed by the "MainTabs" not handled by
+      // any navigator" warning). My Requests lives two levels down: Stack →
+      // "TabNavigator" screen (renders the Drawer) → "MainTabs" Drawer.Screen
+      // (renders the Tab Navigator) → the tab itself. "TabNavigator" is used
+      // here (not "MainApp", the other Stack screen name that also renders
+      // the same Drawer) because it's the name actually used to enter the
+      // app everywhere else, so this updates the already-focused screen
+      // instead of pushing a duplicate on top. Same nested-navigate pattern
+      // already used in SuccessScreen.tsx.
+      navigation.navigate("TabNavigator", {
+        screen: "MainTabs",
+        params: {
+          screen: `${t("bottomTab.txt1")}`,
+        },
+      });
+    } else if (kind === "helper") {
+      navigation.navigate("AcceptedTasks");
     }
   };
 
@@ -517,14 +582,20 @@ const CustomDrawerContent = (props) => {
           onClose={() =>
             setDeleteBlockedModal((prev) => ({ ...prev, visible: false }))
           }
-          onConfirm={() =>
-            setDeleteBlockedModal((prev) => ({ ...prev, visible: false }))
+          onConfirm={handleDeleteBlockedCta}
+          confirmText={
+            deleteBlockedModal.kind === "owner"
+              ? t("settings.deleteBlocked.ownerCta")
+              : deleteBlockedModal.kind === "helper"
+                ? t("settings.deleteBlocked.helperCta")
+                : undefined
           }
           title={deleteBlockedModal.title}
           message={deleteBlockedModal.message}
           type="warning"
           theme={theme}
           t={t}
+          hideCancel
         />
       </View>
     </>

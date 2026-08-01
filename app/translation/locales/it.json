@@ -119,12 +119,12 @@
       "Desc": "Tieni traccia delle tue richieste, aggiorna i tuoi post e chatta con i supporter – tutto in un unico posto."
     },
     "onBoarding4": {
-      "Title": "Goditi 14 giorni di accesso completo",
-      "Desc": "Prova tutte le funzionalità di Büez completamente gratis. Nessuna restrizione, nessun impegno."
+      "Title": "Unisciti al Founder Program",
+      "Desc": "Sii tra i primi 100 Buez Founder e goditi 60 giorni di accesso completo, del tutto gratis."
     },
     "onBoarding5": {
       "Title": "Continua con l'abbonamento",
-      "Desc": "Dopo la tua prova gratuita di 14 giorni, continua a goderti Büez con il piano mensile da 8.90 €. Cancella in qualsiasi momento."
+      "Desc": "Inizia con soli 3.40 € al mese per i primi 3 mesi, poi 7.90 € al mese."
     }
   },
   "login": {
@@ -147,29 +147,15 @@
     "txt5": "Ok",
     "txt6": "Nessun account associato a questo indirizzo email."
   },
-  "freeTrial": {
-    "txt1": "Inizia la tua prova gratuita di 14 giorni",
-    "txt2": "Come funziona la tua prova gratuita",
-    "txt3": "Oggi",
-    "txt4": "Goditi l'accesso illimitato a tutte le nostre funzionalità premium per 14 giorni, completamente gratis.",
-    "txt5": "Dopo 10 giorni",
-    "txt6": "Ti invieremo un promemoria amichevole quando il tuo periodo di prova terminerà in 4 giorni.",
-    "txt7": "Continua dopo la prova",
-    "txt8": "Il tuo abbonamento continuerà automaticamente dopo 14 giorni. Puoi cancellarti in qualsiasi momento.",
-    "txt9": "Inizia la mia prova gratuita"
-  },
   "subscriptionV2": {
     "txt1": "Acquista il nostro premium per accedere a tutti i servizi",
-    "txt2": ",99/mese",
     "txt3": "Pubblica richieste di commissioni giornaliere",
     "txt4": "Vedi le richieste giornalmente",
     "txt5": "Guadagna facendo commissioni giornaliere",
     "txt6": "Annulla in qualsiasi momento",
     "txt7": "Aggiungi carta",
-    "freeTrial": "Prova gratuita",
     "monthly": "Mensile",
     "yearly": "Annuale",
-    "for7Days": "per 14 giorni",
     "perMonth": "al mese",
     "introOffer": "3,90 $/mese per i primi 3 mesi",
     "thenAfter": "{{price}}/mese dopo 3 mesi",
@@ -178,33 +164,22 @@
     "fullAccess": "Accesso completo a tutte le funzionalità",
     "bestValue": "Miglior rapporto qualità-prezzo",
     "choosePlan": "Scegli il tuo BUEZ piano",
-    "startFree": "Inizia con una prova gratuita, aggiorna quando vuoi",
+    "startFree": "Scegli il piano più adatto a te",
     "mostPopular": "PIÙ POPOLARE",
-    "save30": "Risparmia il 36%",
     "noCreditCard": "Nessuna carta di credito",
     "securePayment": "Elaborazione pagamenti sicura",
     "cancelAnytime": "Annulla in qualsiasi momento",
-    "startFreeTrial": "Inizia prova gratuita",
     "continueWith": "Continua con",
     "maybeLater": "Forse più tardi",
     "prioritySupport": "Supporto prioritario",
     "exclusiveContent": "Contenuto esclusivo",
     "selected": "Selezionato",
-    "select": "Seleziona"
-  },
-  "freeTrialModal": {
-    "title": "Inizia la tua prova gratuita",
-    "subtitle": "Scegli come vuoi iniziare la tua prova gratuita di 14 giorni",
-    "addCardNow": "Aggiungi carta ora",
-    "skipForNow": "Salta per ora",
-    "info1": "Aggiungere una carta ora garantisce il servizio senza interruzioni dopo la prova",
-    "info2": "La tua carta non verrà addebitata fino a dopo 14 giorni",
-    "info3": "Puoi annullare in qualsiasi momento durante il periodo di prova",
-    "importantNote": "Inizia il tuo percorso Premium",
-    "automaticSubscription": "Goditi l’accesso completo al Premium per 14 giorni gratis! Dopo il periodo di prova, il tuo abbonamento mensile continuerà automaticamente se aggiungi una carta, così non perderai mai i tuoi vantaggi Premium."
+    "select": "Seleziona",
+    "introOfferDynamic": "{{price}}/mese per i primi {{months}} mesi",
+    "saveLabel": "Risparmia il {{percent}}%",
+    "yearlySavingsCaption": "Risparmi {{amount}} all'anno"
   },
   "subscription": {
-    "txt1": "La tua prova gratuita di 14 giorni è terminata.",
     "txt2": "Passa a Premium per sbloccare l'accesso completo.",
     "txt3": "Checkout",
     "renewSubscription": "BUEZ abbonamento",
@@ -372,10 +347,25 @@
     "txt14": "Piano di aggiornamento",
     "deleteBlocked": {
       "ownerTitle": "Attività attive trovate",
-      "ownerMessage": "Hai {{count}} attività attiva/e che hai creato. Completale o annullale prima di eliminare il tuo account.",
+      "ownerMessage_one": "Hai {{count}} attività attiva che hai creato. Completala o annullala prima di eliminare il tuo account.",
+      "ownerMessage_other": "Hai {{count}} attività attive che hai creato. Completale o annullale prima di eliminare il tuo account.",
       "helperTitle": "Assegnazioni attive trovate",
-      "helperMessage": "Sei un aiutante confermato su {{count}} attività attiva/e. Completa o annulla tali assegnazioni prima di eliminare il tuo account."
-    }
+      "helperMessage_one": "Sei un aiutante confermato su {{count}} attività attiva. Completa o annulla tale assegnazione prima di eliminare il tuo account.",
+      "helperMessage_other": "Sei un aiutante confermato su {{count}} attività attive. Completa o annulla tali assegnazioni prima di eliminare il tuo account.",
+      "ownerPastTitle": "Attività attive passate trovate",
+      "ownerPastMessage_one": "Hai {{count}} attività attiva passata che deve essere completata o annullata prima di eliminare il tuo account.",
+      "ownerPastMessage_other": "Hai {{count}} attività attive passate che devono essere completate o annullate prima di eliminare il tuo account.",
+      "ownerBothTitle": "Attività attive trovate",
+      "futureTaskCount_one": "{{count}} attività attiva futura",
+      "futureTaskCount_other": "{{count}} attività attive future",
+      "pastTaskCount_one": "{{count}} attività attiva passata",
+      "pastTaskCount_other": "{{count}} attività attive passate",
+      "ownerBothMessage": "Hai {{futurePart}} e {{pastPart}} che devono essere completate o annullate prima di eliminare il tuo account.",
+      "ownerCta": "Attività attive",
+      "helperCta": "Attività accettate"
+    },
+    "deleteFailed": "Eliminazione non riuscita",
+    "tryAgain": "Riprova."
   },
   "cancelSubscription": {
     "txt1": "Il tuo abbonamento attuale",
@@ -383,7 +373,6 @@
     "txt10": "Annulla abbonamento",
     "monthlyPlan": "PIANO MENSILE",
     "yearlyPlan": "PIANO ANNUALE",
-    "save36": "Risparmia il",
     "cancellationNote": "Dettagli cancellazione",
     "monthlyCancellation": "Il tuo abbonamento rimarrà attivo fino alla fine del periodo di fatturazione corrente. Non verrai più addebitato.",
     "yearlyCancellation": "Il tuo abbonamento annuale rimarrà attivo fino alla fine del ciclo di fatturazione corrente. Nessun rimborso per il tempo non utilizzato.",
@@ -392,7 +381,10 @@
     "confirmCancel": "Sì, annulla",
     "keepSubscription": "Mantieni abbonamento",
     "monthlyCancelled": "Abbonamento mensile annullato con successo",
-    "yearlyCancelled": "Abbonamento annuale annullato con successo"
+    "yearlyCancelled": "Abbonamento annuale annullato con successo",
+    "renewsOn": "Si rinnova il {{date}}",
+    "expiresOn": "Scade il {{date}}",
+    "savingLabel": "Risparmia il {{percent}}%"
   },
   "chnagePassword": {
     "txt1": "Inserisci vecchia password",
@@ -462,7 +454,7 @@
     "txt1": "Profilo",
     "txt2": "Modifica profilo",
     "txt3": "Valutazioni e recensioni",
-    "txt4": "Attività completate",
+    "txt4": "Aiuti completati",
     "applicantProfile": "Profilo del candidato",
     "confirmApplicant": "Confermare",
     "confirmed": "Confermato",
@@ -516,10 +508,10 @@
     "txt1": "RECENSITO",
     "txt2": "COMPLETATO",
     "txt3": "La tua recensione",
-    "txt4": "Attività completate",
+    "txt4": "Aiuti completati",
     "txt5": " Recensito",
     "txt6": "Recensione in sospeso",
-    "txt7": "Caricamento attività completate..."
+    "txt7": "Caricamento aiuti completati..."
   },
   "pushNotifications": {
     "txt1": "ha accettato la tua richiesta di attività.",
@@ -528,9 +520,7 @@
     "txt4": "La tua attività accettata",
     "txt5": "è stata segnata come completata da",
     "txt6": "Follow-up attività!",
-    "txt7": "Questo è un promemoria sulla tua recente pubblicazione di attività. Controlla i progressi e aggiorna lo stato se completata.",
-    "txt8": "⏰ Prova gratuita in scadenza",
-    "txt9": "La tua prova gratuita termina in 4 giorni. Mantieni l'abbonamento per accesso completo."
+    "txt7": "Questo è un promemoria sulla tua recente pubblicazione di attività. Controlla i progressi e aggiorna lo stato se completata."
   },
   "modal": {
     "txt1": "Attività accettata con successo!",
@@ -568,9 +558,9 @@
       "title": "Account e abbonamento",
       "questions": {
         "q1": "Serve un abbonamento per usare BUEZ?",
-        "a1": "Sì, BUEZ opera su modello in abbonamento. Serve un abbonamento attivo per navigare e pubblicare richieste. Tuttavia, puoi registrarti e creare un account con una prova gratuita di 14 giorni.",
+        "a1": "Sì, BUEZ opera su modello in abbonamento. Serve un abbonamento attivo per navigare e pubblicare richieste. Gli utenti idonei possono però unirsi al Founder Program per ottenere 60 giorni di accesso gratuito.",
         "q2": "Quanto costa l'abbonamento BUEZ?",
-        "a2": "BUEZ offre un piano di abbonamento mensile a $12.99. Puoi iniziare con una prova gratuita di 14 giorni per esplorare tutte le funzionalità.",
+        "a2": "BUEZ offre un piano di abbonamento mensile a $3.40 al mese per i primi 3 mesi, poi $7.90 al mese in seguito. Gli utenti idonei possono anche unirsi al Founder Program per ottenere 60 giorni di accesso gratuito prima di qualsiasi addebito.",
         "q3": "Posso cancellare il mio abbonamento?",
         "a3": "Sì, puoi cancellare il tuo abbonamento in qualsiasi momento tramite impostazioni app. Manterrai l'accesso fino alla fine del periodo di fatturazione.",
         "q4": "Cosa succede se non mi abbono?",
@@ -630,12 +620,12 @@
       }
     },
     "section7": {
-      "title": "Gestione prova gratuita",
+      "title": "Founder Program",
       "questions": {
-        "q1": "Come funziona la prova gratuita di 14 giorni?",
-        "a1": "I nuovi utenti ottengono accesso completo a tutte le funzionalità BUEZ per 14 giorni completamente gratis. Nessuna carta di credito richiesta in anticipo.",
-        "q2": "Verrò addebitato dopo la prova gratuita?",
-        "a2": "Se non cancelli prima della fine della prova, il tuo abbonamento continuerà automaticamente alla tariffa mensile di $12.99.",
+        "q1": "Come funziona il Founder Program?",
+        "a1": "I primi 100 utenti idonei ottengono accesso completo a tutte le funzionalità BUEZ per 60 giorni, completamente gratis. Nessuna carta di credito richiesta in anticipo.",
+        "q2": "Verrò addebitato dopo la fine del mio accesso Founder?",
+        "a2": "Se non cancelli prima della fine dei tuoi 60 giorni di accesso Founder, il tuo abbonamento continuerà automaticamente a $3.40 al mese per i primi 3 mesi, poi $7.90 al mese in seguito.",
         "q3": "Come cancello il mio abbonamento?",
         "a3": "Vai a Impostazioni → Annulla abbonamento. Manterrai l'accesso fino alla fine del periodo di fatturazione corrente.",
         "q4": "Posso ottenere un rimborso?",
@@ -828,28 +818,6 @@
     "resendButton": "Invia di nuovo",
     "resendCooldown": "Invia di nuovo tra {{seconds}}s",
     "backToLogin": "Torna al login"
-  },
-  "freeTrialBanner": {
-    "active": {
-      "label": "Prova gratuita attiva",
-      "title": "Goditi le funzionalità premium"
-    },
-    "warning_no_card": {
-      "label": "Prova in scadenza",
-      "title": "Aggiungi un metodo di pagamento per continuare"
-    },
-    "urgent_no_card": {
-      "label": "Prova scade domani!",
-      "title": "Aggiorna ora per continuare"
-    },
-    "warning_with_card": {
-      "label": "Prova in scadenza",
-      "title": "Il tuo piano inizierà automaticamente"
-    },
-    "autorenew": {
-      "label": "Inizia domani",
-      "title": "Il piano mensile inizierà automaticamente"
-    }
   },
   "founderIntro": {
     "badge": "Limitato · Primi 100",

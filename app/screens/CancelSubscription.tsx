@@ -24,13 +24,13 @@ import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 import * as Localization from "expo-localization";
 import CustomNav from "../components/common/CustomNav";
 import {
-  SUBSCRIPTION_PRICES,
   getPlanAmount,
+  getYearlySavings,
 } from "../config/subscriptionPricing";
 
 function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const userId = getAuth()?.currentUser?.uid;
   const firestore = getFirestore();
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -43,9 +43,6 @@ function CancelSubscription({ navigation }: any) {
 
   const locale = Localization.locale;
   const userCurrency = getCurrencyFromLocale(locale);
-
-  // Shared display pricing (kept in sync with Stripe via subscriptionPricing).
-  const prices = SUBSCRIPTION_PRICES;
 
   const basePlanAmount = getPlanAmount(
     currentPlan === "yearly" ? "yearly" : "monthly",
@@ -104,6 +101,10 @@ function CancelSubscription({ navigation }: any) {
             try {
               await updateDoc(userRef, {
                 isCancelled: true,
+                // Keep the stored expiration in sync with what Stripe
+                // actually returns for this cancellation, so the date shown
+                // on this screen always matches the latest backend data.
+                ...(currentPeriodEnd ? { subscriptionEnd: currentPeriodEnd } : {}),
               });
             } catch (error) {
               console.log("Failed to update subscription status:", error);
@@ -126,18 +127,49 @@ function CancelSubscription({ navigation }: any) {
     }
   };
 
-  const getSavingsPercent = (monthly, yearly) => {
-    const normalYearly = monthly * 12;
-    const saved = normalYearly - yearly;
-    return Math.round((saved / normalYearly) * 100); // round to whole number
+  // Yearly savings percentage — derived from the centralized pricing config
+  // (SUBSCRIPTION_PRICES via getYearlySavings), the same single source of
+  // truth SubscriptionV2 uses, so it's always correct for the user's
+  // currency and needs no hardcoded number here.
+  const { percentage: savingsPercentage } = getYearlySavings(userCurrency);
+  const savingsLabel = t("cancelSubscription.savingLabel", {
+    percent: Math.round(savingsPercentage),
+  });
+
+  // Renewal / expiration date, from the backend-provided subscriptionEnd
+  // (Stripe's currentPeriodEnd, kept in sync by the cancel flow and the
+  // subscription webhook). A still-renewing subscription shows when it
+  // next bills; a cancelled-but-not-yet-expired one shows when access ends.
+  const parseSubscriptionDate = (value: any): Date | null => {
+    if (!value) return null;
+    if (typeof value === "object" && typeof value.seconds === "number") {
+      return new Date(value.seconds * 1000);
+    }
+    if (typeof value === "string" || typeof value === "number") {
+      const parsed = new Date(value);
+      return isNaN(parsed.getTime()) ? null : parsed;
+    }
+    return null;
   };
 
-  const savingsPercent = getSavingsPercent(
-    prices.monthly[userCurrency],
-    prices.yearly[userCurrency],
-  );
+  const subscriptionEndDate = parseSubscriptionDate(userData?.subscriptionEnd);
+  const formattedSubscriptionEndDate = subscriptionEndDate
+    ? subscriptionEndDate.toLocaleDateString(i18n.language, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
 
-  const savingsLabel = `${t("cancelSubscription.save36")} ${savingsPercent}%`;
+  const billingDateLabel = formattedSubscriptionEndDate
+    ? userData?.isCancelled
+      ? t("cancelSubscription.expiresOn", {
+          date: formattedSubscriptionEndDate,
+        })
+      : t("cancelSubscription.renewsOn", {
+          date: formattedSubscriptionEndDate,
+        })
+    : null;
 
   const planDetails = {
     monthly: {
@@ -169,7 +201,7 @@ function CancelSubscription({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {!userData?.isCancelled && userData?.planType != "free" ? (
+        {userData?.planType && userData?.planType !== "free" ? (
           <>
             {/* Current Plan Badge */}
             <View style={styles.planBadgeContainer}>
@@ -215,6 +247,17 @@ function CancelSubscription({ navigation }: any) {
                     {t("subscriptionV2.thenAfter", {
                       price: standardMonthlyPrice,
                     })}
+                  </Text>
+                )}
+
+                {/* Renews on <date> while active, or expires on <date> once
+                    cancelled — both from the backend-synced subscriptionEnd. */}
+                {billingDateLabel && (
+                  <Text
+                    style={[styles.renewalNote, { color: theme.darkGrey }]}
+                    numberOfLines={2}
+                  >
+                    {billingDateLabel}
                   </Text>
                 )}
               </View>
@@ -300,15 +343,19 @@ function CancelSubscription({ navigation }: any) {
               </View>
             </View>
 
-            <View style={styles.buttonContainer}>
-              <MyAppButton
-                title={t("buttons.cancel")}
-                marginTop={RFPercentage(2)}
-                onPress={() => setModalVisible2(true)}
-                width={"90%"}
-                loading={isloading}
-              />
-            </View>
+            {/* Already cancelled and just riding out the paid period — no
+                further action to take, so there's nothing to confirm. */}
+            {!userData?.isCancelled && (
+              <View style={styles.buttonContainer}>
+                <MyAppButton
+                  title={t("buttons.cancel")}
+                  marginTop={RFPercentage(2)}
+                  onPress={() => setModalVisible2(true)}
+                  width={"90%"}
+                  loading={isloading}
+                />
+              </View>
+            )}
           </>
         ) : (
           <>

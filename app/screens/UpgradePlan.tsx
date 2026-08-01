@@ -854,7 +854,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 16,
-    elevation: 6,
   },
   cardTopBar: { height: 3, width: "100%" },
   comparisonBody: { padding: RFPercentage(2.2) },
@@ -946,7 +945,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 6,
   },
   planTitle: {
     fontSize: RFPercentage(2.2),
@@ -1051,7 +1049,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 14,
-    elevation: 10,
     zIndex: 10,
   },
   upgradeBtn: {

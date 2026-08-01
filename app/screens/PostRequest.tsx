@@ -2849,7 +2849,7 @@ const styles = StyleSheet.create({
     marginRight: RFPercentage(1.3),
   },
   sectionTitle: {
-    fontSize: RFPercentage(1.85),
+    fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
     flex: 1,
   },

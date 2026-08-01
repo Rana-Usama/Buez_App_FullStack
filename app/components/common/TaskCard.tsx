@@ -20,6 +20,7 @@ import { getFormatedDate } from "../../services/Shared.service";
 import { Icons } from "../../config/theme";
 import Colors from "../../config/Colors";
 import AvatarInitials from "./DefaultAvatars";
+import FounderBadgeById from "./FounderBadgeById";
 
 const { width } = Dimensions.get("window");
 
@@ -246,21 +247,32 @@ const TaskCard: React.FC<TaskCardProps> = ({
       <View style={styles.infoWrapper}>
         {/* User Info - Always Visible */}
         <View style={styles.cartInfoContainer}>
-          {task.user?.profileImage ? (
-            <Image
-              style={styles.userImage}
-              source={{ uri: task.user.profileImage }}
+          <View style={styles.avatarWrapper}>
+            {task.user?.profileImage ? (
+              <Image
+                style={styles.userImage}
+                source={{ uri: task.user.profileImage }}
+              />
+            ) : (
+              <AvatarInitials
+                name={task.user?.userName}
+                style={[styles.userImage, { borderWidth: 0 }]}
+                textStyle={{
+                  fontSize: RFPercentage(2.5),
+                  lineHeight: RFPercentage(3.5),
+                }}
+              />
+            )}
+
+            {/* Founder Badge for the task poster. task.user is a snapshot
+                taken at post time, so its isFounder (if any) can be stale —
+                resolve by the authoritative task.userId instead. */}
+            <FounderBadgeById
+              userId={task.userId || task.user?.userId}
+              size={RFPercentage(2.4)}
+              style={styles.founderBadge}
             />
-          ) : (
-            <AvatarInitials
-              name={task.user?.userName}
-              style={[styles.userImage, { borderWidth: 0 }]}
-              textStyle={{
-                fontSize: RFPercentage(2.5),
-                lineHeight: RFPercentage(3.5),
-              }}
-            />
-          )}
+          </View>
 
           <View style={styles.userInfoContainer}>
             <Text
@@ -680,6 +692,14 @@ const styles = StyleSheet.create({
   userInfoContainer: {
     flex: 1,
     marginLeft: RFPercentage(2),
+  },
+  avatarWrapper: {
+    position: "relative",
+  },
+  founderBadge: {
+    position: "absolute",
+    right: -RFPercentage(0.5),
+    bottom: -RFPercentage(0.3),
   },
   userImage: {
     width: RFPercentage(6.2),

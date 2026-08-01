@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { doc, updateDoc, arrayRemove } from "firebase/firestore";
+import { doc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { useTranslation } from "react-i18next";
 import Toast from "react-native-toast-message";
@@ -126,6 +126,10 @@ export const useWorkerActions = ({
         appliedWorkers: updatedApplied,
         appliedWorkerIds: arrayRemove(worker.userId),
         confirmedWorkers: updatedConfirmed,
+        // Queryable mirror of confirmedWorkers (the array itself can't be
+        // queried by userId) — lets account deletion reliably find every
+        // task a user is a confirmed helper on, single-helper or bulk.
+        confirmedWorkerIds: arrayUnion(worker.userId),
       };
       if (isSingle) {
         updatePayload.acceptedBy = {
@@ -206,7 +210,12 @@ export const useWorkerActions = ({
 
       const updatePayload: any = {
         appliedWorkers: updatedApplied,
+        // Worker moves back to "applied" — restore it in the queryable
+        // mirror too (was missing before, leaving this array stale after an
+        // un-confirm).
+        appliedWorkerIds: arrayUnion(worker.userId),
         confirmedWorkers: updatedConfirmed,
+        confirmedWorkerIds: arrayRemove(worker.userId),
       };
       if (isSingle) {
         updatePayload.acceptedBy = null;

@@ -52,6 +52,7 @@ const HomeScreen: React.FC = () => {
     setSearchQuery,
     setActiveFilter,
     topRatedUsers,
+    topRatedLoading,
     displayTasks,
     activeIndices,
     setActiveIndices,
@@ -237,7 +238,14 @@ const HomeScreen: React.FC = () => {
             />
 
             {/* Top Rated Users Section */}
-            {topRatedUsers?.length > 0 ? (
+            {/* Loading only ever shows before the very first fetch resolves
+                (no cached data yet). Every subsequent focus refreshes silently
+                behind the already-visible list/banner — no spinner, no flicker. */}
+            {topRatedLoading ? (
+              <View style={styles.topRatedLoadingContainer}>
+                <ActivityIndicator size="small" color={Colors.primary} />
+              </View>
+            ) : topRatedUsers?.length > 0 ? (
               <>
                 <View style={styles.sectionHeader}>
                   <Text style={[styles.sectionTitle, { color: theme.heading }]}>
@@ -383,6 +391,12 @@ const styles = StyleSheet.create({
   topRatedList: {
     width: "100%",
     alignSelf: "stretch",
+  },
+  topRatedLoadingContainer: {
+    width: "100%",
+    paddingVertical: RFPercentage(3),
+    alignItems: "center",
+    justifyContent: "center",
   },
   topRatedContainer: {
     paddingHorizontal: RFPercentage(2),

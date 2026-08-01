@@ -23,6 +23,8 @@ const ConfirmationModal = ({
   loading,
   message,
   type = "info", // Default type is "delete", other options: "logout", "warning", "info", "cancel"
+  confirmText, // Optional override for the confirm button label (defaults to buttons.yes)
+  hideCancel = false, // When true: no Cancel button — single centered CTA + a close (X) icon top-right instead
 }) => {
   // Function to get icon based on type
   const getIconConfig = () => {
@@ -70,6 +72,24 @@ const ConfirmationModal = ({
         style={[styles.modalBackground, { backgroundColor: theme.modal }]}
       >
         <View style={[styles.modalContainer, { backgroundColor: theme.white }]}>
+          {/* Close (X) — replaces the Cancel button for single-CTA modals */}
+          {hideCancel && (
+            <Pressable
+              style={[
+                styles.closeButton,
+                { backgroundColor: theme.mode === "dark" ? Colors.darkGrey + "30" : "#00000010" },
+              ]}
+              onPress={onClose}
+              hitSlop={10}
+            >
+              <MaterialIcons
+                name="close"
+                size={RFPercentage(2.2)}
+                color={theme.darkGrey}
+              />
+            </Pressable>
+          )}
+
           {/* Icon Container */}
           <View style={styles.iconContainer}>
             <View
@@ -99,26 +119,44 @@ const ConfirmationModal = ({
               {message}
             </Text>
           )}
-          <View style={styles.modalButtons}>
-            <Pressable
-              style={[styles.cancelButton, { borderColor: theme.lightGrey }]}
-              onPress={onClose}
-            >
-              <Text
-                style={[styles.cancelButtonText, { color: theme.lightGrey }]}
+          <View
+            style={[
+              styles.modalButtons,
+              hideCancel && styles.modalButtonsCentered,
+            ]}
+          >
+            {!hideCancel && (
+              <Pressable
+                style={[
+                  styles.cancelButton,
+                  { borderColor: theme.lightGrey },
+                  confirmText && styles.cancelButtonCompact,
+                ]}
+                onPress={onClose}
               >
-                {t("buttons.cancel")}
-              </Text>
-            </Pressable>
+                <Text
+                  style={[styles.cancelButtonText, { color: theme.lightGrey }]}
+                >
+                  {t("buttons.cancel")}
+                </Text>
+              </Pressable>
+            )}
 
             <MyAppButton
-              title={t("buttons.yes")}
+              title={confirmText || t("buttons.yes")}
               marginTop={RFPercentage(0)}
               height={
                  RFPercentage(5)
               }
+              // Custom CTAs (e.g. "Active Tasks") are longer than "Yes" — give
+              // them more room instead of clipping to the default width. A
+              // single centered CTA (no Cancel alongside it) gets even more.
               width={
-                 RFPercentage(15)
+                hideCancel
+                  ? RFPercentage(28)
+                  : confirmText
+                    ? RFPercentage(21)
+                    : RFPercentage(15)
               }
               onPress={onConfirm}
               loading={loading}
@@ -148,6 +186,17 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(3),
     alignItems: "center",
     justifyContent: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: RFPercentage(1.2),
+    right: RFPercentage(1.2),
+    width: RFPercentage(3.4),
+    height: RFPercentage(3.4),
+    borderRadius: RFPercentage(1.7),
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
   },
   iconContainer: {
     // marginBottom: RFPercentage(2),
@@ -184,6 +233,9 @@ const styles = StyleSheet.create({
     width: "90%",
     paddingHorizontal: RFPercentage(0.5),
   },
+  modalButtonsCentered: {
+    justifyContent: "center",
+  },
   cancelButton: {
     height:
        RFPercentage(5),
@@ -193,6 +245,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  cancelButtonCompact: {
+    width: RFPercentage(11),
   },
   cancelButtonText: {
     fontSize: RFPercentage(1.8),

@@ -53,8 +53,8 @@
     "subscriptionV2": {
       "one": "Abo nöd vollständet",
       "two": "Dini Chärtli hät nöd chönne hinzugefügt werde. Bitte versuech’s nomol.",
-      "three": "Gratis-Testzit aktiviert",
-      "four": "Dini 14-tägigi Gratis-Testzit het erfolgrich agfange."
+      "three": "Zahlig erfolgriich!",
+      "four": "Willkomme bi Premium!"
     },
     "subscription": {
       "one": "Abo erfolgrich!",
@@ -104,12 +104,12 @@
       "Desc": "Behalte diini Aafrogä im Griff, update diini Posts und schreib mit Unterstützer – alles am gliiche Ort."
     },
     "onBoarding4": {
-      "Title": "Gnüss 14 Täg volle Zuegriff",
-      "Desc": "Probiär all Büez-Funktione gratis us. Kei Limit, kei Verbindlichkeitä."
+      "Title": "Mach mit bim Founder-Programm",
+      "Desc": "Sig eini vo de erschte 100 Buez Founders und gnüss 60 Täg volle Zuegriff, komplett gratis."
     },
     "onBoarding5": {
       "Title": "Mach wiiter mit Abo",
-      "Desc": "Nach de 14-tägige Gratis-Testzit, gnüss Büez mit em $12.99-Abo pro Monet. Chasch jederzeit kündä."
+      "Desc": "Starte für nur $3.40 pro Monet für dini erschte 3 Monet, dänn $7.90 pro Monet."
     }
   },
   "login": {
@@ -132,28 +132,18 @@
     "txt5": "Ok",
     "txt6": "Kein Konto ist mit dieser E-Mail-Adresse verknüpft."
   },
-  "freeTrial": {
-    "txt1": "Aktivier dini 14-tägigi gratis Testzit!",
-    "txt2": "So funktioniert d’Gratis-Testzit",
-    "txt3": "Hüt",
-    "txt4": "Schalt völle Zuegriff frei – gnüss alli Funktione vo dr App, komplett gratis.",
-    "txt5": "In 10 Täg",
-    "txt6": "Mir gibed dir Bescheid, wenn d'Testzit langsam ändet – blib informiert.",
-    "txt7": "In 14 Täg",
-    "txt8": "Dini Abonnemänt startet automatisch. Chasch vorher jederzyt kündä, zum Kostä z'vermide.",
-    "txt9": "Gratis-Testzit starte"
-  },
   "subscriptionV2": {
     "txt1": "Kauf üses Premium, zum völle Service z'nutze",
-    "txt2": ".99 pro Monet",
     "txt3": "Täglich Uftrag-Postings mache",
     "txt4": "Täglich Ufträge aaluege",
     "txt5": "Verdien Gäld mit tägliche Büez",
     "txt6": "Jederzyt kündbar",
-    "txt7": "Chärtli hinzfüege"
+    "txt7": "Chärtli hinzfüege",
+    "introOfferDynamic": "{{price}}/Monat für die ersten {{months}} Monate",
+    "saveLabel": "Spare {{percent}}%",
+    "yearlySavingsCaption": "Du sparst {{amount}} pro Jahr"
   },
   "subscription": {
-    "txt1": "Dini 14-tägigi Gratis-Testzit isch abeglaufe.",
     "txt2": "Upgrade uf Premium, zum völle Zuegriff z'ha.",
     "txt3": "Zahlä"
   },
@@ -243,7 +233,9 @@
     "repostedBadge": "Erneut gepostet",
     "repostAvailable": "Ihre Anfrage wurde erneut gepostet und steht nun anderen Nutzern zur Annahme zur Verfügung.",
     "viewConfirmedHelpers": "Helfer azeige",
-    "txt14": "Vergangen"
+    "txt14": "Vergangen",
+    "noCompletedTasks": "Kei fertigi Ufträg",
+    "noCompletedTasksDesc": "Dini erledigte Ufträg werde do aazeigt"
   },
   "postRequest": {
     "txt1": "Uftrag poste",
@@ -302,10 +294,25 @@
     "txt13": "Dunkles Thema",
     "deleteBlocked": {
       "ownerTitle": "Aktive Aufgaben gefunden",
-      "ownerMessage": "Sie haben {{count}} aktive selbst erstellte Aufgabe(n). Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerMessage_one": "Sie haben {{count}} aktive selbst erstellte Aufgabe. Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerMessage_other": "Sie haben {{count}} aktive selbst erstellte Aufgaben. Bitte schließen Sie diese ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
       "helperTitle": "Aktive Zuweisungen gefunden",
-      "helperMessage": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe(n). Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen."
-    }
+      "helperMessage_one": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgabe. Bitte schließen Sie diese Zuweisung ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "helperMessage_other": "Sie sind bestätigter Helfer bei {{count}} aktiven Aufgaben. Bitte schließen Sie diese Zuweisungen ab oder stornieren Sie sie, bevor Sie Ihr Konto löschen.",
+      "ownerPastTitle": "Vergangene aktive Aufgaben gefunden",
+      "ownerPastMessage_one": "Sie haben {{count}} vergangene aktive Aufgabe, die abgeschlossen oder storniert werden muss, bevor Sie Ihr Konto löschen.",
+      "ownerPastMessage_other": "Sie haben {{count}} vergangene aktive Aufgaben, die abgeschlossen oder storniert werden müssen, bevor Sie Ihr Konto löschen.",
+      "ownerBothTitle": "Aktive Aufgaben gefunden",
+      "futureTaskCount_one": "{{count}} zukünftige aktive Aufgabe",
+      "futureTaskCount_other": "{{count}} zukünftige aktive Aufgaben",
+      "pastTaskCount_one": "{{count}} vergangene aktive Aufgabe",
+      "pastTaskCount_other": "{{count}} vergangene aktive Aufgaben",
+      "ownerBothMessage": "Sie haben {{futurePart}} und {{pastPart}}, die abgeschlossen oder storniert werden müssen, bevor Sie Ihr Konto löschen.",
+      "ownerCta": "Aktive Aufgaben",
+      "helperCta": "Angenommene Aufgaben"
+    },
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "tryAgain": "Bitte versuchen Sie es erneut."
   },
   "cancelSubscription": {
     "txt1": "Premium-Abo kündige",
@@ -317,7 +324,10 @@
     "txt7": "Du verlüsch dä flexible Kündigungs-Zugang",
     "txt8": "Du hesch ke aktivs Abo.",
     "txt9": "Abo aktiviere",
-    "txt10": "Bisch sicher, dass du dini monatlichi Abo kündige wotsch?"
+    "txt10": "Bisch sicher, dass du dini monatlichi Abo kündige wotsch?",
+    "renewsOn": "Verlängert sich am {{date}}",
+    "expiresOn": "Läuft am {{date}} ab",
+    "savingLabel": "Spare {{percent}}%"
   },
   "chnagePassword": {
     "txt1": "Alts Passwort iigäh",
@@ -384,7 +394,7 @@
     "txt1": "Profil",
     "txt2": "Profil bearbeiten",
     "txt3": "Bewertungen & Rückmeldungen",
-    "txt4": "Abgeschlossene Aufgaben",
+    "txt4": "Abgschlosseni Hilf",
     "txt5": "Angenommene Aufgaben"
   },
   "editProfile": {
@@ -431,10 +441,10 @@
     "txt1": "BEWERTET",
     "txt2": "ABGESCHLOSSEN",
     "txt3": "Deine Bewertung",
-    "txt4": "Abgeschlossene Aufgaben",
+    "txt4": "Abgschlosseni Hilf",
     "txt5": " Bewertet",
     "txt6": "Ausstehende Bewertung",
-    "txt7": "Deine abgeschlossenen Aufgaben werden geladen..."
+    "txt7": "Dini abgschlosseni Hilf wird glade..."
   },
   "pushNotifications": {
     "txt1": "Hat deine Aufgabenanfrage akzeptiert.",
@@ -443,9 +453,7 @@
     "txt4": "Deine akzeptierte Aufgabe",
     "txt5": "wurde von markiert als abgeschlossen von",
     "txt6": "Aufgaben-Nachverfolgung!",
-    "txt7": "Dies ist eine Erinnerung an deine letzte Aufgabenveröffentlichung. Bitte überprüfe deinen Fortschritt und aktualisiere den Status, falls abgeschlossen.",
-    "txt8": "⏰ Kostenloses Probeabo endet bald",
-    "txt9": "Dein kostenloses Probeabo endet in 4 Tagen. Bleibe abonnierter Nutzer, um vollen Zugriff zu behalten."
+    "txt7": "Dies ist eine Erinnerung an deine letzte Aufgabenveröffentlichung. Bitte überprüfe deinen Fortschritt und aktualisiere den Status, falls abgeschlossen."
   },
   "modal": {
     "txt1": "Aufgabe erfolgreich angenommen!",

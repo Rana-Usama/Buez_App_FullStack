@@ -16,6 +16,7 @@ import { FIREBASE_DB } from "../../firebaseConfig";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { resolveFounderRoute } from "../services/Founder.service";
+import { Feather } from "@expo/vector-icons";
 
 function EmailVerificationScreen({ navigation, route }: any) {
   const { email, password, deviceId } = route.params;
@@ -173,11 +174,27 @@ function EmailVerificationScreen({ navigation, route }: any) {
           </Text>
         )}
       </TouchableOpacity>
-
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => navigation.navigate("Login")}
+        style={{ flexDirection: "row", alignItems: "center" }}
       >
+        <View
+          style={{
+            height: RFPercentage(3),
+            width: RFPercentage(3),
+            borderRadius: RFPercentage(100),
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: theme.mode === "dark" ? "#050505ff" : "#e8eaff",
+          }}
+        >
+          <Feather
+            name="arrow-left"
+            size={RFPercentage(2)}
+            color={Colors.primary}
+          />
+        </View>
         <Text style={styles.loginText}>
           {t("emailVerification.backToLogin")}
         </Text>
@@ -196,7 +213,7 @@ const styles = StyleSheet.create({
   },
   emoji: { fontSize: RFPercentage(9), marginBottom: RFPercentage(2) },
   title: {
-    fontSize: RFPercentage(3),
+    fontSize: RFPercentage(2.8),
     fontFamily: "Poppins_600SemiBold",
     color: Colors.heading,
     marginBottom: RFPercentage(1),
@@ -222,35 +239,40 @@ const styles = StyleSheet.create({
   primaryButton: {
     backgroundColor: Colors.primary,
     width: "100%",
-    paddingVertical: RFPercentage(1.8),
     borderRadius: RFPercentage(2),
     alignItems: "center",
     marginBottom: RFPercentage(2),
+    height: RFPercentage(6),
+    justifyContent: "center",
   },
   primaryButtonText: {
     color: "#fff",
     fontFamily: "Poppins_600SemiBold",
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
+    lineHeight: RFPercentage(2),
   },
   secondaryButton: {
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: Colors.primary,
     width: "100%",
-    paddingVertical: RFPercentage(1.5),
     borderRadius: RFPercentage(2),
     alignItems: "center",
     marginBottom: RFPercentage(3),
+    height: RFPercentage(6),
+    justifyContent: "center",
   },
   disabledButton: { borderColor: Colors.darkGrey, opacity: 0.5 },
   secondaryButtonText: {
     color: Colors.primary,
     fontFamily: "Poppins_500Medium",
-    fontSize: RFPercentage(1.6),
+    fontSize: RFPercentage(1.7),
+    lineHeight: RFPercentage(2),
   },
   loginText: {
     color: Colors.darkGrey,
     fontFamily: "Poppins_500Medium",
-    fontSize: RFPercentage(1.7),
+    fontSize: RFPercentage(1.8),
+    marginLeft: RFPercentage(1),
   },
 });
 

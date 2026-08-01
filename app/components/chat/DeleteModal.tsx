@@ -34,6 +34,8 @@ const DeleteModal = memo(
                   color: theme.heading,
                   fontFamily: "Poppins_500Medium",
                   fontSize: RFPercentage(1.7),
+                      lineHeight: RFPercentage(2),
+
                 }}
               >
                 {t("buttons.cancel")}
@@ -110,6 +112,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "Poppins_500Medium",
     fontSize: RFPercentage(1.7),
+    lineHeight: RFPercentage(2),
   },
 });
 

@@ -13,6 +13,7 @@ import {
   Platform,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
@@ -190,7 +191,17 @@ const FounderIntro = ({ navigation }: any) => {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
   const { userData } = useUser();
+  const insets = useSafeAreaInsets();
   const isDark = theme.mode === "dark";
+
+  // The footer is position:absolute / bottom:0, and targetSdk 35 (Android 15)
+  // forces edge-to-edge — so it draws underneath the gesture bar / nav bar and
+  // clips the CTA on Samsung devices. Pad by the real inset, with a floor that
+  // preserves the previous spacing where no inset is reported.
+  const footerPaddingBottom = Math.max(
+    insets.bottom + RFPercentage(1.5),
+    Platform.OS === "ios" ? RFPercentage(4.5) : RFPercentage(2.8),
+  );
 
   const [claiming, setClaiming] = useState(false);
   const [deviceId, setDeviceId] = useState("");
@@ -369,6 +380,9 @@ const FounderIntro = ({ navigation }: any) => {
           {
             paddingTop:
               Platform.OS === "ios" ? RFPercentage(7) : RFPercentage(8),
+            // Keep the scroll content clear of the (now inset-aware) absolute
+            // footer, so the last card isn't hidden behind it.
+            paddingBottom: RFPercentage(16) + insets.bottom,
           },
         ]}
       >
@@ -585,8 +599,7 @@ const FounderIntro = ({ navigation }: any) => {
             borderTopColor: isDark
               ? "rgba(69,87,176,0.18)"
               : "rgba(37,50,117,0.08)",
-            paddingBottom:
-              Platform.OS === "ios" ? RFPercentage(4.5) : RFPercentage(2.8),
+            paddingBottom: footerPaddingBottom,
           },
         ]}
       >
@@ -654,7 +667,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(34),
   },
   scrollContent: {
-    paddingBottom: RFPercentage(16),
+    // paddingBottom is applied at runtime (base + safe-area inset).
     alignItems: "center",
   },
   contentWrap: {
@@ -675,7 +688,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.45,
     shadowRadius: 20,
-    elevation: 12,
   },
   heroBadgeRing: {
     position: "absolute",
@@ -741,7 +753,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 18,
-    elevation: 5,
   },
   slotsHeaderRow: {
     flexDirection: "row",
@@ -840,7 +851,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
-    elevation: 2,
   },
   benefitIcon: {
     width: RFPercentage(4.8),
@@ -882,7 +892,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.4,
     shadowRadius: 18,
-    elevation: 10,
   },
   ctaBtn: {
     flex: 1,
