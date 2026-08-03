@@ -23,7 +23,7 @@ const TopRatedExplore: React.FC<TopRatedExploreProps> = ({
     ? HomeGradients.topRatedBrandDark
     : HomeGradients.topRatedBrand;
 
-  const textColor = isDark ? "#FFFFFF" : Colors.primary;
+  const textColor = isDark ? Colors.white : Colors.primary;
 
   return (
     <TouchableOpacity
@@ -33,7 +33,7 @@ const TopRatedExplore: React.FC<TopRatedExploreProps> = ({
         styles.container,
         {
           borderColor: isDark
-            ? "rgba(255,255,255,0.12)"
+            ? Colors.whiteAlpha12
             : Colors.primary + "26",
         },
       ]}
@@ -49,8 +49,8 @@ const TopRatedExplore: React.FC<TopRatedExploreProps> = ({
             styles.iconChip,
             {
               backgroundColor: isDark
-                ? "rgba(255,255,255,0.10)"
-                : "rgba(255,255,255,0.75)",
+                ? Colors.whiteAlpha10
+                : Colors.whiteAlpha75,
             },
           ]}
         >
@@ -69,7 +69,7 @@ const TopRatedExplore: React.FC<TopRatedExploreProps> = ({
           <FontAwesome6
             name="arrow-right"
             size={RFPercentage(1.7)}
-            color="#FFFFFF"
+            color={Colors.white}
           />
         </View>
       </LinearGradient>

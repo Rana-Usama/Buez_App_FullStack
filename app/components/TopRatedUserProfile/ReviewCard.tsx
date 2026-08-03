@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
 import AvatarInitials from "../common/DefaultAvatars";
+import Colors from "../../config/Colors";
 
 const formatDate = (createdAt: any) =>
   createdAt?.seconds
@@ -10,13 +11,13 @@ const formatDate = (createdAt: any) =>
     : "";
 
 const Stars = ({ rating, size }: { rating: number; size: number }) => (
-  <View style={{ flexDirection: "row" }}>
+  <View style={styles.view}>
     {[...Array(5)].map((_, i) => (
       <Ionicons
         key={i}
         name="star"
         size={size}
-        color={i < rating ? "#FFD700" : "#DDD"}
+        color={i < rating ? Colors.gold : "#DDD"}
       />
     ))}
   </View>
@@ -53,43 +54,29 @@ export default function ReviewCard({
         alignSelf: "center",
         borderColor:
           theme.mode === "dark"
-            ? "rgba(255,255,255,0.10)"
-            : "rgba(17,24,39,0.08)",
+            ? Colors.whiteAlpha10
+            : Colors.slateAlpha08,
         backgroundColor:
-          theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+          theme.mode === "dark" ? Colors.whiteAlpha04 : Colors.white,
       }}
     >
       {/* Reviewer profile — rendered once per user */}
       <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: RFPercentage(1),
-        }}
+        style={styles.view2}
       >
         {reviewer?.profileImage ? (
           <Image
             source={{ uri: reviewer.profileImage }}
-            style={{
-              width: RFPercentage(5),
-              height: RFPercentage(5),
-              borderRadius: RFPercentage(1.5),
-              marginRight: RFPercentage(1),
-            }}
+            style={styles.image}
           />
         ) : (
           <AvatarInitials
             name={reviewer?.userName}
-            textStyle={{ fontSize: RFPercentage(2) }}
-            style={{
-              width: RFPercentage(5),
-              height: RFPercentage(5),
-              borderRadius: RFPercentage(1.5),
-              marginRight: RFPercentage(1),
-            }}
+            textStyle={styles.avatarInitialsText}
+            style={styles.image}
           />
         )}
-        <View style={{ flex: 1 }}>
+        <View style={styles.view3}>
           <Text
             style={{
               fontSize: RFPercentage(1.4),
@@ -99,7 +86,7 @@ export default function ReviewCard({
           >
             {reviewer?.userName}
           </Text>
-          <View style={{ marginTop: RFPercentage(0.5) }}>
+          <View style={styles.view4}>
             <Stars rating={headerRating} size={RFPercentage(1.4)} />
           </View>
         </View>
@@ -124,12 +111,7 @@ export default function ReviewCard({
             style={{ marginTop: idx > 0 ? RFPercentage(1.4) : 0 }}
           >
             <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: RFPercentage(0.3),
-              }}
+              style={styles.view5}
             >
               <Text
                 style={{
@@ -155,3 +137,27 @@ export default function ReviewCard({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  view: { flexDirection: "row" },
+  view2: {
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: RFPercentage(1),
+        },
+  image: {
+              width: RFPercentage(5),
+              height: RFPercentage(5),
+              borderRadius: RFPercentage(1.5),
+              marginRight: RFPercentage(1),
+            },
+  avatarInitialsText: { fontSize: RFPercentage(2) },
+  view3: { flex: 1 },
+  view4: { marginTop: RFPercentage(0.5) },
+  view5: {
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: RFPercentage(0.3),
+              },
+});

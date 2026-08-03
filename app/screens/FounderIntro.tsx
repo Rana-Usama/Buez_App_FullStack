@@ -29,15 +29,16 @@ import {
   FOUNDER_TOTAL_SPOTS,
   FounderStats,
 } from "../services/Founder.service";
+import Colors from "../config/Colors";
 
 // Cap content width so the layout stays elegant on tablets / large devices.
 const CONTENT_MAX_WIDTH = 560;
 
 // ── Brand accent palette (matches Subscription / onboarding screens) ──────────
-const ACCENT_PRIMARY = "#253275";
-const ACCENT_PRIMARY_2 = "#4557B0";
-const ACCENT_PINK = "#DD53A8";
-const GOLD = "#F4B740";
+const ACCENT_PRIMARY = Colors.primary;
+const ACCENT_PRIMARY_2 = Colors.success2;
+const ACCENT_PINK = Colors.secondary;
+const GOLD = Colors.orange5;
 
 // ── Benefit row (staggered entrance) ─────────────────────────────────────────
 interface Benefit {
@@ -80,7 +81,7 @@ const BENEFITS: Benefit[] = [
   {
     key: "shape",
     icon: "trending-up",
-    accent: "#2BB6A3",
+    accent: Colors.teal10,
     titleKey: "founderIntro.benefit5Title",
     descKey: "founderIntro.benefit5Desc",
   },
@@ -128,7 +129,7 @@ const BenefitRow = ({
           transform: [{ translateY: slide }],
           backgroundColor: isDark
             ? "rgba(26, 30, 61, 0.65)"
-            : "rgba(255,255,255,0.9)",
+            : Colors.whiteAlpha90,
           borderColor: isDark ? benefit.accent + "33" : benefit.accent + "22",
         },
       ]}
@@ -139,14 +140,14 @@ const BenefitRow = ({
         end={{ x: 1, y: 1 }}
         style={styles.benefitIcon}
       >
-        <Feather name={benefit.icon} size={RFPercentage(2.1)} color="#fff" />
+        <Feather name={benefit.icon} size={RFPercentage(2.1)} color={Colors.white} />
       </LinearGradient>
 
       <View style={styles.benefitTextWrap}>
         <Text
           style={[
             styles.benefitTitle,
-            { color: isDark ? "#eef0ff" : "#1a1e4a" },
+            { color: isDark ? Colors.white4 : Colors.blueDark },
           ]}
         >
           {t(benefit.titleKey)}
@@ -154,7 +155,7 @@ const BenefitRow = ({
         <Text
           style={[
             styles.benefitDesc,
-            { color: isDark ? "#9aa3c4" : "#64748B" },
+            { color: isDark ? Colors.blue20 : Colors.desc },
           ]}
         >
           {t(benefit.descKey)}
@@ -179,7 +180,7 @@ const SlotStat = ({
   <View style={styles.slotStat}>
     <Text style={[styles.slotStatValue, { color }]}>{value}</Text>
     <Text
-      style={[styles.slotStatLabel, { color: isDark ? "#8892b0" : "#64748B" }]}
+      style={[styles.slotStatLabel, { color: isDark ? Colors.blue : Colors.desc }]}
       numberOfLines={1}
     >
       {label}
@@ -397,7 +398,7 @@ const FounderIntro = ({ navigation }: any) => {
             <Image
               source={Icons.founderBadge}
               resizeMode="contain"
-              style={{ width: RFPercentage(16), height: RFPercentage(16) }}
+              style={styles.image}
             />
           </Animated.View>
 
@@ -416,13 +417,13 @@ const FounderIntro = ({ navigation }: any) => {
               ]}
             >
               <Feather name="zap" size={RFPercentage(1.3)} color={GOLD} />
-              <Text style={[styles.limitedPillText, { color: GOLD }]}>
+              <Text style={[styles.limitedPillText, styles.text]}>
                 {t("founderIntro.badge")}
               </Text>
             </View>
 
             <Text
-              style={[styles.title, { color: isDark ? "#eef0ff" : "#1a1e4a" }]}
+              style={[styles.title, { color: isDark ? Colors.white4 : Colors.blueDark }]}
             >
               {t("founderIntro.title")}
             </Text>
@@ -430,7 +431,7 @@ const FounderIntro = ({ navigation }: any) => {
             <Text
               style={[
                 styles.subtitle,
-                { color: isDark ? "#9aa3c4" : "#64748B" },
+                { color: isDark ? Colors.blue20 : Colors.desc },
               ]}
             >
               {t("founderIntro.subtitle")}
@@ -442,10 +443,10 @@ const FounderIntro = ({ navigation }: any) => {
             style={[
               styles.slotsCard,
               {
-                backgroundColor: isDark ? "rgba(10, 13, 33, 0.9)" : "#fff",
+                backgroundColor: isDark ? "rgba(10, 13, 33, 0.9)" : Colors.white,
                 borderColor: isDark
-                  ? "rgba(69,87,176,0.25)"
-                  : "rgba(37,50,117,0.1)",
+                  ? Colors.primary2Alpha25
+                  : Colors.primaryAlpha10,
               },
             ]}
           >
@@ -453,7 +454,7 @@ const FounderIntro = ({ navigation }: any) => {
               <Text
                 style={[
                   styles.slotsTitle,
-                  { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                  { color: isDark ? Colors.white4 : Colors.blueDark },
                 ]}
               >
                 {t("founderIntro.slotsTitle")}
@@ -484,8 +485,8 @@ const FounderIntro = ({ navigation }: any) => {
                     styles.progressTrack,
                     {
                       backgroundColor: isDark
-                        ? "rgba(255,255,255,0.08)"
-                        : "rgba(37,50,117,0.08)",
+                        ? Colors.whiteAlpha08
+                        : Colors.primaryAlpha08,
                     },
                   ]}
                 >
@@ -506,7 +507,7 @@ const FounderIntro = ({ navigation }: any) => {
                       size={RFPercentage(1.7)}
                       color={ACCENT_PINK}
                     />
-                    <Text style={[styles.soldOutText, { color: ACCENT_PINK }]}>
+                    <Text style={[styles.soldOutText, styles.text2]}>
                       {t("founderIntro.soldOutTitle")}
                     </Text>
                   </View>
@@ -514,7 +515,7 @@ const FounderIntro = ({ navigation }: any) => {
                   <Text
                     style={[
                       styles.slotsCaption,
-                      { color: isDark ? "#8892b0" : "#64748B" },
+                      { color: isDark ? Colors.blue : Colors.desc },
                     ]}
                   >
                     {t("founderIntro.slotsCaption", { remaining, total })}
@@ -526,7 +527,7 @@ const FounderIntro = ({ navigation }: any) => {
                   <SlotStat
                     value={total}
                     label={t("founderIntro.slotsTotal")}
-                    color={isDark ? "#eef0ff" : "#1a1e4a"}
+                    color={isDark ? Colors.white4 : Colors.blueDark}
                     isDark={isDark}
                   />
                   <View
@@ -534,8 +535,8 @@ const FounderIntro = ({ navigation }: any) => {
                       styles.slotDivider,
                       {
                         backgroundColor: isDark
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(37,50,117,0.08)",
+                          ? Colors.whiteAlpha08
+                          : Colors.primaryAlpha08,
                       },
                     ]}
                   />
@@ -550,15 +551,15 @@ const FounderIntro = ({ navigation }: any) => {
                       styles.slotDivider,
                       {
                         backgroundColor: isDark
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(37,50,117,0.08)",
+                          ? Colors.whiteAlpha08
+                          : Colors.primaryAlpha08,
                       },
                     ]}
                   />
                   <SlotStat
                     value={remaining}
                     label={t("founderIntro.slotsRemaining")}
-                    color="#2BB6A3"
+                    color={Colors.teal10}
                     isDark={isDark}
                   />
                 </View>
@@ -570,7 +571,7 @@ const FounderIntro = ({ navigation }: any) => {
           <Text
             style={[
               styles.sectionTitle,
-              { color: isDark ? "#eef0ff" : "#1a1e4a" },
+              { color: isDark ? Colors.white4 : Colors.blueDark },
             ]}
           >
             {t("founderIntro.benefitsTitle")}
@@ -597,8 +598,8 @@ const FounderIntro = ({ navigation }: any) => {
           {
             backgroundColor: theme.white,
             borderTopColor: isDark
-              ? "rgba(69,87,176,0.18)"
-              : "rgba(37,50,117,0.08)",
+              ? Colors.primary2Alpha18
+              : Colors.primaryAlpha08,
             paddingBottom: footerPaddingBottom,
           },
         ]}
@@ -616,7 +617,7 @@ const FounderIntro = ({ navigation }: any) => {
             style={styles.ctaBtn}
           >
             {claiming || loading ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={Colors.white} />
             ) : (
               <>
                 <Text style={styles.ctaText}>
@@ -628,7 +629,7 @@ const FounderIntro = ({ navigation }: any) => {
                   <Feather
                     name="arrow-right"
                     size={RFPercentage(1.8)}
-                    color="#fff"
+                    color={Colors.white}
                   />
                 </View>
               </>
@@ -640,10 +641,10 @@ const FounderIntro = ({ navigation }: any) => {
           <Feather
             name={soldOut ? "info" : "shield"}
             size={RFPercentage(1.4)}
-            color={isDark ? "#3a4570" : "#94a3b8"}
+            color={isDark ? "#3a4570" : Colors.inputFieldPlaceholder}
           />
           <Text
-            style={[styles.ctaNote, { color: isDark ? "#5a648f" : "#94a3b8" }]}
+            style={[styles.ctaNote, { color: isDark ? "#5a648f" : Colors.inputFieldPlaceholder }]}
           >
             {soldOut
               ? t("founderIntro.soldOutDesc")
@@ -700,7 +701,7 @@ const styles = StyleSheet.create({
   heroCrown: {
     width: RFPercentage(6),
     height: RFPercentage(6),
-    tintColor: "#fff",
+    tintColor: Colors.white,
   },
   heroTextWrap: {
     alignItems: "center",
@@ -776,7 +777,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
   },
   yourNumberText: {
-    color: "#fff",
+    color: Colors.white,
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.35),
   },
@@ -847,7 +848,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: RFPercentage(1.6),
     gap: RFPercentage(1.4),
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -904,13 +905,13 @@ const styles = StyleSheet.create({
   ctaText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.8),
-    color: "#fff",
+    color: Colors.white,
   },
   ctaArrow: {
     width: RFPercentage(3.2),
     height: RFPercentage(3.2),
     borderRadius: RFPercentage(100),
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -924,4 +925,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.35),
   },
+  image: { width: RFPercentage(16), height: RFPercentage(16) },
+  text: { color: GOLD },
+  text2: { color: ACCENT_PINK },
 });

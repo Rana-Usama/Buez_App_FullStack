@@ -36,7 +36,11 @@ import {
 import { Icons } from "../config/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import Feather from "@expo/vector-icons/Feather";
-import { useNavigation } from "@react-navigation/native";
+import {
+  useNavigation,
+  NavigationProp,
+  ParamListBase,
+} from "@react-navigation/native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -51,7 +55,7 @@ function SubscriptionV2(props: any) {
   const [selectedPlan, setSelectedPlan] = useState("monthly");
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const isDark = theme.mode === "dark";
 
   // Shared display pricing (single source of truth for all pricing screens).
@@ -204,22 +208,22 @@ function SubscriptionV2(props: any) {
   const getBorderGradient = (isSelected : any) => {
     if (!isSelected)
       return {
-        borderColor: isDark ? "rgba(69,87,176,0.18)" : "rgba(37,50,117,0.1)",
+        borderColor: isDark ? Colors.primary2Alpha18 : Colors.primaryAlpha10,
       };
-    return { borderColor: "#253275", borderWidth: 1.5 };
+    return { borderColor: Colors.primary, borderWidth: 1.5 };
   };
 
   // ── PLAN CARD RENDERER ────────────────────────────────────────────────────
   const renderPlanCard = ({ item, index }) => {
     const isSelected = selectedPlan === item.id;
-    const accentColor = item.id === "monthly" ? "#253275" : "#DD53A8";
+    const accentColor = item.id === "monthly" ? Colors.primary : Colors.secondary;
 
     return (
       <TouchableOpacity
         style={[
           styles.planCard,
           {
-            backgroundColor: isDark ? "rgba(7, 9, 25, 0.95)" : "#fff",
+            backgroundColor: isDark ? "rgba(7, 9, 25, 0.95)" : Colors.white,
             ...getBorderGradient(isSelected),
             marginLeft: index === 0 ? RFPercentage(3) : RFPercentage(1),
             marginRight:
@@ -242,8 +246,8 @@ function SubscriptionV2(props: any) {
         <LinearGradient
           colors={
             item.id === "monthly"
-              ? ["#253275", "#4557B0"]
-              : ["#253275", "#DD53A8"]
+              ? [Colors.primary, Colors.success2]
+              : [Colors.primary, Colors.secondary]
           }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -253,7 +257,7 @@ function SubscriptionV2(props: any) {
         {/* Popular badge */}
         {item.popular && (
           <LinearGradient
-            colors={["#253275", "#DD53A8"]}
+            colors={[Colors.primary, Colors.secondary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.popularBadge}
@@ -287,15 +291,15 @@ function SubscriptionV2(props: any) {
               <Feather
                 name={item.id === "monthly" ? "calendar" : "star"}
                 size={RFPercentage(2)}
-                color="#fff"
+                color={Colors.white}
               />
             </LinearGradient>
 
-            <View style={{ flex: 1 }}>
+            <View style={styles.view}>
               <Text
                 style={[
                   styles.planTitle,
-                  { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                  { color: isDark ? Colors.white4 : Colors.blueDark },
                 ]}
               >
                 {item.title}
@@ -303,7 +307,7 @@ function SubscriptionV2(props: any) {
               <Text
                 style={[
                   styles.planDescription,
-                  { color: isDark ? "#909fccff" : "#64748B" },
+                  { color: isDark ? "#909fccff" : Colors.desc },
                 ]}
                 numberOfLines={1}
               >
@@ -318,8 +322,8 @@ function SubscriptionV2(props: any) {
               styles.cardDivider,
               {
                 backgroundColor: isDark
-                  ? "rgba(69,87,176,0.15)"
-                  : "rgba(37,50,117,0.07)",
+                  ? Colors.primary2Alpha15
+                  : Colors.primaryAlpha07,
               },
             ]}
           />
@@ -334,7 +338,7 @@ function SubscriptionV2(props: any) {
                   <Text
                     style={[
                       styles.price,
-                      { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                      { color: isDark ? Colors.white4 : Colors.blueDark },
                     ]}
                   >
                     {integerPart}
@@ -342,7 +346,7 @@ function SubscriptionV2(props: any) {
                       <Text
                         style={[
                           styles.priceDecimal,
-                          { color: isDark ? "#acb8daff" : "#64748B" },
+                          { color: isDark ? "#acb8daff" : Colors.desc },
                         ]}
                       >
                         .{decimalPart}
@@ -354,7 +358,7 @@ function SubscriptionV2(props: any) {
               <Text
                 style={[
                   styles.period,
-                  { color: isDark ? "#8f9dc8ff" : "#94a3b8" },
+                  { color: isDark ? "#8f9dc8ff" : Colors.inputFieldPlaceholder },
                 ]}
               >
                 {item.period}
@@ -370,10 +374,10 @@ function SubscriptionV2(props: any) {
                 {
                   backgroundColor:
                     item.popular || item.id === "yearly"
-                      ? "#DD53A820"
+                      ? Colors.secondarySolid
                       : isDark
-                        ? "rgba(69,87,176,0.2)"
-                        : "rgba(37,50,117,0.08)",
+                        ? Colors.primary2Alpha20
+                        : Colors.primaryAlpha08,
                 },
               ]}
             >
@@ -383,10 +387,10 @@ function SubscriptionV2(props: any) {
                   {
                     color:
                       item.popular || item.id === "yearly"
-                        ? "#DD53A8"
+                        ? Colors.secondary
                         : isDark
                           ? "#616ca5ff"
-                          : "#253275",
+                          : Colors.primary,
                   },
                 ]}
               >
@@ -399,7 +403,7 @@ function SubscriptionV2(props: any) {
               <Text
                 style={[
                   styles.originalPrice,
-                  { color: isDark ? "#838aa8ff" : "#94a3b8" },
+                  { color: isDark ? Colors.blue23 : Colors.inputFieldPlaceholder },
                 ]}
               >
                 {item.originalPrice}
@@ -413,7 +417,7 @@ function SubscriptionV2(props: any) {
             <Text
               style={[
                 styles.savingsCaption,
-                { color: isDark ? "#838aa8ff" : "#94a3b8" },
+                { color: isDark ? Colors.blue23 : Colors.inputFieldPlaceholder },
               ]}
               numberOfLines={1}
             >
@@ -427,8 +431,8 @@ function SubscriptionV2(props: any) {
               styles.cardDivider,
               {
                 backgroundColor: isDark
-                  ? "rgba(69,87,176,0.12)"
-                  : "rgba(37,50,117,0.06)",
+                  ? Colors.primary2Alpha12
+                  : Colors.primaryAlpha06,
               },
             ]}
           />
@@ -448,7 +452,7 @@ function SubscriptionV2(props: any) {
                 <Text
                   style={[
                     styles.featureText,
-                    { color: isDark ? "#a8b3d4ff" : "#475569" },
+                    { color: isDark ? "#a8b3d4ff" : Colors.skip },
                   ]}
                   numberOfLines={1}
                 >
@@ -483,8 +487,8 @@ function SubscriptionV2(props: any) {
       <LinearGradient
         colors={
           theme.mode === "dark"
-            ? ["rgba(37, 50, 117, 0.9)", "transparent"]
-            : ["rgba(37, 50, 117, 0.92)", Colors.white]
+            ? [Colors.primaryAlpha90, "transparent"]
+            : [Colors.primaryAlpha92, Colors.white]
         }
         style={styles.topGlow}
         pointerEvents="none"
@@ -500,12 +504,12 @@ function SubscriptionV2(props: any) {
           {/* Badge */}
           <View style={styles.titleBadgeWrap}>
             <LinearGradient
-              colors={["#253275", "#DD53A8"]}
+              colors={[Colors.primary, Colors.secondary]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.titleBadge}
             >
-              <Feather name="zap" size={RFPercentage(1.3)} color="#fff" />
+              <Feather name="zap" size={RFPercentage(1.3)} color={Colors.white} />
               <Text style={styles.titleBadgeText}>
                 {t("subscriptionV2.choosePlan")}
               </Text>
@@ -515,7 +519,7 @@ function SubscriptionV2(props: any) {
           <Text
             style={[
               styles.mainTitle,
-              { color: isDark ? "#eef0ff" : "#1a1e4a" },
+              { color: isDark ? Colors.white4 : Colors.blueDark },
             ]}
           >
             {t("subscriptionV2.choosePlan")}
@@ -523,14 +527,14 @@ function SubscriptionV2(props: any) {
 
           {/* Gradient underline */}
           <LinearGradient
-            colors={["#253275", "#DD53A8", "transparent"]}
+            colors={[Colors.primary, Colors.secondary, "transparent"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.titleUnderline}
           />
 
           <Text
-            style={[styles.subTitle, { color: isDark ? "#6b7db3" : "#64748B" }]}
+            style={[styles.subTitle, { color: isDark ? Colors.blue2 : Colors.desc }]}
           >
             {t("subscriptionV2.startFree")}
           </Text>
@@ -560,16 +564,16 @@ function SubscriptionV2(props: any) {
         </View>
 
         {/* ── Dot indicators ── */}
-        <View style={[styles.indicatorsContainer, { marginTop: -15 }]}>
+        <View style={[styles.indicatorsContainer, styles.view2]}>
           {plans.map((plan, index) => (
             <LinearGradient
               key={plan.id}
               colors={
                 currentIndex === index
-                  ? ["#253275", "#DD53A8"]
+                  ? [Colors.primary, Colors.secondary]
                   : [
-                      isDark ? "#1e2240" : "#d1d5e8",
-                      isDark ? "#1e2240" : "#d1d5e8",
+                      isDark ? Colors.blueDark11 : Colors.blueLight13,
+                      isDark ? Colors.blueDark11 : Colors.blueLight13,
                     ]
               }
               start={{ x: 0, y: 0 }}
@@ -593,8 +597,8 @@ function SubscriptionV2(props: any) {
           {
             backgroundColor: theme.white,
             borderTopColor: isDark
-              ? "rgba(69,87,176,0.15)"
-              : "rgba(37,50,117,0.08)",
+              ? Colors.primary2Alpha15
+              : Colors.primaryAlpha08,
           },
         ]}
       >
@@ -605,13 +609,13 @@ function SubscriptionV2(props: any) {
           style={styles.ctaOuter}
         >
           <LinearGradient
-            colors={["#253275", "#4557B0"]}
+            colors={[Colors.primary, Colors.success2]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.ctaBtn}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={Colors.white} />
             ) : (
               <>
                 <Text style={styles.ctaBtnText}>
@@ -621,7 +625,7 @@ function SubscriptionV2(props: any) {
                   <Feather
                     name="arrow-right"
                     size={RFPercentage(1.8)}
-                    color="#fff"
+                    color={Colors.white}
                   />
                 </View>
               </>
@@ -632,12 +636,7 @@ function SubscriptionV2(props: any) {
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => navigation.navigate("Login")}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            alignSelf: "center",
-            marginTop: RFPercentage(1.5),
-          }}
+          style={styles.touchableOpacity}
         >
           <View
             style={{
@@ -646,7 +645,7 @@ function SubscriptionV2(props: any) {
               borderRadius: RFPercentage(100),
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: theme.mode === "dark" ? "#050505ff" : "#e8eaff",
+              backgroundColor: theme.mode === "dark" ? Colors.black4 : Colors.blueLight12,
             }}
           >
             <Feather
@@ -697,7 +696,7 @@ const styles = StyleSheet.create({
   titleBadgeText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.3),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.2,
   },
   mainTitle: {
@@ -749,7 +748,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     overflow: "hidden",
     position: "relative",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 20,
@@ -773,7 +772,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   popularText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_700Bold",
     textAlign: "center",
@@ -795,7 +794,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -887,7 +886,7 @@ const styles = StyleSheet.create({
     marginRight: RFPercentage(1.2),
   },
   checkText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_700Bold",
   },
@@ -934,7 +933,7 @@ const styles = StyleSheet.create({
     width: "90%",
     borderRadius: RFPercentage(2),
     overflow: "hidden",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 18,
@@ -954,14 +953,14 @@ const styles = StyleSheet.create({
   ctaBtnText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.7),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.2,
   },
   ctaArrow: {
     width: RFPercentage(3.2),
     height: RFPercentage(3.2),
     borderRadius: 100,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -978,13 +977,13 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 24,
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.3,
     shadowRadius: 40,
     // elevation: 20,
     borderWidth: 1,
-    borderColor: "rgba(69,87,176,0.15)",
+    borderColor: Colors.primary2Alpha15,
   },
   modalTopBar: { height: 4, width: "100%" },
   modalBody: { padding: RFPercentage(3) },
@@ -999,7 +998,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 12,
@@ -1066,7 +1065,7 @@ const styles = StyleSheet.create({
   modalPrimaryText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.65),
-    color: "#fff",
+    color: Colors.white,
   },
   modalSecondaryBtn: {
     flex: 1,
@@ -1086,6 +1085,14 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     marginLeft: RFPercentage(1),
   },
+  view: { flex: 1 },
+  view2: { marginTop: -15 },
+  touchableOpacity: {
+            flexDirection: "row",
+            alignItems: "center",
+            alignSelf: "center",
+            marginTop: RFPercentage(1.5),
+          },
 });
 
 export default SubscriptionV2;

@@ -262,17 +262,17 @@ function UpgradePlan(props) {
 
   // ── PLAN CARD RENDERER ─────────────────────────────────────────────────────
   const renderPlanCard = ({ item, index }) => {
-    const accentColor = item.current ? "#4557B0" : "#DD53A8";
+    const accentColor = item.current ? Colors.success2 : Colors.secondary;
 
     return (
       <View
         style={[
           styles.planCard,
           {
-            backgroundColor: isDark ? "rgba(10, 12, 27, 1)" : Colors.white,
+            backgroundColor: isDark ? Colors.black7 : Colors.white,
             borderColor: item.current
               ? isDark
-                ? "rgba(69,87,176,0.4)"
+                ? Colors.primary2Alpha40
                 : "rgba(37,50,117,0.2)"
               : "#DD53A8AA",
             borderWidth: 1.5,
@@ -286,7 +286,7 @@ function UpgradePlan(props) {
         {/* Top accent bar */}
         <LinearGradient
           colors={
-            item.current ? ["#253275", "#4557B0"] : ["#253275", "#DD53A8"]
+            item.current ? [Colors.primary, Colors.success2] : [Colors.primary, Colors.secondary]
           }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -296,7 +296,7 @@ function UpgradePlan(props) {
         {/* Current Plan badge */}
         {item.current && (
           <LinearGradient
-            colors={["#253275", "#4557B0"]}
+            colors={[Colors.primary, Colors.success2]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.planBadge}
@@ -310,7 +310,7 @@ function UpgradePlan(props) {
         {/* Recommended badge */}
         {item.popular && (
           <LinearGradient
-            colors={["#253275", "#DD53A8"]}
+            colors={[Colors.primary, Colors.secondary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.planBadge}
@@ -333,14 +333,14 @@ function UpgradePlan(props) {
               <Feather
                 name={item.current ? "calendar" : "star"}
                 size={RFPercentage(2)}
-                color="#fff"
+                color={Colors.white}
               />
             </LinearGradient>
-            <View style={{ flex: 1 }}>
+            <View style={styles.view}>
               <Text
                 style={[
                   styles.planTitle,
-                  { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                  { color: isDark ? Colors.white4 : Colors.blueDark },
                 ]}
               >
                 {item.title}
@@ -348,7 +348,7 @@ function UpgradePlan(props) {
               <Text
                 style={[
                   styles.planDescription,
-                  { color: isDark ? "#6b7db3" : "#64748B" },
+                  { color: isDark ? Colors.blue2 : Colors.desc },
                 ]}
               >
                 {item.description}
@@ -362,8 +362,8 @@ function UpgradePlan(props) {
               styles.cardDivider,
               {
                 backgroundColor: isDark
-                  ? "rgba(69,87,176,0.15)"
-                  : "rgba(37,50,117,0.07)",
+                  ? Colors.primary2Alpha15
+                  : Colors.primaryAlpha07,
               },
             ]}
           />
@@ -383,7 +383,7 @@ function UpgradePlan(props) {
                   <Text
                     style={[
                       styles.price,
-                      { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                      { color: isDark ? Colors.white4 : Colors.blueDark },
                     ]}
                   >
                     {integerPart}
@@ -391,7 +391,7 @@ function UpgradePlan(props) {
                       <Text
                         style={[
                           styles.priceDecimal,
-                          { color: isDark ? "#8892b0" : "#64748B" },
+                          { color: isDark ? Colors.blue : Colors.desc },
                         ]}
                       >
                         .{decimalPart}
@@ -403,7 +403,7 @@ function UpgradePlan(props) {
               <Text
                 style={[
                   styles.period,
-                  { color: isDark ? "#6b7db3" : "#94a3b8" },
+                  { color: isDark ? Colors.blue2 : Colors.inputFieldPlaceholder },
                 ]}
               >
                 {item.period}
@@ -416,7 +416,7 @@ function UpgradePlan(props) {
             <Text
               style={[
                 styles.introNote,
-                { color: isDark ? "#8892b0" : "#64748B" },
+                { color: isDark ? Colors.blue : Colors.desc },
               ]}
               numberOfLines={2}
             >
@@ -438,15 +438,15 @@ function UpgradePlan(props) {
                   styles.currentTag,
                   {
                     backgroundColor: isDark
-                      ? "rgba(69,87,176,0.2)"
-                      : "rgba(37,50,117,0.08)",
+                      ? Colors.primary2Alpha20
+                      : Colors.primaryAlpha08,
                   },
                 ]}
               >
                 <Text
                   style={[
                     styles.currentTagText,
-                    { color: isDark ? "#4557B0" : "#253275" },
+                    { color: isDark ? Colors.success2 : Colors.primary },
                   ]}
                 >
                   Active
@@ -457,7 +457,7 @@ function UpgradePlan(props) {
               <Text
                 style={[
                   styles.originalPrice,
-                  { color: isDark ? "#4a5580" : "#94a3b8" },
+                  { color: isDark ? Colors.blue22 : Colors.inputFieldPlaceholder },
                 ]}
               >
                 {item.originalPrice}
@@ -471,8 +471,8 @@ function UpgradePlan(props) {
               styles.cardDivider,
               {
                 backgroundColor: isDark
-                  ? "rgba(69,87,176,0.12)"
-                  : "rgba(37,50,117,0.06)",
+                  ? Colors.primary2Alpha12
+                  : Colors.primaryAlpha06,
               },
             ]}
           />
@@ -492,7 +492,7 @@ function UpgradePlan(props) {
                 <Text
                   style={[
                     styles.featureText,
-                    { color: isDark ? "#8892b0" : "#475569" },
+                    { color: isDark ? Colors.blue : Colors.skip },
                   ]}
                 >
                   {feature}
@@ -510,16 +510,16 @@ function UpgradePlan(props) {
               style={styles.upgradeBtnOuter}
             >
               <LinearGradient
-                colors={["#253275", "#DD53A8"]}
+                colors={[Colors.primary, Colors.secondary]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.upgradeBtn}
               >
                 {loading ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator size="small" color={Colors.white} />
                 ) : (
                   <>
-                    <Feather name="zap" size={RFPercentage(1.7)} color="#fff" />
+                    <Feather name="zap" size={RFPercentage(1.7)} color={Colors.white} />
                     <Text style={styles.upgradeBtnText} numberOfLines={1}>
                       {t("upgradePlan.upgradeNow") || "Upgrade Now"}
                     </Text>
@@ -584,19 +584,19 @@ function UpgradePlan(props) {
                 styles.sectionDot,
                 {
                   backgroundColor: isDark
-                    ? "rgba(69,87,176,0.4)"
-                    : "rgba(37,50,117,0.15)",
+                    ? Colors.primary2Alpha40
+                    : Colors.primaryAlpha15,
                 },
               ]}
             >
               <View
-                style={[styles.sectionDotInner, { backgroundColor: "#4557B0" }]}
+                style={[styles.sectionDotInner, styles.view2]}
               />
             </View>
             <Text
               style={[
                 styles.sectionLabel,
-                { color: isDark ? "#4a5a8a" : "#94a3b8" },
+                { color: isDark ? Colors.blue4 : Colors.inputFieldPlaceholder },
               ]}
             >
               PLAN COMPARISON
@@ -607,10 +607,10 @@ function UpgradePlan(props) {
             style={[
               styles.comparisonCard,
               {
-                backgroundColor: isDark ? "rgba(10, 12, 27, 1)" : Colors.white,
+                backgroundColor: isDark ? Colors.black7 : Colors.white,
                 borderColor: isDark
-                  ? "rgba(69,87,176,0.2)"
-                  : "rgba(37,50,117,0.1)",
+                  ? Colors.primary2Alpha20
+                  : Colors.primaryAlpha10,
               },
             ]}
           >
@@ -618,7 +618,7 @@ function UpgradePlan(props) {
               <Text
                 style={[
                   styles.comparisonTitle,
-                  { color: isDark ? "#dde3ff" : "#1a1e4a" },
+                  { color: isDark ? Colors.blueLight : Colors.blueDark },
                 ]}
               >
                 {t("upgradePlan.planComparison") || "Plan Comparison"}
@@ -630,19 +630,19 @@ function UpgradePlan(props) {
                   styles.compRow,
                   {
                     borderBottomColor: isDark
-                      ? "rgba(69,87,176,0.12)"
-                      : "rgba(37,50,117,0.06)",
+                      ? Colors.primary2Alpha12
+                      : Colors.primaryAlpha06,
                   },
                 ]}
               >
                 <View style={styles.compRowLeft}>
                   <View
-                    style={[styles.compDot, { backgroundColor: "#4557B0" }]}
+                    style={[styles.compDot, styles.view2]}
                   />
                   <Text
                     style={[
                       styles.compLabel,
-                      { color: isDark ? "#8892b0" : "#64748B" },
+                      { color: isDark ? Colors.blue : Colors.desc },
                     ]}
                   >
                     {t("upgradePlan.monthlyCost") || "Monthly plan (per year)"}
@@ -651,7 +651,7 @@ function UpgradePlan(props) {
                 <Text
                   style={[
                     styles.compValue,
-                    { color: isDark ? "#8892b0" : "#64748B" },
+                    { color: isDark ? Colors.blue : Colors.desc },
                   ]}
                 >
                   {yearlySavings.monthlyCost}
@@ -664,40 +664,40 @@ function UpgradePlan(props) {
                   styles.compRow,
                   {
                     borderBottomColor: isDark
-                      ? "rgba(69,87,176,0.12)"
-                      : "rgba(37,50,117,0.06)",
+                      ? Colors.primary2Alpha12
+                      : Colors.primaryAlpha06,
                   },
                 ]}
               >
                 <View style={styles.compRowLeft}>
                   <View
-                    style={[styles.compDot, { backgroundColor: "#DD53A8" }]}
+                    style={[styles.compDot, styles.view3]}
                   />
                   <Text
                     style={[
                       styles.compLabel,
-                      { color: isDark ? "#8892b0" : "#64748B" },
+                      { color: isDark ? Colors.blue : Colors.desc },
                     ]}
                   >
                     {t("upgradePlan.yearlyCost") || "Yearly plan cost"}
                   </Text>
                 </View>
-                <Text style={[styles.compValue, { color: "#DD53A8" }]}>
+                <Text style={[styles.compValue, styles.text]}>
                   {yearlySavings.yearlyCost}
                 </Text>
               </View>
 
               {/* Total savings row */}
-              <View style={[styles.compRow, { borderBottomWidth: 0 }]}>
+              <View style={[styles.compRow, styles.view4]}>
                 <View style={styles.compRowLeft}>
                   <View
-                    style={[styles.compDot, { backgroundColor: "#4CAF50" }]}
+                    style={[styles.compDot, styles.view5]}
                   />
                   <Text
                     style={[
                       styles.compLabel,
                       {
-                        color: isDark ? "#dde3ff" : "#1a1e4a",
+                        color: isDark ? Colors.blueLight : Colors.blueDark,
                         fontFamily: "Poppins_600SemiBold",
                       },
                     ]}
@@ -723,19 +723,19 @@ function UpgradePlan(props) {
                 styles.sectionDot,
                 {
                   backgroundColor: isDark
-                    ? "rgba(69,87,176,0.4)"
-                    : "rgba(37,50,117,0.15)",
+                    ? Colors.primary2Alpha40
+                    : Colors.primaryAlpha15,
                 },
               ]}
             >
               <View
-                style={[styles.sectionDotInner, { backgroundColor: "#DD53A8" }]}
+                style={[styles.sectionDotInner, styles.view3]}
               />
             </View>
             <Text
               style={[
                 styles.sectionLabel,
-                { color: isDark ? "#4a5a8a" : "#94a3b8" },
+                { color: isDark ? Colors.blue4 : Colors.inputFieldPlaceholder },
               ]}
             >
               PLANS
@@ -785,30 +785,30 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: RFPercentage(2.8),
     alignItems: "center",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.4,
     shadowRadius: 20,
   },
   heroPill: {
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     borderRadius: 100,
     paddingHorizontal: RFPercentage(2),
     paddingVertical: RFPercentage(0.5),
     marginBottom: RFPercentage(1.2),
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: Colors.white3,
   },
   heroPillText: {
     fontFamily: "Poppins_700Bold",
     fontSize: RFPercentage(1.55),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.3,
   },
   heroTitle: {
     fontFamily: "Poppins_700Bold",
     fontSize: RFPercentage(2.2),
-    color: "#fff",
+    color: Colors.white,
     textAlign: "center",
     letterSpacing: -0.3,
     marginBottom: RFPercentage(0.5),
@@ -816,7 +816,7 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     fontFamily: "Poppins_400Regular",
     fontSize: RFPercentage(1.5),
-    color: "rgba(255,255,255,0.75)",
+    color: Colors.whiteAlpha75,
     textAlign: "center",
   },
 
@@ -850,7 +850,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     overflow: "hidden",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 16,
@@ -892,7 +892,7 @@ const styles = StyleSheet.create({
   savingsChipText: {
     fontFamily: "Poppins_700Bold",
     fontSize: RFPercentage(1.4),
-    color: "#4CAF50",
+    color: Colors.green,
   },
 
   // ── Plan cards ──
@@ -904,7 +904,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     position: "relative",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 20,
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   planBadgeText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.25),
     fontFamily: "Poppins_700Bold",
     textAlign: "center",
@@ -941,7 +941,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1),
   },
   savingsBadge: {
-    backgroundColor: "#DD53A820",
+    backgroundColor: Colors.secondarySolid,
     paddingHorizontal: RFPercentage(1.4),
     paddingVertical: RFPercentage(0.45),
     borderRadius: 100,
@@ -1001,7 +1001,7 @@ const styles = StyleSheet.create({
   savingsText: {
     fontFamily: "Poppins_700Bold",
     fontSize: RFPercentage(1.35),
-    color: "#DD53A8",
+    color: Colors.secondary,
   },
 
   currentTag: {
@@ -1030,7 +1030,7 @@ const styles = StyleSheet.create({
     marginRight: RFPercentage(1.2),
   },
   checkText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_700Bold",
   },
@@ -1045,7 +1045,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2.2),
     borderRadius: 100,
     overflow: "hidden",
-    shadowColor: "#DD53A8",
+    shadowColor: Colors.secondary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 14,
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
   upgradeBtnText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.75),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.2,
   },
 
@@ -1074,6 +1074,12 @@ const styles = StyleSheet.create({
     bottom: RFPercentage(0),
     right: RFPercentage(0),
   },
+  view: { flex: 1 },
+  view2: { backgroundColor: Colors.success2 },
+  view3: { backgroundColor: Colors.secondary },
+  text: { color: Colors.secondary },
+  view4: { borderBottomWidth: 0 },
+  view5: { backgroundColor: Colors.green },
 });
 
 export default UpgradePlan;

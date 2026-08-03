@@ -179,9 +179,13 @@ const customButtonStyles = StyleSheet.create({
     height: RFPercentage(2),
     borderRadius: RFPercentage(1),
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: Colors.white3,
     borderTopColor: "white",
   },
+  touchableOpacity: { marginTop: 12 },
+  text2: { color: Colors.primary },
+  text3: { color: Colors.green },
+  text4: { color: Colors.red },
 });
 
 function OfferDetail({ navigation, route }) {
@@ -276,15 +280,15 @@ function OfferDetail({ navigation, route }) {
   const isDark = theme.mode === "dark";
   const ui = {
     screenBg: isDark ? theme.white : "#FAFAFC",
-    cardBg: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
-    cardBorder: isDark ? "rgba(255,255,255,0.10)" : "rgba(17,24,39,0.08)",
-    iconChip: isDark ? "rgba(255,255,255,0.08)" : Colors.primary + "0D",
+    cardBg: isDark ? Colors.whiteAlpha04 : Colors.white,
+    cardBorder: isDark ? Colors.whiteAlpha10 : Colors.slateAlpha08,
+    iconChip: isDark ? Colors.whiteAlpha08 : Colors.primary + "0D",
     accent: theme.primary,
-    shadow: isDark ? "#000000" : Colors.primary,
-    footerBg: isDark ? "#15171F" : "#FFFFFF",
-    headerBg: isDark ? "rgba(21,23,31,0.96)" : "rgba(255,255,255,0.98)",
-    divider: isDark ? "rgba(255,255,255,0.08)" : "rgba(17,24,39,0.06)",
-    softFill: isDark ? "rgba(255,255,255,0.04)" : "#F6F7F9",
+    shadow: isDark ? Colors.blackSolid : Colors.primary,
+    footerBg: isDark ? "#15171F" : Colors.white,
+    headerBg: isDark ? "rgba(21,23,31,0.96)" : Colors.whiteAlpha98,
+    divider: isDark ? Colors.whiteAlpha08 : Colors.slateAlpha06,
+    softFill: isDark ? Colors.whiteAlpha04 : Colors.white14,
   };
 
   useEffect(() => {
@@ -1132,7 +1136,7 @@ function OfferDetail({ navigation, route }) {
         <Text style={{ color: theme.darkGrey }}>
           {t("offerDetail.notFound") || "This task is no longer available."}
         </Text>
-        <TouchableOpacity onPress={goBackToOrigin} style={{ marginTop: 12 }}>
+        <TouchableOpacity onPress={goBackToOrigin} style={customButtonStyles.touchableOpacity}>
           <Text style={{ color: theme.primary }}>
             {t("common.goBack") || "Go back"}
           </Text>
@@ -1249,7 +1253,7 @@ function OfferDetail({ navigation, route }) {
                       backgroundColor:
                         index === activeIndex
                           ? Colors.white
-                          : "rgba(255,255,255,0.45)",
+                          : Colors.whiteAlpha45,
                       width:
                         index === activeIndex
                           ? RFPercentage(2.2)
@@ -1346,7 +1350,7 @@ function OfferDetail({ navigation, route }) {
                 {translatedOffer?.description?.length > 150 && (
                   <Text
                     onPress={() => setIsExpanded(!isExpanded)}
-                    style={[styles.readMore, { color: Colors.primary }]}
+                    style={[styles.readMore, customButtonStyles.text2]}
                   >
                     {isExpanded
                       ? ` ${t("details.txt2")}`
@@ -1606,7 +1610,7 @@ function OfferDetail({ navigation, route }) {
                                 size={RFPercentage(1.4)}
                                 color={
                                   star <= headerRating
-                                    ? "#FFD700"
+                                    ? Colors.gold
                                     : theme.border
                                 }
                               />
@@ -1642,7 +1646,7 @@ function OfferDetail({ navigation, route }) {
                                       size={RFPercentage(1.2)}
                                       color={
                                         star <= (review.rating || 0)
-                                          ? "#FFD700"
+                                          ? Colors.gold
                                           : theme.border
                                       }
                                     />
@@ -1656,7 +1660,7 @@ function OfferDetail({ navigation, route }) {
                                 {
                                   backgroundColor: isDark
                                     ? "rgba(32, 37, 52, 0.5)"
-                                    : "#FFFFFF",
+                                    : Colors.white,
                                   borderWidth: 1,
                                   borderColor: ui.divider,
                                 },
@@ -1826,10 +1830,10 @@ function OfferDetail({ navigation, route }) {
                     <Ionicons
                       name="checkmark-circle"
                       size={RFPercentage(2.5)}
-                      color="#4CAF50"
+                      color={Colors.green}
                     />
                     <Text
-                      style={[styles.appliedText, { color: "#4CAF50" }]}
+                      style={[styles.appliedText, customButtonStyles.text3]}
                       numberOfLines={1}
                     >
                       {confirmed
@@ -1853,7 +1857,7 @@ function OfferDetail({ navigation, route }) {
                       color={Colors.red}
                     />
                     <Text
-                      style={[styles.disabledText, { color: Colors.red }]}
+                      style={[styles.disabledText, customButtonStyles.text4]}
                       numberOfLines={1}
                     >
                       {getRemainingSlots() <= 0
@@ -1922,10 +1926,10 @@ function OfferDetail({ navigation, route }) {
                     <Ionicons
                       name="checkmark-circle"
                       size={RFPercentage(2.5)}
-                      color="#4CAF50"
+                      color={Colors.green}
                     />
                     <Text
-                      style={[styles.appliedText, { color: "#4CAF50" }]}
+                      style={[styles.appliedText, customButtonStyles.text3]}
                       numberOfLines={1}
                     >
                       {confirmed
@@ -1949,7 +1953,7 @@ function OfferDetail({ navigation, route }) {
                       color={Colors.red}
                     />
                     <Text
-                      style={[styles.disabledText, { color: Colors.red }]}
+                      style={[styles.disabledText, customButtonStyles.text4]}
                       numberOfLines={1}
                     >
                       {t("offerDetail.cannotApply") || "Cannot apply"}
@@ -2012,7 +2016,7 @@ const styles = StyleSheet.create({
     width: RFPercentage(3.5),
     height: RFPercentage(3.5),
     borderRadius: RFPercentage(2),
-    backgroundColor: "rgba(255,255,255,0.8)",
+    backgroundColor: Colors.lastMsgTextColor,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -2085,7 +2089,7 @@ const styles = StyleSheet.create({
     // width:"100%"
   },
   heroPriceText: {
-    color: "#FFFFFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
     // width:"80%"
@@ -2150,9 +2154,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.8),
     gap: RFPercentage(0.8),
-    backgroundColor: "rgba(17,24,39,0.55)",
+    backgroundColor: Colors.slateAlpha55,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.22)",
+    borderColor: Colors.whiteAlpha22,
     borderRadius: RFPercentage(100),
   },
   categoryText: {
@@ -2172,14 +2176,14 @@ const styles = StyleSheet.create({
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
+    borderColor: Colors.sectionBgLight,
   },
   detailCard: {
     borderRadius: 16,
     padding: RFPercentage(2),
     marginBottom: RFPercentage(1.6),
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
+    borderColor: Colors.sectionBgLight,
   },
   descriptionContainer: {},
   sectionHeader: {
@@ -2221,7 +2225,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: RFPercentage(1.5),
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
+    borderColor: Colors.sectionBgLight,
   },
   iconContainer: {
     width: RFPercentage(4),
@@ -2248,7 +2252,7 @@ const styles = StyleSheet.create({
     padding: RFPercentage(2),
     marginBottom: RFPercentage(1.6),
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
+    borderColor: Colors.sectionBgLight,
   },
   ratingText: {
     fontSize: RFPercentage(1.4),
@@ -2363,7 +2367,7 @@ const styles = StyleSheet.create({
   imageViewerFooter: {
     padding: RFPercentage(1),
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: Colors.overlayDark,
   },
   imageIndexText: {
     color: "white",
@@ -2450,7 +2454,7 @@ const styles = StyleSheet.create({
     padding: RFPercentage(2),
     marginBottom: RFPercentage(2),
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
+    borderColor: Colors.sectionBgLight,
   },
   workersInfoContainer: {
     // flexDirection: "row",
@@ -2546,11 +2550,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: RFPercentage(1.8),
-    backgroundColor: "#4CAF50" + "18",
+    backgroundColor: Colors.green + "18",
     gap: RFPercentage(0.5),
     flexDirection: "row",
     borderWidth: 1,
-    borderColor: "#4CAF50" + "66",
+    borderColor: Colors.green + "66",
   },
   appliedText: {
     fontSize: RFPercentage(1.4),
@@ -2586,7 +2590,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: Colors.chatLoadingBgOverlay,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.25)",
   },

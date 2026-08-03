@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, StatusBar } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useAppTheme } from "../contexts/themeContext";
+import Colors from "../config/Colors";
 
 const NetworkError: React.FC = () => {
   const { theme } = useAppTheme();
@@ -28,7 +29,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#ffffffff",
+    backgroundColor: Colors.white,
   },
   networkText: {
     fontSize: RFPercentage(1.8),

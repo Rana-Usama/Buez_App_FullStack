@@ -516,7 +516,7 @@ const Chat = ({ navigation, route }: any) => {
       <ActivityIndicator
         size="small"
         color={Colors.primary}
-        style={{ marginVertical: 8 }}
+        style={styles.activityIndicator}
       />
     );
   }, [loadingMore]);
@@ -566,7 +566,7 @@ const Chat = ({ navigation, route }: any) => {
         <ImageBackground
           source={theme.mode === "dark" ? Icons.dark : Icons.light}
           resizeMode="cover"
-          style={{ flex: 1 }}
+          style={styles.imageBackground}
         >
           <GiftedChat
             messages={messages}
@@ -843,6 +843,8 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     fontSize: RFPercentage(1.7),
   },
+  activityIndicator: { marginVertical: 8 },
+  imageBackground: { flex: 1 },
 });
 
 export default memo(Chat);

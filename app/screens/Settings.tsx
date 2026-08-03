@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
+  ImageSourcePropType,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
@@ -75,7 +76,7 @@ function Settings({ navigation }) {
         profileImage={profileImgUrl}
         leftLogo={true}
         gradient
-        gradientColors={[Colors.primary, "#0b1544ff"]}
+        gradientColors={[Colors.primary, Colors.blueDark3]}
         title={t("settings.txt9")}
       />
 
@@ -104,8 +105,8 @@ function Settings({ navigation }) {
           style={[
             styles.card,
             {
-              backgroundColor: theme.mode === "dark" ? "#050505ff" : "#F8F9FA",
-              borderColor: theme.mode === "dark" ? "#41444aff" : "#e4e8fbff",
+              backgroundColor: theme.mode === "dark" ? Colors.black4 : Colors.progressBarEmpty,
+              borderColor: theme.mode === "dark" ? Colors.greyDark : Colors.blueLight3,
             },
           ]}
         >
@@ -113,7 +114,7 @@ function Settings({ navigation }) {
             <View
               style={[
                 styles.iconContainer,
-                { backgroundColor: theme.mode === "dark" ? "#26292fff" : theme.primary + "15" },
+                { backgroundColor: theme.mode === "dark" ? Colors.greyDark7 : theme.primary + "15" },
               ]}
             >
               <Feather
@@ -128,7 +129,7 @@ function Settings({ navigation }) {
             <ToggleSwitch
               isOn={theme.mode === "dark"}
               onColor={Colors.primary}
-              offColor={"rgb(224, 224, 227)"}
+              offColor={Colors.switch}
               size="small"
               onToggle={toggleTheme}
             />
@@ -141,8 +142,8 @@ function Settings({ navigation }) {
             styles.card,
             {
               backgroundColor:
-                theme.mode === "dark" ? "#050505ff" : "#ffffffff",
-             borderColor: theme.mode === "dark" ? "#41444aff" : "#e4e8fbff",
+                theme.mode === "dark" ? Colors.black4 : Colors.white,
+             borderColor: theme.mode === "dark" ? Colors.greyDark : Colors.blueLight3,
             },
           ]}
         >
@@ -161,14 +162,14 @@ function Settings({ navigation }) {
                   styles.listItem,
                   i !== filteredList.length - 1 && {
                     borderBottomWidth: 1,
-                    borderBottomColor: theme.mode === "dark" ? "#41444aff" : "#e4e8fbff",
+                    borderBottomColor: theme.mode === "dark" ? Colors.greyDark : Colors.blueLight3,
                   },
                 ]}
               >
                 <View
                   style={[
                     styles.iconContainer,
-                    { backgroundColor:  theme.mode === "dark" ? "#26292fff" : theme.primary + "15" },
+                    { backgroundColor:  theme.mode === "dark" ? Colors.greyDark7 : theme.primary + "15" },
                   ]}
                 >
                   {item.iconType === "feather" ? (
@@ -180,7 +181,9 @@ function Settings({ navigation }) {
                   ) : (
                     <Image
                       style={styles.img}
-                      source={item.iconSource}
+                      // iconSource is a union of image module | icon name;
+                      // this branch only renders the image variant.
+                      source={item.iconSource as ImageSourcePropType}
                       tintColor={theme.heading}
                     />
                   )}

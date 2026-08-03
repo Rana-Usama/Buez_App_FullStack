@@ -38,10 +38,10 @@ export default function UserCard({
       style={[
         styles.card,
         {
-          backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+          backgroundColor: isDark ? Colors.whiteAlpha04 : Colors.white,
           borderColor: isDark
-            ? "rgba(255,255,255,0.10)"
-            : "rgba(17,24,39,0.08)",
+            ? Colors.whiteAlpha10
+            : Colors.slateAlpha08,
         },
       ]}
     >
@@ -49,7 +49,7 @@ export default function UserCard({
         <View style={styles.avatarWrap}>
           {postRequest?.user?.profileImage ? (
             <LinearGradient
-              colors={[Colors.primary, "#4557B0"]}
+              colors={[Colors.primary, Colors.success2]}
               style={styles.avatarRing}
             >
               <Image

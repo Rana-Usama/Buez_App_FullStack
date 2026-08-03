@@ -716,10 +716,17 @@ export const getCurrencySymbolFromLocation = (location = null) => {
  * @returns {string}
  */
 
+interface FormatCurrencyOptions {
+  fallbackCurrency?: string;
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
+  showSymbol?: boolean;
+}
+
 export const formatCurrencyByLocation = (
   amount,
   location = null,
-  options = {}
+  options: FormatCurrencyOptions = {}
 ) => {
   const {
     fallbackCurrency = "USD",

@@ -15,13 +15,29 @@ import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
 import { useAppTheme } from "../contexts/themeContext";
 import { ShareButton } from "../job-sharing/ShareButton";
-import { useRoute } from "@react-navigation/native";
+import { RouteProp, useRoute } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+
+/**
+ * Params this screen is navigated with. `useRoute()` otherwise types
+ * `route.params` as `object`, which has no known properties.
+ */
+type SuccessScreenRoute = RouteProp<
+  {
+    SuccessScreen: {
+      /** The task that was just posted or edited (used for sharing). */
+      taskData?: any;
+      /** True when arriving from an edit rather than a new post. */
+      isEdit?: boolean;
+    };
+  },
+  "SuccessScreen"
+>;
 
 function SuccessScreen({ navigation }) {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
-  const route = useRoute();
+  const route = useRoute<SuccessScreenRoute>();
   const taskData = route.params?.taskData || null;
   // When navigated here after editing an existing task, swap the headline copy
   // to an "edited" confirmation instead of the default "posted" message.
@@ -41,7 +57,7 @@ function SuccessScreen({ navigation }) {
           backgroundColor:
             theme.mode === "dark"
               ? "rgba(21, 23, 47, 0.73)"
-              : "rgba(255,255,255,0.2)",
+              : Colors.backBtnBg,
               borderLeftColor: theme.mode === "dark" ? Colors.darkGrey : Colors.white,
         },
       ]}
@@ -55,15 +71,15 @@ function SuccessScreen({ navigation }) {
         />
       </View>
       <View style={styles.infoTextContainer}>
-        <Text style={[styles.infoTitle, { color: Colors.white }]}>{title}</Text>
+        <Text style={[styles.infoTitle, styles.text]}>{title}</Text>
         <Text
           style={[
             styles.infoDescription,
             {
               color:
                 theme.mode === "dark"
-                  ? "rgba(255,255,255,0.8)"
-                  : "rgba(255,255,255,0.9)",
+                  ? Colors.lastMsgTextColor
+                  : Colors.whiteAlpha90,
             },
           ]}
         >
@@ -77,7 +93,7 @@ function SuccessScreen({ navigation }) {
     <LinearGradient
       colors={
         theme.mode === "dark"
-          ? ["#000000", "#000000"]
+          ? [Colors.blackSolid, Colors.blackSolid]
           : [Colors.primary, Colors.success2]
       }
       start={{ x: 1, y: 0 }}
@@ -115,8 +131,8 @@ function SuccessScreen({ navigation }) {
           {
             color:
               theme.mode === "dark"
-                ? "rgba(255,255,255,0.8)"
-                : "rgba(255,255,255,0.9)",
+                ? Colors.lastMsgTextColor
+                : Colors.whiteAlpha90,
           },
         ]}
       >
@@ -135,11 +151,11 @@ function SuccessScreen({ navigation }) {
             backgroundColor:
               theme.mode === "dark"
                 ? "rgba(46, 43, 86, 0.1)"
-                : "rgba(255,255,255,0.1)",
+                : Colors.whiteAlpha10,
             borderColor:
               theme.mode === "dark"
-                ? "rgba(87, 84, 121, 0.34)"
-                : "rgba(255,255,255,0.15)",
+                ? Colors.blueAlpha34
+                : Colors.categoryBadgeBg,
           },
         ]}
       >
@@ -152,7 +168,7 @@ function SuccessScreen({ navigation }) {
         </View>
 
         <View style={styles.shareContent}>
-          <Text style={[styles.shareTitle, { color: Colors.white }]}>
+          <Text style={[styles.shareTitle, styles.text]}>
             {t("successScreen.shareTitle")}
           </Text>
 
@@ -162,8 +178,8 @@ function SuccessScreen({ navigation }) {
               {
                 color:
                   theme.mode === "dark"
-                    ? "rgba(255,255,255,0.8)"
-                    : "rgba(255,255,255,0.9)",
+                    ? Colors.lastMsgTextColor
+                    : Colors.whiteAlpha90,
               },
             ]}
           >
@@ -180,13 +196,13 @@ function SuccessScreen({ navigation }) {
               {
                 backgroundColor:
                   theme.mode === "dark"
-                    ? "rgba(87, 84, 121, 0.34)"
-                    : "rgba(255,255,255,0.15)",
+                    ? Colors.blueAlpha34
+                    : Colors.categoryBadgeBg,
 
                 borderColor:
                   theme.mode === "dark"
-                    ? "rgba(87, 84, 121, 0.34)"
-                    : "rgba(255,255,255,0.15)",
+                    ? Colors.blueAlpha34
+                    : Colors.categoryBadgeBg,
               },
             ]}
             showLabel={true}
@@ -342,16 +358,16 @@ const styles = StyleSheet.create({
     padding: RFPercentage(2),
     borderRadius: RFPercentage(2),
     marginBottom: RFPercentage(3),
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: Colors.whiteAlpha10,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: Colors.backBtnBg,
     marginHorizontal: RFPercentage(1),
   },
   shareIconContainer: {
     width: RFPercentage(6),
     height: RFPercentage(6),
     borderRadius: RFPercentage(3),
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: Colors.categoryBadgeBg,
     justifyContent: "center",
     alignItems: "center",
     marginRight: RFPercentage(2),
@@ -422,7 +438,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: RFPercentage(2),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -448,6 +464,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_500Medium",
   },
+  text: { color: Colors.white },
 });
 
 export default SuccessScreen;

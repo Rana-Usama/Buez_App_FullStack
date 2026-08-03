@@ -7,7 +7,7 @@ import {
   reauthenticateWithCredential,
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  OAuthProvider
+  OAuthProvider,
 } from "firebase/auth";
 import { deleteUser } from "firebase/auth";
 import { purgeUserAccountData } from "./AccountDeletion.service";
@@ -16,12 +16,13 @@ import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
 import { appleAuth } from "@invertase/react-native-apple-authentication"; // ✅ Needed for Apple login
 import { Linking } from "react-native";
+import { AnyObject } from "yup";
 
 export const resetPassword = async (email: any) => {
   try {
     await sendPasswordResetEmail(FIREBASE_AUTH, email);
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error sending password reset email:", error.message);
     throw error;
   }
@@ -49,7 +50,7 @@ export const emailVerification = async (user: any) => {
         alert("Verification email to1 " + user.email);
       })
       .catch((e) => console.log("Verification email failed2", e));
-  } catch (error) {
+  } catch (error: any) {
     const errorCode = error.code;
     const errorMessage = error.message;
     console.error("Email verification failed1", errorCode, errorMessage);
@@ -60,22 +61,22 @@ export const emailVerification = async (user: any) => {
 // Function to update user password
 export const updatePassword = async (
   currentPassword: any,
-  newPassword: any
+  newPassword: any,
 ) => {
   try {
     const user = FIREBASE_AUTH.currentUser;
     if (user) {
       // Reauthenticate the user first
       const credential = EmailAuthProvider.credential(
-        user.email,
-        currentPassword
+        user?.email,
+        currentPassword,
       );
       await reauthenticateWithCredential(user, credential);
       await firebaseUpdatePassword(user, newPassword);
     } else {
       console.log("No user is logged in to update password");
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error updating password:", error);
     throw error;
   }
@@ -110,14 +111,14 @@ export async function removeCredentials() {
   await SecureStore.deleteItemAsync("password");
 }
 
-export const deleteCurrentUser = async (currentPassword) => {
+export const deleteCurrentUser = async (currentPassword: string) => {
   const user = FIREBASE_AUTH.currentUser;
   if (!user) return;
   try {
     // 🔑 Step 1: Re-authenticate the user
     const credential = EmailAuthProvider.credential(
-      user.email,
-      currentPassword
+      user?.email,
+      currentPassword,
     );
     await reauthenticateWithCredential(user, credential);
     const userId = user.uid;
@@ -159,7 +160,7 @@ export async function deleteGoogleAccount() {
     const user = FIREBASE_AUTH.currentUser;
     if (!user) throw new Error("No user signed in");
     const userInfo = await GoogleSignin.signIn();
-    const { idToken } = userInfo?.data;
+    const { idToken }: any = userInfo?.data;
     const googleCredential = GoogleAuthProvider.credential(idToken);
     await reauthenticateWithCredential(user, googleCredential);
     const userId = user.uid;
@@ -169,7 +170,7 @@ export async function deleteGoogleAccount() {
     await purgeUserAccountData(userId);
     await deleteUser(user);
     console.log("Google account deleted ✅");
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error deleting Google user:", error.message);
   }
 }

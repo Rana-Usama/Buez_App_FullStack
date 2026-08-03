@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../../config/Colors";
@@ -21,22 +21,22 @@ export default function ReviewsCard({ translatedReviews = [], averageRating, t, 
   if (translatedReviews.length === 0 && !averageRating) return null;
 
   return (
-    <View style={{ borderRadius: 16, padding: RFPercentage(2), marginBottom: RFPercentage(2), borderWidth: 1, borderColor: "rgba(0,0,0,0.05)", backgroundColor: theme.mode === "dark" ? theme.white + "10" : "#FFF8E1" }}>
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: RFPercentage(1.5) }}>
-        <Ionicons name="star" size={RFPercentage(2.2)} color="#FFD700" />
+    <View style={{ borderRadius: 16, padding: RFPercentage(2), marginBottom: RFPercentage(2), borderWidth: 1, borderColor: Colors.sectionBgLight, backgroundColor: theme.mode === "dark" ? theme.white + "10" : "#FFF8E1" }}>
+      <View style={styles.view}>
+        <Ionicons name="star" size={RFPercentage(2.2)} color={Colors.gold} />
         <Text style={{ marginLeft: RFPercentage(0.5), fontSize: RFPercentage(1.6), fontFamily: "Poppins_600SemiBold", color: theme.heading }}>{t("profile.txt3")}{averageRating ? <Text style={{ fontSize: RFPercentage(1.4), color: theme.darkGrey }}> ({averageRating} ⭐)</Text> : null}</Text>
       </View>
 
       {visible.map((review, i) => (
-        <View key={review.id || i} style={{ borderRadius: 12, padding: RFPercentage(1.2), marginBottom: RFPercentage(1.2), backgroundColor: theme.mode === "dark" ? theme.white + "08" : "rgba(255,255,255,0.7)" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: RFPercentage(0.8) }}>
-            <Image source={review?.reviewer?.profileImage ? { uri: review.reviewer.profileImage } : Icons.dp} style={{ width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(2), marginRight: RFPercentage(1) }} />
-            <View style={{ flex: 1 }}>
+        <View key={review.id || i} style={{ borderRadius: 12, padding: RFPercentage(1.2), marginBottom: RFPercentage(1.2), backgroundColor: theme.mode === "dark" ? theme.white + "08" : Colors.heroStatsLabel }}>
+          <View style={styles.view2}>
+            <Image source={review?.reviewer?.profileImage ? { uri: review.reviewer.profileImage } : Icons.dp} style={styles.image} />
+            <View style={styles.view3}>
               <Text style={{ fontSize: RFPercentage(1.4), fontFamily: "Poppins_600SemiBold", color: theme.heading }}>{review?.reviewer?.userName}</Text>
               <Text style={{ fontSize: RFPercentage(1.1), color: theme.darkGrey }}>{new Date(review?.createdAt || Date.now()).toLocaleDateString()}</Text>
             </View>
-            <View style={{ flexDirection: "row", gap: 2 }}>
-              {[1,2,3,4,5].map(st => <Ionicons key={st} name="star" size={RFPercentage(1.4)} color={st <= (review.rating||0) ? "#FFD700" : theme.border} />)}
+            <View style={styles.view4}>
+              {[1,2,3,4,5].map(st => <Ionicons key={st} name="star" size={RFPercentage(1.4)} color={st <= (review.rating||0) ? Colors.gold : theme.border} />)}
             </View>
           </View>
           <Text style={{ color: theme.darkGrey }}>{review.translatedText}</Text>
@@ -44,8 +44,17 @@ export default function ReviewsCard({ translatedReviews = [], averageRating, t, 
       ))}
 
       {!showAll && hiddenCount > 0 && (
-        <Text onPress={onShowAll} style={{ color: Colors.primary, marginTop: RFPercentage(0.5) }}>{`+${hiddenCount} ${t("details.txt11")}`}</Text>
+        <Text onPress={onShowAll} style={styles.text}>{`+${hiddenCount} ${t("details.txt11")}`}</Text>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  view: { flexDirection: "row", alignItems: "center", marginBottom: RFPercentage(1.5) },
+  view2: { flexDirection: "row", alignItems: "center", marginBottom: RFPercentage(0.8) },
+  image: { width: RFPercentage(4), height: RFPercentage(4), borderRadius: RFPercentage(2), marginRight: RFPercentage(1) },
+  view3: { flex: 1 },
+  view4: { flexDirection: "row", gap: 2 },
+  text: { color: Colors.primary, marginTop: RFPercentage(0.5) },
+});

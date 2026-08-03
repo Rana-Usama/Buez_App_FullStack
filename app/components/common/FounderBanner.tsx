@@ -17,7 +17,7 @@ import Colors from "../../config/Colors";
 const { width } = Dimensions.get("window");
 
 // Premium founder accent (warm gold) — reused across the banner.
-const GOLD = "#F4B740";
+const GOLD = Colors.orange5;
 const GOLD_SOFT = "rgba(244,183,64,0.35)";
 
 const FounderBanner: React.FC = () => {
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     width: width * 0.34,
     height: width * 0.34,
     borderRadius: width * 0.17,
-    backgroundColor: "rgba(244,183,64,0.14)",
+    backgroundColor: Colors.orangeAlpha14,
     top: -width * 0.15,
     right: -width * 0.09,
   },
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     width: width * 0.24,
     height: width * 0.24,
     borderRadius: width * 0.12,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: Colors.whiteAlpha05,
     bottom: -width * 0.12,
     right: width * 0.18,
   },
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(4.7),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: Colors.whiteAlpha08,
     borderWidth: 1,
     borderColor: GOLD_SOFT,
   },
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1),
     paddingVertical: RFPercentage(0.35),
     borderRadius: RFPercentage(100),
-    backgroundColor: "rgba(244,183,64,0.14)",
+    backgroundColor: Colors.orangeAlpha14,
     borderWidth: 1,
     borderColor: GOLD_SOFT,
     marginBottom: RFPercentage(0.8),

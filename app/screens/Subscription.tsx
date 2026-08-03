@@ -173,22 +173,22 @@ function Subscription({ navigation, route }) {
   const getBorderGradient = (isSelected) => {
     if (!isSelected)
       return {
-        borderColor: isDark ? "rgba(69,87,176,0.18)" : "rgba(37,50,117,0.1)",
+        borderColor: isDark ? Colors.primary2Alpha18 : Colors.primaryAlpha10,
       };
-    return { borderColor: "#253275", borderWidth: 1.5 };
+    return { borderColor: Colors.primary, borderWidth: 1.5 };
   };
 
   // ── PLAN CARD RENDERER ────────────────────────────────────────────────────
   const renderPlanCard = ({ item, index }) => {
     const isSelected = selectedPlan === item.id;
-    const accentColor = item.id === "monthly" ? "#253275" : "#DD53A8";
+    const accentColor = item.id === "monthly" ? Colors.primary : Colors.secondary;
 
     return (
       <TouchableOpacity
         style={[
           styles.planCard,
           {
-            backgroundColor: isDark ? "rgba(17, 20, 48, 0.95)" : "#fff",
+            backgroundColor: isDark ? "rgba(17, 20, 48, 0.95)" : Colors.white,
             ...getBorderGradient(isSelected),
             marginLeft: index === 0 ? RFPercentage(3) : RFPercentage(1),
             marginRight:
@@ -211,8 +211,8 @@ function Subscription({ navigation, route }) {
         <LinearGradient
           colors={
             item.id === "monthly"
-              ? ["#253275", "#4557B0"]
-              : ["#253275", "#DD53A8"]
+              ? [Colors.primary, Colors.success2]
+              : [Colors.primary, Colors.secondary]
           }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -222,7 +222,7 @@ function Subscription({ navigation, route }) {
         {/* Popular badge */}
         {item.popular && (
           <LinearGradient
-            colors={["#253275", "#DD53A8"]}
+            colors={[Colors.primary, Colors.secondary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.popularBadge}
@@ -255,15 +255,15 @@ function Subscription({ navigation, route }) {
               <Feather
                 name={item.id === "monthly" ? "calendar" : "star"}
                 size={RFPercentage(2)}
-                color="#fff"
+                color={Colors.white}
               />
             </LinearGradient>
 
-            <View style={{ flex: 1 }}>
+            <View style={styles.view}>
               <Text
                 style={[
                   styles.planTitle,
-                  { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                  { color: isDark ? Colors.white4 : Colors.blueDark },
                 ]}
               >
                 {item.title}
@@ -271,7 +271,7 @@ function Subscription({ navigation, route }) {
               <Text
                 style={[
                   styles.planDescription,
-                  { color: isDark ? "#6b7db3" : "#64748B" },
+                  { color: isDark ? Colors.blue2 : Colors.desc },
                 ]}
               >
                 {item.description}
@@ -285,8 +285,8 @@ function Subscription({ navigation, route }) {
               styles.cardDivider,
               {
                 backgroundColor: isDark
-                  ? "rgba(69,87,176,0.15)"
-                  : "rgba(37,50,117,0.07)",
+                  ? Colors.primary2Alpha15
+                  : Colors.primaryAlpha07,
               },
             ]}
           />
@@ -301,7 +301,7 @@ function Subscription({ navigation, route }) {
                   <Text
                     style={[
                       styles.price,
-                      { color: isDark ? "#eef0ff" : "#1a1e4a" },
+                      { color: isDark ? Colors.white4 : Colors.blueDark },
                     ]}
                   >
                     {integerPart}
@@ -309,7 +309,7 @@ function Subscription({ navigation, route }) {
                       <Text
                         style={[
                           styles.priceDecimal,
-                          { color: isDark ? "#8892b0" : "#64748B" },
+                          { color: isDark ? Colors.blue : Colors.desc },
                         ]}
                       >
                         .{decimalPart}
@@ -321,7 +321,7 @@ function Subscription({ navigation, route }) {
               <Text
                 style={[
                   styles.period,
-                  { color: isDark ? "#6b7db3" : "#94a3b8" },
+                  { color: isDark ? Colors.blue2 : Colors.inputFieldPlaceholder },
                 ]}
               >
                 {item.period}
@@ -334,7 +334,7 @@ function Subscription({ navigation, route }) {
             <Text
               style={[
                 styles.introNote,
-                { color: isDark ? "#8892b0" : "#64748B" },
+                { color: isDark ? Colors.blue : Colors.desc },
               ]}
               numberOfLines={2}
             >
@@ -350,10 +350,10 @@ function Subscription({ navigation, route }) {
                 {
                   backgroundColor:
                     item.popular || item.id === "yearly"
-                      ? "#DD53A820"
+                      ? Colors.secondarySolid
                       : isDark
-                        ? "rgba(69,87,176,0.2)"
-                        : "rgba(37,50,117,0.08)",
+                        ? Colors.primary2Alpha20
+                        : Colors.primaryAlpha08,
                 },
               ]}
             >
@@ -363,10 +363,10 @@ function Subscription({ navigation, route }) {
                   {
                     color:
                       item.popular || item.id === "yearly"
-                        ? "#DD53A8"
+                        ? Colors.secondary
                         : isDark
-                          ? "#4557B0"
-                          : "#253275",
+                          ? Colors.success2
+                          : Colors.primary,
                   },
                 ]}
               >
@@ -377,7 +377,7 @@ function Subscription({ navigation, route }) {
               <Text
                 style={[
                   styles.originalPrice,
-                  { color: isDark ? "#4a5580" : "#94a3b8" },
+                  { color: isDark ? Colors.blue22 : Colors.inputFieldPlaceholder },
                 ]}
               >
                 {item.originalPrice}
@@ -391,8 +391,8 @@ function Subscription({ navigation, route }) {
               styles.cardDivider,
               {
                 backgroundColor: isDark
-                  ? "rgba(69,87,176,0.12)"
-                  : "rgba(37,50,117,0.06)",
+                  ? Colors.primary2Alpha12
+                  : Colors.primaryAlpha06,
               },
             ]}
           />
@@ -412,7 +412,7 @@ function Subscription({ navigation, route }) {
                 <Text
                   style={[
                     styles.featureText,
-                    { color: isDark ? "#8892b0" : "#475569" },
+                    { color: isDark ? Colors.blue : Colors.skip },
                   ]}
                 >
                   {feature}
@@ -447,8 +447,8 @@ function Subscription({ navigation, route }) {
       <LinearGradient
         colors={
           theme.mode === "dark"
-            ? ["rgba(37, 50, 117, 0.9)", "transparent"]
-            : ["rgba(37, 50, 117, 0.92)", Colors.white]
+            ? [Colors.primaryAlpha90, "transparent"]
+            : [Colors.primaryAlpha92, Colors.white]
         }
         style={styles.topGlow}
         pointerEvents="none"
@@ -464,7 +464,7 @@ function Subscription({ navigation, route }) {
           {/* Badge */}
           <View style={styles.titleBadgeWrap}>
             <LinearGradient
-              colors={["#253275", "#DD53A8"]}
+              colors={[Colors.primary, Colors.secondary]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.titleBadge}
@@ -472,7 +472,7 @@ function Subscription({ navigation, route }) {
               <Feather
                 name="refresh-cw"
                 size={RFPercentage(1.3)}
-                color="#fff"
+                color={Colors.white}
               />
               <Text style={styles.titleBadgeText}>
                 {t("subscription.renewSubscription") || "Renew Subscription"}
@@ -481,21 +481,21 @@ function Subscription({ navigation, route }) {
           </View>
 
           <Text
-            style={[styles.title, { color: isDark ? "#eef0ff" : "#1a1e4a" }]}
+            style={[styles.title, { color: isDark ? Colors.white4 : Colors.blueDark }]}
           >
             {t("subscription.renewSubscription") || "Renew Subscription"}
           </Text>
 
           {/* Gradient underline */}
           <LinearGradient
-            colors={["#253275", "#DD53A8", "transparent"]}
+            colors={[Colors.primary, Colors.secondary, "transparent"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.titleUnderline}
           />
 
           <Text
-            style={[styles.subtitle, { color: isDark ? "#6b7db3" : "#64748B" }]}
+            style={[styles.subtitle, { color: isDark ? Colors.blue2 : Colors.desc }]}
           >
             {t("subscription.choosePlanToContinue") ||
               "Choose a plan to continue enjoying\npremium features on BUEZ"}
@@ -519,20 +519,20 @@ function Subscription({ navigation, route }) {
                   styles.trustBadge,
                   {
                     backgroundColor: isDark
-                      ? "rgba(69,87,176,0.12)"
-                      : "rgba(37,50,117,0.06)",
+                      ? Colors.primary2Alpha12
+                      : Colors.primaryAlpha06,
                   },
                 ]}
               >
                 <Feather
                   name={badge.icon as any}
                   size={RFPercentage(1.4)}
-                  color={isDark ? "#4557B0" : "#253275"}
+                  color={isDark ? Colors.success2 : Colors.primary}
                 />
                 <Text
                   style={[
                     styles.trustText,
-                    { color: isDark ? "#4557B0" : "#253275" },
+                    { color: isDark ? Colors.success2 : Colors.primary },
                   ]}
                 >
                   {badge.label}
@@ -598,8 +598,8 @@ function Subscription({ navigation, route }) {
               ? "rgba(8,11,26,0.97)"
               : "rgba(240,243,255,0.97)",
             borderTopColor: isDark
-              ? "rgba(69,87,176,0.15)"
-              : "rgba(37,50,117,0.08)",
+              ? Colors.primary2Alpha15
+              : Colors.primaryAlpha08,
           },
         ]}
       >
@@ -610,13 +610,13 @@ function Subscription({ navigation, route }) {
           style={styles.ctaOuter}
         >
           <LinearGradient
-            colors={["#253275", "#4557B0"]}
+            colors={[Colors.primary, Colors.success2]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.ctaBtn}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={Colors.white} />
             ) : (
               <>
                 <Text style={styles.ctaBtnText}>
@@ -628,7 +628,7 @@ function Subscription({ navigation, route }) {
                   <Feather
                     name="arrow-right"
                     size={RFPercentage(1.8)}
-                    color="#fff"
+                    color={Colors.white}
                   />
                 </View>
               </>
@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
   titleBadgeText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.3),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.2,
   },
   title: {
@@ -725,7 +725,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     overflow: "hidden",
     position: "relative",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 20,
@@ -749,7 +749,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
   },
   popularText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_700Bold",
     textAlign: "center",
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     marginRight: RFPercentage(1.2),
   },
   checkText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_700Bold",
   },
@@ -902,7 +902,7 @@ const styles = StyleSheet.create({
     width: "90%",
     borderRadius: RFPercentage(2),
     overflow: "hidden",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 18,
@@ -921,17 +921,18 @@ const styles = StyleSheet.create({
   ctaBtnText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.7),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.2,
   },
   ctaArrow: {
     width: RFPercentage(3.2),
     height: RFPercentage(3.2),
     borderRadius: 100,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     alignItems: "center",
     justifyContent: "center",
   },
+  view: { flex: 1 },
 });
 
 export default Subscription;

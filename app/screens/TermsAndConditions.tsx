@@ -71,7 +71,7 @@ function TermsAndConditions({ navigation }) {
           </View>
         ))}
 
-        <View style={{ marginBottom: RFPercentage(6) }} />
+        <View style={styles.view} />
       </ScrollView>
     </View>
   );
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
   },
   scroll: { width: "100%" },
   scrollContent: { width: "100%", alignItems: "center" },
+  view: { marginBottom: RFPercentage(6) },
 });
 
 export default TermsAndConditions;

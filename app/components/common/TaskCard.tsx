@@ -235,9 +235,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
       </View>
 
       {/* Task Type Badge */}
-      <View style={[styles.bulkBadge, { backgroundColor: Colors.primary }]}>
+      <View style={[styles.bulkBadge, styles.view]}>
         <Text
-          style={[styles.bulkBadgeText, { color: Colors.white }]}
+          style={[styles.bulkBadgeText, styles.text]}
           numberOfLines={1}
         >
           {task.taskType}
@@ -256,11 +256,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
             ) : (
               <AvatarInitials
                 name={task.user?.userName}
-                style={[styles.userImage, { borderWidth: 0 }]}
-                textStyle={{
-                  fontSize: RFPercentage(2.5),
-                  lineHeight: RFPercentage(3.5),
-                }}
+                style={[styles.userImage, styles.avatarInitials]}
+                textStyle={styles.avatarInitialsText}
               />
             )}
 
@@ -311,7 +308,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               {
                 backgroundColor:
                   theme.mode === "light"
-                    ? "rgba(215, 215, 215, 0.48)"
+                    ? Colors.greyLightAlpha48
                     : "rgba(53, 51, 64, 0.82)",
               },
             ]}
@@ -368,7 +365,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           <View
             style={[
               styles.compensationWrapper,
-              { width: "90%", alignSelf: "center" },
+              styles.view2,
             ]}
           >
             <Image
@@ -436,7 +433,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                       key={subTask.id || idx}
                       style={[
                         styles.subTaskTag,
-                        { backgroundColor: theme.mode === "dark" ? "rgba(255,255,255,0.1)" :  `${theme.primary}15` },
+                        { backgroundColor: theme.mode === "dark" ? Colors.whiteAlpha10 :  `${theme.primary}15` },
                       ]}
                     >
                       <FontAwesome5
@@ -542,13 +539,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     <View
                       style={[
                         styles.statIconContainer,
-                        { backgroundColor: "#4CAF50" + "15" },
+                        styles.view3,
                       ]}
                     >
                       <Ionicons
                         name="checkmark-circle"
                         size={RFPercentage(1.7)}
-                        color="#4CAF50"
+                        color={Colors.green}
                       />
                     </View>
                     <View>
@@ -558,7 +555,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                       >
                         {t("offerDetail.confirmed")}
                       </Text>
-                      <Text style={[styles.statValue, { color: "#4CAF50" }]}>
+                      <Text style={[styles.statValue, styles.text2]}>
                         {confirmedCount}
                       </Text>
                     </View>
@@ -643,7 +640,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 const styles = StyleSheet.create({
   cartContainer: {
     width: width * 0.9,
-    borderColor: "#E5E7EB",
+    borderColor: Colors.greyLight,
     borderWidth: RFPercentage(0.1),
     borderRadius: RFPercentage(1),
     paddingBottom: RFPercentage(2),
@@ -675,7 +672,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#3B82F6",
   },
   inactiveDot: {
-    backgroundColor: "#D1D5DB",
+    backgroundColor: Colors.stroke,
   },
   infoWrapper: {
     width: "100%",
@@ -719,7 +716,7 @@ const styles = StyleSheet.create({
 
   expandButton: {
     padding: RFPercentage(0.3),
-    backgroundColor: "rgba(215, 215, 215, 0.48)",
+    backgroundColor: Colors.greyLightAlpha48,
     borderRadius: RFPercentage(100),
     bottom: 5,
   },
@@ -869,6 +866,16 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
     lineHeight: RFPercentage(1.5),
   },
+  view: { backgroundColor: Colors.primary },
+  text: { color: Colors.white },
+  avatarInitials: { borderWidth: 0 },
+  avatarInitialsText: {
+                  fontSize: RFPercentage(2.5),
+                  lineHeight: RFPercentage(3.5),
+                },
+  view2: { width: "90%", alignSelf: "center" },
+  view3: { backgroundColor: Colors.green + "15" },
+  text2: { color: Colors.green },
 });
 
 const areEqual = (prevProps: TaskCardProps, nextProps: TaskCardProps) => {

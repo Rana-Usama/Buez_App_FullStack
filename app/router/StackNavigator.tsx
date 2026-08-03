@@ -108,7 +108,9 @@ const StackNavigator = () => {
           // offset is what made the outgoing screen "drop down" before the
           // next screen slid in.
           statusBarTranslucent: true,
-          statusBarColor: "transparent",
+          // NOTE: `statusBarColor` was removed here — native-stack v7 reads
+          // `statusBarBackgroundColor` instead, so the old key was silently
+          // ignored at runtime. Dropping it changes nothing visually.
         }}
       >
         {/* Auth + Onboarding */}

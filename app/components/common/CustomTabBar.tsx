@@ -67,7 +67,7 @@ const CustomTabBar: React.FC<Props> = ({
         style={[
           styles.content,
           {
-            backgroundColor: homeTab ? Colors.primary : "#D1D5DB",
+            backgroundColor: homeTab ? Colors.primary : Colors.stroke,
           },
         ]}
       >

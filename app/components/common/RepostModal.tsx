@@ -64,7 +64,7 @@ const RepostSuccessModal = ({ isVisible, onClose, theme, t }) => {
           </Text>
 
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: Colors.primary }]}
+            style={[styles.button, styles.touchableOpacity]}
             onPress={onClose}
             activeOpacity={0.8}
           >
@@ -81,7 +81,7 @@ const RepostSuccessModal = ({ isVisible, onClose, theme, t }) => {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: Colors.blackAlpha60,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: RFPercentage(2),
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2),
     padding: RFPercentage(3),
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -127,6 +127,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
   },
+  touchableOpacity: { backgroundColor: Colors.primary },
 });
 
 export default RepostSuccessModal;

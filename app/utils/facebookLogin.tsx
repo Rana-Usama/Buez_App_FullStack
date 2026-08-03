@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { View, ActivityIndicator, Alert, Text } from "react-native";
+import { View, ActivityIndicator, Alert, Text, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 import { FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../firebaseConfig";
@@ -9,6 +9,7 @@ import { resolveFounderRoute } from "../services/Founder.service";
 import { saveCredentials } from "../services/Auth.service";
 import { checkExistingEmailLoginType, saveEmailLoginType } from "./loginType";
 import * as SecureStore from "expo-secure-store";
+import Colors from "../config/Colors";
 
 const FB_APP_ID = process.env.EXPO_PUBLIC_FB_APP_ID;
 const APP_SECRET = process.env.EXPO_PUBLIC_APP_SECRET;
@@ -142,7 +143,7 @@ const FacebookLoginWebView = ({ navigation }: any) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.view}>
       <WebView
         ref={webViewRef}
         source={{ uri: FB_LOGIN_URL }}
@@ -154,21 +155,12 @@ const FacebookLoginWebView = ({ navigation }: any) => {
         startInLoadingState
         renderLoading={() => (
           <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 20,
-            }}
+            style={styles.view2}
           >
-            <View style={{ bottom: 200 }}>
-              <ActivityIndicator size="large" color="#333" />
+            <View style={styles.view3}>
+              <ActivityIndicator size="large" color={Colors.greyDark3} />
               <Text
-                style={{
-                  marginTop: 20,
-                  textAlign: "center",
-                  fontFamily: "Poppins_500Medium",
-                }}
+                style={styles.text}
               >
                 {loadingMessage}
               </Text>
@@ -181,3 +173,19 @@ const FacebookLoginWebView = ({ navigation }: any) => {
 };
 
 export default FacebookLoginWebView;
+
+const styles = StyleSheet.create({
+  view: { flex: 1 },
+  view2: {
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 20,
+            },
+  view3: { bottom: 200 },
+  text: {
+                  marginTop: 20,
+                  textAlign: "center",
+                  fontFamily: "Poppins_500Medium",
+                },
+});

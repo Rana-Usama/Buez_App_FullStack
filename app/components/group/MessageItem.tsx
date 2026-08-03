@@ -63,11 +63,7 @@ const MessageItem = memo(
             ]}
           >
             <View
-              style={{
-                marginRight: RFPercentage(1.2),
-                flexDirection: "row",
-                alignItems: "center",
-              }}
+              style={styles.view}
             >
               {profileImage ? (
                 <Image
@@ -78,7 +74,7 @@ const MessageItem = memo(
                 <AvatarInitials name={displayName} style={styles.msgAvatar} />
               )}
 
-              <View style={{ marginLeft: RFPercentage(1.2) }}>
+              <View style={styles.view2}>
                 <Text
                   numberOfLines={1}
                   style={[
@@ -99,10 +95,10 @@ const MessageItem = memo(
                     styles.msgTime,
                     {
                       color: isOwn
-                        ? "rgba(255,255,255,0.6)"
+                        ? Colors.loaderLightOverlay
                         : theme.mode === "dark"
-                          ? "rgba(255,255,255,0.4)"
-                          : "rgba(0,0,0,0.35)",
+                          ? Colors.whiteAlpha40
+                          : Colors.chatLoadingBgOverlay,
                     },
                   ]}
                 >
@@ -124,7 +120,7 @@ const MessageItem = memo(
                 marginBottom: RFPercentage(0.6),
               }}
               linkStyle={{
-                color: isOwn ? "rgba(255,255,255,0.85)" : theme.primary,
+                color: isOwn ? Colors.categoryBadgeText : theme.primary,
               }}
               noPadding
             />
@@ -174,6 +170,12 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.2),
     minWidth: RFPercentage(10),
   },
+  view: {
+                marginRight: RFPercentage(1.2),
+                flexDirection: "row",
+                alignItems: "center",
+              },
+  view2: { marginLeft: RFPercentage(1.2) },
 });
 
 export default MessageItem;

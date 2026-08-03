@@ -508,7 +508,7 @@ function AddReview() {
                 styles.ratingHintChip,
                 {
                   backgroundColor: isDark
-                    ? "rgba(255,255,255,0.08)"
+                    ? Colors.whiteAlpha08
                     : Colors.lightWhite,
                 },
               ]}

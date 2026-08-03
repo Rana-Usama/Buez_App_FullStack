@@ -100,11 +100,12 @@ export default function Reviews({ navigation }) {
       const translated = await Promise.all(
         keys.map((k) => cachedTranslate(labels[k])),
       );
-      const newLabels = keys.reduce((obj, key, i) => {
+      const newLabels = keys.reduce<Record<string, string>>((obj, key, i) => {
         obj[key] = translated[i] || labels[key];
         return obj;
       }, {});
-      setLabels(newLabels);
+      // Rebuilt from Object.keys(labels), so the shape is identical.
+      setLabels(newLabels as typeof labels);
     })();
   }, []);
 
@@ -131,7 +132,8 @@ export default function Reviews({ navigation }) {
         .map(([title, data]) => ({
           title,
           data: data.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           ),
         }))
         .sort((a, b) => {
@@ -187,7 +189,7 @@ export default function Reviews({ navigation }) {
           key={i}
           style={{
             fontSize: size,
-            color: i <= rating ? Colors.star : isDark ? "#e0e0feff" : "#E2E8F0",
+            color: i <= rating ? Colors.star : isDark ? "#e0e0feff" : Colors.greyLight4,
           }}
         >
           ★
@@ -223,7 +225,7 @@ export default function Reviews({ navigation }) {
               <View
                 style={[
                   styles.barTrack,
-                  { backgroundColor: isDark ? "#1f202cff" : "#F1F3F5" },
+                  { backgroundColor: isDark ? "#1f202cff" : Colors.tabsBackgroundLight },
                 ]}
               >
                 <View
@@ -282,10 +284,7 @@ export default function Reviews({ navigation }) {
                 <AvatarInitials
                   name={item.reviewer?.userName}
                   style={[styles.avatar, { borderColor: groupTextColor }]}
-                  textStyle={{
-                    fontSize: RFPercentage(1.8),
-                    lineHeight: RFPercentage(5),
-                  }}
+                  textStyle={styles.avatarInitialsText}
                 />
               )}
               <View style={styles.userDetails}>
@@ -299,7 +298,7 @@ export default function Reviews({ navigation }) {
                     ? item.reviewer.userName.substring(0, 14) + "…"
                     : item.reviewer?.userName}
                 </Text>
-                <Text style={[styles.date, { color: Colors.lightGrey }]}>
+                <Text style={[styles.date, styles.text]}>
                   {created}
                 </Text>
               </View>
@@ -464,7 +463,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.4),
     borderWidth: 1,
     padding: RFPercentage(2.2),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: {
       width: 0,
       height: 5,
@@ -497,13 +496,13 @@ const styles = StyleSheet.create({
   scoreNum: {
     fontSize: RFPercentage(4),
     fontFamily: "Poppins_700Bold",
-    color: "#fff",
+    color: Colors.white,
     lineHeight: RFPercentage(4.8),
   },
   scoreDenom: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
-    color: "rgba(255,255,255,0.75)",
+    color: Colors.whiteAlpha75,
     marginTop: -RFPercentage(0.4),
   },
   scoreStars: {
@@ -582,7 +581,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.6),
     borderRadius: RFPercentage(2.2),
     borderBottomWidth: 1,
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -626,10 +625,10 @@ const styles = StyleSheet.create({
   ratingNumber: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_700Bold",
-    color: "#fff",
+    color: Colors.white,
     lineHeight: RFPercentage(2.4),
   },
-  ratingStar: { fontSize: RFPercentage(1.4), color: "#FFD700" },
+  ratingStar: { fontSize: RFPercentage(1.4), color: Colors.gold },
 
   // Quote block
   quoteBlock: {
@@ -668,4 +667,9 @@ const styles = StyleSheet.create({
 
   listContent: { paddingBottom: RFPercentage(12) },
   loader: { marginTop: RFPercentage(28) },
+  avatarInitialsText: {
+                    fontSize: RFPercentage(1.8),
+                    lineHeight: RFPercentage(5),
+                  },
+  text: { color: Colors.lightGrey },
 });

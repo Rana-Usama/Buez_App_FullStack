@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Colors from "../../config/Colors";
 
@@ -20,18 +20,18 @@ export default function TaskCard({
         width: "90%",
         alignSelf: "center",
         backgroundColor:
-          theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+          theme.mode === "dark" ? Colors.whiteAlpha04 : Colors.white,
         borderColor:
           theme.mode === "dark"
-            ? "rgba(255,255,255,0.10)"
-            : "rgba(17,24,39,0.08)",
+            ? Colors.whiteAlpha10
+            : Colors.slateAlpha08,
       }}
     >
       <Image
         source={{ uri: item.taskDetails.imageUrls?.[0] }}
-        style={{ width: "100%", height: RFPercentage(20) }}
+        style={styles.image}
       />
-      <View style={{ padding: RFPercentage(2) }}>
+      <View style={styles.view}>
         <Text
           style={{
             fontSize: RFPercentage(1.5),
@@ -54,10 +54,26 @@ export default function TaskCard({
         </Text>
       </View>
       <View
-        style={{
-          backgroundColor: "rgba(17,24,39,0.55)",
+        style={styles.view2}
+      >
+        <Text
+          numberOfLines={1}
+          style={styles.text}
+        >
+          {translatedTaskType ?? item.taskDetails.taskType}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  image: { width: "100%", height: RFPercentage(20) },
+  view: { padding: RFPercentage(2) },
+  view2: {
+          backgroundColor: Colors.slateAlpha55,
           borderWidth: 1,
-          borderColor: "rgba(255,255,255,0.22)",
+          borderColor: Colors.whiteAlpha22,
           paddingVertical: RFPercentage(0.6),
           paddingHorizontal: RFPercentage(1.4),
           maxWidth: "60%",
@@ -67,19 +83,10 @@ export default function TaskCard({
           position: "absolute",
           top: RFPercentage(1),
           right: RFPercentage(1),
-        }}
-      >
-        <Text
-          numberOfLines={1}
-          style={{
+        },
+  text: {
             fontSize: RFPercentage(1.3),
             color: Colors.white,
             fontFamily: "Poppins_600SemiBold",
-          }}
-        >
-          {translatedTaskType ?? item.taskDetails.taskType}
-        </Text>
-      </View>
-    </View>
-  );
-}
+          },
+});

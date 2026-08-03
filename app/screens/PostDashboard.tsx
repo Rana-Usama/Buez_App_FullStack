@@ -72,13 +72,13 @@ export default function PostDashboard({ navigation }) {
   const goCompleted = () => navigation.navigate("CompletedTasks");
 
   const cardBg = isDark ? theme.white : Colors.pureWhite;
-  const cardBorder = isDark ? theme.border : "#ECEFF9";
+  const cardBorder = isDark ? theme.border : Colors.white2;
 
   // ── Chart colours (theme-aware) ──
   const ACTIVE_COLOR = "#b390d1ff";
   const COMPLETED_COLOR = "#83c1baff";
   const CANCELLED_COLOR = "#e36056ff";
-  const trackColor = isDark ? "rgba(255,255,255,0.08)" : "#ECEFF9";
+  const trackColor = isDark ? Colors.whiteAlpha08 : Colors.white2;
 
 
   // Tasks that are neither active/completed/cancelled (e.g. expired-but-active)
@@ -96,7 +96,7 @@ export default function PostDashboard({ navigation }) {
       ? [
           {
             value: otherCount,
-            color: isDark ? "rgba(255,255,255,0.18)" : "#D8DCEC",
+            color: isDark ? Colors.whiteAlpha18 : "#D8DCEC",
           },
         ]
       : []),
@@ -145,7 +145,7 @@ export default function PostDashboard({ navigation }) {
       />
       <Nav
         gradient
-        gradientColors={[Colors.primary, "#0b1544ff"]}
+        gradientColors={[Colors.primary, Colors.blueDark3]}
         title={`${t("postDashboard.header")}`}
       />
 
@@ -153,7 +153,7 @@ export default function PostDashboard({ navigation }) {
         <ActivityIndicator
           size="large"
           color={isDark ? Colors.darkGrey : Colors.primary}
-          style={{ marginTop: RFPercentage(28) }}
+          style={styles.activityIndicator}
         />
       ) : counts?.total === 0 ? (
         // ── State 1: New user (empty state) ──
@@ -172,7 +172,7 @@ export default function PostDashboard({ navigation }) {
           <View
             style={[
               styles.emptyIllustrationWrap,
-              { backgroundColor: isDark ? theme.lightWhite : "#EEF1FB" },
+              { backgroundColor: isDark ? theme.lightWhite : Colors.white12 },
             ]}
           >
             <Image
@@ -317,9 +317,9 @@ export default function PostDashboard({ navigation }) {
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={goCreate}
-            style={[styles.fab, { backgroundColor: Colors.primary }]}
+            style={[styles.fab, styles.touchableOpacity]}
           >
-            <Ionicons name="add" size={RFPercentage(2.6)} color="#FFF" />
+            <Ionicons name="add" size={RFPercentage(2.6)} color={Colors.white} />
             <Text style={styles.fabText} numberOfLines={1}>
               {t("postDashboard.newCta")}
             </Text>
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.2),
     borderWidth: 1,
     padding: RFPercentage(2),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: RFPercentage(2.2),
     marginTop: RFPercentage(0.5),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: RFPercentage(2.2),
     marginTop: RFPercentage(1.6),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: RFPercentage(2),
     alignItems: "flex-start",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -557,8 +557,10 @@ const styles = StyleSheet.create({
     // elevation: 8,
   },
   fabText: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
   },
+  activityIndicator: { marginTop: RFPercentage(28) },
+  touchableOpacity: { backgroundColor: Colors.primary },
 });

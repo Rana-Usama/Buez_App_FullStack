@@ -26,6 +26,7 @@ import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import { uploadImage } from "./Shared.service";
 import { REQUEST_STATUS } from "../utils/gloabals";
 import { removeMemberFromGroupChat } from "./GroupChat.service";
+import { WithId } from "../types/firestore.types";
 import { sendPushToUser } from "../utils/pushNotify";
 
 const db = FIREBASE_DB;
@@ -234,7 +235,7 @@ export const getRequestList = (
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        let tasksArray = snapshot.docs.map((doc) => ({
+        let tasksArray = snapshot.docs.map((doc): WithId => ({
           id: doc.id,
           ...doc.data(),
         }));
@@ -295,7 +296,7 @@ export const createCompletedTaskForWorkers = async (taskId, taskData) => {
       throw new Error("Task not found");
     }
 
-    const task = { id: taskDoc.id, ...taskDoc.data() };
+    const task: WithId = { id: taskDoc.id, ...taskDoc.data() };
 
     // Check if this is a bulk request with confirmed workers
     const isBulkRequest = task.numberOfWorkers > 1 || task.isBulkRequest;
@@ -380,7 +381,7 @@ export const updateReqestStatus = async (taskId, status, taskData) => {
     // If marking as completed and it's a bulk request, create entries for workers
     if (status === REQUEST_STATUS.Completed) {
       const taskDoc = await getDoc(taskRef);
-      const task = { id: taskDoc.id, ...taskDoc.data() };
+      const task: WithId = { id: taskDoc.id, ...taskDoc.data() };
 
       const confirmedWorkers = task?.confirmedWorkers || [];
 

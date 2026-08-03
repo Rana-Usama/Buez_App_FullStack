@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import FilterButton from "../common/FilterButton";
 
 type Props = {
@@ -13,7 +13,7 @@ export default function FilterBar({ options, active, onSelect }: Props) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ alignItems: "center", marginTop: 18 }}
+      contentContainerStyle={styles.scrollViewContentContainer}
     >
       {options.map((title, idx) => (
         <FilterButton
@@ -27,3 +27,7 @@ export default function FilterBar({ options, active, onSelect }: Props) {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollViewContentContainer: { alignItems: "center", marginTop: 18 },
+});

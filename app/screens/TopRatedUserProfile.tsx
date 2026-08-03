@@ -43,6 +43,7 @@ import {
   getDoc,
   onSnapshot,
   arrayRemove,
+  DocumentData,
 } from "firebase/firestore";
 import { FIREBASE_DB } from "../../firebaseConfig";
 import { createOrUpdateGroupChat } from "../services/GroupChat.service";
@@ -354,7 +355,9 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       const taskDocRef = doc(db, "taskRequests", postRequest.id);
       const docSnap = await getDoc(taskDocRef);
       if (docSnap.exists()) {
-        const latestData = docSnap.data();
+        // getDoc on an untyped ref yields a bare object; DocumentData is
+        // Firestore's own type for an unmodelled document body.
+        const latestData: DocumentData = docSnap.data();
         const requiredWorkers = latestData.numberOfWorkers || 1;
         const confirmedCount = Array.isArray(latestData.confirmedWorkers)
           ? latestData.confirmedWorkers.length
@@ -405,7 +408,9 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
 
       // Get latest data
       const docSnap = await getDoc(taskDocRef);
-      let latestData = {};
+      // Typed as DocumentData so the field reads below type-check; `{}` on its
+      // own has no known properties.
+      let latestData: DocumentData = {};
       if (docSnap.exists()) {
         latestData = docSnap.data();
       }
@@ -609,21 +614,21 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
       return {
         label: t("profileRank.txt39"),
         icon: "diamond",
-        color: "#bfa824ff",
-        gradient: ["rgba(255, 215, 0, 0.1)","rgba(255, 215, 0, 0.1)"],
+        color: Colors.yellow,
+        gradient: [Colors.yellowAlpha10,Colors.yellowAlpha10],
       };
     if (completedCount >= 2)
       return {
         label: t("profileRank.txt40"),
         icon: "rocket",
-        color: "#79b7b0ff",
-        gradient: ["#71a5821a", "#71a5821a"],
+        color: Colors.teal2,
+        gradient: [Colors.green5, Colors.green5],
       };
     return {
       label: t("profileRank.txt41"),
       icon: "leaf",
-      color: "#9b6fc1ff",
-      gradient: ["#d3c2e23a", "#d3c2e23a"],
+      color: Colors.indigo,
+      gradient: [Colors.indigoLight, Colors.indigoLight],
     };
   };
 
@@ -708,12 +713,12 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               styles.tabContainer,
               {
                 backgroundColor:
-                  theme.mode === "dark" ? "rgba(255,255,255,0.06)" : "#F6F7F9",
+                  theme.mode === "dark" ? Colors.sectionBgDark : Colors.white14,
                 borderWidth: 1,
                 borderColor:
                   theme.mode === "dark"
-                    ? "rgba(255,255,255,0.10)"
-                    : "rgba(17,24,39,0.08)",
+                    ? Colors.whiteAlpha10
+                    : Colors.slateAlpha08,
               },
             ]}
           >
@@ -727,7 +732,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               <Text
                 style={[
                   styles.tabText,
-                  { color: activeTab === "completed" ? "#FFF" : theme.grey },
+                  { color: activeTab === "completed" ? Colors.white : theme.grey },
                 ]}
                 numberOfLines={1}
               >
@@ -741,7 +746,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
               <Text
                 style={[
                   styles.tabText,
-                  { color: activeTab === "reviews" ? "#FFF" : theme.grey },
+                  { color: activeTab === "reviews" ? Colors.white : theme.grey },
                 ]}
                 numberOfLines={1}
               >
@@ -755,7 +760,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
         {activeTab === "completed" ? (
           completedTasks && completedTasks.length > 0 ? (
             <>
-              <View style={{ marginTop: RFPercentage(3) }}>
+              <View style={styles.view}>
                 {visibleCompletedTasks.map((item, idx) => (
                   <TaskCard
                     key={item.id || idx}
@@ -814,7 +819,7 @@ const TopRatedUserProfile = ({ navigation, route }: any) => {
           )
         ) : reviews && reviews.length > 0 ? (
           <>
-            <View style={{ marginTop: RFPercentage(3) }}>
+            <View style={styles.view}>
               {visibleReviewGroups.map((group, i) => (
                 <ReviewCard
                   key={group.key || i}
@@ -894,7 +899,7 @@ const styles = StyleSheet.create({
     paddingBottom: RFPercentage(4),
     borderBottomLeftRadius: RFPercentage(2),
     borderBottomRightRadius: RFPercentage(2),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -914,7 +919,7 @@ const styles = StyleSheet.create({
   avatarRing: {
     padding: RFPercentage(0.5),
     borderRadius: RFPercentage(100),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 16,
@@ -933,7 +938,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: RFPercentage(1),
     right: RFPercentage(1),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -946,7 +951,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#FFF",
+    borderColor: Colors.white,
   },
 
   // Name and Status
@@ -962,14 +967,14 @@ const styles = StyleSheet.create({
   confirmedStatusBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#4CAF50" + "20",
+    backgroundColor: Colors.green + "20",
     paddingHorizontal: RFPercentage(1.5),
     paddingVertical: RFPercentage(0.3),
     borderRadius: RFPercentage(2),
     gap: RFPercentage(0.5),
   },
   confirmedStatusText: {
-    color: "#4CAF50",
+    color: Colors.green,
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.3),
   },
@@ -988,7 +993,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2),
   },
   rankLabel: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -1097,7 +1102,7 @@ const styles = StyleSheet.create({
     right: -5,
     bottom: -5,
     borderRadius: RFPercentage(3),
-    backgroundColor: "#FFF",
+    backgroundColor: Colors.white,
     opacity: 0.2,
   },
   confirmTextContainer: {
@@ -1105,7 +1110,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   confirmButtonTitle: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_700Bold",
     // marginBottom: RFPercentage(0.3),
@@ -1120,7 +1125,7 @@ const styles = StyleSheet.create({
   confirmedContainer: {
     borderRadius: RFPercentage(3),
     padding: RFPercentage(2),
-    shadowColor: "#4CAF50",
+    shadowColor: Colors.green,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -1143,20 +1148,20 @@ const styles = StyleSheet.create({
     right: -5,
     bottom: -5,
     borderRadius: RFPercentage(3),
-    backgroundColor: "#FFF",
+    backgroundColor: Colors.white,
     opacity: 0.2,
   },
   confirmedTextContainer: {
     alignItems: "center",
   },
   confirmedTitle: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_700Bold",
     marginBottom: RFPercentage(0.3),
   },
   confirmedSubtitle: {
-    color: "rgba(255,255,255,0.9)",
+    color: Colors.whiteAlpha90,
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_500Medium",
   },
@@ -1170,7 +1175,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 100,
-    backgroundColor: "rgba(255, 255, 255, 0.2)", // Glass-morphism effect
+    backgroundColor: Colors.backBtnBg, // Glass-morphism effect
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
@@ -1217,7 +1222,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1),
   },
   fullMessageButtonText: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -1229,9 +1234,9 @@ const styles = StyleSheet.create({
     marginHorizontal: RFPercentage(3),
     marginTop: RFPercentage(-3),
     padding: RFPercentage(2),
-    backgroundColor: "#FFF",
+    backgroundColor: Colors.white,
     borderRadius: RFPercentage(2),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -1302,7 +1307,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: RFPercentage(2),
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -1322,7 +1327,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   taskType: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -1345,7 +1350,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2),
     marginBottom: RFPercentage(1.5),
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -1412,6 +1417,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins_500Medium",
   },
+  view: { marginTop: RFPercentage(3) },
 });
 
 const interestsSectionStyle = StyleSheet.create({
@@ -1421,7 +1427,7 @@ const interestsSectionStyle = StyleSheet.create({
     borderRadius: RFPercentage(2),
     padding: RFPercentage(2.2),
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,

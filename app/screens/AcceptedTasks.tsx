@@ -62,7 +62,7 @@ const DURATION_LABELS: Record<string, string> = {
   multiple_days: "Multiple days",
 };
 
-export default function AcceptedTasks({ navigation }) {
+export default function AcceptedTasks({ navigation }:any) {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
   const currentUser = useUser();
@@ -336,7 +336,7 @@ export default function AcceptedTasks({ navigation }) {
           {
             backgroundColor:
               theme.mode === "dark" ? theme.white : Colors.pureWhite,
-            borderColor: theme.mode === "dark" ? theme.border : "#ECEFF9",
+            borderColor: theme.mode === "dark" ? theme.border : Colors.white2,
           },
         ]}
       >
@@ -377,7 +377,7 @@ export default function AcceptedTasks({ navigation }) {
                 <Ionicons
                   name={isConfirmed ? "checkmark-circle" : "briefcase"}
                   size={RFPercentage(1.5)}
-                  color="#fff"
+                  color={Colors.white}
                 />
                 <Text style={styles.statusText}>
                   {isConfirmed
@@ -419,10 +419,7 @@ export default function AcceptedTasks({ navigation }) {
             ) : (
               <AvatarInitials
                 name={cart?.user?.userName}
-                textStyle={{
-                  fontSize: RFPercentage(1.8),
-                  lineHeight: RFPercentage(4),
-                }}
+                textStyle={styles.avatarInitialsText}
                 style={styles.ownerAvatar}
               />
             )}
@@ -435,7 +432,7 @@ export default function AcceptedTasks({ navigation }) {
               style={styles.founderBadge}
             />
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={styles.view}>
             <Text
               style={[styles.ownerName, { color: theme.heading }]}
               numberOfLines={1}
@@ -502,7 +499,7 @@ export default function AcceptedTasks({ navigation }) {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? "rgba(255,255,255,0.1)"
+                        ? Colors.whiteAlpha10
                         : `${Colors.primary}12`,
                   },
                 ]}
@@ -569,11 +566,11 @@ export default function AcceptedTasks({ navigation }) {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? "rgba(13, 14, 26, 1)"
+                        ? Colors.black2
                         : Colors.primary + "12",
                     borderColor:
                       theme.mode === "dark"
-                        ? "rgba(126, 115, 158, 0.2)"
+                        ? Colors.indigoAlpha20
                         : Colors.primary + "30",
                   },
                 ]}
@@ -582,7 +579,7 @@ export default function AcceptedTasks({ navigation }) {
                 <Ionicons
                   name="people"
                   size={RFPercentage(2.1)}
-                  color={theme.mode === "dark" ? "#a6a9c2ff" : "#1b1f45ff"}
+                  color={theme.mode === "dark" ? Colors.darkGrey : Colors.blueDark2}
                 />
               </TouchableOpacity>
             ) : (
@@ -593,11 +590,11 @@ export default function AcceptedTasks({ navigation }) {
                   {
                     backgroundColor:
                       theme.mode === "dark"
-                        ? "rgba(13, 14, 26, 1)"
+                        ? Colors.black2
                         : Colors.primary + "12",
                     borderColor:
                       theme.mode === "dark"
-                        ? "rgba(126, 115, 158, 0.2)"
+                        ? Colors.indigoAlpha20
                         : Colors.primary + "30",
                   },
                 ]}
@@ -606,8 +603,8 @@ export default function AcceptedTasks({ navigation }) {
                 <Image
                   source={Icons.messages}
                   resizeMode="contain"
-                  style={{ width: RFPercentage(2.1), height: RFPercentage(2.1) }}
-                  tintColor={theme.mode === "dark" ? "#a6a9c2ff" : "#1b1f45ff"}
+                  style={styles.image}
+                  tintColor={theme.mode === "dark" ? Colors.darkGrey : Colors.blueDark2}
                 />
               </TouchableOpacity>
             )}
@@ -624,17 +621,17 @@ export default function AcceptedTasks({ navigation }) {
                 {
                   backgroundColor:
                     theme.mode === "dark"
-                      ? "rgba(13, 14, 26, 1)"
+                      ? Colors.black2
                       : Colors.primary + "12",
                   borderColor:
                     theme.mode === "dark"
-                      ? "rgba(126, 115, 158, 0.2)"
+                      ? Colors.indigoAlpha20
                       : Colors.primary + "30",
                 },
               ]}
               showLabel={false}
               iconOnly
-              color={theme.mode === "dark" ? "#a6a9c2ff" : "#1b1f45ff"}
+              color={theme.mode === "dark" ? Colors.darkGrey : Colors.blueDark2}
             />
           </View>
         </View>
@@ -668,7 +665,7 @@ export default function AcceptedTasks({ navigation }) {
               <Text
                 style={[
                   styles.cancelButtonText,
-                  { color: Colors.statusAlertError },
+                  styles.text,
                 ]}
               >
                 {t("acceptedTasks.cancelTask")}
@@ -702,7 +699,7 @@ export default function AcceptedTasks({ navigation }) {
         <ActivityIndicator
           size="large"
           color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
-          style={{ marginTop: RFPercentage(28) }}
+          style={styles.activityIndicator}
         />
       ) : records.length === 0 ? (
         <NotFound title={`${t("home.txt11")}`} />
@@ -720,7 +717,7 @@ export default function AcceptedTasks({ navigation }) {
           }
         >
           {records.map((cart, index) => renderCard(cart, index))}
-          <View style={{ height: RFPercentage(6) }} />
+          <View style={styles.view2} />
         </ScrollView>
       )}
 
@@ -752,7 +749,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2.2),
     borderWidth: 1,
     padding: RFPercentage(1.6),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -767,14 +764,14 @@ const styles = StyleSheet.create({
   categoryBadge: {
     alignSelf: "flex-start",
     margin: RFPercentage(1),
-    backgroundColor: "rgba(0,0,0,0.55)",
+    backgroundColor: Colors.blackAlpha55,
     paddingHorizontal: RFPercentage(1.2),
     paddingVertical: RFPercentage(0.5),
     borderRadius: RFPercentage(2),
     maxWidth: "70%",
   },
   categoryText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -790,7 +787,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(2),
   },
   statusText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -916,4 +913,13 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
   },
+  avatarInitialsText: {
+                  fontSize: RFPercentage(1.8),
+                  lineHeight: RFPercentage(4),
+                },
+  view: { flex: 1 },
+  image: { width: RFPercentage(2.1), height: RFPercentage(2.1) },
+  text: { color: Colors.statusAlertError },
+  activityIndicator: { marginTop: RFPercentage(28) },
+  view2: { height: RFPercentage(6) },
 });

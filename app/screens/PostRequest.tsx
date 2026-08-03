@@ -848,8 +848,10 @@ function PostRequest({ navigation, route }) {
       },
       trigger: {
         date: triggerDate,
-        repeats: false,
-        type: "date",
+        // `repeats` was removed: it is not part of DateTriggerInput (a date
+        // trigger fires once by definition) and was ignored at runtime.
+        // `type` keeps the same underlying value as the previous "date".
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
       },
     });
   }
@@ -1218,7 +1220,7 @@ function PostRequest({ navigation, route }) {
           nestedScrollEnabled
           // onScrollBeginDrag={dismissAll}
         >
-          <Pressable onPress={dismissAll} style={{ flex: 1 }}>
+          <Pressable onPress={dismissAll} style={styles.pressable}>
             <Animated.View
               style={[
                 styles.formContainer,
@@ -1272,7 +1274,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -1430,7 +1432,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -1656,7 +1658,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -1789,7 +1791,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -1914,7 +1916,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -1942,8 +1944,8 @@ function PostRequest({ navigation, route }) {
                   style={{
                     backgroundColor:
                       theme.mode === "dark"
-                        ? "rgba(19, 19, 21, 1)"
-                        : "rgba(239, 239, 250, 0.66)",
+                        ? Colors.black5
+                        : Colors.whiteAlpha66,
                     width: "45%",
                     height: RFPercentage(4),
                     borderRadius: RFPercentage(1),
@@ -1988,21 +1990,15 @@ function PostRequest({ navigation, route }) {
                         borderWidth: 1,
                         borderColor:
                           theme.mode === "dark"
-                            ? "rgba(23, 24, 33, 1)"
-                            : "rgba(239, 239, 250, 0.66)",
+                            ? Colors.black6
+                            : Colors.whiteAlpha66,
                         borderRadius: RFPercentage(1.5),
                         alignItems: "center",
                         marginTop: RFPercentage(1),
                       }}
                     >
                       <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          width: "90%",
-                          marginTop: RFPercentage(2),
-                        }}
+                        style={styles.view}
                       >
                         <TouchableOpacity
                           activeOpacity={0.8}
@@ -2073,7 +2069,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -2101,8 +2097,8 @@ function PostRequest({ navigation, route }) {
                   style={{
                     backgroundColor:
                       theme.mode === "dark"
-                        ? "rgba(19, 19, 21, 1)"
-                        : "rgba(239, 239, 250, 0.66)",
+                        ? Colors.black5
+                        : Colors.whiteAlpha66,
                     width: "40%",
                     height: RFPercentage(4),
                     borderRadius: RFPercentage(1),
@@ -2147,7 +2143,7 @@ function PostRequest({ navigation, route }) {
                         borderWidth: 1,
                         borderColor:
                           theme.mode === "dark"
-                            ? "rgba(23, 24, 33, 1)"
+                            ? Colors.black6
                             : "rgba(235, 236, 251, 1)",
                         borderRadius: RFPercentage(1.5),
                         alignItems: "center",
@@ -2155,13 +2151,7 @@ function PostRequest({ navigation, route }) {
                       }}
                     >
                       <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          width: "90%",
-                          marginTop: RFPercentage(2),
-                        }}
+                        style={styles.view}
                       >
                         <TouchableOpacity
                           activeOpacity={0.8}
@@ -2232,7 +2222,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -2355,7 +2345,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -2415,7 +2405,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -2486,7 +2476,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -2571,7 +2561,7 @@ function PostRequest({ navigation, route }) {
                     backgroundColor:
                       theme.mode === "dark" ? theme.white : Colors.pureWhite,
                     borderColor:
-                      theme.mode === "dark" ? theme.border : "#ECEFF9",
+                      theme.mode === "dark" ? theme.border : Colors.white2,
                   },
                 ]}
               >
@@ -2628,7 +2618,7 @@ function PostRequest({ navigation, route }) {
                             onPress={() => deleteImage(index)}
                             style={[
                               styles.deleteButton,
-                              { backgroundColor: Colors.red },
+                              styles.touchableOpacity,
                             ]}
                           >
                             <MaterialIcons
@@ -2689,7 +2679,7 @@ function PostRequest({ navigation, route }) {
           {
             backgroundColor:
               theme.mode === "dark" ? theme.white : Colors.pureWhite,
-            borderTopColor: theme.mode === "dark" ? theme.border : "#ECEFF9",
+            borderTopColor: theme.mode === "dark" ? theme.border : Colors.white2,
           },
         ]}
       >
@@ -2829,7 +2819,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: RFPercentage(2),
     paddingHorizontal: RFPercentage(2),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -3111,7 +3101,7 @@ const styles = StyleSheet.create({
       Platform.OS === "ios" ? RFPercentage(3.5) : RFPercentage(3),
     borderTopWidth: 1,
     gap: RFPercentage(1.4),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
@@ -3136,6 +3126,15 @@ const styles = StyleSheet.create({
     alignItems:"center"
     
   },
+  pressable: { flex: 1 },
+  view: {
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "90%",
+                          marginTop: RFPercentage(2),
+                        },
+  touchableOpacity: { backgroundColor: Colors.red },
 });
 
 export default PostRequest;

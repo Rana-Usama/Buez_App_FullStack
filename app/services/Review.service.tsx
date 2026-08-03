@@ -11,6 +11,7 @@ import {
 import { getAuth } from "firebase/auth";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
 import haversine from "haversine";
+import { WithId } from "../types/firestore.types";
 
 // services/ReviewService.js
 export const fetchMyReviewsFromFirebase = async () => {
@@ -145,7 +146,7 @@ export const fetchCompletedTasksFromFirebase = async () => {
     const seenTaskIds = new Set();
 
     allTasks.forEach((task) => {
-      const taskId = task.taskId || task.id;
+      const taskId = (task as { taskId?: string }).taskId || task.id;
       if (!seenTaskIds.has(taskId)) {
         seenTaskIds.add(taskId);
         uniqueTasks.push(task);
@@ -240,7 +241,7 @@ export const fetchActiveTasksFromFirebase = async () => {
     const snap = await getDocs(q);
     console.log("snap..", snap);
 
-    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return snap.docs.map((doc): WithId => ({ id: doc.id, ...doc.data() }));
   } catch (err) {
     console.error("Error fetching active tasks:", err);
     return [];
@@ -258,7 +259,7 @@ export const fetchCompletedTasksByUserFromFirebase = async (id: any) => {
     );
 
     const snap = await getDocs(q);
-    return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return snap.docs.map((doc): WithId => ({ id: doc.id, ...doc.data() }));
   } catch (err) {
     console.error("Error fetching completed tasks:", err);
     return [];
@@ -301,10 +302,12 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
     const usersSnap = await getDocs(collection(FIREBASE_DB, "users"));
     const reviewsSnap = await getDocs(collection(FIREBASE_DB, "reviews"));
 
-    const usersMap = {};
-    const usersDataMap = {};
+    // Keyed by userId. Typed as records so Object.values() yields a usable
+    // element type instead of `unknown`.
+    const usersMap: Record<string, any> = {};
+    const usersDataMap: Record<string, any> = {};
 
-    const reviewsByHelper = {};
+    const reviewsByHelper: Record<string, any[]> = {};
     reviewsSnap.docs.forEach((doc) => {
       const reviewData = doc.data();
       const helperId =

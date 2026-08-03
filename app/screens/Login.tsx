@@ -166,12 +166,12 @@ function Login({ navigation }) {
         <Screen style={[styles.screen, { backgroundColor: theme.white }]}>
           <LinearGradient
             colors={[
-              "#7a6bffff",
-              "#4ECDC4",
-              "#45B7D1",
-              "#96CEB4",
-              "#5768feff",
-              "#FF9FF3",
+              Colors.blue7,
+              Colors.teal,
+              Colors.teal6,
+              Colors.green4,
+              Colors.blue8,
+              Colors.purpleLight,
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -377,7 +377,7 @@ function Login({ navigation }) {
                     <Text style={[styles.modalText, { color: theme.black }]}>
                       Instagram Login Requirements
                     </Text>
-                    <View style={{ marginTop: RFPercentage(1) }}>
+                    <View style={styles.view}>
                       <Text
                         style={{
                           fontFamily: "Poppins_400Regular",
@@ -594,6 +594,7 @@ const styles = StyleSheet.create({
     color: Colors.red,
     left: RFPercentage(0.3),
   },
+  view: { marginTop: RFPercentage(1) },
 });
 
 export default Login;

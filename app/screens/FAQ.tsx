@@ -161,7 +161,7 @@ function FAQ() {
 
   const [expandedItems, setExpandedItems] = useState({});
 
-  const toggleFAQ = (sectionIndex, questionIndex) => {
+  const toggleFAQ = (sectionIndex : number, questionIndex : number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const key = `${sectionIndex}-${questionIndex}`;
     setExpandedItems((prev) => ({
@@ -170,14 +170,14 @@ function FAQ() {
     }));
   };
 
-  const getIconComponent = (iconType, iconName, color, size) => {
+  const getIconComponent = (iconType: string, iconName: string, color: string, size: number) => {
     switch (iconType) {
       case "fontawesome":
         return <FontAwesome5 name={iconName} size={size}  color={ theme.mode === "dark" ? Colors.white : theme.primary} />;
       case "ionicons":
-        return <Ionicons name={iconName} size={size}  color={ theme.mode === "dark" ? Colors.white : theme.primary} />;
+        return <Ionicons name={iconName as any} size={size}  color={ theme.mode === "dark" ? Colors.white : theme.primary} />;
       default:
-        return <MaterialIcons name={iconName} size={size}  color={ theme.mode === "dark" ? Colors.white : theme.primary} />;
+        return <MaterialIcons name={iconName as any} size={size}  color={ theme.mode === "dark" ? Colors.white : theme.primary} />;
     }
   };
 
@@ -189,8 +189,8 @@ function FAQ() {
   // Get appropriate shadow color based on theme
   const getShadowColor = () => {
     return theme.mode === "light"
-      ? "rgba(0, 0, 0, 0.1)"
-      : "rgba(255, 255, 255, 0.1)";
+      ? Colors.blackAlpha10
+      : Colors.whiteAlpha10;
   };
 
   useEffect(() => {

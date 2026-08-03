@@ -4,8 +4,7 @@ import {
   TouchableOpacity,
   Image,
   View,
-  Dimensions,
-} from "react-native";
+  Dimensions, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -49,30 +48,18 @@ export default function ImageCarousel({
             >
               <Image
                 source={{ uri: item }}
-                style={{ width: "100%", height: "100%" }}
+                style={styles.image}
                 resizeMode="cover"
               />
               {/* Top scrim for back button / badge legibility */}
               <LinearGradient
-                colors={["rgba(0,0,0,0.35)", "transparent"]}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "22%",
-                }}
+                colors={[Colors.chatLoadingBgOverlay, "transparent"]}
+                style={styles.linearGradient}
               />
               {/* Bottom scrim for dots + content overlap */}
               <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.45)"]}
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "40%",
-                }}
+                colors={["transparent", Colors.blackAlpha45]}
+                style={styles.linearGradient2}
               />
             </TouchableOpacity>
           )}
@@ -80,21 +67,11 @@ export default function ImageCarousel({
         />
       ) : (
         <View
-          style={{
-            width: "100%",
-            height: "100%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+          style={styles.view}
         >
           <LinearGradient
             colors={[Colors.primary + "22", Colors.primary + "08"]}
-            style={{
-              width: "100%",
-              height: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            style={styles.view}
           >
             <Ionicons
               name="image-outline"
@@ -107,3 +84,27 @@ export default function ImageCarousel({
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  image: { width: "100%", height: "100%" },
+  linearGradient: {
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: "22%",
+                },
+  linearGradient2: {
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: "40%",
+                },
+  view: {
+            width: "100%",
+            height: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+});

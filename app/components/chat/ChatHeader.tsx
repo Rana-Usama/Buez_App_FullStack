@@ -26,7 +26,7 @@ const ChatHeader = memo(({ navigation, receiver, theme }: Props) => {
 
   return (
     <View
-      style={[styles.profileContainer, { borderBottomColor: Colors.white5 }]}
+      style={[styles.profileContainer, styles.view]}
     >
       <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
         <Ionicons
@@ -36,7 +36,7 @@ const ChatHeader = memo(({ navigation, receiver, theme }: Props) => {
         />
       </TouchableOpacity>
 
-      <View style={{ marginLeft: RFPercentage(2.5) }}>
+      <View style={styles.view2}>
         {receiver?.profileImage ? (
           <Image
             source={{ uri: receiver.profileImage }}
@@ -57,7 +57,7 @@ const ChatHeader = memo(({ navigation, receiver, theme }: Props) => {
         )}
       </View>
 
-      <View style={{ marginLeft: RFPercentage(1.5), width: "60%" }}>
+      <View style={styles.view3}>
         <Text
           style={{
             color: theme.heading,
@@ -105,6 +105,9 @@ const styles = StyleSheet.create({
     lineHeight: RFPercentage(2.6),
     top: 3,
   },
+  view: { borderBottomColor: Colors.white5 },
+  view2: { marginLeft: RFPercentage(2.5) },
+  view3: { marginLeft: RFPercentage(1.5), width: "60%" },
 });
 
 export default ChatHeader;

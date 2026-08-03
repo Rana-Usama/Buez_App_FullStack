@@ -70,7 +70,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       case "warning":
         return {
           primary: Colors.statusAlertWarning,
-          gradient: [Colors.statusAlertWarning, "#F57C00"],
+          gradient: [Colors.statusAlertWarning, "#F57C00"] as [string, string],
           icon: "alert-circle" as const,
           iconColor: Colors.statusAlertWarning,
         };
@@ -92,7 +92,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       default:
         return {
           primary: Colors.primary,
-          gradient: [Colors.primary, "#314495"] as [string, string],
+          gradient: [Colors.primary, Colors.blue9] as [string, string],
           icon: "information-circle" as const,
           iconColor: Colors.primary,
         };
@@ -110,7 +110,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           styles.modalOverlay,
           {
             opacity: fadeAnim,
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backgroundColor: Colors.blackAlpha60,
           },
         ]}
       >
@@ -136,7 +136,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               end={{ x: 1, y: 0 }}
             >
               <View style={styles.headerContent}>
-                <Ionicons name={typeColors.icon} size={RFPercentage(2.5)} color="#FFF" />
+                <Ionicons name={typeColors.icon} size={RFPercentage(2.5)} color={Colors.white} />
                 <Text style={styles.modalTitle}>{title}</Text>
               </View>
             </LinearGradient>
@@ -185,7 +185,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         styles.buttonText,
                         button.style === "cancel" && { color: theme.heading },
                         (button.style === "primary" || button.style === "destructive") && {
-                          color: "#FFF",
+                          color: Colors.white,
                         },
                       ]}
                     >
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     width: width * 0.85,
     borderRadius: RFPercentage(2.5),
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     gap: RFPercentage(1),
   },
   modalTitle: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_700Bold",
     flex: 1,

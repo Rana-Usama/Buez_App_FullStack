@@ -61,6 +61,22 @@ export interface Task {
   scheduledDate?: string;
   scheduledTime?: string;
   scheduledDateTime?: string;
+
+  /**
+   * Owner id, stored at the top level of the taskRequests document alongside
+   * the denormalised `user` snapshot. Already read at runtime (e.g. TaskCard
+   * resolves the Founder Badge from it) — declared here so it type-checks.
+   */
+  userId?: string;
+
+  /**
+   * Legacy scheduling fields still written by older task documents and read
+   * as a fallback when `scheduledDateTime` is absent.
+   */
+  selectedDate?: string;
+  selectedTime?: string;
+
+  isBulkRequest?: boolean;
 }
 
 export interface TopRatedUser {
@@ -71,6 +87,23 @@ export interface TopRatedUser {
   rating?: number;
   completedTasks?: number;
   successRate?: number;
+
+  /**
+   * Extra fields returned by fetchUsersWithTaskStats and consumed by the
+   * Top Rated surfaces. Declared optional so existing call sites that build
+   * a partial user still satisfy the type.
+   */
+  email?: string;
+  isSubscribed?: boolean;
+  isFounder?: boolean;
+  founderNumber?: number | null;
+  memberSince?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  distance?: number | null;
+  activeCount?: number;
+  completedCount?: number;
+  reviews?: any[];
 }
 
 export interface FilterOption {

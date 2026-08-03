@@ -40,19 +40,19 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
       case "Top Rated":
         return {
           name: "trophy",
-          color: "#bfa824ff",
-          bgColor: "rgba(255, 215, 0, 0.1)",
+          color: Colors.yellow,
+          bgColor: Colors.yellowAlpha10,
         };
       case "Rising Talent":
         return {
           name: "rocket",
-          color: "#79b7b0ff",
+          color: Colors.teal2,
           bgColor: "#71a58231",
         };
       case "Beginner":
-        return { name: "leaf", color: "#9b6fc1ff", bgColor: "#d3c2e23a" };
+        return { name: "leaf", color: Colors.indigo, bgColor: Colors.indigoLight };
       default:
-        return { name: "person", color: "#4557B0" };
+        return { name: "person", color: Colors.success2 };
     }
   };
 
@@ -85,38 +85,38 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
   // light (light mode) vs muted-slate (dark mode) card surfaces.
   const c = darkMode
     ? {
-        title: "#FFFFFF",
-        handle: "rgba(255,255,255,0.7)",
+        title: Colors.white,
+        handle: Colors.heroStatsLabel,
         badgeTint: "dark" as const,
-        badgeText: "#FFFFFF",
-        avatarBg: "rgba(255,255,255,0.16)",
-        avatarText: "#FFFFFF",
-        avatarBorder: "rgba(255,255,255,0.45)",
+        badgeText: Colors.white,
+        avatarBg: Colors.whiteAlpha16,
+        avatarText: Colors.white,
+        avatarBorder: Colors.whiteAlpha45,
         buttonTint: "light" as const,
         buttonBg: Colors.white,
-        buttonBorder: "rgba(255,255,255,0.18)",
-        buttonText: "#FFFFFF",
-        meshLight: "rgba(255,255,255,0.06)",
+        buttonBorder: Colors.whiteAlpha18,
+        buttonText: Colors.white,
+        meshLight: Colors.sectionBgDark,
         meshDark: "rgba(0,0,0,0.18)",
         shadow: "#0A0F26",
-        border: "rgba(255, 255, 255, 0.14)",
+        border: Colors.whiteAlpha14,
       }
     : {
         title: "#61667dff",
-        handle: "#64748B",
+        handle: Colors.desc,
         badgeTint: "light" as const,
-        badgeText: "#253275",
-        avatarBg: "rgba(37,50,117,0.10)",
-        avatarText: "#253275",
+        badgeText: Colors.primary,
+        avatarBg: Colors.primaryAlpha10,
+        avatarText: Colors.primary,
         avatarBorder: "rgba(37,50,117,0.25)",
         buttonTint: "light" as const,
         buttonBg: Colors.primary,
         buttonBorder: "rgba(37,50,117,0.16)",
-        buttonText: "#253275",
+        buttonText: Colors.primary,
         meshLight: "rgba(255,255,255,0.35)",
-        meshDark: "rgba(37,50,117,0.06)",
-        shadow: "rgba(255, 255, 255, 0.98)",
-        border: "rgba(255, 255, 255, 0.14)",
+        meshDark: Colors.primaryAlpha06,
+        shadow: Colors.whiteAlpha98,
+        border: Colors.whiteAlpha14,
       };
 
   return (
@@ -139,7 +139,7 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
           colors={[c.meshLight, "transparent"]}
           style={[
             StyleSheet.absoluteFill,
-            { transform: [{ rotate: "45deg" }], top: -50 },
+            styles.linearGradient,
           ]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -294,8 +294,8 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
-    color: "#FFF",
-    textShadowColor: "rgba(0, 0, 0, 0.1)",
+    color: Colors.white,
+    textShadowColor: Colors.blackAlpha10,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
     lineHeight: RFPercentage(1.8),
@@ -310,10 +310,10 @@ const styles = StyleSheet.create({
   },
   avatarShadow: {
     padding: 3,
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: Colors.white3,
     borderRadius: 50,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.5)",
+    borderColor: Colors.whiteAlpha50,
   },
   avatar: {
     width: RFPercentage(8),
@@ -327,12 +327,12 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: RFPercentage(1.8),
     fontFamily: "Poppins_600SemiBold",
-    color: "#FFF",
+    color: Colors.white,
   },
   userHandle: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.8)",
+    color: Colors.lastMsgTextColor,
     textTransform: "lowercase",
   },
   viewProfileButton: {
@@ -352,8 +352,9 @@ const styles = StyleSheet.create({
   viewProfileText: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
-    color: "#FFF",
+    color: Colors.white,
   },
+  linearGradient: { transform: [{ rotate: "45deg" }], top: -50 },
 });
 
 export default React.memo(TopRatedUserCard);

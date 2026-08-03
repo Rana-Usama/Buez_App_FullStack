@@ -30,7 +30,7 @@ function LockIcon() {
   return (
     <View style={lockStyles.wrapper}>
       <LinearGradient
-        colors={["#253275", "#4557B0"]}
+        colors={[Colors.primary, Colors.success2]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={lockStyles.circle}
@@ -60,7 +60,7 @@ const lockStyles = StyleSheet.create({
     borderRadius: RFPercentage(4.75),
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.45,
     shadowRadius: 20,
@@ -72,25 +72,25 @@ const lockStyles = StyleSheet.create({
     borderTopLeftRadius: RFPercentage(1.6),
     borderTopRightRadius: RFPercentage(1.6),
     borderWidth: 2.5,
-    borderColor: "rgba(255,255,255,0.9)",
+    borderColor: Colors.whiteAlpha90,
     borderBottomWidth: 0,
     marginBottom: -1,
   },
   body: {
     width: RFPercentage(4),
     height: RFPercentage(3.2),
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     borderRadius: 7,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: Colors.white3,
   },
   keyhole: {
     width: RFPercentage(1.1),
     height: RFPercentage(1.1),
     borderRadius: RFPercentage(0.55),
-    backgroundColor: "rgba(255,255,255,0.85)",
+    backgroundColor: Colors.categoryBadgeText,
   },
   pinkDot: {
     position: "absolute",
@@ -99,14 +99,14 @@ const lockStyles = StyleSheet.create({
     width: 11,
     height: 11,
     borderRadius: 6,
-    backgroundColor: "#DD53A8",
-    shadowColor: "#DD53A8",
+    backgroundColor: Colors.secondary,
+    shadowColor: Colors.secondary,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 7,
     elevation: 6,
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: Colors.white,
   },
 });
 
@@ -137,16 +137,16 @@ function SuccessModal({
           style={[
             modalStyles.card,
             {
-              backgroundColor: isDark ? "#080a16ff" : "#ffffff",
+              backgroundColor: isDark ? "#080a16ff" : Colors.white,
               borderColor: isDark
-                ? "rgba(69,87,176,0.2)"
-                : "rgba(37,50,117,0.1)",
+                ? Colors.primary2Alpha20
+                : Colors.primaryAlpha10,
             },
           ]}
         >
           {/* Top gradient bar */}
           <LinearGradient
-            colors={["#253275", "#4557B0", "#DD53A8"]}
+            colors={[Colors.primary, Colors.success2, Colors.secondary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={modalStyles.topBar}
@@ -155,7 +155,7 @@ function SuccessModal({
           <View style={modalStyles.body}>
             {/* Check circle */}
             <LinearGradient
-              colors={["#253275", "#4557B0"]}
+              colors={[Colors.primary, Colors.success2]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={modalStyles.checkCircle}
@@ -167,7 +167,7 @@ function SuccessModal({
             <Text
               style={[
                 modalStyles.title,
-                { color: isDark ? "#f4f6ff" : "#1a1a2e" },
+                { color: isDark ? Colors.white13 : Colors.blueDark10 },
               ]}
             >
               {t("forgetPassword.txt3")}
@@ -179,8 +179,8 @@ function SuccessModal({
                 modalStyles.emailPill,
                 {
                   backgroundColor: isDark
-                    ? "rgba(69,87,176,0.15)"
-                    : "rgba(37,50,117,0.07)",
+                    ? Colors.primary2Alpha15
+                    : Colors.primaryAlpha07,
                 },
               ]}
             >
@@ -192,7 +192,7 @@ function SuccessModal({
             <Text
               style={[
                 modalStyles.hint,
-                { color: isDark ? "#8892b0" : "#64748B" },
+                { color: isDark ? Colors.blue : Colors.desc },
               ]}
             >
               {t("forgetPassword.txt4")}
@@ -204,8 +204,8 @@ function SuccessModal({
                 modalStyles.divider,
                 {
                   backgroundColor: isDark
-                    ? "rgba(255,255,255,0.06)"
-                    : "rgba(0,0,0,0.06)",
+                    ? Colors.sectionBgDark
+                    : Colors.blackAlpha06,
                 },
               ]}
             />
@@ -217,7 +217,7 @@ function SuccessModal({
               style={modalStyles.btnOuter}
             >
               <LinearGradient
-                colors={["#253275", "#4557B0"]}
+                colors={[Colors.primary, Colors.success2]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={modalStyles.btn}
@@ -243,7 +243,7 @@ const modalStyles = StyleSheet.create({
     borderRadius: 24,
     overflow: "hidden",
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.2,
     shadowRadius: 40,
@@ -263,14 +263,14 @@ const modalStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: RFPercentage(2),
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 14,
     elevation: 10,
   },
   checkText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(3),
     fontFamily: "Poppins_700Bold",
     lineHeight: RFPercentage(4),
@@ -291,7 +291,7 @@ const modalStyles = StyleSheet.create({
   emailText: {
     fontFamily: "Poppins_500Medium",
     fontSize: RFPercentage(1.5),
-    color: "#4557B0",
+    color: Colors.success2,
     textAlign: "center",
   },
   hint: {
@@ -311,7 +311,7 @@ const modalStyles = StyleSheet.create({
     width: "50%",
     borderRadius: 100,
     overflow: "hidden",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 12,
@@ -325,7 +325,7 @@ const modalStyles = StyleSheet.create({
   btnText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.8),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.3,
   },
 });
@@ -388,20 +388,20 @@ function ForgotPassword(props: any) {
         <LockIcon />
 
         {/* Heading */}
-        <Text style={[styles.title, { color: isDark ? "#f4f6ff" : "#1a1a2e" }]}>
+        <Text style={[styles.title, { color: isDark ? Colors.white13 : Colors.blueDark10 }]}>
           {t("forgetPassword.txt1")}
         </Text>
 
         {/* Gradient underline */}
         <LinearGradient
-          colors={["#253275", "#DD53A8"]}
+          colors={[Colors.primary, Colors.secondary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.titleUnderline}
         />
 
         <Text
-          style={[styles.subtitle, { color: isDark ? "#8892b0" : "#64748B" }]}
+          style={[styles.subtitle, { color: isDark ? Colors.blue : Colors.desc }]}
         >
           Enter your email and we'll send you a password reset link.
         </Text>
@@ -429,13 +429,13 @@ function ForgotPassword(props: any) {
                     : "rgba(255,255,255,0.95)",
                   borderColor: isDark
                     ? "rgba(107, 115, 156, 0.38)"
-                    : "rgba(37,50,117,0.1)",
+                    : Colors.primaryAlpha10,
                 },
               ]}
             >
               {/* Card top bar */}
               <LinearGradient
-                colors={["#253275", "#4557B0", "#DD53A8"]}
+                colors={[Colors.primary, Colors.success2, Colors.secondary]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.cardTopBar}
@@ -445,7 +445,7 @@ function ForgotPassword(props: any) {
                 <Text
                   style={[
                     styles.fieldLabel,
-                    { color: isDark ? "#8892b0" : "#64748B" },
+                    { color: isDark ? Colors.blue : Colors.desc },
                   ]}
                 >
                   Email Address
@@ -468,7 +468,7 @@ function ForgotPassword(props: any) {
                         ? Colors.red
                         : isDark
                           ? "rgba(69, 87, 176, 0.63)"
-                          : "rgba(37,50,117,0.15)",
+                          : Colors.primaryAlpha15,
                     marginTop: RFPercentage(1),
                   }}
                 />
@@ -491,7 +491,7 @@ function ForgotPassword(props: any) {
                   style={styles.btnOuter}
                 >
                   <LinearGradient
-                    colors={loader ? ["#aaa", "#bbb"] : ["#253275", "#4557B0"]}
+                    colors={loader ? [Colors.grey3, "#bbb"] : [Colors.primary, Colors.success2]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.btn}
@@ -512,7 +512,7 @@ function ForgotPassword(props: any) {
                   <Text
                     style={[
                       styles.backText,
-                      { color: isDark ? "#8892b0" : "#94A3B8" },
+                      { color: isDark ? Colors.blue : Colors.inputFieldPlaceholder },
                     ]}
                   >
                     Remember your password?{" "}
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: "hidden",
     borderWidth: 1,
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.15,
     shadowRadius: 28,
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(2.8),
     borderRadius: RFPercentage(2),
     overflow: "hidden",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.38,
     shadowRadius: 14,
@@ -632,19 +632,19 @@ const styles = StyleSheet.create({
   btnText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.85),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.3,
   },
   arrowBubble: {
     width: 26,
     height: 26,
     borderRadius: 100,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     alignItems: "center",
     justifyContent: "center",
   },
   arrowText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(2.2),
     textAlign: "center",
     fontFamily: "Poppins_400Regular",
@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
   },
   backLink: {
     fontFamily: "Poppins_600SemiBold",
-    color: "#4557B0",
+    color: Colors.success2,
   },
 });
 

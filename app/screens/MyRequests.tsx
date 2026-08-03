@@ -659,7 +659,7 @@ function MyRequests({ navigation }) {
       {isActive ? (
         <View style={styles.neonContainer}>
           <LinearGradient
-            colors={["#314495ff", "#14225eff"]}
+            colors={[Colors.blue9, "#14225eff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.neonGradient}
@@ -888,7 +888,7 @@ function MyRequests({ navigation }) {
         profileImage={profileImgUrl}
         leftLogo
         gradient
-        gradientColors={[Colors.primary, "#0b1544ff"]}
+        gradientColors={[Colors.primary, Colors.blueDark3]}
         title={`${t("myRequests.txt1")}`}
       />
       <ScrollView
@@ -1010,7 +1010,7 @@ function MyRequests({ navigation }) {
                           name="refresh-circle"
                           size={RFPercentage(1.5)}
                           color={Colors.white}
-                          style={{ marginRight: RFPercentage(0.3) }}
+                          style={styles.ionicons}
                         />
                         <Text style={styles.repostedBadgeText}>
                           {t("myRequests.repostedBadge")}
@@ -1026,7 +1026,7 @@ function MyRequests({ navigation }) {
                             styles.workerStatusBadge,
                             {
                               backgroundColor: isConfirmedWorker
-                                ? "#4CAF50" + "20"
+                                ? Colors.green + "20"
                                 : Colors.primary + "20",
                             },
                           ]}
@@ -1039,16 +1039,16 @@ function MyRequests({ navigation }) {
                             }
                             size={RFPercentage(1.5)}
                             color={
-                              isConfirmedWorker ? "#4CAF50" : Colors.primary
+                              isConfirmedWorker ? Colors.green : Colors.primary
                             }
-                            style={{ marginRight: RFPercentage(0.3) }}
+                            style={styles.ionicons}
                           />
                           <Text
                             style={[
                               styles.workerStatusText,
                               {
                                 color: isConfirmedWorker
-                                  ? "#4CAF50"
+                                  ? Colors.green
                                   : Colors.primary,
                               },
                             ]}
@@ -1112,13 +1112,10 @@ function MyRequests({ navigation }) {
                   ) : (
                     <AvatarInitials
                       name={cart?.user?.userName}
-                      textStyle={{
-                        fontSize: RFPercentage(2),
-                        lineHeight: RFPercentage(4),
-                      }}
+                      textStyle={styles.avatarInitialsText}
                       style={[
                         styles.userImage,
-                        { borderWidth: RFPercentage(0) },
+                        styles.avatarInitials,
                       ]}
                     />
                   )}
@@ -1134,10 +1131,7 @@ function MyRequests({ navigation }) {
                   <Text style={[styles.postDate, { color: theme.darkGrey }]}>
                     {isConfirmedWorker && cart?.confirmedAt && (
                       <Text
-                        style={{
-                          color: "#4CAF50",
-                          fontSize: RFPercentage(1.2),
-                        }}
+                        style={styles.text}
                       >
                         {" "}
                         • {t("offerDetail.confirmedOn")}{" "}
@@ -1268,7 +1262,7 @@ function MyRequests({ navigation }) {
                               {
                                 backgroundColor:
                                   theme.mode === "dark"
-                                    ? "rgba(255,255,255,0.1)"
+                                    ? Colors.whiteAlpha10
                                     : `${Colors.primary}15`,
                               },
                             ]}
@@ -1325,16 +1319,16 @@ function MyRequests({ navigation }) {
                     <View
                       style={[
                         styles.confirmedBadge,
-                        { backgroundColor: "#4CAF50" + "20" },
+                        styles.view,
                       ]}
                     >
                       <Ionicons
                         name="checkmark-circle"
                         size={RFPercentage(1.3)}
-                        color="#4CAF50"
+                        color={Colors.green}
                       />
                       <Text
-                        style={[styles.confirmedText, { color: "#4CAF50" }]}
+                        style={[styles.confirmedText, styles.text4]}
                       >
                         {t("offerDetail.youAreConfirmed") ||
                           "You are confirmed"}
@@ -1377,10 +1371,7 @@ function MyRequests({ navigation }) {
                       <View
                         style={[
                           styles.viewHelpersButton,
-                          {
-                            borderColor: Colors.statusAlertSuccess + "55",
-                            backgroundColor: Colors.statusAlertSuccess + "12",
-                          },
+                          styles.view2,
                         ]}
                       >
                         <Ionicons
@@ -1391,7 +1382,7 @@ function MyRequests({ navigation }) {
                         <Text
                           style={[
                             styles.viewHelpersButtonText,
-                            { color: Colors.statusAlertSuccess },
+                            styles.text5,
                           ]}
                           numberOfLines={1}
                         >
@@ -1406,7 +1397,7 @@ function MyRequests({ navigation }) {
                             borderColor: Colors.primary + "55",
                             backgroundColor:
                               theme.mode === "dark"
-                                ? "rgba(255,255,255,0.1)"
+                                ? Colors.whiteAlpha10
                                 : Colors.primary + "0D",
                           },
                         ]}
@@ -1453,7 +1444,7 @@ function MyRequests({ navigation }) {
                           borderColor: Colors.primary + "55",
                           backgroundColor:
                             theme.mode === "dark"
-                              ? "rgba(255,255,255,0.1)"
+                              ? Colors.whiteAlpha10
                               : Colors.primary + "0D",
                         },
                       ]}
@@ -1567,8 +1558,8 @@ function MyRequests({ navigation }) {
                                 size={RFPercentage(2.3)}
                                 color={
                                   theme.mode === "dark"
-                                    ? "#a6a9c2ff"
-                                    : "#1b1f45ff"
+                                    ? Colors.darkGrey
+                                    : Colors.blueDark2
                                 }
                               />
                               <Text
@@ -1577,8 +1568,8 @@ function MyRequests({ navigation }) {
                                   {
                                     color:
                                       theme.mode === "dark"
-                                        ? "#a6a9c2ff"
-                                        : "#1b1f45ff",
+                                        ? Colors.darkGrey
+                                        : Colors.blueDark2,
                                   },
                                 ]}
                               >
@@ -1599,12 +1590,12 @@ function MyRequests({ navigation }) {
                                 {
                                   backgroundColor:
                                     theme.mode === "dark"
-                                      ? "rgba(13, 14, 26, 1)"
+                                      ? Colors.black2
                                       : Colors.primary + "15",
                                   borderWidth: 1,
                                   borderColor:
                                     theme.mode === "dark"
-                                      ? "rgba(126, 115, 158, 0.2)"
+                                      ? Colors.indigoAlpha20
                                       : Colors.primary + "30",
                                 },
                               ]}
@@ -1612,8 +1603,8 @@ function MyRequests({ navigation }) {
                               iconOnly={true}
                               color={
                                 theme.mode === "dark"
-                                  ? "#a6a9c2ff"
-                                  : "#1b1f45ff"
+                                  ? Colors.darkGrey
+                                  : Colors.blueDark2
                               }
                             />
                           </>
@@ -1633,14 +1624,11 @@ function MyRequests({ navigation }) {
                               <Image
                                 source={Icons.messages}
                                 resizeMode="contain"
-                                style={{
-                                  width: RFPercentage(2.3),
-                                  height: RFPercentage(2.3),
-                                }}
+                                style={styles.image}
                                 tintColor={
                                   theme.mode === "dark"
-                                    ? "#a6a9c2ff"
-                                    : "#1b1f45ff"
+                                    ? Colors.darkGrey
+                                    : Colors.blueDark2
                                 }
                               />
                               <Text
@@ -1649,8 +1637,8 @@ function MyRequests({ navigation }) {
                                   {
                                     color:
                                       theme.mode === "dark"
-                                        ? "#a6a9c2ff"
-                                        : "#1b1f45ff",
+                                        ? Colors.darkGrey
+                                        : Colors.blueDark2,
                                   },
                                 ]}
                               >
@@ -1672,12 +1660,12 @@ function MyRequests({ navigation }) {
                                 {
                                   backgroundColor:
                                     theme.mode === "dark"
-                                      ? "rgba(13, 14, 26, 1)"
+                                      ? Colors.black2
                                       : Colors.primary + "15",
                                   borderWidth: 1,
                                   borderColor:
                                     theme.mode === "dark"
-                                      ? "rgba(126, 115, 158, 0.2)"
+                                      ? Colors.indigoAlpha20
                                       : Colors.primary + "30",
                                 },
                               ]}
@@ -1685,8 +1673,8 @@ function MyRequests({ navigation }) {
                               iconOnly={true}
                               color={
                                 theme.mode === "dark"
-                                  ? "#a6a9c2ff"
-                                  : "#1b1f45ff"
+                                  ? Colors.darkGrey
+                                  : Colors.blueDark2
                               }
                             />
                           </>
@@ -1770,18 +1758,18 @@ function MyRequests({ navigation }) {
                         {
                           backgroundColor:
                             theme.mode === "dark"
-                              ? "rgba(13, 14, 26, 1)"
+                              ? Colors.black2
                               : Colors.primary + "15",
                           borderWidth: 1,
                           borderColor:
                             theme.mode === "dark"
-                              ? "rgba(126, 115, 158, 0.2)"
+                              ? Colors.indigoAlpha20
                               : Colors.primary + "30",
                         },
                       ]}
                       showLabel={false}
                       iconOnly={true}
-                      color={theme.mode === "dark" ? "#a6a9c2ff" : "#1b1f45ff"}
+                      color={theme.mode === "dark" ? Colors.darkGrey : Colors.blueDark2}
                     />
                   </View>
                 )}
@@ -1847,7 +1835,7 @@ function MyRequests({ navigation }) {
         })}
 
         {(loading || loadingMore) && (
-          <View style={{ marginTop: RFPercentage(28) }}>
+          <View style={styles.view3}>
             <ActivityIndicator
               size="large"
               color={theme.mode === "dark" ? Colors.darkGrey : Colors.primary}
@@ -2082,7 +2070,7 @@ const styles = StyleSheet.create({
   },
   expandButton: {
     padding: RFPercentage(0.2),
-    backgroundColor: "rgba(215, 215, 215, 0.48)",
+    backgroundColor: Colors.greyLightAlpha48,
     borderRadius: RFPercentage(100),
   },
   briefDescriptionContainer: {
@@ -2389,7 +2377,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#243683ff",
     opacity: 0.5,
     zIndex: 1,
-    shadowColor: "#667eea",
+    shadowColor: Colors.blue16,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 10,
@@ -2404,7 +2392,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
-    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowColor: Colors.blackAlpha30,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },
@@ -2423,13 +2411,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: RFPercentage(0.8),
     paddingHorizontal: RFPercentage(1.5),
-    backgroundColor: "#4CAF50" + "20",
+    backgroundColor: Colors.green + "20",
     borderRadius: RFPercentage(1),
   },
 
   reviewedText: {
     marginLeft: RFPercentage(0.5),
-    color: "#4CAF50",
+    color: Colors.green,
     fontSize: RFPercentage(1.3),
     fontWeight: "500",
   },
@@ -2456,4 +2444,26 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     // backgroundColor: "red",
   },
+  ionicons: { marginRight: RFPercentage(0.3) },
+  avatarInitialsText: {
+                        fontSize: RFPercentage(2),
+                        lineHeight: RFPercentage(4),
+                      },
+  avatarInitials: { borderWidth: RFPercentage(0) },
+  text: {
+                          color: Colors.green,
+                          fontSize: RFPercentage(1.2),
+                        },
+  view: { backgroundColor: Colors.green + "20" },
+  text4: { color: Colors.green },
+  view2: {
+                            borderColor: Colors.statusAlertSuccess + "55",
+                            backgroundColor: Colors.statusAlertSuccess + "12",
+                          },
+  text5: { color: Colors.statusAlertSuccess },
+  image: {
+                                  width: RFPercentage(2.3),
+                                  height: RFPercentage(2.3),
+                                },
+  view3: { marginTop: RFPercentage(28) },
 });

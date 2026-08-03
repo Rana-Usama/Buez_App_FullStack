@@ -20,16 +20,16 @@ const GroupInputToolbar = memo(({ inputText, setInputText, onSendText, theme, t 
         containerStyle={[
           styles.toolbar,
           {
-            backgroundColor: theme.mode === "dark" ? "transparent" : "rgba(241,241,241,1)",
-            borderColor: theme.mode === "dark" ? Colors.darkGrey : "rgba(234,233,233,1)",
-            borderTopColor: theme.mode === "dark" ? Colors.darkGrey : "rgba(234,233,233,1)",
+            backgroundColor: theme.mode === "dark" ? "transparent" : Colors.w1,
+            borderColor: theme.mode === "dark" ? Colors.darkGrey : Colors.greyLight2,
+            borderTopColor: theme.mode === "dark" ? Colors.darkGrey : Colors.greyLight2,
           },
         ]}
         renderComposer={() => (
           <TextInput
             style={[styles.customTextInput, { color: theme.black }]}
             placeholder={`${t("chat.txt2")}`}
-            placeholderTextColor="rgba(145,144,144,1)"
+            placeholderTextColor={Colors.gr1}
             value={inputText}
             onChangeText={setInputText}
             multiline

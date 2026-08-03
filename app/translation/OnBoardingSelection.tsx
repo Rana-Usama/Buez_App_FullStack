@@ -124,7 +124,7 @@ const LanguageOnboardingModal = ({
     >
       <StatusBar
         barStyle="light-content"
-        backgroundColor="rgba(0,0,0,0.5)"
+        backgroundColor={Colors.overlayDark}
         translucent
       />
       {/*
@@ -213,8 +213,8 @@ const LanguageSheet = ({
             <Ionicons
               name="arrow-forward"
               size={RFPercentage(2.2)}
-              color="#fff"
-              style={{ marginLeft: RFPercentage(1) }}
+              color={Colors.white}
+              style={styles.ionicons}
             />
           </TouchableOpacity>
         </View>
@@ -245,11 +245,11 @@ export const useLanguageOnboarding = () => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: Colors.overlayDark,
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.white,
     borderTopLeftRadius: RFPercentage(3),
     borderTopRightRadius: RFPercentage(3),
     paddingHorizontal: RFPercentage(2.5),
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: RFPercentage(2.4),
     fontFamily: "Poppins_600SemiBold",
-    color: "#1A1A1A",
+    color: Colors.tabsBackgroundDark,
     marginBottom: RFPercentage(0.8),
   },
   subtitle: {
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   languageLabel: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_500Medium",
-    color: "#333",
+    color: Colors.greyDark3,
   },
   languageLabelSelected: {
     fontFamily: "Poppins_600SemiBold",
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   nativeLabel: {
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
-    color: "#AAA",
+    color: Colors.grey3,
     marginTop: 1,
   },
   radioOuter: {
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(2.8),
     borderRadius: RFPercentage(1.4),
     borderWidth: 2,
-    borderColor: "#CCC",
+    borderColor: Colors.greyLight3,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -365,10 +365,11 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.5),
   },
   confirmText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.9),
     fontFamily: "Poppins_600SemiBold",
   },
+  ionicons: { marginLeft: RFPercentage(1) },
 });
 
 export default LanguageOnboardingModal;

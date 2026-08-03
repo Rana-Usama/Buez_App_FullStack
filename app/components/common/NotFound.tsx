@@ -17,7 +17,7 @@ const NotFound: React.FC<NotFoundProps> = ({ title }) => {
       <View
         style={[
           styles.emptyIllustrationWrap,
-          { backgroundColor: isDark ? theme.lightWhite : "#EEF1FB" },
+          { backgroundColor: isDark ? theme.lightWhite : Colors.white12 },
         ]}
       >
         <Image

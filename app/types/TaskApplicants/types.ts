@@ -6,6 +6,15 @@ export interface Worker {
   token?: string;
   confirmedAt?: string;
   confirmedBy?: string;
+  /**
+   * Written into the applicant snapshot when a helper applies (see
+   * OfferDetail.handleApply) and copied onto `acceptedBy` on confirmation.
+   */
+  phone?: string;
+  appliedAt?: string;
+  status?: string;
+  userRating?: number;
+  completedTasks?: number;
 }
 
 export interface TaskData {

@@ -490,7 +490,7 @@ const GroupChat = ({ navigation, route }: any) => {
       <ActivityIndicator
         size="small"
         color={Colors.primary}
-        style={{ marginVertical: 8 }}
+        style={styles.activityIndicator}
       />
     );
   }, [loadingMore]);
@@ -540,13 +540,20 @@ const GroupChat = ({ navigation, route }: any) => {
         <ImageBackground
           source={theme.mode === "dark" ? Icons.dark : Icons.light}
           resizeMode="cover"
-          style={{ flex: 1 }}
+          style={styles.imageBackground}
         >
           <GiftedChat
             messages={messages}
             onSend={onSend}
             user={{ _id: currentUserId, name: currentUserName }}
-            keyExtractor={(item) => item._id.toString()}
+            // Neither `keyExtractor` nor `scrollToBottom` is declared by
+            // GiftedChatProps, but both are honoured at runtime. They are
+            // preserved exactly, with the cast scoped to just these two
+            // undeclared props rather than the whole component.
+            {...({
+              keyExtractor: (item: any) => item._id.toString(),
+              scrollToBottom: true,
+            } as Record<string, unknown>)}
             loadEarlier={hasMore}
             onLoadEarlier={loadMoreMessages}
             isLoadingEarlier={loadingMore}
@@ -561,14 +568,13 @@ const GroupChat = ({ navigation, route }: any) => {
               />
             )}
             renderDay={renderDay}
-            renderMessage={renderMessage}
+            renderMessage={renderMessage as any}
             renderAvatar={() => null}
             renderBubble={undefined}
             listViewProps={listViewProps as any}
             maxInputLength={500}
             showUserAvatar={false}
             alwaysShowSend
-            scrollToBottom
             renderMessageText={renderMessageText}
           />
 
@@ -579,8 +585,8 @@ const GroupChat = ({ navigation, route }: any) => {
                 {
                   backgroundColor:
                     theme.mode === "dark"
-                      ? "rgba(4,4,4,0.6)"
-                      : "rgba(255,255,255,0.6)",
+                      ? Colors.loaderDarkOverlay
+                      : Colors.loaderLightOverlay,
                 },
               ]}
             >
@@ -776,7 +782,7 @@ const styles = StyleSheet.create({
   // Delete modal
   modalOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: Colors.overlayDark,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 999,
@@ -785,7 +791,7 @@ const styles = StyleSheet.create({
     width: "80%",
     borderRadius: RFPercentage(2),
     padding: RFPercentage(3),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -816,14 +822,16 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: RFPercentage(1.2),
     borderRadius: RFPercentage(100),
-    backgroundColor: "#F44336",
+    backgroundColor: Colors.dangerRed,
     alignItems: "center",
   },
   deleteBtnText: {
-    color: "#FFF",
+    color: Colors.white,
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.5),
   },
+  activityIndicator: { marginVertical: 8 },
+  imageBackground: { flex: 1 },
 });
 
 export default GroupChat;

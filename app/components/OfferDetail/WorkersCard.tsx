@@ -36,16 +36,16 @@ export default function WorkersCard({
   if (!isBulkRequest) return null;
 
   const isDark = theme.mode === "dark";
-  const cardBg = isDark ? "rgba(255,255,255,0.05)" : "#FFFFFF";
-  const cardBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(37,50,117,0.07)";
-  const chip = (hex: string) => (isDark ? "rgba(255,255,255,0.10)" : hex);
+  const cardBg = isDark ? Colors.whiteAlpha05 : Colors.white;
+  const cardBorder = isDark ? Colors.whiteAlpha08 : Colors.primaryAlpha07;
+  const chip = (hex: string) => (isDark ? Colors.whiteAlpha10 : hex);
 
   return (
     <View
       style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder }]}
     >
       <View style={styles.header}>
-        <View style={[styles.headerChip, { backgroundColor: chip("#E8EBFA") }]}>
+        <View style={[styles.headerChip, { backgroundColor: chip(Colors.blueLight4) }]}>
           <Ionicons
             name="people"
             size={RFPercentage(2.2)}
@@ -64,7 +64,7 @@ export default function WorkersCard({
             { backgroundColor: chip("#F4F6FB"), borderColor: cardBorder },
           ]}
         >
-          <View style={[styles.statIcon, { backgroundColor: chip("#E8EBFA") }]}>
+          <View style={[styles.statIcon, { backgroundColor: chip(Colors.blueLight4) }]}>
             <Ionicons
               name="people-outline"
               size={RFPercentage(2)}
@@ -89,13 +89,13 @@ export default function WorkersCard({
             <Ionicons
               name="checkmark-circle"
               size={RFPercentage(2)}
-              color="#34A853"
+              color={Colors.green2}
             />
           </View>
           <Text style={[styles.statLabel, { color: theme.darkGrey }]}>
             {t("offerDetail.confirmed") || "Confirmed"}
           </Text>
-          <Text style={[styles.statValue, { color: "#34A853" }]}>
+          <Text style={[styles.statValue, styles.text]}>
             {confirmedWorkers.length}
           </Text>
         </View>
@@ -217,4 +217,5 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
     lineHeight: RFPercentage(1.2),
   },
+  text: { color: Colors.green2 },
 });

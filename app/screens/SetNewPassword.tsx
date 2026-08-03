@@ -36,7 +36,7 @@ function SetNewPassword(props: any) {
     <Screen style={styles.screen}>
       
       <View style={styles.content}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={{ position: "absolute", left: 0 }}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={styles.touchableOpacity}>
           <Ionicons name="chevron-back" style={styles.arrow} color={Colors.heading} />
         </TouchableOpacity>
         <Text style={styles.title}>Reset Password?</Text>
@@ -48,11 +48,11 @@ function SetNewPassword(props: any) {
           <View key={i} style={{ marginTop: i == 0 ? RFPercentage(5) : RFPercentage(3) }}>
             <InputField
               placeholder={item.placeholder}
-              placeholderColor={"#6B7280"}
+              placeholderColor={Colors.heading}
               height={RFPercentage(6.2)}
               backgroundColor={Colors.white}
               borderWidth={RFPercentage(0.1)}
-              borderColor={"#E5E7EB"}
+              borderColor={Colors.greyLight}
               secure={item.secure}
               borderRadius={RFPercentage(1.6)}
               color={Colors.black}
@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
   arrow: { fontSize: RFPercentage(2.5) },
   title: { color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium" },
   fieldContent: { justifyContent: "center", alignItems: "center", width: "100%" },
+  touchableOpacity: { position: "absolute", left: 0 },
 });
 
 export default SetNewPassword;

@@ -67,12 +67,12 @@ const MemberRow = ({ member, index, currentUserId, onChat, theme }: Props) => {
           {
             backgroundColor:
               theme.mode === "dark"
-                ? "rgba(255,255,255,0.04)"
-                : "rgba(0,0,0,0.025)",
+                ? Colors.whiteAlpha04
+                : Colors.infoFooterBgLight,
             borderColor:
               theme.mode === "dark"
-                ? "rgba(255,255,255,0.07)"
-                : "rgba(0,0,0,0.06)",
+                ? Colors.whiteAlpha07
+                : Colors.blackAlpha06,
           },
         ]}
       >
@@ -125,7 +125,7 @@ const MemberRow = ({ member, index, currentUserId, onChat, theme }: Props) => {
 
             {isOwner ? (
               <LinearGradient
-                colors={["#FFD700", "#FFA500"]}
+                colors={[Colors.gold, Colors.orange]}
                 style={styles.ownerBadge}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -133,7 +133,7 @@ const MemberRow = ({ member, index, currentUserId, onChat, theme }: Props) => {
                 <Ionicons
                   name="shield-checkmark"
                   size={RFPercentage(1.3)}
-                  color="#FFF"
+                  color={Colors.white}
                 />
                 <Text style={styles.ownerBadgeText}>Owner</Text>
               </LinearGradient>
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   memberAvatarInitial: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_700Bold",
   },
@@ -247,9 +247,9 @@ const styles = StyleSheet.create({
     width: RFPercentage(1.3),
     height: RFPercentage(1.3),
     borderRadius: RFPercentage(100),
-    backgroundColor: "#4CAF50",
+    backgroundColor: Colors.green,
     borderWidth: 1.5,
-    borderColor: "#FFF",
+    borderColor: Colors.white,
   },
   memberInfo: { flex: 1, gap: RFPercentage(0.4) },
   memberNameRow: {
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1),
   },
   ownerBadgeText: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.1),
     fontFamily: "Poppins_600SemiBold",
   },

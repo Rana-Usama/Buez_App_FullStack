@@ -1,6 +1,12 @@
-import { createNavigationContainerRef } from "@react-navigation/native";
+import {
+  createNavigationContainerRef,
+  ParamListBase,
+} from "@react-navigation/native";
 
-export const navigationRef = createNavigationContainerRef();
+// Parameterised with ParamListBase so `navigate(name, params)` accepts the
+// dynamic screen names used across the app; without it the ref defaults to an
+// empty param list and every argument widens to `never`.
+export const navigationRef = createNavigationContainerRef<ParamListBase>();
 
 export function navigate(name: string, params?: any) {
   if (navigationRef.isReady()) {

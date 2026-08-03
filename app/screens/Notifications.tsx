@@ -88,7 +88,8 @@ interface Translations {
   helpersNeeded: string;
   bulkTaskCompleted: string;
   bulkTaskCompletedMessage: string;
-  cancelledTask: string;
+  /** Populated by the translation effect; absent from the initial state. */
+  cancelledTask?: string;
 }
 
 export default function Notifications({ navigation }) {
@@ -547,7 +548,7 @@ export default function Notifications({ navigation }) {
                   ? Colors.primary
                   : "rgba(224, 223, 232, 1)",
                 shadowColor:
-                  theme.mode === "dark" ? "#000" : "#rgba(0,0,0,0.1)",
+                  theme.mode === "dark" ? Colors.blackSolid : "#rgba(0,0,0,0.1)",
                 shadowOffset: {
                   width: 0,
                   height: 2,
@@ -568,7 +569,7 @@ export default function Notifications({ navigation }) {
                 ) : (
                   <AvatarInitials
                     name={senderName}
-                    textStyle={{ fontSize: RFPercentage(1.8) }}
+                    textStyle={styles.avatarInitialsText}
                   />
                 )}
 
@@ -1086,4 +1087,5 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
   },
+  avatarInitialsText: { fontSize: RFPercentage(1.8) },
 });

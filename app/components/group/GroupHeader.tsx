@@ -14,7 +14,7 @@ type Props = {
 
 const GroupHeader = memo(({ navigation, groupTitle, memberCount, theme, onOpenDetails }: Props) => {
   return (
-    <View style={[styles.header, { borderBottomColor: Colors.white5 }]}>
+    <View style={[styles.header, styles.view]}>
       <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={RFPercentage(2.7)} color={theme.heading} />
       </TouchableOpacity>
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
   },
+  view: { borderBottomColor: Colors.white5 },
 });
 
 export default GroupHeader;

@@ -13,6 +13,35 @@ import MyAppButton from "./MyAppButton";
 import { MaterialIcons } from "@expo/vector-icons"; // You can use any icon library
 import Colors from "../../config/Colors";
 
+type ConfirmationModalType =
+  | "delete"
+  | "logout"
+  | "warning"
+  | "info"
+  | "cancel";
+
+interface ConfirmationModalProps {
+  isVisible: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  /** App theme object (see contexts/colorTheme). */
+  theme: any;
+  /** i18next translate function. */
+  t: (key: string, options?: any) => string;
+  loading?: boolean;
+  /**
+   * Rendered inside a <Text> when truthy. Callers pass `false` to omit it,
+   * so this is a ReactNode rather than a string.
+   */
+  message?: React.ReactNode;
+  type?: ConfirmationModalType;
+  /** Override for the confirm button label (defaults to buttons.yes). */
+  confirmText?: string;
+  /** When true: no Cancel button — single centered CTA + a close (X) icon top-right instead. */
+  hideCancel?: boolean;
+}
+
 const ConfirmationModal = ({
   isVisible,
   onClose,
@@ -25,35 +54,35 @@ const ConfirmationModal = ({
   type = "info", // Default type is "delete", other options: "logout", "warning", "info", "cancel"
   confirmText, // Optional override for the confirm button label (defaults to buttons.yes)
   hideCancel = false, // When true: no Cancel button — single centered CTA + a close (X) icon top-right instead
-}) => {
+}: ConfirmationModalProps) => {
   // Function to get icon based on type
   const getIconConfig = () => {
     switch (type) {
       case "logout":
         return {
           name: "logout",
-          color: theme.warning || "#FFA726",
+          color: theme.warning || Colors.orange6,
         };
       case "warning":
         return {
           name: "warning",
-          color: theme.warning || "#FFA726",
+          color: theme.warning || Colors.orange6,
         };
       case "info":
         return {
           name: "info",
-          color: theme.info || "#757575",
+          color: theme.info || Colors.grey2,
         };
       case "cancel":
         return {
           name: "cancel",
-          color: theme.secondary || "#757575",
+          color: theme.secondary || Colors.grey2,
         };
       case "delete":
       default:
         return {
           name: "delete",
-          color: theme.error || "#F44336",
+          color: theme.error || Colors.dangerRed,
         };
     }
   };

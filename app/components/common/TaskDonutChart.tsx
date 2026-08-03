@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
 import { RFPercentage } from "react-native-responsive-fontsize";
+import Colors from "../../config/Colors";
 
 export type DonutSegment = {
   value: number;
@@ -33,9 +34,9 @@ const TaskDonutChart = ({
   strokeWidth,
   centerValue,
   centerLabel,
-  valueColor = "#000",
+  valueColor = Colors.blackSolid,
   labelColor = "#666",
-  trackColor = "rgba(0,0,0,0.06)",
+  trackColor = Colors.blackAlpha06,
 }: Props) => {
   const sw = strokeWidth ?? Math.round(size * 0.13);
   const radius = (size - sw) / 2;

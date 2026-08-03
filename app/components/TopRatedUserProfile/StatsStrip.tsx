@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
+import Colors from "../../config/Colors";
 
 type Props = {
   stats: any;
@@ -10,7 +11,7 @@ type Props = {
 };
 
 const StatItem = ({ label, value, icon, color, theme }: any) => (
-  <View style={{ flex: 1, alignItems: "center" }}>
+  <View style={styles.view}>
     <View
       style={{
         width: RFPercentage(4.4),
@@ -49,7 +50,7 @@ const StatItem = ({ label, value, icon, color, theme }: any) => (
 
 export default function StatsStrip({ stats, theme, t }: Props) {
   const isDark = theme.mode === "dark";
-  const divider = isDark ? "rgba(255,255,255,0.10)" : "rgba(17,24,39,0.08)";
+  const divider = isDark ? Colors.whiteAlpha10 : Colors.slateAlpha08;
 
   return (
     <View
@@ -59,7 +60,7 @@ export default function StatsStrip({ stats, theme, t }: Props) {
         marginHorizontal: RFPercentage(3),
         marginTop: RFPercentage(-3),
         padding: RFPercentage(2),
-        backgroundColor: isDark ? "#1A1D2C" : "#FFFFFF",
+        backgroundColor: isDark ? Colors.blueDark5 : Colors.white,
         borderRadius: 16,
         borderWidth: 1,
         borderColor: divider,
@@ -103,3 +104,7 @@ export default function StatsStrip({ stats, theme, t }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  view: { flex: 1, alignItems: "center" },
+});

@@ -135,7 +135,7 @@ function EmailVerificationScreen({ navigation, route }: any) {
         disabled={checking}
       >
         {checking ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={Colors.white} />
         ) : (
           <Text style={styles.primaryButtonText}>
             {t("emailVerification.verifiedButton")}
@@ -177,7 +177,7 @@ function EmailVerificationScreen({ navigation, route }: any) {
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={() => navigation.navigate("Login")}
-        style={{ flexDirection: "row", alignItems: "center" }}
+        style={styles.touchableOpacity}
       >
         <View
           style={{
@@ -186,7 +186,7 @@ function EmailVerificationScreen({ navigation, route }: any) {
             borderRadius: RFPercentage(100),
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: theme.mode === "dark" ? "#050505ff" : "#e8eaff",
+            backgroundColor: theme.mode === "dark" ? Colors.black4 : Colors.blueLight12,
           }}
         >
           <Feather
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   primaryButtonText: {
-    color: "#fff",
+    color: Colors.white,
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.7),
     lineHeight: RFPercentage(2),
@@ -274,6 +274,7 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.8),
     marginLeft: RFPercentage(1),
   },
+  touchableOpacity: { flexDirection: "row", alignItems: "center" },
 });
 
 export default EmailVerificationScreen;

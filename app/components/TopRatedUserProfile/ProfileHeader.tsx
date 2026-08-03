@@ -4,8 +4,7 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+  ActivityIndicator, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
@@ -57,8 +56,8 @@ export default function ProfileHeader({
     : HomeGradients.topRatedBrand;
 
   const ui = {
-    backBg: isDark ? "rgba(255,255,255,0.10)" : "rgba(17,24,39,0.06)",
-    backIcon: isDark ? "#FFFFFF" : theme.heading,
+    backBg: isDark ? Colors.whiteAlpha10 : Colors.slateAlpha06,
+    backIcon: isDark ? Colors.white : theme.heading,
     name: theme.heading,
     rankTint: rank.color,
     buttonBg: Colors.primary,
@@ -96,12 +95,7 @@ export default function ProfileHeader({
       colors={headerGradient}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={{
-        paddingTop: RFPercentage(2),
-        paddingBottom: RFPercentage(5),
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-      }}
+      style={styles.linearGradient}
     >
       <TouchableOpacity
         onPress={() => navigation.goBack()}
@@ -127,14 +121,10 @@ export default function ProfileHeader({
       </TouchableOpacity>
 
       <View
-        style={{
-          alignItems: "center",
-          paddingHorizontal: RFPercentage(3),
-          paddingTop: RFPercentage(8),
-        }}
+        style={styles.view}
       >
         {/* Avatar with rank ring + badge */}
-        <View style={{ position: "relative", marginBottom: RFPercentage(2) }}>
+        <View style={styles.view2}>
           <View
             style={{
               padding: RFPercentage(0.4),
@@ -142,36 +132,28 @@ export default function ProfileHeader({
               borderWidth: 2,
               borderColor: rank.color,
               backgroundColor: isDark
-                ? "rgba(255,255,255,0.06)"
-                : "rgba(255,255,255,0.85)",
+                ? Colors.sectionBgDark
+                : Colors.categoryBadgeText,
             }}
           >
             <View
-              style={{
-                width: RFPercentage(14),
-                height: RFPercentage(14),
-                overflow: "hidden",
-                borderRadius: RFPercentage(7),
-              }}
+              style={styles.view3}
             >
               {userBasic?.profileImage ? (
                 <Image
                   source={{ uri: userBasic.profileImage }}
-                  style={{ width: "100%", height: "100%" }}
+                  style={styles.image}
                 />
               ) : (
                 <AvatarInitials
                   name={userBasic?.userName}
-                  textStyle={{
-                    fontSize: RFPercentage(4),
-                    lineHeight: RFPercentage(6),
-                  }}
-                  textColor={isDark ? "#FFFFFF" : Colors.primary}
+                  textStyle={styles.avatarInitialsText}
+                  textColor={isDark ? Colors.white : Colors.primary}
                   style={{
                     width: "100%",
                     height: "100%",
                     backgroundColor: isDark
-                      ? "rgba(255,255,255,0.14)"
+                      ? Colors.whiteAlpha14
                       : Colors.primary + "15",
                   }}
                 />
@@ -190,13 +172,13 @@ export default function ProfileHeader({
               justifyContent: "center",
               alignItems: "center",
               borderWidth: 2,
-              borderColor: isDark ? "#23273B" : "#FFFFFF",
+              borderColor: isDark ? Colors.blueDark4 : Colors.white,
             }}
           >
             <Ionicons
               name={rank.icon as any}
               size={RFPercentage(1.8)}
-              color="#FFF"
+              color={Colors.white}
             />
           </View>
         </View>
@@ -212,37 +194,22 @@ export default function ProfileHeader({
           {userBasic?.userName}
         </Text>
 
-       <View style={{position:"absolute", right:RFPercentage(3), top:RFPercentage(5)}}>
+       <View style={styles.view4}>
         <FounderBadgeById user={userBasic} variant="pill" />
         </View>
 
         {applier && isConfirmed && (
           <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "#4CAF50" + "18",
-              borderWidth: 1,
-              borderColor: "#4CAF50" + "55",
-              paddingHorizontal: RFPercentage(1.5),
-              paddingVertical: RFPercentage(0.5),
-              borderRadius: RFPercentage(100),
-              marginBottom: RFPercentage(1),
-            }}
+            style={styles.view5}
           >
             <Ionicons
               name="checkmark-circle"
               size={RFPercentage(1.8)}
-              color="#4CAF50"
+              color={Colors.green}
             />
             <Text
               numberOfLines={1}
-              style={{
-                color: "#4CAF50",
-                fontFamily: "Poppins_600SemiBold",
-                fontSize: RFPercentage(1.3),
-                marginLeft: RFPercentage(0.6),
-              }}
+              style={styles.text}
             >
               {t("profile.confirmed")}
             </Text>
@@ -251,11 +218,7 @@ export default function ProfileHeader({
 
         {/* Rank pill */}
         <View
-          style={{
-            flexDirection: "row",
-            gap: RFPercentage(1),
-            marginBottom: RFPercentage(1.2),
-          }}
+          style={styles.view6}
         >
           <View
             style={{
@@ -275,12 +238,7 @@ export default function ProfileHeader({
             />
             <Text
               numberOfLines={1}
-              style={{
-                color: Colors.white,
-                fontSize: RFPercentage(1.3),
-                fontFamily: "Poppins_600SemiBold",
-                lineHeight: RFPercentage(1.7),
-              }}
+              style={styles.text2}
             >
               {rank.label}
             </Text>
@@ -304,7 +262,7 @@ export default function ProfileHeader({
         </Text>
 
         {applier && canConfirm ? (
-          <View style={{ width: "100%", marginBottom: RFPercentage(2) }}>
+          <View style={styles.view7}>
             {!isConfirmed ? (
               <>
                 <PrimaryButton
@@ -315,15 +273,11 @@ export default function ProfileHeader({
                   }
                 >
                   {confirming ? (
-                    <ActivityIndicator color="#FFF" />
+                    <ActivityIndicator color={Colors.white} />
                   ) : (
                     <Text
                       numberOfLines={1}
-                      style={{
-                        color: "#FFF",
-                        fontSize: RFPercentage(1.6),
-                        fontFamily: "Poppins_600SemiBold",
-                      }}
+                      style={styles.text3}
                     >
                       {slotInfo.isFull
                         ? t("offerDetail.full")
@@ -346,15 +300,11 @@ export default function ProfileHeader({
                 <Ionicons
                   name="chatbubble-ellipses"
                   size={RFPercentage(2)}
-                  color="#FFF"
+                  color={Colors.white}
                 />
                 <Text
                   numberOfLines={1}
-                  style={{
-                    color: "#FFF",
-                    fontSize: RFPercentage(1.6),
-                    fontFamily: "Poppins_600SemiBold",
-                  }}
+                  style={styles.text3}
                 >
                   {t("details.txt9")}
                 </Text>
@@ -366,15 +316,11 @@ export default function ProfileHeader({
             <Ionicons
               name="chatbubble-ellipses"
               size={RFPercentage(2)}
-              color="#FFF"
+              color={Colors.white}
             />
             <Text
               numberOfLines={1}
-              style={{
-                color: "#FFF",
-                fontSize: RFPercentage(1.6),
-                fontFamily: "Poppins_600SemiBold",
-              }}
+              style={styles.text3}
             >
               {t("details.txt9")}
             </Text>
@@ -384,3 +330,64 @@ export default function ProfileHeader({
     </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  linearGradient: {
+        paddingTop: RFPercentage(2),
+        paddingBottom: RFPercentage(5),
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+      },
+  view: {
+          alignItems: "center",
+          paddingHorizontal: RFPercentage(3),
+          paddingTop: RFPercentage(8),
+        },
+  view2: { position: "relative", marginBottom: RFPercentage(2) },
+  view3: {
+                width: RFPercentage(14),
+                height: RFPercentage(14),
+                overflow: "hidden",
+                borderRadius: RFPercentage(7),
+              },
+  image: { width: "100%", height: "100%" },
+  avatarInitialsText: {
+                    fontSize: RFPercentage(4),
+                    lineHeight: RFPercentage(6),
+                  },
+  view4: {position:"absolute", right:RFPercentage(3), top:RFPercentage(5)},
+  view5: {
+              flexDirection: "row",
+              alignItems: "center",
+              backgroundColor: Colors.green + "18",
+              borderWidth: 1,
+              borderColor: Colors.green + "55",
+              paddingHorizontal: RFPercentage(1.5),
+              paddingVertical: RFPercentage(0.5),
+              borderRadius: RFPercentage(100),
+              marginBottom: RFPercentage(1),
+            },
+  text: {
+                color: Colors.green,
+                fontFamily: "Poppins_600SemiBold",
+                fontSize: RFPercentage(1.3),
+                marginLeft: RFPercentage(0.6),
+              },
+  view6: {
+            flexDirection: "row",
+            gap: RFPercentage(1),
+            marginBottom: RFPercentage(1.2),
+          },
+  text2: {
+                color: Colors.white,
+                fontSize: RFPercentage(1.3),
+                fontFamily: "Poppins_600SemiBold",
+                lineHeight: RFPercentage(1.7),
+              },
+  view7: { width: "100%", marginBottom: RFPercentage(2) },
+  text3: {
+                        color: Colors.white,
+                        fontSize: RFPercentage(1.6),
+                        fontFamily: "Poppins_600SemiBold",
+                      },
+});

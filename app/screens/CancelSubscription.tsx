@@ -338,7 +338,7 @@ function CancelSubscription({ navigation }: any) {
                 </Text>
               </View>
 
-              <View style={[styles.starContainer, { bottom: RFPercentage(1) }]}>
+              <View style={[styles.starContainer, styles.view]}>
                 <Image style={styles.starIconRight} source={Icons.stars} />
               </View>
             </View>
@@ -578,6 +578,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: RFPercentage(6),
   },
+  view: { bottom: RFPercentage(1) },
 });
 
 export default CancelSubscription;

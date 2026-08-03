@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../../config/Colors";
@@ -70,13 +70,13 @@ export default function ActionButtons({
     // Post owner: show group chat (if any) + view applicants
     if (isPostOwner) {
       return (
-        <View style={{ flexDirection: "row", gap: RFPercentage(1.5), marginTop: RFPercentage(1), marginBottom: RFPercentage(4) }}>
+        <View style={styles.view}>
           <TouchableOpacity
             onPress={() => handleOpenGroupChat && handleOpenGroupChat()}
             style={secondaryStyle}
             activeOpacity={0.8}
           >
-            <Text style={{color: "#fff", fontFamily:"Poppins_400Regular"}}>{t("taskApplicants.group")}</Text>
+            <Text style={styles.text}>{t("taskApplicants.group")}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -84,7 +84,7 @@ export default function ActionButtons({
             style={primaryStyle}
             activeOpacity={0.85}
           >
-            <Text style={{ color: "#fff" , fontFamily:"Poppins_400Regular"}}>{t("offerDetail.viewApplications")}</Text>
+            <Text style={styles.text2}>{t("offerDetail.viewApplications")}</Text>
           </TouchableOpacity>
         </View>
       );
@@ -94,13 +94,13 @@ export default function ActionButtons({
     // If confirmed and hasGroupChat -> show group chat + confirmed status
     if (confirmed && hasGroupChat) {
       return (
-        <View style={{ flexDirection: "row", gap: RFPercentage(1.5), marginTop: RFPercentage(1), marginBottom: RFPercentage(4) }}>
+        <View style={styles.view}>
           <TouchableOpacity onPress={() => handleOpenGroupChat && handleOpenGroupChat()} style={primaryStyle} activeOpacity={0.85}>
-            <Text style={{ color: "#fff", fontFamily:"Poppins_400Regular" }}>{t("taskApplicants.group")}</Text>
+            <Text style={styles.text3}>{t("taskApplicants.group")}</Text>
           </TouchableOpacity>
 
           <View style={{ ...secondaryStyle, backgroundColor: "#4CAF5020" }}>
-            <Text style={{ color: "#4CAF50", fontFamily:"Poppins_400Regular"}}>{t("profile.confirmed") || "Confirmed"}</Text>
+            <Text style={styles.text4}>{t("profile.confirmed") || "Confirmed"}</Text>
           </View>
         </View>
       );
@@ -109,7 +109,7 @@ export default function ActionButtons({
     // Not confirmed
     // Show group chat button (disabled until confirmed) and second button for apply / status
     return (
-      <View style={{ flexDirection: "row", gap: RFPercentage(1.5), marginTop: RFPercentage(1), marginBottom: RFPercentage(4) }}>
+      <View style={styles.view}>
         <TouchableOpacity
           onPress={() => {
             if (confirmed && handleOpenGroupChat) handleOpenGroupChat();
@@ -118,21 +118,21 @@ export default function ActionButtons({
           activeOpacity={0.8}
           disabled={!confirmed}
         >
-          <Text style={{ color: confirmed ? "#fff" : theme.darkGrey , fontFamily:"Poppins_400Regular"}}>{t("taskApplicants.group")}</Text>
+          <Text style={{ color: confirmed ? Colors.white : theme.darkGrey , fontFamily:"Poppins_400Regular"}}>{t("taskApplicants.group")}</Text>
         </TouchableOpacity>
 
         {/* Second control: either applied status or "I'm available" / apply button */}
         {hasApplied ? (
           <View style={{ ...secondaryStyle, backgroundColor: Colors.primary + "10" }}>
-            <Text style={{ color: Colors.primary, fontWeight: "600" }}>{t("offerDetail.applied") || "Applied"}</Text>
+            <Text style={styles.text5}>{t("offerDetail.applied") || "Applied"}</Text>
           </View>
         ) : canApply() ? (
           <TouchableOpacity onPress={() => handleApply && handleApply()} style={primaryStyle} activeOpacity={0.85}>
-            <Text style={{ color: "#fff", fontFamily:"Poppins_400Regular" }}>{t("offerDetail.imAvailable") || "I'm available"}</Text>
+            <Text style={styles.text3}>{t("offerDetail.imAvailable") || "I'm available"}</Text>
           </TouchableOpacity>
         ) : (
           <View style={disabledStyle}>
-            <Text style={{ color: Colors.red }}>{t("offerDetail.cannotApply") || "Cannot apply"}</Text>
+            <Text style={styles.text6}>{t("offerDetail.cannotApply") || "Cannot apply"}</Text>
           </View>
         )}
       </View>
@@ -144,9 +144,9 @@ export default function ActionButtons({
   if (isAccepted || /* confirmed flag may also represent acceptance */ false) {
     if (isPostOwner) return null;
     return (
-      <View style={{ flexDirection: "row", gap: RFPercentage(1.5), marginTop: RFPercentage(1), marginBottom: RFPercentage(4) }}>
+      <View style={styles.view}>
         <TouchableOpacity onPress={() => handleStartChat && handleStartChat()} style={primaryStyle} activeOpacity={0.85}>
-          <Text style={{ color: "#fff", fontFamily:"Poppins_400Regular" }}>{t("details.txt9")}</Text>
+          <Text style={styles.text3}>{t("details.txt9")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -155,13 +155,13 @@ export default function ActionButtons({
   // Not accepted and not bulk
   if (!isPostOwner) {
     return (
-      <View style={{ flexDirection: "row", gap: RFPercentage(1.5), marginTop: RFPercentage(1), marginBottom: RFPercentage(4) }}>
+      <View style={styles.view}>
         <TouchableOpacity onPress={() => handleStartChat && handleStartChat()} style={secondaryStyle} activeOpacity={0.8}>
-          <Text style={{ color :  Colors.primary , fontFamily:"Poppins_400Regular" }}>{t("details.txt9")}</Text>
+          <Text style={styles.text7}>{t("details.txt9")}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => handleAccept && handleAccept()} style={primaryStyle} activeOpacity={0.85}>
-          <Text style={{ color: "#fff" }}>{t("details.txt12")}</Text>
+          <Text style={styles.text8}>{t("details.txt12")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -169,3 +169,15 @@ export default function ActionButtons({
 
   return null;
 }
+
+const styles = StyleSheet.create({
+  view: { flexDirection: "row", gap: RFPercentage(1.5), marginTop: RFPercentage(1), marginBottom: RFPercentage(4) },
+  text: {color: Colors.white, fontFamily:"Poppins_400Regular"},
+  text2: { color: Colors.white , fontFamily:"Poppins_400Regular"},
+  text3: { color: Colors.white, fontFamily:"Poppins_400Regular" },
+  text4: { color: Colors.green, fontFamily:"Poppins_400Regular"},
+  text5: { color: Colors.primary, fontWeight: "600" },
+  text6: { color: Colors.red },
+  text7: { color :  Colors.primary , fontFamily:"Poppins_400Regular" },
+  text8: { color: Colors.white },
+});

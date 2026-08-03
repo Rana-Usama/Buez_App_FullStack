@@ -7,8 +7,7 @@ import {
   TextInputProps,
   StyleProp,
   TextStyle,
-  KeyboardTypeOptions,
-} from "react-native";
+  KeyboardTypeOptions, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
@@ -68,7 +67,7 @@ const InputField: React.FC<InputFieldProps> = ({
   borderBottomColor = Colors.white,
   borderWidth = 0,
   fontFamily = undefined,
-  placeholderColor = "#B4B6B8",
+  placeholderColor = Colors.greyLight5,
   borderRadius = RFPercentage(1),
   letterSpacing = false,
   backgroundColor = Colors.white,
@@ -96,7 +95,7 @@ const InputField: React.FC<InputFieldProps> = ({
   const [eyeIcon, setEyeIcon] = useState(false);
 
   return (
-    <View style={{ justifyContent: "center", alignItems: "center" }}>
+    <View style={styles.view}>
       <View
         style={{
           alignItems: "center",
@@ -144,11 +143,11 @@ const InputField: React.FC<InputFieldProps> = ({
         {secure && (
           <TouchableOpacity
             onPress={() => setEyeIcon(!eyeIcon)}
-            style={{ position: "absolute", right: RFPercentage(1) }}
+            style={styles.touchableOpacity}
           >
             <Ionicons
               color={Colors.lightGrey}
-              style={{ right: RFPercentage(0.5) }}
+              style={styles.ionicons}
               size={RFPercentage(2.2)}
               name={eyeIcon ? "eye" : "eye-off-outline"}
             />
@@ -156,19 +155,19 @@ const InputField: React.FC<InputFieldProps> = ({
         )}
 
         {cardIcon && (
-          <TouchableOpacity style={{ position: "absolute", right: RFPercentage(1) }}>
+          <TouchableOpacity style={styles.touchableOpacity}>
             <Image
-              style={{ width: RFPercentage(3.5), height: RFPercentage(3) }}
+              style={styles.image}
               source={Icons.visa}
             />
           </TouchableOpacity>
         )}
 
         {icon && (
-          <TouchableOpacity style={{ position: "absolute", right: RFPercentage(1) }}>
+          <TouchableOpacity style={styles.touchableOpacity}>
             <Ionicons
               color={Colors.darkGrey2}
-              style={{ right: RFPercentage(0.5) }}
+              style={styles.ionicons}
               size={RFPercentage(2.7)}
               name={"search-outline"}
             />
@@ -176,10 +175,10 @@ const InputField: React.FC<InputFieldProps> = ({
         )}
 
         {iconName === "Wifi" && (
-          <TouchableOpacity style={{ position: "absolute", right: RFPercentage(1) }}>
+          <TouchableOpacity style={styles.touchableOpacity}>
             <Feather
               color={Colors.darkGrey2}
-              style={{ right: RFPercentage(0.5) }}
+              style={styles.ionicons}
               size={RFPercentage(2.7)}
               name={"wifi"}
             />
@@ -191,3 +190,10 @@ const InputField: React.FC<InputFieldProps> = ({
 };
 
 export default InputField;
+
+const styles = StyleSheet.create({
+  view: { justifyContent: "center", alignItems: "center" },
+  touchableOpacity: { position: "absolute", right: RFPercentage(1) },
+  ionicons: { right: RFPercentage(0.5) },
+  image: { width: RFPercentage(3.5), height: RFPercentage(3) },
+});

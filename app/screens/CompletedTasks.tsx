@@ -101,7 +101,7 @@ const StarRating = ({ rating }: { rating: number }) => (
         key={i}
         style={[
           starStyles.star,
-          { color: i <= rating ? "#F5A623" :  "rgba(179, 179, 179, 1)" },
+          { color: i <= rating ? Colors.orange12 :  "rgba(179, 179, 179, 1)" },
         ]}
       >
         ★
@@ -113,6 +113,8 @@ const StarRating = ({ rating }: { rating: number }) => (
 const starStyles = StyleSheet.create({
   row: { flexDirection: "row", gap: 2 },
   star: { fontSize: RFPercentage(2), lineHeight: RFPercentage(2.4) },
+  avatarInitialsText: { fontSize: RFPercentage(2.1) },
+  activityIndicator: { marginBottom: RFPercentage(1.5) },
 });
 
 // ─── Pill Badge ───────────────────────────────────────────────────────────────
@@ -175,7 +177,7 @@ const StatCell = ({
             ? accent
             : theme?.mode === "dark"
               ? Colors.darkGrey
-              : "rgba(0,0,0,0.45)",
+              : Colors.blackAlpha45,
         },
         active && statCellStyles.labelActive,
       ]}
@@ -201,7 +203,7 @@ const statCellStyles = StyleSheet.create({
   label: {
     fontSize: RFPercentage(1.2),
     fontFamily: "Poppins_400Regular",
-    color: "rgba(0,0,0,0.45)",
+    color: Colors.blackAlpha45,
     textAlign: "center",
   },
   labelActive: {
@@ -246,19 +248,19 @@ export default function CompletedTasks({ navigation }: any) {
   // ─── Tokens ──────────────────────────────────────────────────────────────
   const token = {
     bg: isDark ? "#0E0F14" : "#F6F7FB",
-    card: isDark ? "#050507ff" : "#FFFFFF",
+    card: isDark ? "#050507ff" : Colors.white,
     border: isDark ? "rgba(50, 53, 72, 0.38)" : "rgba(235, 235, 255, 0.81)",
-    heading: isDark ? "#FFFFFF" : "#0D0E14",
+    heading: isDark ? Colors.white : "#0D0E14",
     body: isDark ? "rgba(255, 255, 255, 0.68)" : "rgba(13,14,20,0.55)",
     accent: Colors.primary,
     success: "#22C55E",
-    warning: "#F5A623",
-    statBg: isDark ? "rgba(255,255,255,0.04)" : "rgba(13,14,20,0.03)",
+    warning: Colors.orange12,
+    statBg: isDark ? Colors.whiteAlpha04 : Colors.blackAlpha03,
     bannerBg: isDark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.07)",
     bulkBg: isDark ? "rgba(99,102,241,0.10)" : "rgba(99,102,241,0.06)",
     dateBg: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
-    reviewBg: isDark ? "rgba(255,255,255,0.04)" : "rgba(13,14,20,0.03)",
-    divider: isDark ? "rgba(73, 88, 117, 0.27)" : "rgba(0,0,0,0.06)",
+    reviewBg: isDark ? Colors.whiteAlpha04 : Colors.blackAlpha03,
+    divider: isDark ? "rgba(73, 88, 117, 0.27)" : Colors.blackAlpha06,
   };
 
   // ─── Translations ─────────────────────────────────────────────────────────
@@ -417,7 +419,7 @@ export default function CompletedTasks({ navigation }: any) {
             {
               backgroundColor: token.card,
               borderColor: token.border,
-              shadowColor: isDark ? "#000" : "#5c61aaff",
+              shadowColor: isDark ? Colors.blackSolid : Colors.blue19,
             },
           ]}
         >
@@ -436,7 +438,7 @@ export default function CompletedTasks({ navigation }: any) {
                 <AvatarInitials
                   name={owner.userName}
                   style={[styles.avatar, { borderColor: groupTextColor }]}
-                  textStyle={{ fontSize: RFPercentage(2.1) }}
+                  textStyle={starStyles.avatarInitialsText}
                 />
               )}
 
@@ -458,7 +460,7 @@ export default function CompletedTasks({ navigation }: any) {
                 {owner.userName || "User"}
               </Text>
               <Pill
-                label={catName}
+                label={catName as any}
                 color={token.success}
                 bg={token.success + "18"}
               />
@@ -598,7 +600,7 @@ export default function CompletedTasks({ navigation }: any) {
                 })
               }
             >
-              <Feather name="edit-3" size={RFPercentage(1.8)} color="#fff" />
+              <Feather name="edit-3" size={RFPercentage(1.8)} color={Colors.white} />
               <Text style={styles.reviewCTAText}>
                 {tr.review || "Add Review"}
               </Text>
@@ -627,7 +629,7 @@ export default function CompletedTasks({ navigation }: any) {
             {
               backgroundColor: token.card,
               borderColor: token.border,
-              shadowColor: isDark ? "#000" : "#5c61aaff",
+              shadowColor: isDark ? Colors.blackSolid : Colors.blue19,
             },
           ]}
         >
@@ -671,7 +673,7 @@ export default function CompletedTasks({ navigation }: any) {
             <ActivityIndicator
               size="large"
               color={token.body}
-              style={{ marginBottom: RFPercentage(1.5) }}
+              style={starStyles.activityIndicator}
             />
             <Text style={[styles.loadingText, { color: token.body }]}>
               {`${t("completed.txt7")}`}
@@ -815,7 +817,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(1.5),
     borderRadius: RFPercentage(0.75),
     borderWidth: 1.5,
-    borderColor: "#fff",
+    borderColor: Colors.white,
   },
   metaBlock: { flex: 1, gap: RFPercentage(0.5) ,},
   userName: {
@@ -929,6 +931,6 @@ const styles = StyleSheet.create({
   reviewCTAText: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
-    color: "#FFFFFF",
+    color: Colors.white,
   },
 });

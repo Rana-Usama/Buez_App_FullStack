@@ -37,8 +37,8 @@ function OTPInput(props : any) {
   return (
     <Screen style={styles.screen}>
       <View style={styles.container}>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={{ position: "absolute", left: 0 }}>
-          <Ionicons name="chevron-back" style={{ fontSize: RFPercentage(2.5) }} color={Colors.heading} />
+        <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.goBack()} style={styles.touchableOpacity}>
+          <Ionicons name="chevron-back" style={styles.ionicons} color={Colors.heading} />
         </TouchableOpacity>
         <Text style={styles.heading}>Reset Password?</Text>
       </View>
@@ -49,11 +49,11 @@ function OTPInput(props : any) {
           <View key={i} style={{ marginTop: i == 0 ? RFPercentage(5) : RFPercentage(3) }}>
             <InputField
               placeholder={item.placeholder}
-              placeholderColor={"#6B7280"}
+              placeholderColor={Colors.heading}
               height={RFPercentage(6.2)}
               backgroundColor={Colors.white}
               borderWidth={RFPercentage(0.1)}
-              borderColor={"#E5E7EB"}
+              borderColor={Colors.greyLight}
               secure={item.secure}
               borderRadius={RFPercentage(1.6)}
               color={Colors.black}
@@ -84,6 +84,8 @@ const styles = StyleSheet.create({
   container: { width: "90%", justifyContent: "center", alignItems: "center", marginTop: RFPercentage(3) },
   heading: { color: Colors.heading, fontSize: RFPercentage(2.4), fontFamily: "Poppins_500Medium" },
   wrap: { justifyContent: "center", alignItems: "center", width: "100%" },
+  touchableOpacity: { position: "absolute", left: 0 },
+  ionicons: { fontSize: RFPercentage(2.5) },
 });
 
 export default OTPInput;

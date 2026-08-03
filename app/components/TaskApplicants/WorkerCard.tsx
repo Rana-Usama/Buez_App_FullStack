@@ -72,7 +72,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
               source={{ uri: worker.profileImage }}
               style={[
                 styles.workerAvatar,
-                { borderColor: Colors.workerAvatarBorder(Colors.primary) },
+                styles.image,
               ]}
             />
           ) : (
@@ -95,7 +95,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
               <Ionicons
                 name="checkmark"
                 size={RFPercentage(1.4)}
-                color="#FFF"
+                color={Colors.white}
               />
             </View>
           )}
@@ -141,7 +141,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
               <Text
                 style={[
                   styles.confirmedTime,
-                  { color: Colors.statusAlertSuccess },
+                  styles.text,
                 ]}
                 numberOfLines={1}
               >
@@ -173,13 +173,13 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
             activeOpacity={0.7}
           >
             {isRemoving ? (
-              <ActivityIndicator size="small" color="#FFF" />
+              <ActivityIndicator size="small" color={Colors.white} />
             ) : (
               <>
                 <Ionicons
                   name="close-circle"
                   size={RFPercentage(1.8)}
-                  color="#FFF"
+                  color={Colors.white}
                 />
                 <Text numberOfLines={1} style={styles.removeButtonText}>
                   {t("taskApplicants.remove")}
@@ -199,13 +199,13 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
             activeOpacity={0.7}
           >
             {isConfirming ? (
-              <ActivityIndicator size="small" color="#FFF" />
+              <ActivityIndicator size="small" color={Colors.white} />
             ) : (
               <>
                 <Ionicons
                   name={isLimitReached ? "checkmark-done" : "checkmark-circle"}
                   size={RFPercentage(1.8)}
-                  color="#FFF"
+                  color={Colors.white}
                 />
                 <Text numberOfLines={1} style={styles.confirmButtonText}>
                   {isLimitReached
@@ -224,11 +224,11 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
             {
               backgroundColor:
                 theme.mode === "dark"
-                  ? "rgba(71, 72, 82, 0.71)"
+                  ? Colors.greyDarkAlpha71
                   : Colors.profileButtonBg,
               borderColor:
                 theme.mode === "dark"
-                  ? "rgba(71, 72, 82, 0.71)"
+                  ? Colors.greyDarkAlpha71
                   : Colors.profileButtonBg,
             },
           ]}
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     marginBottom: RFPercentage(1.6),
     borderWidth: 1,
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   confirmButtonText: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   removeButtonText: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -398,6 +398,8 @@ const styles = StyleSheet.create({
   buttonDisabled: {
     opacity: 0.6,
   },
+  image: { borderColor: Colors.workerAvatarBorder(Colors.primary) },
+  text: { color: Colors.statusAlertSuccess },
 });
 
 export default WorkerCard;

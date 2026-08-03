@@ -12,8 +12,9 @@ import { useTranslation } from "react-i18next";
 import { useUser } from "../../contexts/user.context";
 import { Icons } from "../../config/theme";
 import { hasFounderBadge } from "../../services/Founder.service";
+import Colors from "../../config/Colors";
 
-const GOLD = "#F4B740";
+const GOLD = Colors.orange5;
 
 interface FounderBadgeProps {
   /**

@@ -57,7 +57,7 @@ const DeleteModal = memo(
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: Colors.overlayDark,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 9999,
@@ -101,11 +101,11 @@ const styles = StyleSheet.create({
   markButton: {
     borderRadius: RFPercentage(100),
     height: RFPercentage(5.2),
-    borderColor: "#F44336",
+    borderColor: Colors.dangerRed,
     borderWidth: RFPercentage(0.1),
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F44336",
+    backgroundColor: Colors.dangerRed,
     width: RFPercentage(15.5),
   },
   txt: {

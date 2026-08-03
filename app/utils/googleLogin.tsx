@@ -19,6 +19,7 @@ import { Icons } from "../config/theme";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import DeviceInfo from "react-native-device-info";
 import { useAppTheme } from "../contexts/themeContext";
+import Colors from "../config/Colors";
 
 
 const webClientId =
@@ -214,7 +215,7 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
         styles.circleButton,
         {
           // Match the Apple button: solid black in light mode, white in dark.
-          backgroundColor: theme.mode === "dark" ? "#FFFFFF" : "#000000ff",
+          backgroundColor: theme.mode === "dark" ? Colors.white : Colors.blackSolid,
         },
       ]}
     >

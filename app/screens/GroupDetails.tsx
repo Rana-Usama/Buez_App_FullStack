@@ -130,7 +130,7 @@ const GroupDetails = ({ navigation, route }: any) => {
     // Translate last message text
     if (groupData.lastMessage?.text) {
       cachedTranslate(groupData.lastMessage.text).then((translated) =>
-        setTranslatedLastMessage(translated || groupData.lastMessage.text),
+        setTranslatedLastMessage(translated || groupData?.lastMessage?.text),
       );
     } else {
       setTranslatedLastMessage("");
@@ -230,7 +230,7 @@ const GroupDetails = ({ navigation, route }: any) => {
             onPress={() => navigation.goBack()}
             activeOpacity={0.8}
           >
-            <Ionicons name="chevron-back" size={20} color="#FFF" />
+            <Ionicons name="chevron-back" size={20} color={Colors.white} />
           </TouchableOpacity>
 
           {/* Group icon */}
@@ -247,7 +247,7 @@ const GroupDetails = ({ navigation, route }: any) => {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <Ionicons name="people" size={RFPercentage(5)} color="#FFF" />
+              <Ionicons name="people" size={RFPercentage(5)} color={Colors.white} />
             </LinearGradient>
 
             {/* Member count bubble */}
@@ -358,7 +358,7 @@ const GroupDetails = ({ navigation, route }: any) => {
                   <Ionicons
                     name="shield-checkmark"
                     size={RFPercentage(1.8)}
-                    color="#FFF"
+                    color={Colors.white}
                   />
                 </LinearGradient>
                 <Text style={[styles.sectionTitle, { color: theme.heading }]}>
@@ -367,11 +367,11 @@ const GroupDetails = ({ navigation, route }: any) => {
                 <View
                   style={[
                     styles.sectionCount,
-                    { backgroundColor: Colors.gold20 },
+                    styles.view,
                   ]}
                 >
                   <Text
-                    style={[styles.sectionCountText, { color: Colors.orange }]}
+                    style={[styles.sectionCountText, styles.text]}
                   >
                     {owners.length}
                   </Text>
@@ -420,13 +420,13 @@ const GroupDetails = ({ navigation, route }: any) => {
                 <View
                   style={[
                     styles.sectionIconWrap,
-                    { backgroundColor: Colors.primary },
+                    styles.view2,
                   ]}
                 >
                   <MaterialCommunityIcons
                     name="hammer-wrench"
                     size={RFPercentage(1.8)}
-                    color="#FFF"
+                    color={Colors.white}
                   />
                 </View>
                 <Text style={[styles.sectionTitle, { color: theme.heading }]}>
@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomLeftRadius: RFPercentage(3),
     borderBottomRightRadius: RFPercentage(3),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 16,
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(3.5),
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   memberAvatarInitial: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_700Bold",
   },
@@ -748,9 +748,9 @@ const styles = StyleSheet.create({
     width: RFPercentage(1.3),
     height: RFPercentage(1.3),
     borderRadius: RFPercentage(100),
-    backgroundColor: "#4CAF50",
+    backgroundColor: Colors.green,
     borderWidth: 1.5,
-    borderColor: "#FFF",
+    borderColor: Colors.white,
   },
   memberInfo: {
     flex: 1,
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1),
   },
   ownerBadgeText: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.1),
     fontFamily: "Poppins_600SemiBold",
   },
@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(2),
     paddingHorizontal: RFPercentage(3),
     borderRadius: RFPercentage(2),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
@@ -847,6 +847,9 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_500Medium",
   },
+  view: { backgroundColor: Colors.gold20 },
+  text: { color: Colors.orange },
+  view2: { backgroundColor: Colors.primary },
 });
 
 export default GroupDetails;

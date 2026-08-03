@@ -28,7 +28,7 @@ const CustomNav = ({ title, showBack = true, onBack }: NavProps) => {
   const { theme } = useAppTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.white , borderBottomColor:theme.mode === "dark" ? "rgba(222, 219, 219, 0.31)" :  "rgba(222, 219, 219, 0.25)"}]}>
+    <View style={[styles.container, { backgroundColor: theme.white , borderBottomColor:theme.mode === "dark" ? "rgba(222, 219, 219, 0.31)" :  Colors.greyLightAlpha25}]}>
       <View style={styles.content}>
         {/* Left Action: Back Button */}
         <View style={styles.actionContainer}>
@@ -40,11 +40,11 @@ const CustomNav = ({ title, showBack = true, onBack }: NavProps) => {
                 styles.backButton,
                 {
                   backgroundColor:
-                  theme.mode === "dark" ?  "rgba(53, 52, 57, 1)" : Colors.primary,
+                  theme.mode === "dark" ?  Colors.greyDark4 : Colors.primary,
                 },
               ]}
             >
-              <Ionicons name="chevron-back" size={20} color="#FFF" />
+              <Ionicons name="chevron-back" size={20} color={Colors.white} />
             </TouchableOpacity>
           )}
         </View>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 100,
-    backgroundColor: "rgba(255, 255, 255, 0.2)", // Glass-morphism effect
+    backgroundColor: Colors.backBtnBg, // Glass-morphism effect
     alignItems: "center",
     justifyContent: "center",
   },
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: 16,
     fontFamily: "Poppins_700Bold",
     letterSpacing: 0.5,

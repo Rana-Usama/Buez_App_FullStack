@@ -41,7 +41,7 @@ interface ReviewType {
   [key: string]: any;
 }
 
-function ConfirmedHelpers({ route, navigation }) {
+function ConfirmedHelpers({ route, navigation }: { route: any; navigation: any }) {
   const { t } = useTranslation();
   const { theme } = useAppTheme();
   const { userData: currentUser } = useUser();
@@ -54,7 +54,7 @@ function ConfirmedHelpers({ route, navigation }) {
   const currentUserId = getAuth().currentUser?.uid;
 
   // Check if user has reviewed a helper
-  const checkIfReviewed = async (workerId) => {
+  const checkIfReviewed = async (workerId: string) => {
     try {
       const reviewsRef = collection(db, "reviews");
       const reviewQuery = query(
@@ -80,7 +80,7 @@ function ConfirmedHelpers({ route, navigation }) {
   };
 
   // Fetch complete user data for confirmed workers
-  const fetchUserData = async (userId) => {
+  const fetchUserData = async (userId: string) => {
     try {
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
@@ -88,7 +88,7 @@ function ConfirmedHelpers({ route, navigation }) {
         return userSnap.data();
       }
       return null;
-    } catch (error) {
+    } catch (error: any) {
       console.log("Error fetching user data:", error);
       return null;
     }
@@ -134,7 +134,7 @@ function ConfirmedHelpers({ route, navigation }) {
       let helpers = [];
       if (task.confirmedWorkers && task.confirmedWorkers.length > 0) {
         const helpersWithData = await Promise.all(
-          task.confirmedWorkers.map(async (worker) => {
+          task.confirmedWorkers.map(async (worker: any) => {
             const userData = await fetchUserData(worker.userId);
             let hasReviewed = reviewedUserIds.has(worker.userId);
             if (!hasReviewed) {
@@ -186,8 +186,8 @@ function ConfirmedHelpers({ route, navigation }) {
         ];
       }
 
-      setConfirmedHelpers(helpers);
-    } catch (error) {
+      setConfirmedHelpers(helpers || []);
+    } catch (error: any) {
       console.log("Error fetching confirmed helpers:", error);
     } finally {
       setLoading(false);
@@ -204,7 +204,7 @@ function ConfirmedHelpers({ route, navigation }) {
     setRefreshing(false);
   };
 
-  const handleStartChat = async (receiverUser) => {
+  const handleStartChat = async (receiverUser: any) => {
     try {
       const chatId = await createNewChat(currentUserId, receiverUser.userId);
       navigation.navigate("Chat", {
@@ -218,7 +218,7 @@ function ConfirmedHelpers({ route, navigation }) {
     }
   };
 
-  const handleAddReview = (worker) => {
+  const handleAddReview = (worker: any) => {
     navigation.navigate("AddReviewToAccepter", {
       task: {
         ...task,
@@ -230,7 +230,7 @@ function ConfirmedHelpers({ route, navigation }) {
     });
   };
 
-  const renderHelperItem = ({ item, index }) => {
+  const renderHelperItem = ({ item }: { item: any }) => {
     const isDark = theme.mode === "dark";
 
     const firstLetter = item?.userName.trim()?.[0];
@@ -241,11 +241,11 @@ function ConfirmedHelpers({ route, navigation }) {
         style={[
           styles.helperCard,
           {
-            backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+            backgroundColor: isDark ? Colors.whiteAlpha04 : Colors.white,
             borderWidth: 1,
             borderColor: isDark
-              ? "rgba(255,255,255,0.10)"
-              : "rgba(17,24,39,0.08)",
+              ? Colors.whiteAlpha10
+              : Colors.slateAlpha08,
           },
         ]}
       >
@@ -307,8 +307,8 @@ function ConfirmedHelpers({ route, navigation }) {
             styles.helperDivider,
             {
               backgroundColor: isDark
-                ? "rgba(255,255,255,0.08)"
-                : "rgba(17,24,39,0.06)",
+                ? Colors.whiteAlpha08
+                : Colors.slateAlpha06,
             },
           ]}
         />
@@ -347,11 +347,11 @@ function ConfirmedHelpers({ route, navigation }) {
               styles.messageButton,
               {
                 backgroundColor: isDark
-                  ? "rgba(255,255,255,0.06)"
+                  ? Colors.sectionBgDark
                   : Colors.primary + "0D",
                 borderWidth: 1,
                 borderColor: isDark
-                  ? "rgba(255,255,255,0.12)"
+                  ? Colors.whiteAlpha12
                   : Colors.primary + "33",
               },
             ]}
@@ -392,11 +392,11 @@ function ConfirmedHelpers({ route, navigation }) {
           styles.taskInfo,
           {
             backgroundColor:
-              theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+              theme.mode === "dark" ? Colors.whiteAlpha04 : Colors.white,
             borderColor:
               theme.mode === "dark"
-                ? "rgba(255,255,255,0.10)"
-                : "rgba(17,24,39,0.08)",
+                ? Colors.whiteAlpha10
+                : Colors.slateAlpha08,
           },
         ]}
       >

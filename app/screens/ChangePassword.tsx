@@ -114,8 +114,8 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
       />
       <CustomNav showBack title={`${t("settings.txt2")}`} />
       <ScrollView
-        style={{ width: "100%" }}
-        contentContainerStyle={{ width: "100%", alignItems: "center" }}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContentContainer}
       >
         {/* If Google login → show message + manage account link */}
         {provider === "google.com" || provider === "apple.com" ? (
@@ -143,8 +143,8 @@ function ChangePassword({ navigation }: ChangePasswordProps) {
                 <FontAwesome
                   name="apple"
                   size={RFPercentage(6)}
-                  color={theme.mode === "dark" ? "#FFFFFF" : "#1b1717"}
-                  style={{ marginTop: -RFPercentage(0.3) }}
+                  color={theme.mode === "dark" ? Colors.white : "#1b1717"}
+                  style={styles.fontAwesome}
                 />
               )}
             </View>
@@ -354,6 +354,9 @@ const styles = StyleSheet.create({
     width: RFPercentage(6),
     height: RFPercentage(6),
   },
+  scrollView: { width: "100%" },
+  scrollViewContentContainer: { width: "100%", alignItems: "center" },
+  fontAwesome: { marginTop: -RFPercentage(0.3) },
 });
 
 export default ChangePassword;

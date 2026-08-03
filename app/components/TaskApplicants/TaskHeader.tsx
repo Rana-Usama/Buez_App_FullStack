@@ -119,7 +119,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
           {/* Group/Broadcast chat — bulk tasks only (single tasks use 1:1 chat) */}
           {requiredWorkers > 1 && confirmedWorkers?.length > 0 && (
             <GroupChatButton
-              style={{ marginTop: RFPercentage(0.5), width: "58%" }}
+              style={styles.groupChatButton}
               onPress={() =>
                 navigation.navigate("GroupChat", {
                   groupChatId: taskId,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     width: width * 0.5,
     height: width * 0.5,
     borderRadius: width * 0.25,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: Colors.sectionBgDark,
     top: -width * 0.2,
     right: -width * 0.15,
   },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     width: width * 0.32,
     height: width * 0.32,
     borderRadius: width * 0.16,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: Colors.whiteAlpha04,
     bottom: -width * 0.12,
     left: -width * 0.1,
   },
@@ -237,9 +237,9 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(100),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: Colors.categoryBadgeBg,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: Colors.backBtnBg,
   },
   backBtnSpacer: {
     width: RFPercentage(4.4),
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     maxWidth: "90%",
     backgroundColor: Colors.categoryBadgeBg,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
+    borderColor: Colors.whiteAlpha18,
   },
   taskTypeText: {
     fontSize: RFPercentage(1.35),
@@ -289,9 +289,9 @@ const styles = StyleSheet.create({
     paddingVertical: RFPercentage(1.8),
     paddingHorizontal: RFPercentage(1.2),
     marginTop: RFPercentage(1.5),
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: Colors.whiteAlpha12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.16)",
+    borderColor: Colors.whiteAlpha16,
   },
   statItem: {
     alignItems: "center",
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(0.9),
     borderRadius: RFPercentage(0.6),
     overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.18)",
+    backgroundColor: Colors.whiteAlpha18,
   },
   progressFill: {
     height: "100%",
@@ -338,6 +338,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.8),
     color: Colors.heroStatsLabel,
   },
+  groupChatButton: { marginTop: RFPercentage(0.5), width: "58%" },
 });
 
 export default TaskHeader;

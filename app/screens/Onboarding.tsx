@@ -186,7 +186,7 @@ function Onboarding(props) {
           }}
         />
 
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
+        <View style={styles.view}>
           <View style={styles.wrapper}>
             <Text style={[styles.title, { color: theme.heading }]}>
               {title}
@@ -220,7 +220,7 @@ function Onboarding(props) {
           style={styles.nextContainer}
         >
           <LinearGradient
-            colors={[Colors.primary, "#4557B0"]}
+            colors={[Colors.primary, Colors.success2]}
             start={{ x: 0, y: 1 }}
             end={{ x: 1, y: 0 }}
             style={styles.gradient}
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   desc: {
     lineHeight: RFPercentage(2.7),
     textAlign: "center",
-    color: "#64748B",
+    color: Colors.desc,
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_400Regular",
   },
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   },
   skip: { position: "absolute", left: RFPercentage(1) },
   skipText: {
-    color: "#475569",
+    color: Colors.skip,
     fontSize: RFPercentage(2.1),
     fontFamily: "Poppins_500Medium",
   },
@@ -344,6 +344,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: RFPercentage(-3),
   },
+  view: { alignItems: "center", justifyContent: "center" },
 });
 
 export default Onboarding;

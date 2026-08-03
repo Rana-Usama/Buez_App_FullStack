@@ -30,19 +30,19 @@ const { width } = Dimensions.get("window");
 // ─── Data ──────────────────────────────────────────────────────────────────────
 
 const taskOptions = [
-  { id: 1, name: "Cleaning", icon: "broom", color: "#4ECDC4" },
-  { id: 2, name: "Moving", icon: "truck", color: "#FF6B6B" },
-  { id: 3, name: "Gardening", icon: "seedling", color: "#95E06C" },
-  { id: 4, name: "Gaming", icon: "gamepad", color: "#A78BFA" },
-  { id: 5, name: "Plumbing", icon: "wrench", color: "#60A5FA" },
-  { id: 6, name: "Electrical", icon: "bolt", color: "#FBBF24" },
-  { id: 7, name: "Carpentry", icon: "hammer", color: "#F97316" },
-  { id: 8, name: "Painting", icon: "paint-brush", color: "#EC4899" },
-  { id: 9, name: "Delivery", icon: "shipping-fast", color: "#14B8A6" },
-  { id: 10, name: "Tutoring", icon: "chalkboard-teacher", color: "#8B5CF6" },
-  { id: 11, name: "Event Setup", icon: "calendar-alt", color: "#F43F5E" },
-  { id: 12, name: "Photography", icon: "camera", color: "#06B6D4" },
-  { id: 13, name: "Pet Care", icon: "paw", color: "#D97706" },
+  { id: 1, name: "Cleaning", icon: "broom", color: Colors.teal },
+  { id: 2, name: "Moving", icon: "truck", color: Colors.red2 },
+  { id: 3, name: "Gardening", icon: "seedling", color: Colors.green3 },
+  { id: 4, name: "Gaming", icon: "gamepad", color: Colors.indigoLight2 },
+  { id: 5, name: "Plumbing", icon: "wrench", color: Colors.blue5 },
+  { id: 6, name: "Electrical", icon: "bolt", color: Colors.orange2 },
+  { id: 7, name: "Carpentry", icon: "hammer", color: Colors.orange3 },
+  { id: 8, name: "Painting", icon: "paint-brush", color: Colors.pink },
+  { id: 9, name: "Delivery", icon: "shipping-fast", color: Colors.teal4 },
+  { id: 10, name: "Tutoring", icon: "chalkboard-teacher", color: Colors.indigo2 },
+  { id: 11, name: "Event Setup", icon: "calendar-alt", color: Colors.red3 },
+  { id: 12, name: "Photography", icon: "camera", color: Colors.teal5 },
+  { id: 13, name: "Pet Care", icon: "paw", color: Colors.orange4 },
 ];
 
 // ─── Animated Chip ────────────────────────────────────────────────────────────
@@ -113,8 +113,8 @@ const AnimatedChip = ({
             borderColor: isSelected
               ? item.color + "AA"
               : isDark
-                ? "rgba(69,87,176,0.18)"
-                : "rgba(37,50,117,0.1)",
+                ? Colors.primary2Alpha18
+                : Colors.primaryAlpha10,
           },
         ]}
       >
@@ -132,7 +132,7 @@ const AnimatedChip = ({
           <FontAwesome5
             name={item.icon}
             size={RFPercentage(1.7)}
-            color={isSelected ? "#fff" : item.color}
+            color={isSelected ? Colors.white : item.color}
             solid
           />
         </LinearGradient>
@@ -145,7 +145,7 @@ const AnimatedChip = ({
                 ? item.color
                 : isDark
                   ? "rgba(180,186,220,0.85)"
-                  : "#475569",
+                  : Colors.skip,
               fontFamily: isSelected
                 ? "Poppins_600SemiBold"
                 : "Poppins_400Regular",
@@ -162,7 +162,7 @@ const AnimatedChip = ({
             <FontAwesome5
               name="check"
               size={RFPercentage(0.8)}
-              color="#fff"
+              color={Colors.white}
               solid
             />
           </View>
@@ -201,6 +201,10 @@ const chipStyles = StyleSheet.create({
     justifyContent: "center",
     marginLeft: 2,
   },
+  scrollView: { flex: 1 },
+  view: { backgroundColor: Colors.success2 },
+  fontAwesome5: { marginLeft: RFPercentage(1.4) },
+  view2: { height: RFPercentage(16) },
 });
 
 // ─── Custom Tag ───────────────────────────────────────────────────────────────
@@ -227,7 +231,7 @@ const CustomTag = ({
   return (
     <Animated.View style={{ transform: [{ scale: anim }], opacity: anim }}>
       <LinearGradient
-        colors={["#253275", "#4557B0"]}
+        colors={[Colors.primary, Colors.success2]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={tagStyles.tag}
@@ -241,7 +245,7 @@ const CustomTag = ({
           <FontAwesome5
             name="times"
             size={RFPercentage(1.0)}
-            color="rgba(255,255,255,0.85)"
+            color={Colors.categoryBadgeText}
             solid
           />
         </TouchableOpacity>
@@ -263,13 +267,13 @@ const tagStyles = StyleSheet.create({
   label: {
     fontSize: RFPercentage(1.45),
     fontFamily: "Poppins_500Medium",
-    color: "#fff",
+    color: Colors.white,
   },
   remove: {
     width: RFPercentage(2.1),
     height: RFPercentage(2.1),
     borderRadius: 100,
-    backgroundColor: "rgba(255,255,255,0.18)",
+    backgroundColor: Colors.whiteAlpha18,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -304,10 +308,10 @@ const dotStyles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "rgba(69,87,176,0.2)",
+    backgroundColor: Colors.primary2Alpha20,
   },
-  dotFilled: { backgroundColor: "#4557B0" },
-  dotActive: { width: 18, backgroundColor: "#DD53A8" },
+  dotFilled: { backgroundColor: Colors.success2 },
+  dotActive: { width: 18, backgroundColor: Colors.secondary },
 });
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
@@ -472,15 +476,15 @@ export default function InterestSelectionScreen({ navigation }: any) {
       <LinearGradient
         colors={
           theme.mode === "dark"
-            ? ["rgba(37, 50, 117, 0.9)", "transparent"]
-            : ["rgba(37, 50, 117, 0.92)", Colors.white]
+            ? [Colors.primaryAlpha90, "transparent"]
+            : [Colors.primaryAlpha92, Colors.white]
         }
         style={styles.topGlow}
         pointerEvents="none"
       />
 
       <ScrollView
-        style={{ flex: 1 }}
+        style={chipStyles.scrollView}
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -511,8 +515,8 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 styles.backBtn,
                 {
                   backgroundColor: isDark
-                    ? "rgba(69,87,176,0.15)"
-                    : "rgba(37,50,117,0.1)",
+                    ? Colors.primary2Alpha15
+                    : Colors.primaryAlpha10,
                 },
               ]}
             >
@@ -525,7 +529,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
 
             <View style={styles.badge}>
               <LinearGradient
-                colors={["#253275", "#DD53A8"]}
+                colors={[Colors.primary, Colors.secondary]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.badgeGradient}
@@ -533,7 +537,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 <FontAwesome5
                   name="magic"
                   size={RFPercentage(1.2)}
-                  color="#fff"
+                  color={Colors.white}
                   solid
                 />
                 <Text style={styles.badgeText}>
@@ -545,21 +549,21 @@ export default function InterestSelectionScreen({ navigation }: any) {
 
           {/* Title */}
           <Text
-            style={[styles.title, { color: isDark ? "#eef0ff" : "#1a1e4a" }]}
+            style={[styles.title, { color: isDark ? Colors.white4 : Colors.blueDark }]}
           >
             {t("interestSelection.whatAreYouInterested")}
           </Text>
 
           {/* Gradient underline */}
           <LinearGradient
-            colors={["#253275", "#DD53A8", "transparent"]}
+            colors={[Colors.primary, Colors.secondary, "transparent"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.titleUnderline}
           />
 
           <Text
-            style={[styles.subtitle, { color: isDark ? "#6b7db3" : "#64748B" }]}
+            style={[styles.subtitle, { color: isDark ? Colors.blue2 : Colors.desc }]}
           >
             {t("interestSelection.pickYourFavorites")}
           </Text>
@@ -575,7 +579,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 style={[
                   styles.progressLabel,
                   {
-                    color: isReady ? "#DD53A8" : isDark ? "#4557B0" : "#8094c8",
+                    color: isReady ? Colors.secondary : isDark ? Colors.success2 : Colors.blue21,
                   },
                 ]}
               >
@@ -593,8 +597,8 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 styles.track,
                 {
                   backgroundColor: isDark
-                    ? "rgba(69,87,176,0.15)"
-                    : "rgba(37,50,117,0.08)",
+                    ? Colors.primary2Alpha15
+                    : Colors.primaryAlpha08,
                 },
               ]}
             >
@@ -608,7 +612,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
               >
                 <LinearGradient
                   colors={
-                    isReady ? ["#253275", "#DD53A8"] : ["#253275", "#4557B0"]
+                    isReady ? [Colors.primary, Colors.secondary] : [Colors.primary, Colors.success2]
                   }
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
@@ -628,22 +632,22 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 styles.sectionLabelDot,
                 {
                   backgroundColor: isDark
-                    ? "rgba(69,87,176,0.4)"
-                    : "rgba(37,50,117,0.15)",
+                    ? Colors.primary2Alpha40
+                    : Colors.primaryAlpha15,
                 },
               ]}
             >
               <View
                 style={[
                   styles.sectionLabelDotInner,
-                  { backgroundColor: "#4557B0" },
+                  chipStyles.view,
                 ]}
               />
             </View>
             <Text
               style={[
                 styles.sectionLabel,
-                { color: isDark ? "#4a5a8a" : "#94a3b8" },
+                { color: isDark ? Colors.blue4 : Colors.inputFieldPlaceholder },
               ]}
             >
               CATEGORIES
@@ -680,13 +684,13 @@ export default function InterestSelectionScreen({ navigation }: any) {
                   : "rgba(255,255,255,0.92)",
                 borderColor: isDark
                   ? "rgba(69,87,176,0.22)"
-                  : "rgba(37,50,117,0.12)",
+                  : Colors.primaryAlpha12,
               },
             ]}
           >
             {/* Card accent bar */}
             <LinearGradient
-              colors={["#253275", "#4557B0", "#DD53A8"]}
+              colors={[Colors.primary, Colors.success2, Colors.secondary]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.cardBar}
@@ -696,7 +700,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
               {/* Header row */}
               <View style={styles.customCardHeader}>
                 <LinearGradient
-                  colors={["#253275", "#4557B0"]}
+                  colors={[Colors.primary, Colors.success2]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.customIconBg}
@@ -704,15 +708,15 @@ export default function InterestSelectionScreen({ navigation }: any) {
                   <FontAwesome5
                     name="plus"
                     size={RFPercentage(1.3)}
-                    color="#fff"
+                    color={Colors.white}
                     solid
                   />
                 </LinearGradient>
-                <View style={{ flex: 1 }}>
+                <View style={chipStyles.scrollView}>
                   <Text
                     style={[
                       styles.customCardTitle,
-                      { color: isDark ? "#dde3ff" : "#1a1e4a" },
+                      { color: isDark ? Colors.blueLight : Colors.blueDark },
                     ]}
                   >
                     {t("interestSelection.addCustomInterestTitle")}
@@ -720,7 +724,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                   <Text
                     style={[
                       styles.customCardSubtitle,
-                      { color: isDark ? "#4a5a8a" : "#94a3b8" },
+                      { color: isDark ? Colors.blue4 : Colors.inputFieldPlaceholder },
                     ]}
                   >
                     {t("interestSelection.addCustomInterestSubtitle")}
@@ -749,31 +753,31 @@ export default function InterestSelectionScreen({ navigation }: any) {
                     styles.inputWrap,
                     {
                       backgroundColor: isDark
-                        ? "rgba(37,50,117,0.12)"
+                        ? Colors.primaryAlpha12
                         : "rgba(37,50,117,0.05)",
                       borderColor: isDark
-                        ? "rgba(69,87,176,0.25)"
-                        : "rgba(37,50,117,0.12)",
+                        ? Colors.primary2Alpha25
+                        : Colors.primaryAlpha12,
                     },
                   ]}
                 >
                   <FontAwesome5
                     name="pen"
                     size={RFPercentage(1.4)}
-                    color={isDark ? "#4557B0" : "#8094c8"}
+                    color={isDark ? Colors.success2 : Colors.blue21}
                     solid
-                    style={{ marginLeft: RFPercentage(1.4) }}
+                    style={chipStyles.fontAwesome5}
                   />
                   <TextInput
                     ref={inputRef}
                     style={[
                       styles.input,
-                      { color: isDark ? "#dde3ff" : "#1a1e4a" },
+                      { color: isDark ? Colors.blueLight : Colors.blueDark },
                     ]}
                     placeholder={t(
                       "interestSelection.customInterestPlaceholder",
                     )}
-                    placeholderTextColor={isDark ? "#374070" : "#94a3b8"}
+                    placeholderTextColor={isDark ? "#374070" : Colors.inputFieldPlaceholder}
                     value={inputText}
                     onChangeText={setInputText}
                     onSubmitEditing={addCustomInterest}
@@ -791,7 +795,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                   <LinearGradient
                     colors={
                       inputText.trim()
-                        ? ["#253275", "#4557B0"]
+                        ? [Colors.primary, Colors.success2]
                         : ["#333a61ff", "#60678cff"]
                     }
                     start={{ x: 0, y: 0 }}
@@ -804,7 +808,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                     <FontAwesome5
                       name="arrow-right"
                       size={RFPercentage(1.8)}
-                      color="#fff"
+                      color={Colors.white}
                       solid
                     />
                   </LinearGradient>
@@ -815,7 +819,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
         </Animated.View>
 
         {/* Spacer for floating CTA */}
-        <View style={{ height: RFPercentage(16) }} />
+        <View style={chipStyles.view2} />
       </ScrollView>
 
       <View
@@ -824,8 +828,8 @@ export default function InterestSelectionScreen({ navigation }: any) {
           {
             backgroundColor: theme.white,
             borderTopColor: isDark
-              ? "rgba(69,87,176,0.15)"
-              : "rgba(37,50,117,0.08)",
+              ? Colors.primary2Alpha15
+              : Colors.primaryAlpha08,
           },
         ]}
       >
@@ -839,7 +843,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
           <LinearGradient
             colors={
               isReady
-                ? ["#253275", "#4557B0"]
+                ? [Colors.primary, Colors.success2]
                 : isDark
                   ? ["#1c1f3a", "#22254a"]
                   : ["#d7dae8ff", "#ecf0ffff"]
@@ -853,7 +857,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                 <FontAwesome5
                   name="circle-notch"
                   size={RFPercentage(1.9)}
-                  color="#fff"
+                  color={Colors.white}
                 />
                 <Text style={styles.ctaBtnText} numberOfLines={1}>
                   {t("interestSelection.saving")}
@@ -866,7 +870,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                     styles.ctaBtnText,
                     !isReady && {
                       color: isDark
-                        ? "rgba(255,255,255,0.5)"
+                        ? Colors.whiteAlpha50
                         : "rgba(37,50,117,0.5)",
                     },
                   ]}
@@ -883,7 +887,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
                     <Feather
                       name="arrow-right"
                       size={RFPercentage(1.8)}
-                      color="#fff"
+                      color={Colors.white}
                     />
                   </View>
                 )}
@@ -901,7 +905,7 @@ export default function InterestSelectionScreen({ navigation }: any) {
           <Text
             style={[
               styles.skipText,
-              { color: isDark ? "#9098b9ff" : "#94a3b8" },
+              { color: isDark ? "#9098b9ff" : Colors.inputFieldPlaceholder },
             ]}
             numberOfLines={1}
           >
@@ -963,7 +967,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontFamily: "Poppins_500Medium",
     fontSize: RFPercentage(1.35),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.2,
   },
 
@@ -1045,7 +1049,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     borderWidth: 1,
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 20,
@@ -1109,7 +1113,7 @@ const styles = StyleSheet.create({
   addBtn: {
     borderRadius: 14,
     overflow: "hidden",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -1140,7 +1144,7 @@ const styles = StyleSheet.create({
     width: "90%",
     borderRadius: RFPercentage(2),
     overflow: "hidden",
-    shadowColor: "#253275",
+    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 16,
@@ -1158,14 +1162,14 @@ const styles = StyleSheet.create({
   ctaBtnText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.7),
-    color: "#fff",
+    color: Colors.white,
     letterSpacing: 0.2,
   },
   ctaArrow: {
     width: RFPercentage(3.2),
     height: RFPercentage(3.2),
     borderRadius: 100,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     alignItems: "center",
     justifyContent: "center",
   },

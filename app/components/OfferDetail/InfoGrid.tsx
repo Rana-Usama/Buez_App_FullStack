@@ -19,10 +19,10 @@ export default function InfoGrid({
 }: Props) {
   const isDark = theme.mode === "dark";
 
-  const cardBg = isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF";
-  const cardBorder = isDark ? "rgba(255,255,255,0.10)" : "rgba(17,24,39,0.08)";
+  const cardBg = isDark ? Colors.whiteAlpha04 : Colors.white;
+  const cardBorder = isDark ? Colors.whiteAlpha10 : Colors.slateAlpha08;
   const chipBg = (hex: string) =>
-    isDark ? "rgba(255,255,255,0.10)" : hex;
+    isDark ? Colors.whiteAlpha10 : hex;
 
   const isMonetary = postRequest?.compensationType === "Monitarely";
 
@@ -55,7 +55,7 @@ export default function InfoGrid({
           <Ionicons
             name={isMonetary ? "cash" : "gift"}
             size={RFPercentage(2.2)}
-            color={isMonetary ? "#34A853" : "#FB8C00"}
+            color={isMonetary ? Colors.green2 : "#FB8C00"}
           />
         </View>
         <Text style={[styles.label, { color: theme.darkGrey }]}>

@@ -36,7 +36,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
       <Text
         style={[
           styles.countBadgeText,
-          { color: active ? "#FFF" : theme.darkGrey },
+          { color: active ? Colors.white : theme.darkGrey },
         ]}
       >
         {count}
@@ -68,7 +68,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
           <LinearGradient
             colors={
               activeTab === TABS.APPLIED
-                ? ["#465493ff", "#465493ff"]
+                ? [Colors.blue3, Colors.blue3]
                 : ["transparent", "transparent"]
             }
             style={styles.tabGradient}
@@ -78,14 +78,14 @@ const TabsSection: React.FC<TabsSectionProps> = ({
             <Ionicons
               name="person-add"
               size={RFPercentage(1.9)}
-              color={activeTab === TABS.APPLIED ? "#FFF" : theme.darkGrey}
+              color={activeTab === TABS.APPLIED ? Colors.white : theme.darkGrey}
             />
             <Text
               numberOfLines={1}
               style={[
                 styles.tabText,
                 {
-                  color: activeTab === TABS.APPLIED ? "#FFF" : theme.darkGrey,
+                  color: activeTab === TABS.APPLIED ? Colors.white : theme.darkGrey,
                 },
               ]}
             >
@@ -104,7 +104,7 @@ const TabsSection: React.FC<TabsSectionProps> = ({
           <LinearGradient
             colors={
               activeTab === TABS.CONFIRMED
-                  ? ["#465493ff", "#465493ff"]
+                  ? [Colors.blue3, Colors.blue3]
                 : ["transparent", "transparent"]
             }
             style={styles.tabGradient}
@@ -114,14 +114,14 @@ const TabsSection: React.FC<TabsSectionProps> = ({
             <Ionicons
               name="checkmark-circle"
               size={RFPercentage(1.9)}
-              color={activeTab === TABS.CONFIRMED ? "#FFF" : theme.darkGrey}
+              color={activeTab === TABS.CONFIRMED ? Colors.white : theme.darkGrey}
             />
             <Text
               numberOfLines={1}
               style={[
                 styles.tabText,
                 {
-                  color: activeTab === TABS.CONFIRMED ? "#FFF" : theme.darkGrey,
+                  color: activeTab === TABS.CONFIRMED ? Colors.white : theme.darkGrey,
                 },
               ]}
             >
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(3),
     padding: RFPercentage(0.6),
     gap: RFPercentage(0.6),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_700Bold",
   },
   activeTab: {
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,

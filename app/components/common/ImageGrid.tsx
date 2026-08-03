@@ -46,7 +46,7 @@ function ImageGrid({ imageUris, onPick, onDelete, theme, t }: Props) {
               <Image style={styles.selectedImage} source={{ uri }} />
               <TouchableOpacity
                 onPress={() => onDelete(index)}
-                style={[styles.deleteButton, { backgroundColor: Colors.red }]}
+                style={[styles.deleteButton, styles.touchableOpacity]}
               >
                 <MaterialIcons name="close" size={RFPercentage(1.8)} color={theme.white} />
               </TouchableOpacity>
@@ -77,7 +77,7 @@ function ImageGrid({ imageUris, onPick, onDelete, theme, t }: Props) {
       numColumns={3}
       scrollEnabled={false}
       renderItem={renderItem}
-      contentContainerStyle={{ justifyContent: "space-between" }}
+      contentContainerStyle={styles.flatListContentContainer}
     />
   );
 }
@@ -126,6 +126,8 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     marginTop: RFPercentage(1),
   },
+  touchableOpacity: { backgroundColor: Colors.red },
+  flatListContentContainer: { justifyContent: "space-between" },
 });
 
 export default React.memo(ImageGrid);

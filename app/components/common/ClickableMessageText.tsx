@@ -126,7 +126,7 @@ const ClickableMessageText: React.FC<ClickableMessageTextProps> = ({
                 key={index}
                 style={[
                   {
-                    color: isOwn ? "rgba(255,255,255,0.85)" : theme.primary,
+                    color: isOwn ? Colors.categoryBadgeText : theme.primary,
                     textDecorationLine: "underline",
                     fontFamily: "Poppins_400Regular",
                     fontSize: RFPercentage(1.8),

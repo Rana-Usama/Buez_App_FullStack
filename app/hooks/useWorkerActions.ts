@@ -224,7 +224,12 @@ export const useWorkerActions = ({
       await updateDoc(taskDocRef, updatePayload);
 
       if (!isSingle) {
-        await removeMemberFromGroupChat(taskId, worker);
+        await removeMemberFromGroupChat(taskId, {
+          userId: worker.userId,
+          userName: worker.userName,
+          profileImage: worker.profileImage || "",
+          token: worker.token || "",
+        });
       }
       await sendRemovalNotification(worker);
 

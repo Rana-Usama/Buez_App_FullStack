@@ -52,7 +52,7 @@ const GroupDeleteModal = memo(
 const styles = StyleSheet.create({
   modalOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: Colors.overlayDark,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 999,
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     height: RFPercentage(5),
   },
   deleteBtnText: {
-    color: "#FFF",
+    color: Colors.white,
     fontFamily: "Poppins_600SemiBold",
     fontSize: RFPercentage(1.6),
     lineHeight: RFPercentage(2),

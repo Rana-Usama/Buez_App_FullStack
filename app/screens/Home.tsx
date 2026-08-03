@@ -181,7 +181,7 @@ const HomeScreen: React.FC = () => {
       {/* Navigation Header */}
       <Nav
         gradient
-        gradientColors={[Colors.primary, "#0b1544ff"]}
+        gradientColors={[Colors.primary, Colors.blueDark3]}
         title={t("home.txt1")}
       />
       

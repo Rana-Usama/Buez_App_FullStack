@@ -19,6 +19,7 @@ import { saveCredentials } from "../services/Auth.service";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useAppTheme } from "../contexts/themeContext";
 import DeviceInfo from "react-native-device-info";
+import Colors from "../config/Colors";
 
 const AppleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
@@ -256,14 +257,14 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
       onPress={handleAppleLogin}
       style={[
         styles.circleButton,
-        { backgroundColor: theme.mode === "dark" ? "#FFFFFF" : "#000000ff" },
+        { backgroundColor: theme.mode === "dark" ? Colors.white : Colors.blackSolid },
       ]}
     >
       <FontAwesome
         name="apple"
         size={RFPercentage(3)}
-        color={theme.mode === "dark" ? "#000000" : "#FFFFFF"}
-        style={{ marginTop: -RFPercentage(0.3) }}
+        color={theme.mode === "dark" ? Colors.blackSolid : Colors.white}
+        style={styles.fontAwesome}
       />
     </TouchableOpacity>
   );
@@ -277,6 +278,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  fontAwesome: { marginTop: -RFPercentage(0.3) },
 });
 
 export default AppleLoginButton;

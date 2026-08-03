@@ -144,12 +144,12 @@ function Signup({ navigation }: any) {
       />
       <LinearGradient
         colors={[
-          "#7a6bffff",
-          "#4ECDC4",
-          "#45B7D1",
-          "#96CEB4",
-          "#5768feff",
-          "#FF9FF3",
+          Colors.blue7,
+          Colors.teal,
+          Colors.teal6,
+          Colors.green4,
+          Colors.blue8,
+          Colors.purpleLight,
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -317,7 +317,7 @@ function Signup({ navigation }: any) {
           </View> */}
           <GoogleLoginButton navigation={navigation} />
           {Platform.OS === "android" ? null : (
-            <View style={{ marginLeft: RFPercentage(1.5) }}>
+            <View style={styles.view}>
               <AppleLoginButton navigation={navigation} />
             </View>
           )}
@@ -349,7 +349,7 @@ function Signup({ navigation }: any) {
           style={[styles.modalBackground, { backgroundColor: theme.modal }]}
         >
           <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
-            <View style={{ flex: 1, width: "100%" }}>
+            <View style={styles.view2}>
               <TouchableWithoutFeedback>
                 <View
                   style={[
@@ -365,7 +365,7 @@ function Signup({ navigation }: any) {
                   <Text style={[styles.modalText, { color: theme.black }]}>
                     Instagram Login Requirements
                   </Text>
-                  <View style={{ marginTop: RFPercentage(1) }}>
+                  <View style={styles.view3}>
                     <Text
                       style={{
                         fontFamily: "Poppins_400Regular",
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
   divider: {
     width: RFPercentage(3),
     height: RFPercentage(0.1),
-    backgroundColor: "#E5E7EB",
+    backgroundColor: Colors.greyLight,
   },
   socialMediaText: {
     color: Colors.darkGrey,
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: RFPercentage(1.7),
-    color: "#4B5563",
+    color: Colors.cartsTitle,
     fontFamily: "Poppins_400Regular",
   },
   loginText: {
@@ -536,6 +536,9 @@ const styles = StyleSheet.create({
   socialIconMargin: {
     marginHorizontal: RFPercentage(1),
   },
+  view: { marginLeft: RFPercentage(1.5) },
+  view2: { flex: 1, width: "100%" },
+  view3: { marginTop: RFPercentage(1) },
 });
 
 export default Signup;

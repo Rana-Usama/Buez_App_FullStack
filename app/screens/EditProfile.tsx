@@ -40,7 +40,7 @@ type InputFieldType = {
   type?: string;
 };
 
-function EditProfile({ navigation }) {
+function EditProfile({ navigation }: { navigation: any }) {
   const { t } = useTranslation();
   const { userData: user } = useUser();
   const { theme } = useAppTheme();
@@ -131,13 +131,13 @@ function EditProfile({ navigation }) {
     translateTexts();
   }, []);
 
-  const handleChange = (text, i) => {
+  const handleChange = (text: string, i: number) => {
     let tempFields = [...inputField];
     tempFields[i].value = text;
     setInputField(tempFields);
   };
 
-  const handleBiographyChange = (text) => {
+  const handleBiographyChange = (text : string) => {
     setBiography(text);
   };
 
@@ -307,10 +307,7 @@ function EditProfile({ navigation }) {
                         borderWidth: RFPercentage(0.2),
                         borderColor: groupTextColor,
                       }}
-                      textStyle={{
-                        fontSize: RFPercentage(4),
-                        lineHeight: RFPercentage(6),
-                      }}
+                      textStyle={styles.avatarInitialsText}
                     />
                     <View
                       style={[
@@ -340,7 +337,7 @@ function EditProfile({ navigation }) {
                 borderColor:
                   theme.mode === "dark"
                     ? theme.border
-                    : "rgba(238, 238, 238, 1)",
+                    : Colors.white9,
               },
             ]}
           >
@@ -484,8 +481,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#FFFFFF",
-    shadowColor: "#000",
+    borderColor: Colors.white,
+    shadowColor: Colors.blackSolid,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -503,8 +500,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#FFFFFF",
-    shadowColor: "#000",
+    borderColor: Colors.white,
+    shadowColor: Colors.blackSolid,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -522,7 +519,7 @@ const styles = StyleSheet.create({
     marginHorizontal: RFPercentage(2),
     borderRadius: RFPercentage(1.5),
     padding: RFPercentage(3),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -597,6 +594,10 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontStyle: "italic",
   },
+  avatarInitialsText: {
+                        fontSize: RFPercentage(4),
+                        lineHeight: RFPercentage(6),
+                      },
 });
 
 export default EditProfile;

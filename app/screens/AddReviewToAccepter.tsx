@@ -413,7 +413,7 @@ function AddReviewToAccepter() {
           );
 
           const allConfirmedWorkersReviewed = task.confirmedWorkers.every(
-            (worker) => reviewedWorkers.has(worker.userId),
+            (worker:any) => reviewedWorkers.has(worker.userId),
           );
 
           if (allConfirmedWorkersReviewed) {
@@ -466,7 +466,7 @@ function AddReviewToAccepter() {
       setTimeout(() => {
         navigation.goBack();
       }, 1500);
-    } catch (e) {
+    } catch (e: any) {
       console.log("Review submission error:", e);
       Toast.show({
         type: "error",
@@ -546,7 +546,7 @@ function AddReviewToAccepter() {
                       styles.bulkBadge,
                       {
                         backgroundColor: isDark
-                          ? "rgba(255,255,255,0.15)"
+                          ? Colors.categoryBadgeBg
                           : Colors.primary + "15",
                       },
                     ]}
@@ -654,7 +654,7 @@ function AddReviewToAccepter() {
                 styles.ratingHintChip,
                 {
                   backgroundColor: isDark
-                    ? "rgba(255,255,255,0.08)"
+                    ? Colors.whiteAlpha08
                     : Colors.lightWhite,
                 },
               ]}

@@ -62,7 +62,7 @@ const InputFieldNew = (props: Props) => {
             name={visible ? "eye" : "eye-off"}
             size={RFPercentage(1.8)}
             color={theme.lightGrey}
-            style={{ right: RFPercentage(0.7) }}
+            style={styles.feather}
           />
         </TouchableOpacity>
       )}
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     borderWidth: 1.2,
-    borderColor: "#E5E7EB",
+    borderColor: Colors.greyLight,
     alignItems: "center",
     borderRadius: RFPercentage(1.2),
     marginTop: RFPercentage(2.5),
@@ -102,9 +102,10 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   counterText: {
-    color: "#6B7280",
+    color: Colors.heading,
     fontSize: RFPercentage(1.3),
     fontFamily: "Poppins_400Regular",
     right: RFPercentage(0),
   },
+  feather: { right: RFPercentage(0.7) },
 });

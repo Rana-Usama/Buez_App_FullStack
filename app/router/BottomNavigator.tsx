@@ -8,6 +8,7 @@ import {
   Keyboard,
   BackHandler,
   Platform,
+  ViewStyle,
 } from "react-native";
 import {
   createBottomTabNavigator,
@@ -56,7 +57,7 @@ const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
 // Custom Drawer Content with Icons and Custom Styling
-const CustomDrawerContent = (props) => {
+const CustomDrawerContent = (props: any) => {
   const { theme } = useAppTheme();
   const { t } = useTranslation();
   const { userData: user } = useUser();
@@ -170,7 +171,7 @@ const CustomDrawerContent = (props) => {
   // Get the current active route
   const activeRoute = props.state?.routeNames[props.state?.index] || "MainTabs";
 
-  const handleItemPress = (item) => {
+  const handleItemPress = (item : any) => {
     props.navigation.closeDrawer();
     if (item.onPress) {
       item.onPress();
@@ -310,7 +311,7 @@ const CustomDrawerContent = (props) => {
       await SecureStore.deleteItemAsync("password2");
       setIsDeleteAccountModalVisible(false);
       navigation.navigate("OnBoarding");
-    } catch (error) {
+    } catch (error: any) {
       console.log("Error deleting account:", error.message || error);
       Toast.show({
         type: "error",
@@ -351,18 +352,18 @@ const CustomDrawerContent = (props) => {
     }
   };
 
-  const renderIcon = (icon, iconType, color) => {
+  const renderIcon = (icon: string, iconType: string, color: string) => {
     if (iconType === "material") {
       return (
         <MaterialCommunityIcons
-          name={icon}
+          name={icon as any}
           size={RFPercentage(2.5)}
           color={color}
         />
       );
     } else {
       // Default to Ionicons
-      return <Ionicons name={icon} size={RFPercentage(2.5)} color={color} />;
+      return <Ionicons name={icon as any} size={RFPercentage(2.5)} color={color} />;
     }
   };
 
@@ -370,7 +371,7 @@ const CustomDrawerContent = (props) => {
     <>
       <DrawerContentScrollView
         {...props}
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={styles.drawerContentScrollViewContentContainer}
         showsVerticalScrollIndicator={false}
       >
         {/* Gradient Background Base */}
@@ -383,7 +384,7 @@ const CustomDrawerContent = (props) => {
 
         {/* Drawer Header with Glass Effect */}
         <View
-          style={[styles.drawerHeader, { borderBottomColor: "transparent" }]}
+          style={[styles.drawerHeader, styles.view]}
         >
           <View style={styles.headerContent}>
             {/* Avatar with Glass Border */}
@@ -409,10 +410,7 @@ const CustomDrawerContent = (props) => {
                 <AvatarInitials
                   name={user?.userName}
                   style={styles.userImage}
-                  textStyle={{
-                    fontSize: RFPercentage(4),
-                    lineHeight: RFPercentage(6),
-                  }}
+                  textStyle={styles.avatarInitialsText}
                 />
               )}
             </View>
@@ -455,13 +453,13 @@ const CustomDrawerContent = (props) => {
                   <BlurView
                     intensity={60}
                     tint="light"
-                    style={[styles.activeItemGlass,{backgroundColor: "rgba(255, 255, 255, 0.61)",}]}
+                    style={[styles.activeItemGlass,styles.blurView]}
                   >
                     <LinearGradient
                       colors={
                         theme.mode === "dark"
                           ? ["rgba(49, 53, 72, 0.4)", "rgba(88, 91, 105, 0.2)"]
-                          : ["rgba(69, 87, 176, 0.4)", "rgba(69, 87, 176, 0.2)"]
+                          : [Colors.primary2Alpha40, Colors.primary2Alpha20]
                       }
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
@@ -484,13 +482,7 @@ const CustomDrawerContent = (props) => {
                       <View
                         style={[
                           styles.activeIndicator,
-                          {
-                            backgroundColor: "rgba(255,255,255,0.8)",
-                            shadowColor: "#fff",
-                            shadowOffset: { width: 0, height: 0 },
-                            shadowOpacity: 0.5,
-                            shadowRadius: 4,
-                          },
+                          styles.view2,
                         ]}
                       />
                     </LinearGradient>
@@ -606,6 +598,9 @@ const CustomDrawerContent = (props) => {
 function DrawerNavigator() {
   return (
     <Drawer.Navigator
+      // v7 types require `id`. Inert at runtime — only ever used as a lookup
+      // key by navigation.getParent(id), which nothing in the app calls.
+      id="RootDrawer"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerShown: false,
@@ -615,7 +610,7 @@ function DrawerNavigator() {
         },
         drawerType: "front",
         swipeEnabled: true,
-        overlayColor: "rgba(0, 0, 0, 0.5)",
+        overlayColor: Colors.overlayDark,
         drawerStatusBarAnimation: "slide",
       }}
     >
@@ -639,6 +634,7 @@ function MainTabNavigator() {
   return (
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
+      id={undefined}
       initialRouteName={`${t("bottomTab.txt3")}`}
       screenOptions={{
         headerShown: false,
@@ -704,7 +700,14 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               target: route.key,
             } as any);
 
-            if (!isFocused && !event.defaultPrevented) {
+            // `emit` is called with an `as any` payload above, so the returned
+            // event widens and loses `defaultPrevented`; read it through a
+            // narrow shape rather than re-typing the emit (which would change
+            // whether the event is preventable at runtime).
+            if (
+              !isFocused &&
+              !(event as { defaultPrevented?: boolean }).defaultPrevented
+            ) {
               navigation.navigate(route.name);
             }
           };
@@ -714,14 +717,16 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
               activeOpacity={0.8}
               key={index}
               onPress={onPress}
-              style={[styles.tabButton, isFocused && styles.activeTab]}
+              // `activeTab` only sets fontWeight, which a View ignores — a
+              // pre-existing no-op kept as-is so nothing changes visually.
+              style={[
+                styles.tabButton,
+                isFocused && (styles.activeTab as unknown as ViewStyle),
+              ]}
             >
               {route.name === `${t("bottomTab.txt3")}` ? (
                 <View
-                  style={{
-                    bottom:
-                      RFPercentage(3.5),
-                  }}
+                  style={styles.view3}
                 >
                   <Image
                     source={
@@ -767,11 +772,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                       ]}
                     >
                       <Text
-                        style={{
-                          color: "white",
-                          fontSize: RFPercentage(1.3),
-                          fontFamily: "Poppins_400Regular",
-                        }}
+                        style={styles.text}
                       >
                         {totalUnreadCount > 9 ? "9+" : totalUnreadCount}
                       </Text>
@@ -798,7 +799,11 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
                     : "Poppins_500Medium",
                 }}
               >
-                {label?.length > 9 ? label?.slice(0, 9) + `..` : label}
+                {typeof label === "string"
+                  ? label.length > 9
+                    ? label.slice(0, 9) + `..`
+                    : label
+                  : null}
               </Text>
             </TouchableOpacity>
           );
@@ -877,7 +882,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: RFPercentage(1),
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: Colors.white3,
   },
   gradientHeader: {
     paddingVertical: RFPercentage(3),
@@ -913,8 +918,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: Colors.whiteAlpha10,
+    backgroundColor: Colors.whiteAlpha05,
   },
   headerContent: {
     padding: 20,
@@ -943,7 +948,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: RFPercentage(1.9),
     marginTop: RFPercentage(0.3),
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowColor: Colors.blackAlpha30,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
@@ -964,8 +969,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
-    backgroundColor: "rgba(255, 255, 255, 0.61)",
+    borderColor: Colors.categoryBadgeBg,
+    backgroundColor: Colors.whiteAlpha61,
   },
   activeItemGradient: {
     flexDirection: "row",
@@ -1007,7 +1012,7 @@ const styles = StyleSheet.create({
     padding: 15,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: Colors.whiteAlpha10,
     alignItems: "center",
   },
   versionText: {
@@ -1019,4 +1024,27 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign:"center"
   },
+  drawerContentScrollViewContentContainer: { flexGrow: 1 },
+  view: { borderBottomColor: "transparent" },
+  avatarInitialsText: {
+                    fontSize: RFPercentage(4),
+                    lineHeight: RFPercentage(6),
+                  },
+  blurView: {backgroundColor: Colors.whiteAlpha61,},
+  view2: {
+                            backgroundColor: Colors.lastMsgTextColor,
+                            shadowColor: Colors.white,
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowOpacity: 0.5,
+                            shadowRadius: 4,
+                          },
+  view3: {
+                    bottom:
+                      RFPercentage(3.5),
+                  },
+  text: {
+                          color: "white",
+                          fontSize: RFPercentage(1.3),
+                          fontFamily: "Poppins_400Regular",
+                        },
 });

@@ -220,11 +220,7 @@ const ChatItem = memo(({ item, userId, theme, onPress, t }: any) => {
             ) : (
               <AvatarInitials
                 name={item.user?.userName}
-                style={{
-                  width: RFPercentage(6.5),
-                  height: RFPercentage(6.5),
-                  borderRadius: RFPercentage(100),
-                }}
+                style={styles.avatarInitials}
               />
             )}
 
@@ -583,7 +579,7 @@ function Messages({ navigation }: any) {
         profileImage={profileImgUrl}
         leftLogo
         gradient
-        gradientColors={[Colors.primary, "#0b1544ff"]}
+        gradientColors={[Colors.primary, Colors.blueDark3]}
         title={`${t("messages.txt1")}`}
       />
 
@@ -775,6 +771,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.white,
   },
+  avatarInitials: {
+                  width: RFPercentage(6.5),
+                  height: RFPercentage(6.5),
+                  borderRadius: RFPercentage(100),
+                },
 });
 
 export default Messages;

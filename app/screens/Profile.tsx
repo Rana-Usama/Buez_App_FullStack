@@ -34,19 +34,19 @@ import FounderBadge from "../components/common/FounderBadge";
 
 // ─── Category master list (always English — source of truth) ──────────────────
 const taskOptions = [
-  { id: 1, name: "Cleaning", icon: "broom", color: "#4ECDC4" },
-  { id: 2, name: "Moving", icon: "truck", color: "#FF6B6B" },
-  { id: 3, name: "Gardening", icon: "seedling", color: "#95E06C" },
-  { id: 4, name: "Gaming", icon: "gamepad", color: "#A78BFA" },
-  { id: 5, name: "Plumbing", icon: "wrench", color: "#60A5FA" },
-  { id: 6, name: "Electrical", icon: "bolt", color: "#FBBF24" },
-  { id: 7, name: "Carpentry", icon: "hammer", color: "#F97316" },
-  { id: 8, name: "Painting", icon: "paint-brush", color: "#EC4899" },
-  { id: 9, name: "Delivery", icon: "shipping-fast", color: "#14B8A6" },
-  { id: 10, name: "Tutoring", icon: "chalkboard-teacher", color: "#8B5CF6" },
-  { id: 11, name: "Event Setup", icon: "calendar-alt", color: "#F43F5E" },
-  { id: 12, name: "Photography", icon: "camera", color: "#06B6D4" },
-  { id: 13, name: "Pet Care", icon: "paw", color: "#D97706" },
+  { id: 1, name: "Cleaning", icon: "broom", color: Colors.teal },
+  { id: 2, name: "Moving", icon: "truck", color: Colors.red2 },
+  { id: 3, name: "Gardening", icon: "seedling", color: Colors.green3 },
+  { id: 4, name: "Gaming", icon: "gamepad", color: Colors.indigoLight2 },
+  { id: 5, name: "Plumbing", icon: "wrench", color: Colors.blue5 },
+  { id: 6, name: "Electrical", icon: "bolt", color: Colors.orange2 },
+  { id: 7, name: "Carpentry", icon: "hammer", color: Colors.orange3 },
+  { id: 8, name: "Painting", icon: "paint-brush", color: Colors.pink },
+  { id: 9, name: "Delivery", icon: "shipping-fast", color: Colors.teal4 },
+  { id: 10, name: "Tutoring", icon: "chalkboard-teacher", color: Colors.indigo2 },
+  { id: 11, name: "Event Setup", icon: "calendar-alt", color: Colors.red3 },
+  { id: 12, name: "Photography", icon: "camera", color: Colors.teal5 },
+  { id: 13, name: "Pet Care", icon: "paw", color: Colors.orange4 },
 ];
 
 
@@ -119,7 +119,7 @@ const ModalChip = ({
           <FontAwesome5
             name={item.icon}
             size={RFPercentage(1.5)}
-            color={isSelected ? "#fff" : item.color}
+            color={isSelected ? Colors.white : item.color}
             solid
           />
         </View>
@@ -141,7 +141,7 @@ const ModalChip = ({
             <FontAwesome5
               name="check"
               size={RFPercentage(0.8)}
-              color="#fff"
+              color={Colors.white}
               solid
             />
           </View>
@@ -187,7 +187,7 @@ const CustomTag = ({
           <FontAwesome5
             name="times"
             size={RFPercentage(1)}
-            color="rgba(255,255,255,0.8)"
+            color={Colors.lastMsgTextColor}
             solid
           />
         </TouchableOpacity>
@@ -542,27 +542,27 @@ function Profile({ navigation }: any) {
           badge = {
             icon: "diamond",
             text: `${t("profileRank.txt5")}`,
-            color: "#bfa824ff",
+            color: Colors.yellow,
             bgColor: "#41403462",
-            borderColor: "#bfa824ff",
+            borderColor: Colors.yellow,
             bgColor2: "rgba(233, 226, 182, 0.25)",
           };
         else if (count >= 2)
           badge = {
             icon: "rocket",
             text: `${t("profileRank.txt4")}`,
-            color: "#79b7b0ff",
+            color: Colors.teal2,
             bgColor: "rgb(97, 124, 121)",
-            borderColor: "#79b7b0ff",
+            borderColor: Colors.teal2,
             bgColor2: "rgba(187, 218, 214, 0.33)",
           };
         else if (count >= 1)
           badge = {
             icon: "leaf",
             text: `${t("profileRank.txt3")}`,
-            color: "#9b6fc1ff",
+            color: Colors.indigo,
             bgColor: "rgb(39, 34, 43)",
-            borderColor: "#9b6fc1ff",
+            borderColor: Colors.indigo,
             bgColor2: "rgba(89, 84, 92, 0.26)",
           };
         setUserBadge(badge);
@@ -661,11 +661,11 @@ function Profile({ navigation }: any) {
               backgroundColor: theme.white,
               borderWidth: 1,
               borderColor:
-                theme.mode === "dark" ? theme.border : "rgba(238,238,238,1)",
+                theme.mode === "dark" ? theme.border : Colors.white9,
             },
           ]}
         >
-          <View style={{position:"absolute", left:RFPercentage(1), top:RFPercentage(1)}}>
+          <View style={styles.view}>
             <FounderBadge variant="pill" />
           </View>
           <View style={styles.imageSection}>
@@ -688,17 +688,8 @@ function Profile({ navigation }: any) {
               ) : (
                 <AvatarInitials
                   name={userName}
-                  style={{
-                    borderRadius: RFPercentage(10),
-                    width: RFPercentage(12),
-                    height: RFPercentage(12),
-                    borderWidth : 2,
-                    borderColor:Colors.primary
-                  }}
-                  textStyle={{
-                    fontSize: RFPercentage(3.5),
-                    lineHeight: RFPercentage(5),
-                  }}
+                  style={styles.avatarInitials}
+                  textStyle={styles.avatarInitialsText}
                 />
               )}
 
@@ -706,11 +697,7 @@ function Profile({ navigation }: any) {
                   subscription or trial-expiry state. */}
               <FounderBadge
                 variant="avatar"
-                style={{
-                  position: "absolute",
-                  right: RFPercentage(-2),
-                  bottom: 0,
-                }}
+                style={styles.founderBadge}
               />
             </TouchableOpacity>
           </View>
@@ -824,7 +811,7 @@ function Profile({ navigation }: any) {
             {
               backgroundColor: theme.white,
               borderColor:
-                theme.mode === "dark" ? theme.border : "rgba(238,238,238,1)",
+                theme.mode === "dark" ? theme.border : Colors.white9,
             },
           ]}
         >
@@ -832,7 +819,7 @@ function Profile({ navigation }: any) {
           <View style={styles.interestsHeader}>
             <View style={styles.interestsTitleRow}>
               <View
-                style={[styles.interestsIconBg,{backgroundColor: theme.mode === "dark" ? theme.border + "60" : "rgba(238,238,238,1)"}]}
+                style={[styles.interestsIconBg,{backgroundColor: theme.mode === "dark" ? theme.border + "60" : Colors.white9}]}
               >
                 <FontAwesome5
                   name="heart"
@@ -932,7 +919,7 @@ function Profile({ navigation }: any) {
           <View
             style={[
               styles.navigationList,
-              { borderRadius: RFPercentage(1.5), overflow: "hidden" },
+              styles.view2,
             ]}
           >
             {navigationsList.map((item, i) => (
@@ -980,7 +967,7 @@ function Profile({ navigation }: any) {
           </View>
         </View>
 
-        <View style={{ height: RFPercentage(4) }} />
+        <View style={styles.view3} />
       </ScrollView>
 
       {/* ── Edit Interests Modal ── */}
@@ -991,14 +978,14 @@ function Profile({ navigation }: any) {
         onRequestClose={closeModal}
       >
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
+          style={styles.keyboardAvoidingView}
           // behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           {/* Backdrop */}
           <Animated.View
             style={[
               modalStyles.overlay,
-              { opacity: modalAnim, backgroundColor: "rgba(0,0,0,0.55)" },
+              { opacity: modalAnim, backgroundColor: Colors.blackAlpha55 },
             ]}
           >
             <TouchableOpacity
@@ -1041,14 +1028,14 @@ function Profile({ navigation }: any) {
                 <FontAwesome5
                   name="times"
                   size={RFPercentage(1.6)}
-                  color="rgba(255,255,255,0.6)"
+                  color={Colors.loaderLightOverlay}
                   solid
                 />
               </TouchableOpacity>
             </View>
 
             <ScrollView
-              style={{ flex: 1 }}
+              style={styles.keyboardAvoidingView}
               contentContainerStyle={modalStyles.scrollContent}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
@@ -1073,7 +1060,7 @@ function Profile({ navigation }: any) {
               <Text
                 style={[
                   modalStyles.sectionLabel,
-                  { marginTop: RFPercentage(2.5) },
+                  styles.text,
                 ]}
               >
                 {modalTx.customLabel}
@@ -1099,12 +1086,12 @@ function Profile({ navigation }: any) {
                     size={RFPercentage(1.4)}
                     color="rgba(167,139,250,0.5)"
                     solid
-                    style={{ marginLeft: RFPercentage(1.3) }}
+                    style={styles.fontAwesome5}
                   />
                   <TextInput
                     style={modalStyles.textInput}
                     placeholder={modalTx.placeholder}
-                    placeholderTextColor="rgba(255,255,255,0.22)"
+                    placeholderTextColor={Colors.whiteAlpha22}
                     value={customInput}
                     onChangeText={setCustomInput}
                     onSubmitEditing={addCustom}
@@ -1127,14 +1114,14 @@ function Profile({ navigation }: any) {
                     <FontAwesome5
                       name="arrow-right"
                       size={RFPercentage(1.5)}
-                      color="#fff"
+                      color={Colors.white}
                       solid
                     />
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
 
-              <View style={{ height: RFPercentage(12) }} />
+              <View style={styles.view4} />
             </ScrollView>
 
             {/* Save Button */}
@@ -1143,11 +1130,7 @@ function Profile({ navigation }: any) {
                 onPress={saveInterests}
                 disabled={saving}
                 activeOpacity={0.9}
-                style={{
-                  width: "90%",
-                  alignSelf: "center",
-                  borderRadius: RFPercentage(100),
-                }}
+                style={styles.touchableOpacity}
               >
                 <LinearGradient
                   colors={["#232e7eff", "#1c1662ff"]}
@@ -1179,7 +1162,7 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(3),
     borderRadius: RFPercentage(1.5),
     padding: RFPercentage(3),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -1264,7 +1247,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1.5),
     padding: RFPercentage(2.5),
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -1337,7 +1320,7 @@ const styles = StyleSheet.create({
     marginHorizontal: RFPercentage(2),
   },
   navigationList: {
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -1367,6 +1350,34 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     flex: 1,
   },
+  view: {position:"absolute", left:RFPercentage(1), top:RFPercentage(1)},
+  avatarInitials: {
+                    borderRadius: RFPercentage(10),
+                    width: RFPercentage(12),
+                    height: RFPercentage(12),
+                    borderWidth : 2,
+                    borderColor:Colors.primary
+                  },
+  avatarInitialsText: {
+                    fontSize: RFPercentage(3.5),
+                    lineHeight: RFPercentage(5),
+                  },
+  founderBadge: {
+                  position: "absolute",
+                  right: RFPercentage(-2),
+                  bottom: 0,
+                },
+  view2: { borderRadius: RFPercentage(1.5), overflow: "hidden" },
+  view3: { height: RFPercentage(4) },
+  keyboardAvoidingView: { flex: 1 },
+  text: { marginTop: RFPercentage(2.5) },
+  fontAwesome5: { marginLeft: RFPercentage(1.3) },
+  view4: { height: RFPercentage(12) },
+  touchableOpacity: {
+                  width: "90%",
+                  alignSelf: "center",
+                  borderRadius: RFPercentage(100),
+                },
 });
 
 const pillStyles = StyleSheet.create({
@@ -1408,7 +1419,7 @@ const modalStyles = StyleSheet.create({
   handle: {
     width: RFPercentage(5),
     height: RFPercentage(0.5),
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
     borderRadius: RFPercentage(1),
     alignSelf: "center",
     marginTop: RFPercentage(1.5),
@@ -1421,24 +1432,24 @@ const modalStyles = StyleSheet.create({
     paddingHorizontal: RFPercentage(2.5),
     paddingVertical: RFPercentage(2),
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.07)",
+    borderBottomColor: Colors.whiteAlpha07,
   },
   modalTitle: {
     fontSize: RFPercentage(2.2),
     fontFamily: "Poppins_700Bold",
-    color: "#fff",
+    color: Colors.white,
   },
   modalSubtitle: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.4)",
+    color: Colors.whiteAlpha40,
     marginTop: RFPercentage(0.2),
   },
   closeBtn: {
     width: RFPercentage(4),
     height: RFPercentage(4),
     borderRadius: RFPercentage(2),
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: Colors.whiteAlpha08,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1450,7 +1461,7 @@ const modalStyles = StyleSheet.create({
   sectionLabel: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
-    color: "rgba(255,255,255,0.4)",
+    color: Colors.whiteAlpha40,
     letterSpacing: 0.8,
     marginBottom: RFPercentage(1.5),
     textTransform: "uppercase",
@@ -1459,9 +1470,9 @@ const modalStyles = StyleSheet.create({
   chip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: Colors.whiteAlpha05,
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: Colors.whiteAlpha10,
     borderRadius: RFPercentage(10),
     paddingVertical: RFPercentage(0.6),
     paddingLeft: RFPercentage(0.7),
@@ -1478,7 +1489,7 @@ const modalStyles = StyleSheet.create({
   chipText: {
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.7)",
+    color: Colors.heroStatsLabel,
   },
   checkBadge: {
     width: RFPercentage(1.7),
@@ -1506,13 +1517,13 @@ const modalStyles = StyleSheet.create({
   customTagText: {
     fontSize: RFPercentage(1.4),
     fontFamily: "Poppins_500Medium",
-    color: "#fff",
+    color: Colors.white,
   },
   customTagRemove: {
     width: RFPercentage(2),
     height: RFPercentage(2),
     borderRadius: RFPercentage(1),
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: Colors.categoryBadgeBg,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1525,7 +1536,7 @@ const modalStyles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: Colors.whiteAlpha05,
     borderWidth: 1,
     borderColor: "rgba(87,84,93,0.3)",
     borderRadius: RFPercentage(1.5),
@@ -1534,7 +1545,7 @@ const modalStyles = StyleSheet.create({
   textInput: {
     flex: 1,
     height: RFPercentage(5.2),
-    color: "#fff",
+    color: Colors.white,
     fontSize: RFPercentage(1.55),
     fontFamily: "Poppins_400Regular",
     paddingRight: RFPercentage(1.5),
@@ -1557,7 +1568,7 @@ const modalStyles = StyleSheet.create({
     paddingTop: RFPercentage(1.5),
     backgroundColor: "rgba(15,12,41,0.97)",
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.06)",
+    borderTopColor: Colors.sectionBgDark,
   },
   saveBtn: {
     width: "100%",
@@ -1571,7 +1582,7 @@ const modalStyles = StyleSheet.create({
   saveBtnText: {
     fontSize: RFPercentage(1.7),
     fontFamily: "Poppins_600SemiBold",
-    color: "#fff",
+    color: Colors.white,
   },
 });
 

@@ -68,7 +68,7 @@ const AcceptanceSuccessModal = ({
         {
           backgroundColor:
             theme.mode === "dark"
-              ? "rgba(255,255,255,0.05)"
+              ? Colors.whiteAlpha05
               : "rgba(0,0,0,0.02)",
         },
       ]}
@@ -102,7 +102,7 @@ const AcceptanceSuccessModal = ({
           style={[
             styles.modalContainer,
             {
-              backgroundColor: theme.mode === "dark" ? "#1a1a1a" : Colors.white,
+              backgroundColor: theme.mode === "dark" ? Colors.tabsBackgroundDark : Colors.white,
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }],
             },
@@ -158,7 +158,7 @@ const AcceptanceSuccessModal = ({
               activeOpacity={0.8}
               style={[
                 styles.primaryModalButton,
-                { backgroundColor: Colors.primary },
+                styles.touchableOpacity,
               ]}
               onPress={onClose}
             >
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     maxHeight: "80%",
     borderRadius: RFPercentage(2),
     padding: RFPercentage(3),
-    shadowColor: "#000",
+    shadowColor: Colors.blackSolid,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -290,6 +290,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
     lineHeight: RFPercentage(1.8),
   },
+  touchableOpacity: { backgroundColor: Colors.primary },
 });
 
 export default AcceptanceSuccessModal;

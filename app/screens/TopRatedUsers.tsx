@@ -145,22 +145,22 @@ const TopRatedUsers = ({ navigation }: any) => {
         return {
           icon: "diamond",
           text: t("profileRank.txt5"),
-          color: "#bfa824ff",
-          bgColor: "rgba(255, 215, 0, 0.1)",
+          color: Colors.yellow,
+          bgColor: Colors.yellowAlpha10,
         };
       case "rising":
         return {
           icon: "rocket",
           text: t("profileRank.txt4"),
-          color: "#79b7b0ff",
-          bgColor: "#71a5821a",
+          color: Colors.teal2,
+          bgColor: Colors.green5,
         };
       default:
         return {
           icon: "leaf",
           text: t("profileRank.txt3"),
-          color: "#9b6fc1ff",
-          bgColor: "#d3c2e23a",
+          color: Colors.indigo,
+          bgColor: Colors.indigoLight,
         };
     }
   };
@@ -174,10 +174,10 @@ const TopRatedUsers = ({ navigation }: any) => {
       ? HomeGradients.topRatedBrandDark
       : HomeGradients.topRatedBrand;
     const ui = {
-      cardBorder: isDark ? "rgba(255,255,255,0.10)" : "rgba(37,50,117,0.10)",
-      softFill: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.60)",
-      divider: isDark ? "rgba(255,255,255,0.10)" : "rgba(37,50,117,0.12)",
-      chevronBg: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.70)",
+      cardBorder: isDark ? Colors.whiteAlpha10 : Colors.primaryAlpha10,
+      softFill: isDark ? Colors.sectionBgDark : Colors.loaderLightOverlay,
+      divider: isDark ? Colors.whiteAlpha10 : Colors.primaryAlpha12,
+      chevronBg: isDark ? Colors.whiteAlpha08 : Colors.heroStatsLabel,
     };
 
     return (
@@ -262,7 +262,7 @@ const TopRatedUsers = ({ navigation }: any) => {
               <Feather
                 name="chevron-right"
                 size={18}
-                color={isDark ? "#FFFFFF" : theme.darkGrey}
+                color={isDark ? Colors.white : theme.darkGrey}
               />
             </View>
           </View>
@@ -345,7 +345,7 @@ const TopRatedUsers = ({ navigation }: any) => {
           placeholder={inputField[0].placeholder}
           placeholderColor={theme.grey}
           height={RFPercentage(6)}
-          backgroundColor={theme.mode === "dark" ? "#131214ff" : "#F1F3F5"}
+          backgroundColor={theme.mode === "dark" ? Colors.hom2 : Colors.tabsBackgroundLight}
           borderWidth={0}
           borderRadius={14}
           color={theme.heading}
@@ -371,7 +371,7 @@ const TopRatedUsers = ({ navigation }: any) => {
               style={[
                 styles.tab,
                 {
-                  borderColor: theme.mode === "dark" ? "#22282dff" : "#E9ECEF",
+                  borderColor: theme.mode === "dark" ? Colors.greyDark2 : Colors.white6,
                 },
                 !useCustomLocation && {
                   backgroundColor: Colors.primary,
@@ -386,12 +386,12 @@ const TopRatedUsers = ({ navigation }: any) => {
               <Ionicons
                 name="navigate"
                 size={16}
-                color={!useCustomLocation ? "#FFF" : theme.grey}
+                color={!useCustomLocation ? Colors.white : theme.grey}
               />
               <Text
                 style={[
                   styles.tabText,
-                  { color: !useCustomLocation ? "#FFF" : theme.grey },
+                  { color: !useCustomLocation ? Colors.white : theme.grey },
                 ]}
               >
                 {t("profileRank.txt43")}
@@ -403,7 +403,7 @@ const TopRatedUsers = ({ navigation }: any) => {
               style={[
                 styles.tab,
                 {
-                  borderColor: theme.mode === "dark" ? "#22282dff" : "#E9ECEF",
+                  borderColor: theme.mode === "dark" ? Colors.greyDark2 : Colors.white6,
                 },
                 useCustomLocation && {
                   backgroundColor: Colors.primary,
@@ -418,12 +418,12 @@ const TopRatedUsers = ({ navigation }: any) => {
               <Ionicons
                 name="map"
                 size={16}
-                color={useCustomLocation ? "#FFF" : theme.grey}
+                color={useCustomLocation ? Colors.white : theme.grey}
               />
               <Text
                 style={[
                   styles.tabText,
-                  { color: useCustomLocation ? "#FFF" : theme.grey },
+                  { color: useCustomLocation ? Colors.white : theme.grey },
                 ]}
                 numberOfLines={1}
               >
@@ -437,7 +437,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                 <AntDesign
                   name="closecircle"
                   size={14}
-                  color="#FFF"
+                  color={Colors.white}
                   onPress={() => {
                     dispatch(selectLocation(null));
                     setUseCustomLocation(false);
@@ -456,7 +456,7 @@ const TopRatedUsers = ({ navigation }: any) => {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8 }}
+            contentContainerStyle={styles.scrollViewContentContainer}
           >
             {["all", "pro", "rising", "beginner"].map((v) => (
               <TouchableOpacity
@@ -466,7 +466,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                   styles.chip,
                   {
                     borderColor:
-                      theme.mode === "dark" ? "#22282dff" : "#E9ECEF",
+                      theme.mode === "dark" ? Colors.greyDark2 : Colors.white6,
                   },
                   filter === v && {
                     backgroundColor: Colors.primary,
@@ -477,7 +477,7 @@ const TopRatedUsers = ({ navigation }: any) => {
                 <Text
                   style={[
                     styles.chipText,
-                    { color: filter === v ? "#FFF" : theme.grey },
+                    { color: filter === v ? Colors.white : theme.grey },
                   ]}
                 >
                   {t(
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E9ECEF",
+    borderColor: Colors.white6,
     gap: 6,
   },
   tabText: { fontSize: 14, fontFamily: "Poppins_500Medium" },
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#E9ECEF",
+    borderColor: Colors.white6,
   },
   chipText: { fontSize: 14, fontFamily: "Poppins_600SemiBold" },
   listSection: { paddingHorizontal: 16, marginTop: 20 },
@@ -648,6 +648,7 @@ const styles = StyleSheet.create({
   },
   center: { alignItems: "center", justifyContent: "center", marginTop: 40 },
   emptyText: { marginTop: 10, fontSize: 14, fontFamily: "Poppins_400Regular" },
+  scrollViewContentContainer: { gap: 8 },
 });
 
 export default TopRatedUsers;

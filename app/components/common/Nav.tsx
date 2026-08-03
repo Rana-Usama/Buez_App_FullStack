@@ -12,7 +12,12 @@ import {
   TextInput,
 } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
-import { useNavigation, DrawerActions } from "@react-navigation/native";
+import {
+  useNavigation,
+  DrawerActions,
+  NavigationProp,
+  ParamListBase,
+} from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -62,10 +67,10 @@ const Nav: React.FC<NavProps> = ({
   onSearchClose,
   onPress,
   gradient = true,
-  gradientColors = [
-    Colors.gradient1 || "#667eea",
-    Colors.gradient2 || "#764ba2",
-  ],
+  // Colors.gradient1 / gradient2 never existed on the palette, so these
+  // always fell through to the literals below — kept byte-identical, just
+  // without the dead references that TypeScript (correctly) rejected.
+  gradientColors = [Colors.blue16, "#764ba2"] as [string, string],
   curvedBottom = true,
   showWave = false,
   titleCenter = true,
@@ -77,7 +82,7 @@ const Nav: React.FC<NavProps> = ({
 }) => {
   const { unreadCount } = useNotifications();
   const { theme } = useAppTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -256,13 +261,13 @@ const Nav: React.FC<NavProps> = ({
           <TextInput
             style={styles.searchInput}
             placeholder={searchPlaceholder}
-            placeholderTextColor="rgba(255,255,255,0.7)"
+            placeholderTextColor={Colors.heroStatsLabel}
             value={searchQuery}
             onChangeText={handleSearchChange}
             autoFocus={autoFocusSearch}
             returnKeyType="search"
             clearButtonMode="while-editing"
-            selectionColor="rgba(255,255,255,0.5)"
+            selectionColor={Colors.whiteAlpha50}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity
@@ -273,7 +278,7 @@ const Nav: React.FC<NavProps> = ({
               <Ionicons
                 name="close-circle"
                 size={RFPercentage(2)}
-                color="rgba(255,255,255,0.7)"
+                color={Colors.heroStatsLabel}
               />
             </TouchableOpacity>
           )}
@@ -307,7 +312,7 @@ const Nav: React.FC<NavProps> = ({
             <TouchableOpacity
               onPress={handleOpenDrawer}
               activeOpacity={0.7}
-              style={[styles.menuButton, { backgroundColor: Colors.primary }]}
+              style={[styles.menuButton, styles.touchableOpacity]}
             >
               <Ionicons name="menu" size={RFPercentage(3)} color="white" />
             </TouchableOpacity>
@@ -315,7 +320,7 @@ const Nav: React.FC<NavProps> = ({
             <TouchableOpacity
               onPress={handleBack}
               activeOpacity={0.7}
-              style={[styles.backButton,{backgroundColor:  theme.mode === "dark" ?  "rgba(53, 52, 57, 1)" : Colors.primary,}]}
+              style={[styles.backButton,{backgroundColor:  theme.mode === "dark" ?  Colors.greyDark4 : Colors.primary,}]}
             >
               <Ionicons
                 name="arrow-back"
@@ -381,7 +386,7 @@ const Nav: React.FC<NavProps> = ({
               <TouchableOpacity
                 onPress={handleSearchToggle}
                 activeOpacity={0.7}
-                style={[styles.iconButton, { backgroundColor: Colors.primary }]}
+                style={[styles.iconButton, styles.touchableOpacity]}
               >
                 <Ionicons
                   name="search"
@@ -410,7 +415,7 @@ const Nav: React.FC<NavProps> = ({
                   activeOpacity={0.7}
                   style={[
                     styles.iconButton,
-                    { backgroundColor: Colors.primary },
+                    styles.touchableOpacity,
                   ]}
                 >
                   <Ionicons
@@ -439,7 +444,7 @@ const Nav: React.FC<NavProps> = ({
             style={[
               styles.gradientHeader,
               curvedBottom && styles.curvedBottom,
-              { borderBottomColor:theme.mode === "dark" ? "rgba(222, 219, 219, 0.35)" :  "rgba(222, 219, 219, 0.25)" },
+              { borderBottomColor:theme.mode === "dark" ? "rgba(222, 219, 219, 0.35)" :  Colors.greyLightAlpha25 },
             ]}
           >
             {showWave && <WaveEffect />}
@@ -469,7 +474,7 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     elevation: 12,
-    shadowColor: "#0b1544ff",
+    shadowColor: Colors.blueDark3,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 16,
@@ -488,7 +493,7 @@ const styles = StyleSheet.create({
     // paddingBottom: RFPercentage(2),
     paddingHorizontal: RFPercentage(2),
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.05)",
+    borderBottomColor: Colors.sectionBgLight,
   },
   curvedBottom: {
     // borderBottomLeftRadius: 30,
@@ -522,12 +527,12 @@ const styles = StyleSheet.create({
   menuButton: {
     padding: RFPercentage(0.8),
     borderRadius: RFPercentage(1),
-    backgroundColor: "rgba(174, 179, 200, 1)",
+    backgroundColor: Colors.blue6,
   },
   backButton: {
     padding: RFPercentage(0.8),
     borderRadius: RFPercentage(100),
-    backgroundColor: "rgba(174, 179, 200, 1)",
+    backgroundColor: Colors.blue6,
   },
   title: {
     fontSize: RFPercentage(2),
@@ -542,19 +547,19 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
-    color: "rgba(255,255,255,0.8)",
+    color: Colors.lastMsgTextColor,
     marginTop: RFPercentage(0.5),
   },
   iconButton: {
     padding: RFPercentage(0.8),
     borderRadius: RFPercentage(1),
-    backgroundColor: "rgba(174, 179, 200, 1)",
+    backgroundColor: Colors.blue6,
     position: "relative",
   },
   postButton: {
     padding: RFPercentage(0.8),
     borderRadius: RFPercentage(1),
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: Colors.backBtnBg,
   },
   badge: {
     position: "absolute",
@@ -597,7 +602,7 @@ const styles = StyleSheet.create({
     borderRadius: RFPercentage(1),
     padding: RFPercentage(0.2),
     borderWidth: 1,
-    borderColor: "#FFD700",
+    borderColor: Colors.gold,
   },
   wave: {
     position: "absolute",
@@ -605,7 +610,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: Colors.whiteAlpha10,
     transform: [{ skewX: "-20deg" }],
   },
   // Search Bar Styles
@@ -624,7 +629,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: RFPercentage(1),
     height: RFPercentage(5.5),
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: Colors.white3,
   },
   searchBackButton: {
     padding: RFPercentage(0.5),
@@ -648,6 +653,7 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: RFPercentage(0.5),
   },
+  touchableOpacity: { backgroundColor: Colors.primary },
 });
 
 export default Nav;

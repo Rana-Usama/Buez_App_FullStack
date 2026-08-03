@@ -307,7 +307,7 @@ export default function Location({ navigation, route }) {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={handleApplyFilter}
-            style={[styles.applyButton, { backgroundColor: Colors.primary }]}
+            style={[styles.applyButton, styles.touchableOpacity]}
           >
             <Text style={styles.applyButtonText}>{t("location.apply")}</Text>
           </TouchableOpacity>
@@ -375,4 +375,5 @@ const styles = StyleSheet.create({
     opacity: 1,
     width: "90%",
   },
+  touchableOpacity: { backgroundColor: Colors.primary },
 });

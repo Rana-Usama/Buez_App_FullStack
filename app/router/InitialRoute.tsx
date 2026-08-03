@@ -2,14 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import * as SecureStore from "expo-secure-store";
 import { getCredentials } from "../services/Auth.service";
 
-export const useInitialRoute = (userData, userLoading) => {
+export const useInitialRoute = (userData: any, userLoading: boolean) => {
   const [initialRoute, setInitialRoute] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const retryRef = useRef<NodeJS.Timeout | null>(null);
   const retryCount = useRef(0);
   const hasDecided = useRef(false);
 
-  const parseFirestoreTimestamp = (timestamp) => {
+  const parseFirestoreTimestamp = (timestamp: any) => {
     if (!timestamp) return null;
     if (timestamp.seconds) return new Date(timestamp.seconds * 1000);
     if (typeof timestamp === "string") return new Date(timestamp);

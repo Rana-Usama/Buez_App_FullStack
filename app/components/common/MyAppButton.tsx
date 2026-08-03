@@ -4,8 +4,7 @@ import {
   Text,
   ActivityIndicator,
   GestureResponderEvent,
-  Platform,
-} from "react-native";
+  Platform, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -53,27 +52,17 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
       onPress={onPress}
     >
       <LinearGradient
-        colors={[Colors.primary, "#4557B0"]}
+        colors={[Colors.primary, Colors.success2]}
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 0 }}
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
+        style={styles.linearGradient}
       >
         {loading ? (
           <ActivityIndicator size="small" color={Colors.white} />
         ) : (
           <Text
             numberOfLines={1}
-            style={{
-              color: Colors.white,
-              fontSize: RFPercentage(1.8),
-              fontFamily: "Poppins_600SemiBold",
-              textAlign: "center",
-              marginHorizontal: 5,
-            }}
+            style={styles.text}
           >
             {title}
           </Text>
@@ -84,3 +73,18 @@ const MyAppButton: React.FC<MyAppButtonProps> = ({
 };
 
 export default MyAppButton;
+
+const styles = StyleSheet.create({
+  linearGradient: {
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        },
+  text: {
+              color: Colors.white,
+              fontSize: RFPercentage(1.8),
+              fontFamily: "Poppins_600SemiBold",
+              textAlign: "center",
+              marginHorizontal: 5,
+            },
+});

@@ -20,7 +20,7 @@ const GroupChatButton: React.FC<GroupChatButtonProps> = ({ onPress, t, style }) 
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Ionicons name="people" size={RFPercentage(2)} color="#FFF" />
+      <Ionicons name="people" size={RFPercentage(2)} color={Colors.white} />
       <Text numberOfLines={1} style={styles.groupChatBtnText}>
         {t("taskApplicants.group")}
       </Text>
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   groupChatBtnText: {
-    color: "#FFF",
+    color: Colors.white,
     fontSize: RFPercentage(1.5),
     fontFamily: "Poppins_600SemiBold",
   },

@@ -1,31 +1,34 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { FontAwesome5 } from "@expo/vector-icons";
 import Colors from "../../config/Colors";
 const InterestPill = ({ item, isCustom, theme }: any) => {
   const CATEGORY_MAP: Record<string, { color: string; icon: string }> = {
-    Cleaning: { color: "#4ECDC4", icon: "broom" },
-    Moving: { color: "#FF6B6B", icon: "truck" },
-    Gardening: { color: "#95E06C", icon: "seedling" },
-    Gaming: { color: "#A78BFA", icon: "gamepad" },
-    Plumbing: { color: "#60A5FA", icon: "wrench" },
-    Electrical: { color: "#FBBF24", icon: "bolt" },
-    Carpentry: { color: "#F97316", icon: "hammer" },
-    Painting: { color: "#EC4899", icon: "paint-brush" },
-    Delivery: { color: "#14B8A6", icon: "shipping-fast" },
-    Tutoring: { color: "#8B5CF6", icon: "chalkboard-teacher" },
-    "Event Setup": { color: "#F43F5E", icon: "calendar-alt" },
-    Photography: { color: "#06B6D4", icon: "camera" },
-    "Pet Care": { color: "#D97706", icon: "paw" },
-    Other: { color: "#6B7280", icon: "ellipsis-h" },
+    Cleaning: { color: Colors.teal, icon: "broom" },
+    Moving: { color: Colors.red2, icon: "truck" },
+    Gardening: { color: Colors.green3, icon: "seedling" },
+    Gaming: { color: Colors.indigoLight2, icon: "gamepad" },
+    Plumbing: { color: Colors.blue5, icon: "wrench" },
+    Electrical: { color: Colors.orange2, icon: "bolt" },
+    Carpentry: { color: Colors.orange3, icon: "hammer" },
+    Painting: { color: Colors.pink, icon: "paint-brush" },
+    Delivery: { color: Colors.teal4, icon: "shipping-fast" },
+    Tutoring: { color: Colors.indigo2, icon: "chalkboard-teacher" },
+    "Event Setup": { color: Colors.red3, icon: "calendar-alt" },
+    Photography: { color: Colors.teal5, icon: "camera" },
+    "Pet Care": { color: Colors.orange4, icon: "paw" },
+    Other: { color: Colors.heading, icon: "ellipsis-h" },
   };
-  const meta = CATEGORY_MAP[item.key] || {};
+  // Falls back to an empty object for unknown keys; typed so the optional
+  // lookups below (meta.color / meta.icon) remain valid.
+  const meta: { color?: string; icon?: string } =
+    CATEGORY_MAP[item.key] || {};
   const color =
     isCustom && theme.mode === "dark"
-      ? "#5e617dff"
+      ? Colors.blue10
       : isCustom && theme.mode === "light"
-        ? "#1b1f45ff"
+        ? Colors.blueDark2
         : meta.color || "#3a6dedff";
   return (
     <View
@@ -40,9 +43,9 @@ const InterestPill = ({ item, isCustom, theme }: any) => {
         gap: RFPercentage(0.55),
         borderColor:
           isCustom && theme.mode === "dark"
-            ? "#5e617dff"
+            ? Colors.blue10
             : isCustom && theme.mode === "light"
-              ? "#1b1f45ff"
+              ? Colors.blueDark2
               : color + "40",
         backgroundColor: color + "10",
         marginRight: RFPercentage(1),
@@ -98,20 +101,15 @@ export default function InterestsSection({
         padding: RFPercentage(2.2),
         borderWidth: 1,
         backgroundColor:
-          theme.mode === "dark" ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+          theme.mode === "dark" ? Colors.whiteAlpha04 : Colors.white,
         borderColor:
           theme.mode === "dark"
-            ? "rgba(255,255,255,0.10)"
-            : "rgba(17,24,39,0.08)",
+            ? Colors.whiteAlpha10
+            : Colors.slateAlpha08,
       }}
     >
       <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          gap: RFPercentage(0.9),
-          marginBottom: RFPercentage(1.8),
-        }}
+        style={styles.view}
       >
         <View
           style={{
@@ -122,14 +120,14 @@ export default function InterestsSection({
             alignItems: "center",
             backgroundColor:
               theme.mode === "dark"
-                ? "rgba(255,255,255,0.08)"
+                ? Colors.whiteAlpha08
                 : Colors.primary + "0D",
           }}
         >
           <FontAwesome5
             name="heart"
             size={RFPercentage(1.4)}
-            color={theme.mode === "dark" ? "#FFFFFF" : Colors.primary}
+            color={theme.mode === "dark" ? Colors.white : Colors.primary}
             solid
           />
         </View>
@@ -145,7 +143,7 @@ export default function InterestsSection({
         </Text>
        
       </View>
-      <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+      <View style={styles.view2}>
         {translatedInterests.selectedCategories?.map((it: any) => (
           <InterestPill key={it.key} item={it} theme={theme} />
         ))}
@@ -156,3 +154,13 @@ export default function InterestsSection({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  view: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: RFPercentage(0.9),
+          marginBottom: RFPercentage(1.8),
+        },
+  view2: { flexDirection: "row", flexWrap: "wrap" },
+});
