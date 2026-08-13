@@ -315,7 +315,10 @@
     "tryAgain": "Bitte versuchen Sie es erneut."
   },
   "cancelSubscription": {
-    "txt1": "Premium-Abo kündige",
+    "cancelledBannerTitle": "Abonnemänt kündigt",
+    "cancelledBannerMessage": "Du hesch dis Abonnemänt kündigt. Du behaltisch de voll Zugriff uf Buez Premium bis am {{date}} und wirsch nüme belaschtet.",
+    "cancelledBannerMessageNoDate": "Du hesch dis Abonnemänt kündigt. Du behaltisch de voll Zugriff uf Buez Premium bis zum End vo dinere aktuelle Abrechnigsperiode und wirsch nüme belaschtet.",
+    "txt1": "Mis Abonnemänt",
     "txt2": "Aktuälle Plan",
     "txt3": ".99 pro Monet",
     "txt4": "Dini Dienst wird nümme für anderi sichtbar si",
@@ -327,7 +330,9 @@
     "txt10": "Bisch sicher, dass du dini monatlichi Abo kündige wotsch?",
     "renewsOn": "Verlängert sich am {{date}}",
     "expiresOn": "Läuft am {{date}} ab",
-    "savingLabel": "Spare {{percent}}%"
+    "savingLabel": "Spare {{percent}}%",
+    "currentPriceLabel": "Aktueller Preis",
+    "afterIntroMonths": "Nach den ersten {{months}} Monaten: {{price}}/Monat"
   },
   "chnagePassword": {
     "txt1": "Alts Passwort iigäh",

@@ -20,7 +20,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.1</string>
 	<key>CFBundleVersion</key>
-	<string>2</string>
+	<string>4</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 
@@ -49,8 +49,12 @@
 	<false/>
 
 	<!-- User Interface -->
+	<!-- Must stay Automatic. Hard-locking to Light pins native UI (keyboard,
+	     alerts, action sheets, date pickers, text selection) to light mode even
+	     while the in-app theme toggle is set to dark. ThemeProvider drives the
+	     native appearance at runtime via Appearance.setColorScheme(). -->
 	<key>UIUserInterfaceStyle</key>
-	<string>Light</string>
+	<string>Automatic</string>
 	<key>UIRequiresFullScreen</key>
 	<false/>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -164,6 +168,14 @@
 		<string>fbshareextension</string>
 		 <string>mailto</string>
 	</array>
+
+	<!-- Export Compliance -->
+	<!-- App uses only standard HTTPS/TLS (Firebase, Stripe, REST APIs), which is
+	     exempt. Declaring this here stops every upload from landing in App Store
+	     Connect as "Missing Compliance", which blocks automatic distribution to
+	     TestFlight groups and blocks external testers from installing. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 
 	<!-- Other Metadata -->
 	<key>LSRequiresIPhoneOS</key>

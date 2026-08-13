@@ -368,7 +368,10 @@
     "tryAgain": "Bitte versuchen Sie es erneut."
   },
   "cancelSubscription": {
-    "txt1": "Dein aktuelles Abonnement",
+    "cancelledBannerTitle": "Abonnement gekündigt",
+    "cancelledBannerMessage": "Du hast dein Abonnement gekündigt. Du behältst den vollen Zugang zu Buez Premium bis zum {{date}} und wirst nicht erneut belastet.",
+    "cancelledBannerMessageNoDate": "Du hast dein Abonnement gekündigt. Du behältst den vollen Zugang zu Buez Premium bis zum Ende deiner aktuellen Abrechnungsperiode und wirst nicht erneut belastet.",
+    "txt1": "Mein Abonnement",
     "txt8": "Du hast kein aktives Abonnement",
     "txt10": "Abonnement kündigen",
     "monthlyPlan": "MONATSPLAN",
@@ -384,7 +387,9 @@
     "yearlyCancelled": "Jahresabonnement erfolgreich gekündigt",
     "renewsOn": "Verlängert sich am {{date}}",
     "expiresOn": "Läuft am {{date}} ab",
-    "savingLabel": "Spare {{percent}}%"
+    "savingLabel": "Spare {{percent}}%",
+    "currentPriceLabel": "Aktueller Preis",
+    "afterIntroMonths": "Nach den ersten {{months}} Monaten: {{price}}/Monat"
   },
   "chnagePassword": {
     "txt1": "Altes Passwort eingeben",

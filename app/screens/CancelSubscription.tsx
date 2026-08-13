@@ -26,6 +26,8 @@ import CustomNav from "../components/common/CustomNav";
 import {
   getPlanAmount,
   getYearlySavings,
+  parseSubscriptionDate,
+  resolveMonthlyPricing,
 } from "../config/subscriptionPricing";
 
 function CancelSubscription({ navigation }: any) {
@@ -40,34 +42,43 @@ function CancelSubscription({ navigation }: any) {
   const currentPlan =
     userData?.planType || userData?.subscription?.planInterval || "monthly"; // Default to monthly if not specified
   const isYearlyPlan = currentPlan === "yearly";
+  const isCancelled = !!userData?.isCancelled;
 
   const locale = Localization.locale;
   const userCurrency = getCurrencyFromLocale(locale);
 
-  const basePlanAmount = getPlanAmount(
-    currentPlan === "yearly" ? "yearly" : "monthly",
-    userCurrency,
+  // Which subscription stage the user is actually in. resolveMonthlyPricing
+  // prefers the amount Stripe billed (subscription.amountPaid, written by the
+  // webhook) and falls back to subscriptionStart + INTRO_MONTHS, so a user
+  // inside the promotional window is never shown the standard price just
+  // because the webhook amount hasn't landed yet.
+  const monthlyPricing = resolveMonthlyPricing({
+    planType: currentPlan,
+    subscriptionStart: userData?.subscriptionStart,
+    amountPaid: userData?.subscription?.amountPaid,
+    amountCurrency: userData?.subscription?.currency,
+    fallbackCurrency: userCurrency,
+  });
+
+  const isOnIntroPricing = !isYearlyPlan && monthlyPricing.isIntroPricing;
+
+  // Yearly keeps its own base price; monthly uses the resolved current amount
+  // (promotional $3.90 during the first 3 cycles, standard $7.90 after).
+  const displayedAmount = isYearlyPlan
+    ? getPlanAmount("yearly", userCurrency)
+    : monthlyPricing.currentAmount;
+  const displayedCurrency = isYearlyPlan
+    ? userCurrency
+    : monthlyPricing.currentCurrency;
+
+  const formattedPrice = formatCurrency(displayedAmount, displayedCurrency);
+
+  // Standard monthly renewal price, surfaced alongside the promotional one so
+  // the user knows what the plan renews at after the intro months.
+  const standardMonthlyPrice = formatCurrency(
+    monthlyPricing.standardAmount,
+    monthlyPricing.standardCurrency,
   );
-
-  // Prefer the amount the user is actually being billed (saved by the Stripe
-  // webhook) — during the 3 intro months this is the discounted $3.90, and
-  // from cycle 4 it is the standard $7.90. Falls back to the base price.
-  const paidAmount =
-    typeof userData?.subscription?.amountPaid === "number" &&
-    userData.subscription.amountPaid > 0
-      ? userData.subscription.amountPaid
-      : basePlanAmount;
-  const paidCurrency = (
-    userData?.subscription?.currency || userCurrency
-  ).toUpperCase();
-
-  const formattedPrice = formatCurrency(paidAmount, paidCurrency);
-
-  // On the intro discount (monthly only) → surface the standard renewal
-  // price so the user knows what the plan renews at after 3 months.
-  const isOnIntroPricing =
-    currentPlan !== "yearly" && paidAmount < basePlanAmount;
-  const standardMonthlyPrice = formatCurrency(basePlanAmount, userCurrency);
 
   const cancelSubscription = async () => {
     if (!userData?.subscriptionId) {
@@ -140,18 +151,6 @@ function CancelSubscription({ navigation }: any) {
   // (Stripe's currentPeriodEnd, kept in sync by the cancel flow and the
   // subscription webhook). A still-renewing subscription shows when it
   // next bills; a cancelled-but-not-yet-expired one shows when access ends.
-  const parseSubscriptionDate = (value: any): Date | null => {
-    if (!value) return null;
-    if (typeof value === "object" && typeof value.seconds === "number") {
-      return new Date(value.seconds * 1000);
-    }
-    if (typeof value === "string" || typeof value === "number") {
-      const parsed = new Date(value);
-      return isNaN(parsed.getTime()) ? null : parsed;
-    }
-    return null;
-  };
-
   const subscriptionEndDate = parseSubscriptionDate(userData?.subscriptionEnd);
   const formattedSubscriptionEndDate = subscriptionEndDate
     ? subscriptionEndDate.toLocaleDateString(i18n.language, {
@@ -161,8 +160,17 @@ function CancelSubscription({ navigation }: any) {
       })
     : null;
 
+  // Cancelled subscriptions stay usable until the paid period runs out, so
+  // the banner states that plainly. With no synced end date yet, fall back to
+  // the generic "end of your current billing period" wording.
+  const cancelledBannerMessage = formattedSubscriptionEndDate
+    ? t("cancelSubscription.cancelledBannerMessage", {
+        date: formattedSubscriptionEndDate,
+      })
+    : t("cancelSubscription.cancelledBannerMessageNoDate");
+
   const billingDateLabel = formattedSubscriptionEndDate
-    ? userData?.isCancelled
+    ? isCancelled
       ? t("cancelSubscription.expiresOn", {
           date: formattedSubscriptionEndDate,
         })
@@ -203,8 +211,47 @@ function CancelSubscription({ navigation }: any) {
       >
         {userData?.planType && userData?.planType !== "free" ? (
           <>
+            {/* Cancelled: state it up front — premium stays on until the
+                already-paid period ends, and there is no further charge. */}
+            {isCancelled && (
+              <View
+                style={[
+                  styles.cancelledBanner,
+                  {
+                    backgroundColor: Colors.orange + "1A",
+                    borderColor: Colors.orange + "66",
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.cancelledBannerTitle,
+                    {
+                      color:
+                        theme.mode === "dark" ? Colors.white : Colors.darkGrey2,
+                    },
+                  ]}
+                >
+                  {t("cancelSubscription.cancelledBannerTitle")}
+                </Text>
+                <Text
+                  style={[
+                    styles.cancelledBannerText,
+                    { color: theme.darkGrey },
+                  ]}
+                >
+                  {cancelledBannerMessage}
+                </Text>
+              </View>
+            )}
+
             {/* Current Plan Badge */}
-            <View style={styles.planBadgeContainer}>
+            <View
+              style={[
+                styles.planBadgeContainer,
+                isCancelled && { marginTop: RFPercentage(2) },
+              ]}
+            >
               <View
                 style={[styles.planBadge, { backgroundColor: theme.primary }]}
               >
@@ -228,6 +275,32 @@ function CancelSubscription({ navigation }: any) {
                   {currentPlanDetails?.title}
                 </Text>
 
+                {/* Promotional stage: label the big figure as the price the
+                    user is paying right now, so it reads unambiguously
+                    against the standard price shown underneath. */}
+                {isOnIntroPricing && (
+                  <View
+                    style={[
+                      styles.introBadge,
+                      { backgroundColor: theme.primary + "1A" },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.introBadgeText,
+                        {
+                          color:
+                            theme.mode === "dark"
+                              ? Colors.white
+                              : theme.primary,
+                        },
+                      ]}
+                    >
+                      {t("cancelSubscription.currentPriceLabel")}
+                    </Text>
+                  </View>
+                )}
+
                 <Text style={[styles.priceText, { color: theme.darkGrey }]}>
                   {currentPlanDetails?.price?.split(".")[0]}
                   <Text style={styles.priceDecimal}>
@@ -238,13 +311,15 @@ function CancelSubscription({ navigation }: any) {
                   {currentPlanDetails?.period}
                 </Text>
 
-                {/* Intro offer: show the standard renewal price */}
+                {/* Intro offer: spell out what the plan renews at once the
+                    promotional months are over. */}
                 {isOnIntroPricing && (
                   <Text
                     style={[styles.renewalNote, { color: theme.darkGrey }]}
                     numberOfLines={2}
                   >
-                    {t("subscriptionV2.thenAfter", {
+                    {t("cancelSubscription.afterIntroMonths", {
+                      months: monthlyPricing.introMonths,
                       price: standardMonthlyPrice,
                     })}
                   </Text>
@@ -311,7 +386,9 @@ function CancelSubscription({ navigation }: any) {
                 )}
               </View>
 
-              {/* Cancellation Info */}
+              {/* Cancellation Info — pre-cancellation guidance only; after
+                  cancelling, the banner above already says what happens. */}
+              {!isCancelled && (
               <View
                 style={[
                   styles.cancellationInfo,
@@ -337,6 +414,7 @@ function CancelSubscription({ navigation }: any) {
                     : t("cancelSubscription.monthlyCancellation")}
                 </Text>
               </View>
+              )}
 
               <View style={[styles.starContainer, styles.view]}>
                 <Image style={styles.starIconRight} source={Icons.stars} />
@@ -345,7 +423,7 @@ function CancelSubscription({ navigation }: any) {
 
             {/* Already cancelled and just riding out the paid period — no
                 further action to take, so there's nothing to confirm. */}
-            {!userData?.isCancelled && (
+            {!isCancelled && (
               <View style={styles.buttonContainer}>
                 <MyAppButton
                   title={t("buttons.cancel")}
@@ -491,6 +569,17 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(0.6),
     textAlign: "center",
   },
+  introBadge: {
+    paddingHorizontal: RFPercentage(1.4),
+    paddingVertical: RFPercentage(0.4),
+    borderRadius: RFPercentage(1),
+    marginBottom: RFPercentage(0.6),
+  },
+  introBadgeText: {
+    fontSize: RFPercentage(1.3),
+    fontFamily: "Poppins_600SemiBold",
+    textAlign: "center",
+  },
   periodText: {
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
@@ -533,6 +622,24 @@ const styles = StyleSheet.create({
     marginTop: RFPercentage(1),
     fontFamily: "Poppins_400Regular",
     lineHeight: RFPercentage(2),
+  },
+  cancelledBanner: {
+    width: "90%",
+    alignSelf: "center",
+    marginTop: RFPercentage(3),
+    padding: RFPercentage(1.8),
+    borderRadius: RFPercentage(1.2),
+    borderWidth: RFPercentage(0.12),
+  },
+  cancelledBannerTitle: {
+    fontSize: RFPercentage(1.7),
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: RFPercentage(0.6),
+  },
+  cancelledBannerText: {
+    fontSize: RFPercentage(1.45),
+    fontFamily: "Poppins_400Regular",
+    lineHeight: RFPercentage(2.1),
   },
   cancellationInfo: {
     width: "90%",

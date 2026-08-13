@@ -23,7 +23,7 @@ import {
 
 const db = FIREBASE_DB;
 
-export const DELETED_USER_NAME = "Past Buezer";
+export const DELETED_USER_NAME = "Deleted User";
 
 // Firestore batches allow 500 ops; stay comfortably below.
 const BATCH_LIMIT = 400;
@@ -258,7 +258,7 @@ const removeUserFromApplications = async (userId: string) => {
 const anonymizeCompletedHistory = async (userId: string) => {
   const ops: PendingOp[] = [];
 
-  // As helper: keep the record, display helper as "Past Buezer".
+  // As helper: keep the record, display helper as "Deleted User".
   const asHelper = await safeGetDocs(
     query(
       collection(db, "completedTask"),
@@ -283,7 +283,7 @@ const anonymizeCompletedHistory = async (userId: string) => {
   });
 
   // As task owner: helpers keep their completed history, owner shows as
-  // "Past Buezer".
+  // "Deleted User".
   const asOwner = await safeGetDocs(
     query(
       collection(db, "completedTask"),
@@ -311,7 +311,7 @@ const anonymizeCompletedHistory = async (userId: string) => {
 
 // ─── Step 4: chats — preserve for other participants ─────────────────────────
 // Nothing is deleted. The other participant's UI resolves this user's name and
-// avatar from the (now anonymized) users doc, so history shows "Past Buezer".
+// avatar from the (now anonymized) users doc, so history shows "Deleted User".
 // A deletedUsers marker is added so the chat UI can disable new messages.
 const markChatsUserDeleted = async (userId: string) => {
   const chats = await safeGetDocs(
@@ -496,7 +496,7 @@ const deleteStorageFiles = async (urls: string[]) => {
 
 // ─── Step 9: profile — remove all PII, keep an anonymized shell ───────────────
 // Full setDoc (no merge) intentionally wipes every personal field. The shell
-// keeps chats/reviews resolving to "Past Buezer" instead of breaking.
+// keeps chats/reviews resolving to "Deleted User" instead of breaking.
 const anonymizeUserProfile = async (userId: string) => {
   try {
     await setDoc(doc(db, "users", userId), {

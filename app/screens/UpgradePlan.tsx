@@ -29,7 +29,10 @@ import { handlePaymentSheet } from "../services/Subscription.service";
 import { getCurrencyFromLocale, formatCurrency } from "../utils/getCurrency";
 import {
   SUBSCRIPTION_PRICES,
-  getPlanAmount,
+  getForwardYearlySavings,
+  getIntroMonthlyAmount,
+  resolveMonthlyPricing,
+  INTRO_MONTHS,
 } from "../config/subscriptionPricing";
 import CustomNav from "../components/common/CustomNav";
 import { LinearGradient } from "expo-linear-gradient";
@@ -65,20 +68,43 @@ function UpgradePlan(props) {
   const currentPlan =
     userData?.planType || userData?.subscription?.planInterval || "free";
 
-  // Intro pricing awareness: during the first 3 discounted monthly cycles the
-  // user is billed the coupon price (saved by the Stripe webhook), then the
-  // standard monthly price automatically.
-  const baseMonthlyAmount = getPlanAmount("monthly", userCurrency);
-  const paidAmount =
-    typeof userData?.subscription?.amountPaid === "number" &&
-    userData.subscription.amountPaid > 0
-      ? userData.subscription.amountPaid
-      : baseMonthlyAmount;
-  const paidCurrency = (
-    userData?.subscription?.currency || userCurrency
-  ).toUpperCase();
-  const isOnIntroPricing =
-    currentPlan !== "yearly" && paidAmount < baseMonthlyAmount;
+  // Intro pricing awareness: the first INTRO_MONTHS monthly cycles are billed
+  // at the promotional price ($3.90), then the standard price ($7.90)
+  // automatically. resolveMonthlyPricing prefers the amount Stripe actually
+  // billed and falls back to subscriptionStart + INTRO_MONTHS.
+  const monthlyPricing = resolveMonthlyPricing({
+    planType: currentPlan,
+    subscriptionStart: userData?.subscriptionStart,
+    amountPaid: userData?.subscription?.amountPaid,
+    amountCurrency: userData?.subscription?.currency,
+    fallbackCurrency: userCurrency,
+  });
+
+  const isMonthlySubscriber = currentPlan === "monthly";
+  const isOnIntroPricing = monthlyPricing.isIntroPricing;
+
+  // Promotional monthly figure advertised to users who aren't on the monthly
+  // plan yet (the offer they'd get on signup).
+  const introMonthlyPrice = formatCurrency(
+    getIntroMonthlyAmount(userCurrency),
+    userCurrency,
+  );
+
+  // The monthly card shows what this user would actually be billed:
+  //  - monthly subscriber inside the promo → their promotional amount
+  //  - monthly subscriber past the promo   → the standard price
+  //  - not on monthly yet (offer view)     → the promotional price
+  const monthlyCardPrice = isMonthlySubscriber
+    ? formatCurrency(
+        monthlyPricing.currentAmount,
+        monthlyPricing.currentCurrency,
+      )
+    : introMonthlyPrice;
+
+  // Show the "then <standard>/month" note whenever a promotional figure is on
+  // screen — either because the user is inside the promo window or because
+  // we're advertising the offer to them.
+  const showIntroNote = isOnIntroPricing || !isMonthlySubscriber;
 
   const updateSubscriptionStatus = async (start, end) => {
     if (!userId) return;
@@ -197,22 +223,26 @@ function UpgradePlan(props) {
 
   const monthlyPrice = priceLabelForPlan("monthly");
 
-  const monthlyRegular = prices.monthly[userCurrency];
   const yearlyPrice = prices.yearly[userCurrency];
 
-  // Amount discounted each month for the intro offer
-  const introDiscount = 4.0;
+  // POST-PURCHASE baseline: this screen is only reachable by an existing
+  // monthly subscriber, so the honest comparison is their OWN next 12 months
+  // on monthly — remaining promo cycles at $3.90, the rest at $7.90. That
+  // baseline climbs from $82.80 (cycle 1) to $94.80 (post-promo) as the promo
+  // is consumed, so the advertised saving climbs from 5% to 17% with it.
+  //
+  // Using the fixed first-year figure here would understate the saving for
+  // every subscriber past month 3. See the "two yearly-savings baselines" note
+  // in config/subscriptionPricing.ts.
+  const {
+    monthlyBaseline: firstYearMonthlyCost,
+    amount: savingsAmount,
+    percentage: savingsPercentage,
+  } = getForwardYearlySavings(userCurrency, userData?.subscriptionStart);
 
-  // First 3 months intro price
-  const introMonthly = monthlyRegular - introDiscount;
-
-  // Cost of first year on monthly plan
-  const firstYearMonthlyCost = introMonthly * 3 + monthlyRegular * 9;
-
-  const savingsAmount = firstYearMonthlyCost - yearlyPrice;
-
-  const savingsPercentage = (savingsAmount / firstYearMonthlyCost) * 100;
-  const highlightText = `Save ${Math.round(savingsPercentage)}%`;
+  const highlightText = t("subscriptionV2.saveLabel", {
+    percent: Math.round(savingsPercentage),
+  });
 
     const yearlySavings = {
     monthlyCost: formatCurrency(firstYearMonthlyCost, userCurrency),
@@ -225,7 +255,7 @@ function UpgradePlan(props) {
     {
       id: "monthly",
       title: t("subscriptionV2.monthly") || "Monthly",
-      price: monthlyPrice,
+      price: monthlyCardPrice,
       period: t("subscriptionV2.perMonth") || "per month",
       description:
         t("subscriptionV2.fullAccess") || "Full access to all features",
@@ -372,11 +402,12 @@ function UpgradePlan(props) {
           <View style={styles.priceSection}>
             <View style={styles.priceContainer}>
               {(() => {
-                // Current monthly plan on intro pricing → show what the user
-                // is actually billed right now ($3.90 during intro months).
+                // Monthly card → the figure this user is actually billed
+                // (promotional $3.90 during the intro months, standard $7.90
+                // after) or the promotional price when advertising the offer.
                 const priceStr =
-                  item.id === "monthly" && isOnIntroPricing
-                    ? formatCurrency(paidAmount, paidCurrency)
+                  item.id === "monthly"
+                    ? monthlyCardPrice
                     : priceLabelForPlan(item.id);
                 const [integerPart, decimalPart] = priceStr.split(".");
                 return (
@@ -411,17 +442,19 @@ function UpgradePlan(props) {
             </View>
           </View>
 
-          {/* Intro pricing note — standard price after the first 3 months */}
-          {item.id === "monthly" && isOnIntroPricing && (
-            <Text
-              style={[
-                styles.introNote,
-                { color: isDark ? Colors.blue : Colors.desc },
-              ]}
-              numberOfLines={2}
-            >
-              {t("subscriptionV2.thenAfter", { price: monthlyPrice })}
-            </Text>
+         
+          {item.id === "monthly" && showIntroNote && (
+            <>
+              <Text
+                style={[
+                  styles.introNote,
+                  { color: isDark ? Colors.blue : Colors.desc },
+                ]}
+                numberOfLines={2}
+              >
+                {t("subscriptionV2.thenAfter", { price: monthlyPrice })}
+              </Text>
+            </>
           )}
 
           {/* Savings badge + original price */}
@@ -979,10 +1012,15 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     paddingBottom: RFPercentage(0.5),
   },
+  introHighlight: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_600SemiBold",
+    marginTop: -RFPercentage(0.6),
+  },
   introNote: {
     fontSize: RFPercentage(1.45),
     fontFamily: "Poppins_500Medium",
-    marginTop: -RFPercentage(0.6),
+    marginTop: RFPercentage(0.2),
     marginBottom: RFPercentage(1),
   },
 

@@ -368,7 +368,10 @@
     "tryAgain": "Riprova."
   },
   "cancelSubscription": {
-    "txt1": "Il tuo abbonamento attuale",
+    "cancelledBannerTitle": "Abbonamento annullato",
+    "cancelledBannerMessage": "Hai annullato il tuo abbonamento. Manterrai l’accesso completo a Buez Premium fino al {{date}} e non ti verrà addebitato nulla.",
+    "cancelledBannerMessageNoDate": "Hai annullato il tuo abbonamento. Manterrai l’accesso completo a Buez Premium fino alla fine del periodo di fatturazione corrente e non ti verrà addebitato nulla.",
+    "txt1": "Il mio abbonamento",
     "txt8": "Non hai un abbonamento attivo",
     "txt10": "Annulla abbonamento",
     "monthlyPlan": "PIANO MENSILE",
@@ -384,7 +387,9 @@
     "yearlyCancelled": "Abbonamento annuale annullato con successo",
     "renewsOn": "Si rinnova il {{date}}",
     "expiresOn": "Scade il {{date}}",
-    "savingLabel": "Risparmia il {{percent}}%"
+    "savingLabel": "Risparmia il {{percent}}%",
+    "currentPriceLabel": "Prezzo attuale",
+    "afterIntroMonths": "Dopo i primi {{months}} mesi: {{price}}/mese"
   },
   "chnagePassword": {
     "txt1": "Inserisci vecchia password",

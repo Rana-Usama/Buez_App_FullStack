@@ -127,6 +127,12 @@ function SubscriptionV2(props: any) {
   // choosing yearly instead — both amount and percentage — computed from the
   // centralized SUBSCRIPTION_PRICES config for the user's currency. No
   // hardcoded numbers: change the config and this recalculates everywhere.
+  //
+  // PRE-PURCHASE baseline (standardMonthly × 12 = $94.80 → "Save 17%"): the
+  // viewer hasn't consumed the intro offer yet. UpgradePlan intentionally uses
+  // a different baseline for existing subscribers — see the "two
+  // yearly-savings baselines" note in config/subscriptionPricing.ts before
+  // changing either one.
   const originalYearlyPrice = formatCurrency(
     getRegularYearlyEquivalent(userCurrency),
     userCurrency,
@@ -365,6 +371,21 @@ function SubscriptionV2(props: any) {
               </Text>
             </View>
           </View>
+
+          {/* Intro offer line (monthly only) — states the promotional price
+              and duration explicitly; the badge below it carries the standard
+              price the plan renews at. Mirrors UpgradePlan's monthly card. */}
+          {item.id === "monthly" && item.highlight && (
+            <Text
+              style={[
+                styles.introHighlight,
+                { color: isDark ? Colors.success2 : Colors.primary },
+              ]}
+              numberOfLines={2}
+            >
+              {item.highlight}
+            </Text>
+          )}
 
           {/* Highlight badge + original price */}
           <View style={styles.highlightRow}>
@@ -837,6 +858,12 @@ const styles = StyleSheet.create({
     fontSize: RFPercentage(1.6),
     fontFamily: "Poppins_400Regular",
     paddingBottom: RFPercentage(0.5),
+  },
+  introHighlight: {
+    fontSize: RFPercentage(1.5),
+    fontFamily: "Poppins_600SemiBold",
+    marginTop: -RFPercentage(0.6),
+    marginBottom: RFPercentage(0.8),
   },
   introNote: {
     fontSize: RFPercentage(1.45),

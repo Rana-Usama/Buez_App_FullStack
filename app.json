@@ -7,6 +7,7 @@
     "icon": "./assets/icon.png",
     "newArchEnabled": true,
     "scheme": "buez",
+    "userInterfaceStyle": "automatic",
     "notification": {
       "icon": "./assets/notification-icon.png"
     },
@@ -27,6 +28,7 @@
         "googleMapsApiKey": "AIzaSyBSq361kA1Z14M0ymJ_u6UlKn4ulBLLrKQ"
       },
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
         "SKAdNetworkItems": [
           {
@@ -52,7 +54,7 @@
       },
       "bundleIdentifier": "com.adamburg.Buez",
       "appleTeamId": "34G27X37J4",
-      "buildNumber": "2"
+      "buildNumber": "4"
     },
     "android": {
       "adaptiveIcon": {

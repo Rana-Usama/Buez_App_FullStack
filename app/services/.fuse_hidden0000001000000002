@@ -126,7 +126,7 @@ export const deleteCurrentUser = async (currentPassword: string) => {
     // 🧹 Step 2: Clean up Firestore/Storage data. Deletes private data and
     // active tasks, cancels active acceptances (owners are notified), and
     // anonymizes everything other users still rely on (chats, completed task
-    // history, reviews written) as "Past Buezer".
+    // history, reviews written) as "Deleted User".
     await purgeUserAccountData(userId);
 
     // 🚀 Step 3: Delete the auth account
