@@ -1,5 +1,6 @@
 import React, { memo } from "react";
-import { View, TouchableOpacity, Image, Text, StyleSheet } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import ClickableMessageText from "../../components/common/ClickableMessageText";
 import Colors from "../../config/Colors";
@@ -69,6 +70,9 @@ const MessageItem = memo(
                 <Image
                   source={{ uri: profileImage }}
                   style={styles.msgAvatar}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
                 />
               ) : (
                 <AvatarInitials name={displayName} style={styles.msgAvatar} />

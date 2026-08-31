@@ -1,12 +1,12 @@
-import React from "react";
+import React, { memo } from "react";
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useAppTheme } from "../../contexts/themeContext";
@@ -74,6 +74,9 @@ const WorkerCard: React.FC<WorkerCardProps> = ({
                 styles.workerAvatar,
                 styles.image,
               ]}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={200}
             />
           ) : (
             <AvatarInitials
@@ -402,4 +405,4 @@ const styles = StyleSheet.create({
   text: { color: Colors.statusAlertSuccess },
 });
 
-export default WorkerCard;
+export default memo(WorkerCard);

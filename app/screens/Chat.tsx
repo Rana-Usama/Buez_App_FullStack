@@ -5,13 +5,13 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image,
   TextInput,
   StatusBar,
   ImageBackground,
   ActivityIndicator,
   FlatList,
 } from "react-native";
+import { Image } from "expo-image";
 import React, {
   useCallback,
   useEffect,
@@ -417,7 +417,7 @@ const Chat = ({ navigation, route }: any) => {
 
       if (props.currentMessage?.user?._id === currentUserId) return null;
       return receiver?.profileImage ? (
-        <Image source={{ uri: receiver.profileImage }} style={styles.img} />
+        <Image source={{ uri: receiver.profileImage }} style={styles.img} contentFit="cover" cachePolicy="memory-disk" transition={200} />
       ) : (
         <AvatarInitials
           name={receiver?.userName}

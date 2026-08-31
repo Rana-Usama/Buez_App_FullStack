@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getFirestore,
+  documentId,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { FIREBASE_DB, FIREBASE_AUTH } from "../../firebaseConfig";
@@ -298,8 +299,40 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
       collection(FIREBASE_DB, "completedTask")
     );
 
-    // Fetch users data
-    const usersSnap = await getDocs(collection(FIREBASE_DB, "users"));
+    // Only fetch the specific users referenced by these completed tasks
+    // (the helper who accepted each one) instead of downloading the entire
+    // `users` collection -- every user with zero completed tasks was being
+    // pulled down here and then discarded a few lines below anyway (see the
+    // `completedCount > 0` filter at the end of this function).
+    const helperIds = Array.from(
+      new Set(
+        completedTasksSnap.docs
+          .map((d) => d.data()?.acceptedBy?.userId)
+          .filter((id): id is string => Boolean(id))
+      )
+    );
+
+    const USERS_CHUNK_SIZE = 30; // Firestore "in" query limit
+    const userIdChunks: string[][] = [];
+    for (let i = 0; i < helperIds.length; i += USERS_CHUNK_SIZE) {
+      userIdChunks.push(helperIds.slice(i, i + USERS_CHUNK_SIZE));
+    }
+
+    const userSnapChunks = await Promise.all(
+      userIdChunks.map((chunk) =>
+        getDocs(
+          query(collection(FIREBASE_DB, "users"), where(documentId(), "in", chunk))
+        )
+      )
+    );
+    const userDocs = userSnapChunks.flatMap((snap) => snap.docs);
+
+    // `reviews` still needs a full-collection read: review docs use
+    // whichever of helperId / taskOwnerId / userId happens to be populated
+    // for "who this review is about" (see the fallback chain a few lines
+    // below), so a targeted query can't safely replace this until that
+    // field is standardized at write time. Tracked as a follow-up in
+    // PERFORMANCE_AUDIT.md (Section 2 / P1).
     const reviewsSnap = await getDocs(collection(FIREBASE_DB, "reviews"));
 
     // Keyed by userId. Typed as records so Object.values() yields a usable
@@ -320,8 +353,8 @@ export const fetchUsersWithTaskStats = async (customLocation = null) => {
       });
     });
 
-    // First, create a map of all users for quick lookup
-    usersSnap.docs.forEach((doc) => {
+    // First, create a map of the (now narrowed) users for quick lookup
+    userDocs.forEach((doc) => {
       const userData = doc.data();
       usersDataMap[userData.userId] = {
         userName: userData.userName || "Unknown",
@@ -493,27 +526,34 @@ export const fetchConfirmedTasksAsWorker = async (userId) => {
   }
 };
 
-// Alternative approach: Fetch all tasks and filter in memory
+// Alternative approach: Fetch tasks and filter in memory (array-contains
+// doesn't work reliably against confirmedWorkers' object entries -- see the
+// note on fetchConfirmedTasksAsWorker above).
 export const fetchAllConfirmedTasksAsWorker = async (userId) => {
   try {
     const db = getFirestore();
     const taskRequestsRef = collection(db, "taskRequests");
 
-    // Get all task requests (since array-contains doesn't work with complex objects)
-    const querySnapshot = await getDocs(taskRequestsRef);
+    // Bound the scan to tasks that are still open. A task that's already
+    // Completed/Cancelled was being fetched here and then discarded a few
+    // lines below anyway, so this removes reads that were always thrown
+    // away -- it doesn't change which tasks end up in the result. Using
+    // "not-in" (rather than an allowlist of open statuses) mirrors the
+    // original skip condition exactly, so any status value other than
+    // Completed/Cancelled still comes through as before.
+    // Note: like Firestore's `!=`, "not-in" excludes docs that have no
+    // `status` field at all -- not a concern here since every taskRequests
+    // doc is created with a status (see savePost in Post.service.tsx).
+    const openTasksQuery = query(
+      taskRequestsRef,
+      where("status", "not-in", ["Completed", "Cancelled"]),
+    );
+    const querySnapshot = await getDocs(openTasksQuery);
     const tasks = [];
 
     querySnapshot.forEach((doc) => {
       const taskData = doc.data();
       const taskId = doc.id;
-
-      // Skip tasks that are no longer active for the worker. Once the owner
-      // marks a (bulk) task Completed/Cancelled it must drop out of the
-      // worker's "Accepted Tasks" list and surface only under "Completed".
-      const taskStatus = taskData.status;
-      if (taskStatus === "Completed" || taskStatus === "Cancelled") {
-        return;
-      }
 
       // Check if user is in confirmedWorkers
       const confirmedWorkers = taskData.confirmedWorkers || [];

@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   Image,
-  ImageBackground,
   FlatList,
   ScrollView,
   TouchableOpacity,
@@ -13,6 +12,7 @@ import {
   StatusBar,
   Dimensions,
 } from "react-native";
+import { Image as ExpoImage, ImageBackground } from "expo-image";
 import Toast from "react-native-toast-message";
 import ConfirmationModal from "../components/common/ConfirmationModal";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -348,13 +348,15 @@ export default function AcceptedTasks({ navigation }:any) {
           showsHorizontalScrollIndicator={false}
           onScroll={(e) => handleImageScroll(e, index)}
           scrollEventThrottle={16}
-          keyExtractor={(_, i) => i.toString()}
+          keyExtractor={(item) => item}  // item is the image URL string itself -- stable and unique per task
           renderItem={({ item }) => (
             <ImageBackground
               style={styles.cardImageBg}
               imageStyle={styles.cardImage}
               source={{ uri: item }}
-              resizeMode="cover"
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={200}
             >
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryText} numberOfLines={1}>
@@ -412,9 +414,12 @@ export default function AcceptedTasks({ navigation }:any) {
         <View style={styles.ownerRow}>
           <View style={styles.avatarWrapper}>
             {cart?.user?.profileImage ? (
-              <Image
+              <ExpoImage
                 style={styles.ownerAvatar}
                 source={{ uri: cart.user.profileImage }}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                transition={200}
               />
             ) : (
               <AvatarInitials

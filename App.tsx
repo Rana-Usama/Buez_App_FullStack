@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, LogBox, Image, Platform } from "react-native";
+import { View, LogBox, Image, Platform, InteractionManager } from "react-native";
 import {
   Poppins_300Light,
   Poppins_400Regular,
@@ -20,7 +20,7 @@ import { NotificationProvider } from "./app/contexts/notification.context";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./app/utils/ToastConfig";
 import StackNavigator from "./app/router/StackNavigator";
-import i18n from "./app/translation/i18n";
+import "./app/translation/i18n"; // side effect only: triggers i18next init at module load
 import { ThemeProvider, useAppTheme } from "./app/contexts/themeContext";
 import "react-native-get-random-values";
 import { Provider } from "react-redux";
@@ -36,6 +36,7 @@ import { useDeepLinking } from "./app/job-sharing/useDeepLinking";
 import { navigate } from "./app/router/navigationRef";
 import { initLiveRates } from "./app/utils/currencyChange";
 import { applyGlobalFontScaling } from "./app/utils/fontScaling";
+import { markFirstScreenReady } from "./app/utils/launchMetrics";
 
 LogBox.ignoreAllLogs();
 
@@ -108,12 +109,37 @@ function MainApp() {
 
   useEffect(() => {
     async function prepare() {
-      await new Promise((resolve) => setTimeout(resolve, 500));
       setAppReady(true);
       await SplashScreen.hideAsync();
+      markFirstScreenReady();
     }
     prepare();
   }, []);
+
+  useEffect(() => {
+    if (!appReady) return;
+
+    // Deferred until the first real screen is visible -- none of this is
+    // needed to render it, so it shouldn't compete with startup for the JS
+    // thread. See PERFORMANCE_AUDIT.md, Section 1.
+    const interactionHandle = InteractionManager.runAfterInteractions(() => {
+      initLiveRates().catch(() => {});
+
+      getFCMToken()
+        .then((token) => {
+          if (token) console.log("FCM token:", token);
+        })
+        .catch(() => {});
+
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        sound: "default",
+      });
+    });
+
+    return () => interactionHandle.cancel();
+  }, [appReady]);
 
   if (!appReady) {
     return (
@@ -144,21 +170,12 @@ export default function App() {
   const { showModal, checked, handleDone } = useLanguageOnboarding();
 
   useEffect(() => {
-    initLiveRates().catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    getFCMToken()
-      .then((token) => {
-        if (token) console.log("FCM token:", token);
-      })
-      .catch(() => {});
-
-    Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      sound: "default",
-    });
+    // Foreground push messages must be subscribed as early as possible so
+    // none are missed while the app is open -- this only registers a
+    // listener (no network/permission work), so it's cheap enough to keep
+    // immediate. The actual permission prompt + token fetch + Android
+    // channel setup are deferred until after the first screen is visible
+    // (see the appReady-gated effect in MainApp above).
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       await Notifications.scheduleNotificationAsync({
         content: {
@@ -180,9 +197,6 @@ export default function App() {
     setupLanguage();
   }, []);
 
-  useEffect(() => {
-    console.log(i18n.isInitialized);
-  }, []);
   if (!checked || !fontsLoaded) return null;
 
   return (

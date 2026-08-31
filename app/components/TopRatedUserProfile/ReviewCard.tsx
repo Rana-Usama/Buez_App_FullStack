@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons } from "@expo/vector-icons";
 import AvatarInitials from "../common/DefaultAvatars";
@@ -68,6 +69,9 @@ export default function ReviewCard({
           <Image
             source={{ uri: reviewer.profileImage }}
             style={styles.image}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={200}
           />
         ) : (
           <AvatarInitials

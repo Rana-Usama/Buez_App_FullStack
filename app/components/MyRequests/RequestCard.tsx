@@ -3,11 +3,11 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ImageBackground,
   Image,
   FlatList,
   Animated,
   LayoutAnimation, StyleSheet } from "react-native";
+import { Image as ExpoImage, ImageBackground } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -105,7 +105,7 @@ function RequestCard({
         onScroll={onImageScroll}
         scrollEventThrottle={16}
         renderItem={({ item }) => (
-          <ImageBackground style={styles.imageBackground} imageStyle={styles.imageBackgroundImage} source={{ uri: item }}>
+          <ImageBackground style={styles.imageBackground} imageStyle={styles.imageBackgroundImage} source={{ uri: item }} contentFit="cover" cachePolicy="memory-disk" transition={200}>
             <View style={styles.view}>
               <Text style={styles.text} numberOfLines={1}>
                 {task?.taskType === "Other" ? task.customTaskTitle : task?.taskType}
@@ -133,7 +133,7 @@ function RequestCard({
 
       <View style={styles.view4}>
         <TouchableOpacity activeOpacity={0.8}>
-          <Image style={styles.image2} source={task?.user?.profileImage ? { uri: task?.user?.profileImage } : Icons.dp} />
+          <ExpoImage style={styles.image2} source={task?.user?.profileImage ? { uri: task?.user?.profileImage } : Icons.dp} contentFit="cover" cachePolicy="memory-disk" transition={200} />
         </TouchableOpacity>
         <Text style={{ marginLeft: RFPercentage(1.4), fontSize: RFPercentage(1.8), flex: 1, color: theme.heading }} numberOfLines={1}>
           {task?.user?.userName?.substr(0, 10) + (task?.user?.userName?.length > 10 ? "..." : "")}

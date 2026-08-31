@@ -2,12 +2,12 @@ import React, { useCallback } from "react";
 import {
   View,
   TouchableOpacity,
-  Image,
   Text,
   FlatList,
   StyleSheet,
   Dimensions,
 } from "react-native";
+import { Image } from "expo-image";
 import { MaterialIcons } from "@expo/vector-icons";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Colors from "../../../app/config/Colors";
@@ -43,7 +43,7 @@ function ImageGrid({ imageUris, onPick, onDelete, theme, t }: Props) {
         >
           {uri ? (
             <>
-              <Image style={styles.selectedImage} source={{ uri }} />
+              <Image style={styles.selectedImage} source={{ uri }} contentFit="cover" cachePolicy="memory-disk" transition={150} />
               <TouchableOpacity
                 onPress={() => onDelete(index)}
                 style={[styles.deleteButton, styles.touchableOpacity]}

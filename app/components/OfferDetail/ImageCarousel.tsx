@@ -2,9 +2,9 @@ import React from "react";
 import {
   FlatList,
   TouchableOpacity,
-  Image,
   View,
   Dimensions, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -49,7 +49,9 @@ export default function ImageCarousel({
               <Image
                 source={{ uri: item }}
                 style={styles.image}
-                resizeMode="cover"
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                transition={200}
               />
               {/* Top scrim for back button / badge legibility */}
               <LinearGradient

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  ImageBackground,
   Image,
   Platform,
   FlatList,
@@ -17,6 +16,7 @@ import {
   LayoutAnimation,
   UIManager,
 } from "react-native";
+import { Image as ExpoImage, ImageBackground } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "../config/Colors";
@@ -992,7 +992,9 @@ function MyRequests({ navigation }) {
                     style={styles.cartImageBackground}
                     imageStyle={styles.cartImage}
                     source={{ uri: item }}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    transition={200}
                   >
                     <View style={styles.categoryBadge}>
                       <Text style={styles.categoryText} numberOfLines={1}>
@@ -1079,7 +1081,7 @@ function MyRequests({ navigation }) {
                       )}
                   </ImageBackground>
                 )}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item) => item}  // item is the image URL string itself -- stable and unique per task
               />
 
               {cart.imageUrls?.length > 1 && (
@@ -1105,9 +1107,12 @@ function MyRequests({ navigation }) {
               <View style={styles.cartInfoContainer}>
                 <TouchableOpacity activeOpacity={1}>
                   {cart?.user?.profileImage ? (
-                    <Image
+                    <ExpoImage
                       style={styles.userImage}
                       source={{ uri: cart?.user?.profileImage }}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
+                      transition={200}
                     />
                   ) : (
                     <AvatarInitials

@@ -2,11 +2,11 @@ import React, { memo } from "react";
 import {
   View,
   TouchableOpacity,
-  Image,
   Platform,
   Text,
   StyleSheet,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Colors from "../../config/Colors";
@@ -40,7 +40,9 @@ const ChatHeader = memo(({ navigation, receiver, theme }: Props) => {
         {receiver?.profileImage ? (
           <Image
             source={{ uri: receiver.profileImage }}
-            resizeMode="cover"
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={200}
             style={styles.profile}
           />
         ) : (

@@ -14,6 +14,7 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from "react-native";
+import { Image as ExpoImage } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { MaterialIcons, Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -680,9 +681,12 @@ function Profile({ navigation }: any) {
                     { borderColor: theme.primary },
                   ]}
                 >
-                  <Image
+                  <ExpoImage
                     style={styles.profileImage}
                     source={{ uri: profileImgUrl }}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    transition={200}
                   />
                 </View>
               ) : (

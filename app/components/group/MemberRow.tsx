@@ -3,10 +3,10 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   Animated,
   StyleSheet,
 } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -92,6 +92,9 @@ const MemberRow = ({ member, index, currentUserId, onChat, theme }: Props) => {
             <Image
               source={{ uri: member.profileImage }}
               style={styles.memberAvatar}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={200}
             />
           ) : (
             <AvatarInitials

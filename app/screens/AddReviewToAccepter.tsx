@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   ScrollView,
   Platform,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import {
   Animated,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -522,7 +522,9 @@ function AddReviewToAccepter() {
               {recipientUser?.profileImage ? (
                 <Image
                   source={{ uri: recipientUser?.profileImage }}
-                  resizeMode="cover"
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
                   style={styles.profileImage}
                 />
               ) : (

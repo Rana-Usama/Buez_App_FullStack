@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   FlatList,
   Dimensions,
   Platform,
@@ -14,6 +13,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getAuth } from "firebase/auth";
@@ -1581,6 +1581,9 @@ function OfferDetail({ navigation, route }) {
                                 : Icons.dp
                             }
                             style={styles.reviewerAvatar}
+                            contentFit="cover"
+                            cachePolicy="memory-disk"
+                            transition={200}
                           />
                           <View style={styles.reviewerInfo}>
                             <Text

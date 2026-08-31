@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
   StatusBar,
   RefreshControl,
   Alert,
 } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Colors from "../config/Colors";
 import { useTranslation } from "react-i18next";
@@ -204,33 +204,40 @@ function ConfirmedHelpers({ route, navigation }: { route: any; navigation: any }
     setRefreshing(false);
   };
 
-  const handleStartChat = async (receiverUser: any) => {
-    try {
-      const chatId = await createNewChat(currentUserId, receiverUser.userId);
-      navigation.navigate("Chat", {
-        chatId,
-        senderId: currentUserId,
-        senderName: currentUser?.userName,
-        receiver: receiverUser,
+  // Memoized -- renderHelperItem (below) depends on both of these.
+  const handleStartChat = useCallback(
+    async (receiverUser: any) => {
+      try {
+        const chatId = await createNewChat(currentUserId, receiverUser.userId);
+        navigation.navigate("Chat", {
+          chatId,
+          senderId: currentUserId,
+          senderName: currentUser?.userName,
+          receiver: receiverUser,
+        });
+      } catch (err) {
+        console.log("Chat start error:", err);
+      }
+    },
+    [currentUserId, currentUser?.userName, navigation],
+  );
+
+  const handleAddReview = useCallback(
+    (worker: any) => {
+      navigation.navigate("AddReviewToAccepter", {
+        task: {
+          ...task,
+          acceptedBy: worker,
+          taskId: task.id,
+          isBulkRequest: task.isBulkRequest,
+          bulkWorkerId: worker.userId,
+        },
       });
-    } catch (err) {
-      console.log("Chat start error:", err);
-    }
-  };
+    },
+    [navigation, task],
+  );
 
-  const handleAddReview = (worker: any) => {
-    navigation.navigate("AddReviewToAccepter", {
-      task: {
-        ...task,
-        acceptedBy: worker,
-        taskId: task.id,
-        isBulkRequest: task.isBulkRequest,
-        bulkWorkerId: worker.userId,
-      },
-    });
-  };
-
-  const renderHelperItem = ({ item }: { item: any }) => {
+  const renderHelperItem = useCallback(({ item }: { item: any }) => {
     const isDark = theme.mode === "dark";
 
     const firstLetter = item?.userName.trim()?.[0];
@@ -255,7 +262,9 @@ function ConfirmedHelpers({ route, navigation }: { route: any; navigation: any }
               <Image
                 style={styles.helperImage}
                 source={{ uri: item.profileImage }}
-                resizeMode="cover"
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                transition={200}
               />
             ) : (
               <AvatarInitials
@@ -375,7 +384,7 @@ function ConfirmedHelpers({ route, navigation }: { route: any; navigation: any }
         </View>
       </View>
     );
-  };
+  }, [handleAddReview, handleStartChat, t, theme]);
   return (
     <View style={[styles.screen, { backgroundColor: theme.white }]}>
       <StatusBar
@@ -402,7 +411,9 @@ function ConfirmedHelpers({ route, navigation }: { route: any; navigation: any }
       >
         <Image
           source={{ uri: task?.imageUrls[0] }}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={200}
           style={styles.taskThumb}
         />
         <View style={styles.taskMeta}>
@@ -458,8 +469,12 @@ function ConfirmedHelpers({ route, navigation }: { route: any; navigation: any }
         <FlatList
           data={confirmedHelpers}
           renderItem={renderHelperItem}
-          keyExtractor={(item, index) => `${item.userId}_${index}`}
+          keyExtractor={(item) => item.userId}
           contentContainerStyle={styles.listContainer}
+          initialNumToRender={8}
+          maxToRenderPerBatch={8}
+          windowSize={7}
+          removeClippedSubviews
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

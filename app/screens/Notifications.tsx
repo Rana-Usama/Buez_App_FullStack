@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   SectionList,
   TouchableOpacity,
   ActivityIndicator,
@@ -12,6 +11,7 @@ import {
   RefreshControl,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { getAuth } from "firebase/auth";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
@@ -302,7 +302,7 @@ export default function Notifications({ navigation }) {
     [currentUserId, currentUser?.userData?.userName],
   );
 
-  const getNotificationIcon = (type, isRead) => {
+  const getNotificationIcon = useCallback((type, isRead) => {
     const iconColor = theme.mode === "dark" ? Colors.white : Colors.primary;
 
     switch (type) {
@@ -367,7 +367,7 @@ export default function Notifications({ navigation }) {
           />
         );
     }
-  };
+  }, [theme]);
 
   const getAnimationValue = (id) => {
     if (!animationValues.current[id]) {
@@ -455,7 +455,7 @@ export default function Notifications({ navigation }) {
     }
   };
 
-  const renderItem = ({ item, index }) => {
+  const renderItem = useCallback(({ item, index }) => {
     const isExpanded = expandedId === item.id;
     const animation = getAnimationValue(item.id);
     const senderName = item.sender?.userName || "Someone";
@@ -565,6 +565,9 @@ export default function Notifications({ navigation }) {
                   <Image
                     source={profileImage ? { uri: profileImage } : Icons.dp}
                     style={styles.avatar}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    transition={200}
                   />
                 ) : (
                   <AvatarInitials
@@ -767,7 +770,7 @@ export default function Notifications({ navigation }) {
         </View>
       </Animated.View>
     );
-  };
+  }, [descCache, expandedId, fadeAnim, getNotificationIcon, handleStartChat, lang, markAsRead, navigation, theme, tr]);
 
   const renderHeader = ({ section: { title } }) => {
     const show =
@@ -836,6 +839,10 @@ export default function Notifications({ navigation }) {
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             renderSectionHeader={renderHeader}
+            initialNumToRender={8}
+            maxToRenderPerBatch={8}
+            windowSize={7}
+            removeClippedSubviews
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Ionicons

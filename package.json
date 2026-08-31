@@ -43,6 +43,7 @@
     "expo-dev-client": "~5.0.20",
     "expo-device": "~7.0.3",
     "expo-font": "~13.0.4",
+    "expo-image": "~2.0.7",
     "expo-image-manipulator": "~13.0.6",
     "expo-image-picker": "~16.0.6",
     "expo-linear-gradient": "~14.0.2",
@@ -98,6 +99,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "eslint": "^8.57.0",
     "eslint-config-expo": "~8.0.1",
     "patch-package": "^8.0.0",

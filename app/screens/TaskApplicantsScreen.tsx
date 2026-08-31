@@ -366,10 +366,14 @@ const TaskApplicantsScreen: React.FC<TaskApplicantsScreenProps> = ({
             <FlatList
               data={currentWorkers}
               renderItem={renderWorkerItem}
-              keyExtractor={(item, index) => `${item.userId}-${index}`}
+              keyExtractor={(item) => item.userId}
               scrollEnabled={false}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
+              initialNumToRender={8}
+              maxToRenderPerBatch={8}
+              windowSize={7}
+              removeClippedSubviews
             />
           ) : (
             <EmptyState message={emptyMessage} icon={emptyIcon} />

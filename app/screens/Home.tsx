@@ -124,6 +124,43 @@ const HomeScreen: React.FC = () => {
     setActiveIndices((prev) => ({ ...prev, [index]: slideIndex }));
   }, []);
 
+  // Memoized so the horizontal list can skip re-invoking it for unchanged rows.
+  const renderTopRatedUser = useCallback(
+    ({ item }) => (
+      <TopRatedUserCard
+        user={item}
+        onPress={() => handleUserPress(item)}
+        darkMode={theme.mode === "dark"}
+        t={t}
+      />
+    ),
+    [handleUserPress, theme, t],
+  );
+
+  // Memoized so FlatList can skip re-invoking it for unchanged rows.
+  const renderTaskItem = useCallback(
+    ({ item, index }) => (
+      <TaskCard
+        task={item}
+        index={index}
+        onPress={handleTaskPress}
+        activeIndex={activeIndices[index] || 0}
+        onImageScroll={handleImageScroll}
+        getConvertedCompensation={getConvertedCompensation}
+        theme={theme}
+        t={t}
+      />
+    ),
+    [
+      handleTaskPress,
+      activeIndices,
+      handleImageScroll,
+      getConvertedCompensation,
+      theme,
+      t,
+    ],
+  );
+
   // Render loading state
   const renderLoading = () => (
     <View style={styles.loadingContainer}>
@@ -146,20 +183,13 @@ const HomeScreen: React.FC = () => {
   const renderTaskList = () => (
     <FlatList
       data={displayTasks}
-      keyExtractor={(item, index) => `${item.id}-${index}`}
+      keyExtractor={(item) => item.id}
       scrollEventThrottle={16}
-      renderItem={({ item, index }) => (
-        <TaskCard
-          task={item}
-          index={index}
-          onPress={handleTaskPress}
-          activeIndex={activeIndices[index] || 0}
-          onImageScroll={handleImageScroll}
-          getConvertedCompensation={getConvertedCompensation}
-          theme={theme}
-          t={t}
-        />
-      )}
+      renderItem={renderTaskItem}
+      initialNumToRender={6}
+      maxToRenderPerBatch={6}
+      windowSize={7}
+      removeClippedSubviews
       ListEmptyComponent={
         !loading && (
           <View style={styles.notFoundContainer}>
@@ -274,21 +304,14 @@ const HomeScreen: React.FC = () => {
                 <FlatList
                   horizontal
                   data={topRatedUsers}
-                  keyExtractor={(item, index) => `${item.userId}-${index}`}
+                  keyExtractor={(item) => item.userId}
                   style={styles.topRatedList}
                   contentContainerStyle={styles.topRatedContainer}
                   showsHorizontalScrollIndicator={false}
-                  renderItem={({ item }) => (
-                    <TopRatedUserCard
-                      user={item}
-                      onPress={() => handleUserPress(item)}
-                      // onPress={() => {
-                      //   navigation.navigate("FounderIntro");
-                      // }}
-                      darkMode={theme.mode === "dark"}
-                      t={t}
-                    />
-                  )}
+                  renderItem={renderTopRatedUser}
+                  initialNumToRender={5}
+                  windowSize={5}
+                  removeClippedSubviews
                 />
               </>
             ) : (

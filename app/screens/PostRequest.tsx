@@ -7,7 +7,6 @@ import {
   ScrollView,
   FlatList,
   TextInput,
-  Image,
   Platform,
   Pressable,
   TouchableWithoutFeedback,
@@ -16,6 +15,7 @@ import {
   Dimensions,
   Animated,
 } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import {
   MaterialIcons,
@@ -2613,6 +2613,9 @@ function PostRequest({ navigation, route }) {
                           <Image
                             style={styles.selectedImage}
                             source={{ uri: imageUris[index] }}
+                            contentFit="cover"
+                            cachePolicy="memory-disk"
+                            transition={150}
                           />
                           <TouchableOpacity
                             onPress={() => deleteImage(index)}

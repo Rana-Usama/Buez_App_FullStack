@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../../config/Colors";
@@ -30,7 +31,7 @@ export default function ReviewsCard({ translatedReviews = [], averageRating, t, 
       {visible.map((review, i) => (
         <View key={review.id || i} style={{ borderRadius: 12, padding: RFPercentage(1.2), marginBottom: RFPercentage(1.2), backgroundColor: theme.mode === "dark" ? theme.white + "08" : Colors.heroStatsLabel }}>
           <View style={styles.view2}>
-            <Image source={review?.reviewer?.profileImage ? { uri: review.reviewer.profileImage } : Icons.dp} style={styles.image} />
+            <Image source={review?.reviewer?.profileImage ? { uri: review.reviewer.profileImage } : Icons.dp} style={styles.image} contentFit="cover" cachePolicy="memory-disk" transition={200} />
             <View style={styles.view3}>
               <Text style={{ fontSize: RFPercentage(1.4), fontFamily: "Poppins_600SemiBold", color: theme.heading }}>{review?.reviewer?.userName}</Text>
               <Text style={{ fontSize: RFPercentage(1.1), color: theme.darkGrey }}>{new Date(review?.createdAt || Date.now()).toLocaleDateString()}</Text>

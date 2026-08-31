@@ -11,7 +11,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   FlatList,
   ActivityIndicator,
   RefreshControl,
@@ -19,6 +18,7 @@ import {
   Animated,
   Platform,
 } from "react-native";
+import { Image } from "expo-image";
 import {
   collection,
   query,
@@ -216,6 +216,9 @@ const ChatItem = memo(({ item, userId, theme, onPress, t }: any) => {
               <Image
                 style={styles.avatar}
                 source={{ uri: item.user.profileImage }}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                transition={200}
               />
             ) : (
               <AvatarInitials

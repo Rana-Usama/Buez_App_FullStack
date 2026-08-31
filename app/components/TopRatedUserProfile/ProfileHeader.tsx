@@ -2,9 +2,9 @@ import React from "react";
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   ActivityIndicator, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
@@ -143,6 +143,9 @@ export default function ProfileHeader({
                 <Image
                   source={{ uri: userBasic.profileImage }}
                   style={styles.image}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
                 />
               ) : (
                 <AvatarInitials

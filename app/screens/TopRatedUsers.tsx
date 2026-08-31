@@ -3,11 +3,11 @@ import {
   View,
   TouchableOpacity,
   Text,
-  Image,
   ActivityIndicator,
   ScrollView,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import React, { useState, useEffect } from "react";
 import { useAppTheme } from "../contexts/themeContext";
 import { RFPercentage } from "react-native-responsive-fontsize";
@@ -204,7 +204,9 @@ const TopRatedUsers = ({ navigation }: any) => {
                 <Image
                   source={{ uri: user.profileImage }}
                   style={styles.avatar}
-                  resizeMode="cover"
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
                 />
               ) : (
                 <AvatarInitials name={user.userName} style={styles.avatar} />

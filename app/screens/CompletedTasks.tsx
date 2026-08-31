@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   FlatList,
   ActivityIndicator,
   RefreshControl,
@@ -11,6 +10,7 @@ import {
   TouchableOpacity,
   Animated,
 } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
 import MyAppButton from "../components/common/MyAppButton";
@@ -246,22 +246,27 @@ export default function CompletedTasks({ navigation }: any) {
   const isDark = theme.mode === "dark";
 
   // ─── Tokens ──────────────────────────────────────────────────────────────
-  const token = {
-    bg: isDark ? "#0E0F14" : "#F6F7FB",
-    card: isDark ? "#050507ff" : Colors.white,
-    border: isDark ? "rgba(50, 53, 72, 0.38)" : "rgba(235, 235, 255, 0.81)",
-    heading: isDark ? Colors.white : "#0D0E14",
-    body: isDark ? "rgba(255, 255, 255, 0.68)" : "rgba(13,14,20,0.55)",
-    accent: Colors.primary,
-    success: "#22C55E",
-    warning: Colors.orange12,
-    statBg: isDark ? Colors.whiteAlpha04 : Colors.blackAlpha03,
-    bannerBg: isDark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.07)",
-    bulkBg: isDark ? "rgba(99,102,241,0.10)" : "rgba(99,102,241,0.06)",
-    dateBg: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
-    reviewBg: isDark ? Colors.whiteAlpha04 : Colors.blackAlpha03,
-    divider: isDark ? "rgba(73, 88, 117, 0.27)" : Colors.blackAlpha06,
-  };
+  // Memoized so it's not a fresh object reference every render -- renderItem
+  // (below) depends on it, and without this it would defeat that memoization.
+  const token = useMemo(
+    () => ({
+      bg: isDark ? "#0E0F14" : "#F6F7FB",
+      card: isDark ? "#050507ff" : Colors.white,
+      border: isDark ? "rgba(50, 53, 72, 0.38)" : "rgba(235, 235, 255, 0.81)",
+      heading: isDark ? Colors.white : "#0D0E14",
+      body: isDark ? "rgba(255, 255, 255, 0.68)" : "rgba(13,14,20,0.55)",
+      accent: Colors.primary,
+      success: "#22C55E",
+      warning: Colors.orange12,
+      statBg: isDark ? Colors.whiteAlpha04 : Colors.blackAlpha03,
+      bannerBg: isDark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.07)",
+      bulkBg: isDark ? "rgba(99,102,241,0.10)" : "rgba(99,102,241,0.06)",
+      dateBg: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
+      reviewBg: isDark ? Colors.whiteAlpha04 : Colors.blackAlpha03,
+      divider: isDark ? "rgba(73, 88, 117, 0.27)" : Colors.blackAlpha06,
+    }),
+    [isDark],
+  );
 
   // ─── Translations ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -365,18 +370,22 @@ export default function CompletedTasks({ navigation }: any) {
   );
 
   // ─── Review Check ─────────────────────────────────────────────────────────
-  const hasUserReviewedTask = (taskId: string, task: any) => {
-    if (task.isPersonalReview) return true;
-    if (task.reviewed) {
-      if (task.reviewer?.userId === currentUserId) return true;
-      if (
-        task.taskDetails?.isBulkRequest &&
-        task.taskOwnerId === task.taskDetails?.user?.userId
-      )
-        return true;
-    }
-    return false;
-  };
+  // Memoized for the same reason as `token` above -- renderItem depends on it.
+  const hasUserReviewedTask = useCallback(
+    (taskId: string, task: any) => {
+      if (task.isPersonalReview) return true;
+      if (task.reviewed) {
+        if (task.reviewer?.userId === currentUserId) return true;
+        if (
+          task.taskDetails?.isBulkRequest &&
+          task.taskOwnerId === task.taskDetails?.user?.userId
+        )
+          return true;
+      }
+      return false;
+    },
+    [currentUserId],
+  );
 
   // ─── Derived Stats ────────────────────────────────────────────────────────
   const reviewedCount = tasks.filter((t) =>
@@ -393,7 +402,7 @@ export default function CompletedTasks({ navigation }: any) {
         : tasks;
 
   // ─── Render Card ──────────────────────────────────────────────────────────
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
+  const renderItem = useCallback(({ item, index }: { item: any; index: number }) => {
     const details = item.taskDetails || {};
     const owner = details.user || {};
     const doneOn =
@@ -433,6 +442,9 @@ export default function CompletedTasks({ navigation }: any) {
                 <Image
                   style={[styles.avatar, { borderColor: token.accent + "40" }]}
                   source={{ uri: owner?.profileImage }}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
                 />
               ) : (
                 <AvatarInitials
@@ -609,7 +621,7 @@ export default function CompletedTasks({ navigation }: any) {
         </View>
       </AnimatedCard>
     );
-  };
+  }, [cache, hasUserReviewedTask, isDark, navigation, t, theme, token, tr]);
 
   // ─── Root Render ──────────────────────────────────────────────────────────
   return (
@@ -713,6 +725,10 @@ export default function CompletedTasks({ navigation }: any) {
               offset: RFPercentage(30) * index,
               index,
             })}
+            initialNumToRender={6}
+            maxToRenderPerBatch={6}
+            windowSize={7}
+            removeClippedSubviews
           />
         )}
       </View>

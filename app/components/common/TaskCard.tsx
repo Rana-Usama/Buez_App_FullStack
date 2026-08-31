@@ -12,6 +12,7 @@ import {
   Platform,
   UIManager,
 } from "react-native";
+import { Image as ExpoImage } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -207,8 +208,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
           scrollEnabled={true}
           onScroll={handleScroll}
           renderItem={({ item: imageUrl }) => (
-            <Image
-              resizeMode="cover"
+            <ExpoImage
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={200}
               source={{ uri: imageUrl }}
               style={styles.img}
             />
@@ -249,9 +252,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
         <View style={styles.cartInfoContainer}>
           <View style={styles.avatarWrapper}>
             {task.user?.profileImage ? (
-              <Image
+              <ExpoImage
                 style={styles.userImage}
                 source={{ uri: task.user.profileImage }}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                transition={200}
               />
             ) : (
               <AvatarInitials

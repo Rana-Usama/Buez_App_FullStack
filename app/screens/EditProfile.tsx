@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
@@ -12,6 +11,7 @@ import {
   Alert,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -281,6 +281,9 @@ function EditProfile({ navigation }: { navigation: any }) {
                     <Image
                       style={styles.profileImage}
                       source={{ uri: imageUri }}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
+                      transition={200}
                     />
 
                     <View

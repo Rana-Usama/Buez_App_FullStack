@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   ImageSourcePropType,
 } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
@@ -176,6 +176,9 @@ const TopRatedUserCard: React.FC<TopRatedUserCardProps> = ({
                 <Image
                   source={{ uri: user.profileImage }}
                   style={styles.avatar}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
                 />
               </View>
             ) : (

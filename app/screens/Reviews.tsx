@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   ActivityIndicator,
   RefreshControl,
   SectionList,
@@ -11,6 +10,7 @@ import {
   StatusBar,
   Platform,
 } from "react-native";
+import { Image } from "expo-image";
 import { RFPercentage } from "react-native-responsive-fontsize";
 import { useFocusEffect } from "@react-navigation/native";
 import moment from "moment";
@@ -279,6 +279,9 @@ export default function Reviews({ navigation }) {
                 <Image
                   style={[styles.avatar, { borderColor: accentColor + "50" }]}
                   source={{ uri: item.reviewer.profileImage }}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
                 />
               ) : (
                 <AvatarInitials
