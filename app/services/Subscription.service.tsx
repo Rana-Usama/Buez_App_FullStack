@@ -16,11 +16,14 @@ export const updateSubscriptionStatus = async (start, end, planType) => {
   const userRef = doc(db, "users", userId);
 
   try {
-    // Paid Subscription User
+    // Paid Subscription User.
+    // Only write the period dates when the backend actually returned them —
+    // writing null would fail the isWithinPaidPeriod gate and lock out a user
+    // who just paid. The webhook fills them in either way.
     await updateDoc(userRef, {
       isSubscribed: true,
-      subscriptionStart: start,
-      subscriptionEnd: end,
+      ...(start ? { subscriptionStart: start } : {}),
+      ...(end ? { subscriptionEnd: end } : {}),
       planType: planType,
       isCancelled: false,
     });

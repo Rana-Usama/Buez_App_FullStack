@@ -110,10 +110,13 @@ function UpgradePlan(props) {
     if (!userId) return;
     const userRef = doc(firestore, "users", userId);
     try {
+      // Only write the period dates when the backend actually returned them —
+      // writing null would fail the isWithinPaidPeriod gate and lock out a
+      // user who just upgraded. The webhook fills them in either way.
       await updateDoc(userRef, {
         isSubscribed: true,
-        subscriptionStart: start,
-        subscriptionEnd: end,
+        ...(start ? { subscriptionStart: start } : {}),
+        ...(end ? { subscriptionEnd: end } : {}),
         planType: "yearly",
         isCancelled: false,
       });
