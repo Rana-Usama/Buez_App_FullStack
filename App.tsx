@@ -127,7 +127,7 @@ function MainApp() {
 
       getFCMToken()
         .then((token) => {
-          if (token) console.log("FCM token:", token);
+          if (token) console.log("FCM token",);
         })
         .catch(() => {});
 
