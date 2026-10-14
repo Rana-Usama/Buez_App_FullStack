@@ -895,5 +895,10 @@
     "cancelConfirmNo": "Mantieni attività",
     "cancelSuccess": "Hai annullato questa attività",
     "cancelError": "Impossibile annullare l'attività. Riprova."
+  },
+  "errorBoundary": {
+    "title": "Qualcosa è andato storto",
+    "message": "Si è verificato un errore imprevisto. Riprova.",
+    "retry": "Riprova"
   }
 }

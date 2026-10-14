@@ -895,5 +895,10 @@
     "cancelConfirmNo": "Ufgab behalte",
     "cancelSuccess": "Du hesch die Ufgab storniert",
     "cancelError": "D'Ufgab het nöd chönne storniert werde. Bitte versuechs nomal."
+  },
+  "errorBoundary": {
+    "title": "Öppis isch schief gloffe",
+    "message": "En unerwartete Fehler isch passiert. Bitte versuechs nomol.",
+    "retry": "Nomol versueche"
   }
 }

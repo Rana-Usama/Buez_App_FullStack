@@ -21,6 +21,8 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
 
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+apply from: new File(["node", "--print", "require('path').dirname(require.resolve('@sentry/react-native/package.json'))"].execute(null, rootDir).text.trim(), "sentry.gradle.kts")
+
 android {
 ndkVersion rootProject.ext.ndkVersion
 buildToolsVersion rootProject.ext.buildToolsVersion

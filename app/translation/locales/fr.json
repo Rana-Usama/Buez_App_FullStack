@@ -895,5 +895,10 @@
     "cancelConfirmNo": "Garder la tâche",
     "cancelSuccess": "Vous avez annulé cette tâche",
     "cancelError": "Impossible d'annuler la tâche. Veuillez réessayer."
+  },
+  "errorBoundary": {
+    "title": "Quelque chose s'est mal passé",
+    "message": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "retry": "Réessayer"
   }
 }

@@ -489,5 +489,10 @@
       "title": "Bewerber nicht verfügbar",
       "message": "Dieser Bewerber hat sein Konto gelöscht und kann nicht mehr bestätigt werden."
     }
+  },
+  "errorBoundary": {
+    "title": "Öppis isch schief gange",
+    "message": "En unerwartete Fehler isch ufträte. Bitte nomol versueche.",
+    "retry": "Nomol versueche"
   }
 }

@@ -895,5 +895,10 @@
     "cancelConfirmNo": "Mantener tarea",
     "cancelSuccess": "Has cancelado esta tarea",
     "cancelError": "No se pudo cancelar la tarea. Inténtalo de nuevo."
+  },
+  "errorBoundary": {
+    "title": "Algo salió mal",
+    "message": "Se produjo un error inesperado. Por favor, inténtalo de nuevo.",
+    "retry": "Reintentar"
   }
 }

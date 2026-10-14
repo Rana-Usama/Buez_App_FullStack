@@ -37,6 +37,8 @@ import AppleLoginButton from "../utils/appleLogin";
 import DeviceInfo from "react-native-device-info";
 import { serverTimestamp } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
+import { identifyCurrentUser } from "../observability/identity";
+import { trackEvent } from "../observability/events";
 
 function Signup({ navigation }: any) {
   const { t } = useTranslation();
@@ -102,6 +104,10 @@ function Signup({ navigation }: any) {
       const password = values.password.trim();
       const user = await createAccountWithEmail(email, password);
       await SecureStore.setItemAsync("loggedOut", "false");
+      if (user) {
+        identifyCurrentUser();
+        trackEvent("signup_success", { method: "email" });
+      }
       await SecureStore.setItemAsync("password2", password);
 
       if (user) {

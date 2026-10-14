@@ -37,6 +37,7 @@ import {
 import CustomNav from "../components/common/CustomNav";
 import { LinearGradient } from "expo-linear-gradient";
 import Feather from "@expo/vector-icons/Feather";
+import { trackEvent } from "../observability/events";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -200,6 +201,7 @@ function UpgradePlan(props) {
           result?.currentPeriodEnd,
         );
         await saveSubscription(userId, result?.subscriptionId);
+        trackEvent("subscription_upgraded", { plan: "yearly" });
         Toast.show({
           type: "success",
           text1: t("toast.upgradePlan.upgradeSuccess"),

@@ -17,6 +17,8 @@ import Toast from "react-native-toast-message";
 import { appleAuth } from "@invertase/react-native-apple-authentication"; // ✅ Needed for Apple login
 import { Linking } from "react-native";
 import { AnyObject } from "yup";
+import { clearUserIdentity } from "../observability/identity";
+import { ensureFreshInstallCleanup } from "../utils/freshInstall";
 
 export const resetPassword = async (email: any) => {
   try {
@@ -85,6 +87,7 @@ export const updatePassword = async (
 export const logout = async () => {
   await signOut(FIREBASE_AUTH);
   await SecureStore.setItemAsync("loggedOut", "true");
+  clearUserIdentity();
   Toast.show({
     type: "success",
     text1: "Logout",
@@ -101,6 +104,7 @@ export async function saveCredentials(email: any, password: any) {
 
 // Retrieve credentials
 export async function getCredentials() {
+  await ensureFreshInstallCleanup();
   const email = await SecureStore.getItemAsync("email");
   const password = await SecureStore.getItemAsync("password");
   return { email, password };

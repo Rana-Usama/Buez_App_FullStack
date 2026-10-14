@@ -20,6 +20,8 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useAppTheme } from "../contexts/themeContext";
 import DeviceInfo from "react-native-device-info";
 import Colors from "../config/Colors";
+import { identifyCurrentUser } from "../observability/identity";
+import { trackEvent } from "../observability/events";
 
 const AppleLoginButton = ({ navigation }: { navigation: any }) => {
   const [loading, setLoading] = useState(false);
@@ -164,6 +166,8 @@ const AppleLoginButton = ({ navigation }: { navigation: any }) => {
 
       await saveCredentials(finalEmail, appleUserId);
       await SecureStore.setItemAsync("loggedOut", "false");
+      identifyCurrentUser();
+      trackEvent("login_success", { method: "apple" });
 
       // 4️⃣ Fetch updated user data for routing
       const updatedSnap = await getDoc(userRef);

@@ -5,6 +5,8 @@ import { saveCredentials } from "../services/Auth.service";
 import { resolveFounderRoute } from "../services/Founder.service";
 import { FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import * as SecureStore from "expo-secure-store";
+import { identifyCurrentUser } from "../observability/identity";
+import { trackEvent } from "../observability/events";
 
 export const handleInstagramLogin = async ({
   igProfile,
@@ -61,6 +63,8 @@ export const handleInstagramLogin = async ({
     const password = igProfile.id;
     await saveCredentials(email, password);
     await SecureStore.setItemAsync("loggedOut", "false");
+    identifyCurrentUser();
+    trackEvent("login_success", { method: "instagram" });
 
     Toast.show({
       type: "success",

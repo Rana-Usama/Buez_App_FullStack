@@ -29,6 +29,7 @@ import {
   parseSubscriptionDate,
   resolveMonthlyPricing,
 } from "../config/subscriptionPricing";
+import { trackEvent } from "../observability/events";
 
 function CancelSubscription({ navigation }: any) {
   const { userData } = useUser();
@@ -121,6 +122,7 @@ function CancelSubscription({ navigation }: any) {
               console.log("Failed to update subscription status:", error);
             }
           }
+          trackEvent("subscription_cancelled", { plan: String(currentPlan) });
           Toast.show({
             type: "success",
             text1: t("toast.cancelSubscription.three"),

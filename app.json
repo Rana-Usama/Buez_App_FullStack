@@ -2,7 +2,7 @@
   "expo": {
     "name": "Buez",
     "slug": "Buez",
-    "version": "1.0.1",
+    "version": "2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "newArchEnabled": true,
@@ -54,7 +54,7 @@
       },
       "bundleIdentifier": "com.adamburg.Buez",
       "appleTeamId": "34G27X37J4",
-      "buildNumber": "4"
+      "buildNumber": "3"
     },
     "android": {
       "adaptiveIcon": {
@@ -63,6 +63,7 @@
       },
       "googleServicesFile": "./google-services.json",
       "package": "com.adamburg.buez",
+      "versionCode": 7,
       "permissions": [
         "android.permission.INTERNET"
       ]
@@ -124,7 +125,15 @@
         }
       ],
       "expo-localization",
-      "expo-font"
+      "expo-font",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "organization": "sana-asghar",
+          "project": "buez-app"
+        }
+      ]
     ],
     "extra": {
       "facebookAppId": "716889610970681",

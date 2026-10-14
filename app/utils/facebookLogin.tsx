@@ -10,6 +10,8 @@ import { saveCredentials } from "../services/Auth.service";
 import { checkExistingEmailLoginType, saveEmailLoginType } from "./loginType";
 import * as SecureStore from "expo-secure-store";
 import Colors from "../config/Colors";
+import { identifyCurrentUser } from "../observability/identity";
+import { trackEvent } from "../observability/events";
 
 const FB_APP_ID = process.env.EXPO_PUBLIC_FB_APP_ID;
 const APP_SECRET = process.env.EXPO_PUBLIC_APP_SECRET;
@@ -116,6 +118,8 @@ const FacebookLoginWebView = ({ navigation }: any) => {
       const password = userDataResponse.id;
       await saveCredentials(userDataResponse.email, password);
       await SecureStore.setItemAsync("loggedOut", "false");
+      identifyCurrentUser();
+      trackEvent("login_success", { method: "facebook" });
       const userData = userSnapshot.exists() ? userSnapshot.data() : null;
 
       const now = new Date();

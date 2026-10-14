@@ -53,6 +53,7 @@ import DrawerNavigator from "./BottomNavigator";
 import TaskApplicantsScreen from "../screens/TaskApplicantsScreen";
 import ConfirmedHelpers from "../screens/ConfirmedHelpers";
 import { navigationRef } from "./navigationRef";
+import { onNavigationReady, onNavigationStateChange } from "../observability";
 
 import GroupChat from "../screens/GroupChat";
 import GroupDetails from "../screens/GroupDetails";
@@ -93,7 +94,11 @@ const StackNavigator = () => {
   // }
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={onNavigationReady}
+      onStateChange={onNavigationStateChange}
+    >
       <Stack.Navigator
         id={undefined}
         initialRouteName={"Decider"}

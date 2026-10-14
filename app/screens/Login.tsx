@@ -41,6 +41,8 @@ import { FIREBASE_DB } from "../../firebaseConfig";
 import AppleLoginButton from "../utils/appleLogin";
 import { LinearGradient } from "expo-linear-gradient";
 import DeviceInfo from "react-native-device-info";
+import { identifyCurrentUser } from "../observability/identity";
+import { trackEvent } from "../observability/events";
 
 function Login({ navigation }) {
   const [indicator, showIndicator] = useState(false);
@@ -109,6 +111,8 @@ function Login({ navigation }) {
         return;
       }
       await SecureStore.setItemAsync("loggedOut", "false");
+      identifyCurrentUser();
+      trackEvent("login_success", { method: "email" });
       await SecureStore.setItemAsync("password2", password);
       await new Promise((resolve) => setTimeout(resolve, 100));
 

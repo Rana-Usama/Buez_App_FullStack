@@ -895,5 +895,10 @@
     "cancelConfirmNo": "Aufgabe behalten",
     "cancelSuccess": "Du hast diese Aufgabe storniert",
     "cancelError": "Aufgabe konnte nicht storniert werden. Bitte versuche es erneut."
+  },
+  "errorBoundary": {
+    "title": "Etwas ist schiefgelaufen",
+    "message": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
+    "retry": "Erneut versuchen"
   }
 }

@@ -61,6 +61,7 @@ export default function Location({ navigation, route }) {
           const response = await axios.get(
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${loc.latitude},${loc.longitude}&key=${key}`
           );
+          console.log("📍 Reverse Geocoding Response:", response.data);
           const results = response.data.results;
           const address = results[0]?.formatted_address || "Current Location";
           const addressComponents = results[0]?.address_components;

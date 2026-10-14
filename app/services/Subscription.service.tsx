@@ -3,6 +3,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import Toast from "react-native-toast-message";
 import { saveSubscription } from "./User.service";
 import { FIREBASE_DB } from "../../firebaseConfig";
+import { trackEvent } from "../observability/events";
 
 const db = FIREBASE_DB;
 
@@ -119,6 +120,7 @@ export const handlePaymentSheet = async ({
       selectedPlan
     );
     await saveSubscription(userId, result.subscriptionId);
+    trackEvent("subscription_started", { plan: String(selectedPlan) });
     Toast.show({
       type: "success",
       text1: t("toast.subscription.one"),

@@ -20,6 +20,8 @@ import { RFPercentage } from "react-native-responsive-fontsize";
 import DeviceInfo from "react-native-device-info";
 import { useAppTheme } from "../contexts/themeContext";
 import Colors from "../config/Colors";
+import { identifyCurrentUser } from "../observability/identity";
+import { trackEvent } from "../observability/events";
 
 
 const webClientId =
@@ -133,6 +135,8 @@ const GoogleLoginButton = ({ navigation }: { navigation: any }) => {
 
       // Save credentials and clear logged out flag
        await SecureStore.setItemAsync("loggedOut", "false");
+       identifyCurrentUser();
+       trackEvent("login_success", { method: "google" });
       await saveCredentials(user.email, "123456");
      
       // Give Firestore a moment to update

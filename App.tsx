@@ -37,6 +37,7 @@ import { navigate } from "./app/router/navigationRef";
 import { initLiveRates } from "./app/utils/currencyChange";
 import { applyGlobalFontScaling } from "./app/utils/fontScaling";
 import { markFirstScreenReady } from "./app/utils/launchMetrics";
+import { AppErrorBoundary, useObservabilityIdentity } from "./app/observability";
 
 LogBox.ignoreAllLogs();
 
@@ -93,7 +94,8 @@ async function getFCMToken() {
 function MainApp() {
   const { theme } = useAppTheme();
   const [appReady, setAppReady] = useState(false);
-  const { userData, loading: userLoading } = useUser();
+  const { userData, authUser, loading: userLoading } = useUser();
+  useObservabilityIdentity(authUser?.uid);
   useDeepLinking({
     userData,
     userLoading,
@@ -170,12 +172,6 @@ export default function App() {
   const { showModal, checked, handleDone } = useLanguageOnboarding();
 
   useEffect(() => {
-    // Foreground push messages must be subscribed as early as possible so
-    // none are missed while the app is open -- this only registers a
-    // listener (no network/permission work), so it's cheap enough to keep
-    // immediate. The actual permission prompt + token fetch + Android
-    // channel setup are deferred until after the first screen is visible
-    // (see the appReady-gated effect in MainApp above).
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       await Notifications.scheduleNotificationAsync({
         content: {
@@ -201,24 +197,26 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <UserProvider>
-        <PostProvider>
-          <UnreadMessagesProvider>
-            <NotificationProvider>
-              <ExpoStripeProvider>
-                <Provider store={store}>
-                  <MainApp />
-                  <LanguageOnboardingModal
-                    visible={showModal}
-                    onDone={handleDone}
-                  />
-                </Provider>
-                <Toast config={toastConfig} />
-              </ExpoStripeProvider>
-            </NotificationProvider>
-          </UnreadMessagesProvider>
-        </PostProvider>
-      </UserProvider>
+      <AppErrorBoundary>
+        <UserProvider>
+          <PostProvider>
+            <UnreadMessagesProvider>
+              <NotificationProvider>
+                <ExpoStripeProvider>
+                  <Provider store={store}>
+                    <MainApp />
+                    <LanguageOnboardingModal
+                      visible={showModal}
+                      onDone={handleDone}
+                    />
+                  </Provider>
+                  <Toast config={toastConfig} />
+                </ExpoStripeProvider>
+              </NotificationProvider>
+            </UnreadMessagesProvider>
+          </PostProvider>
+        </UserProvider>
+      </AppErrorBoundary>
     </ThemeProvider>
   );
 }

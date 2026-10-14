@@ -57,6 +57,7 @@ import { useLocation } from "../utils/useLocation";
 import CustomNav from "../components/common/CustomNav";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { trackEvent } from "../observability/events";
 
 const { width } = Dimensions.get("window");
 
@@ -1039,6 +1040,7 @@ function PostRequest({ navigation, route }) {
           user: user?.userData || {},
         };
 
+        trackEvent("task_posted", { workers: numberOfWorkers });
         // Navigate with task data
         navigation.navigate("SuccessScreen", {
           taskData: taskDataForSuccess,
@@ -1053,6 +1055,7 @@ function PostRequest({ navigation, route }) {
         // no group chat, and no ties to the previous run — which stays
         // intact as history under the old ID.
         const savedPost = await repostTask(currentPostRequest.id, data, imgs);
+        trackEvent("task_reposted", { workers: numberOfWorkers });
 
         navigation.navigate("SuccessScreen", {
           taskData: {
@@ -1093,6 +1096,7 @@ function PostRequest({ navigation, route }) {
           ...editData
         } = data;
         await updatePost(currentPostRequest.id, editData, imgs);
+        trackEvent("task_edited");
         navigation.navigate("SuccessScreen", {
           isEdit: true,
           taskData: {

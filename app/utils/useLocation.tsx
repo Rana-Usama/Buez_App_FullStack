@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import axios from "axios";
 import { saveLocationToSecureStore, getLocationFromSecureStore } from "../services/Auth.service";
+import { createLogger } from "./logger";
+
+const log = createLogger("useLocation");
 
 export function useLocation() {
   const [location, setLocation] = useState(null);
@@ -97,32 +100,52 @@ export function useLocation() {
 
   // Start watching with detailed info
   useEffect(() => {
-    let subscription;
+    let subscription: Location.LocationSubscription | undefined;
+    let cancelled = false;
+
     const startWatching = async () => {
-      subscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 10000,
-          distanceInterval: 50,
-        },
-        async (loc) => {
-          const basicCoords = {
-            latitude: loc.coords.latitude,
-            longitude: loc.coords.longitude,
-          };
-          
-          // Get detailed location information
-          const detailedLocation = await getDetailedLocationInfo(basicCoords);
-          
-          setLocation(detailedLocation);
-          await saveLocationToSecureStore(detailedLocation);
-        }
-      );
+      try {
+        // Check only — the permission prompt is owned by getCurrentLocation().
+        // watchPositionAsync rejects when permission is missing.
+        const { status } = await Location.getForegroundPermissionsAsync();
+        if (status !== "granted" || cancelled) return;
+
+        const sub = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 10000,
+            distanceInterval: 50,
+          },
+          async (loc) => {
+            try {
+              const basicCoords = {
+                latitude: loc.coords.latitude,
+                longitude: loc.coords.longitude,
+              };
+
+              // Get detailed location information
+              const detailedLocation = await getDetailedLocationInfo(basicCoords);
+
+              setLocation(detailedLocation);
+              await saveLocationToSecureStore(detailedLocation);
+            } catch (error) {
+              log.error(error, "watchPosition update failed");
+            }
+          }
+        );
+
+        // Unmounted while the watcher was starting — stop it immediately.
+        if (cancelled) sub.remove();
+        else subscription = sub;
+      } catch (error) {
+        log.error(error, "watchPosition failed to start");
+      }
     };
     startWatching();
 
     return () => {
-      if (subscription) subscription.remove();
+      cancelled = true;
+      subscription?.remove();
     };
   }, []);
 

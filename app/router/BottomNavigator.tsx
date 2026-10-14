@@ -52,6 +52,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import AvatarInitials from "../components/common/DefaultAvatars";
 import { getAvatarColors } from "../config/avatarColors";
+import { clearUserIdentity } from "../observability/identity";
+import { trackEvent } from "../observability/events";
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -220,6 +222,8 @@ const CustomDrawerContent = (props: any) => {
       }
       await removeCredentials();
       await SecureStore.setItemAsync("loggedOut", "true");
+      trackEvent("logout");
+      clearUserIdentity();
       setIsLogoutModalVisible(false);
       navigation.navigate("Login");
     } catch (error) {
@@ -309,6 +313,8 @@ const CustomDrawerContent = (props: any) => {
       await removeCredentials();
       await SecureStore.deleteItemAsync("appLanguage");
       await SecureStore.deleteItemAsync("password2");
+      trackEvent("account_deleted");
+      clearUserIdentity();
       setIsDeleteAccountModalVisible(false);
       navigation.navigate("OnBoarding");
     } catch (error: any) {

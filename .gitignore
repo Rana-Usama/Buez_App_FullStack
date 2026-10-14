@@ -37,3 +37,7 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Sentry (contains auth.token — never commit)
+ios/sentry.properties
+android/sentry.properties
